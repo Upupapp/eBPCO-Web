@@ -1,2 +1,2 @@
 # eBPCO
-Front-end Software containing web admin and mobile
+Front-end Software containing web admin portal
