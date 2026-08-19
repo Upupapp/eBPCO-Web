@@ -9,6 +9,8 @@ export interface EvaluationRecord {
   stage: EvaluationStage;
   result: EvaluationResult;
   evaluator: string;
+  /** The office responsible for this stage on this application's permit type (see requirements-catalog.ts's evaluationSequence) — filled by ApplicationStore.recordEvaluation, never independently guessed by a view. */
+  departmentId: string;
   /** Required (enforced by the store) whenever result is 'Revision Required' or 'Rejected'. */
   remarks: string | null;
   evaluatedAtValue: Date | null;

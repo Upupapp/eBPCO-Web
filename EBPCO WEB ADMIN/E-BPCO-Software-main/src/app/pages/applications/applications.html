@@ -249,11 +249,61 @@
           </div>
           <div>
             <dt>Email :</dt>
-            <dd>{{ detail.email }}</dd>
+            <dd>
+              {{ detail.email }}
+              <span
+                class="verify-pill"
+                [class]="detail.emailVerification.status.toLowerCase().replace(' ', '-')"
+                >{{ detail.emailVerification.status }}</span
+              >
+              @if (canVerifyContact() && detail.emailVerification.status !== 'Verified') {
+                <button
+                  type="button"
+                  class="verify-action"
+                  (click)="verifyContact('email', 'Verified')"
+                >
+                  Confirm
+                </button>
+                <button
+                  type="button"
+                  class="verify-action danger"
+                  (click)="verifyContact('email', 'Verification Failed')"
+                >
+                  Mark Failed
+                </button>
+              }
+            </dd>
           </div>
           <div>
             <dt>Phone :</dt>
-            <dd>{{ detail.phone }}</dd>
+            <dd>
+              {{ detail.phone }}
+              <span
+                class="verify-pill"
+                [class]="detail.mobileVerification.status.toLowerCase().replace(' ', '-')"
+                >{{ detail.mobileVerification.status }}</span
+              >
+              @if (canVerifyContact() && detail.mobileVerification.status !== 'Verified') {
+                <button
+                  type="button"
+                  class="verify-action"
+                  (click)="verifyContact('mobile', 'Verified')"
+                >
+                  Confirm
+                </button>
+                <button
+                  type="button"
+                  class="verify-action danger"
+                  (click)="verifyContact('mobile', 'Verification Failed')"
+                >
+                  Mark Failed
+                </button>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Barangay :</dt>
+            <dd>{{ detail.barangay }}</dd>
           </div>
         </dl>
       </div>
@@ -292,6 +342,14 @@
           (click)="selectDetailTab('documents')"
         >
           Documents
+        </button>
+        <button
+          type="button"
+          class="tab-pill"
+          [class.active]="detailTab() === 'permit'"
+          (click)="selectDetailTab('permit')"
+        >
+          Permit Result
         </button>
         <button
           type="button"
@@ -363,8 +421,21 @@
           @case ('documents') {
             <div class="card-head">
               <div>
-                <h2>Documents</h2>
-                <p class="muted-sub">Lorem ipsum sit dolor amet consecturer.</p>
+                <h2>Required Documents</h2>
+                <p class="muted-sub">
+                  Checklist for {{ detail.row.permitType }}
+                  @if (missingRequiredCount() > 0) {
+                    —
+                    <strong class="missing-count"
+                      >{{ missingRequiredCount() }} required document{{
+                        missingRequiredCount() === 1 ? '' : 's'
+                      }}
+                      still missing</strong
+                    >
+                  } @else {
+                    — all required documents resolved
+                  }
+                </p>
               </div>
               <div class="menu-wrap">
                 <button
@@ -383,14 +454,47 @@
                       <app-icon name="download" [size]="14" />
                       Export {{ docSelectedIds().size > 0 ? 'Selected' : 'All' }}
                     </button>
-                    <button type="button" role="menuitem" (click)="markSelectedDocsApproved()">
+                    <button type="button" role="menuitem" (click)="markSelectedDocsAccepted()">
                       <app-icon name="check-circle" [size]="14" />
-                      Mark Selected Approved
+                      Mark Selected Accepted
                     </button>
                   </div>
                 }
               </div>
             </div>
+
+            <details class="requirement-sources">
+              <summary>
+                Requirement sources &amp; verification status ({{ requirementSources().length }})
+              </summary>
+              <ul>
+                @for (src of requirementSources(); track src.url) {
+                  <li>
+                    <span
+                      class="source-status"
+                      [class]="src.verificationStatus.toLowerCase().replaceAll('_', '-')"
+                      >{{ src.verificationStatus.replaceAll('_', ' ') }}</span
+                    >
+                    <a [href]="src.url" target="_blank" rel="noopener noreferrer">{{
+                      src.title
+                    }}</a>
+                    <span class="source-meta"
+                      >{{ src.jurisdiction }} · as of {{ src.effectiveDate }}</span
+                    >
+                  </li>
+                }
+              </ul>
+            </details>
+
+            <label class="doc-remarks-field">
+              Remarks <span class="optional">(required when rejecting or requesting revision)</span>
+              <input
+                type="text"
+                [value]="docRemarksDraft()"
+                (input)="docRemarksDraft.set($any($event.target).value)"
+                placeholder="Reason shown to the applicant…"
+              />
+            </label>
 
             <div class="table-wrap">
               <table>
@@ -404,48 +508,201 @@
                         (change)="toggleSelectAllDocs()"
                       />
                     </th>
-                    <th>Category Event</th>
-                    <th>Uploaded Dates</th>
+                    <th>Document</th>
+                    <th>Required</th>
+                    <th>Reviewing Department</th>
+                    <th>Uploaded</th>
                     <th>Status</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (d of documents(); track d.name) {
-                    <tr>
+                  @for (r of documentRows(); track r.requirementId) {
+                    <tr [class.missing-row]="r.required && !r.doc">
                       <td>
                         <input
                           type="checkbox"
-                          [attr.aria-label]="'Select ' + d.name"
-                          [checked]="isDocSelected(d)"
-                          (change)="toggleDocSelected(d)"
+                          [attr.aria-label]="'Select ' + r.label"
+                          [checked]="isDocSelected(r)"
+                          [disabled]="!r.doc"
+                          (change)="toggleDocSelected(r)"
                         />
                       </td>
                       <td>
                         <div class="doc-cell">
                           <span class="doc-icon"><app-icon name="file-check" [size]="18" /></span>
                           <div>
-                            <div class="doc-name">{{ d.name }}</div>
-                            <div class="doc-file">{{ d.filename }}</div>
+                            <div class="doc-name">{{ r.label }}</div>
+                            <div class="doc-file">{{ r.doc?.fileName ?? 'No file attached' }}</div>
+                            @if (r.doc?.remarks) {
+                              <div class="doc-remarks">{{ r.doc?.remarks }}</div>
+                            }
                           </div>
                         </div>
                       </td>
-                      <td>{{ d.uploadedDate }}</td>
                       <td>
-                        <span class="status-pill" [class]="d.status.toLowerCase()">{{
-                          d.status
+                        <span class="badge-req" [class.optional-badge]="!r.required">{{
+                          r.required ? 'Required' : 'Optional'
                         }}</span>
                       </td>
+                      <td>{{ r.departmentName }}</td>
+                      <td>{{ r.doc?.uploadedAt ?? '—' }}</td>
                       <td>
-                        <button type="button" class="preview-btn" (click)="openDocumentPreview(d)">
-                          Preview
-                        </button>
+                        <span
+                          class="status-pill"
+                          [class]="(r.doc?.status ?? 'Missing').toLowerCase().replace(' ', '-')"
+                          >{{ r.doc?.status ?? 'Missing' }}</span
+                        >
+                      </td>
+                      <td class="doc-actions">
+                        @if (r.doc) {
+                          <button type="button" class="preview-btn" (click)="previewDocumentRow(r)">
+                            Preview
+                          </button>
+                          @if (
+                            r.doc.status === 'Rejected' ||
+                            r.doc.status === 'Revision Required' ||
+                            r.doc.status === 'Expired'
+                          ) {
+                            <label class="resubmit-btn">
+                              Resubmit
+                              <input type="file" (change)="resubmitDocumentFile(r, $event)" />
+                            </label>
+                          }
+                          @if (r.doc.status === 'Submitted' || r.doc.status === 'Uploaded') {
+                            <button
+                              type="button"
+                              class="preview-btn"
+                              (click)="setDocStatus(r, 'Under Review')"
+                            >
+                              Mark Under Review
+                            </button>
+                          }
+                          @if (r.doc.status === 'Under Review') {
+                            <button
+                              type="button"
+                              class="preview-btn"
+                              (click)="setDocStatus(r, 'Accepted')"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              type="button"
+                              class="preview-btn danger-text"
+                              (click)="setDocStatus(r, 'Revision Required')"
+                            >
+                              Request Revision
+                            </button>
+                            <button
+                              type="button"
+                              class="preview-btn danger-text"
+                              (click)="setDocStatus(r, 'Rejected')"
+                            >
+                              Reject
+                            </button>
+                          }
+                        } @else {
+                          <label class="resubmit-btn">
+                            Attach
+                            <input type="file" (change)="attachDocumentFile(r, $event)" />
+                          </label>
+                        }
                       </td>
                     </tr>
                   }
                 </tbody>
               </table>
             </div>
+          }
+
+          @case ('permit') {
+            <h2>Permit Result</h2>
+            @if (permitResult(); as permit) {
+              <div class="permit-result-panel" [class.released]="releaseResult()">
+                <span class="status-pill approved">
+                  {{ releaseResult() ? 'Released' : 'Approved' }}
+                </span>
+                <h3>{{ finalDocumentName() }}</h3>
+                <dl class="permit-fields">
+                  <div>
+                    <dt>Permit Number</dt>
+                    <dd>{{ permit.permitNumber }}</dd>
+                  </div>
+                  <div>
+                    <dt>Issued</dt>
+                    <dd>{{ permit.issuedDate }}</dd>
+                  </div>
+                  <div>
+                    <dt>Validity / Expiry</dt>
+                    <dd>{{ permit.expiryDate ?? 'No fixed expiry' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Approving Official</dt>
+                    <dd>{{ permit.approvingOfficial }}</dd>
+                  </div>
+                  <div>
+                    <dt>Approving Office</dt>
+                    <dd>{{ permit.approvingOffice }}</dd>
+                  </div>
+                </dl>
+                @if (releaseResult(); as release) {
+                  <dl class="permit-fields">
+                    <div>
+                      <dt>Released To</dt>
+                      <dd>{{ release.claimantName }}</dd>
+                    </div>
+                    <div>
+                      <dt>Release Method</dt>
+                      <dd>{{ release.releaseMethod }}</dd>
+                    </div>
+                    <div>
+                      <dt>Released On</dt>
+                      <dd>{{ release.releasedAt }}</dd>
+                    </div>
+                  </dl>
+                } @else {
+                  <p class="permit-note">Ready for release — not yet claimed.</p>
+                }
+                <div class="permit-result-actions">
+                  <button
+                    type="button"
+                    class="btn-primary"
+                    (click)="openDocumentPreviewModal('permit')"
+                  >
+                    <app-icon name="file-check" [size]="14" />
+                    Preview / Download {{ finalDocumentName() }}
+                  </button>
+                  @if (releaseResult()) {
+                    <button
+                      type="button"
+                      class="btn-outline"
+                      (click)="openDocumentPreviewModal('release-form')"
+                    >
+                      Preview Release Form
+                    </button>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="permit-result-panel empty">
+                <p>
+                  No permit or clearance has been generated yet for this application. Its current
+                  status is <strong>{{ detail.row.status }}</strong> ({{
+                    detail.row.lifecycleStatus
+                  }}).
+                </p>
+                @if (canAssessFee()) {
+                  <button type="button" class="btn-primary" (click)="assessFeeAction()">
+                    Assess Fee
+                  </button>
+                }
+                @if (canGeneratePermit()) {
+                  <button type="button" class="btn-primary" (click)="generatePermitAction()">
+                    Generate {{ finalDocumentName() }}
+                  </button>
+                }
+              </div>
+            }
           }
 
           @case ('comments') {
@@ -1183,46 +1440,16 @@
   </div>
 }
 
-@if (showCreate()) {
-  <div class="modal-backdrop" (click)="cancelCreate()">
-    <div class="modal-box create-box" (click)="$event.stopPropagation()">
-      <button type="button" class="modal-close" aria-label="Close" (click)="cancelCreate()">
-        &#10005;
-      </button>
-      <h2>New Application</h2>
-      <form class="create-form" (ngSubmit)="createApplication()">
-        <label>
-          Applicant Name
-          <input type="text" [(ngModel)]="newApplication.applicant" name="appApplicant" required />
-        </label>
-        <label>
-          Location
-          <input
-            type="text"
-            [(ngModel)]="newApplication.location"
-            name="appLocation"
-            placeholder="Barangay …"
-          />
-        </label>
-        <label>
-          Type
-          <select [(ngModel)]="newApplication.type" name="appType">
-            <option>Residential</option>
-            <option>Commercial</option>
-            <option>Renovation</option>
-          </select>
-        </label>
-        <label>
-          Assigned Officer
-          <input type="text" [(ngModel)]="newApplication.officer" name="appOfficer" />
-        </label>
-        <div class="modal-actions">
-          <button type="button" class="modal-btn neutral" (click)="cancelCreate()">Cancel</button>
-          <button type="submit" class="modal-btn confirm">Create Application</button>
-        </div>
-      </form>
-    </div>
-  </div>
+@if (showIntake()) {
+  <app-application-intake (cancelled)="cancelCreate()" (created)="onIntakeCreated($event)" />
+}
+
+@if (showDocPreview() && selectedRow(); as row) {
+  <app-document-preview
+    [applicationId]="row.id"
+    [kind]="docPreviewKind()"
+    (closed)="closeDocumentPreviewModal()"
+  />
 }
 
 @if (showNotifyModal()) {

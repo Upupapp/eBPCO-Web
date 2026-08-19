@@ -42,6 +42,39 @@
         <button
           type="button"
           class="filter-trigger"
+          [class.active]="barangayOpen()"
+          [attr.aria-expanded]="barangayOpen()"
+          (click)="toggleBarangayMenu()"
+          (keydown.escape)="closeBarangayMenu()"
+        >
+          <app-icon name="map" [size]="15" />
+          {{ selectedBarangayLabel() }}
+          <app-icon name="chevron-down" [size]="14" />
+        </button>
+
+        @if (barangayOpen()) {
+          <div class="filter-backdrop" (click)="closeBarangayMenu()"></div>
+          <div class="filter-menu" role="menu" aria-label="Filter by barangay">
+            @for (option of barangayOptions(); track option) {
+              <button
+                type="button"
+                class="filter-option"
+                role="menuitemradio"
+                [attr.aria-checked]="barangayFilter() === option"
+                [class.active]="barangayFilter() === option"
+                (click)="selectBarangay(option)"
+              >
+                {{ option === 'All' ? 'All Barangays' : 'Barangay ' + option }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="filter-wrap">
+        <button
+          type="button"
+          class="filter-trigger"
           [class.active]="filterOpen()"
           [attr.aria-expanded]="filterOpen()"
           (click)="toggleFilterMenu()"
@@ -158,16 +191,18 @@
                   class="sticky-note"
                   [class]="column.dotClass"
                   [style.--note-rotate]="noteRotation(app.id)"
-                  [attr.title]="stageDateLabel(app)"
-                  [attr.aria-label]="
-                    'View application ' +
-                    app.id +
-                    ' for ' +
+                  [attr.title]="
                     app.applicant +
-                    ', ' +
-                    app.type +
-                    ', draggable to another stage'
+                    ' — ' +
+                    app.businessName +
+                    ' (' +
+                    app.id +
+                    ') — ' +
+                    app.permitType +
+                    ' — ' +
+                    stageDateLabel(app)
                   "
+                  [attr.aria-label]="noteAriaLabel(app)"
                   (click)="select(app)"
                   cdkDrag
                   [cdkDragData]="app"
@@ -175,8 +210,9 @@
                 >
                   <span class="note-pin" aria-hidden="true"></span>
                   <span class="note-name">{{ app.applicant }}</span>
+                  <span class="note-business">{{ app.businessName }}</span>
                   <span class="note-id">{{ app.id }}</span>
-                  <span class="note-type">{{ app.type }}</span>
+                  <span class="note-type">{{ permitShortLabel(app) }}</span>
                 </button>
               }
             }

@@ -7,14 +7,24 @@ import {
   PaymentStatus,
   PermitReleaseStatus,
 } from './status.model';
-import { Applicant } from './applicant.model';
+import { Applicant, ContactVerification } from './applicant.model';
 import { Business, BusinessCategory } from './business.model';
-import { ApplicationAction, GeneratedPermit, PermitReleaseRecord, PermitType, ServiceDomain } from './permit.model';
-import { ApplicationDocument, DocumentStatus } from './document.model';
+import {
+  ALL_PERMIT_TYPES,
+  ApplicationAction,
+  GeneratedPermit,
+  PermitReleaseRecord,
+  PermitType,
+  permitTypeDomain,
+} from './permit.model';
+import { ApplicationDocument, DocumentHistoryEntry, DocumentStatus } from './document.model';
 import { EvaluationRecord } from './evaluation.model';
-import { AssessmentFeeCentavos, PaymentTransaction, totalAssessmentCentavos } from './payment.model';
+import { PaymentTransaction, totalAssessmentCentavos } from './payment.model';
 import { AuditEvent } from './audit.model';
 import { AppNotification } from './notification.model';
+import { DEFAULT_FEE_CONFIGS, feeScheduleCentavos } from './payment-config.model';
+import { RequirementDocument, requirementsFor } from './requirements-catalog';
+import { departmentName } from './department.model';
 
 // ---- Deterministic PRNG ----------------------------------------------------
 // So the seeded dataset (and every count an admin sees) stays stable across
@@ -33,7 +43,11 @@ function mulberry32(seed: number): () => number {
 // ---- Reference data --------------------------------------------------------
 
 const BUSINESS_SEED: { name: string; category: BusinessCategory; owner: [string, string] }[] = [
-  { name: 'Villanueva Hardware & Construction Supply', category: 'Retail', owner: ['Raul', 'Villanueva'] },
+  {
+    name: 'Villanueva Hardware & Construction Supply',
+    category: 'Retail',
+    owner: ['Raul', 'Villanueva'],
+  },
   { name: 'Simbulan Sari-Sari Store', category: 'Retail', owner: ['Fe', 'Simbulan'] },
   { name: 'Rodrigo Bakeshop', category: 'Food Service', owner: ['David', 'Rodrigo'] },
   { name: 'Zaballero Auto Repair Shop', category: 'Services', owner: ['Jaime', 'Zaballero'] },
@@ -53,6 +67,10 @@ const BUSINESS_SEED: { name: string; category: BusinessCategory; owner: [string,
 
 const OFFICERS = ['Engr. Ricardo Buenaflor', 'Engr. Miriam Castañares', 'Engr. Paolo Ventura'];
 
+// Doubles as the seed's barangay list — every `location`/`barangay` value
+// in this dataset is drawn from here, so the Business Application Stages
+// board's "All Barangays" filter (built from the real application data,
+// per that requirement) only ever offers barangays that genuinely appear.
 const LOCATIONS = [
   'Barangay Poblacion',
   'Barangay Buenavista',
@@ -63,44 +81,49 @@ const LOCATIONS = [
   'Barangay San Isidro',
 ];
 
-const DOCUMENT_LABELS = [
-  'DTI/SEC Registration',
-  'Barangay Clearance',
-  "Mayor's Permit (Previous Year)",
-  'Lease Contract / Land Title',
-  'Fire Safety Inspection Certificate',
-  'Sanitary Permit',
-  'Locational Clearance',
-  'Community Tax Certificate (Cedula)',
+// The centralized permit-type catalog (permit.model.ts) IS the "one
+// centralized list" this weighting reuses — no separate/duplicated type
+// list lives here. Weighted so Business Permit filings (the highest
+// real-world volume for a municipal BPLO) dominate, with the 16
+// construction/ancillary/certificate types sharing the remainder — no
+// application in this dataset is ever assigned the old generic
+// "Business Permit" value; every one gets one of the specific types
+// below.
+const PERMIT_WEIGHTS: [PermitType, number][] = [
+  ['New Business Permit', 0.18],
+  ['Business Permit Renewal', 0.16],
+  ['Business Permit Amendment', 0.06],
+  ['New Construction', 0.09],
+  ['Renovation', 0.08],
+  ['Addition/Extension', 0.05],
+  ['Demolition', 0.02],
+  ['Architectural', 0.03],
+  ['Civil/Structural', 0.03],
+  ['Electrical', 0.05],
+  ['Mechanical', 0.02],
+  ['Sanitary/Plumbing', 0.03],
+  ['Plumbing', 0.02],
+  ['Electronics', 0.02],
+  ['Interior Design', 0.02],
+  ['Fencing', 0.03],
+  ['Sign', 0.04],
+  ['Excavation', 0.02],
+  ['Certificate of Occupancy', 0.05],
 ];
 
-// One service-domain + permit-type per application, weighted so most
-// applications are ordinary Business Permit filings with a smaller share
-// of construction/ancillary permit types — matches the relative volume a
-// real municipal office would see.
-const PERMIT_CHOICES: { domain: ServiceDomain; type: PermitType }[] = [
-  { domain: 'Business Permit', type: 'Business Permit' },
-  { domain: 'Business Permit', type: 'Business Permit' },
-  { domain: 'Business Permit', type: 'Business Permit' },
-  { domain: 'Business Permit', type: 'Business Permit' },
-  { domain: 'Construction Permit', type: 'New Construction' },
-  { domain: 'Construction Permit', type: 'Renovation' },
-  { domain: 'Construction Permit', type: 'Addition/Extension' },
-  { domain: 'Construction Permit', type: 'Electrical' },
-  { domain: 'Construction Permit', type: 'Sanitary/Plumbing' },
-  { domain: 'Construction Permit', type: 'Sign' },
-];
-
-const ACTIONS: ApplicationAction[] = ['New', 'New', 'New', 'Renewal', 'Renewal', 'Amendment'];
-
-const FEE_SCHEDULE_CENTAVOS: AssessmentFeeCentavos = {
-  filing: 25000,
-  processing: 15000,
-  architectural: 30000,
-  structural: 30000,
-  electrical: 25000,
-  others: 15000,
+// Business-domain permit types carry a fixed, matching transaction nature
+// (a "New Business Permit" application IS a New transaction) — only the
+// construction domain rolls ApplicationAction independently, since a
+// Renovation/Electrical/etc. permit can genuinely be filed as New or as a
+// Renewal of a prior ancillary permit.
+const BUSINESS_ACTION: Record<string, ApplicationAction> = {
+  'New Business Permit': 'New',
+  'Business Permit Renewal': 'Renewal',
+  'Business Permit Amendment': 'Amendment',
 };
+const CONSTRUCTION_ACTIONS: ApplicationAction[] = ['New', 'New', 'New', 'Renewal', 'Amendment'];
+
+const FEE_SCHEDULE_CENTAVOS = feeScheduleCentavos(DEFAULT_FEE_CONFIGS);
 
 // Weighted lifecycle-status buckets — sums to 1. Skewed toward a realistic
 // operational funnel: more mid-pipeline volume than either extreme, with
@@ -148,6 +171,34 @@ function addHours(base: Date, hours: number): Date {
   return d;
 }
 
+function addMonths(base: Date, months: number): Date {
+  const d = new Date(base);
+  d.setMonth(d.getMonth() + months);
+  return d;
+}
+
+// A document's real-world issuing office (who handed the applicant this
+// paper) is often different from the LGU office that reviews it — e.g.
+// DTI issues the registration certificate, but BPLO reviews it. This is a
+// light heuristic over the requirement id/label, not a second source of
+// truth: falls back to the reviewing department's own name when nothing
+// more specific applies.
+function guessIssuingOffice(requirement: RequirementDocument, barangay: string): string | null {
+  const id = requirement.id;
+  if (id.includes('dti')) return 'DTI Provincial Office – Sorsogon';
+  if (id.includes('brgy')) return `Barangay ${barangay} Hall`;
+  if (id.includes('fsic') || id.includes('fire'))
+    return 'Bureau of Fire Protection – Castilla Fire Station';
+  if (id.includes('sanitary') && requirement.reviewingDepartmentId === 'health')
+    return 'Municipal Health Office';
+  if (id.includes('prc')) return 'Professional Regulation Commission';
+  if (id.includes('locational') || id.includes('zoning'))
+    return 'Municipal Planning and Development Office';
+  if (id.includes('land-title')) return 'Registry of Deeds – Sorsogon';
+  if (id.includes('id') && !id.includes('bfp')) return null; // government-issued IDs have no single "office" worth naming
+  return departmentName(requirement.reviewingDepartmentId);
+}
+
 // Derives the "how far did evaluation get" and "how far did payment get"
 // sub-states from one lifecycle status, so every downstream collection
 // (documents, evaluation records, payment, permit/release) is internally
@@ -161,7 +212,10 @@ function derivePipelinePosition(status: ApplicationLifecycleStatus): {
   permitReleaseStatus: PermitReleaseStatus;
 } {
   const early = new Set<ApplicationLifecycleStatus>(['Draft', 'Submitted', 'Received']);
-  const evaluating = new Set<ApplicationLifecycleStatus>(['Document Verification', 'Under Evaluation']);
+  const evaluating = new Set<ApplicationLifecycleStatus>([
+    'Document Verification',
+    'Under Evaluation',
+  ]);
   const pastEvaluation = new Set<ApplicationLifecycleStatus>([
     'Assessed',
     'Payment Submitted',
@@ -208,7 +262,8 @@ function derivePipelinePosition(status: ApplicationLifecycleStatus): {
 
   let paymentStatus: PaymentStatus = 'Not Yet Available';
   if (status === 'Assessed') paymentStatus = 'Not Yet Available';
-  else if (status === 'Payment Submitted' || status === 'Payment Under Verification') paymentStatus = 'Pending Verification';
+  else if (status === 'Payment Submitted' || status === 'Payment Under Verification')
+    paymentStatus = 'Pending Verification';
   else if (
     status === 'Payment Verified' ||
     status === 'For Approval' ||
@@ -224,10 +279,17 @@ function derivePipelinePosition(status: ApplicationLifecycleStatus): {
   }
 
   let permitReleaseStatus: PermitReleaseStatus = 'Not Ready';
-  if (status === 'Permit Generated' || status === 'Ready for Release') permitReleaseStatus = 'Ready for Release';
+  if (status === 'Permit Generated' || status === 'Ready for Release')
+    permitReleaseStatus = 'Ready for Release';
   else if (status === 'Released' || status === 'Completed') permitReleaseStatus = 'Released';
 
-  return { evaluationStage, evaluationResult, evaluationStagesPassed, paymentStatus, permitReleaseStatus };
+  return {
+    evaluationStage,
+    evaluationResult,
+    evaluationStagesPassed,
+    paymentStatus,
+    permitReleaseStatus,
+  };
 }
 
 // ---- Public seed shape ------------------------------------------------------
@@ -245,12 +307,383 @@ export interface SeedResult {
   notifications: AppNotification[];
 }
 
+interface BuildContext {
+  rand: () => number;
+  referenceDate: Date;
+  applications: ApplicationRecord[];
+  documents: ApplicationDocument[];
+  evaluations: EvaluationRecord[];
+  payments: PaymentTransaction[];
+  permits: GeneratedPermit[];
+  releases: PermitReleaseRecord[];
+  auditEvents: AuditEvent[];
+}
+
+/**
+ * Builds one fully cross-linked application "bundle" (the application
+ * record plus its documents/evaluations/payment/permit/release/audit
+ * trail) and appends it to `ctx`'s collections. Shared by both the
+ * randomized volume pool and the guaranteed one-per-permit-type showcase
+ * pass below, so the two never drift on how a record's related data is
+ * derived from its lifecycle status.
+ */
+function buildApplicationBundle(
+  ctx: BuildContext,
+  index: number,
+  business: Business,
+  applicant: Applicant,
+  permitType: PermitType,
+  opts: {
+    forcedStatus?: ApplicationLifecycleStatus;
+    forceRevisionLoop?: boolean;
+    daysAgo?: number;
+  } = {},
+): ApplicationRecord {
+  const { rand, referenceDate } = ctx;
+  const requirements = requirementsFor(permitType);
+
+  let daysAgo = opts.daysAgo ?? Math.floor(-Math.log(1 - rand()) * 9);
+  if (daysAgo > 59) daysAgo = 59;
+  const submitted = new Date(referenceDate);
+  submitted.setDate(submitted.getDate() - daysAgo);
+  submitted.setHours(9 + Math.floor(rand() * 8), Math.floor(rand() * 60), 0, 0);
+
+  const lifecycleStatus = opts.forcedStatus ?? pickWeighted(rand, STATUS_WEIGHTS);
+  const pos = derivePipelinePosition(lifecycleStatus);
+  const officer = OFFICERS[Math.floor(rand() * OFFICERS.length)];
+  const applicationAction: ApplicationAction =
+    BUSINESS_ACTION[permitType] ??
+    CONSTRUCTION_ACTIONS[Math.floor(rand() * CONSTRUCTION_ACTIONS.length)];
+
+  const id = `E-BPCO-2026-${String(100 + index).padStart(6, '0')}`;
+
+  const record = withProjectedFields({
+    id,
+    businessId: business.id,
+    businessName: business.name,
+    applicantId: applicant.id,
+    applicant: `${applicant.firstName} ${applicant.lastName}`,
+    location: `Barangay ${business.barangay}`,
+    serviceDomain: permitTypeDomain(permitType),
+    permitType,
+    applicationAction,
+    officer,
+    dateValue: submitted,
+    dateSubmitted: formatDate(submitted),
+    lifecycleStatus,
+    evaluationStage: pos.evaluationStage,
+    evaluationResult: pos.evaluationResult,
+    paymentStatus: pos.paymentStatus,
+    permitReleaseStatus: pos.permitReleaseStatus,
+    assessedAmountCentavos:
+      pos.paymentStatus === 'Not Yet Available'
+        ? null
+        : totalAssessmentCentavos(FEE_SCHEDULE_CENTAVOS),
+  });
+  ctx.applications.push(record);
+
+  let cursor = submitted;
+  ctx.auditEvents.push({
+    id: `AUD-${id}-1`,
+    applicationId: id,
+    actor: `${applicant.firstName} ${applicant.lastName}`,
+    role: 'Applicant',
+    action: 'Submitted application',
+    timestampValue: cursor,
+    timestamp: formatDate(cursor),
+    remarks: null,
+  });
+
+  // Documents — one per requirement in this permit type's own catalog
+  // entry (see requirements-catalog.ts), never a generic rotating list —
+  // status follows how far the application actually got.
+  requirements.documents.forEach((req, d) => {
+    let status: DocumentStatus =
+      pos.evaluationStagesPassed >= 1 || lifecycleStatus === 'Rejected' ? 'Accepted' : 'Submitted';
+    if (
+      lifecycleStatus === 'Revision Required' &&
+      d === requirements.documents.length - 1 &&
+      req.required
+    ) {
+      status = 'Revision Required';
+    }
+    if (lifecycleStatus === 'Rejected' && req.required && rand() < 0.4) status = 'Rejected';
+    if (!req.required && rand() < 0.35 && early(lifecycleStatus)) status = 'Missing';
+
+    const uploadedAt = addHours(submitted, 2 + d);
+    const history: DocumentHistoryEntry[] = [
+      {
+        fileName: fileNameFor(req.label, id),
+        uploadedAtValue: uploadedAt,
+        uploadedAt: formatDate(uploadedAt),
+        status,
+        remarks: null,
+      },
+    ];
+    ctx.documents.push({
+      id: `DOC-${id}-${d + 1}`,
+      applicationId: id,
+      requirementId: req.id,
+      label: req.label,
+      fileName: fileNameFor(req.label, id),
+      uploadedAtValue: uploadedAt,
+      uploadedAt: formatDate(uploadedAt),
+      status,
+      issuingOffice: guessIssuingOffice(req, business.barangay),
+      issueDateValue: uploadedAt,
+      issueDate: formatDate(uploadedAt),
+      expiryDateValue: null,
+      expiryDate: null,
+      remarks:
+        status === 'Rejected' || status === 'Revision Required'
+          ? 'Please submit a clearer/updated copy of this document.'
+          : null,
+      history,
+    });
+  });
+
+  // Evaluations — one record per stage already reached, department drawn
+  // from this permit type's own evaluation sequence.
+  const stageDept = new Map(requirements.evaluationSequence.map((s) => [s.stage, s.departmentId]));
+  if (opts.forceRevisionLoop) {
+    cursor = addHours(cursor, 10);
+    ctx.evaluations.push({
+      id: `EVAL-${id}-r0`,
+      applicationId: id,
+      stage: 'Zoning',
+      result: 'Revision Required',
+      evaluator: officer,
+      departmentId: stageDept.get('Zoning') ?? 'zoning',
+      remarks:
+        'Submitted plans did not match the declared scope of work — please revise and resubmit the site development plan.',
+      evaluatedAtValue: cursor,
+      evaluatedAt: formatDate(cursor),
+    });
+    ctx.auditEvents.push({
+      id: `AUD-${id}-r0`,
+      applicationId: id,
+      actor: officer,
+      role: 'Evaluator',
+      action: 'Zoning evaluation: Revision Required',
+      timestampValue: cursor,
+      timestamp: formatDate(cursor),
+      remarks: 'Revision requested — see evaluation remarks.',
+    });
+    cursor = addHours(cursor, 30);
+    ctx.auditEvents.push({
+      id: `AUD-${id}-r1`,
+      applicationId: id,
+      actor: `${applicant.firstName} ${applicant.lastName}`,
+      role: 'Applicant',
+      action: 'Resubmitted revised site development plan',
+      timestampValue: cursor,
+      timestamp: formatDate(cursor),
+      remarks: null,
+    });
+  }
+
+  const stagesToWrite = Math.max(
+    pos.evaluationStagesPassed,
+    lifecycleStatus === 'Revision Required' ? 3 : 0,
+  );
+  for (let s = 0; s < EVALUATION_STAGE_ORDER.length; s++) {
+    const stage = EVALUATION_STAGE_ORDER[s];
+    if (s > stagesToWrite) break;
+    const isCurrentStage = stage === pos.evaluationStage;
+    const result: EvaluationResult =
+      s < pos.evaluationStagesPassed ? 'Passed' : isCurrentStage ? pos.evaluationResult : 'Pending';
+    if (result === 'Pending' && s !== pos.evaluationStagesPassed) continue;
+    cursor = addHours(cursor, 6 + s * 4);
+    const needsRemarks = result === 'Revision Required' || result === 'Rejected';
+    ctx.evaluations.push({
+      id: `EVAL-${id}-${s + 1}`,
+      applicationId: id,
+      stage,
+      result,
+      evaluator: officer,
+      departmentId: stageDept.get(stage) ?? 'obo',
+      remarks: needsRemarks
+        ? 'Submitted documents incomplete — please provide updated supporting documents.'
+        : null,
+      evaluatedAtValue: result === 'Pending' ? null : cursor,
+      evaluatedAt: result === 'Pending' ? null : formatDate(cursor),
+    });
+    if (result !== 'Pending') {
+      ctx.auditEvents.push({
+        id: `AUD-${id}-eval-${s + 1}`,
+        applicationId: id,
+        actor: officer,
+        role: 'Evaluator',
+        action: `${stage} evaluation: ${result}`,
+        timestampValue: cursor,
+        timestamp: formatDate(cursor),
+        remarks: needsRemarks ? 'Revision requested — see evaluation remarks.' : null,
+      });
+    }
+  }
+
+  // Payment — only once assessed.
+  if (pos.paymentStatus !== 'Not Yet Available') {
+    cursor = addHours(cursor, 24);
+    const amount = totalAssessmentCentavos(FEE_SCHEDULE_CENTAVOS);
+    const method = rand() < 0.6 ? 'Onsite' : 'Bank Transfer';
+    ctx.payments.push({
+      id: `PAY-${id}`,
+      applicationId: id,
+      referenceNumber: `OR-2026-${String(400000 + index * 41).padStart(6, '0')}`,
+      amountCentavos: amount,
+      method,
+      status: pos.paymentStatus,
+      submittedAtValue: cursor,
+      submittedAt: formatDate(cursor),
+      verifiedAtValue: pos.paymentStatus === 'Paid' ? addHours(cursor, 12) : null,
+      verifiedAt: pos.paymentStatus === 'Paid' ? formatDate(addHours(cursor, 12)) : null,
+      recordedBy: method === 'Onsite' ? officer : null,
+    });
+    ctx.auditEvents.push({
+      id: `AUD-${id}-pay`,
+      applicationId: id,
+      actor: method === 'Onsite' ? officer : applicant.firstName + ' ' + applicant.lastName,
+      role: method === 'Onsite' ? 'Cashier' : 'Applicant',
+      action: `Payment ${pos.paymentStatus === 'Paid' ? 'verified' : 'recorded'} (${method})`,
+      timestampValue: cursor,
+      timestamp: formatDate(cursor),
+      remarks: null,
+    });
+  }
+
+  // Permit + release — only once generated/released.
+  if (pos.permitReleaseStatus !== 'Not Ready') {
+    cursor = addHours(cursor, 24);
+    const permitNumber = `PERMIT-2026-${String(1000 + index).padStart(6, '0')}`;
+    const approvingOffice = departmentName(requirements.responsibleDepartmentId);
+    ctx.permits.push({
+      applicationId: id,
+      permitNumber,
+      issuedDateValue: cursor,
+      issuedDate: formatDate(cursor),
+      expiryDateValue: requirements.validityMonths
+        ? addMonths(cursor, requirements.validityMonths)
+        : null,
+      expiryDate: requirements.validityMonths
+        ? formatDate(addMonths(cursor, requirements.validityMonths))
+        : null,
+      approvingOfficial: officer,
+      approvingOffice,
+    });
+    ctx.auditEvents.push({
+      id: `AUD-${id}-permit`,
+      applicationId: id,
+      actor: officer,
+      role: 'Approving Officer',
+      action: `Permit ${permitNumber} generated`,
+      timestampValue: cursor,
+      timestamp: formatDate(cursor),
+      remarks: null,
+    });
+    if (pos.permitReleaseStatus === 'Released') {
+      cursor = addHours(cursor, 24);
+      ctx.releases.push({
+        applicationId: id,
+        permitNumber,
+        releasingOfficer: officer,
+        claimantName: `${applicant.firstName} ${applicant.lastName}`,
+        releaseMethod: rand() < 0.85 ? 'Physical Claim' : 'Authorized Representative',
+        releasedAtValue: cursor,
+        releasedAt: formatDate(cursor),
+      });
+      ctx.auditEvents.push({
+        id: `AUD-${id}-release`,
+        applicationId: id,
+        actor: officer,
+        role: 'Releasing Officer',
+        action: `Permit ${permitNumber} released`,
+        timestampValue: cursor,
+        timestamp: formatDate(cursor),
+        remarks: null,
+      });
+    }
+  }
+
+  return record;
+}
+
+function early(status: ApplicationLifecycleStatus): boolean {
+  return (
+    status === 'Draft' ||
+    status === 'Submitted' ||
+    status === 'Received' ||
+    status === 'Document Verification'
+  );
+}
+
+function fileNameFor(label: string, applicationId: string): string {
+  const slug = label
+    .toLowerCase()
+    .replace(/[()]/g, '')
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)
+    .slice(0, 3)
+    .join('-');
+  return `${slug}-${applicationId}.pdf`;
+}
+
+function buildVerification(
+  rand: () => number,
+  referenceDate: Date,
+  verifier: string,
+): ContactVerification {
+  const roll = rand();
+  if (roll < 0.72) {
+    const verifiedAt = new Date(referenceDate);
+    verifiedAt.setDate(verifiedAt.getDate() - Math.floor(rand() * 200));
+    return {
+      status: 'Verified',
+      method: 'Manual Administrator Confirmation',
+      verifiedBy: verifier,
+      verifiedAtValue: verifiedAt,
+      verifiedAt: formatDate(verifiedAt),
+    };
+  }
+  if (roll < 0.88) {
+    return {
+      status: 'Pending Verification',
+      method: 'Email Verification Link',
+      verifiedBy: null,
+      verifiedAtValue: null,
+      verifiedAt: null,
+    };
+  }
+  if (roll < 0.95) {
+    return {
+      status: 'Unverified',
+      method: null,
+      verifiedBy: null,
+      verifiedAtValue: null,
+      verifiedAt: null,
+    };
+  }
+  return {
+    status: 'Verification Failed',
+    method: 'Mobile OTP',
+    verifiedBy: null,
+    verifiedAtValue: null,
+    verifiedAt: null,
+  };
+}
+
 /**
  * Generates one deterministic, fully cross-linked dataset — every entity
  * everywhere in the admin (dashboard, applications, evaluations, payments,
  * permit release, business stages board, notifications, audit log) reads
  * from this single pass, so a given application ID represents the same
  * applicant, business, dates, and related records on every page.
+ *
+ * Includes one guaranteed, fully-resolved (Completed/Released) sample
+ * application per permit type in `ALL_PERMIT_TYPES` — every supported
+ * application type has at least one complete, browsable example with
+ * documents, evaluation results, a payment + receipt, a generated permit,
+ * and a release record, on top of the larger randomized volume pool.
  */
 export function buildSeed(referenceDate: Date = new Date()): SeedResult {
   const rand = mulberry32(20260813);
@@ -259,18 +692,32 @@ export function buildSeed(referenceDate: Date = new Date()): SeedResult {
   const applicantKey = (o: [string, string]) => `${o[0]}|${o[1]}`;
   const applicantIdByKey = new Map<string, string>();
   const applicants: Applicant[] = [];
-  BUSINESS_SEED.forEach((b) => {
+  BUSINESS_SEED.forEach((b, i) => {
     const key = applicantKey(b.owner);
     if (applicantIdByKey.has(key)) return;
     const id = `APL-${String(applicants.length + 1).padStart(4, '0')}`;
     applicantIdByKey.set(key, id);
     const emailLocal = `${b.owner[0]}.${b.owner[1]}`.toLowerCase().replace(/[^a-z.]/g, '');
+    const barangay = LOCATIONS[i % LOCATIONS.length].replace('Barangay ', '');
+    // "9" + a 9-digit subscriber block == the 10-digit core of a PH
+    // mobile number (canonical "+63 9XX XXX XXXX" form validateMobileNumber
+    // itself produces — see shared/utils/validators.ts).
+    const core = `9${String(150000000 + applicants.length * 137).padStart(9, '0')}`;
     applicants.push({
       id,
       firstName: b.owner[0],
       lastName: b.owner[1],
       email: `${emailLocal}@gmail.com`,
-      mobileNumber: `09${String(150000000 + applicants.length * 137).padStart(9, '0')}`,
+      mobileNumber: `+63 ${core.slice(0, 3)} ${core.slice(3, 6)} ${core.slice(6)}`,
+      landlineNumber:
+        rand() < 0.3
+          ? `(056) ${String(200 + applicants.length).padStart(3, '0')} ${String(1000 + applicants.length * 7).padStart(4, '0')}`
+          : null,
+      applicantType: rand() < 0.85 ? 'Individual' : 'Authorized Representative',
+      addressLine: `Purok ${1 + (i % 4)}, Barangay ${barangay}`,
+      barangay,
+      emailVerification: buildVerification(rand, referenceDate, 'Ma. Andrea Belarmino'),
+      mobileVerification: buildVerification(rand, referenceDate, 'Ma. Andrea Belarmino'),
     });
   });
 
@@ -295,193 +742,52 @@ export function buildSeed(referenceDate: Date = new Date()): SeedResult {
     };
   });
 
-  const count = 50;
-  const meanDaysAgo = 9;
+  const ctx: BuildContext = {
+    rand,
+    referenceDate,
+    applications: [],
+    documents: [],
+    evaluations: [],
+    payments: [],
+    permits: [],
+    releases: [],
+    auditEvents: [],
+  };
 
-  const applications: ApplicationRecord[] = [];
-  const documents: ApplicationDocument[] = [];
-  const evaluations: EvaluationRecord[] = [];
-  const payments: PaymentTransaction[] = [];
-  const permits: GeneratedPermit[] = [];
-  const releases: PermitReleaseRecord[] = [];
-  const auditEvents: AuditEvent[] = [];
+  let cursor = 0;
 
-  for (let i = 0; i < count; i++) {
-    const business = businesses[i % businesses.length];
+  // ---- Guaranteed showcase: one complete, fully-resolved sample per
+  // permit type (satisfies "create a sample package for every application
+  // type"). The Renovation showcase specifically demonstrates a revision
+  // loop before final approval, per the "Required renovation example".
+  for (const permitType of ALL_PERMIT_TYPES) {
+    const business = businesses[cursor % businesses.length];
     const applicant = applicants.find((a) => a.id === business.ownerApplicantId)!;
-
-    let daysAgo = Math.floor(-Math.log(1 - rand()) * meanDaysAgo);
-    if (daysAgo > 59) daysAgo = 59;
-    const submitted = new Date(referenceDate);
-    submitted.setDate(submitted.getDate() - daysAgo);
-    submitted.setHours(9 + Math.floor(rand() * 8), Math.floor(rand() * 60), 0, 0);
-
-    const lifecycleStatus = pickWeighted(rand, STATUS_WEIGHTS);
-    const pos = derivePipelinePosition(lifecycleStatus);
-    const permitChoice = PERMIT_CHOICES[Math.floor(rand() * PERMIT_CHOICES.length)];
-    const officer = OFFICERS[Math.floor(rand() * OFFICERS.length)];
-
-    const id = `E-BPCO-2026-${String(100 + i).padStart(6, '0')}`;
-
-    const record = withProjectedFields({
-      id,
-      businessId: business.id,
-      businessName: business.name,
-      applicantId: applicant.id,
-      applicant: `${applicant.firstName} ${applicant.lastName}`,
-      location: LOCATIONS[Math.floor(rand() * LOCATIONS.length)],
-      serviceDomain: permitChoice.domain,
-      permitType: permitChoice.type,
-      applicationAction: ACTIONS[Math.floor(rand() * ACTIONS.length)],
-      officer,
-      dateValue: submitted,
-      dateSubmitted: formatDate(submitted),
-      lifecycleStatus,
-      evaluationStage: pos.evaluationStage,
-      evaluationResult: pos.evaluationResult,
-      paymentStatus: pos.paymentStatus,
-      permitReleaseStatus: pos.permitReleaseStatus,
-      assessedAmountCentavos: pos.paymentStatus === 'Not Yet Available' ? null : totalAssessmentCentavos(FEE_SCHEDULE_CENTAVOS),
+    buildApplicationBundle(ctx, cursor, business, applicant, permitType, {
+      forcedStatus: 'Completed',
+      forceRevisionLoop: permitType === 'Renovation',
+      daysAgo: 20 + (cursor % 30),
     });
-    applications.push(record);
-
-    // Audit: submission event always exists.
-    let cursor = submitted;
-    auditEvents.push({
-      id: `AUD-${id}-1`,
-      applicationId: id,
-      actor: `${applicant.firstName} ${applicant.lastName}`,
-      role: 'Applicant',
-      action: 'Submitted application',
-      timestampValue: cursor,
-      timestamp: formatDate(cursor),
-      remarks: null,
-    });
-
-    // Documents — a handful drawn from the standard checklist, status
-    // following how far the application actually got.
-    const docCount = 4 + Math.floor(rand() * 4);
-    for (let d = 0; d < docCount; d++) {
-      const label = DOCUMENT_LABELS[d % DOCUMENT_LABELS.length];
-      let status: DocumentStatus = 'Pending';
-      if (pos.evaluationStagesPassed >= 1) status = 'Approved';
-      if (record.lifecycleStatus === 'Revision Required' && d === docCount - 1) status = 'Rejected';
-      if (record.lifecycleStatus === 'Rejected') status = rand() < 0.5 ? 'Rejected' : 'Approved';
-      documents.push({
-        id: `DOC-${id}-${d + 1}`,
-        applicationId: id,
-        label,
-        fileName: `${label.split(' ')[0].toLowerCase()}-${id}.pdf`,
-        uploadedAtValue: addHours(submitted, 2 + d),
-        uploadedAt: formatDate(addHours(submitted, 2 + d)),
-        status,
-      });
-    }
-
-    // Evaluations — one record per stage already reached.
-    const stagesToWrite = Math.max(pos.evaluationStagesPassed, record.lifecycleStatus === 'Revision Required' ? 3 : 0);
-    for (let s = 0; s < EVALUATION_STAGE_ORDER.length; s++) {
-      const stage = EVALUATION_STAGE_ORDER[s];
-      if (s > stagesToWrite) break;
-      const isCurrentStage = stage === pos.evaluationStage;
-      const result: EvaluationResult = s < pos.evaluationStagesPassed ? 'Passed' : isCurrentStage ? pos.evaluationResult : 'Pending';
-      if (result === 'Pending' && s !== pos.evaluationStagesPassed) continue;
-      cursor = addHours(cursor, 6 + s * 4);
-      const needsRemarks = result === 'Revision Required' || result === 'Rejected';
-      evaluations.push({
-        id: `EVAL-${id}-${s + 1}`,
-        applicationId: id,
-        stage,
-        result,
-        evaluator: officer,
-        remarks: needsRemarks ? 'Submitted documents incomplete — please provide updated Fire Safety Inspection Certificate.' : null,
-        evaluatedAtValue: result === 'Pending' ? null : cursor,
-        evaluatedAt: result === 'Pending' ? null : formatDate(cursor),
-      });
-      if (result !== 'Pending') {
-        auditEvents.push({
-          id: `AUD-${id}-eval-${s + 1}`,
-          applicationId: id,
-          actor: officer,
-          role: 'Evaluator',
-          action: `${stage} evaluation: ${result}`,
-          timestampValue: cursor,
-          timestamp: formatDate(cursor),
-          remarks: needsRemarks ? 'Revision requested — see evaluation remarks.' : null,
-        });
-      }
-    }
-
-    // Payment — only once assessed.
-    if (pos.paymentStatus !== 'Not Yet Available') {
-      cursor = addHours(cursor, 24);
-      const amount = totalAssessmentCentavos(FEE_SCHEDULE_CENTAVOS);
-      const method = rand() < 0.6 ? 'Onsite' : 'Bank Transfer';
-      payments.push({
-        id: `PAY-${id}`,
-        applicationId: id,
-        referenceNumber: `OR-2026-${String(400000 + i * 41).padStart(6, '0')}`,
-        amountCentavos: amount,
-        method,
-        status: pos.paymentStatus,
-        submittedAtValue: cursor,
-        submittedAt: formatDate(cursor),
-        verifiedAtValue: pos.paymentStatus === 'Paid' ? addHours(cursor, 12) : null,
-        verifiedAt: pos.paymentStatus === 'Paid' ? formatDate(addHours(cursor, 12)) : null,
-        recordedBy: method === 'Onsite' ? officer : null,
-      });
-      auditEvents.push({
-        id: `AUD-${id}-pay`,
-        applicationId: id,
-        actor: method === 'Onsite' ? officer : applicant.firstName + ' ' + applicant.lastName,
-        role: method === 'Onsite' ? 'Cashier' : 'Applicant',
-        action: `Payment ${pos.paymentStatus === 'Paid' ? 'verified' : 'recorded'} (${method})`,
-        timestampValue: cursor,
-        timestamp: formatDate(cursor),
-        remarks: null,
-      });
-    }
-
-    // Permit + release — only once generated/released.
-    if (pos.permitReleaseStatus !== 'Not Ready') {
-      cursor = addHours(cursor, 24);
-      const permitNumber = `PERMIT-2026-${String(1000 + i).padStart(6, '0')}`;
-      permits.push({
-        applicationId: id,
-        permitNumber,
-        issuedDateValue: cursor,
-        issuedDate: formatDate(cursor),
-      });
-      if (pos.permitReleaseStatus === 'Released') {
-        cursor = addHours(cursor, 24);
-        releases.push({
-          applicationId: id,
-          permitNumber,
-          releasingOfficer: officer,
-          claimantName: `${applicant.firstName} ${applicant.lastName}`,
-          releaseMethod: rand() < 0.85 ? 'Physical Claim' : 'Authorized Representative',
-          releasedAtValue: cursor,
-          releasedAt: formatDate(cursor),
-        });
-        auditEvents.push({
-          id: `AUD-${id}-release`,
-          applicationId: id,
-          actor: officer,
-          role: 'Releasing Officer',
-          action: `Permit ${permitNumber} released`,
-          timestampValue: cursor,
-          timestamp: formatDate(cursor),
-          remarks: null,
-        });
-      }
-    }
+    cursor++;
   }
 
-  applications.sort((a, b) => b.dateValue.getTime() - a.dateValue.getTime());
+  // ---- Randomized volume pool — realistic funnel distribution across
+  // every stage, still only ever assigning a real, centralized permit
+  // type (never the removed generic "Business Permit" value).
+  const poolCount = 50;
+  for (let i = 0; i < poolCount; i++) {
+    const business = businesses[cursor % businesses.length];
+    const applicant = applicants.find((a) => a.id === business.ownerApplicantId)!;
+    const permitType = pickWeighted(rand, PERMIT_WEIGHTS);
+    buildApplicationBundle(ctx, cursor, business, applicant, permitType);
+    cursor++;
+  }
+
+  ctx.applications.sort((a, b) => b.dateValue.getTime() - a.dateValue.getTime());
 
   // Notifications — derived from a slice of the audit trail itself, so
   // every referenced application/permit/reference number genuinely exists.
-  const notifSource = auditEvents.filter((e) => e.applicationId).slice(-24);
+  const notifSource = ctx.auditEvents.filter((e) => e.applicationId).slice(-24);
   const notifications: AppNotification[] = [];
   for (let n = 0; n < Math.min(6, notifSource.length); n++) {
     const e = notifSource[notifSource.length - 1 - n];
@@ -496,7 +802,18 @@ export function buildSeed(referenceDate: Date = new Date()): SeedResult {
     });
   }
 
-  return { applicants, businesses, applications, documents, evaluations, payments, permits, releases, auditEvents, notifications };
+  return {
+    applicants,
+    businesses,
+    applications: ctx.applications,
+    documents: ctx.documents,
+    evaluations: ctx.evaluations,
+    payments: ctx.payments,
+    permits: ctx.permits,
+    releases: ctx.releases,
+    auditEvents: ctx.auditEvents,
+    notifications,
+  };
 }
 
 /** @deprecated Use `buildSeed()` and its `.applications` field — kept only so any not-yet-migrated call site still compiles during the transition. */

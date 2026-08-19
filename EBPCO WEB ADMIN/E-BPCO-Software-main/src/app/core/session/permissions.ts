@@ -41,7 +41,14 @@ export interface NavModule {
 // Logs). Super Admin sees everything; every other role is scoped to the
 // modules its job actually touches.
 export const NAV_MODULES: NavModule[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: 'home', path: '/dashboard', group: 'root', roles: ALL_STAFF_ROLES },
+  {
+    key: 'dashboard',
+    label: 'Dashboard',
+    icon: 'home',
+    path: '/dashboard',
+    group: 'root',
+    roles: ALL_STAFF_ROLES,
+  },
 
   {
     key: 'applications',
@@ -121,14 +128,23 @@ export function canAccessPath(role: StaffRole, path: string): boolean {
 // Evaluator can open Applications, but only these roles can act on the
 // specific admin actions described in the consolidation spec.
 export const ACTION_PERMISSIONS = {
-  createApplication: (role: StaffRole): boolean => role === 'Super Admin' || role === 'Administrator',
-  archiveApplication: (role: StaffRole): boolean => role === 'Super Admin' || role === 'Administrator',
+  createApplication: (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator',
+  archiveApplication: (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator',
   recordEvaluation: (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator' || role === 'Evaluator',
+  /** Manual administrator confirmation of an applicant's email/mobile — the only verification path this frontend-only mock can honestly perform (see setContactVerification in application-store.ts). */
+  verifyContact: (role: StaffRole): boolean => role === 'Super Admin' || role === 'Administrator',
+  assessFee: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Evaluator',
   recordPayment: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Payment Officer',
   verifyPayment: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Payment Officer',
+  generatePermit: (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator' || role === 'Approving Officer',
   releasePermit: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Releasing Officer',
+  configurePayments: (role: StaffRole): boolean => role === 'Super Admin',
 };

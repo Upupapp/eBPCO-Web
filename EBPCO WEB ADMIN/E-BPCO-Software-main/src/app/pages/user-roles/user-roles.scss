@@ -262,3 +262,54 @@
     margin-top: 0.4rem;
   }
 }
+
+// ---- Payment Settings tab ---------------------------------------------
+
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.settings-section {
+  h3 {
+    margin: 0 0 0.3rem;
+    font-size: 1rem;
+    color: $color-ink-900;
+  }
+}
+
+.settings-amount-input {
+  width: 110px;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid $color-border-strong;
+  border-radius: $radius-sm;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    border-color: $color-brand-500;
+  }
+}
+
+.toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: $color-ink-500;
+  cursor: pointer;
+
+  input {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: $color-brand-600;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+}

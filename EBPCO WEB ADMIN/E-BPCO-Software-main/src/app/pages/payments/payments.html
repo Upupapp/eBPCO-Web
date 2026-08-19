@@ -198,10 +198,15 @@
     <div class="summary-card">
       <div class="card-head">
         <h2>Payment Summary</h2>
-        <button type="button" class="btn-outline" (click)="downloadReceipt()">
-          Download Receipt
-          <app-icon name="download" [size]="15" />
-        </button>
+        <div class="doc-actions">
+          <button type="button" class="btn-outline" (click)="openReceiptPreview()">
+            Preview Official Receipt
+          </button>
+          <button type="button" class="btn-outline" (click)="downloadReceipt()">
+            Export CSV
+            <app-icon name="download" [size]="15" />
+          </button>
+        </div>
       </div>
 
       <p class="verified-note">This Payment Is {{ row.status }}</p>
@@ -314,4 +319,12 @@
       </form>
     </div>
   </div>
+}
+
+@if (showReceiptPreview() && selectedRow(); as row) {
+  <app-document-preview
+    [applicationId]="row.id"
+    kind="official-receipt"
+    (closed)="closeReceiptPreview()"
+  />
 }

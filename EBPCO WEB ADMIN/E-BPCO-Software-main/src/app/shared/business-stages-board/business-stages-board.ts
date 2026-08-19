@@ -4,7 +4,8 @@ import { Router } from '@angular/router';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { Icon } from '../icon/icon';
 import { ApplicationStore } from '../../core/domain/application-store';
-import { ApplicationRecord, AppStatus } from '../../core/domain/application.model';
+import { ApplicationRecord, AppStatus, barangayOf } from '../../core/domain/application.model';
+import { permitShortLabel } from '../../core/domain/permit.model';
 import {
   ApplicationLifecycleStatus,
   EvaluationStage,
@@ -169,8 +170,10 @@ export class BusinessStagesBoard {
   protected clearFilter(): void {
     this.preset.set('all');
     this.stageFilter.set('All');
+    this.barangayFilter.set('All');
     this.filterOpen.set(false);
     this.stageFilterOpen.set(false);
+    this.barangayOpen.set(false);
   }
 
   protected readonly selectedPresetLabel = computed(() => {
@@ -200,6 +203,44 @@ export class BusinessStagesBoard {
       this.stageFilterOptions.find((option) => option.value === this.stageFilter())?.label ??
       'All Permit Stages',
   );
+
+  // ---- Barangay filter ----------------------------------------------------
+  // Options are generated FROM the available application data (never a
+  // hand-maintained list) — a barangay that has no applications right now
+  // simply doesn't appear as a filter option, so this can never offer a
+  // choice that would always show "no applications match".
+  protected readonly barangayFilter = signal<'All' | string>('All');
+  protected readonly barangayOpen = signal(false);
+
+  protected readonly barangayOptions = computed<string[]>(() => {
+    const set = new Set(this.allApplications().map((app) => barangayOf(app)));
+    return ['All', ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+  });
+
+  protected toggleBarangayMenu(): void {
+    this.barangayOpen.update((open) => !open);
+  }
+
+  protected closeBarangayMenu(): void {
+    this.barangayOpen.set(false);
+  }
+
+  protected selectBarangay(value: string): void {
+    this.barangayFilter.set(value);
+    this.barangayOpen.set(false);
+  }
+
+  protected readonly selectedBarangayLabel = computed(() =>
+    this.barangayFilter() === 'All' ? 'All Barangays' : `Barangay ${this.barangayFilter()}`,
+  );
+
+  protected permitShortLabel(app: ApplicationRecord): string {
+    return permitShortLabel(app.permitType);
+  }
+
+  protected noteAriaLabel(app: ApplicationRecord): string {
+    return `View application ${app.id} for ${app.applicant}, ${app.businessName}, ${app.permitType}, draggable to another stage`;
+  }
 
   // 'all' is handled directly in `columns()` (skips date filtering
   // entirely) rather than here, since there's no finite Date range that
@@ -247,9 +288,12 @@ export class BusinessStagesBoard {
     const stage = this.stageFilter();
     const inStage =
       stage === 'All' ? inRange : inRange.filter((app) => app.evaluationStage === stage);
+    const barangay = this.barangayFilter();
+    const inBarangay =
+      barangay === 'All' ? inStage : inStage.filter((app) => barangayOf(app) === barangay);
     return STAGE_ORDER.map((column) => ({
       ...column,
-      apps: inStage.filter((app) => app.status === column.status),
+      apps: inBarangay.filter((app) => app.status === column.status),
     }));
   });
 

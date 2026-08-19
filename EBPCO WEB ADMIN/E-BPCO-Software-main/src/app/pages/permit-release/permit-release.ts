@@ -12,6 +12,7 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS } from '../../core/session/permissions';
 import { ReleaseMethod } from '../../core/domain/permit.model';
+import { DocumentPreview } from '../../shared/document-preview/document-preview';
 
 // 'Ready for Release' mirrors E-BPCO Mobile's ApplicationStatus.released
 // display label exactly (application_model.dart) — from the applicant's
@@ -45,7 +46,7 @@ interface RingStat {
 
 @Component({
   selector: 'app-permit-release',
-  imports: [Topbar, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel],
+  imports: [Topbar, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, DocumentPreview],
   templateUrl: './permit-release.html',
   styleUrl: './permit-release.scss',
 })
@@ -300,6 +301,16 @@ export class PermitRelease {
 
   protected readonly view = signal<'list' | 'detail'>('list');
   protected readonly selectedRow = signal<ReleaseRow | null>(null);
+
+  protected readonly previewTarget = signal<ReleaseRow | null>(null);
+
+  protected previewPermit(row: ReleaseRow): void {
+    this.previewTarget.set(row);
+  }
+
+  protected closePermitPreview(): void {
+    this.previewTarget.set(null);
+  }
 
   openDetail(row: ReleaseRow): void {
     this.selectedRow.set(row);

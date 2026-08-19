@@ -554,6 +554,15 @@ $stage-colors: (
   overflow: hidden;
 }
 
+.note-business {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba($color-ink-900, 0.68);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .note-id {
   font-size: 0.68rem;
   font-weight: 700;

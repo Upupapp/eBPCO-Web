@@ -232,6 +232,7 @@ export class Evaluations {
       Applicant: row.applicant,
       'Missing Documents': row.missingDocuments,
       Type: row.type,
+      'Reviewing Department': row.department,
       'Date Submitted': row.dateSubmitted,
       Officer: row.officer,
       Status: row.status,

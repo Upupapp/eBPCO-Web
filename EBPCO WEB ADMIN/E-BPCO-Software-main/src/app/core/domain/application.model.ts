@@ -1,4 +1,12 @@
-import { ApplicationLifecycleStatus, CoarseStatus, EvaluationResult, EvaluationStage, PaymentStatus, PermitReleaseStatus, coarseStatus } from './status.model';
+import {
+  ApplicationLifecycleStatus,
+  CoarseStatus,
+  EvaluationResult,
+  EvaluationStage,
+  PaymentStatus,
+  PermitReleaseStatus,
+  coarseStatus,
+} from './status.model';
 import { ApplicationAction, PermitType, ServiceDomain } from './permit.model';
 
 // Re-exported so existing imports of `AppStatus`/`ApplicationRecord` from
@@ -49,4 +57,9 @@ export function withProjectedFields<T extends Omit<ApplicationRecord, 'type' | '
   record: T,
 ): T & { type: string; status: CoarseStatus } {
   return { ...record, type: record.permitType, status: coarseStatus(record.lifecycleStatus) };
+}
+
+/** Bare barangay name (e.g. "Poblacion") from a record's `location` display string (e.g. "Barangay Poblacion") — the one place that mapping happens, so the Business Stages board's Barangay filter and the intake form's location field never diverge on how they derive it. */
+export function barangayOf(app: Pick<ApplicationRecord, 'location'>): string {
+  return app.location.replace(/^Barangay\s+/i, '').trim();
 }

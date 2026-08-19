@@ -1,15 +1,29 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { ApplicationRecord, withProjectedFields } from './application.model';
 import { ApplicationLifecycleStatus, canTransition, coarseStatus } from './status.model';
 import { buildSeed } from './application-seed';
-import { Applicant } from './applicant.model';
+import { Applicant, ContactVerification, VerificationMethod } from './applicant.model';
 import { Business } from './business.model';
 import { GeneratedPermit, PermitReleaseRecord, ReleaseMethod } from './permit.model';
-import { ApplicationDocument } from './document.model';
+import {
+  ApplicationDocument,
+  DocumentHistoryEntry,
+  DocumentStatus,
+  UNRESOLVED_DOCUMENT_STATUSES,
+} from './document.model';
 import { EvaluationRecord } from './evaluation.model';
-import { PaymentTransaction } from './payment.model';
+import { PaymentTransaction, totalAssessmentCentavos } from './payment.model';
 import { AuditEvent } from './audit.model';
 import { AppNotification } from './notification.model';
+
+function addMonths(date: Date, months: number): Date {
+  const copy = new Date(date);
+  copy.setMonth(copy.getMonth() + months);
+  return copy;
+}
+import { requirementsFor } from './requirements-catalog';
+import { departmentName } from './department.model';
+import { PaymentConfigStore } from './payment-config-store';
 
 /**
  * Single in-memory source of truth for applications and every record
@@ -27,6 +41,7 @@ import { AppNotification } from './notification.model';
  */
 @Injectable({ providedIn: 'root' })
 export class ApplicationStore {
+  private readonly paymentConfig = inject(PaymentConfigStore);
   private readonly seed = buildSeed();
 
   private readonly _applications = signal<ApplicationRecord[]>(this.seed.applications);
@@ -220,6 +235,11 @@ export class ApplicationStore {
     if (!row) return false;
     if (!canTransition(row.lifecycleStatus, to)) return false;
     if ((to === 'Revision Required' || to === 'Rejected') && !remarks?.trim()) return false;
+    // "Prevent final approval while mandatory documents remain
+    // unresolved" — checked here rather than only in the UI, so no
+    // caller (Business Stages board drag, Applications' quick status
+    // menu, a future API) can push an application to Approved around it.
+    if (to === 'Approved' && !this.canApprove(id)) return false;
 
     this._applications.update((rows) =>
       rows.map((r) => (r.id === id ? withProjectedFields({ ...r, lifecycleStatus: to }) : r)),
@@ -253,6 +273,9 @@ export class ApplicationStore {
     if ((result === 'Revision Required' || result === 'Rejected') && !remarks?.trim()) return false;
 
     const now = new Date();
+    const departmentId =
+      requirementsFor(row.permitType).evaluationSequence.find((s) => s.stage === stage)
+        ?.departmentId ?? 'obo';
     this._evaluations.update((rows) => [
       ...rows,
       {
@@ -261,6 +284,7 @@ export class ApplicationStore {
         stage,
         result,
         evaluator,
+        departmentId,
         remarks: remarks ?? null,
         evaluatedAtValue: now,
         evaluatedAt: now.toLocaleDateString('en-GB', {
@@ -464,6 +488,288 @@ export class ApplicationStore {
     this._applications.update((rows) => [created, ...rows]);
     this.appAudit(actor, role, id, 'Application filed (assisted/onsite)');
     return created;
+  }
+
+  /** Records a freeform note against an application's audit timeline — used for the intake form's optional "Initial Remarks" field, and any other place a plain note (not a status change) needs to be on the record. */
+  addNote(applicationId: string, actor: string, role: string, note: string): void {
+    this.appAudit(actor, role, applicationId, 'Note added', note);
+  }
+
+  // ---- Applicant / business records for manual intake -------------------
+  // Used by the "+ Application" walk-in intake form so an encoded
+  // application links to a REAL Applicant/Business record (name, contact
+  // details, barangay, etc.) rather than the old WALKIN-<id> placeholder
+  // pair that carried no real information.
+
+  addApplicant(applicant: Omit<Applicant, 'id'>): Applicant {
+    const id = `APL-${String(this._applicants().length + 1).padStart(4, '0')}`;
+    const created: Applicant = { ...applicant, id };
+    this._applicants.update((rows) => [...rows, created]);
+    return created;
+  }
+
+  addBusiness(business: Omit<Business, 'id' | 'dateRegisteredValue' | 'dateRegistered'>): Business {
+    const id = `REG-2026-${String(this._businesses().length + 1).padStart(6, '0')}`;
+    const now = new Date();
+    const created: Business = {
+      ...business,
+      id,
+      dateRegisteredValue: now,
+      dateRegistered: now.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }),
+    };
+    this._businesses.update((rows) => [...rows, created]);
+    return created;
+  }
+
+  /** Manual/administrator confirmation of a contact detail (or marking it failed/pending) — the only verification paths this frontend-only mock can actually perform, since it can't deliver a real email link or SMS OTP. Never call this to silently default a fresh applicant to 'Verified'. */
+  setContactVerification(
+    applicantId: string,
+    channel: 'email' | 'mobile',
+    status: ContactVerification['status'],
+    method: VerificationMethod | null,
+    actor: string,
+  ): boolean {
+    const applicant = this.getApplicant(applicantId);
+    if (!applicant) return false;
+    const now = new Date();
+    const verification: ContactVerification = {
+      status,
+      method,
+      verifiedBy: status === 'Verified' ? actor : null,
+      verifiedAtValue: status === 'Verified' ? now : null,
+      verifiedAt:
+        status === 'Verified'
+          ? now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+          : null,
+    };
+    this._applicants.update((rows) =>
+      rows.map((a) =>
+        a.id === applicantId
+          ? {
+              ...a,
+              [channel === 'email' ? 'emailVerification' : 'mobileVerification']: verification,
+            }
+          : a,
+      ),
+    );
+    this.appAudit(
+      actor,
+      'Administrator',
+      null,
+      `${channel === 'email' ? 'Email' : 'Mobile number'} for ${applicant.firstName} ${applicant.lastName} marked ${status}`,
+    );
+    return true;
+  }
+
+  // ---- Document lifecycle -------------------------------------------------
+
+  getDocument(applicationId: string, requirementId: string): ApplicationDocument | undefined {
+    return this._documents().find(
+      (d) => d.applicationId === applicationId && d.requirementId === requirementId,
+    );
+  }
+
+  /**
+   * True only when every REQUIRED document for this application's permit
+   * type (see requirements-catalog.ts) has reached the sole "resolved"
+   * status, 'Accepted' — an optional document, or one that's merely
+   * Uploaded/Submitted/Under Review, never blocks approval on its own,
+   * but a Missing/Rejected/Revision Required/Expired required document
+   * always does.
+   */
+  canApprove(applicationId: string): boolean {
+    const row = this.getById(applicationId);
+    if (!row) return false;
+    const required = requirementsFor(row.permitType).documents.filter((d) => d.required);
+    const docs = this.getDocuments(applicationId);
+    return required.every((req) => {
+      const match = docs.find((d) => d.requirementId === req.id);
+      return !!match && !UNRESOLVED_DOCUMENT_STATUSES.has(match.status);
+    });
+  }
+
+  /** Attaches a new document for a requirement that has none yet, or resubmits over an existing one (preserving its history) — the one entry point the intake form and the Documents tab's upload control both go through. */
+  attachDocument(
+    applicationId: string,
+    requirementId: string,
+    label: string,
+    fileName: string,
+    actor: string,
+    meta: {
+      issuingOffice?: string | null;
+      issueDate?: string | null;
+      expiryDate?: string | null;
+    } = {},
+  ): ApplicationDocument {
+    const existing = this.getDocument(applicationId, requirementId);
+    if (existing) {
+      this.resubmitDocument(applicationId, existing.id, fileName, actor);
+      return this.getDocument(applicationId, requirementId)!;
+    }
+    const now = new Date();
+    const created: ApplicationDocument = {
+      id: `DOC-${applicationId}-${this._documents().length + 1}`,
+      applicationId,
+      requirementId,
+      label,
+      fileName,
+      uploadedAtValue: now,
+      uploadedAt: now.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }),
+      status: 'Submitted',
+      issuingOffice: meta.issuingOffice ?? null,
+      issueDateValue: meta.issueDate ? new Date(meta.issueDate) : null,
+      issueDate: meta.issueDate ?? null,
+      expiryDateValue: meta.expiryDate ? new Date(meta.expiryDate) : null,
+      expiryDate: meta.expiryDate ?? null,
+      remarks: null,
+      history: [],
+    };
+    this._documents.update((rows) => [...rows, created]);
+    this.appAudit(actor, 'Staff', applicationId, `Document attached: ${label}`);
+    return created;
+  }
+
+  /** Required whenever `status` is 'Rejected' or 'Revision Required'. */
+  setDocumentStatus(
+    applicationId: string,
+    documentId: string,
+    status: DocumentStatus,
+    actor: string,
+    remarks?: string,
+  ): boolean {
+    const needsRemarks = status === 'Rejected' || status === 'Revision Required';
+    if (needsRemarks && !remarks?.trim()) return false;
+    const target = this._documents().find(
+      (d) => d.id === documentId && d.applicationId === applicationId,
+    );
+    if (!target) return false;
+    this._documents.update((rows) =>
+      rows.map((d) =>
+        d.id === documentId ? { ...d, status, remarks: remarks?.trim() || null } : d,
+      ),
+    );
+    this.appAudit(
+      actor,
+      'Evaluator',
+      applicationId,
+      `Document "${target.label}" marked ${status}`,
+      remarks ?? null,
+    );
+    return true;
+  }
+
+  /** Resubmits a rejected/revision-required document — appends the file/status it's replacing to `history` rather than discarding it, so resubmission never loses document history. */
+  resubmitDocument(
+    applicationId: string,
+    documentId: string,
+    fileName: string,
+    actor: string,
+  ): boolean {
+    const now = new Date();
+    const target = this._documents().find(
+      (d) => d.id === documentId && d.applicationId === applicationId,
+    );
+    if (!target) return false;
+    const historyEntry: DocumentHistoryEntry = {
+      fileName: target.fileName,
+      uploadedAtValue: target.uploadedAtValue,
+      uploadedAt: target.uploadedAt,
+      status: target.status,
+      remarks: target.remarks,
+    };
+    this._documents.update((rows) =>
+      rows.map((d) =>
+        d.id === documentId
+          ? {
+              ...d,
+              fileName,
+              uploadedAtValue: now,
+              uploadedAt: now.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+              }),
+              status: 'Submitted',
+              remarks: null,
+              history: [...d.history, historyEntry],
+            }
+          : d,
+      ),
+    );
+    this.appAudit(actor, 'Applicant', applicationId, `Document "${target.label}" resubmitted`);
+    return true;
+  }
+
+  // ---- Fee assessment + permit generation --------------------------------
+
+  /** Computes the assessed amount from the CURRENT Super Admin Settings fee schedule (PaymentConfigStore) rather than a hardcoded literal — an application assessed before a settings change keeps its own snapshot (`assessedAmountCentavos`), so editing fees later never rewrites history. */
+  assessFee(applicationId: string, actor: string, role: string): boolean {
+    const row = this.getById(applicationId);
+    if (!row || row.assessedAmountCentavos !== null) return false;
+    const total = totalAssessmentCentavos(this.paymentConfig.feeSchedule());
+    this._applications.update((rows) =>
+      rows.map((r) =>
+        r.id === applicationId ? withProjectedFields({ ...r, assessedAmountCentavos: total }) : r,
+      ),
+    );
+    if (row.lifecycleStatus === 'Under Evaluation') {
+      this.transitionStatus(applicationId, 'Assessed', actor, role);
+    }
+    this.appAudit(actor, role, applicationId, `Fee assessed (₱${(total / 100).toFixed(2)})`);
+    return true;
+  }
+
+  /**
+   * Generates the actual permit/clearance record for an Approved,
+   * fully-paid application — requires Approved + Paid + no existing
+   * permit, then advances the application straight through 'Permit
+   * Generated' to 'Ready for Release' (both legal single-path
+   * transitions per VALID_TRANSITIONS, so nothing else can happen to the
+   * record in between). Expiry is computed from the permit type's own
+   * validity rule in requirements-catalog.ts, never guessed per-call.
+   */
+  generatePermit(applicationId: string, actor: string, role: string): boolean {
+    const row = this.getById(applicationId);
+    if (!row) return false;
+    if (row.lifecycleStatus !== 'Approved' || row.paymentStatus !== 'Paid') return false;
+    if (this.getPermit(applicationId)) return false;
+    const req = requirementsFor(row.permitType);
+    const now = new Date();
+    const permitNumber = `PERMIT-2026-${String(2000 + this._permits().length + 1).padStart(6, '0')}`;
+    const expiryDateValue = req.validityMonths ? addMonths(now, req.validityMonths) : null;
+    const permit: GeneratedPermit = {
+      applicationId,
+      permitNumber,
+      issuedDateValue: now,
+      issuedDate: now.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }),
+      expiryDateValue,
+      expiryDate: expiryDateValue
+        ? expiryDateValue.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
+        : null,
+      approvingOfficial: actor,
+      approvingOffice: departmentName(req.responsibleDepartmentId),
+    };
+    this._permits.update((rows) => [...rows, permit]);
+    this.transitionStatus(applicationId, 'Permit Generated', actor, role);
+    this.transitionStatus(applicationId, 'Ready for Release', actor, role);
+    this.appAudit(actor, role, applicationId, `${req.finalDocument} ${permitNumber} generated`);
+    return true;
   }
 
   markNotificationRead(id: string): void {

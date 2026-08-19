@@ -20,7 +20,7 @@
 
   <section class="card">
     <nav class="tab-nav">
-      @for (t of tabs; track t.key) {
+      @for (t of visibleTabs(); track t.key) {
         <button
           type="button"
           class="tab-btn"
@@ -163,7 +163,7 @@
         [pageSize]="pageSize"
         [(page)]="page"
       />
-    } @else {
+    } @else if (activeTab() === 'roles') {
       <div class="role-grid">
         @for (role of roles(); track role.name) {
           <div class="role-card">
@@ -199,6 +199,102 @@
             </div>
           </div>
         }
+      </div>
+    } @else if (activeTab() === 'settings') {
+      <div class="settings-panel">
+        <section class="settings-section">
+          <h3>Fee &amp; Charge Types</h3>
+          <p class="muted-sub">
+            Configure standard fees. An applicable-permit-types list scopes a fee to specific permit
+            types; empty means it applies globally. Changing an amount only affects applications
+            assessed after the change — already-recorded payments keep their own amount.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fee Name</th>
+                  <th>Description</th>
+                  <th>Amount (₱)</th>
+                  <th>Collecting Office</th>
+                  <th>Effective Date</th>
+                  <th>Active</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (fee of fees(); track fee.id) {
+                  <tr>
+                    <td class="strong-cell">{{ fee.name }}</td>
+                    <td class="muted">{{ fee.description }}</td>
+                    <td>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        class="settings-amount-input"
+                        [value]="fee.amountCentavos / 100"
+                        (change)="onFeeAmountChange(fee, $any($event.target).value)"
+                      />
+                    </td>
+                    <td>{{ departmentLabel(fee.collectingOfficeId) }}</td>
+                    <td>{{ fee.effectiveDate }}</td>
+                    <td>
+                      <label class="toggle-switch">
+                        <input
+                          type="checkbox"
+                          [checked]="fee.active"
+                          (change)="toggleFeeActive(fee)"
+                          [attr.aria-label]="'Toggle ' + fee.name + ' active'"
+                        />
+                        <span>{{ fee.active ? 'Active' : 'Inactive' }}</span>
+                      </label>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h3>Payment Methods</h3>
+          <p class="muted-sub">
+            Only methods marked Active are offered when recording a payment. Methods without a live
+            integration in this build are shown disabled rather than removed, so the catalog stays
+            visible for future configuration.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Description</th>
+                  <th>Active</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (method of methods(); track method.id) {
+                  <tr>
+                    <td class="strong-cell">{{ method.name }}</td>
+                    <td class="muted">{{ method.description }}</td>
+                    <td>
+                      <label class="toggle-switch">
+                        <input
+                          type="checkbox"
+                          [checked]="method.active"
+                          [disabled]="!method.domainMethod"
+                          (change)="toggleMethodActive(method)"
+                          [attr.aria-label]="'Toggle ' + method.name + ' active'"
+                        />
+                        <span>{{ method.active ? 'Active' : 'Inactive' }}</span>
+                      </label>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
     }
   </section>
