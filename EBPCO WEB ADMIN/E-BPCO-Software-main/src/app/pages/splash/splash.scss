@@ -1,0 +1,488 @@
+@use 'sass:math';
+@use '../../shared/styles/tokens' as *;
+
+// Cinematic brand reveal, read as nine distinct beats:
+//   1. Zoom   — logo starts dramatically enlarged and eases down to natural size.
+//   2. Hold   — brief pause at the centered, natural-size logo.
+//   3. Shrink — the logo settles slightly smaller, in place.
+//   4. Right  — the logo overshoots right of its resting spot.
+//   5. Hold   — brief pause at the right overshoot.
+//   6. Return — the logo slides back left while the wordmark reveals beside it.
+//   7. Spark  — one light sweep across the assembled lockup, right after it settles.
+//   8. Hold   — a brief settled pause once the spark has fully finished.
+//   9. Fade   — the whole overlay fades into the app — never starting until
+//      beat 7 (the spark) is completely done.
+// All nine live in ONE master keyframe per animated property (`logo-cinematic`
+// for the logo's transform, one keyframe each for the wordmark's own
+// reveal and its layout space) so nothing competes for `transform`.
+//
+// Centering: `.brand-lockup` is a centered inline-flex row. The wordmark's
+// layout space (`.title-reveal`'s max-width) and the row's own `gap` both
+// start at zero, so at rest the logo is the row's *only* content and sits
+// exactly on the viewport's center — not offset by an invisible sibling.
+// As those two grow back in during the "Return" beat, the flex row's total
+// width grows too, and because the row is centered as a whole, the logo is
+// naturally pushed left into the final two-item lockup instead of being
+// hand-positioned with a fixed translateX.
+
+:host {
+  display: block;
+  // Responsive knobs referenced from the keyframes below — overridden for
+  // narrow phones in the media query near the bottom of this file, so the
+  // keyframes themselves never need a duplicate mobile copy.
+  --intro-zoom-start: 5.5; // desktop: within the requested scale(5)–scale(6) range
+  --intro-nudge: clamp(120px, 10vw, 190px); // desktop right-overshoot distance
+  --intro-gap: clamp(0px, 0.15vw, 2px); // final logo↔wordmark gap — kept tight, a lockup not two separate marks
+}
+
+$ease-zoom: cubic-bezier(0.16, 1, 0.3, 1);
+$ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+$logo-settle-scale: 0.72; // final resting scale — noticeably smaller than natural size
+
+// ---- Phase durations (named, so the keyframe percentages below are derived
+// from them rather than hand-typed) ------------------------------------------
+
+$zoom-duration: 1.0s; // beat 1: huge → natural size
+$center-hold-duration: 0.18s; // beat 2: hold at natural size
+$shrink-duration: 0.34s; // beat 3: shrink in place
+$overshoot-duration: 0.36s; // beat 4: slide right, past rest
+$right-hold-duration: 0.14s; // beat 5: hold at the overshoot
+$return-duration: 0.92s; // beat 6: slide left + wordmark reveals
+
+// Cumulative timestamps, each the end of its beat.
+$t-zoom-end: $zoom-duration;
+$t-center-hold-end: $t-zoom-end + $center-hold-duration;
+$t-shrink-end: $t-center-hold-end + $shrink-duration;
+$t-overshoot-end: $t-shrink-end + $overshoot-duration;
+$t-right-hold-end: $t-overshoot-end + $right-hold-duration;
+$logo-duration: $t-right-hold-end + $return-duration; // beat 6 ends here — ~2.78s
+
+// Converts an absolute timestamp into a keyframe percentage of $logo-duration.
+@function pct($time) {
+  @return math.div($time, $logo-duration) * 100%;
+}
+
+// The wordmark reveal (beat 6) runs alongside the logo's own return-left,
+// so the two finish together and the lockup never "jumps" into place.
+$text-delay: $t-right-hold-end;
+$text-duration: $return-duration;
+
+// Background turns institutional red while the logo is mid-settle, well
+// before the wordmark starts revealing, so the light title always has
+// contrast the moment it appears.
+$bg-turn-delay: $t-center-hold-end;
+$bg-turn-duration: 0.6s;
+
+// Spark runs once, only after the lockup is fully assembled.
+$spark-delay: $logo-duration + 0.05s;
+$spark-duration: 0.65s;
+$spark-end: $spark-delay + $spark-duration;
+
+// The fade (beat 9) waits for the spark to fully finish, plus a short
+// settled hold, so the overlay never starts dimming mid-sweep.
+$post-spark-hold: 0.2s; // beat 7
+$fade-delay: $spark-end + $post-spark-hold; // beat 9 starts here
+$fade-duration: 0.5s; // beat 9
+
+.splash-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: $color-bg;
+  animation:
+    bg-turn-red $bg-turn-duration ease $bg-turn-delay forwards,
+    splash-reveal $fade-duration ease-in-out $fade-delay forwards;
+}
+
+// A red-tinted photo of the skyline (same source image as the login
+// screen's `auth-layout`, tinted with the exact red of its "Login Account"
+// button — `_auth-form.scss`'s `#d50000` — rather than the brand-red
+// tokens) fading in under the lockup, in place of a flat color — timed to
+// the same beat as `bg-turn-red` so the plain background never "turns red"
+// and then separately pops in a photo.
+.splash-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(165deg, rgba(213, 0, 0, 0.85), rgba(213, 0, 0, 0.92)),
+    url('/assets/backgrounds/auth-skyline.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  animation: bg-photo-in $bg-turn-duration ease $bg-turn-delay forwards;
+}
+
+@keyframes bg-photo-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// ---- The lockup: logo + wordmark as one centered flex group ---------------
+// `gap` starts at 0 (see centering note above) and only opens up once the
+// wordmark begins revealing, in lockstep with `.title-reveal`'s max-width.
+
+.brand-lockup {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  animation: lockup-gap-reveal $text-duration $ease-settle $text-delay forwards;
+}
+
+@keyframes lockup-gap-reveal {
+  from {
+    gap: 0;
+  }
+  to {
+    gap: var(--intro-gap);
+  }
+}
+
+// ---- The logo ---------------------------------------------------------------
+// One master keyframe drives the whole cinematic move — zoom, hold, shrink,
+// overshoot, hold, return — so nothing else ever competes for `transform`.
+// Every stop keeps the same `translateX(...) scale(...)` function order so
+// browsers interpolate each axis independently and smoothly between beats.
+
+$logo-size: clamp(140px, 14vw, 220px);
+
+.logo-wrap {
+  position: relative;
+  display: block;
+  width: $logo-size;
+  height: $logo-size;
+  will-change: transform;
+  animation: logo-cinematic $logo-duration $ease-zoom forwards;
+}
+
+.intro-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.4));
+}
+
+// A local `perspective(...)` plus `rotateY(...)` in the very first stop —
+// resolved to flat by the end of beat 1 (zoom) and held flat for every
+// beat after — reads as the seal flipping face-up into frame like a coin,
+// without touching any of the later beats' already-tuned lateral motion.
+@keyframes logo-cinematic {
+  0% {
+    transform: perspective(600px) translateX(0) rotateY(-65deg) scale(var(--intro-zoom-start));
+    animation-timing-function: $ease-zoom; // into beat 1: zoom out
+  }
+  #{pct($t-zoom-end)} {
+    transform: perspective(600px) translateX(0) rotateY(0deg) scale(1);
+    animation-timing-function: linear; // into beat 2: hold (no change in value)
+  }
+  #{pct($t-center-hold-end)} {
+    transform: perspective(600px) translateX(0) rotateY(0deg) scale(1);
+    animation-timing-function: $ease-settle; // into beat 3: shrink
+  }
+  #{pct($t-shrink-end)} {
+    transform: perspective(600px) translateX(0) rotateY(0deg) scale($logo-settle-scale);
+    animation-timing-function: $ease-settle; // into beat 4: overshoot right
+  }
+  #{pct($t-overshoot-end)} {
+    transform: perspective(600px) translateX(var(--intro-nudge)) rotateY(0deg) scale($logo-settle-scale);
+    animation-timing-function: linear; // into beat 5: hold (no change in value)
+  }
+  #{pct($t-right-hold-end)} {
+    transform: perspective(600px) translateX(var(--intro-nudge)) rotateY(0deg) scale($logo-settle-scale);
+    animation-timing-function: $ease-settle; // into beat 6: return left
+  }
+  100% {
+    transform: perspective(600px) translateX(0) rotateY(0deg) scale($logo-settle-scale);
+  }
+}
+
+// ---- The wordmark -----------------------------------------------------------
+// `.title-reveal` owns the *layout space* (clipped to 0 width until the
+// return beat, then opened up to comfortably more than the text's natural
+// width so nothing clips). `.intro-title` owns the *visible* fade + slide,
+// so the two together read as the text being uncovered by the logo's own
+// leftward motion rather than appearing on its own.
+
+.title-reveal {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 0;
+  animation: title-wrap-reveal $text-duration $ease-settle $text-delay forwards;
+}
+
+@keyframes title-wrap-reveal {
+  from {
+    max-width: 0;
+  }
+  to {
+    // A fixed, generously large value rather than a `ch`-based guess — `ch`
+    // is the width of the "0" glyph, which is noticeably narrower than the
+    // actual bold-weight uppercase letters in "E-BPCO Admin Portal",
+    // and was clipping "Portal" at 22ch. This is comfortably larger than
+    // the text at any of `.intro-title`'s font-size clamp values; the
+    // wrapper's real layout width still shrinks to fit the actual text.
+    max-width: 30rem;
+  }
+}
+
+.intro-title {
+  position: relative;
+  margin: 0;
+  padding: 0 0.15em 0 0.05em;
+  font-size: clamp(2.1rem, 4.6vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: $color-surface;
+  opacity: 0;
+  transform: translateX(-14px);
+  will-change: transform, opacity;
+  animation: title-text-reveal $text-duration $ease-settle $text-delay forwards;
+}
+
+.intro-title-base {
+  display: block;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+}
+
+// Two-line lockup — "E-BPCO" reads as the primary mark, "Admin Portal" as
+// a smaller, softer subtitle underneath it, rather than one run-on line.
+.intro-title-line1 {
+  // `width: fit-content` (rather than the block default of stretching to
+  // fill `.intro-title-base`'s full width) so this box's right edge is the
+  // actual glyph extent — needed for `.intro-title-line2`'s size to be
+  // tuned against a real measurement, not an invisible full-width box.
+  display: block;
+  width: fit-content;
+  font-size: 1em;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.intro-title-line2 {
+  display: block;
+  width: fit-content;
+  margin-top: 0.1em;
+  font-size: 0.69em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+.intro-title-base .intro-title-line2 {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.intro-dash {
+  margin: 0 0.05em;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+// Same margin as `.intro-dash`, no color of its own, so the spark
+// duplicate below matches the base text's width exactly — otherwise the
+// two dashes drift apart and the sweep after the dash creeps out of
+// alignment with the visible glyphs.
+.intro-dash-spark {
+  margin: 0 0.05em;
+}
+
+@keyframes title-text-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// ---- Spark: one light sweep clipped to the logo's and wordmark's own shapes -
+// Runs once, only after the lockup is fully assembled (beat 8). Two
+// separate sweeps, timed together, each masked to only its own element so
+// neither ever paints outside the actual artwork/glyphs:
+//   - `.logo-spark` is a gradient `background`, clipped by a CSS mask built
+//     from logo.png's own alpha channel — it only shows through the seal's
+//     opaque pixels, following its circular silhouette.
+//   - `.intro-title-spark` is a transparent duplicate of the wordmark with
+//     `background-clip: text`, so its gradient only shows through the
+//     glyph shapes.
+// Painted as a plain translucent gold, not a lighten-only blend mode —
+// `screen`/`overlay` are near no-ops against pixels that are already close
+// to white (the seal's ring, the wordmark itself), which is most of what
+// these two elements are, so the highlight would barely show. Ordinary
+// alpha compositing tints visibly at any base brightness. Brief and
+// understated — no glow, no spin, no ring, and never a box.
+
+.logo-spark {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    115deg,
+    transparent 10%,
+    rgba(255, 224, 150, 0.97) 38%,
+    rgba(255, 224, 150, 0.97) 58%,
+    transparent 88%
+  );
+  background-size: 180% 100%;
+  background-position: -70% 0;
+  -webkit-mask-image: url('/assets/logos/logo.png');
+  mask-image: url('/assets/logos/logo.png');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  opacity: 0;
+  pointer-events: none;
+  animation: spark-sweep $spark-duration ease $spark-delay both;
+}
+
+.intro-title-spark {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-image: linear-gradient(
+    115deg,
+    transparent 10%,
+    rgba(255, 224, 150, 1) 38%,
+    rgba(255, 224, 150, 1) 58%,
+    transparent 88%
+  );
+  background-size: 180% 100%;
+  background-position: -70% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+  pointer-events: none;
+  animation: spark-sweep $spark-duration ease $spark-delay both;
+}
+
+@keyframes spark-sweep {
+  0% {
+    background-position: -70% 0;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 150% 0;
+    opacity: 0;
+  }
+}
+
+@keyframes bg-turn-red {
+  from {
+    background-color: $color-bg;
+  }
+  to {
+    // Same #d50000 as the login "Login Account" button — this is the
+    // fallback flat color `.splash-bg`'s photo layer sits on top of.
+    background-color: #d50000;
+  }
+}
+
+@keyframes splash-reveal {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+// ---- Narrow phones: smaller logo/type + a gentler overshoot ----------------
+// Only the values that actually need to differ are overridden here — the
+// keyframes themselves (`logo-cinematic`, `title-wrap-reveal`, …) read the
+// custom properties above, so nothing is duplicated.
+
+@media (max-width: 640px) {
+  :host {
+    --intro-zoom-start: 4.2; // slightly lower than desktop, per spec
+    --intro-nudge: clamp(42px, 10vw, 68px);
+    --intro-gap: clamp(8px, 2vw, 14px);
+  }
+
+  $logo-size-mobile: clamp(76px, 20vw, 116px);
+
+  .logo-wrap {
+    width: $logo-size-mobile;
+    height: $logo-size-mobile;
+  }
+
+  .intro-title {
+    font-size: clamp(0.74rem, 3.6vw, 0.98rem);
+  }
+}
+
+// ---- Reduced motion ---------------------------------------------------------
+// Skip the zoom, overshoot, slide, and spark entirely — the logo and
+// wordmark both appear immediately at their final, settled, centered
+// positions, held briefly, then a short fade hands off to the app. The
+// same `animationend` listener drives navigation either way (the fade
+// keyframe still runs, just compressed), so there's no branching timer
+// logic in the component.
+
+@media (prefers-reduced-motion: reduce) {
+  $reduced-hold: 0.2s; // within the requested 150–300ms hold
+  $reduced-fade: 0.25s;
+
+  .splash-bg {
+    animation: none;
+    opacity: 1;
+  }
+
+  .logo-wrap {
+    animation: none;
+    transform: scale($logo-settle-scale);
+  }
+
+  .brand-lockup {
+    animation: none;
+    gap: var(--intro-gap);
+  }
+
+  .title-reveal {
+    animation: none;
+    max-width: 30rem;
+  }
+
+  .intro-title {
+    animation: none;
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .logo-spark,
+  .intro-title-spark {
+    animation: none;
+    opacity: 0;
+  }
+
+  .splash-intro {
+    animation-duration: $reduced-fade;
+    animation-delay: $reduced-hold;
+  }
+}

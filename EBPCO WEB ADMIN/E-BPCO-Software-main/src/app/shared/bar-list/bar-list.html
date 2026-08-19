@@ -1,0 +1,14 @@
+@for (row of rows(); track row.name) {
+  <div class="bar-row" role="img" [attr.aria-label]="row.name + ': ' + row.value">
+    <app-avatar [name]="row.name" [size]="34" />
+    <span class="row-name">{{ row.name }}</span>
+    <span class="row-bar-track">
+      <span
+        class="row-bar-fill"
+        [style.width.%]="widthFor(row.value)"
+        [style.background]="barColor()"
+      ></span>
+    </span>
+    <span class="row-value">{{ row.value }}</span>
+  </div>
+}

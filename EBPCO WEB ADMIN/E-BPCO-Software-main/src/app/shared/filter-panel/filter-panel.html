@@ -1,0 +1,20 @@
+<div class="filter-wrap">
+  <button type="button" class="btn-outline filter-trigger" [class.active]="open()" (click)="toggle()">
+    <app-icon name="filter" [size]="15" />
+    Filters
+    @if (activeCount() > 0) {
+      <span class="filter-badge">{{ activeCount() }}</span>
+    }
+  </button>
+
+  @if (open()) {
+    <div class="filter-backdrop" (click)="close()"></div>
+    <div class="filter-menu" role="menu">
+      <ng-content></ng-content>
+
+      @if (showClear() && activeCount() > 0) {
+        <button type="button" class="filter-clear" (click)="clear.emit()">Clear all</button>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,92 @@
+@use '../styles/tokens' as *;
+
+@keyframes bar-row-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bar-fill-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.stacked-bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.25rem 0.25rem 0.5rem;
+}
+
+.stacked-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: $radius-sm;
+  cursor: default;
+  animation: bar-row-in 0.4s ease both;
+  transition: background $ease-fast;
+
+  &:hover,
+  &:focus-visible {
+    background: $color-bg-subtle;
+  }
+}
+
+.bar-row-label {
+  flex: 0 0 14.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: $color-ink-500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-row-track {
+  display: flex;
+  align-items: stretch;
+  height: 14px;
+  min-width: 4%;
+  border-radius: 4px;
+  overflow: hidden;
+  background: $color-bg-muted;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bar-row-fill {
+  display: block;
+  height: 100%;
+  border-right: 2px solid $color-surface;
+  transform-origin: left;
+  animation: bar-fill-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  &:last-child {
+    border-right: none;
+  }
+}
+
+.bar-row-total {
+  flex: 0 0 2.5rem;
+  text-align: right;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: $color-ink-900;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .bar-row-label {
+    flex-basis: 8rem;
+  }
+}

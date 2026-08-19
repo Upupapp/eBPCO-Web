@@ -1,0 +1,695 @@
+@use 'sass:color';
+@use '../../shared/styles/tokens' as *;
+
+// Derived from the brand token (not a standalone hex) for the one thing
+// tokens don't cover: a light-on-dark accent for text/icons sitting on the
+// visual panel's ink background, where the normal brand red would be too
+// dark to read against navy.
+$visual-accent: color.mix($color-brand-600, white, 55%);
+
+@keyframes welcome-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes welcome-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes welcome-drift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(12px, -10px);
+  }
+}
+
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.welcome-shell {
+  min-height: 100dvh;
+  display: flex;
+  align-items: stretch;
+  animation: welcome-fade 0.5s ease both;
+}
+
+// ---- Left: branded visual panel ----------------------------------------
+
+.welcome-visual {
+  position: relative;
+  width: 46%;
+  min-width: 380px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 2.5rem 2.75rem;
+  color: #fff;
+  background:
+    radial-gradient(circle at 88% 6%, rgba(37, 99, 235, 0.28), transparent 55%),
+    radial-gradient(circle at 10% 96%, rgba(200, 30, 44, 0.32), transparent 55%),
+    linear-gradient(165deg, #10131c 0%, #1c2130 48%, #2a1420 100%);
+}
+
+// A faint repeating dot field — the same "document board" texture used
+// elsewhere in the app, just light-on-dark here instead of dark-on-light.
+.visual-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+// Filmic grain — a tiny tileable feTurbulence noise texture blended in at
+// low opacity, same technique as the auth screens' own grain layer, so the
+// panel reads as directed/institutional rather than a flat CSS gradient.
+.welcome-visual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+// An oversized, barely-there seal — a watermark, not a logo placement, so
+// it's cropped off-canvas and desaturated rather than sitting as a crisp
+// colored image competing with the real header seal.
+.visual-watermark {
+  position: absolute;
+  right: -130px;
+  bottom: -110px;
+  width: 520px;
+  height: 520px;
+  opacity: 0.05;
+  filter: grayscale(1) brightness(2.4);
+  pointer-events: none;
+}
+
+.visual-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+// A wrapper around `<app-dilg-seal>`, not the seal's own `<img>` — under
+// Angular's emulated view encapsulation, a parent stylesheet can't select
+// into a child component's internal template, so effects that need to
+// apply to the seal (filter, the mobile scale-down below) are set on this
+// wrapper instead, the same workaround AuthLayout uses for the same seal.
+.header-seal {
+  display: inline-flex;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+}
+
+.visual-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.visual-muni {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.visual-province {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.visual-office {
+  margin: 0.25rem 0 0;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.visual-hero {
+  position: relative;
+  z-index: 1;
+  max-width: 460px;
+  animation: welcome-rise 0.6s ease-out 0.15s both;
+}
+
+.visual-eyebrow {
+  margin: 0 0 0.9rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $visual-accent;
+}
+
+.visual-headline {
+  margin: 0 0 1rem;
+  font-size: clamp(1.9rem, 1.6vw + 1.5rem, 2.6rem);
+  font-weight: 800;
+  line-height: 1.16;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.visual-copy {
+  margin: 0;
+  max-width: 420px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.visual-trust {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  animation: welcome-rise 0.6s ease-out 0.3s both;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  app-icon {
+    display: inline-flex;
+    color: $visual-accent;
+  }
+}
+
+.trust-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+// ---- Right: information panel -------------------------------------------
+
+.welcome-info {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 2rem;
+  background: $color-surface;
+  overflow: hidden;
+}
+
+.welcome-info::before,
+.welcome-info::after {
+  content: '';
+  position: absolute;
+  width: 440px;
+  height: 440px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.welcome-info::before {
+  top: -140px;
+  right: -140px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.14), transparent 70%);
+  animation: welcome-drift 17s ease-in-out infinite;
+}
+
+.welcome-info::after {
+  bottom: -150px;
+  left: -150px;
+  background: radial-gradient(
+    circle,
+    color.mix($color-brand-600, transparent, 12%),
+    transparent 70%
+  );
+  animation: welcome-drift 21s ease-in-out infinite reverse;
+}
+
+.info-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 560px;
+  animation: welcome-rise 0.55s ease-out 0.1s both;
+}
+
+.info-eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $color-brand-600;
+}
+
+.info-heading {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.4rem, 0.7vw + 1.2rem, 1.7rem);
+  font-weight: 800;
+  line-height: 1.14;
+  color: $color-ink-900;
+}
+
+.info-copy {
+  margin: 0 0 0.6rem;
+  max-width: 480px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: $color-ink-500;
+}
+
+.capabilities-heading {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $color-ink-400;
+}
+
+.capabilities-list {
+  // One shared shade system for the three illustrations below — derived
+  // from the brand token, not arbitrary hex, so every card's artwork stays
+  // in the same red family as the rest of the app.
+  --art-1: #{color.mix($color-brand-500, white, 15%)};
+  --art-2: #{color.mix($color-brand-500, white, 35%)};
+  --art-3: #{color.mix($color-brand-600, white, 55%)};
+  --art-4: #{$color-brand-600};
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0 0 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+// Informational, not interactive — no cursor/hover-lift/focus treatment.
+// The illustration is `position: absolute` rather than a flex sibling so
+// every breakpoint only has to resize/reposition/fade one element instead
+// of restructuring the row; `padding-right` reserves the clearance that
+// keeps text off the artwork, and z-index keeps text legible even where
+// the low-opacity art extends behind it on mobile.
+.capability-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  // A fixed `height`, not `min-height` — the three descriptions wrap to a
+  // different number of lines at this column width, so a min-height alone
+  // let real content height win and produced three visibly different
+  // card heights. Pairing this with the description's own line-clamp
+  // below is what makes "identical dimensions" hold regardless of exact
+  // wording length. Kept deliberately below the original 130-155px design
+  // spec — fitting the whole screen without scrolling took priority over
+  // that range once it was clear the two couldn't both hold.
+  height: 106px;
+  padding: 12px 22px;
+  padding-right: 108px;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid $color-brand-border;
+  background:
+    radial-gradient(120% 140% at 100% 50%, rgba($color-brand-500, 0.06), transparent 60%),
+    $color-surface;
+  box-shadow:
+    0 14px 32px rgba($color-brand-600, 0.06),
+    0 2px 6px rgba($color-ink-900, 0.04);
+  animation: welcome-rise 0.45s ease-out both;
+
+  &:nth-child(1) {
+    animation-delay: 0.18s;
+  }
+  &:nth-child(2) {
+    animation-delay: 0.25s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.32s;
+  }
+}
+
+// The atmospheric glow behind each illustration — "light reflecting"
+// rather than a visible blob, so it stays extremely pale and blurred.
+.capability-card::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  right: -30px;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background: radial-gradient(circle, $color-brand-100 0%, transparent 72%);
+  opacity: 0.7;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.capability-icon {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: $color-brand-50;
+  color: $color-brand-600;
+  box-shadow: 0 0 0 5px rgba($color-brand-500, 0.05);
+}
+
+.capability-text {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+}
+
+// A wide-enough text column (see the reduced `padding-right` above) that a
+// single line reliably fits even the longest title, so ellipsis is only a
+// safety net rather than an expected outcome.
+.capability-title {
+  margin: 0 0 0.18rem;
+  font-size: 1.02rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: $color-ink-900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Clamped to 3 lines — the fixed card `height` above needs every card's
+// content to top out at the same line count, not just the same font size,
+// or the taller-wrapping description would overflow a fixed-height card.
+.capability-desc {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.32;
+  color: $color-ink-500;
+}
+
+// Secondary to the text by design: contained within the card's rounded
+// corners (`overflow: hidden` on `.capability-card`), never overlapping
+// the title/description at any breakpoint, and purely decorative.
+.capability-art {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: -8px;
+  width: 100px;
+  height: auto;
+  transform: translateY(-50%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+// ---- Primary action: continue to sign-in ---------------------------------
+
+.signin-action {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 48px;
+  padding: 0.6rem 1.2rem;
+  margin-bottom: 0.75rem;
+  border-radius: $radius-lg;
+  border: 1px solid color.mix($color-brand-600, $color-surface, 55%);
+  background: linear-gradient(135deg, $color-brand-600, $color-brand-700);
+  color: $color-surface;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(200, 30, 44, 0.22);
+  transition:
+    transform $ease-fast,
+    box-shadow $ease-base,
+    filter $ease-base;
+
+  &:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+    box-shadow: 0 14px 30px rgba(200, 30, 44, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.99);
+  }
+
+  // The global `:focus-visible` outline is the same brand red as this
+  // card's own background, so it would vanish here — an explicit white
+  // ring keeps focus visible against the card's own fill.
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
+}
+
+.signin-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.signin-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.signin-title {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.signin-desc {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.signin-arrow {
+  flex-shrink: 0;
+  transition: transform $ease-fast;
+}
+
+.signin-action:hover .signin-arrow {
+  transform: translateX(3px);
+}
+
+// ---- Security notice / assistance / footer -------------------------------
+
+.security-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.55rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: $color-ink-500;
+
+  // Box-centered against the text (verified via computed geometry), but
+  // the shield glyph is wider at top and tapers to a point at the bottom,
+  // so its visual weight sits higher than its bounding box — a small
+  // nudge down corrects the optical illusion that a true center leaves.
+  app-icon {
+    flex-shrink: 0;
+    margin-top: -3px;
+    color: $color-ink-300;
+  }
+}
+
+.assist-copy {
+  margin: 0 0 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: $color-ink-400;
+}
+
+.welcome-footer {
+  border-top: 1px solid $color-border;
+  padding-top: 0.55rem;
+
+  p {
+    margin: 0;
+    font-size: 0.68rem;
+    color: $color-ink-300;
+  }
+}
+
+// ---- Responsive -----------------------------------------------------------
+// Same 900px stacking point as the auth screens: the visual panel becomes
+// a wide branded hero band above the information panel instead of a
+// side-by-side split.
+
+@media (max-width: 900px) {
+  .welcome-shell {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+  }
+
+  .welcome-visual {
+    width: 100%;
+    min-width: 0;
+    padding: 1.8rem 1.75rem;
+    gap: 1.4rem;
+  }
+
+  .welcome-info {
+    width: 100%;
+    padding: 2.75rem 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .welcome-visual {
+    padding: 1.3rem 1.25rem 1.5rem;
+    min-height: 250px;
+    gap: 1rem;
+  }
+
+  .header-seal {
+    transform: scale(0.85);
+    transform-origin: left center;
+  }
+
+  .visual-office {
+    display: none;
+  }
+
+  .visual-eyebrow {
+    margin-bottom: 0.5rem;
+    font-size: 0.66rem;
+  }
+
+  .visual-headline {
+    margin-bottom: 0.55rem;
+    font-size: 1.35rem;
+  }
+
+  .visual-copy {
+    font-size: 0.82rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .visual-trust {
+    display: none;
+  }
+
+  .visual-watermark {
+    right: -80px;
+    bottom: -70px;
+    width: 280px;
+    height: 280px;
+  }
+
+  .welcome-info {
+    padding: 2.25rem 1.25rem;
+  }
+
+  .info-copy {
+    margin-bottom: 1.5rem;
+  }
+
+  // The illustration steps back to a pale corner watermark instead of a
+  // full-height side element — icon and text keep the row, get full
+  // width back (no more `padding-right` reservation), and stay on top of
+  // the art via z-index regardless of how far it reaches under them.
+  .capability-card {
+    height: 126px;
+    padding: 16px 18px;
+    gap: 0.55rem;
+  }
+
+  .capability-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+  }
+
+  .capability-title {
+    font-size: 1.02rem;
+  }
+
+  .capability-desc {
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+
+  .capability-art {
+    top: auto;
+    right: -14px;
+    bottom: -14px;
+    width: 108px;
+    opacity: 0.28;
+    transform: none;
+  }
+
+  .capability-card::before {
+    top: auto;
+    bottom: -30px;
+    right: -30px;
+    width: 130px;
+    height: 130px;
+    transform: none;
+  }
+
+  .signin-action {
+    padding: 0.9rem 1rem;
+  }
+}

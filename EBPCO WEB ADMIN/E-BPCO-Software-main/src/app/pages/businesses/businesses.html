@@ -1,0 +1,922 @@
+<app-topbar
+  title="Businesses"
+  [searchTerm]="searchTerm()"
+  (searchChange)="searchTerm.set($event); onSearchChange()"
+/>
+
+@if (view() === 'list') {
+  <section class="kpi-grid">
+    @for (stat of ringStats; track stat.label) {
+      <app-kpi-card
+        [label]="stat.label"
+        [value]="stat.value"
+        [icon]="stat.icon"
+        [tone]="stat.tone"
+        [illustration]="stat.illustration"
+        [progress]="stat.isTotal ? null : stat.pct"
+        [support]="stat.support"
+      />
+    }
+  </section>
+
+  <section class="card table-card">
+    <div class="table-toolbar">
+      <div class="search-input">
+        <app-icon name="search" [size]="16" />
+        <input
+          type="text"
+          placeholder="Search Here By Application ID, Applicant Name, or Location"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+        />
+      </div>
+      <div class="toolbar-actions">
+        <app-filter-panel [activeCount]="activeFilterCount()" (clear)="clearFilters()">
+          <div class="filter-field">
+            <label for="business-category-filter">Category</label>
+            <select id="business-category-filter" [(ngModel)]="categoryFilter">
+              <option value="All">All Categories</option>
+              @for (opt of categoryOptions; track opt) {
+                <option [value]="opt">{{ opt }}</option>
+              }
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="business-status-filter">Status</label>
+            <select id="business-status-filter" [(ngModel)]="statusFilter">
+              <option value="All">All Statuses</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </app-filter-panel>
+        <button type="button" class="btn-outline" (click)="exportVisible()">
+          <app-icon name="download" [size]="15" />
+          Export
+        </button>
+        <button type="button" class="btn-primary" (click)="openCreate()">
+          <app-icon name="plus" [size]="15" />
+          Create New Business
+        </button>
+      </div>
+    </div>
+
+    @if (selectedIds().size > 0) {
+      <div class="bulk-bar">
+        <span>{{ selectedIds().size }} selected</span>
+        <button type="button" class="btn-outline" (click)="exportVisible()">
+          <app-icon name="download" [size]="14" />
+          Export
+        </button>
+        <button type="button" class="btn-outline danger" (click)="requestDeleteSelected()">
+          <app-icon name="trash" [size]="14" />
+          Delete
+        </button>
+      </div>
+    }
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>
+              <input
+                type="checkbox"
+                aria-label="Select all businesses"
+                [checked]="allVisibleSelected()"
+                (change)="toggleSelectAll()"
+              />
+            </th>
+            <th>Business ID</th>
+            <th>BUSINESS NAME</th>
+            <th>CATEGORY</th>
+            <th>CONTACT PERSON</th>
+            <th>Sub Domain</th>
+            <th>DATE CREATED</th>
+            <th>User Count</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of pagedBusinessRows(); track row.id) {
+            <tr
+              class="row-clickable"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'View business ' + row.code"
+              (click)="openDetail(row)"
+              (keydown.enter)="openDetail(row)"
+              (keydown.space)="$event.preventDefault(); openDetail(row)"
+            >
+              <td (click)="$event.stopPropagation()">
+                <input
+                  type="checkbox"
+                  [attr.aria-label]="'Select ' + row.code"
+                  [checked]="isSelected(row)"
+                  (change)="toggleRowSelected(row)"
+                />
+              </td>
+              <td class="id-cell">{{ row.id }}</td>
+              <td>
+                <div class="applicant-cell">
+                  <app-avatar [name]="row.contactName" [size]="30" />
+                  {{ row.code }}
+                </div>
+              </td>
+              <td>{{ row.category }}</td>
+              <td>
+                <div class="contact-cell">
+                  <span>{{ row.contactName }}</span>
+                  <span class="contact-phone">{{ row.contactPhone }}</span>
+                </div>
+              </td>
+              <td>{{ row.subdomain }}</td>
+              <td>{{ row.dateCreated }}</td>
+              <td>{{ row.userCount }}</td>
+              <td>
+                <span class="status-pill" [class]="row.status.toLowerCase()">{{ row.status }}</span>
+              </td>
+              <td (click)="$event.stopPropagation()">
+                <div class="actions-cell">
+                  <button
+                    type="button"
+                    class="icon-btn view"
+                    aria-label="View business"
+                    (click)="openDetail(row)"
+                  >
+                    <app-icon name="eye" [size]="14" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn edit"
+                    aria-label="Edit business"
+                    (click)="openDetail(row)"
+                  >
+                    <app-icon name="edit" [size]="14" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn del"
+                    aria-label="Delete business"
+                    (click)="requestDelete(row)"
+                  >
+                    <app-icon name="trash" [size]="14" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr class="table-empty-row">
+              <td colspan="10">No businesses match your search.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination
+      [totalItems]="filteredBusinessRows().length"
+      [pageSize]="pageSize"
+      [(page)]="page"
+    />
+  </section>
+
+  <section class="card subtabs-card">
+    <nav class="pill-tabs">
+      <button
+        type="button"
+        class="pill-tab"
+        [class.active]="activeSubTab() === 'analytics'"
+        (click)="selectSubTab('analytics')"
+      >
+        <app-icon name="trend-up" [size]="15" />
+        Analytics
+      </button>
+      <button
+        type="button"
+        class="pill-tab"
+        [class.active]="activeSubTab() === 'modules'"
+        (click)="selectSubTab('modules')"
+      >
+        <app-icon name="plug" [size]="15" />
+        Modules
+      </button>
+      <button
+        type="button"
+        class="pill-tab"
+        [class.active]="activeSubTab() === 'recent-activity'"
+        (click)="selectSubTab('recent-activity')"
+      >
+        <app-icon name="logs" [size]="15" />
+        Recent Activity
+      </button>
+    </nav>
+
+    @switch (activeSubTab()) {
+      @case ('analytics') {
+        <div class="analytics-layout">
+          <div class="growth-card">
+            <div class="card-head">
+              <h2>Businesses Growth</h2>
+              <select class="filter-select">
+                <option>This Year</option>
+                <option>Last Year</option>
+              </select>
+            </div>
+
+            <div
+              class="growth-chart-wrap"
+              #growthChartWrap
+              (mousemove)="onGrowthPointerMove($event)"
+              (mouseleave)="onGrowthPointerLeave()"
+            >
+              <svg viewBox="0 0 1000 260" preserveAspectRatio="none" class="growth-svg">
+                @for (i of [0, 1, 2, 3]; track i) {
+                  <line
+                    x1="0"
+                    [attr.y1]="(i / 3) * 260"
+                    x2="1000"
+                    [attr.y2]="(i / 3) * 260"
+                    class="grid-line"
+                  />
+                }
+                <path [attr.d]="growthPath()" class="growth-line" />
+
+                @if (hoveredGrowthPoint(); as hp) {
+                  <line
+                    [attr.x1]="hp.x"
+                    [attr.x2]="hp.x"
+                    y1="0"
+                    y2="260"
+                    class="growth-crosshair"
+                  />
+                }
+
+                @for (m of growthMarkers(); track m.label; let i = $index) {
+                  <circle
+                    [attr.cx]="m.x"
+                    [attr.cy]="m.y"
+                    r="6"
+                    class="growth-dot"
+                    [class.active]="i === hoveredGrowthIndex()"
+                  />
+                }
+              </svg>
+
+              @if (hoveredGrowthPoint(); as hp) {
+                <div
+                  class="growth-tooltip"
+                  [style.left.%]="(hp.x / 1000) * 100"
+                  [style.top.%]="(hp.tooltipY / 260) * 100"
+                >
+                  <strong>{{ hp.label }} 2024</strong>
+                  <span><i></i>Registrations: +{{ hp.value }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="growth-x-axis">
+              @for (m of growthMarkers(); track m.label) {
+                <span>{{ m.label }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="kpi-grid">
+            @for (m of metricTiles; track m.label) {
+              <app-kpi-card
+                [label]="m.label"
+                [value]="m.value"
+                [unit]="m.unit ?? ''"
+                [icon]="m.icon"
+                [tone]="m.tone"
+                [illustration]="m.illustration"
+                [trend]="m.trend"
+              />
+            }
+          </div>
+        </div>
+      }
+
+      @case ('modules') {
+        <div class="modules-card">
+          <div class="card-head">
+            <h2>Module Usage Across Businesses</h2>
+            <button type="button" class="btn-outline" (click)="openCatalog()">
+              Manage Catalog
+            </button>
+          </div>
+
+          <div class="module-list">
+            @for (m of moduleUsage; track m.name) {
+              <div class="module-row">
+                <span class="module-name">{{ m.name }}</span>
+                <span class="module-count">{{ m.businessCount }} Businesses</span>
+                <div class="module-bar-col">
+                  <span class="module-bar-track">
+                    <span
+                      class="module-bar-fill"
+                      [style.width.%]="m.pct"
+                      [style.background]="m.color"
+                    ></span>
+                  </span>
+                  <span class="module-pct">{{ m.pct }}%</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @case ('recent-activity') {
+        <div class="activity-layout">
+          <div class="activity-list-card">
+            <div class="card-head">
+              <h2>Recent Activity</h2>
+              <a class="view-all-link" href="javascript:void(0)" (click)="goToActivityLog()">
+                View All
+                <app-icon name="chevron-right" [size]="14" />
+              </a>
+            </div>
+
+            @for (item of recentActivity; track item.name + item.agoLabel) {
+              <div class="activity-row">
+                <span class="activity-dot" [style.background]="item.color"></span>
+                <div class="activity-body">
+                  <span class="activity-name">{{ item.name }}</span>
+                  <p class="activity-text">{{ item.text }}</p>
+                  <span class="activity-ago">{{ item.agoLabel }}</span>
+                </div>
+                <span class="activity-date">{{ item.dateLabel }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="comm-center-card">
+            <h2>Communication Center</h2>
+            <p class="comm-subtitle">Broadcast system-wide notices to businesses.</p>
+            <textarea
+              placeholder="Compose an announcement..."
+              rows="7"
+              [(ngModel)]="announcementText"
+              (ngModelChange)="onAnnouncementChange()"
+            ></textarea>
+            @if (announcementError()) {
+              <p class="field-error">{{ announcementError() }}</p>
+            }
+            @if (announcementSent()) {
+              <p class="field-success">Announcement broadcast to {{ announcementAudience() }}.</p>
+            }
+            <select class="filter-select full-width" [(ngModel)]="announcementAudience">
+              <option>All Businesses (150)</option>
+              <option>Active Businesses Only</option>
+            </select>
+            <button type="button" class="btn-primary full-width" (click)="broadcastNotice()">
+              Broadcast Notice
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </section>
+} @else if (view() === 'detail' && selectedBusiness(); as row) {
+  <div class="detail-head">
+    <h1>{{ row.code }}</h1>
+    <div class="header-actions">
+      <span class="status-pill" [class]="row.status.toLowerCase()">{{ row.status }}</span>
+      <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
+    </div>
+  </div>
+
+  @if (businessDetail(); as detail) {
+    <div class="kpi-grid kpi-grid--compact">
+      <app-kpi-card
+        label="Total Applications"
+        [value]="detail.metrics.totalApplications + ''"
+        icon="logs"
+        tone="info"
+        density="compact"
+      />
+      <app-kpi-card
+        label="Approved Permits"
+        [value]="detail.metrics.approvedPermits + ''"
+        icon="check-circle"
+        tone="success"
+        density="compact"
+      />
+      <app-kpi-card
+        label="Pending Payments"
+        [value]="detail.metrics.pendingPayments"
+        icon="wallet"
+        tone="warning"
+        density="compact"
+      />
+      <app-kpi-card
+        label="Active Users"
+        [value]="detail.metrics.activeUsers + ''"
+        icon="users"
+        tone="brand"
+        density="compact"
+      />
+    </div>
+  }
+
+  <div class="detail-grid">
+    <div class="record-card">
+      <div class="record-banner">
+        <app-icon name="image" [size]="26" />
+        <app-avatar [name]="row.contactName" [size]="72" class="banner-avatar" />
+      </div>
+
+      <div class="record-info">
+        <h2>{{ row.contactName }}</h2>
+        <span class="status-pill" [class]="row.status.toLowerCase()">{{ row.status }}</span>
+
+        <dl class="info-list">
+          <div>
+            <dt>Category :</dt>
+            <dd>{{ row.category }}</dd>
+          </div>
+          <div>
+            <dt>Barangay :</dt>
+            <dd>{{ row.city }}</dd>
+          </div>
+          <div>
+            <dt>Contact No. :</dt>
+            <dd>{{ row.contactPhone }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="record-footer">
+        <div>
+          <strong>{{ row.dateCreated }}</strong>
+          <span>Date Created</span>
+        </div>
+        <div>
+          <strong>{{ row.userCount }}</strong>
+          <span>User Count</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-head">
+        <h2>Account Overview</h2>
+        <button type="button" class="btn-outline" (click)="exportDetail()">
+          <app-icon name="download" [size]="15" />
+          Export
+        </button>
+      </div>
+
+      <nav class="detail-tabs">
+        <button
+          type="button"
+          class="detail-tab"
+          [class.active]="detailTab() === 'overview'"
+          (click)="selectDetailTab('overview')"
+        >
+          Overview
+        </button>
+        <button
+          type="button"
+          class="detail-tab"
+          [class.active]="detailTab() === 'applications'"
+          (click)="selectDetailTab('applications')"
+        >
+          Applications
+        </button>
+        <button
+          type="button"
+          class="detail-tab"
+          [class.active]="detailTab() === 'documents'"
+          (click)="selectDetailTab('documents')"
+        >
+          Documents
+        </button>
+        <button
+          type="button"
+          class="detail-tab"
+          [class.active]="detailTab() === 'users'"
+          (click)="selectDetailTab('users')"
+        >
+          Users
+        </button>
+        <button
+          type="button"
+          class="detail-tab"
+          [class.active]="detailTab() === 'activity'"
+          (click)="selectDetailTab('activity')"
+        >
+          Activity
+        </button>
+      </nav>
+
+      @switch (detailTab()) {
+        @case ('overview') {
+          <h3>Registration</h3>
+          <dl class="info-grid">
+            <div>
+              <dt>Business ID</dt>
+              <dd>{{ row.id }}</dd>
+            </div>
+            <div>
+              <dt>Business Name</dt>
+              <dd>{{ row.code }}</dd>
+            </div>
+            <div>
+              <dt>Category</dt>
+              <dd>{{ row.category }}</dd>
+            </div>
+            <div>
+              <dt>Registered</dt>
+              <dd>{{ row.dateCreated }}</dd>
+            </div>
+            <div>
+              <dt>Barangay</dt>
+              <dd>{{ row.city }}, Castilla</dd>
+            </div>
+            <div>
+              <dt>Province</dt>
+              <dd>Sorsogon, Region V</dd>
+            </div>
+            <div>
+              <dt>Sub Domain</dt>
+              <dd>{{ row.subdomain }}</dd>
+            </div>
+            <div>
+              <dt>Account Status</dt>
+              <dd>{{ row.status }}</dd>
+            </div>
+          </dl>
+
+          <h3>Contact Person</h3>
+          <div class="officer-row">
+            <app-avatar [name]="row.contactName" [size]="34" />
+            <div>
+              <strong>{{ row.contactName }}</strong>
+              <span>{{ row.contactPhone }}</span>
+            </div>
+          </div>
+        }
+
+        @case ('applications') {
+          @if (businessDetail(); as detail) {
+            <div class="table-wrap">
+              <table class="detail-table">
+                <thead>
+                  <tr>
+                    <th>Permit ID</th>
+                    <th>Type</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (p of detail.permits; track p.id) {
+                    <tr>
+                      <td class="muted">{{ p.id }}</td>
+                      <td>{{ p.type }}</td>
+                      <td class="muted">{{ p.dateSubmitted }}</td>
+                      <td>
+                        <span
+                          class="status-pill"
+                          [class]="p.status.toLowerCase().replace(' ', '-')"
+                          >{{ p.status }}</span
+                        >
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+
+        @case ('documents') {
+          @if (businessDetail(); as detail) {
+            <div class="table-wrap">
+              <table class="detail-table">
+                <thead>
+                  <tr>
+                    <th>Document</th>
+                    <th>Uploaded</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (d of detail.documents; track d.name) {
+                    <tr>
+                      <td>{{ d.name }}</td>
+                      <td class="muted">{{ d.uploadedDate }}</td>
+                      <td>
+                        <span
+                          class="status-pill"
+                          [class]="d.status.toLowerCase().replace(' ', '-')"
+                          >{{ d.status }}</span
+                        >
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+
+        @case ('users') {
+          @if (businessDetail(); as detail) {
+            <div class="table-wrap">
+              <table class="detail-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (u of detail.users; track u.name) {
+                    <tr>
+                      <td><app-avatar [name]="u.name" [size]="26" /></td>
+                      <td>{{ u.name }}</td>
+                      <td class="muted">{{ u.role }}</td>
+                      <td>
+                        <span class="status-pill" [class]="u.status.toLowerCase()">{{
+                          u.status
+                        }}</span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+
+        @case ('activity') {
+          @if (businessDetail(); as detail) {
+            <ul class="timeline-feed">
+              @for (item of detail.activity; track item.title) {
+                <li class="timeline-feed-item">
+                  <span class="timeline-feed-icon"><app-icon name="clock" [size]="14" /></span>
+                  <div class="timeline-feed-body">
+                    <div class="timeline-feed-head">
+                      <span class="timeline-feed-title">{{ item.title }}</span>
+                      <span class="timeline-feed-time">{{ item.timeAgo }}</span>
+                    </div>
+                    <p class="timeline-feed-detail">
+                      {{ item.detail }} — <em>{{ item.actor }}</em>
+                    </p>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        }
+      }
+    </div>
+  </div>
+} @else {
+  <div class="create-header">
+    <div>
+      <h1>Create Business</h1>
+      <p>Register a new Business (business owner / applicant) in the System</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn-outline" (click)="backToList()">Back to List</button>
+      <button type="button" class="btn-primary" (click)="createBusiness()">
+        <app-icon name="plus" [size]="15" />
+        Create New Business
+      </button>
+    </div>
+  </div>
+
+  <div class="create-grid">
+    <div class="create-col">
+      <div class="card">
+        <h2>Basic Information</h2>
+        <label class="field-label">Business Name</label>
+        <input
+          class="text-input"
+          type="text"
+          placeholder="Enter Business Name"
+          [(ngModel)]="newBusiness.businessName"
+        />
+
+        <label class="field-label">Business Category</label>
+        <select class="select-input" [(ngModel)]="newBusiness.type">
+          <option value="">Select Business Category</option>
+          <option value="Retail">Retail</option>
+          <option value="Food Service">Food Service</option>
+          <option value="Services">Services</option>
+          <option value="Manufacturing">Manufacturing</option>
+          <option value="Wholesale">Wholesale</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <h2>Contact Person</h2>
+        <label class="field-label">Full Name</label>
+        <input
+          class="text-input"
+          type="text"
+          placeholder="Enter Full Name"
+          [(ngModel)]="newBusiness.contactName"
+        />
+
+        <label class="field-label">Contact Number</label>
+        <input
+          class="text-input"
+          type="text"
+          placeholder="Enter Contact Number"
+          [(ngModel)]="newBusiness.contactPhone"
+        />
+      </div>
+
+      <div class="card">
+        <h2>Initial Information</h2>
+        <span class="field-label">Enable Modules</span>
+
+        <label class="checkbox-row">
+          <input type="checkbox" [(ngModel)]="newBusiness.modules.initialEvaluation" />
+          Initial Evaluation
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" [(ngModel)]="newBusiness.modules.zoningEvaluation" />
+          Zoning Evaluation
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" [(ngModel)]="newBusiness.modules.fireSafetyEvaluation" />
+          Fire Safety Evaluation
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" [(ngModel)]="newBusiness.modules.locationalClearance" />
+          Locational Clearance
+        </label>
+      </div>
+    </div>
+
+    <div class="create-col">
+      <div class="card">
+        <h2>Address Information</h2>
+        <label class="field-label">Region</label>
+        <select class="select-input" [(ngModel)]="newBusiness.region">
+          <option value="region-5">Region V (Bicol Region)</option>
+        </select>
+
+        <label class="field-label">Province</label>
+        <select class="select-input" [(ngModel)]="newBusiness.province">
+          <option value="sorsogon">Sorsogon</option>
+        </select>
+
+        <label class="field-label">City/Municipality</label>
+        <select class="select-input" [(ngModel)]="newBusiness.cityMunicipality">
+          <option value="castilla">Castilla</option>
+        </select>
+
+        <label class="field-label">Barangay</label>
+        <select class="select-input" [(ngModel)]="newBusiness.barangay">
+          <option value="">Select Barangay</option>
+          <option value="amomonting">Amomonting</option>
+          <option value="bagalayag">Bagalayag</option>
+          <option value="bagong-sirang">Bagong Sirang</option>
+          <option value="bonga">Bonga</option>
+          <option value="buenavista">Buenavista</option>
+          <option value="burabod">Burabod</option>
+          <option value="caburacan">Caburacan</option>
+          <option value="canjela">Canjela</option>
+          <option value="cogon">Cogon</option>
+          <option value="cumadcad">Cumadcad</option>
+          <option value="dangcalan">Dangcalan</option>
+          <option value="dinapa">Dinapa</option>
+          <option value="la-union">La Union</option>
+          <option value="libtong">Libtong</option>
+          <option value="loreto">Loreto</option>
+          <option value="macalaya">Macalaya</option>
+          <option value="maracabac">Maracabac</option>
+          <option value="mayon">Mayon</option>
+          <option value="maypangi">Maypangi</option>
+          <option value="milagrosa">Milagrosa</option>
+          <option value="miluya">Miluya</option>
+          <option value="monte-carmelo">Monte Carmelo</option>
+          <option value="oras">Oras</option>
+          <option value="pandan">Pandan</option>
+          <option value="poblacion">Poblacion</option>
+          <option value="quirapi">Quirapi</option>
+          <option value="saclayan">Saclayan</option>
+          <option value="salvacion">Salvacion</option>
+          <option value="san-isidro">San Isidro</option>
+          <option value="san-rafael">San Rafael</option>
+          <option value="san-roque">San Roque</option>
+          <option value="san-vicente">San Vicente</option>
+          <option value="sogoy">Sogoy</option>
+          <option value="tomalaytay">Tomalaytay</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <h2>Login Credentials</h2>
+        <label class="field-label">User Name</label>
+        <input
+          class="text-input"
+          type="text"
+          placeholder="Enter User Name"
+          [(ngModel)]="newBusiness.userName"
+        />
+
+        <label class="field-label">Password</label>
+        <div class="input-wrap">
+          <app-icon name="lock" [size]="16" class="input-icon" />
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            placeholder="••••••••"
+            [(ngModel)]="newBusiness.password"
+          />
+          <button
+            type="button"
+            class="toggle-visibility"
+            (click)="showPassword.set(!showPassword())"
+          >
+            <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="17" />
+          </button>
+        </div>
+
+        <label class="field-label">Confirm Password</label>
+        <div class="input-wrap">
+          <app-icon name="lock" [size]="16" class="input-icon" />
+          <input
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            placeholder="••••••••"
+            [(ngModel)]="newBusiness.confirmPassword"
+          />
+          <button
+            type="button"
+            class="toggle-visibility"
+            (click)="showConfirmPassword.set(!showConfirmPassword())"
+          >
+            <app-icon [name]="showConfirmPassword() ? 'eye-off' : 'eye'" [size]="17" />
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Subdomain Configuration</h2>
+        <label class="field-label">Slug/Subdomain Field</label>
+        <div class="slug-wrap">
+          <input
+            class="text-input"
+            type="text"
+            placeholder="Enter Slug Name"
+            [(ngModel)]="newBusiness.slug"
+          />
+          <span class="slug-suffix">yourapp.gov.ph</span>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showCatalog()) {
+  <div class="modal-backdrop" (click)="closeCatalog()">
+    <div class="modal-box catalog-box" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" aria-label="Close" (click)="closeCatalog()">
+        &#10005;
+      </button>
+      <h2>Module Catalog</h2>
+      <p>Turn platform modules on or off for new and existing businesses.</p>
+      <ul class="catalog-list">
+        @for (m of moduleUsage; track m.name) {
+          <li>
+            <span>{{ m.name }}</span>
+            <label class="switch">
+              <input
+                type="checkbox"
+                [checked]="isModuleEnabled(m.name)"
+                (change)="toggleModule(m.name)"
+              />
+              <span class="switch-track"></span>
+            </label>
+          </li>
+        }
+      </ul>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn confirm" (click)="closeCatalog()">Done</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (deleteTarget()) {
+  <app-confirm-dialog
+    title="Delete business?"
+    [message]="deleteDialogMessage()"
+    confirmLabel="Delete"
+    tone="danger"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  />
+}

@@ -1,0 +1,39 @@
+@use 'tokens' as *;
+
+// Compact underline tab-nav — shared by system-logs and user-roles (and any
+// future page that needs a simple content-switcher row).
+.tab-nav {
+  display: flex;
+  gap: 1.25rem;
+  border-bottom: 1px solid $color-border;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.3rem 0.15rem 0.7rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: $color-ink-400;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color $ease-base,
+    border-color $ease-base;
+
+  &:hover {
+    color: $color-brand-600;
+  }
+
+  &.active {
+    color: $color-brand-600;
+    border-bottom-color: $color-brand-600;
+    font-weight: 700;
+  }
+}

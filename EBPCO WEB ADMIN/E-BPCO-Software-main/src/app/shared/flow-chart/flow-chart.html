@@ -1,0 +1,89 @@
+<div class="flow-wrap">
+  @if (title()) {
+    <h2 class="flow-title">{{ title() }}</h2>
+  }
+
+  <div class="flow-scroll">
+    <svg
+      [attr.viewBox]="viewBox()"
+      [style.width.px]="viewBoxWidth()"
+      [style.min-width.px]="viewBoxWidth()"
+      [style.height.px]="viewBoxHeight()"
+      class="flow-svg"
+    >
+      <defs>
+        @for (c of ['gray', 'red', 'green', 'pink', 'blue']; track c) {
+          <marker
+            [attr.id]="'arrow-' + c"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="7"
+            markerHeight="7"
+            orient="auto-start-reverse"
+          >
+            <path d="M0,0 L10,5 L0,10 Z" [class]="'arrow-fill-' + c" />
+          </marker>
+        }
+      </defs>
+
+      @for (e of edges(); track e.path) {
+        <path
+          [attr.d]="e.path"
+          [attr.stroke]="colorFor(e)"
+          fill="none"
+          stroke-width="2"
+          [attr.marker-end]="markerFor(e)"
+          class="flow-edge"
+        />
+      }
+
+      @for (e of edges(); track e.path + '-label') {
+        @if (e.label) {
+          <g [attr.transform]="labelTransformFor(e)" class="edge-label-group">
+            <rect
+              [attr.x]="-labelWidth(e.label) / 2"
+              y="-10"
+              [attr.width]="labelWidth(e.label)"
+              height="20"
+              rx="4"
+              fill="#fff"
+            />
+            <text text-anchor="middle" dy="4" [attr.fill]="colorFor(e)" class="edge-label">{{
+              e.label
+            }}</text>
+          </g>
+        }
+      }
+
+      @for (n of nodes(); track n.id) {
+        <g [attr.transform]="transformFor(n)" class="flow-node-pos" [class]="'node-' + n.type">
+          <g class="flow-node">
+            @switch (n.type) {
+              @case ('decision') {
+                <polygon [attr.points]="diamondPoints(n)" class="node-shape" />
+              }
+              @case ('start') {
+                <rect [attr.width]="n.w" [attr.height]="n.h" [attr.rx]="n.h / 2" class="node-shape" />
+              }
+              @case ('end') {
+                <rect [attr.width]="n.w" [attr.height]="n.h" [attr.rx]="n.h / 2" class="node-shape" />
+              }
+              @default {
+                <rect [attr.width]="n.w" [attr.height]="n.h" rx="6" class="node-shape" />
+              }
+            }
+            <foreignObject [attr.width]="n.w" [attr.height]="n.h" x="0" y="0">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="node-label">
+                <span>{{ n.label }}</span>
+                @if (n.platform) {
+                  <small>[Platform: {{ n.platform }}]</small>
+                }
+              </div>
+            </foreignObject>
+          </g>
+        </g>
+      }
+    </svg>
+  </div>
+</div>

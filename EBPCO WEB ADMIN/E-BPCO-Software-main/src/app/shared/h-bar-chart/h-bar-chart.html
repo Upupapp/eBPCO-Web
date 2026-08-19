@@ -1,0 +1,25 @@
+<div class="hbar-chart">
+  <div class="hbar-rows">
+    @for (row of rows(); track row.label) {
+      <div class="hbar-row">
+        <span class="hbar-label">{{ row.label }}</span>
+        <span class="hbar-track">
+          <span
+            class="hbar-fill"
+            [style.width.%]="widthFor(row.value)"
+            [style.background]="color()"
+          ></span>
+        </span>
+      </div>
+    }
+  </div>
+
+  <div class="hbar-axis">
+    <span class="hbar-axis-spacer"></span>
+    <span class="hbar-axis-line">
+      @for (t of tickPositions(); track t.value) {
+        <span class="hbar-tick" [style.left.%]="t.pct">{{ t.value }}</span>
+      }
+    </span>
+  </div>
+</div>

@@ -1,0 +1,220 @@
+@use 'tokens' as *;
+
+.btn-outline,
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: $radius-md;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.83rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform $ease-fast,
+    background $ease-base,
+    color $ease-base,
+    border-color $ease-base;
+  white-space: nowrap;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.btn-outline {
+  background: $color-surface;
+  border: 1px solid $color-border-strong;
+  color: $color-ink-600;
+
+  &:hover {
+    border-color: $color-brand-600;
+    color: $color-brand-600;
+  }
+}
+
+.btn-primary {
+  background: $color-info;
+  border: 1px solid $color-info;
+  color: $color-surface;
+
+  &:hover {
+    background: $color-info-700;
+  }
+}
+
+.filter-select {
+  border: 1px solid $color-border-strong;
+  border-radius: $radius-sm;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $color-ink-600;
+  background: $color-surface;
+  cursor: pointer;
+  transition: border-color $ease-base;
+
+  &:hover,
+  &:focus-visible {
+    border-color: $color-brand-600;
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+thead th {
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: $color-ink-050;
+  letter-spacing: 0.03em;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid $color-border;
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 0.8rem 0.75rem;
+  font-size: 0.85rem;
+  color: $color-ink-700;
+  border-bottom: 1px solid $color-bg-muted;
+  white-space: nowrap;
+}
+
+tbody tr {
+  transition: background $ease-fast;
+
+  &:hover {
+    background: $color-bg-subtle;
+  }
+}
+
+// Whole-row navigation to a record's detail view. Docs (03-Component-Library
+// Tables: "Support hover feedback", "Interactive rows shall provide visible
+// focus indicators") require both a hover and a keyboard focus treatment —
+// rows carrying this class also get tabindex="0"/role="button" and an
+// (keydown.enter)/(keydown.space) handler in the template, since a bare
+// <tr> isn't natively keyboard-operable.
+tbody tr.row-clickable {
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: -2px;
+    background: $color-bg-subtle;
+  }
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: $radius-pill;
+  font-size: 0.76rem;
+  font-weight: 700;
+
+  // "accepted" and "paid" are E-BPCO Mobile's own labels for a passed
+  // per-document evaluation (ElectricalDocumentEvaluationStatus.accepted)
+  // and a settled payment (PaymentAssessmentStatus.paid) — same success
+  // tone as "approved" so status pills stay visually consistent everywhere.
+  &.approved,
+  &.accepted,
+  &.paid,
+  &.active,
+  &.verified,
+  &.good {
+    background: $color-success-bg;
+    color: $color-success;
+  }
+  // "under-review", "pending-review", "pending-verification" mirror
+  // E-BPCO Mobile's ApplicationStatus/PaymentAssessmentStatus labels
+  // ("Under Review", "Pending Review", "Pending Verification").
+  &.pending,
+  &.under-review,
+  &.pending-review,
+  &.pending-verification,
+  &.warning {
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+  // "revision-required" and "overdue" mirror E-BPCO Mobile's
+  // ElectricalPermitStatus.revisionRequired and
+  // PaymentAssessmentStatus.overdue labels.
+  &.rejected,
+  &.revision-required,
+  &.overdue,
+  &.inactive,
+  &.missing,
+  &.critical {
+    background: $color-danger-bg;
+    color: $color-danger;
+  }
+  // "ready-for-release" mirrors ApplicationStatus.released's display
+  // label in E-BPCO Mobile ("Ready for Release").
+  &.ready-for-release {
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+  &.info {
+    background: $color-info-bg;
+    color: $color-info;
+  }
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform $ease-fast;
+
+  &:active {
+    transform: scale(0.9);
+  }
+
+  &.view {
+    background: $color-info-bg-soft;
+    color: $color-info;
+  }
+  &.edit {
+    background: $color-success-bg-soft;
+    color: $color-success;
+  }
+  &.del {
+    background: $color-danger-bg-soft;
+    color: $color-danger;
+  }
+}
+
+.table-footer {
+  text-align: center;
+  margin: 1.25rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $color-ink-700;
+}
+
+.table-empty-row td {
+  text-align: center;
+  padding: 2.5rem 0.75rem;
+  color: $color-ink-300;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: normal;
+}

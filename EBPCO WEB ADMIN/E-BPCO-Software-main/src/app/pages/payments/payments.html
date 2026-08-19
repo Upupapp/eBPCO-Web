@@ -1,0 +1,317 @@
+<app-topbar
+  title="Payments"
+  [searchTerm]="searchTerm()"
+  (searchChange)="searchTerm.set($event); onSearchChange()"
+/>
+
+@if (view() === 'list') {
+  <section class="kpi-grid">
+    @for (stat of ringStats(); track stat.label) {
+      <app-kpi-card
+        [label]="stat.label"
+        [value]="stat.value"
+        [icon]="stat.icon"
+        [tone]="stat.tone"
+        [illustration]="stat.illustration"
+        [progress]="stat.isTotal ? null : stat.pct"
+        [support]="stat.support ?? ''"
+        [bars]="stat.bars ?? null"
+      />
+    }
+  </section>
+
+  <section class="card table-card">
+    <div class="table-toolbar">
+      <div class="search-input">
+        <app-icon name="search" [size]="16" />
+        <input
+          type="text"
+          placeholder="Search Here By Application ID, Applicant Name, or Location"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+        />
+      </div>
+      <div class="toolbar-actions">
+        <app-filter-panel [activeCount]="activeFilterCount()" (clear)="clearFilters()">
+          <div class="filter-field">
+            <label for="pay-status-filter">Status</label>
+            <select id="pay-status-filter" [(ngModel)]="statusFilter">
+              <option value="All">All Statuses</option>
+              @for (opt of statusOptions; track opt) {
+                <option [value]="opt">{{ opt }}</option>
+              }
+            </select>
+          </div>
+        </app-filter-panel>
+        <button type="button" class="btn-outline" (click)="exportVisible()">
+          <app-icon name="download" [size]="15" />
+          Export
+        </button>
+        @if (canRecord()) {
+          <button type="button" class="btn-primary" (click)="openRecordPayment()">
+            <app-icon name="plus" [size]="15" />
+            Record Payment
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>APPLICATION ID</th>
+            <th>APPLICANT NAME</th>
+            <th>LOCATION</th>
+            <th>TYPE</th>
+            <th>DATE SUBMITTED</th>
+            <th>AMOUNT</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of pagedRows(); track row.id) {
+            <tr
+              class="row-clickable"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'View payment ' + row.id + ' for ' + row.applicant"
+              (click)="openDetail(row)"
+              (keydown.enter)="openDetail(row)"
+              (keydown.space)="$event.preventDefault(); openDetail(row)"
+            >
+              <td class="id-cell">{{ row.id }}</td>
+              <td>
+                <div class="applicant-cell">
+                  <app-avatar [name]="row.applicant" [size]="30" />
+                  {{ row.applicant }}
+                </div>
+              </td>
+              <td>{{ row.city }}</td>
+              <td>{{ row.type }}</td>
+              <td>{{ row.dateSubmitted }}</td>
+              <td>{{ row.amount }}</td>
+              <td>
+                <span class="status-pill" [class]="row.status.toLowerCase().replace(/\s+/g, '-')">{{
+                  row.status
+                }}</span>
+              </td>
+              <td (click)="$event.stopPropagation()">
+                <div class="actions-cell">
+                  <button
+                    type="button"
+                    class="icon-btn view"
+                    aria-label="View payment"
+                    (click)="openDetail(row)"
+                  >
+                    <app-icon name="eye" [size]="15" />
+                  </button>
+                  @if (row.status === 'Paid') {
+                    <button type="button" class="pill-btn verified" disabled>Verified</button>
+                  } @else if (canVerify() && row.status === 'Pending Verification') {
+                    <button type="button" class="pill-btn verify" (click)="verifyPayment(row)">
+                      Verify
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr class="table-empty-row">
+              <td colspan="8">No payments match your search.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination [totalItems]="filteredRows().length" [pageSize]="pageSize" [(page)]="page" />
+  </section>
+} @else if (selectedRow(); as row) {
+  <div class="detail-head">
+    <h1>Payment Details</h1>
+    <div class="header-actions">
+      <span
+        class="pill-btn"
+        [class.verified]="row.status === 'Paid'"
+        [class.verify]="row.status !== 'Paid'"
+        class="static"
+        >{{ row.status }}</span
+      >
+      <button type="button" class="btn-outline" (click)="openApplicationRecord(row)">
+        View Application
+      </button>
+      <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div class="record-card">
+      <div class="record-banner">
+        <app-icon name="image" [size]="26" />
+        <app-avatar [name]="row.applicant" [size]="72" class="banner-avatar" />
+      </div>
+
+      <div class="record-info">
+        <h2>{{ row.id }} - {{ row.applicant }}</h2>
+        <span class="status-pill" [class]="row.status.toLowerCase().replace(/\s+/g, '-')">{{
+          row.status
+        }}</span>
+
+        <dl class="info-list">
+          <div>
+            <dt>Barangay :</dt>
+            <dd>{{ row.city }}</dd>
+          </div>
+          <div>
+            <dt>Region :</dt>
+            <dd>{{ row.region }}</dd>
+          </div>
+          <div>
+            <dt>Type :</dt>
+            <dd>{{ row.type }}</dd>
+          </div>
+          <div>
+            <dt>Ref No:</dt>
+            <dd>{{ row.refNo }}</dd>
+          </div>
+          <div>
+            <dt>Amount:</dt>
+            <dd>{{ row.amount }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="record-footer">
+        <div>
+          <strong>{{ row.dateSubmitted }}</strong>
+          <span>Date of Latest Payment</span>
+        </div>
+        <div>
+          <strong>{{ row.paymentMethod }}</strong>
+          <span>Payment Method</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-head">
+        <h2>Payment Summary</h2>
+        <button type="button" class="btn-outline" (click)="downloadReceipt()">
+          Download Receipt
+          <app-icon name="download" [size]="15" />
+        </button>
+      </div>
+
+      <p class="verified-note">This Payment Is {{ row.status }}</p>
+
+      <h3>Fee Breakdown</h3>
+      <div class="table-wrap">
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th>Filing Fee</th>
+              <th>Processing Fee</th>
+              <th>Architectural</th>
+              <th>Structural</th>
+              <th>Electrical</th>
+              <th>Others</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ row.fees.filing }}</td>
+              <td>{{ row.fees.processing }}</td>
+              <td>{{ row.fees.architectural }}</td>
+              <td>{{ row.fees.structural }}</td>
+              <td>{{ row.fees.electrical }}</td>
+              <td>{{ row.fees.others }}</td>
+              <td>{{ row.fees.total }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Payment History</h3>
+      <div class="table-wrap">
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Payment Method</th>
+              <th>Verified By</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (h of row.history; track h.ref) {
+              <tr>
+                <td class="muted">{{ h.ref }}</td>
+                <td>{{ h.amount }}</td>
+                <td>{{ h.date }}</td>
+                <td>
+                  <span class="status-pill" [class]="h.status.toLowerCase()">{{ h.status }}</span>
+                </td>
+                <td class="muted">{{ h.method }}</td>
+                <td>{{ h.verifiedBy || '—' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="muted">No payment history yet.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showRecordPayment()) {
+  <div class="modal-backdrop" (click)="cancelRecordPayment()">
+    <div class="modal-box create-box" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelRecordPayment()">
+        &#10005;
+      </button>
+      <h2>Record Onsite Payment</h2>
+      <p class="modal-hint">
+        Attaches a payment to an existing, already-assessed application — this never creates a new
+        application.
+      </p>
+      <form class="create-form" (ngSubmit)="createPayment()">
+        <label>
+          Application ID
+          <input
+            type="text"
+            [(ngModel)]="newPayment.applicationId"
+            name="payAppId"
+            placeholder="E-BPCO-2026-000123"
+            required
+          />
+        </label>
+        <label>
+          Reference Number (optional)
+          <input
+            type="text"
+            [(ngModel)]="newPayment.referenceNumber"
+            name="payRef"
+            placeholder="Auto-generated if left blank"
+          />
+        </label>
+        @if (recordPaymentError()) {
+          <p class="form-error">{{ recordPaymentError() }}</p>
+        }
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelRecordPayment()">
+            Cancel
+          </button>
+          <button type="submit" class="modal-btn confirm">Record Payment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

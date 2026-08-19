@@ -1,0 +1,795 @@
+@if (interactive()) {
+  <button
+    type="button"
+    class="kpi-card"
+    [class]="hostClass()"
+    [attr.aria-label]="accessibleLabel()"
+    (click)="onActivate()"
+  >
+    <ng-container [ngTemplateOutlet]="density() === 'compact' ? compactBody : fullBody" />
+  </button>
+} @else {
+  <div class="kpi-card" [class]="hostClass()">
+    <ng-container [ngTemplateOutlet]="density() === 'compact' ? compactBody : fullBody" />
+  </div>
+}
+
+<!-- Compact: for detail-view metric strips — icon, label, value only, no
+     illustration or footer, since 4+ of these sit under a record header
+     rather than being a page's primary KPI row. -->
+<ng-template #compactBody>
+  <div class="kpi-top">
+    <div class="kpi-text">
+      <p class="kpi-label" [id]="labelId">{{ label() }}</p>
+      <p class="kpi-value" [attr.aria-describedby]="labelId">
+        {{ value() }}
+        @if (unit()) {
+          <span class="kpi-unit">{{ unit() }}</span>
+        }
+      </p>
+    </div>
+    @if (icon()) {
+      <span class="kpi-icon" aria-hidden="true">
+        <app-icon [name]="icon()" [size]="14" />
+      </span>
+    }
+  </div>
+  @if (support() || description()) {
+    <p class="kpi-caption">{{ description() || support() }}</p>
+  }
+</ng-template>
+
+<!-- Standard: the full portrait card — utility row, dimensional
+     illustration, label/value/description, and an insight footer. -->
+<ng-template #fullBody>
+  <div class="kpi-main">
+    @if (interactive()) {
+      <div class="kpi-top">
+        <span class="kpi-nav-arrow" aria-hidden="true">
+          <app-icon name="arrow-up-right" [size]="14" />
+        </span>
+      </div>
+    }
+
+    @if (artwork() || illustration()) {
+      <div class="kpi-illustration" aria-hidden="true">
+        @if (artwork()) {
+          <img [src]="artwork()" alt="" loading="lazy" class="kpi-illustration-img" />
+        } @else {
+          <svg viewBox="0 0 120 120" class="kpi-illustration-svg">
+            <defs>
+              <radialGradient [attr.id]="illustrationId + '-glow'" cx="56%" cy="46%" r="65%">
+                <stop offset="0%" [attr.stop-color]="toneAccent()" stop-opacity="0.32" />
+                <stop offset="100%" [attr.stop-color]="toneAccent()" stop-opacity="0" />
+              </radialGradient>
+              <linearGradient [attr.id]="illustrationId + '-glass'" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop offset="45%" [attr.stop-color]="toneAccent()" stop-opacity="0.32" />
+                <stop offset="100%" [attr.stop-color]="toneAccent()" stop-opacity="0.5" />
+              </linearGradient>
+              <linearGradient [attr.id]="illustrationId + '-glassSoft'" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85" />
+                <stop offset="100%" [attr.stop-color]="toneAccent()" stop-opacity="0.22" />
+              </linearGradient>
+              <filter
+                [attr.id]="illustrationId + '-soft'"
+                x="-60%"
+                y="-60%"
+                width="220%"
+                height="220%"
+              >
+                <feGaussianBlur stdDeviation="4.5" />
+              </filter>
+              <filter
+                [attr.id]="illustrationId + '-shadow'"
+                x="-80%"
+                y="-80%"
+                width="260%"
+                height="260%"
+              >
+                <feGaussianBlur stdDeviation="4" />
+              </filter>
+            </defs>
+
+            <circle cx="62" cy="52" r="54" [attr.fill]="'url(#' + illustrationId + '-glow)'" />
+            <ellipse
+              cx="58"
+              cy="101"
+              rx="28"
+              ry="6"
+              fill="#14142d"
+              opacity="0.12"
+              [attr.filter]="'url(#' + illustrationId + '-shadow)'"
+            />
+
+            @switch (illustration()) {
+              @case ('totals') {
+                <circle
+                  cx="60"
+                  cy="55"
+                  r="28"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.25"
+                />
+                <ellipse
+                  cx="60"
+                  cy="55"
+                  rx="44"
+                  ry="17"
+                  fill="none"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.4"
+                  stroke-width="2"
+                  transform="rotate(-18 60 55)"
+                />
+                <ellipse
+                  cx="60"
+                  cy="55"
+                  rx="30"
+                  ry="11"
+                  fill="none"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.55"
+                  stroke-width="2"
+                  transform="rotate(14 60 55)"
+                />
+                <circle cx="96" cy="45" r="4.5" [attr.fill]="toneAccent()" />
+                <circle cx="25" cy="66" r="3" [attr.fill]="toneAccent()" opacity="0.6" />
+              }
+              @case ('users') {
+                <circle
+                  cx="60"
+                  cy="56"
+                  r="34"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.25"
+                />
+                <circle cx="45" cy="46" r="9" fill="#ffffff" opacity="0.55" />
+                <path d="M31 79 q14 -18 28 0 z" fill="#ffffff" opacity="0.5" />
+                <circle cx="71" cy="50" r="11" [attr.fill]="toneAccent()" opacity="0.85" />
+                <path d="M52 87 q19 -23 38 0 z" [attr.fill]="toneAccent()" opacity="0.85" />
+              }
+              @case ('active') {
+                <circle
+                  cx="60"
+                  cy="55"
+                  r="32"
+                  fill="none"
+                  [attr.stroke]="'url(#' + illustrationId + '-glass)'"
+                  stroke-width="14"
+                />
+                <circle
+                  cx="60"
+                  cy="55"
+                  r="32"
+                  fill="none"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.28"
+                  stroke-width="14"
+                  stroke-dasharray="6 8"
+                />
+                <path
+                  d="M48 55 l8 9 l17 -19"
+                  fill="none"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle
+                  cx="95"
+                  cy="32"
+                  r="6"
+                  [attr.fill]="'url(#' + illustrationId + '-glassSoft)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.4"
+                />
+              }
+              @case ('pending') {
+                <path
+                  d="M27 70 h64 l-8 20 a6 6 0 0 1 -6 4 h-36 a6 6 0 0 1 -6 -4 z"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <rect
+                  x="41"
+                  y="29"
+                  width="36"
+                  height="46"
+                  rx="4"
+                  fill="#ffffff"
+                  opacity="0.75"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <line
+                  x1="48"
+                  y1="41"
+                  x2="70"
+                  y2="41"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.5"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+                <line
+                  x1="48"
+                  y1="51"
+                  x2="64"
+                  y2="51"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.5"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+                <circle
+                  cx="89"
+                  cy="77"
+                  r="15"
+                  [attr.fill]="'url(#' + illustrationId + '-glassSoft)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.4"
+                />
+                <line
+                  x1="89"
+                  y1="77"
+                  x2="89"
+                  y2="68"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+                <line
+                  x1="89"
+                  y1="77"
+                  x2="95"
+                  y2="80"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+              }
+              @case ('roles') {
+                <path
+                  d="M60 21 l28 10 v24 c0 22 -14 34 -28 40 c-14 -6 -28 -18 -28 -40 v-24 z"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <path
+                  d="M44 55 l6 -10 8 8 8 -8 8 8 6 -10 v14 h-36 z"
+                  [attr.fill]="toneAccent()"
+                  opacity="0.85"
+                />
+              }
+              @case ('applications') {
+                <rect
+                  x="33"
+                  y="35"
+                  width="46"
+                  height="58"
+                  rx="5"
+                  fill="#ffffff"
+                  opacity="0.55"
+                  transform="rotate(-8 56 64)"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.2"
+                />
+                <rect
+                  x="42"
+                  y="28"
+                  width="46"
+                  height="58"
+                  rx="5"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <line
+                  x1="50"
+                  y1="42"
+                  x2="76"
+                  y2="42"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.55"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+                <line
+                  x1="50"
+                  y1="52"
+                  x2="70"
+                  y2="52"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.55"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+                <line
+                  x1="50"
+                  y1="62"
+                  x2="66"
+                  y2="62"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.55"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+                <circle
+                  cx="85"
+                  cy="80"
+                  r="12"
+                  [attr.fill]="'url(#' + illustrationId + '-glassSoft)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.4"
+                />
+                <path
+                  d="M79 80 l4 4 8 -8"
+                  fill="none"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              }
+              @case ('businesses') {
+                <rect
+                  x="38"
+                  y="34"
+                  width="44"
+                  height="58"
+                  rx="6"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <rect
+                  x="29"
+                  y="52"
+                  width="20"
+                  height="40"
+                  rx="4"
+                  fill="#ffffff"
+                  opacity="0.55"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.2"
+                />
+                <rect
+                  x="46"
+                  y="42"
+                  width="8"
+                  height="8"
+                  rx="1.5"
+                  [attr.fill]="toneAccent()"
+                  opacity="0.5"
+                />
+                <rect
+                  x="60"
+                  y="42"
+                  width="8"
+                  height="8"
+                  rx="1.5"
+                  [attr.fill]="toneAccent()"
+                  opacity="0.5"
+                />
+                <rect
+                  x="46"
+                  y="56"
+                  width="8"
+                  height="8"
+                  rx="1.5"
+                  [attr.fill]="toneAccent()"
+                  opacity="0.5"
+                />
+                <rect
+                  x="60"
+                  y="56"
+                  width="8"
+                  height="8"
+                  rx="1.5"
+                  [attr.fill]="toneAccent()"
+                  opacity="0.5"
+                />
+                <rect
+                  x="60"
+                  y="70"
+                  width="8"
+                  height="8"
+                  rx="1.5"
+                  [attr.fill]="toneAccent()"
+                  opacity="0.5"
+                />
+              }
+              @case ('evaluations') {
+                <rect
+                  x="35"
+                  y="27"
+                  width="48"
+                  height="60"
+                  rx="6"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <rect
+                  x="49"
+                  y="23"
+                  width="20"
+                  height="10"
+                  rx="3"
+                  fill="#ffffff"
+                  opacity="0.8"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <path
+                  d="M44 46 l4 4 7 -7"
+                  fill="none"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <line
+                  x1="59"
+                  y1="46"
+                  x2="75"
+                  y2="46"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.5"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M44 60 l4 4 7 -7"
+                  fill="none"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <line
+                  x1="59"
+                  y1="60"
+                  x2="75"
+                  y2="60"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.5"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+                <circle
+                  cx="85"
+                  cy="80"
+                  r="12"
+                  fill="none"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="4"
+                  stroke-opacity="0.55"
+                />
+                <line
+                  x1="93"
+                  y1="88"
+                  x2="101"
+                  y2="96"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="4"
+                  stroke-linecap="round"
+                  stroke-opacity="0.55"
+                />
+              }
+              @case ('payments') {
+                <rect
+                  x="29"
+                  y="42"
+                  width="60"
+                  height="42"
+                  rx="8"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <path
+                  d="M29 52 h60 v-6 a6 6 0 0 0 -6 -6 h-48 a6 6 0 0 0 -6 6 z"
+                  fill="#ffffff"
+                  opacity="0.5"
+                />
+                <circle
+                  cx="75"
+                  cy="63"
+                  r="7"
+                  fill="#ffffff"
+                  opacity="0.85"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.4"
+                />
+                <circle
+                  cx="33"
+                  cy="86"
+                  r="10"
+                  [attr.fill]="'url(#' + illustrationId + '-glassSoft)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.4"
+                />
+                <circle cx="49" cy="92" r="7" [attr.fill]="toneAccent()" opacity="0.5" />
+              }
+              @case ('permit') {
+                <rect
+                  x="31"
+                  y="26"
+                  width="56"
+                  height="50"
+                  rx="5"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <rect
+                  x="37"
+                  y="32"
+                  width="44"
+                  height="38"
+                  rx="3"
+                  fill="none"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.35"
+                  stroke-width="1.5"
+                  stroke-dasharray="3 3"
+                />
+                <line
+                  x1="43"
+                  y1="44"
+                  x2="69"
+                  y2="44"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.5"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+                <line
+                  x1="43"
+                  y1="53"
+                  x2="61"
+                  y2="53"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.5"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+                <circle
+                  cx="81"
+                  cy="82"
+                  r="14"
+                  [attr.fill]="'url(#' + illustrationId + '-glassSoft)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.4"
+                />
+                <path
+                  d="M81 74 l3.5 7 7.5 1 -5.5 5.5 1.5 7.5 -7 -3.7 -7 3.7 1.5 -7.5 -5.5 -5.5 7.5 -1 z"
+                  [attr.fill]="toneAccent()"
+                  opacity="0.6"
+                />
+              }
+              @case ('logs') {
+                <rect
+                  x="33"
+                  y="33"
+                  width="46"
+                  height="56"
+                  rx="5"
+                  fill="#ffffff"
+                  opacity="0.5"
+                  transform="rotate(-6 56 61)"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.2"
+                />
+                <rect
+                  x="41"
+                  y="27"
+                  width="46"
+                  height="56"
+                  rx="5"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <polyline
+                  points="47,63 57,63 61,51 67,73 72,63 79,63"
+                  fill="none"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <line
+                  x1="49"
+                  y1="41"
+                  x2="73"
+                  y2="41"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.45"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                />
+              }
+              @case ('success') {
+                <circle
+                  cx="60"
+                  cy="55"
+                  r="34"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <path
+                  d="M43 56 l11 12 22 -26"
+                  fill="none"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              }
+              @case ('critical') {
+                <path
+                  d="M60 19 l30 11 v25 c0 24 -15 36 -30 42 c-15 -6 -30 -18 -30 -42 v-25 z"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                />
+                <line
+                  x1="60"
+                  y1="39"
+                  x2="60"
+                  y2="63"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="6"
+                  stroke-linecap="round"
+                />
+                <circle cx="60" cy="76" r="4" [attr.fill]="toneAccent()" />
+              }
+              @case ('warning') {
+                <path
+                  d="M60 23 l34 60 h-68 z"
+                  [attr.fill]="'url(#' + illustrationId + '-glass)'"
+                  [attr.stroke]="toneAccent()"
+                  stroke-opacity="0.3"
+                  stroke-linejoin="round"
+                />
+                <line
+                  x1="60"
+                  y1="47"
+                  x2="60"
+                  y2="65"
+                  [attr.stroke]="toneAccent()"
+                  stroke-width="6"
+                  stroke-linecap="round"
+                />
+                <circle cx="60" cy="75" r="4" [attr.fill]="toneAccent()" />
+              }
+            }
+
+            <ellipse
+              cx="45"
+              cy="33"
+              rx="18"
+              ry="8"
+              fill="#ffffff"
+              opacity="0.32"
+              transform="rotate(-28 45 33)"
+              [attr.filter]="'url(#' + illustrationId + '-soft)'"
+            />
+          </svg>
+        }
+        @if (artworkBadge()) {
+          <span class="kpi-illustration-badge">{{ artworkBadge() }}</span>
+        }
+      </div>
+    }
+
+    <div class="kpi-text">
+      <p class="kpi-label" [id]="labelId">{{ label() }}</p>
+      <p class="kpi-value" [attr.aria-describedby]="labelId">
+        {{ value() }}
+        @if (unit()) {
+          <span class="kpi-unit">{{ unit() }}</span>
+        }
+      </p>
+      @if (description()) {
+        <p class="kpi-description">{{ description() }}</p>
+      }
+      @if (mainTrend(); as t) {
+        <div class="kpi-footnote-row kpi-main-trend">
+          <span
+            class="kpi-trend"
+            [class.positive]="t.sentiment === 'positive'"
+            [class.negative]="t.sentiment === 'negative'"
+          >
+            <app-icon [name]="t.direction === 'up' ? 'trend-up' : 'trend-down'" [size]="12" />
+            {{ t.label }}
+          </span>
+          @if (t.comparison) {
+            <span class="kpi-caption">{{ t.comparison }}</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (footerTrend() || support() || insight() !== 'none') {
+    <div class="kpi-footer">
+      @if (footerTrend(); as t) {
+        <div class="kpi-footnote-row">
+          <span
+            class="kpi-trend"
+            [class.positive]="t.sentiment === 'positive'"
+            [class.negative]="t.sentiment === 'negative'"
+          >
+            <app-icon [name]="t.direction === 'up' ? 'trend-up' : 'trend-down'" [size]="12" />
+            {{ t.label }}
+          </span>
+          @if (t.comparison) {
+            <span class="kpi-caption">{{ t.comparison }}</span>
+          }
+        </div>
+      } @else if (support()) {
+        <div class="kpi-footnote-row">
+          <span class="kpi-caption">{{ support() }}</span>
+        </div>
+      }
+
+      @switch (insight()) {
+        @case ('progress') {
+          <div
+            class="kpi-bar-track"
+            role="img"
+            [attr.aria-label]="label() + ' progress: ' + roundPct(progress()!) + ' percent'"
+          >
+            <div class="kpi-bar-fill" [style.width.%]="progressPct()"></div>
+          </div>
+        }
+        @case ('sparkline') {
+          <svg
+            class="kpi-sparkline"
+            viewBox="0 0 100 26"
+            preserveAspectRatio="none"
+            role="img"
+            [attr.aria-label]="sparklineSummary()"
+          >
+            <polyline
+              [attr.points]="sparklinePoints()"
+              fill="none"
+              [attr.stroke]="toneAccent()"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        }
+        @case ('bars') {
+          <div class="kpi-bars" role="img" [attr.aria-label]="barsSummary()">
+            @for (h of barHeights(); track $index) {
+              <span class="kpi-bar" [style.height.%]="h"></span>
+            }
+          </div>
+        }
+        @case ('record') {
+          <div class="kpi-record">
+            <span class="kpi-record-label">{{ record()!.label }}</span>
+            <span class="kpi-record-meta">{{ record()!.meta }}</span>
+          </div>
+        }
+        @case ('avatars') {
+          <div class="kpi-avatars" role="img" [attr.aria-label]="avatarsSummary()">
+            @for (a of avatars()!; track a.initials) {
+              <span class="kpi-avatar">{{ a.initials }}</span>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+</ng-template>

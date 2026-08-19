@@ -1,0 +1,47 @@
+// E-BPCO motion system.
+//
+// Two tiers, by design — not an oversight:
+//
+// 1. UTILITY MOTION (almost everything: tables, forms, dashboards, detail
+//    views). This app is a permit office's daily work tool. Motion here
+//    exists only to confirm an action landed or to soften a state change —
+//    never to be watched. Fast, small, no scroll-triggered reveals (a
+//    50-row table that fades in row by row makes staff wait to scan it),
+//    no parallax, no custom cursor. $dur-instant/$dur-fast/$dur-base cover
+//    this tier; $ease-standard is the only curve most of it needs.
+//
+// 2. EXPRESSIVE MOTION (splash, login, register only — the three screens
+//    with no data to scan, just a brand moment before work starts). This
+//    is where $dur-slow/$dur-cinematic and the entrance/settle curves
+//    belong. Splash's own keyframes stay bespoke (a hand-tuned nine-beat
+//    sequence isn't a token lookup), but new expressive work should still
+//    reach for $ease-entrance/$ease-settle rather than inventing another
+//    one-off bezier.
+//
+// Every animation in the app is neutralized under prefers-reduced-motion
+// by the global kill-switch in `styles.scss` — that's the one rule that
+// has to cover all of it, so tune durations here assuming it's the
+// backstop, not the first line of defense.
+
+// ---- Durations ----------------------------------------------------------
+
+$dur-instant: 0.08s; // press/active feedback — a button visibly "landing"
+$dur-fast: 0.15s; // hover, focus-visible, small state toggles
+$dur-base: 0.2s; // panel/dropdown open, tab switch, most transitions
+$dur-slow: 0.4s; // a section/card entering on mount
+$dur-cinematic: 0.6s; // reserved for splash/login/register hero beats
+
+// ---- Easing ---------------------------------------------------------------
+
+$ease-standard: ease; // the default — reversible UI state (hover, focus, open/close)
+$ease-entrance: cubic-bezier(0.16, 1, 0.3, 1); // fast start, soft landing — content arriving
+$ease-settle: cubic-bezier(0.22, 1, 0.36, 1); // a gentler landing for hero-scale moves
+
+// ---- Shorthands ------------------------------------------------------------
+// Most call sites just want "the fast one" or "the entrance one" without
+// re-deriving `$dur * $ease` — these cover the common cases; reach for the
+// raw tokens above only when a call site genuinely needs a custom pairing.
+
+$transition-fast: $dur-fast $ease-standard;
+$transition-base: $dur-base $ease-standard;
+$transition-entrance: $dur-slow $ease-entrance;

@@ -1,0 +1,455 @@
+@use '../../shared/styles/data-table';
+@use '../../shared/styles/tabs';
+@use '../../shared/styles/detail-view';
+@use '../../shared/styles/modal';
+@use '../../shared/styles/kpi-grid';
+@use '../../shared/styles/tokens' as *;
+
+@keyframes section-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tab-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:host {
+  display: block;
+}
+
+.card {
+  background: #fff;
+  border-radius: 0.9rem;
+  padding: 1.5rem 1.6rem;
+  border: 1px solid #eeeef2;
+  animation: section-in 0.4s ease both;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.date-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid #e6e6ec;
+  border-radius: 0.4rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #454a58;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.live-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.switch {
+  position: relative;
+  width: 38px;
+  height: 21px;
+  border-radius: 12px;
+  border: none;
+  background: #d7dbe3;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  padding: 0;
+
+  .knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 0.25s ease;
+  }
+
+  &.on {
+    background: #2563eb;
+
+    .knob {
+      transform: translateX(17px);
+    }
+  }
+}
+
+.table-wrap table {
+  animation: tab-fade 0.3s ease both;
+}
+
+.wrap-cell {
+  display: block;
+  width: 240px;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.pagination-row {
+  display: block;
+  margin-top: 1.25rem;
+}
+
+// ---- Log detail view ------------------------------------------------------
+// A dedicated layout for this page's audit-record view. Deliberately not
+// reusing the shared .detail-head/.detail-grid pattern from _detail-view.scss
+// — that pattern (a bare h1 + action row stretched to the viewport edges,
+// paired with a fixed narrow content column) is exactly what made this page
+// read as left-heavy and disconnected. Every other .detail-head/.detail-grid
+// consumer (Applications, Payments, Businesses, etc.) keeps using its
+// existing markup untouched; these classes only exist here.
+
+.log-detail-view {
+  max-width: 1260px;
+  margin: 0 auto;
+}
+
+.log-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  // Padding (offset by a matching negative margin) grows the tap target
+  // to a comfortable size without shifting the link's visual position or
+  // adding to the layout's own spacing rhythm.
+  border: none;
+  background: none;
+  padding: 0.4rem 0.3rem;
+  margin: -0.4rem 0 0.7rem -0.3rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $color-ink-300;
+  cursor: pointer;
+  transition: color $ease-fast;
+
+  &:hover {
+    color: $color-brand-600;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: 3px;
+    border-radius: $radius-sm;
+  }
+}
+
+.log-record-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  animation: section-in 0.4s ease both;
+
+  h1 {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: $color-ink-900;
+  }
+}
+
+.log-record-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $color-ink-300;
+}
+
+.log-category {
+  color: $color-ink-500;
+}
+
+.log-meta-dot {
+  color: $color-ink-100;
+}
+
+.log-id {
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: $color-ink-300;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.copy-id {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: $color-bg-subtle;
+  color: $color-ink-300;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color $ease-fast;
+
+  &:hover {
+    color: $color-brand-600;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: 2px;
+  }
+}
+
+.log-timestamp {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.log-record-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+  padding-top: 0.15rem;
+}
+
+// 8/4-column split (approximated with 2fr/1fr, since the grid only ever
+// holds these two panels) — collapses to one column once there's no
+// Related Events panel to sit beside, and again at tablet widths.
+.log-content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+
+  &.log-content-grid--single {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.log-detail-card,
+.log-related-card {
+  padding: 1.35rem 1.5rem;
+
+  .card-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.immutable-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1.1rem;
+  padding: 0.55rem 0.8rem;
+  background: $color-bg-subtle;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  font-size: 0.78rem;
+  color: $color-ink-500;
+
+  app-icon {
+    flex-shrink: 0;
+    color: $color-ink-200;
+  }
+}
+
+.log-fields-grid {
+  margin-top: 0.25rem;
+
+  dd {
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+}
+
+.log-outcome {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  &.positive {
+    color: $color-success-strong;
+  }
+
+  &.negative {
+    color: $color-danger;
+  }
+}
+
+.log-related-tenant {
+  margin: -0.4rem 0 1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $color-ink-300;
+}
+
+.related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.related-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: $radius-md;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background $ease-fast,
+    border-color $ease-fast;
+
+  &:hover {
+    background: $color-bg-subtle;
+    border-color: $color-border;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: -2px;
+  }
+
+  &:hover .related-icon {
+    color: $color-brand-600;
+  }
+
+  &:hover .related-chevron {
+    color: $color-brand-600;
+    transform: translateX(2px);
+  }
+}
+
+.related-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-bg-subtle;
+  color: $color-ink-300;
+  transition: color $ease-fast;
+}
+
+.related-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+
+.related-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: $color-ink-900;
+}
+
+.related-time {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  color: $color-ink-200;
+  white-space: nowrap;
+}
+
+.related-chevron {
+  flex-shrink: 0;
+  color: $color-ink-100;
+  transition:
+    color $ease-fast,
+    transform $ease-fast;
+}
+
+.btn-outline[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+
+  &:hover {
+    border-color: $color-border-strong;
+    color: $color-ink-600;
+  }
+}
+
+.filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 0.3rem;
+  border-radius: $radius-pill;
+  background: $color-brand-600;
+  color: $color-surface;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+@media (max-width: 1024px) {
+  .log-content-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .log-record-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .log-record-actions {
+    padding-top: 0;
+
+    .btn-outline {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .log-detail-card,
+  .log-related-card {
+    padding: 1.1rem 1.15rem;
+  }
+}

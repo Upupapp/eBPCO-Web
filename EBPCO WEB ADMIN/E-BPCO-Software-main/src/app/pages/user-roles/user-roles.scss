@@ -1,0 +1,264 @@
+@use '../../shared/styles/data-table';
+@use '../../shared/styles/tabs';
+@use '../../shared/styles/detail-view';
+@use '../../shared/styles/modal';
+@use '../../shared/styles/kpi-grid';
+@use '../../shared/styles/tokens' as *;
+
+@keyframes section-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:host {
+  display: block;
+}
+
+.card {
+  background: $color-surface;
+  border-radius: $radius-xl;
+  padding: 1.5rem 1.6rem;
+  border: 1px solid $color-border;
+  animation: section-in 0.4s ease both;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin-bottom: 1.25rem;
+
+  .filter-select,
+  .btn-outline,
+  .btn-primary {
+    flex-shrink: 0;
+    padding: 0.42rem 0.5rem;
+    font-size: 0.76rem;
+  }
+
+  .filter-select {
+    padding: 0.35rem 0.4rem;
+    font-size: 0.74rem;
+  }
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: $color-bg-muted;
+  border-radius: $radius-md;
+  padding: 0.42rem 0.5rem;
+  color: $color-ink-200;
+  min-width: 90px;
+  flex-shrink: 1;
+  transition: box-shadow $ease-base;
+
+  &:focus-within {
+    box-shadow: 0 0 0 2px $color-brand-focus-ring;
+  }
+
+  input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.82rem;
+    color: $color-ink-700;
+
+    &::placeholder {
+      color: $color-ink-100;
+    }
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.user-name {
+  font-weight: 700;
+  font-size: 0.87rem;
+  color: $color-ink-900;
+}
+
+.user-email {
+  font-size: 0.78rem;
+  color: $color-ink-300;
+}
+
+.pagination-row {
+  display: block;
+  margin-top: 1.25rem;
+}
+
+/* Roles & Permissions */
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.1rem;
+}
+
+.role-card {
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: 1.25rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  transition:
+    box-shadow $ease-base,
+    border-color $ease-base,
+    transform $ease-base;
+
+  &:hover {
+    box-shadow: $shadow-card-hover;
+    border-color: $color-border-strong;
+    transform: translateY(-2px);
+  }
+}
+
+.role-head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+
+  h3 {
+    margin: 0;
+    font-size: 0.98rem;
+    color: $color-ink-900;
+  }
+}
+
+.role-icon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-surface;
+  box-shadow: $shadow-badge;
+}
+
+.role-count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $color-ink-300;
+}
+
+.role-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: $color-ink-500;
+  flex: 1;
+}
+
+.role-permissions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.permission-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.28rem 0.6rem;
+  border-radius: $radius-pill;
+  background: $color-info-bg-soft;
+  color: $color-info;
+}
+
+.role-actions {
+  display: flex;
+  gap: 0.6rem;
+
+  .btn-outline {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 1400px) {
+  .role-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .role-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.btn-outline[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+
+  &:hover {
+    border-color: $color-border-strong;
+    color: $color-ink-600;
+  }
+}
+
+// ---- Add user / edit role modals ---------------------------------------
+
+.create-box {
+  text-align: left;
+  max-width: 420px;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $color-ink-500;
+  }
+
+  input,
+  select,
+  textarea {
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-sm;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: $color-ink-700;
+    font-family: inherit;
+    resize: vertical;
+
+    &:focus-visible {
+      outline: none;
+      border-color: $color-brand-600;
+    }
+  }
+
+  .modal-actions {
+    margin-top: 0.4rem;
+  }
+}

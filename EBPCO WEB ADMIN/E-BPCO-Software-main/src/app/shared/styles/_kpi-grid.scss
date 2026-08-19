@@ -1,0 +1,83 @@
+// Single responsive row contract for every KPI row in the app — replaces
+// the three near-duplicate `.stat-row` implementations (dashboard,
+// system-logs, user-roles, each with slightly different column counts and
+// breakpoints) and the separate `.ring-stat-row` partial (4-col fixed,
+// with one-off 3-col overrides on pages that only have 3 cards).
+//
+// Cards always stay on a single row — never wrapping into a second row —
+// by shrinking together as the viewport narrows (each card's own internal
+// proportions scale with it via container queries in kpi-card.scss) down
+// to a legible floor width. Only once that floor is reached does the row
+// become horizontally scrollable, rather than ever stacking into multiple
+// rows or squeezing cards past the point of being readable.
+@use 'tokens' as *;
+
+.kpi-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1.1rem;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  // Room for the focus outline on an interactive card's last column so a
+  // scrolling row doesn't clip it, and to keep the scrollbar (where the
+  // platform renders one inline) from sitting flush against the cards.
+  padding-bottom: 3px;
+}
+
+.kpi-grid > app-kpi-card {
+  flex: 1 1 235px;
+  min-width: 170px;
+  // No max-width — a page with fewer cards (e.g. Permit Release's 3) would
+  // otherwise cap out well short of the table/content below it, leaving a
+  // visibly empty gap the rest of the page doesn't have. Letting flex-grow
+  // fill the full row means the KPI row's width always matches whatever's
+  // beneath it, on every page, regardless of card count.
+}
+
+// Detail-view metric strips use the small compact-density card, not the
+// portrait one, so they keep a tighter floor — but both real usages
+// (Business detail, User detail) sit directly above a full content panel,
+// not a tab strip, so they need real breathing room below just like the
+// standard grid.
+.kpi-grid--compact {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.85rem;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 3px;
+}
+
+.kpi-grid--compact > app-kpi-card {
+  flex: 1 1 160px;
+  min-width: 130px;
+}
+
+// For a page where these cards are the primary navigation surface (only
+// Evaluations today) rather than a dense KPI row — pairs with `size="large"`
+// on the card itself. Deliberately opts OUT of the shared single-row
+// contract above: wrapping to a second row here is fine (asked for
+// explicitly), so cards get real width instead of shrinking to fit one line.
+.kpi-grid--wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+  // Fully redeclared (not just added) since this combines with `.kpi-grid`
+  // in markup — `.kpi-grid`'s own `overflow-y: hidden` would otherwise
+  // clip a second wrapped row, and its `overflow-x: auto`/`padding-bottom`
+  // don't apply to a wrapping layout anyway.
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+.kpi-grid--wrap > app-kpi-card {
+  flex: 1 1 300px;
+  min-width: 260px;
+  max-width: 380px;
+}

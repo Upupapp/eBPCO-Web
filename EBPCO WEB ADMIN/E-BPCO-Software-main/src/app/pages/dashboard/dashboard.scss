@@ -1,0 +1,690 @@
+@use '../../shared/styles/data-table';
+@use '../../shared/styles/detail-view';
+@use '../../shared/styles/modal';
+@use '../../shared/styles/kpi-grid';
+@use '../../shared/styles/tokens' as *;
+
+@keyframes section-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:host {
+  display: block;
+}
+
+.card {
+  background: $color-surface;
+  border-radius: $radius-xl;
+  padding: 1.5rem 1.6rem;
+  border: 1px solid $color-border;
+  margin-bottom: 1.5rem;
+  animation: section-in 0.4s ease both;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: $color-ink-900;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+/* Queue card */
+.queue-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.legend {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $color-ink-500;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+}
+
+.queue-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.mini-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 20px;
+
+  i {
+    width: 5px;
+    border-radius: 2px;
+    background: $color-brand-600;
+    display: block;
+
+    &:nth-child(1) {
+      height: 40%;
+      opacity: 0.4;
+    }
+    &:nth-child(2) {
+      height: 70%;
+      opacity: 0.7;
+    }
+    &:nth-child(3) {
+      height: 100%;
+    }
+  }
+}
+
+.save-report-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid $color-brand-600;
+  color: $color-brand-600;
+  background: $color-surface;
+  border-radius: $radius-md;
+  padding: 0.55rem 1rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background $ease-base,
+    color $ease-base;
+
+  &:hover {
+    background: $color-brand-600;
+    color: $color-surface;
+  }
+}
+
+/* Mid row */
+.mid-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+
+  // Both cards in a row stretch to equal height (the grid row's own
+  // height, i.e. the taller card's natural content) and lay out as a
+  // column themselves so their own content can fill that height evenly,
+  // instead of two differently-tall boxes with a ragged bottom edge.
+  .card {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0;
+  }
+}
+
+.pending-card,
+.overdue-card {
+  .overdue-list {
+    flex: 1;
+  }
+}
+
+.pending-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.panel-subtitle {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: $color-ink-300;
+}
+
+.stage-summary {
+  margin: 0 0 1.1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: $color-ink-500;
+
+  strong {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: $color-ink-900;
+  }
+}
+
+.stage-attention {
+  color: $color-danger;
+  font-weight: 700;
+}
+
+.stage-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.stage-row {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: $radius-md;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.55rem 0.65rem;
+  margin: 0 -0.65rem;
+  transition:
+    background $ease-base,
+    border-color $ease-base;
+
+  &:hover {
+    background: $color-info-bg-soft;
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: $color-info;
+    box-shadow: 0 0 0 3px $color-info-bg;
+  }
+}
+
+.stage-row-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.stage-row-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: $color-ink-700;
+}
+
+.stage-row-meta {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: $color-ink-500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.stage-row-track {
+  display: block;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: $color-bg-subtle;
+  overflow: hidden;
+}
+
+.stage-row-fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 999px;
+  background: $color-info;
+  transition: width $ease-base;
+}
+
+.stage-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2rem 1rem;
+  color: $color-ink-300;
+  text-align: center;
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+}
+
+.stage-view-all {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 1.1rem;
+  border: none;
+  background: none;
+  font: inherit;
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $color-brand-600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-info;
+    outline-offset: 3px;
+    border-radius: $radius-sm;
+  }
+}
+
+// The status card is a flex column so its body can center vertically
+// inside whatever row height the grid gives it (it sits next to the
+// taller tenants-card, which otherwise leaves it stranded at the top).
+.status-card {
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow $ease-base;
+
+  &:hover {
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.status-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.75rem;
+  min-height: 14rem;
+  flex-wrap: wrap;
+}
+
+.status-chart {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+
+  // Soft radial backdrop so the donut reads as the card's focal point
+  // rather than floating unanchored on plain white.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, $color-bg-subtle 0%, rgba(250, 250, 252, 0) 72%);
+  }
+
+  app-donut-chart {
+    position: relative;
+  }
+}
+
+.status-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  min-width: 12.5rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
+
+  .legend-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: $color-ink-700;
+    white-space: nowrap;
+  }
+
+  .legend-value {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: $color-ink-900;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .legend-pct {
+    font-size: 0.76rem;
+    font-weight: 600;
+    font-style: normal;
+    color: $color-ink-300;
+  }
+
+  i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .status-body {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .status-legend {
+    width: 100%;
+  }
+}
+
+/* Overview card */
+.overview-legend {
+  display: flex;
+  gap: 1.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $color-ink-500;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  strong {
+    color: $color-ink-900;
+    font-weight: 800;
+  }
+}
+
+/* Recent tenants */
+.recent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.recent-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.view-all {
+  border: none;
+  background: none;
+  font: inherit;
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $color-brand-600;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ---- Pending-by-stage / Overdue review (merged from the former Tenant
+// Dashboard) ------------------------------------------------------------
+
+.view-all-link {
+  border: none;
+  background: none;
+  font: inherit;
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $color-brand-600;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.severity-legend {
+  display: flex;
+  gap: 1.1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $color-ink-500;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+}
+
+.overdue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.overdue-empty {
+  margin: 0;
+  padding: 1rem 0;
+  font-size: 0.85rem;
+  color: $color-ink-200;
+  text-align: center;
+}
+
+.overdue-item {
+  position: relative;
+  display: flex;
+  gap: 0.7rem;
+  border: 1px solid $color-border;
+  border-left: 3px solid;
+  border-radius: $radius-md;
+  padding: 0.9rem 1rem;
+  transition:
+    transform $ease-base,
+    box-shadow $ease-base;
+
+  &:hover {
+    transform: translateX(2px);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.overdue-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-top: 0.4rem;
+  flex-shrink: 0;
+}
+
+.overdue-body {
+  flex: 1;
+
+  p {
+    margin: 0 0 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: $color-ink-700;
+    line-height: 1.4;
+  }
+}
+
+.overdue-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ago {
+  font-size: 0.78rem;
+  color: $color-ink-100;
+}
+
+.review-link {
+  border: none;
+  background: none;
+  font: inherit;
+  padding: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.id-cell {
+  font-weight: 700;
+}
+
+.applicant-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 600;
+}
+
+// ---- Bulk selection bar --------------------------------------------------
+
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+  background: $color-brand-50;
+  border: 1px solid $color-brand-border;
+  border-radius: $radius-md;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $color-ink-700;
+
+  .btn-outline {
+    margin-left: auto;
+
+    &:last-child {
+      margin-left: 0;
+    }
+  }
+
+  .btn-outline.danger {
+    border-color: $color-danger;
+    color: $color-danger;
+
+    &:hover {
+      background: $color-danger;
+      color: $color-surface;
+    }
+  }
+}
+
+// ---- New application modal -----------------------------------------------
+
+.create-box {
+  text-align: left;
+  max-width: 420px;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $color-ink-500;
+  }
+
+  input,
+  select {
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-sm;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: $color-ink-700;
+
+    &:focus-visible {
+      outline: none;
+      border-color: $color-brand-600;
+    }
+  }
+
+  .modal-actions {
+    margin-top: 0.4rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .mid-row {
+    grid-template-columns: 1fr;
+  }
+}
