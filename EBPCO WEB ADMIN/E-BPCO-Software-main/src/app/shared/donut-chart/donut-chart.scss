@@ -1,0 +1,62 @@
+@use '../styles/tokens' as *;
+
+@keyframes spin-in {
+  from {
+    transform: rotate(-90deg) scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.donut {
+  display: block;
+  animation: spin-in 0.6s ease both;
+  overflow: visible;
+}
+
+.donut-arc {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: scale(1.035);
+    filter: brightness(1.06);
+  }
+}
+
+.donut-label {
+  font-size: 6.5px;
+  font-weight: 800;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.18);
+  stroke-width: 0.4px;
+  pointer-events: none;
+}
+
+// Font sizes are in SVG viewBox units (viewBox is a fixed 100x100), so both
+// scale together automatically as the [size] input grows or shrinks — no
+// separate "responsive" handling needed here.
+.donut-center-value {
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  fill: $color-ink-900;
+  pointer-events: none;
+}
+
+.donut-center-label {
+  font-size: 4.1px;
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  fill: $chart-axis-text;
+  text-transform: uppercase;
+  pointer-events: none;
+}

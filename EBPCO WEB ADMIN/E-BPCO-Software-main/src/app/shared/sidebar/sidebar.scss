@@ -1,0 +1,158 @@
+@use '../styles/tokens' as *;
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.sidebar {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.25rem;
+  background: $color-surface;
+  border-right: 1px solid $color-border;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 2rem;
+  padding-left: 0.25rem;
+
+  span {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: $color-ink-700;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+}
+
+.nav-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.nav-section-label {
+  display: block;
+  padding: 0 0.9rem 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: $color-ink-100;
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: $radius-md;
+  color: $color-ink-400;
+  font-weight: 600;
+  font-size: 0.92rem;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition:
+    background $ease-base,
+    color $ease-base,
+    border-color $ease-base,
+    transform $ease-fast;
+
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    background: $color-brand-100;
+    color: $color-brand-600;
+    transform: translateX(2px);
+  }
+
+  &.active {
+    background: linear-gradient(90deg, $color-brand-tint-a, $color-brand-tint-b);
+    color: $color-brand-600;
+    border-left-color: $color-brand-600;
+    font-weight: 700;
+  }
+}
+
+.logout-btn {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border-radius: $radius-md;
+  border: 1px solid $color-brand-border;
+  background: $color-surface;
+  color: $color-brand-600;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition:
+    background $ease-base,
+    transform $ease-fast;
+
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  &:hover {
+    background: $color-brand-tint-a;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+// Matches the 76px collapsed width set on .admin-sidebar / .tenant-sidebar
+// at <= 900px (see admin-layout.scss / tenant-layout.scss) so labels don't
+// wrap or overflow the rail — icons remain, text is visually hidden but
+// still available to assistive tech via the existing DOM text content.
+@media (max-width: 900px) {
+  .sidebar {
+    padding: 1.5rem 0.75rem;
+    align-items: center;
+  }
+
+  .brand span,
+  .nav-section-label,
+  .nav-item span,
+  .logout-btn span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .nav-item,
+  .logout-btn {
+    justify-content: center;
+    padding: 0.7rem;
+  }
+
+  .nav-item.active {
+    border-left-width: 3px;
+  }
+}

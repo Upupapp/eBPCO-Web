@@ -1,0 +1,109 @@
+<header class="topbar">
+  <h1 class="page-title">{{ title() }}</h1>
+
+  <div class="topbar-right">
+    <div class="search-box">
+      <app-icon name="search" [size]="17" />
+      <label class="sr-only" for="topbar-search">Search</label>
+      <input
+        id="topbar-search"
+        type="text"
+        [placeholder]="searchPlaceholder()"
+        [value]="currentSearch()"
+        (input)="onSearchInput($any($event.target).value)"
+        (keydown.escape)="clearSearch()"
+      />
+      @if (currentSearch()) {
+        <button type="button" class="search-clear" aria-label="Clear search" (click)="clearSearch()">
+          <app-icon name="x-circle" [size]="15" />
+        </button>
+      }
+    </div>
+
+    <div class="topbar-menu-wrap">
+      <button
+        type="button"
+        class="bell-btn"
+        [class.active]="notifPanelOpen()"
+        aria-label="Notifications"
+        [attr.aria-expanded]="notifPanelOpen()"
+        (click)="toggleNotifPanel()"
+      >
+        <app-icon name="bell" [size]="19" />
+        @if (unreadCount() > 0) {
+          <span class="badge">{{ unreadCount() }}</span>
+        }
+      </button>
+
+      @if (notifPanelOpen()) {
+        <div class="topbar-backdrop" (click)="closeMenus()"></div>
+        <div class="topbar-panel notif-panel" role="menu">
+          <div class="panel-head">
+            <h2>Notifications</h2>
+            @if (unreadCount() > 0) {
+              <button type="button" class="mark-read-btn" (click)="markAllRead()">Mark all as read</button>
+            }
+          </div>
+          <ul class="notif-list">
+            @for (n of notifications(); track n.id) {
+              <li
+                [class.unread]="!n.isRead"
+                role="menuitem"
+                tabindex="0"
+                (click)="selectNotification(n.id, n.applicationId)"
+                (keydown.enter)="selectNotification(n.id, n.applicationId)"
+                (keydown.space)="$event.preventDefault(); selectNotification(n.id, n.applicationId)"
+              >
+                <span class="notif-dot" aria-hidden="true"></span>
+                <span class="notif-body">
+                  <span class="notif-title">{{ n.title }}</span>
+                  <span class="notif-detail">{{ n.message }}</span>
+                  <span class="notif-time">{{ n.createdAt }}</span>
+                </span>
+              </li>
+            } @empty {
+              <li class="notif-empty">No notifications yet.</li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+
+    <div class="topbar-menu-wrap">
+      <button
+        type="button"
+        class="user-chip"
+        [class.active]="userMenuOpen()"
+        [attr.aria-expanded]="userMenuOpen()"
+        (click)="toggleUserMenu()"
+      >
+        <span class="avatar-wrap">
+          <app-avatar [name]="userName()" [size]="38" />
+          <span class="status-dot"></span>
+        </span>
+        <span class="user-text">
+          <span class="user-name">{{ userName() }}</span>
+          <span class="user-role">{{ userRole() }}</span>
+        </span>
+        <app-icon name="chevron-down" [size]="14" />
+      </button>
+
+      @if (userMenuOpen()) {
+        <div class="topbar-backdrop" (click)="closeMenus()"></div>
+        <div class="topbar-panel user-panel" role="menu">
+          <div class="user-panel-head">
+            <app-avatar [name]="userName()" [size]="44" />
+            <div>
+              <span class="user-name">{{ userName() }}</span>
+              <span class="user-role">{{ userRole() }}</span>
+            </div>
+          </div>
+          <button type="button" class="logout-btn" (click)="logout()">
+            <app-icon name="logout" [size]="15" />
+            Log Out
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</header>

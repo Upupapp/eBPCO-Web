@@ -1,0 +1,50 @@
+<div class="auth-shell" (mousemove)="onVisualMouseMove($event)" (mouseleave)="onVisualMouseLeave()">
+  <div class="auth-visual">
+    <svg class="visual-shape" viewBox="0 0 100 130" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <path
+          id="blobPath"
+          d="M0,0 H62 C83,3 101,19 96,49 C93,67 71,65 68,78 C66,88 93,83 86,96 C81,106 65,103 60,130 L0,130 Z"
+        />
+        <clipPath id="blobClip" clipPathUnits="userSpaceOnUse">
+          <use href="#blobPath" />
+        </clipPath>
+        <linearGradient id="redTint" x1="0" y1="0" x2="75" y2="130" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#ff6b4a" />
+          <stop offset="0.45" stop-color="#d50000" />
+          <stop offset="1" stop-color="#5c0b12" />
+        </linearGradient>
+      </defs>
+
+      <g clip-path="url(#blobClip)">
+        <image
+          href="/assets/backgrounds/auth-skyline.jpg"
+          x="0"
+          y="0"
+          width="100"
+          height="130"
+          preserveAspectRatio="xMidYMid slice"
+          class="visual-photo-img"
+        />
+        <rect x="0" y="0" width="100" height="130" fill="url(#redTint)" class="visual-tint" />
+      </g>
+
+      <use href="#blobPath" class="visual-border" />
+    </svg>
+
+    <span class="visual-grain" aria-hidden="true"></span>
+
+    <div class="visual-content" [style.--parallax]="visualParallax()">
+      <div class="visual-seal">
+        <app-dilg-seal [size]="150" [dimensional]="true" />
+      </div>
+      <p class="visual-tagline">Electronic Business Permit and Clearance Office</p>
+      <p class="visual-subtagline">Municipality of Castilla, Sorsogon</p>
+    </div>
+  </div>
+
+  <div class="auth-panel">
+    <ng-content></ng-content>
+    <p class="auth-footer">&copy; {{ currentYear }} Municipality of Castilla, Sorsogon. All rights reserved.</p>
+  </div>
+</div>

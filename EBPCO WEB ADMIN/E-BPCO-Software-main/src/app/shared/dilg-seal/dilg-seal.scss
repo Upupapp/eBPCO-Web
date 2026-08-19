@@ -1,0 +1,56 @@
+.seal {
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+// ---- Dimensional medallion ---------------------------------------------------
+// Bevel + gold rim-light + grounding shadow + a slow tilt/float so the seal
+// reads as an extruded coin catching light, not a flat PNG — used only at
+// the one or two "hero" placements (auth visual panel, splash).
+
+@keyframes medallion-float {
+  0%,
+  100% {
+    transform: perspective(700px) rotateX(6deg) rotateY(-8deg) translateY(0);
+  }
+  50% {
+    transform: perspective(700px) rotateX(4deg) rotateY(-4deg) translateY(-6px);
+  }
+}
+
+.seal-medallion {
+  position: relative;
+  display: inline-block;
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  animation: medallion-float 7s ease-in-out infinite;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.4)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+
+  .seal {
+    width: 100%;
+    height: 100%;
+    box-shadow:
+      0 0 0 3px rgba(255, 224, 150, 0.95),
+      0 0 0 4.5px rgba(165, 24, 42, 0.35),
+      inset 0 3px 6px rgba(255, 255, 255, 0.35),
+      inset 0 -4px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  // Soft top-left key-light sheen, echoing the splash spark's 115° sweep.
+  .seal-sheen {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background: linear-gradient(115deg, rgba(255, 255, 255, 0.55) 0%, transparent 35%, transparent 100%);
+    mix-blend-mode: overlay;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seal-medallion {
+    animation: none;
+    transform: perspective(700px) rotateX(5deg) rotateY(-6deg);
+  }
+}

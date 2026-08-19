@@ -1,0 +1,60 @@
+@use 'tokens' as *;
+
+// Small "more actions" trigger/popover pattern. Mirrors the topbar's
+// notification and user-menu dropdowns so every ad hoc action menu in the
+// app shares one visual language.
+
+.menu-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+}
+
+.menu-panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 50;
+  min-width: 190px;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card-hover;
+  padding: 0.35rem;
+  display: flex;
+  flex-direction: column;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+    border: none;
+    background: transparent;
+    border-radius: $radius-sm;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: $color-ink-700;
+    text-align: left;
+    cursor: pointer;
+    transition: background $ease-fast;
+
+    &:hover {
+      background: $color-bg-subtle;
+    }
+
+    &.danger {
+      color: $color-danger;
+
+      &:hover {
+        background: $color-danger-bg-soft;
+      }
+    }
+  }
+}

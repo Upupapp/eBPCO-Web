@@ -1,0 +1,191 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: #f4f4f6;
+  background-image: radial-gradient(circle, #dcdce1 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.auth-shell {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  align-items: stretch;
+}
+
+.auth-visual {
+  position: relative;
+  width: 50%;
+  min-width: 340px;
+  overflow: hidden;
+  background: #f4f4f6;
+
+  .visual-shape {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.65));
+  }
+
+  .visual-photo-img {
+    filter: brightness(1.15) contrast(1.05);
+  }
+
+  .visual-tint {
+    opacity: 0.88;
+  }
+
+  .visual-border {
+    fill: none;
+    stroke: #ff5a5a;
+    stroke-width: 1.3;
+  }
+
+  // Filmic grain — a tiny tileable feTurbulence noise texture, blended in
+  // at low opacity so the red wash reads as directed/cinematic rather than
+  // a flat CSS gradient. Static (not animated) so it never distracts.
+  .visual-grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .visual-content {
+    position: absolute;
+    top: 50%;
+    left: 36%;
+    // The centering offset lives in CSS so it's never at the mercy of the
+    // parallax binding below — that only ever sets `--parallax`, appended
+    // here rather than replacing `transform` outright (an inline
+    // `[style.transform]` would have clobbered the `translate(-50%,-50%)`
+    // centering entirely, which is exactly what broke this the first time).
+    transform: translate(-50%, -50%) var(--parallax, translate3d(0, 0, 0) rotate(0deg));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.15s ease-out;
+  }
+
+  .visual-seal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .visual-tagline {
+    margin: 1.5rem 0 0.3rem;
+    max-width: 260px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  }
+
+  .visual-subtagline {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: rgba(255, 224, 150, 0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visual-content {
+    transition: none;
+  }
+}
+
+.auth-panel {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+}
+
+.auth-footer {
+  margin: 1.5rem 0 0;
+  font-size: 0.75rem;
+  color: #9a9aa5;
+  text-align: center;
+}
+
+// A condensed hero band instead of hiding the visual entirely — mobile
+// still opens on the same red-skyline/seal moment, just shorter, so the
+// brand story isn't lost on the majority of real-world traffic.
+@media (max-width: 900px) {
+  .auth-shell {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+  }
+
+  // Nested under `.auth-visual`, matching the base rules' own specificity
+  // (`.auth-visual .visual-shape` etc.) — flat selectors here would lose
+  // the cascade to those nested base rules regardless of source order.
+  .auth-visual {
+    width: 100%;
+    min-width: 0;
+    height: 260px;
+    // The blob SVG border is tuned for a tall portrait panel — on a short
+    // wide band it stretches into an odd shape, so mobile gets a plain
+    // rectangular version of the same photo + dusk gradient instead.
+    background-image:
+      linear-gradient(165deg, rgba(255, 107, 74, 0.55), rgba(213, 0, 0, 0.85) 45%, rgba(92, 11, 18, 0.92)),
+      url('/assets/backgrounds/auth-skyline.jpg');
+    background-size: cover;
+    background-position: center 30%;
+
+    .visual-shape {
+      display: none;
+    }
+
+    .visual-content {
+      left: 50%;
+    }
+
+    // The seal's own pixel size comes from an inline `[style.width/height]`
+    // (the `size` input), which a CSS `width`/`height` override can't win
+    // against — scaling the wrapper via `transform` instead sidesteps that.
+    .visual-seal {
+      transform: scale(0.72);
+    }
+
+    .visual-tagline {
+      font-size: 0.92rem;
+      max-width: 220px;
+    }
+
+    .visual-subtagline {
+      font-size: 0.72rem;
+      max-width: 220px;
+    }
+  }
+
+  .auth-panel {
+    width: 100%;
+    min-height: 100dvh;
+  }
+}
+
+@media (max-width: 900px) and (max-height: 640px) {
+  .auth-visual {
+    height: 150px;
+
+    .visual-tagline,
+    .visual-subtagline {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,82 @@
+@keyframes hbar-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.hbar-chart {
+  --label-width: 140px;
+}
+
+.hbar-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.hbar-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hbar-label {
+  flex: 0 0 var(--label-width);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2b2f3a;
+}
+
+.hbar-track {
+  flex: 1;
+  height: 30px;
+  background: transparent;
+  position: relative;
+}
+
+.hbar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 0.3rem;
+  transform-origin: left;
+  animation: hbar-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: filter 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
+
+.hbar-axis {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.hbar-axis-spacer {
+  flex: 0 0 var(--label-width);
+}
+
+.hbar-axis-line {
+  flex: 1;
+  position: relative;
+  height: 1rem;
+  border-top: 1px solid #eeeef2;
+}
+
+.hbar-tick {
+  position: absolute;
+  top: 0.4rem;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: #9297a3;
+  font-weight: 500;
+
+  &:first-child {
+    transform: translateX(0);
+  }
+}

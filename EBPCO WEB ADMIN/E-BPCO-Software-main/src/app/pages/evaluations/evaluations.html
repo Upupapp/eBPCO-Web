@@ -1,0 +1,526 @@
+<app-topbar
+  title="Evaluations"
+  [searchTerm]="searchTerm()"
+  (searchChange)="searchTerm.set($event); onSearchChange()"
+/>
+
+@if (view() === 'list') {
+  <h2 class="page-heading">List Of Evaluations</h2>
+
+  <div class="eval-steps">
+    @for (card of cards(); track card.key; let i = $index) {
+      <button
+        type="button"
+        class="eval-step"
+        [class]="'tone-' + card.tone"
+        (click)="openCard(card)"
+        [attr.aria-label]="card.title + ': ' + card.count + ' applications. ' + card.description"
+      >
+        <div class="eval-step-top">
+          <span class="eval-step-number" aria-hidden="true">{{
+            (i + 1 + '').padStart(2, '0')
+          }}</span>
+          <span class="eval-step-arrow" aria-hidden="true">
+            <app-icon name="arrow-up-right" [size]="14" />
+          </span>
+        </div>
+
+        <div class="eval-step-illustration" aria-hidden="true">
+          <svg viewBox="0 0 120 120" class="eval-step-svg">
+            <defs>
+              <radialGradient [attr.id]="'eval-glow-' + card.key" cx="55%" cy="45%" r="65%">
+                <stop
+                  offset="0%"
+                  [attr.stop-color]="evalToneAccent(card.tone)"
+                  stop-opacity="0.3"
+                />
+                <stop
+                  offset="100%"
+                  [attr.stop-color]="evalToneAccent(card.tone)"
+                  stop-opacity="0"
+                />
+              </radialGradient>
+              <linearGradient [attr.id]="'eval-glass-' + card.key" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop
+                  offset="45%"
+                  [attr.stop-color]="evalToneAccent(card.tone)"
+                  stop-opacity="0.28"
+                />
+                <stop
+                  offset="100%"
+                  [attr.stop-color]="evalToneAccent(card.tone)"
+                  stop-opacity="0.46"
+                />
+              </linearGradient>
+            </defs>
+
+            <circle cx="60" cy="54" r="54" [attr.fill]="'url(#eval-glow-' + card.key + ')'" />
+            <ellipse cx="58" cy="106" rx="28" ry="6" fill="#14142d" opacity="0.1" />
+
+            <!-- floating particles, used sparingly -->
+            <circle
+              cx="16"
+              cy="86"
+              r="2.4"
+              [attr.fill]="evalToneAccent(card.tone)"
+              opacity="0.45"
+            />
+            <circle cx="104" cy="32" r="2" [attr.fill]="evalToneAccent(card.tone)" opacity="0.4" />
+            <circle
+              cx="22"
+              cy="34"
+              r="1.6"
+              [attr.fill]="evalToneAccent(card.tone)"
+              opacity="0.35"
+            />
+
+            <!-- clipboard -->
+            <rect
+              x="32"
+              y="28"
+              width="56"
+              height="72"
+              rx="8"
+              [attr.fill]="'url(#eval-glass-' + card.key + ')'"
+              [attr.stroke]="evalToneAccent(card.tone)"
+              stroke-opacity="0.3"
+            />
+            <rect
+              x="48"
+              y="22"
+              width="24"
+              height="12"
+              rx="4"
+              fill="#ffffff"
+              [attr.stroke]="evalToneAccent(card.tone)"
+              stroke-opacity="0.3"
+            />
+            <path
+              d="M40 46 l4 4 6 -7"
+              fill="none"
+              [attr.stroke]="evalToneAccent(card.tone)"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <line
+              x1="54"
+              y1="46"
+              x2="78"
+              y2="46"
+              [attr.stroke]="evalToneAccent(card.tone)"
+              stroke-opacity="0.5"
+              stroke-width="2.5"
+              stroke-linecap="round"
+            />
+            <path
+              d="M40 60 l4 4 6 -7"
+              fill="none"
+              [attr.stroke]="evalToneAccent(card.tone)"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <line
+              x1="54"
+              y1="60"
+              x2="78"
+              y2="60"
+              [attr.stroke]="evalToneAccent(card.tone)"
+              stroke-opacity="0.5"
+              stroke-width="2.5"
+              stroke-linecap="round"
+            />
+            <path
+              d="M40 74 l4 4 6 -7"
+              fill="none"
+              [attr.stroke]="evalToneAccent(card.tone)"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <line
+              x1="54"
+              y1="74"
+              x2="72"
+              y2="74"
+              [attr.stroke]="evalToneAccent(card.tone)"
+              stroke-opacity="0.5"
+              stroke-width="2.5"
+              stroke-linecap="round"
+            />
+
+            <!-- magnifier -->
+            <circle
+              cx="86"
+              cy="90"
+              r="14"
+              fill="#ffffff"
+              [attr.stroke]="evalToneAccent(card.tone)"
+              stroke-width="4"
+            />
+            <line
+              x1="96"
+              y1="100"
+              x2="105"
+              y2="109"
+              [attr.stroke]="evalToneAccent(card.tone)"
+              stroke-width="5"
+              stroke-linecap="round"
+            />
+
+            <!-- a type-specific accent badge, only for the two evaluation
+                 stages with a genuinely distinct real-world symbol (fire
+                 safety, final sign-off) — every other stage stays the
+                 plain clipboard so the badge reads as meaningful, not
+                 decorative noise repeated on every card. -->
+            @if (card.key === 'fire') {
+              <circle
+                cx="38"
+                cy="38"
+                r="15"
+                fill="#ffffff"
+                [attr.stroke]="evalToneAccent(card.tone)"
+                stroke-opacity="0.35"
+              />
+              <circle
+                cx="38"
+                cy="38"
+                r="11"
+                [attr.fill]="evalToneAccent(card.tone)"
+                opacity="0.9"
+              />
+              <path
+                d="M38 31 c3 3.5 5 6 4 8.5 c-0.6 1.6 -2 2 -2.4 0.8 c-0.4 1.8 -3 1.8 -3.2 -0.2 c-0.2 -1.6 0.6 -2.6 1.6 -3.6 c-0.6 0.2 -1.4 0 -1.6 -0.8 c-0.3 -1.2 0.6 -2.7 1.6 -4.7 Z"
+                fill="#ffffff"
+                opacity="0.95"
+              />
+            }
+            @if (card.key === 'final') {
+              <circle
+                cx="38"
+                cy="38"
+                r="15"
+                fill="#ffffff"
+                [attr.stroke]="evalToneAccent(card.tone)"
+                stroke-opacity="0.35"
+              />
+              <circle
+                cx="38"
+                cy="38"
+                r="11"
+                [attr.fill]="evalToneAccent(card.tone)"
+                opacity="0.9"
+              />
+              <path
+                d="M32 38 l4 4 8 -9"
+                fill="none"
+                stroke="#ffffff"
+                stroke-width="2.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            }
+          </svg>
+        </div>
+
+        <div class="eval-step-connector" aria-hidden="true">
+          <span class="eval-step-line"></span>
+          <span class="eval-step-dot"></span>
+        </div>
+
+        <p class="eval-step-value">{{ card.count }}</p>
+        <p class="eval-step-label">{{ card.title }}</p>
+        <p class="eval-step-description">{{ card.description }}</p>
+      </button>
+    }
+  </div>
+} @else if (view() === 'detail' && selectedCard(); as card) {
+  <div class="detail-head">
+    <h1>{{ card.key === 'final' ? 'Final Evaluations' : card.title }}</h1>
+    <div class="header-actions">
+      <button type="button" class="btn-primary" (click)="backToList()">Back</button>
+      <div class="menu-wrap">
+        <button
+          type="button"
+          class="icon-btn more"
+          aria-label="More actions"
+          [attr.aria-expanded]="openMenuFor() === 'header'"
+          (click)="toggleHeaderMenu()"
+        >
+          <app-icon name="dots-horizontal" [size]="16" />
+        </button>
+        @if (openMenuFor() === 'header') {
+          <div class="menu-backdrop" (click)="closeMenu()"></div>
+          <div class="menu-panel" role="menu">
+            <button type="button" role="menuitem" (click)="exportAll()">
+              <app-icon name="download" [size]="14" />
+              Export All Stages
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <section class="kpi-grid">
+    @for (stat of ringStats(); track stat.label) {
+      <app-kpi-card
+        [label]="stat.label"
+        [value]="stat.value"
+        [icon]="stat.icon"
+        [tone]="stat.tone"
+        [illustration]="stat.illustration"
+        [progress]="stat.isTotal ? null : stat.pct"
+        [support]="stat.support ?? ''"
+        [bars]="stat.bars ?? null"
+      />
+    }
+  </section>
+
+  <div class="stage-tabs">
+    @for (tab of stageTabs; track tab.key) {
+      <button
+        type="button"
+        class="stage-tab"
+        [class.active]="activeStage() === tab.key"
+        (click)="selectStage(tab.key)"
+      >
+        <app-icon [name]="tab.icon" [size]="15" />
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  <section class="card table-card">
+    <div class="table-toolbar">
+      <div class="search-input">
+        <app-icon name="search" [size]="16" />
+        <input
+          type="text"
+          placeholder="Search Here By Application ID, Applicant Name, or Location"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+        />
+      </div>
+      <div class="toolbar-actions">
+        <app-filter-panel [activeCount]="activeFilterCount()" (clear)="clearFilters()">
+          <div class="filter-field">
+            <label for="eval-type-filter">Type</label>
+            <select id="eval-type-filter" [(ngModel)]="typeFilter">
+              <option value="All">All Types</option>
+              @for (opt of typeOptions; track opt) {
+                <option [value]="opt">{{ opt }}</option>
+              }
+            </select>
+          </div>
+        </app-filter-panel>
+        <button type="button" class="btn-outline" (click)="exportVisible()">
+          <app-icon name="download" [size]="15" />
+          Export
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" /></th>
+            <th>APPLICATION ID</th>
+            <th>APPLICANT NAME</th>
+            <th>MISSING DOCUMENTS</th>
+            <th>TYPE</th>
+            <th>DATE SUBMITTED</th>
+            <th>ASSIGNED OFFICER</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of pagedRows(); track row.id) {
+            <tr
+              class="row-clickable"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'View evaluation for ' + row.id + ', ' + row.applicant"
+              (click)="openRecord(row)"
+              (keydown.enter)="openRecord(row)"
+              (keydown.space)="$event.preventDefault(); openRecord(row)"
+            >
+              <td (click)="$event.stopPropagation()"><input type="checkbox" /></td>
+              <td class="id-cell">{{ row.id }}</td>
+              <td>
+                <div class="applicant-cell">
+                  <app-avatar [name]="row.applicant" [size]="30" />
+                  {{ row.applicant }}
+                </div>
+              </td>
+              <td>{{ row.missingDocuments }}</td>
+              <td>{{ row.type }}</td>
+              <td>{{ row.dateSubmitted }}</td>
+              <td>{{ row.officer }}</td>
+              <td>
+                <span class="status-pill" [class]="row.status.toLowerCase().replace(/ /g, '-')">{{
+                  row.status
+                }}</span>
+              </td>
+              <td (click)="$event.stopPropagation()">
+                <div class="actions-cell">
+                  <button type="button" class="review-btn" (click)="openRecord(row)">Review</button>
+                  <div class="menu-wrap">
+                    <button
+                      type="button"
+                      class="icon-btn more small"
+                      aria-label="More actions"
+                      [attr.aria-expanded]="openMenuFor() === row.id"
+                      (click)="toggleRowMenu(row)"
+                    >
+                      <app-icon name="dots-horizontal" [size]="15" />
+                    </button>
+                    @if (openMenuFor() === row.id) {
+                      <div class="menu-backdrop" (click)="closeMenu()"></div>
+                      <div class="menu-panel" role="menu">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          (click)="openRecord(row); closeMenu()"
+                        >
+                          <app-icon name="eye" [size]="14" />
+                          View Record
+                        </button>
+                        @if (row.stage !== 'passed') {
+                          <button type="button" role="menuitem" (click)="advanceStage(row)">
+                            <app-icon name="check-circle" [size]="14" />
+                            Advance Stage
+                          </button>
+                        }
+                        @if (row.stage !== 'returned') {
+                          <label
+                            class="revision-remarks-label"
+                            [for]="'revision-remarks-' + row.id"
+                          >
+                            Remarks (required to return)
+                          </label>
+                          <input
+                            [id]="'revision-remarks-' + row.id"
+                            type="text"
+                            class="revision-remarks-input"
+                            placeholder="What needs to be revised?"
+                            [ngModel]="revisionRemarks()"
+                            (ngModelChange)="revisionRemarks.set($event)"
+                            (click)="$event.stopPropagation()"
+                          />
+                          <button
+                            type="button"
+                            role="menuitem"
+                            class="danger"
+                            [disabled]="!revisionRemarks().trim()"
+                            (click)="returnForRevision(row)"
+                          >
+                            <app-icon name="alert-triangle" [size]="14" />
+                            Return for Revision
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr class="table-empty-row">
+              <td colspan="9">No applications match your search.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination [totalItems]="stageRows().length" [pageSize]="pageSize" [(page)]="page" />
+  </section>
+} @else if (view() === 'record' && selectedRow(); as row) {
+  <div class="detail-head">
+    <h1>{{ row.id }}</h1>
+    <div class="header-actions">
+      <span class="status-pill" [class]="row.status.toLowerCase().replace(/ /g, '-')">{{
+        row.status
+      }}</span>
+      <button type="button" class="btn-primary" (click)="backToStage()">
+        Back to {{ stageLabel() }}
+      </button>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div class="record-card">
+      <div class="record-banner">
+        <app-icon name="image" [size]="26" />
+        <app-avatar [name]="row.applicant" [size]="72" class="banner-avatar" />
+      </div>
+
+      <div class="record-info">
+        <h2>{{ row.applicant }}</h2>
+        <span class="status-pill" [class]="row.status.toLowerCase().replace(/ /g, '-')">{{
+          row.status
+        }}</span>
+
+        <dl class="info-list">
+          <div>
+            <dt>Type :</dt>
+            <dd>{{ row.type }}</dd>
+          </div>
+          <div>
+            <dt>Stage :</dt>
+            <dd>{{ stageLabel() }}</dd>
+          </div>
+          <div>
+            <dt>Missing Documents :</dt>
+            <dd>{{ row.missingDocuments }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="record-footer">
+        <div>
+          <strong>{{ row.dateSubmitted }}</strong>
+          <span>Date Submitted</span>
+        </div>
+        <div>
+          <strong>{{ row.id }}</strong>
+          <span>Application ID</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-head">
+        <h2>Evaluation Summary</h2>
+        <button type="button" class="btn-outline" (click)="exportDetail()">
+          <app-icon name="download" [size]="15" />
+          Export
+        </button>
+      </div>
+
+      <h3>Evaluation Stage</h3>
+      <div class="stage-tabs static" role="list">
+        @for (tab of stageTabs; track tab.key) {
+          <span class="stage-tab" role="listitem" [class.active]="tab.key === row.stage">
+            <app-icon [name]="tab.icon" [size]="15" />
+            {{ tab.label }}
+          </span>
+        }
+      </div>
+
+      <h3>Assigned Officer</h3>
+      <div class="officer-row">
+        <app-avatar [name]="row.officer" [size]="34" />
+        <div>
+          <strong>{{ row.officer }}</strong>
+          <span>Reviewing this evaluation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+}

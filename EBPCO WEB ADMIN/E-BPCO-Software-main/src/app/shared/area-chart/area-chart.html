@@ -1,0 +1,87 @@
+<div class="chart-shell">
+  <div class="y-axis">
+    @for (tick of ticks(); track tick) {
+      <span>{{ formatTick(tick) }}</span>
+    }
+  </div>
+
+  <div
+    class="chart-area"
+    #chartArea
+    (mousemove)="onPointerMove($event)"
+    (mouseleave)="onPointerLeave()"
+  >
+    <svg viewBox="0 0 1000 300" preserveAspectRatio="none" class="chart-svg" role="img"
+      [attr.aria-label]="'Line chart: ' + series().length + ' series across ' + xLabels().length + ' months'">
+      <defs>
+        @for (s of geometry(); track s.name) {
+          <linearGradient [attr.id]="'areaFill-' + $index" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" [attr.stop-color]="s.color" stop-opacity="0.16" />
+            <stop offset="1" [attr.stop-color]="s.color" stop-opacity="0" />
+          </linearGradient>
+        }
+      </defs>
+
+      @for (tick of ticks(); track tick) {
+        <line
+          x1="0"
+          [attr.y1]="yForTick(tick)"
+          x2="1000"
+          [attr.y2]="yForTick(tick)"
+          class="grid-line"
+        />
+      }
+
+      @for (s of geometry(); track s.name; let i = $index) {
+        <path class="area-fill" [attr.fill]="'url(#areaFill-' + i + ')'" [attr.d]="s.areaPath" />
+      }
+      @for (s of geometry(); track s.name) {
+        <path class="line-stroke" [attr.stroke]="s.color" [attr.d]="s.linePath" />
+      }
+
+      @for (s of geometry(); track s.name) {
+        @for (p of s.points; track $index) {
+          <circle class="point-dot" [attr.cx]="p.x" [attr.cy]="p.y" r="3" [attr.fill]="s.color" />
+        }
+      }
+
+      @if (hoveredIndex() !== null) {
+        <line
+          [attr.x1]="crosshairX()"
+          [attr.x2]="crosshairX()"
+          y1="0"
+          y2="300"
+          class="crosshair"
+        />
+        @for (s of geometry(); track s.name) {
+          <circle
+            class="hover-dot"
+            [attr.cx]="s.points[hoveredIndex()!].x"
+            [attr.cy]="s.points[hoveredIndex()!].y"
+            r="4.5"
+            [attr.fill]="s.color"
+          />
+        }
+      }
+    </svg>
+
+    @if (tooltip(); as t) {
+      <div class="chart-tooltip" [style.left.%]="(hoveredIndex()! / (xLabels().length - 1)) * 100">
+        <p class="tooltip-label">{{ t.label }}</p>
+        @for (row of t.rows; track row.name) {
+          <p class="tooltip-row">
+            <i [style.background]="row.color"></i>
+            <span class="tooltip-name">{{ row.name }}</span>
+            <span class="tooltip-value">{{ row.value }}</span>
+          </p>
+        }
+      </div>
+    }
+
+    <div class="x-axis">
+      @for (label of xLabels(); track label; let i = $index) {
+        <span [class.active]="i === hoveredIndex()">{{ label }}</span>
+      }
+    </div>
+  </div>
+</div>

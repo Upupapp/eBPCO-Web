@@ -1,0 +1,505 @@
+@use '../../shared/styles/data-table';
+@use '../../shared/styles/kpi-grid';
+@use '../../shared/styles/detail-view';
+@use '../../shared/styles/menu-popover';
+@use '../../shared/styles/tokens' as *;
+
+.revision-remarks-label {
+  display: block;
+  padding: 0.5rem 0.9rem 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: $color-ink-100;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.revision-remarks-input {
+  display: block;
+  width: calc(100% - 1.4rem);
+  margin: 0 0.7rem 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid $color-border-strong;
+  border-radius: $radius-sm;
+  font-size: 0.82rem;
+  color: $color-ink-700;
+
+  &:focus-visible {
+    border-color: $color-brand-600;
+    outline: none;
+  }
+}
+
+@keyframes section-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:host {
+  display: block;
+}
+
+.page-heading {
+  margin: 0 0 1.25rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1f2430;
+}
+
+// ---- Evaluation type "pipeline" steps --------------------------------------
+// A bespoke treatment for this one page only — these 5 cards are the real
+// evaluation pipeline order (Initial → Zoning → Fire Safety → OBO → Final,
+// see EVAL_KEY_TO_APP_STAGE), so a connected step/stepper visual is
+// meaningful here in a way it wouldn't be for an unordered KPI row
+// elsewhere. One shared bordered strip (not individual floating cards)
+// divided by thin rules, so the sequence reads as one continuous flow.
+// Deliberately stays single-row with horizontal scroll rather than
+// wrapping — wrapping would break the connecting line's story.
+.eval-steps {
+  display: flex;
+  flex-wrap: nowrap;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-xl;
+  box-shadow:
+    0 1px 2px rgba(20, 20, 40, 0.04),
+    0 10px 24px rgba(20, 20, 40, 0.05);
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin-bottom: 1.5rem;
+  animation: section-in 0.4s ease both;
+}
+
+.eval-step {
+  flex: 1 1 220px;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  border-right: 1px solid $color-border;
+  padding: 1.25rem 1.4rem 1.5rem;
+  cursor: pointer;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: background $ease-fast;
+  }
+
+  &:hover {
+    background: $color-bg-subtle;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-600;
+    outline-offset: -2px;
+  }
+}
+
+.eval-step-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.eval-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 24px;
+  padding: 0 0.4rem;
+  border-radius: $radius-sm;
+  font-size: 0.78rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.eval-step-arrow {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid $color-border-strong;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-ink-300;
+}
+
+.eval-step-illustration {
+  width: 100%;
+  max-width: 140px;
+  margin: 0.2rem auto 0;
+  aspect-ratio: 1;
+}
+
+.eval-step-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+// The dashed line spans each step's own full width, so two adjacent
+// steps' lines nearly meet at their shared border — a continuous-reading
+// connector without needing to draw outside either step's own box. The
+// dot sits on top, tone-colored via `currentColor`.
+.eval-step-connector {
+  position: relative;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.35rem 0 0.6rem;
+}
+
+.eval-step-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px dashed $color-border-strong;
+  transform: translateY(-50%);
+}
+
+.eval-step:last-child .eval-step-line {
+  display: none;
+}
+
+.eval-step-dot {
+  position: relative;
+  z-index: 1;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.eval-step-value {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.eval-step-label {
+  margin: 0.3rem 0 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: $color-ink-900;
+}
+
+.eval-step-description {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: $color-ink-300;
+}
+
+// Tone → number badge, dot, and value color. Same tint/accent pairing
+// `.status-pill`/`app-kpi-card` already use elsewhere.
+.eval-step.tone-warning {
+  .eval-step-number {
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+  .eval-step-dot,
+  .eval-step-value {
+    color: $color-warning;
+  }
+}
+.eval-step.tone-info {
+  .eval-step-number {
+    background: $color-info-bg;
+    color: $color-info;
+  }
+  .eval-step-dot,
+  .eval-step-value {
+    color: $color-info;
+  }
+}
+.eval-step.tone-danger {
+  .eval-step-number {
+    background: $color-danger-bg;
+    color: $color-danger;
+  }
+  .eval-step-dot,
+  .eval-step-value {
+    color: $color-danger;
+  }
+}
+.eval-step.tone-neutral {
+  .eval-step-number {
+    background: $color-bg-muted;
+    color: $color-ink-600;
+  }
+  .eval-step-dot {
+    color: $color-ink-400;
+  }
+  .eval-step-value {
+    color: $color-ink-700;
+  }
+}
+.eval-step.tone-success {
+  .eval-step-number {
+    background: $color-success-bg;
+    color: $color-success;
+  }
+  .eval-step-dot,
+  .eval-step-value {
+    color: $color-success;
+  }
+}
+
+.card {
+  background: #fff;
+  border-radius: 0.9rem;
+  padding: 1.5rem 1.6rem;
+  border: 1px solid #eeeef2;
+  animation: section-in 0.4s ease both;
+}
+
+/* Detail view */
+.detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  animation: section-in 0.4s ease both;
+
+  h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #1f2430;
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.5rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #2563eb;
+  border: 1px solid #2563eb;
+  color: #fff;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: #1d4ed8;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.icon-btn.more {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid #e2e2e6;
+  background: #fff;
+  color: #6b7080;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: #f4f4f7;
+  }
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  &.small {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* Stage tabs */
+.stage-tabs {
+  display: flex;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  overflow: hidden;
+  margin-bottom: 1.35rem;
+  background: $color-surface;
+}
+
+.stage-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: none;
+  border-left: 1px solid $color-border;
+  background: $color-surface;
+  padding: 0.75rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $color-ink-600;
+  cursor: pointer;
+  transition:
+    background $ease-fast,
+    color $ease-fast;
+
+  &:first-child {
+    border-left: none;
+  }
+
+  &:hover {
+    color: $color-brand-600;
+  }
+
+  &.active {
+    background: $color-brand-tint-a;
+    color: $color-brand-600;
+  }
+}
+
+// Read-only rendering of the same pills — used on a record's detail view to
+// show which stage it's currently in, without implying they're clickable.
+.stage-tabs.static .stage-tab {
+  cursor: default;
+
+  &:hover {
+    color: $color-ink-600;
+  }
+
+  &.active:hover {
+    color: $color-brand-600;
+  }
+}
+
+/* Table toolbar */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: #f4f4f7;
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  color: #8b8f9b;
+
+  input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    font-size: 0.86rem;
+    color: #2b2f3a;
+
+    &::placeholder {
+      color: #9a9ea8;
+    }
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.id-cell {
+  font-weight: 700;
+}
+
+.applicant-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 600;
+}
+
+.status-pill.revision-required {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-btn {
+  border: 1px solid #2563eb;
+  background: #fff;
+  color: #2563eb;
+  border-radius: 0.4rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: #2563eb;
+    color: #fff;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+@media (max-width: 900px) {
+  .stage-tabs {
+    flex-wrap: wrap;
+  }
+
+  .stage-tab {
+    flex: 1 1 50%;
+  }
+}

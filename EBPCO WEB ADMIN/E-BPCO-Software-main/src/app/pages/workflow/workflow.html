@@ -1,0 +1,41 @@
+<app-topbar title="Workflow" />
+
+<div class="workflow-head">
+  <h2>System Flowchart</h2>
+  <div class="head-actions">
+    <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
+
+    <div class="filter-dropdown">
+      <button type="button" class="filter-toggle" (click)="toggleFilterMenu()">
+        <app-icon name="filter" [size]="14" />
+        {{ activeLabel() }}
+      </button>
+
+      @if (filterMenuOpen()) {
+        <div class="filter-panel">
+          <span class="filter-panel-title">Filter</span>
+          @for (f of filters; track f.key) {
+            <label class="filter-option">
+              <input
+                type="checkbox"
+                [checked]="activeFilter() === f.key"
+                (change)="selectFilter(f.key)"
+              />
+              {{ f.label }}
+            </label>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<section class="card canvas-card">
+  <app-flow-chart
+    [title]="activeFlow().title"
+    [nodes]="activeFlow().nodes"
+    [edges]="activeFlow().edges"
+    [viewBoxWidth]="activeFlow().width"
+    [viewBoxHeight]="activeFlow().height"
+  />
+</section>

@@ -1,0 +1,78 @@
+// Esperanza / E-BPCO design tokens.
+// Single source of truth for the values already in use across the app —
+// nothing here changes a rendered color, it only names what was hardcoded.
+
+// Brand red (protected primary)
+$color-brand-700: #a5182a;
+$color-brand-600: #c81e2c;
+$color-brand-500: #dc2626;
+$color-brand-100: #fdeceb;
+$color-brand-50: #fdf6f6;
+$color-brand-tint-a: #fdeceb;
+$color-brand-tint-b: #fff5f5;
+$color-brand-border: #f0c9c9;
+$color-brand-focus-ring: rgba(200, 30, 44, 0.25);
+
+// Neutrals
+$color-ink-900: #1f2430;
+$color-ink-700: #2b2f3a;
+$color-ink-600: #454a58;
+$color-ink-500: #565c6b;
+$color-ink-400: #6b7080;
+$color-ink-300: #7a7f8c;
+$color-ink-200: #8b8f9b;
+$color-ink-100: #9a9ea8;
+$color-ink-050: #9297a3;
+
+$color-border: #eeeef2;
+$color-border-strong: #e6e6ec;
+$color-surface: #ffffff;
+$color-bg: #f4f5f7;
+$color-bg-subtle: #fafafc;
+$color-bg-muted: #f4f4f7;
+
+// Semantic (support only — never dominant over brand red)
+$color-success: #16a34a;
+$color-success-strong: #059669;
+$color-success-bg: #dcfce7;
+$color-success-bg-soft: #e7fbef;
+$color-warning: #b45309;
+$color-warning-bg: #fef3c7;
+$color-warning-bg-soft: #fef8ea;
+$color-danger: #dc2626;
+$color-danger-bg: #fee2e2;
+$color-danger-bg-soft: #fdeceb;
+$color-info: #2563eb;
+$color-info-700: #1d4ed8;
+$color-info-bg: #dbeafe;
+$color-info-bg-soft: #e8f1ff;
+$color-violet: #7c3aed;
+$color-violet-bg: #ede9fe;
+$color-violet-bg-soft: #f5f3ff;
+
+// Chart / data-viz palette — validated with the dataviz skill's
+// validate_palette.js (CVD separation + lightness band + chroma floor all
+// PASS; the amber slot WARNs under 3:1 fill contrast, which is why every
+// mark using it ships a direct label or tooltip alongside the color).
+$chart-info: #2563eb; // identity / "for evaluation" / new
+$chart-success: #16a34a; // approved / good
+$chart-warning: #f59e0b; // pending / warning (vivid mark tone — distinct
+// from $color-warning, which is the darker text-safe amber used on badges)
+$chart-danger: #dc2626; // rejected / critical
+$chart-violet: #7c3aed; // 4th categorical slot (e.g. "returned")
+$chart-grid: #eef0f4;
+$chart-axis-text: #9297a3;
+
+// Elevation / shape
+$radius-sm: 0.4rem;
+$radius-md: 0.5rem;
+$radius-lg: 0.85rem;
+$radius-xl: 0.9rem;
+$radius-pill: 1rem;
+
+$shadow-card: 0 1px 2px rgba(20, 20, 40, 0.04);
+$shadow-card-hover: 0 10px 22px rgba(20, 20, 40, 0.08);
+$shadow-badge: 0 4px 10px rgba(0, 0, 0, 0.12);
+
+$ease-base: 0.2s ease;
+$ease-fast: 0.15s ease;

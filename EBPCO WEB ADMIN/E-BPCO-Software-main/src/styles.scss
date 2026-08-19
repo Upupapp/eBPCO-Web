@@ -1,0 +1,71 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family:
+    'Gothic A1',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  color: #1f2430;
+}
+
+button {
+  font-family: inherit;
+}
+
+// Suppress the browser's own built-in password reveal/clear icon so it
+// doesn't double up with our custom eye/eye-off toggle button — Edge/IE
+// inject theirs via -ms-reveal once the field has text.
+input[type='password']::-ms-reveal,
+input[type='password']::-ms-clear {
+  display: none;
+}
+
+:focus-visible {
+  outline: 2px solid #c81e2c;
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Global reduced-motion backstop. Individual screens (splash, login,
+// register) already define their own tailored reduced-motion behavior —
+// this exists for the other ~60 entrance/hover/tab animations across the
+// app that don't, so `prefers-reduced-motion: reduce` is honored
+// everywhere by default instead of screen-by-screen opt-in. `0.01ms`
+// rather than `0s` so `animation-fill-mode: forwards/both` still resolves
+// to each animation's end state instead of a browser edge case leaving
+// content stuck at its pre-animation (often invisible) starting frame.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

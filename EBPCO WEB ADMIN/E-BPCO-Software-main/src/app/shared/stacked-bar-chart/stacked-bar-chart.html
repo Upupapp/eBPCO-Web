@@ -1,0 +1,26 @@
+<div class="stacked-bar-list">
+  @for (row of rows(); track row.label) {
+    <div
+      class="stacked-bar-row"
+      tabindex="0"
+      role="img"
+      [title]="row.tooltip"
+      [attr.aria-label]="row.label + ' — ' + row.tooltip"
+      [style.animation-delay.ms]="$index * 25"
+    >
+      <span class="bar-row-label">{{ row.label }}</span>
+      <span class="bar-row-track" [style.width.%]="trackWidth(row.total)">
+        @for (seg of row.segments; track seg.label) {
+          @if (seg.value > 0) {
+            <span
+              class="bar-row-fill"
+              [style.width.%]="segmentWidth(seg.value, row.total)"
+              [style.background]="seg.color"
+            ></span>
+          }
+        }
+      </span>
+      <span class="bar-row-total">{{ row.total }}</span>
+    </div>
+  }
+</div>

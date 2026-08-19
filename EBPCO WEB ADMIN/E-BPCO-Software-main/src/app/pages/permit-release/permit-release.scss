@@ -1,0 +1,264 @@
+@use '../../shared/styles/data-table';
+@use '../../shared/styles/kpi-grid';
+@use '../../shared/styles/modal';
+@use '../../shared/styles/detail-view';
+@use '../../shared/styles/tokens' as *;
+
+.modal-hint {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.82rem;
+  color: $color-ink-300;
+}
+
+.form-error {
+  margin: -0.25rem 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $color-danger;
+}
+
+@keyframes section-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:host {
+  display: block;
+}
+
+.card {
+  background: #fff;
+  border-radius: 0.9rem;
+  padding: 1.5rem 1.6rem;
+  border: 1px solid #eeeef2;
+  animation: section-in 0.4s ease both;
+}
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: #f4f4f7;
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  color: #8b8f9b;
+
+  input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    font-size: 0.86rem;
+    color: #2b2f3a;
+
+    &::placeholder {
+      color: #9a9ea8;
+    }
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.5rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.83rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #2563eb;
+  border: 1px solid #2563eb;
+  color: #fff;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: #1d4ed8;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.release-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7080;
+  line-height: 1.5;
+}
+
+.id-cell {
+  font-weight: 700;
+}
+
+.applicant-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 600;
+}
+
+.status-pill.ready-for-release {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-pill.released {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-btn.generate {
+  background: #e8f1ff;
+  color: #2563eb;
+}
+
+.icon-btn.release {
+  background: #dcfce7;
+  color: #16a34a;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.modal-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.3);
+}
+
+// ---- Bulk selection bar --------------------------------------------------
+
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+  background: #eef4ff;
+  border: 1px solid #d5e3fb;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1f2937;
+
+  .btn-outline {
+    margin-left: auto;
+  }
+}
+
+// ---- Printable summary ----------------------------------------------------
+// Hidden on screen; shown (and everything else hidden) only when the browser
+// print dialog is invoked from the "Print PDF" button.
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  :host > *:not(.print-only) {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block;
+
+    h1 {
+      margin: 0 0 0.4rem;
+      font-size: 1.3rem;
+    }
+
+    .print-meta {
+      margin: 0 0 1.25rem;
+      color: #555;
+      font-size: 0.85rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 0.45rem 0.6rem;
+      font-size: 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background: #f2f2f2;
+    }
+  }
+}
+
+.print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: #1d4ed8;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}

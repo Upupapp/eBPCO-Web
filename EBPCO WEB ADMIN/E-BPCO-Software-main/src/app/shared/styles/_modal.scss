@@ -1,0 +1,134 @@
+@keyframes modal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 30, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: modal-fade 0.2s ease both;
+}
+
+.modal-box {
+  position: relative;
+  background: #fff;
+  border-radius: 0.9rem;
+  padding: 2.5rem 2.75rem;
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+  animation: modal-pop 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  h2 {
+    font-size: 1.2rem;
+    margin: 0 0 0.75rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #7a7f8c;
+    line-height: 1.5;
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.1rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #9297a3;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #1f2430;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.9rem;
+  justify-content: center;
+  margin-top: 1.75rem;
+}
+
+.modal-btn {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.7rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    filter 0.2s ease,
+    transform 0.15s ease;
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &.confirm {
+    background: #22c55e;
+    color: #fff;
+
+    &:hover {
+      filter: brightness(1.05);
+    }
+  }
+
+  &.cancel {
+    background: #ef4444;
+    color: #fff;
+
+    &:hover {
+      filter: brightness(1.05);
+    }
+  }
+
+  // Added for confirm-dialog (shared/confirm-dialog): a destructive action
+  // (e.g. Delete) paired with a plain neutral Cancel, rather than the
+  // green/red confirm/cancel pairing above, which was built for a single
+  // specific "Verify payment" prompt.
+  &.danger {
+    background: #dc2626;
+    color: #fff;
+
+    &:hover {
+      filter: brightness(1.08);
+    }
+  }
+
+  &.neutral {
+    background: #fff;
+    color: #454a58;
+    border: 1px solid #e6e6ec;
+
+    &:hover {
+      border-color: #c6c6d0;
+    }
+  }
+}

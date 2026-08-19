@@ -1,0 +1,62 @@
+@use '../styles/tokens' as *;
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.range-label {
+  font-size: 0.85rem;
+  color: $color-ink-300;
+  font-weight: 500;
+}
+
+.page-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.page-nav,
+.page-btn {
+  min-width: 30px;
+  height: 30px;
+  border-radius: $radius-sm;
+  border: 1px solid $color-border-strong;
+  background: $color-surface;
+  color: #5a5f6b;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background $ease-fast,
+    color $ease-fast,
+    border-color $ease-fast,
+    transform $ease-fast;
+
+  &:hover:not(:disabled) {
+    border-color: $color-brand-600;
+    color: $color-brand-600;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.page-btn.active {
+  background: $color-brand-600;
+  border-color: $color-brand-600;
+  color: $color-surface;
+}

@@ -1,0 +1,363 @@
+@use '../styles/tokens' as *;
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: $color-ink-900;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: #eeeef1;
+  border-radius: $radius-md;
+  padding: 0.6rem 0.9rem;
+  color: $color-ink-200;
+  width: 260px;
+  transition: box-shadow $ease-base;
+
+  &:focus-within {
+    box-shadow: 0 0 0 2px $color-brand-focus-ring;
+  }
+
+  input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    font-size: 0.88rem;
+    color: $color-ink-700;
+
+    &::placeholder {
+      color: $color-ink-100;
+    }
+  }
+
+  .search-clear {
+    display: inline-flex;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: $color-ink-100;
+    cursor: pointer;
+    transition: color $ease-fast;
+
+    &:hover {
+      color: $color-ink-500;
+    }
+  }
+}
+
+// Wraps the bell / user-chip so their dropdown panels can be positioned
+// relative to just that trigger, not the whole topbar-right row.
+.topbar-menu-wrap {
+  position: relative;
+}
+
+.topbar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+}
+
+.bell-btn {
+  position: relative;
+  border: 1px solid #ececf1;
+  background: $color-surface;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-ink-500;
+  cursor: pointer;
+  transition:
+    transform $ease-fast,
+    color $ease-base,
+    border-color $ease-base;
+
+  &:hover,
+  &.active {
+    color: $color-brand-600;
+    transform: translateY(-1px);
+  }
+
+  &.active {
+    border-color: $color-brand-border;
+  }
+
+  .badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: $color-brand-600;
+    color: $color-surface;
+    font-size: 0.62rem;
+    font-weight: 800;
+    min-width: 17px;
+    height: 17px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    border: 2px solid $color-surface;
+  }
+}
+
+.topbar-panel {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  right: 0;
+  z-index: 50;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card-hover;
+  animation: topbar-panel-in 0.15s ease both;
+}
+
+@keyframes topbar-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notif-panel {
+  width: 320px;
+  padding: 0.9rem;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+
+  h2 {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: $color-ink-900;
+  }
+}
+
+.mark-read-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: $color-brand-600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 22rem;
+  overflow-y: auto;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.6rem 0.3rem;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    transition: background $ease-fast;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid $color-bg-muted;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: $color-bg-subtle;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-brand-focus-ring;
+      outline-offset: -2px;
+    }
+  }
+}
+
+.notif-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-top: 0.4rem;
+  flex-shrink: 0;
+  background: transparent;
+
+  li.unread & {
+    background: $color-brand-600;
+  }
+}
+
+.notif-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.notif-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: $color-ink-900;
+}
+
+.notif-detail {
+  font-size: 0.78rem;
+  color: $color-ink-500;
+  line-height: 1.35;
+}
+
+.notif-time {
+  font-size: 0.72rem;
+  color: $color-ink-100;
+  font-weight: 600;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  border-radius: $radius-md;
+  transition:
+    background $ease-fast,
+    box-shadow $ease-base;
+
+  &:hover,
+  &.active {
+    background: $color-bg-subtle;
+  }
+
+  &.active {
+    box-shadow: 0 0 0 1px $color-border-strong inset;
+  }
+
+  > app-icon {
+    color: $color-ink-100;
+    margin-right: 0.15rem;
+  }
+}
+
+.user-panel {
+  width: 240px;
+  padding: 0.7rem;
+}
+
+.user-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.3rem 0.4rem 0.9rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid $color-bg-muted;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+    min-width: 0;
+  }
+
+  .user-name {
+    font-size: 0.86rem;
+  }
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  border: none;
+  background: transparent;
+  border-radius: $radius-sm;
+  padding: 0.55rem 0.5rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: $color-danger;
+  cursor: pointer;
+  transition: background $ease-fast;
+
+  &:hover {
+    background: $color-danger-bg-soft;
+  }
+}
+
+.avatar-wrap {
+  position: relative;
+  display: inline-flex;
+
+  .status-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #22c55e;
+    border: 2px solid $color-surface;
+  }
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $color-ink-900;
+}
+
+.user-role {
+  font-size: 0.76rem;
+  color: $color-ink-200;
+  font-weight: 500;
+}
+
+@media (max-width: 720px) {
+  .search-box {
+    display: none;
+  }
+}

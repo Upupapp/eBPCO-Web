@@ -1,0 +1,45 @@
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.coming-soon-card {
+  background: #fff;
+  border: 1px solid #eeeef2;
+  border-radius: 0.9rem;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  animation: fade-up 0.4s ease both;
+}
+
+.icon-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fdeceb;
+  color: #c81e2c;
+  margin-bottom: 1.25rem;
+}
+
+.coming-soon-card h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1f2430;
+}
+
+.coming-soon-card p {
+  margin: 0 auto;
+  max-width: 420px;
+  color: #7a7f8c;
+  font-size: 0.92rem;
+}

@@ -1,0 +1,633 @@
+<app-topbar
+  title="System Logs"
+  [searchTerm]="searchTerm()"
+  (searchChange)="searchTerm.set($event); onSearchChange()"
+/>
+
+@if (view() === 'list') {
+  <section class="kpi-grid">
+    @for (s of currentStats(); track s.label) {
+      <app-kpi-card
+        [icon]="s.icon"
+        [tone]="s.tone"
+        [illustration]="s.illustration"
+        [label]="s.label"
+        [value]="s.value"
+        [support]="s.footnote ?? ''"
+      />
+    }
+  </section>
+
+  <section class="card logs-card">
+    <nav class="tab-nav">
+      @for (t of tabs; track t.key) {
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab() === t.key"
+          (click)="selectTab(t.key)"
+        >
+          <app-icon [name]="t.icon" [size]="15" />
+          {{ t.label }}
+        </button>
+      }
+    </nav>
+
+    <div class="filter-bar">
+      <div class="filter-item date-filter">
+        <app-icon name="calendar" [size]="15" />
+        <span>May {{ dateRange }}</span>
+      </div>
+
+      <select class="filter-select" [(ngModel)]="tenantFilter" (ngModelChange)="page.set(1)">
+        <option>All Tenants</option>
+        @for (t of tenantOptions; track t) {
+          <option [value]="t">{{ t }}</option>
+        }
+      </select>
+      <select class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="page.set(1)">
+        <option>All Statuses</option>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+      </select>
+      <select class="filter-select" [(ngModel)]="severityFilter" (ngModelChange)="page.set(1)">
+        <option>All Severity</option>
+        <option value="Critical">Critical</option>
+        <option value="Warning">Warning</option>
+        <option value="Info">Info</option>
+      </select>
+
+      <div class="spacer"></div>
+
+      <div class="live-toggle">
+        <span>Live Stream</span>
+        <button
+          type="button"
+          class="switch"
+          [class.on]="liveStream()"
+          (click)="toggleLiveStream()"
+          role="switch"
+          [attr.aria-checked]="liveStream()"
+        >
+          <span class="knob"></span>
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="btn-outline"
+        [disabled]="activeFilterCount() === 0"
+        (click)="clearFilters()"
+      >
+        <app-icon name="filter" [size]="15" />
+        Clear Filters
+        @if (activeFilterCount() > 0) {
+          <span class="filter-count">{{ activeFilterCount() }}</span>
+        }
+      </button>
+      <button type="button" class="btn-outline" (click)="exportCurrentTab()">
+        <app-icon name="download" [size]="15" />
+        Export
+      </button>
+    </div>
+
+    <div class="table-wrap">
+      @switch (activeTab()) {
+        @case ('activity') {
+          <table>
+            <thead>
+              <tr>
+                <th>Time Stamp</th>
+                <th>Event type</th>
+                <th>Description</th>
+                <th>User/Action</th>
+                <th>Tenant</th>
+                <th>Module</th>
+                <th>IP Address</th>
+                <th>Status</th>
+                <th>Severity</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of pagedActivityRows(); track row.timestamp + row.user) {
+                <tr
+                  class="row-clickable"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-label]="'View log entry for ' + row.eventType + ' by ' + row.user"
+                  (click)="openActivityDetail(row)"
+                  (keydown.enter)="openActivityDetail(row)"
+                  (keydown.space)="$event.preventDefault(); openActivityDetail(row)"
+                >
+                  <td>{{ row.timestamp }}</td>
+                  <td>{{ row.eventType }}</td>
+                  <td>{{ row.description }}</td>
+                  <td>{{ row.user }}</td>
+                  <td>{{ row.tenant }}</td>
+                  <td>{{ row.module }}</td>
+                  <td>{{ row.ip }}</td>
+                  <td>
+                    <span class="status-pill" [class]="row.status.toLowerCase()">{{
+                      row.status
+                    }}</span>
+                  </td>
+                  <td>
+                    <span class="status-pill" [class]="row.severity.toLowerCase()">{{
+                      row.severity
+                    }}</span>
+                  </td>
+                  <td (click)="$event.stopPropagation()">
+                    <div class="actions-cell">
+                      <button
+                        type="button"
+                        class="icon-btn view"
+                        aria-label="View"
+                        (click)="openActivityDetail(row)"
+                      >
+                        <app-icon name="eye" [size]="14" />
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn edit"
+                        aria-label="Edit"
+                        (click)="openActivityDetail(row)"
+                      >
+                        <app-icon name="edit" [size]="14" />
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn del"
+                        aria-label="Delete"
+                        (click)="requestDelete(row)"
+                      >
+                        <app-icon name="trash" [size]="14" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr class="table-empty-row">
+                  <td colspan="10">No activity logs match your search.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        @case ('access') {
+          <table>
+            <thead>
+              <tr>
+                <th>Time Stamp</th>
+                <th>Users</th>
+                <th>Tenant</th>
+                <th>Event</th>
+                <th>Status</th>
+                <th>IP Address</th>
+                <th>Device/Browser</th>
+                <th>Location</th>
+                <th>Session Duration</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of pagedAccessRows(); track row.timestamp + row.user) {
+                <tr
+                  class="row-clickable"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-label]="'View log entry for ' + row.event + ' by ' + row.user"
+                  (click)="openAccessDetail(row)"
+                  (keydown.enter)="openAccessDetail(row)"
+                  (keydown.space)="$event.preventDefault(); openAccessDetail(row)"
+                >
+                  <td>{{ row.timestamp }}</td>
+                  <td>{{ row.user }}</td>
+                  <td>{{ row.tenant }}</td>
+                  <td>{{ row.event }}</td>
+                  <td>
+                    <span class="status-pill" [class]="row.status.toLowerCase()">{{
+                      row.status
+                    }}</span>
+                  </td>
+                  <td>{{ row.ip }}</td>
+                  <td>{{ row.device }}</td>
+                  <td>{{ row.location }}</td>
+                  <td>
+                    <span class="status-pill active">{{ row.sessionDuration }}</span>
+                  </td>
+                  <td (click)="$event.stopPropagation()">
+                    <div class="actions-cell">
+                      <button
+                        type="button"
+                        class="icon-btn view"
+                        aria-label="View"
+                        (click)="openAccessDetail(row)"
+                      >
+                        <app-icon name="eye" [size]="14" />
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn edit"
+                        aria-label="Edit"
+                        (click)="openAccessDetail(row)"
+                      >
+                        <app-icon name="edit" [size]="14" />
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn del"
+                        aria-label="Delete"
+                        (click)="requestDelete(row)"
+                      >
+                        <app-icon name="trash" [size]="14" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr class="table-empty-row">
+                  <td colspan="10">No access logs match your search.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        @case ('error') {
+          <table>
+            <thead>
+              <tr>
+                <th>Time Stamp</th>
+                <th>Error Type</th>
+                <th>Message</th>
+                <th>Module</th>
+                <th>Tenant</th>
+                <th>Environment</th>
+                <th>Status</th>
+                <th>Severity</th>
+                <th>Request ID</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of pagedErrorRows(); track row.timestamp + row.requestId) {
+                <tr
+                  class="row-clickable"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-label]="'View log entry for ' + row.errorType + ', ' + row.requestId"
+                  (click)="openErrorDetail(row)"
+                  (keydown.enter)="openErrorDetail(row)"
+                  (keydown.space)="$event.preventDefault(); openErrorDetail(row)"
+                >
+                  <td>{{ row.timestamp }}</td>
+                  <td>{{ row.errorType }}</td>
+                  <td>
+                    <div class="wrap-cell">{{ row.message }}</div>
+                  </td>
+                  <td>{{ row.module }}</td>
+                  <td>{{ row.tenant }}</td>
+                  <td>{{ row.environment }}</td>
+                  <td>
+                    <span class="status-pill" [class]="row.status.toLowerCase()">{{
+                      row.status
+                    }}</span>
+                  </td>
+                  <td>
+                    <span class="status-pill" [class]="row.severity.toLowerCase()">{{
+                      row.severity
+                    }}</span>
+                  </td>
+                  <td>{{ row.requestId }}</td>
+                  <td (click)="$event.stopPropagation()">
+                    <div class="actions-cell">
+                      <button
+                        type="button"
+                        class="icon-btn view"
+                        aria-label="View"
+                        (click)="openErrorDetail(row)"
+                      >
+                        <app-icon name="eye" [size]="14" />
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn edit"
+                        aria-label="Edit"
+                        (click)="openErrorDetail(row)"
+                      >
+                        <app-icon name="edit" [size]="14" />
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn del"
+                        aria-label="Delete"
+                        (click)="requestDelete(row)"
+                      >
+                        <app-icon name="trash" [size]="14" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr class="table-empty-row">
+                  <td colspan="10">No error logs match your search.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        @case ('security') {
+          <table>
+            <thead>
+              <tr>
+                <th>Time Stamp</th>
+                <th>Event Type</th>
+                <th>User</th>
+                <th>Tenant</th>
+                <th>Message</th>
+                <th>IP Address</th>
+                <th>Environment</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of pagedSecurityRows(); track row.timestamp + row.user) {
+                <tr
+                  class="row-clickable"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-label]="'View log entry for ' + row.eventType + ' by ' + row.user"
+                  (click)="openSecurityDetail(row)"
+                  (keydown.enter)="openSecurityDetail(row)"
+                  (keydown.space)="$event.preventDefault(); openSecurityDetail(row)"
+                >
+                  <td>{{ row.timestamp }}</td>
+                  <td>{{ row.eventType }}</td>
+                  <td>{{ row.user }}</td>
+                  <td>{{ row.tenant }}</td>
+                  <td>
+                    <div class="wrap-cell">{{ row.message }}</div>
+                  </td>
+                  <td>{{ row.ip }}</td>
+                  <td>{{ row.environment }}</td>
+                  <td>
+                    <span class="status-pill" [class]="row.severity.toLowerCase()">{{
+                      row.severity
+                    }}</span>
+                  </td>
+                  <td>
+                    <span class="status-pill" [class]="row.status.toLowerCase()">{{
+                      row.status
+                    }}</span>
+                  </td>
+                  <td (click)="$event.stopPropagation()">
+                    <div class="actions-cell">
+                      <button
+                        type="button"
+                        class="icon-btn view"
+                        aria-label="View"
+                        (click)="openSecurityDetail(row)"
+                      >
+                        <app-icon name="eye" [size]="14" />
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn edit"
+                        aria-label="Edit"
+                        (click)="openSecurityDetail(row)"
+                      >
+                        <app-icon name="edit" [size]="14" />
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn del"
+                        aria-label="Delete"
+                        (click)="requestDelete(row)"
+                      >
+                        <app-icon name="trash" [size]="14" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr class="table-empty-row">
+                  <td colspan="10">No security activity matches your search.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        @case ('events') {
+          <table>
+            <thead>
+              <tr>
+                <th>Time Stamp</th>
+                <th>Event Type</th>
+                <th>Event</th>
+                <th>Module</th>
+                <th>Tenant</th>
+                <th>Environment</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of pagedEventRows(); track row.timestamp + row.event) {
+                <tr
+                  class="row-clickable"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-label]="'View log entry for ' + row.eventType + ' on ' + row.module"
+                  (click)="openEventDetail(row)"
+                  (keydown.enter)="openEventDetail(row)"
+                  (keydown.space)="$event.preventDefault(); openEventDetail(row)"
+                >
+                  <td>{{ row.timestamp }}</td>
+                  <td>{{ row.eventType }}</td>
+                  <td>{{ row.event }}</td>
+                  <td>{{ row.module }}</td>
+                  <td>{{ row.tenant }}</td>
+                  <td>{{ row.environment }}</td>
+                  <td>
+                    <span class="status-pill" [class]="row.severity.toLowerCase()">{{
+                      row.severity
+                    }}</span>
+                  </td>
+                  <td>
+                    <span class="status-pill" [class]="row.status.toLowerCase()">{{
+                      row.status
+                    }}</span>
+                  </td>
+                  <td (click)="$event.stopPropagation()">
+                    <div class="actions-cell">
+                      <button
+                        type="button"
+                        class="icon-btn view"
+                        aria-label="View"
+                        (click)="openEventDetail(row)"
+                      >
+                        <app-icon name="eye" [size]="14" />
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn edit"
+                        aria-label="Edit"
+                        (click)="openEventDetail(row)"
+                      >
+                        <app-icon name="edit" [size]="14" />
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn del"
+                        aria-label="Delete"
+                        (click)="requestDelete(row)"
+                      >
+                        <app-icon name="trash" [size]="14" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr class="table-empty-row">
+                  <td colspan="9">No system events match your search.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      }
+    </div>
+
+    <app-pagination
+      class="pagination-row"
+      [totalItems]="totalItems()"
+      [pageSize]="pageSize"
+      [(page)]="page"
+    />
+  </section>
+} @else if (view() === 'detail' && selectedLog(); as log) {
+  <div class="log-detail-view">
+    <button type="button" class="log-back-link" (click)="backToList()">
+      <app-icon name="chevron-left" [size]="16" />
+      Back to System Logs
+    </button>
+
+    <div class="log-record-head">
+      <div class="log-record-heading">
+        <h1>{{ log.title }}</h1>
+        <div class="log-record-meta">
+          <span class="log-category">{{ log.category }}</span>
+          <span class="log-meta-dot" aria-hidden="true">&bull;</span>
+          <span class="log-id">{{ log.logId }}</span>
+          <button
+            type="button"
+            class="icon-btn copy-id"
+            aria-label="Copy log ID"
+            (click)="copyLogId()"
+          >
+            <app-icon name="copy" [size]="13" />
+          </button>
+          <span class="log-meta-dot" aria-hidden="true">&bull;</span>
+          <span class="log-timestamp">{{ log.timestamp }}</span>
+          <span class="status-pill" [class]="log.status.toLowerCase()">{{ log.status }}</span>
+          @if (log.severity) {
+            <span class="status-pill" [class]="log.severity.toLowerCase()">{{ log.severity }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="log-record-actions">
+        <button type="button" class="btn-outline" (click)="exportLogDetail()">
+          <app-icon name="download" [size]="15" />
+          Export
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="log-content-grid"
+      [class.log-content-grid--single]="relatedLogEvents().length === 0"
+    >
+      <div class="summary-card log-detail-card">
+        <div class="card-head">
+          <h2><app-icon name="logs" [size]="16" />Event Details</h2>
+        </div>
+
+        <p class="immutable-note">
+          <app-icon name="lock" [size]="13" />
+          This is an immutable audit record — entries are viewed and exported, never edited.
+        </p>
+
+        <dl class="info-grid with-dividers log-fields-grid">
+          @for (field of log.fields; track field.label) {
+            <div>
+              <dt>{{ field.label }}</dt>
+              <dd>
+                @if (outcomeTone(field); as tone) {
+                  <span
+                    class="log-outcome"
+                    [class.positive]="tone === 'positive'"
+                    [class.negative]="tone === 'negative'"
+                  >
+                    <app-icon
+                      [name]="tone === 'positive' ? 'check-circle' : 'x-circle'"
+                      [size]="13"
+                    />
+                    {{ field.value }}
+                  </span>
+                } @else {
+                  {{ field.value }}
+                }
+              </dd>
+            </div>
+          }
+        </dl>
+      </div>
+
+      @if (relatedLogEvents().length > 0) {
+        <div class="summary-card log-related-card">
+          <div class="card-head">
+            <h2><app-icon name="clock" [size]="16" />Related Events</h2>
+          </div>
+          <p class="log-related-tenant">{{ log.tenant }}</p>
+
+          <ul class="related-list">
+            @for (item of relatedLogEvents(); track item.timestamp) {
+              <li>
+                <button type="button" class="related-row" (click)="openRelatedEvent(item)">
+                  <span class="related-icon"><app-icon name="logs" [size]="14" /></span>
+                  <span class="related-main">
+                    <span class="related-title">{{ item.title }}</span>
+                    <span class="status-pill" [class]="item.status.toLowerCase()">{{
+                      item.status
+                    }}</span>
+                  </span>
+                  <span class="related-time">{{ item.timestamp }}</span>
+                  <app-icon name="chevron-right" [size]="16" class="related-chevron" />
+                </button>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (deleteTarget()) {
+  <app-confirm-dialog
+    title="Delete log entry?"
+    message="This entry will be permanently removed from the log."
+    confirmLabel="Delete"
+    tone="danger"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  />
+}

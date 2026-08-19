@@ -1,0 +1,580 @@
+<app-topbar
+  title="User &amp; Roles"
+  [searchTerm]="searchTerm()"
+  (searchChange)="searchTerm.set($event); onFilterChange()"
+/>
+
+@if (view() === 'list') {
+  <section class="kpi-grid">
+    @for (s of stats(); track s.label) {
+      <app-kpi-card
+        [icon]="s.icon"
+        [tone]="s.tone"
+        [illustration]="s.illustration"
+        [label]="s.label"
+        [value]="s.value"
+        [support]="s.footnote ?? ''"
+      />
+    }
+  </section>
+
+  <section class="card">
+    <nav class="tab-nav">
+      @for (t of tabs; track t.key) {
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab() === t.key"
+          (click)="selectTab(t.key)"
+        >
+          <app-icon [name]="t.icon" [size]="15" />
+          {{ t.label }}
+        </button>
+      }
+    </nav>
+
+    @if (activeTab() === 'users') {
+      <div class="filter-bar">
+        <div class="search-box">
+          <app-icon name="search" [size]="16" />
+          <label class="sr-only" for="user-search">Search users</label>
+          <input
+            id="user-search"
+            type="text"
+            placeholder="Search name, email, or role..."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onFilterChange()"
+          />
+        </div>
+
+        <select class="filter-select" [(ngModel)]="roleFilter" (ngModelChange)="onFilterChange()">
+          <option>All Roles</option>
+          @for (role of roleOptions; track role) {
+            <option>{{ role }}</option>
+          }
+        </select>
+        <select class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
+          <option>All Statuses</option>
+          @for (status of statusOptions; track status) {
+            <option>{{ status }}</option>
+          }
+        </select>
+
+        <div class="spacer"></div>
+
+        <button
+          type="button"
+          class="btn-outline"
+          [disabled]="!hasActiveFilters()"
+          (click)="clearFilters()"
+        >
+          <app-icon name="filter" [size]="15" />
+          Clear Filters
+        </button>
+        <button type="button" class="btn-outline" (click)="exportUsers()">
+          <app-icon name="download" [size]="15" />
+          Export
+        </button>
+        <button type="button" class="btn-primary" (click)="openAddUser()">
+          <app-icon name="plus" [size]="15" />
+          Add User
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">User</th>
+              <th scope="col">Role</th>
+              <th scope="col">Department</th>
+              <th scope="col">Status</th>
+              <th scope="col">Last Active</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of pagedUsers(); track row.email) {
+              <tr
+                class="row-clickable"
+                tabindex="0"
+                role="button"
+                [attr.aria-label]="'View profile for ' + row.name"
+                (click)="openDetail(row)"
+                (keydown.enter)="openDetail(row)"
+                (keydown.space)="$event.preventDefault(); openDetail(row)"
+              >
+                <td>
+                  <div class="user-cell">
+                    <app-avatar [name]="row.name" [size]="34" />
+                    <div>
+                      <div class="user-name">{{ row.name }}</div>
+                      <div class="user-email">{{ row.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ row.role }}</td>
+                <td>{{ row.department }}</td>
+                <td>
+                  <span class="status-pill" [class]="row.status.toLowerCase()">{{
+                    row.status
+                  }}</span>
+                </td>
+                <td>{{ row.lastActive }}</td>
+                <td class="actions-cell" (click)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="icon-btn view"
+                    [attr.aria-label]="'View ' + row.name"
+                    (click)="openDetail(row)"
+                  >
+                    <app-icon name="eye" [size]="14" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn edit"
+                    [attr.aria-label]="'Edit ' + row.name"
+                    (click)="openDetail(row)"
+                  >
+                    <app-icon name="edit" [size]="14" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn del"
+                    [attr.aria-label]="'Remove ' + row.name"
+                    (click)="requestDelete(row)"
+                  >
+                    <app-icon name="trash" [size]="14" />
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr class="table-empty-row">
+                <td colspan="6">No users match your search.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <app-pagination
+        class="pagination-row"
+        [totalItems]="totalItems()"
+        [pageSize]="pageSize"
+        [(page)]="page"
+      />
+    } @else {
+      <div class="role-grid">
+        @for (role of roles(); track role.name) {
+          <div class="role-card">
+            <div class="role-head">
+              <span class="role-icon" [style.background]="role.iconBg">
+                <app-icon name="shield" [size]="18" />
+              </span>
+              <div>
+                <h3>{{ role.name }}</h3>
+                <span class="role-count"
+                  >{{ role.userCount }} user{{ role.userCount === 1 ? '' : 's' }}</span
+                >
+              </div>
+            </div>
+
+            <p class="role-desc">{{ role.description }}</p>
+
+            <div class="role-permissions">
+              @for (perm of role.permissions; track perm) {
+                <span class="permission-badge">{{ perm }}</span>
+              }
+            </div>
+
+            <div class="role-actions">
+              <button type="button" class="btn-outline" (click)="openEditRole(role)">
+                <app-icon name="edit" [size]="14" />
+                Edit
+              </button>
+              <button type="button" class="btn-outline" (click)="viewUsersForRole(role.name)">
+                <app-icon name="user-check" [size]="14" />
+                View Users
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+} @else if (view() === 'detail' && selectedUser(); as row) {
+  <div class="detail-head">
+    <h1>{{ row.name }}</h1>
+    <div class="header-actions">
+      <span class="status-pill" [class]="row.status.toLowerCase()">{{ row.status }}</span>
+      <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
+    </div>
+  </div>
+
+  @if (workload(); as w) {
+    <div class="kpi-grid kpi-grid--compact">
+      <app-kpi-card
+        label="Open Assignments"
+        [value]="w.openAssignments + ''"
+        icon="logs"
+        tone="info"
+        density="compact"
+      />
+      <app-kpi-card
+        label="Overdue"
+        [value]="w.overdue + ''"
+        icon="alert-triangle"
+        tone="danger"
+        density="compact"
+      />
+      <app-kpi-card
+        label="Completed This Month"
+        [value]="w.completedThisMonth + ''"
+        icon="check-circle"
+        tone="success"
+        density="compact"
+      />
+      <app-kpi-card
+        label="Assigned Role"
+        [value]="selectedUserRole()?.name || '—'"
+        icon="shield"
+        tone="brand"
+        density="compact"
+      />
+    </div>
+  }
+
+  <div class="detail-grid">
+    <div class="record-card">
+      <div class="record-banner">
+        <app-icon name="image" [size]="26" />
+        <app-avatar [name]="row.name" [size]="72" class="banner-avatar" />
+      </div>
+
+      <div class="record-info">
+        <h2>{{ row.name }}</h2>
+        <span class="status-pill" [class]="row.status.toLowerCase()">{{ row.status }}</span>
+
+        <dl class="info-list">
+          <div>
+            <dt>Email :</dt>
+            <dd>{{ row.email }}</dd>
+          </div>
+          <div>
+            <dt>Role :</dt>
+            <dd>{{ row.role }}</dd>
+          </div>
+          <div>
+            <dt>Department :</dt>
+            <dd>{{ row.department }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="record-footer">
+        <div>
+          <strong>{{ row.lastActive }}</strong>
+          <span>Last Active</span>
+        </div>
+        <div>
+          <strong>{{ row.status }}</strong>
+          <span>Account Status</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-head">
+        <h2>Staff Account</h2>
+        @if (selectedUserRole(); as role) {
+          <button
+            type="button"
+            class="icon-btn edit"
+            [attr.aria-label]="'Edit ' + role.name"
+            (click)="openEditRole(role)"
+          >
+            <app-icon name="edit" [size]="14" />
+          </button>
+        }
+      </div>
+
+      <nav class="detail-tabs">
+        <button
+          type="button"
+          class="detail-tab"
+          [class.active]="userDetailTab() === 'profile'"
+          (click)="selectUserDetailTab('profile')"
+        >
+          Profile
+        </button>
+        <button
+          type="button"
+          class="detail-tab"
+          [class.active]="userDetailTab() === 'permissions'"
+          (click)="selectUserDetailTab('permissions')"
+        >
+          Role &amp; Permissions
+        </button>
+        <button
+          type="button"
+          class="detail-tab"
+          [class.active]="userDetailTab() === 'workload'"
+          (click)="selectUserDetailTab('workload')"
+        >
+          Workload
+        </button>
+        <button
+          type="button"
+          class="detail-tab"
+          [class.active]="userDetailTab() === 'security'"
+          (click)="selectUserDetailTab('security')"
+        >
+          Security
+        </button>
+        <button
+          type="button"
+          class="detail-tab"
+          [class.active]="userDetailTab() === 'activity'"
+          (click)="selectUserDetailTab('activity')"
+        >
+          Activity
+        </button>
+      </nav>
+
+      @switch (userDetailTab()) {
+        @case ('profile') {
+          <h3>Contact Information</h3>
+          <dl class="info-grid">
+            <div>
+              <dt>Full Name</dt>
+              <dd>{{ row.name }}</dd>
+            </div>
+            <div>
+              <dt>Email</dt>
+              <dd>{{ row.email }}</dd>
+            </div>
+            <div>
+              <dt>Department</dt>
+              <dd>{{ row.department }}</dd>
+            </div>
+            <div>
+              <dt>Account Status</dt>
+              <dd>{{ row.status }}</dd>
+            </div>
+          </dl>
+
+          <h3>Department</h3>
+          <div class="officer-row">
+            <app-avatar [name]="row.department" [size]="34" />
+            <div>
+              <strong>{{ row.department }}</strong>
+              <span>Assigned Department</span>
+            </div>
+          </div>
+        }
+
+        @case ('permissions') {
+          @if (selectedUserRole(); as role) {
+            <h3>{{ role.name }}</h3>
+            <p class="role-desc">{{ role.description }}</p>
+
+            <div class="table-wrap">
+              <table class="permission-matrix">
+                <thead>
+                  <tr>
+                    <th>Module</th>
+                    <th>View</th>
+                    <th>Create</th>
+                    <th>Approve</th>
+                    <th>Verify</th>
+                    <th>Export</th>
+                    <th>Configure</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (perm of permissionMatrix(); track perm.module) {
+                    <tr>
+                      <td>{{ perm.module }}</td>
+                      <td [class]="perm.view ? 'perm-yes' : 'perm-no'">
+                        {{ perm.view ? '✓' : '—' }}
+                      </td>
+                      <td [class]="perm.create ? 'perm-yes' : 'perm-no'">
+                        {{ perm.create ? '✓' : '—' }}
+                      </td>
+                      <td [class]="perm.approve ? 'perm-yes' : 'perm-no'">
+                        {{ perm.approve ? '✓' : '—' }}
+                      </td>
+                      <td [class]="perm.verify ? 'perm-yes' : 'perm-no'">
+                        {{ perm.verify ? '✓' : '—' }}
+                      </td>
+                      <td [class]="perm.export ? 'perm-yes' : 'perm-no'">
+                        {{ perm.export ? '✓' : '—' }}
+                      </td>
+                      <td [class]="perm.configure ? 'perm-yes' : 'perm-no'">
+                        {{ perm.configure ? '✓' : '—' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+
+        @case ('workload') {
+          @if (workload(); as w) {
+            <dl class="info-grid">
+              <div>
+                <dt>Open Assignments</dt>
+                <dd>{{ w.openAssignments }}</dd>
+              </div>
+              <div>
+                <dt>Overdue</dt>
+                <dd>{{ w.overdue }}</dd>
+              </div>
+              <div>
+                <dt>Completed This Month</dt>
+                <dd>{{ w.completedThisMonth }}</dd>
+              </div>
+              <div>
+                <dt>Department</dt>
+                <dd>{{ row.department }}</dd>
+              </div>
+            </dl>
+            <p class="role-desc">
+              Workload counts are derived from this account's assigned module ({{
+                selectedUserRole()?.name
+              }}) and reflect the same records visible from Applications, Evaluations, and Payments.
+            </p>
+          }
+        }
+
+        @case ('security') {
+          <h3>Recent Sessions</h3>
+          <p class="role-desc">
+            Prototype data — this app has no authentication backend, so sessions are simulated.
+          </p>
+          <div class="table-wrap">
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>Device / Browser</th>
+                  <th>IP Address</th>
+                  <th>Last Seen</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of sessions(); track s.ip) {
+                  <tr>
+                    <td>{{ s.device }}</td>
+                    <td class="muted">{{ s.ip }}</td>
+                    <td class="muted">{{ s.lastSeen }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        @case ('activity') {
+          <ul class="timeline-feed">
+            @for (item of userActivity(); track item.title) {
+              <li class="timeline-feed-item">
+                <span class="timeline-feed-icon"><app-icon name="clock" [size]="14" /></span>
+                <div class="timeline-feed-body">
+                  <div class="timeline-feed-head">
+                    <span class="timeline-feed-title">{{ item.title }}</span>
+                    <span class="timeline-feed-time">{{ item.timeAgo }}</span>
+                  </div>
+                  <p class="timeline-feed-detail">{{ item.detail }}</p>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      }
+    </div>
+  </div>
+}
+
+@if (showAddUser()) {
+  <div class="modal-backdrop" (click)="cancelAddUser()">
+    <div class="modal-box create-box" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelAddUser()">
+        &#10005;
+      </button>
+      <h2>Add User</h2>
+      <form class="create-form" (ngSubmit)="createUser()">
+        <label>
+          Full Name
+          <input type="text" [(ngModel)]="newUser.name" name="userName" required />
+        </label>
+        <label>
+          Email
+          <input
+            type="email"
+            [(ngModel)]="newUser.email"
+            name="userEmail"
+            placeholder="Auto-generated if left blank"
+          />
+        </label>
+        <label>
+          Role
+          <select [(ngModel)]="newUser.role" name="userRole">
+            @for (role of roleOptions; track role) {
+              <option [value]="role">{{ role }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Department
+          <select [(ngModel)]="newUser.department" name="userDepartment">
+            @for (dept of departments; track dept) {
+              <option [value]="dept">{{ dept }}</option>
+            }
+          </select>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelAddUser()">Cancel</button>
+          <button type="submit" class="modal-btn confirm">Invite User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (editingRole(); as role) {
+  <div class="modal-backdrop" (click)="cancelEditRole()">
+    <div class="modal-box create-box" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelEditRole()">
+        &#10005;
+      </button>
+      <h2>Edit Role</h2>
+      <form class="create-form" (ngSubmit)="saveEditRole()">
+        <label>
+          Role Name
+          <input type="text" [(ngModel)]="role.name" name="roleName" required />
+        </label>
+        <label>
+          Description
+          <textarea rows="3" [(ngModel)]="role.description" name="roleDescription"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelEditRole()">Cancel</button>
+          <button type="submit" class="modal-btn confirm">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (deleteTarget(); as target) {
+  <app-confirm-dialog
+    title="Remove user?"
+    [message]="target.name + ' will lose access immediately.'"
+    confirmLabel="Remove"
+    tone="danger"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  />
+}

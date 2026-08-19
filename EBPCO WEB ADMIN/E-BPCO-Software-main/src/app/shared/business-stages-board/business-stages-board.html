@@ -1,0 +1,232 @@
+<section class="card stages-card">
+  <div class="stages-header">
+    <div>
+      <h2>Business Application Stages</h2>
+      <p class="stages-subtitle">Track businesses across each stage of the application process.</p>
+    </div>
+
+    <div class="filters-group">
+      <div class="filter-wrap">
+        <button
+          type="button"
+          class="filter-trigger"
+          [class.active]="stageFilterOpen()"
+          [attr.aria-expanded]="stageFilterOpen()"
+          (click)="toggleStageFilterMenu()"
+        >
+          <app-icon name="filter" [size]="15" />
+          {{ selectedStageFilterLabel() }}
+          <app-icon name="chevron-down" [size]="14" />
+        </button>
+
+        @if (stageFilterOpen()) {
+          <div class="filter-backdrop" (click)="closeStageFilterMenu()"></div>
+          <div class="filter-menu" role="menu">
+            @for (option of stageFilterOptions; track option.value) {
+              <button
+                type="button"
+                class="filter-option"
+                role="menuitemradio"
+                [attr.aria-checked]="stageFilter() === option.value"
+                [class.active]="stageFilter() === option.value"
+                (click)="selectStageFilter(option.value)"
+              >
+                {{ option.label }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="filter-wrap">
+        <button
+          type="button"
+          class="filter-trigger"
+          [class.active]="filterOpen()"
+          [attr.aria-expanded]="filterOpen()"
+          (click)="toggleFilterMenu()"
+        >
+          <app-icon name="calendar" [size]="15" />
+          {{ selectedPresetLabel() }}
+          <app-icon name="chevron-down" [size]="14" />
+        </button>
+
+        @if (filterOpen()) {
+          <div class="filter-backdrop" (click)="closeFilterMenu()"></div>
+          <div class="filter-menu" role="menu">
+            @for (option of presetOptions; track option.value) {
+              <button
+                type="button"
+                class="filter-option"
+                role="menuitemradio"
+                [attr.aria-checked]="preset() === option.value"
+                [class.active]="preset() === option.value"
+                (click)="selectPreset(option.value)"
+              >
+                {{ option.label }}
+              </button>
+            }
+
+            @if (preset() === 'custom') {
+              <div class="custom-range">
+                <label>
+                  Start date
+                  <input
+                    type="date"
+                    [value]="draftStart()"
+                    (change)="draftStart.set($any($event.target).value)"
+                  />
+                </label>
+                <label>
+                  End date
+                  <input
+                    type="date"
+                    [value]="draftEnd()"
+                    (change)="draftEnd.set($any($event.target).value)"
+                  />
+                </label>
+                <button type="button" class="apply-btn" (click)="applyCustomRange()">Apply</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="stages-board skeleton" aria-hidden="true">
+      @for (i of [0, 1, 2]; track i) {
+        <div class="stage-col">
+          <div class="stage-col-head">
+            <span class="skel skel-icon"></span>
+            <span class="skel skel-title"></span>
+            <span class="skel skel-count"></span>
+          </div>
+          <span class="skel skel-divider"></span>
+          <div class="stage-col-body">
+            @for (n of [0, 1, 2, 3, 4, 5]; track n) {
+              <span class="skel skel-note"></span>
+            }
+          </div>
+          <span class="skel skel-footer"></span>
+        </div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="stages-state">
+      <app-icon name="alert-triangle" [size]="22" />
+      <p>Unable to load business stages.</p>
+      <button type="button" class="btn-outline" (click)="retry()">Retry</button>
+    </div>
+  } @else if (totalCount() === 0) {
+    <div class="stages-state">
+      <app-icon name="building" [size]="22" />
+      <p>No business applications found for this period.</p>
+      <button type="button" class="btn-outline" (click)="clearFilter()">Reset Filter</button>
+    </div>
+  } @else {
+    <div class="stages-board">
+      @for (column of columns(); track column.status) {
+        <div class="stage-col" [class]="column.dotClass">
+          <div class="stage-col-head">
+            <span class="stage-icon" [class]="column.dotClass" aria-hidden="true">
+              <app-icon [name]="column.icon" [size]="14" />
+            </span>
+            <span class="stage-name">{{ column.label }}</span>
+            <span class="stage-count" [class]="column.dotClass">{{ column.apps.length }}</span>
+          </div>
+
+          <div class="stage-divider" [class]="column.dotClass" aria-hidden="true"></div>
+
+          <div
+            class="stage-col-body"
+            cdkDropList
+            [id]="column.dotClass"
+            [cdkDropListConnectedTo]="dropListIds"
+            (cdkDropListDropped)="onDrop($event, column.status)"
+          >
+            @if (column.apps.length === 0) {
+              <div class="stage-empty">
+                <app-icon [name]="column.icon" [size]="20" />
+                <p>{{ column.emptyLabel }}</p>
+              </div>
+            } @else {
+              @for (app of visibleApps(column); track app.id) {
+                <button
+                  type="button"
+                  class="sticky-note"
+                  [class]="column.dotClass"
+                  [style.--note-rotate]="noteRotation(app.id)"
+                  [attr.title]="stageDateLabel(app)"
+                  [attr.aria-label]="
+                    'View application ' +
+                    app.id +
+                    ' for ' +
+                    app.applicant +
+                    ', ' +
+                    app.type +
+                    ', draggable to another stage'
+                  "
+                  (click)="select(app)"
+                  cdkDrag
+                  [cdkDragData]="app"
+                  cdkDragBoundary=".stages-board"
+                >
+                  <span class="note-pin" aria-hidden="true"></span>
+                  <span class="note-name">{{ app.applicant }}</span>
+                  <span class="note-id">{{ app.id }}</span>
+                  <span class="note-type">{{ app.type }}</span>
+                </button>
+              }
+            }
+          </div>
+
+          @if (column.apps.length > 0) {
+            <button
+              type="button"
+              class="view-all-btn"
+              [class]="column.dotClass"
+              (click)="viewAll(column.status)"
+            >
+              <app-icon [name]="column.footerIcon" [size]="13" />
+              <span>View all {{ column.apps.length }}</span>
+              <app-icon name="chevron-right" [size]="13" />
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>
+
+@if (pendingReject(); as pending) {
+  <div class="modal-backdrop" (click)="cancelReject()">
+    <div
+      class="modal-box reject-box"
+      (click)="$event.stopPropagation()"
+      role="alertdialog"
+      aria-modal="true"
+    >
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelReject()">
+        &#10005;
+      </button>
+      <h2>Reject application?</h2>
+      <p>{{ pending.app.applicant }}'s application ({{ pending.app.id }}) will move to Rejected.</p>
+      <label class="reject-label" for="reject-remarks">
+        Reason <span class="optional">(optional)</span>
+        <textarea
+          id="reject-remarks"
+          rows="3"
+          placeholder="Explain why this application is being rejected…"
+          [ngModel]="rejectRemarks()"
+          (ngModelChange)="rejectRemarks.set($event)"
+        ></textarea>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn neutral" (click)="cancelReject()">Cancel</button>
+        <button type="button" class="modal-btn danger" (click)="confirmReject()">OK</button>
+      </div>
+    </div>
+  </div>
+}

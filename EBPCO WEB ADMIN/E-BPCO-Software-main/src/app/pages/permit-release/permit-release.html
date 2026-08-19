@@ -1,0 +1,324 @@
+<app-topbar
+  title="Permit Release"
+  [searchTerm]="searchTerm()"
+  (searchChange)="searchTerm.set($event); onSearchChange()"
+/>
+
+@if (view() === 'list') {
+  <section class="kpi-grid">
+    @for (stat of ringStats(); track stat.label) {
+      <app-kpi-card
+        [label]="stat.label"
+        [value]="stat.value"
+        [icon]="stat.icon"
+        [tone]="stat.tone"
+        [illustration]="stat.illustration"
+        [progress]="stat.isTotal ? null : stat.pct"
+        [support]="stat.support ?? ''"
+        [bars]="stat.bars ?? null"
+      />
+    }
+  </section>
+
+  <section class="card table-card">
+    <div class="table-toolbar">
+      <div class="search-input">
+        <app-icon name="search" [size]="16" />
+        <input
+          type="text"
+          placeholder="Search Here By Application ID, Applicant Name, or Location"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+        />
+      </div>
+      <div class="toolbar-actions">
+        <app-filter-panel [activeCount]="activeFilterCount()" (clear)="clearFilters()">
+          <div class="filter-field">
+            <label for="release-status-filter">Permit Status</label>
+            <select id="release-status-filter" [(ngModel)]="statusFilter">
+              <option value="All">All Statuses</option>
+              @for (opt of statusOptions; track opt) {
+                <option [value]="opt">{{ opt }}</option>
+              }
+            </select>
+          </div>
+        </app-filter-panel>
+        <button type="button" class="btn-outline" (click)="exportVisible()">
+          <app-icon name="download" [size]="15" />
+          Export
+        </button>
+        <button type="button" class="btn-primary" (click)="generate()">
+          <app-icon name="sparkles" [size]="15" />
+          Generate
+        </button>
+      </div>
+    </div>
+
+    @if (selectedIds().size > 0) {
+      <div class="bulk-bar">
+        <span>{{ selectedIds().size }} selected</span>
+        <button type="button" class="btn-outline" (click)="exportSelected()">
+          <app-icon name="download" [size]="14" />
+          Export Selected
+        </button>
+      </div>
+    }
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>
+              <input
+                type="checkbox"
+                aria-label="Select all permit releases"
+                [checked]="allVisibleSelected()"
+                (change)="toggleSelectAll()"
+              />
+            </th>
+            <th>APPLICATION ID</th>
+            <th>APPLICANT NAME</th>
+            <th>LOCATION</th>
+            <th>TYPE</th>
+            <th>APPROVAL STATUS</th>
+            <th>PAYMENT STATUS</th>
+            <th>PERMIT STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of pagedRows(); track row.id) {
+            <tr
+              class="row-clickable"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'View permit release for ' + row.id + ', ' + row.applicant"
+              (click)="openDetail(row)"
+              (keydown.enter)="openDetail(row)"
+              (keydown.space)="$event.preventDefault(); openDetail(row)"
+            >
+              <td (click)="$event.stopPropagation()">
+                <input
+                  type="checkbox"
+                  [attr.aria-label]="'Select permit release ' + row.id"
+                  [checked]="isSelected(row)"
+                  (change)="toggleRowSelected(row)"
+                />
+              </td>
+              <td class="id-cell">{{ row.id }}</td>
+              <td>
+                <div class="applicant-cell">
+                  <app-avatar [name]="row.applicant" [size]="30" />
+                  {{ row.applicant }}
+                </div>
+              </td>
+              <td>{{ row.city }}</td>
+              <td>{{ row.type }}</td>
+              <td>{{ row.approvalStatus }}</td>
+              <td>{{ row.paymentStatus }}</td>
+              <td>
+                <span
+                  class="status-pill"
+                  [class]="row.permitStatus.toLowerCase().replace(/\s+/g, '-')"
+                  >{{ row.permitStatus }}</span
+                >
+              </td>
+              <td (click)="$event.stopPropagation()">
+                <div class="actions-cell">
+                  <button type="button" class="icon-btn generate" (click)="generate(row)">
+                    <app-icon name="sparkles" [size]="15" />
+                  </button>
+                  @if (canRelease()) {
+                    <button
+                      type="button"
+                      class="icon-btn release"
+                      [disabled]="row.permitStatus === 'Released'"
+                      (click)="requestRelease(row)"
+                    >
+                      <app-icon name="send" [size]="15" />
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr class="table-empty-row">
+              <td colspan="9">No applications match your search.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination [totalItems]="filteredRows().length" [pageSize]="pageSize" [(page)]="page" />
+  </section>
+} @else if (view() === 'detail' && selectedRow(); as row) {
+  <div class="detail-head">
+    <h1>{{ row.id }}</h1>
+    <div class="header-actions">
+      <span class="status-pill" [class]="row.permitStatus.toLowerCase().replace(/\s+/g, '-')">{{
+        row.permitStatus
+      }}</span>
+      <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div class="record-card">
+      <div class="record-banner">
+        <app-icon name="image" [size]="26" />
+        <app-avatar [name]="row.applicant" [size]="72" class="banner-avatar" />
+      </div>
+
+      <div class="record-info">
+        <h2>{{ row.applicant }}</h2>
+        <span class="status-pill" [class]="row.permitStatus.toLowerCase().replace(/\s+/g, '-')">{{
+          row.permitStatus
+        }}</span>
+
+        <dl class="info-list">
+          <div>
+            <dt>Location :</dt>
+            <dd>{{ row.city }}</dd>
+          </div>
+          <div>
+            <dt>Type :</dt>
+            <dd>{{ row.type }}</dd>
+          </div>
+          <div>
+            <dt>Approval Status :</dt>
+            <dd>{{ row.approvalStatus }}</dd>
+          </div>
+          <div>
+            <dt>Payment Status :</dt>
+            <dd>{{ row.paymentStatus }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="record-footer">
+        <div>
+          <strong>{{ row.approvalStatus }}</strong>
+          <span>Approval Status</span>
+        </div>
+        <div>
+          <strong>{{ row.id }}</strong>
+          <span>Application ID</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-head">
+        <h2>Release Actions</h2>
+      </div>
+
+      <h3>Permit Status</h3>
+      <p class="release-note">
+        @if (row.permitStatus === 'Ready for Release') {
+          This permit has been approved and paid, and is ready to be handed over to the applicant.
+        } @else {
+          This permit has already been released to the applicant.
+        }
+      </p>
+
+      <div class="header-actions">
+        <button type="button" class="btn-outline" (click)="generate(row)">
+          <app-icon name="sparkles" [size]="15" />
+          Generate PDF
+        </button>
+        @if (canRelease()) {
+          <button
+            type="button"
+            class="btn-primary"
+            [disabled]="row.permitStatus === 'Released'"
+            (click)="requestRelease(row)"
+          >
+            <app-icon name="send" [size]="15" />
+            Mark as Released
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+@if (releaseTarget(); as target) {
+  <div class="modal-backdrop" (click)="cancelRelease()">
+    <div class="modal-box create-box" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelRelease()">
+        &#10005;
+      </button>
+      <h2>Release Permit {{ target.permitNumber }}</h2>
+      <p class="modal-hint">{{ target.id }} — {{ target.applicant }}</p>
+      <form class="create-form" (ngSubmit)="confirmRelease()">
+        <label>
+          Claimant Name
+          <input type="text" [(ngModel)]="claimantName" name="claimantName" required />
+        </label>
+        <label>
+          Release Method
+          <select [(ngModel)]="releaseMethod" name="releaseMethod">
+            <option value="Physical Claim">Physical Claim</option>
+            <option value="Authorized Representative">Authorized Representative</option>
+          </select>
+        </label>
+        @if (releaseError()) {
+          <p class="form-error">{{ releaseError() }}</p>
+        }
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelRelease()">Cancel</button>
+          <button type="submit" class="modal-btn confirm">Confirm Release</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showGenerateModal()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" (click)="closeModal()">&#10005;</button>
+      <span class="modal-icon"><app-icon name="sparkles" [size]="34" /></span>
+      <h2>PDF GENERATED SUCCESSFULLY</h2>
+      <button type="button" class="print-btn" (click)="printPdf()">
+        <app-icon name="printer" [size]="17" />
+        Print PDF
+      </button>
+    </div>
+  </div>
+}
+
+<div class="print-only">
+  <h1>Permit Release Summary</h1>
+  <p class="print-meta">
+    {{ generateTarget() ? 'Single application' : 'Ready for Release batch' }} — generated
+    {{ printRows().length }} record{{ printRows().length === 1 ? '' : 's' }}
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Application ID</th>
+        <th>Applicant</th>
+        <th>Location</th>
+        <th>Type</th>
+        <th>Approval Status</th>
+        <th>Payment Status</th>
+        <th>Permit Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of printRows(); track row.id) {
+        <tr>
+          <td>{{ row.id }}</td>
+          <td>{{ row.applicant }}</td>
+          <td>{{ row.city }}</td>
+          <td>{{ row.type }}</td>
+          <td>{{ row.approvalStatus }}</td>
+          <td>{{ row.paymentStatus }}</td>
+          <td>{{ row.permitStatus }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

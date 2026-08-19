@@ -1,0 +1,1263 @@
+<app-topbar
+  title="Applications"
+  [searchTerm]="searchTerm()"
+  (searchChange)="searchTerm.set($event); onSearchChange()"
+/>
+
+@if (view() === 'list') {
+  <section class="kpi-grid">
+    @for (stat of ringStats(); track stat.label) {
+      <app-kpi-card
+        [label]="stat.label"
+        [value]="stat.value"
+        [icon]="stat.icon"
+        [tone]="stat.tone"
+        [illustration]="stat.illustration"
+        [progress]="stat.isTotal ? null : stat.pct"
+        [support]="stat.support ?? ''"
+        [bars]="stat.bars ?? null"
+      />
+    }
+  </section>
+
+  <section class="card table-card">
+    <div class="table-toolbar">
+      <div class="search-input">
+        <app-icon name="search" [size]="16" />
+        <input
+          type="text"
+          placeholder="Search Here By Application ID, Applicant Name, or Location"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+        />
+      </div>
+      <div class="toolbar-actions">
+        <app-filter-panel [activeCount]="activeFilterCount()" (clear)="clearFilters()">
+          <div class="filter-field">
+            <label for="app-status-filter">Status</label>
+            <select id="app-status-filter" [(ngModel)]="statusFilter">
+              <option value="All">All Statuses</option>
+              @for (opt of statusOptions; track opt) {
+                <option [value]="opt">{{ opt }}</option>
+              }
+            </select>
+          </div>
+        </app-filter-panel>
+        <button type="button" class="btn-outline" (click)="exportVisible()">
+          <app-icon name="download" [size]="15" />
+          Export
+        </button>
+        @if (canCreate()) {
+          <button type="button" class="btn-primary" (click)="openCreate()">
+            <app-icon name="plus" [size]="15" />
+            Application
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (selectedIds().size > 0) {
+      <div class="bulk-bar">
+        <span>{{ selectedIds().size }} selected</span>
+        <button type="button" class="btn-outline" (click)="exportVisible()">
+          <app-icon name="download" [size]="14" />
+          Export
+        </button>
+        <button type="button" class="btn-outline danger" (click)="requestDeleteSelected()">
+          <app-icon name="trash" [size]="14" />
+          Delete
+        </button>
+      </div>
+    }
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>
+              <input
+                type="checkbox"
+                aria-label="Select all applications"
+                [checked]="allVisibleSelected()"
+                (change)="toggleSelectAll()"
+              />
+            </th>
+            <th>APPLICATION ID</th>
+            <th>APPLICANT NAME</th>
+            <th>LOCATION</th>
+            <th>TYPE</th>
+            <th>DATE SUBMITTED</th>
+            <th>ASSIGNED OFFICER</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of pagedRows(); track row.id) {
+            <tr
+              class="row-clickable"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'View application ' + row.id + ' for ' + row.applicant"
+              (click)="openDetail(row)"
+              (keydown.enter)="openDetail(row)"
+              (keydown.space)="$event.preventDefault(); openDetail(row)"
+            >
+              <td (click)="$event.stopPropagation()">
+                <input
+                  type="checkbox"
+                  [attr.aria-label]="'Select application ' + row.id"
+                  [checked]="isSelected(row)"
+                  (change)="toggleRowSelected(row)"
+                />
+              </td>
+              <td class="id-cell">{{ row.id }}</td>
+              <td>
+                <div class="applicant-cell">
+                  <app-avatar [name]="row.applicant" [size]="30" />
+                  {{ row.applicant }}
+                </div>
+              </td>
+              <td>{{ row.location }}</td>
+              <td>{{ row.type }}</td>
+              <td>{{ row.dateSubmitted }}</td>
+              <td>{{ row.officer }}</td>
+              <td>
+                <span class="status-pill" [class]="row.status.toLowerCase().replace(/\s+/g, '-')">{{
+                  row.status
+                }}</span>
+              </td>
+              <td (click)="$event.stopPropagation()">
+                <div class="actions-cell">
+                  <button
+                    type="button"
+                    class="icon-btn view"
+                    aria-label="View application"
+                    (click)="openDetail(row)"
+                  >
+                    <app-icon name="eye" [size]="15" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn edit"
+                    aria-label="Edit application"
+                    (click)="openDetail(row)"
+                  >
+                    <app-icon name="edit" [size]="15" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn del"
+                    [attr.aria-label]="'Delete application ' + row.id"
+                    (click)="requestDelete(row)"
+                  >
+                    <app-icon name="trash" [size]="15" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr class="table-empty-row">
+              <td colspan="9">No applications match your search.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination [totalItems]="filteredRows().length" [pageSize]="pageSize" [(page)]="page" />
+  </section>
+} @else if (view() === 'detail' && selectedDetail(); as detail) {
+  <div class="detail-head">
+    <h1>Application Details</h1>
+    <div class="header-actions">
+      <div class="menu-wrap">
+        <button
+          type="button"
+          class="btn-outline"
+          [attr.aria-expanded]="actionMenuOpen()"
+          (click)="toggleActionMenu()"
+        >
+          Action
+        </button>
+        @if (actionMenuOpen()) {
+          <div class="menu-backdrop" (click)="closeActionMenu()"></div>
+          <div class="menu-panel" role="menu">
+            @for (opt of statusOptions; track opt) {
+              <button type="button" role="menuitem" (click)="setStatus(opt)">
+                <app-icon name="check-circle" [size]="14" />
+                Mark {{ opt }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+      <button type="button" class="btn-primary" (click)="openEvaluations()">Evaluate</button>
+      <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
+      <div class="menu-wrap">
+        <button
+          type="button"
+          class="icon-btn more"
+          aria-label="More actions"
+          [attr.aria-expanded]="moreMenuOpen()"
+          (click)="toggleMoreMenu()"
+        >
+          <app-icon name="dots-horizontal" [size]="16" />
+        </button>
+        @if (moreMenuOpen()) {
+          <div class="menu-backdrop" (click)="closeMoreMenu()"></div>
+          <div class="menu-panel" role="menu">
+            <button type="button" role="menuitem" (click)="exportDetail(); closeMoreMenu()">
+              <app-icon name="download" [size]="14" />
+              Export Application
+            </button>
+            <button type="button" role="menuitem" class="danger" (click)="deleteFromDetail()">
+              <app-icon name="trash" [size]="14" />
+              Delete Application
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div class="applicant-card">
+      <div class="banner">
+        <app-icon name="image" [size]="26" />
+        <app-avatar [name]="detail.row.applicant" [size]="72" class="banner-avatar" />
+      </div>
+
+      <div class="applicant-info">
+        <h2>{{ detail.row.id }} - {{ detail.row.applicant }}</h2>
+        <span class="status-pill" [class]="detail.row.status.toLowerCase().replace(/\s+/g, '-')">{{
+          detail.row.status
+        }}</span>
+
+        <dl class="info-list">
+          <div>
+            <dt>City :</dt>
+            <dd>{{ detail.row.location }}</dd>
+          </div>
+          <div>
+            <dt>Region :</dt>
+            <dd>{{ detail.region }}</dd>
+          </div>
+          <div>
+            <dt>Type :</dt>
+            <dd>{{ detail.row.type }}</dd>
+          </div>
+          <div>
+            <dt>Email :</dt>
+            <dd>{{ detail.email }}</dd>
+          </div>
+          <div>
+            <dt>Phone :</dt>
+            <dd>{{ detail.phone }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="applicant-footer">
+        <div>
+          <strong>{{ detail.row.dateSubmitted }}</strong>
+          <span>Date Submitted</span>
+        </div>
+        <div>
+          <strong>{{ detail.row.officer }}</strong>
+          <span>Assigned Officer</span>
+        </div>
+      </div>
+
+      <button type="button" class="app-info-btn" (click)="openInfo()">
+        Application Info
+        <app-icon name="chevron-right" [size]="15" />
+      </button>
+    </div>
+
+    <div class="detail-main">
+      <div class="tab-row">
+        <button
+          type="button"
+          class="tab-pill"
+          [class.active]="detailTab() === 'timeline'"
+          (click)="selectDetailTab('timeline')"
+        >
+          Timeline
+        </button>
+        <button
+          type="button"
+          class="tab-pill"
+          [class.active]="detailTab() === 'documents'"
+          (click)="selectDetailTab('documents')"
+        >
+          Documents
+        </button>
+        <button
+          type="button"
+          class="tab-pill"
+          [class.active]="detailTab() === 'comments'"
+          (click)="selectDetailTab('comments')"
+        >
+          Comments
+        </button>
+      </div>
+
+      <div class="card tab-content">
+        @switch (detailTab()) {
+          @case ('timeline') {
+            <h2>Activity Summary</h2>
+            <p class="summary-line">
+              This Application Is <strong>{{ detail.row.status }}</strong>
+            </p>
+
+            <h3>Quick Information :</h3>
+            <div class="quick-info">
+              <ul>
+                <li>Assigned To: {{ detail.row.officer }}</li>
+                <li>Current Step: {{ detail.row.status }}</li>
+                <li>Days In Current Step: 2 Days</li>
+              </ul>
+              <span class="elapsed">Total Elapsed Time: 9 Days</span>
+            </div>
+
+            <h3>Projects</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Timeline Event</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Details</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (t of timeline; track t.num) {
+                    <tr>
+                      <td class="muted">{{ t.num }}</td>
+                      <td class="strong-cell">{{ t.event }}</td>
+                      <td>{{ t.date }}</td>
+                      <td>{{ t.time }}</td>
+                      <td class="muted">{{ t.detail }}</td>
+                      <td>
+                        <button
+                          type="button"
+                          class="icon-btn more small"
+                          [attr.aria-label]="'Export ' + t.event"
+                          title="Export this entry"
+                          (click)="exportTimelineEntry(t)"
+                        >
+                          <app-icon name="download" [size]="14" />
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          @case ('documents') {
+            <div class="card-head">
+              <div>
+                <h2>Documents</h2>
+                <p class="muted-sub">Lorem ipsum sit dolor amet consecturer.</p>
+              </div>
+              <div class="menu-wrap">
+                <button
+                  type="button"
+                  class="btn-outline"
+                  [attr.aria-expanded]="docActionMenuOpen()"
+                  (click)="toggleDocActionMenu()"
+                >
+                  Action
+                  <app-icon name="chevron-down" [size]="14" />
+                </button>
+                @if (docActionMenuOpen()) {
+                  <div class="menu-backdrop" (click)="closeDocActionMenu()"></div>
+                  <div class="menu-panel" role="menu">
+                    <button type="button" role="menuitem" (click)="exportSelectedDocs()">
+                      <app-icon name="download" [size]="14" />
+                      Export {{ docSelectedIds().size > 0 ? 'Selected' : 'All' }}
+                    </button>
+                    <button type="button" role="menuitem" (click)="markSelectedDocsApproved()">
+                      <app-icon name="check-circle" [size]="14" />
+                      Mark Selected Approved
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      <input
+                        type="checkbox"
+                        aria-label="Select all documents"
+                        [checked]="allDocsSelected()"
+                        (change)="toggleSelectAllDocs()"
+                      />
+                    </th>
+                    <th>Category Event</th>
+                    <th>Uploaded Dates</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (d of documents(); track d.name) {
+                    <tr>
+                      <td>
+                        <input
+                          type="checkbox"
+                          [attr.aria-label]="'Select ' + d.name"
+                          [checked]="isDocSelected(d)"
+                          (change)="toggleDocSelected(d)"
+                        />
+                      </td>
+                      <td>
+                        <div class="doc-cell">
+                          <span class="doc-icon"><app-icon name="file-check" [size]="18" /></span>
+                          <div>
+                            <div class="doc-name">{{ d.name }}</div>
+                            <div class="doc-file">{{ d.filename }}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{{ d.uploadedDate }}</td>
+                      <td>
+                        <span class="status-pill" [class]="d.status.toLowerCase()">{{
+                          d.status
+                        }}</span>
+                      </td>
+                      <td>
+                        <button type="button" class="preview-btn" (click)="openDocumentPreview(d)">
+                          Preview
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          @case ('comments') {
+            @if (replyTarget(); as target) {
+              <div class="reply-banner">
+                Replying to <strong>{{ target.author }}</strong>
+                <button type="button" (click)="cancelReply()">
+                  <app-icon name="x-circle" [size]="13" />
+                </button>
+              </div>
+            }
+            <div class="post-row">
+              <input
+                type="text"
+                placeholder="Post a new message"
+                [value]="newMessage()"
+                (input)="newMessage.set($any($event.target).value)"
+                (keydown.enter)="sendComment()"
+              />
+              <button type="button" class="send-btn" (click)="sendComment()">Send</button>
+            </div>
+            <div class="toolbar-icons">
+              <app-icon name="user" [size]="16" />
+              <app-icon name="send" [size]="16" />
+              <app-icon name="camera" [size]="16" />
+              <app-icon name="smile" [size]="16" />
+            </div>
+
+            <div class="comment-list">
+              @for (c of comments(); track c.author + c.timeAgo) {
+                <div class="comment-row" [style.margin-left.px]="c.depth * 36">
+                  <app-avatar [name]="c.author" [size]="32" />
+                  <div class="comment-body">
+                    <span class="comment-author"
+                      >{{ c.author }}<em>{{ c.timeAgo }}</em></span
+                    >
+                    @if (editingComment() === c) {
+                      <div class="comment-edit-row">
+                        <input
+                          type="text"
+                          [value]="editingText()"
+                          (input)="editingText.set($any($event.target).value)"
+                          (keydown.enter)="saveEdit()"
+                        />
+                        <button type="button" (click)="saveEdit()">Save</button>
+                        <button type="button" (click)="cancelEdit()">Cancel</button>
+                      </div>
+                    } @else {
+                      <p>{{ c.text }}</p>
+                    }
+                    @if (c.thumbnails) {
+                      <div class="comment-thumbs">
+                        @for (t of c.thumbnails; track t) {
+                          <span class="thumb" [style.background]="t"></span>
+                        }
+                      </div>
+                    }
+                    <div class="comment-links">
+                      <a href="javascript:void(0)" (click)="startEdit(c)">Edit</a>
+                      <a href="javascript:void(0)" (click)="startReply(c)">Reply</a>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <button type="button" class="load-more" disabled title="No more comments to load">
+              <app-icon name="sparkles" [size]="14" />
+              All comments loaded
+            </button>
+          }
+        }
+      </div>
+    </div>
+  </div>
+} @else if (view() === 'info' && selectedDetail(); as detail) {
+  <div class="detail-head">
+    <h1>Application Details</h1>
+    <div class="header-actions">
+      <button type="button" class="btn-outline" (click)="exportDetail()">
+        <app-icon name="download" [size]="15" />
+        Export
+      </button>
+      <button type="button" class="btn-primary" (click)="backFromInfo()">Back</button>
+      <div class="menu-wrap">
+        <button
+          type="button"
+          class="icon-btn more"
+          aria-label="More actions"
+          [attr.aria-expanded]="moreMenuOpen()"
+          (click)="toggleMoreMenu()"
+        >
+          <app-icon name="dots-horizontal" [size]="16" />
+        </button>
+        @if (moreMenuOpen()) {
+          <div class="menu-backdrop" (click)="closeMoreMenu()"></div>
+          <div class="menu-panel" role="menu">
+            <button type="button" role="menuitem" (click)="exportDetail(); closeMoreMenu()">
+              <app-icon name="download" [size]="14" />
+              Export Application
+            </button>
+            <button type="button" role="menuitem" class="danger" (click)="deleteFromDetail()">
+              <app-icon name="trash" [size]="14" />
+              Delete Application
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="card info-header-card">
+    <app-avatar [name]="detail.row.applicant" [size]="64" />
+    <div class="info-header-text">
+      <h2>{{ detail.row.id }} - {{ detail.row.applicant }}</h2>
+      <span class="status-pill" [class]="detail.row.status.toLowerCase().replace(/\s+/g, '-')">{{
+        detail.row.status
+      }}</span>
+      @if (editingProfile()) {
+        <div class="profile-edit-row">
+          <label>
+            Location
+            <input type="text" [(ngModel)]="profileEditCity" name="profileCity" />
+          </label>
+          <label>
+            Assigned Officer
+            <input type="text" [(ngModel)]="profileEditOfficer" name="profileOfficer" />
+          </label>
+          <div class="profile-edit-actions">
+            <button type="button" class="modal-btn confirm" (click)="saveEditProfile()">
+              Save
+            </button>
+            <button type="button" class="modal-btn neutral" (click)="cancelEditProfile()">
+              Cancel
+            </button>
+          </div>
+        </div>
+      } @else {
+        <p>{{ detail.row.location }}</p>
+        <p>{{ detail.phone }}</p>
+        <p>{{ detail.email }}</p>
+      }
+    </div>
+    <div class="info-header-actions">
+      <button type="button" class="btn-outline" (click)="openNotify()">
+        <app-icon name="bell" [size]="15" />Send Notification
+      </button>
+      <button type="button" class="btn-primary" (click)="startEditProfile()">
+        <app-icon name="edit" [size]="15" />Edit Profile
+      </button>
+    </div>
+    <span class="last-updated">Last updated: {{ detail.lastUpdated }}</span>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-col">
+      <div class="card accordion-card">
+        <button type="button" class="accordion-head" (click)="toggleSection('meta')">
+          <h3>Application Meta Data</h3>
+          <app-icon [name]="openSection() === 'meta' ? 'chevron-up' : 'chevron-down'" [size]="16" />
+        </button>
+        @if (openSection() === 'meta') {
+          <div class="accordion-body">
+            <label>Date Submitted</label>
+            <input type="text" disabled [value]="detail.meta.dateSubmitted" />
+            <label>Application Number</label>
+            <input type="text" disabled [value]="detail.meta.applicationNumber" />
+            <label>Current Status</label>
+            <input type="text" disabled [value]="detail.meta.currentStatus" />
+          </div>
+        }
+      </div>
+
+      <div class="card accordion-card">
+        <button type="button" class="accordion-head" (click)="toggleSection('project')">
+          <h3>Project Information</h3>
+          <app-icon
+            [name]="openSection() === 'project' ? 'chevron-up' : 'chevron-down'"
+            [size]="16"
+          />
+        </button>
+        @if (openSection() === 'project') {
+          <div class="accordion-body">
+            <label>Project Location</label>
+            <textarea disabled rows="2">{{ detail.project.location }}</textarea>
+            <label>Lot Area</label>
+            <input type="text" disabled [value]="detail.project.lotArea" />
+            <label>Floor Area</label>
+            <input type="text" disabled [value]="detail.project.floorArea" />
+            <label>Number Of Floors</label>
+            <input type="text" disabled [value]="detail.project.floors" />
+            <label>Project Type</label>
+            <select disabled>
+              <option>{{ detail.project.projectType }}</option>
+            </select>
+          </div>
+        }
+      </div>
+
+      <div class="card accordion-card">
+        <button type="button" class="accordion-head" (click)="toggleSection('type')">
+          <h3>Application Type</h3>
+          <app-icon [name]="openSection() === 'type' ? 'chevron-up' : 'chevron-down'" [size]="16" />
+        </button>
+        @if (openSection() === 'type') {
+          <div class="accordion-body">
+            <label>Type</label>
+            <select disabled>
+              <option>{{ detail.applicationType.type }}</option>
+            </select>
+            <label>If Company:</label>
+            <input type="text" disabled placeholder="Company name" />
+            <label>Authorized Representative</label>
+            <input type="text" disabled placeholder="Select" />
+            <label>Business Permit</label>
+            <input type="text" disabled placeholder="Select" />
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="info-col">
+      <div class="card accordion-card">
+        <button type="button" class="accordion-head" (click)="toggleSection('govid')">
+          <h3>Government Identification</h3>
+          <app-icon
+            [name]="openSection() === 'govid' ? 'chevron-up' : 'chevron-down'"
+            [size]="16"
+          />
+        </button>
+        @if (openSection() === 'govid') {
+          <div class="accordion-body">
+            <label>ID Type</label>
+            <input type="text" disabled [value]="detail.govId.idType" />
+            <label>Contact Number</label>
+            <input type="text" disabled [value]="detail.govId.contactNumber" />
+            <label>TIN</label>
+            <input type="text" disabled [value]="detail.govId.tin" />
+          </div>
+        }
+      </div>
+
+      <div class="card accordion-card">
+        <button type="button" class="accordion-head" (click)="toggleSection('professional')">
+          <h3>Professional Involved</h3>
+          <app-icon
+            [name]="openSection() === 'professional' ? 'chevron-up' : 'chevron-down'"
+            [size]="16"
+          />
+        </button>
+        @if (openSection() === 'professional') {
+          <div class="accordion-body">
+            <label>Architect</label>
+            <input type="text" disabled placeholder="Name" />
+            <label>Civil Engineer</label>
+            <input type="text" disabled placeholder="Name" />
+            <label>Electrical Engineer</label>
+            <input type="text" disabled placeholder="Name" />
+          </div>
+        }
+      </div>
+
+      <div class="card accordion-card">
+        <button type="button" class="accordion-head" (click)="toggleSection('ownership')">
+          <h3>Ownership Information</h3>
+          <app-icon
+            [name]="openSection() === 'ownership' ? 'chevron-up' : 'chevron-down'"
+            [size]="16"
+          />
+        </button>
+        @if (openSection() === 'ownership') {
+          <div class="accordion-body">
+            <label>Lot Owner Name</label>
+            <input type="text" disabled [value]="detail.ownership.lotOwnerName" />
+            <label>Relationship to Applicant</label>
+            <input type="text" disabled [value]="detail.ownership.relationship" />
+            <label>Ownership Type</label>
+            <select disabled>
+              <option>{{ detail.ownership.ownershipType }}</option>
+            </select>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+} @else if (view() === 'evaluations' && selectedDetail(); as detail) {
+  <div class="detail-head">
+    <h1>{{ detail.row.applicant }} Evaluation's</h1>
+    <div class="header-actions">
+      <div class="menu-wrap">
+        <button
+          type="button"
+          class="btn-primary"
+          [attr.aria-expanded]="actionMenuOpen()"
+          (click)="toggleActionMenu()"
+        >
+          Action
+        </button>
+        @if (actionMenuOpen()) {
+          <div class="menu-backdrop" (click)="closeActionMenu()"></div>
+          <div class="menu-panel" role="menu">
+            @for (opt of statusOptions; track opt) {
+              <button type="button" role="menuitem" (click)="setStatus(opt)">
+                <app-icon name="check-circle" [size]="14" />
+                Mark {{ opt }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+      <button type="button" class="btn-primary" (click)="backFromEvaluations()">Back</button>
+      <div class="menu-wrap">
+        <button
+          type="button"
+          class="icon-btn more"
+          aria-label="More actions"
+          [attr.aria-expanded]="moreMenuOpen()"
+          (click)="toggleMoreMenu()"
+        >
+          <app-icon name="dots-horizontal" [size]="16" />
+        </button>
+        @if (moreMenuOpen()) {
+          <div class="menu-backdrop" (click)="closeMoreMenu()"></div>
+          <div class="menu-panel" role="menu">
+            <button type="button" role="menuitem" (click)="exportEvalSummary(); closeMoreMenu()">
+              <app-icon name="download" [size]="14" />
+              Export Evaluation Summary
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="eval-grid">
+    @for (card of evalCards(); track card.key) {
+      <div class="card eval-card" (click)="openEvalDetail(card.key)">
+        <div class="eval-card-head">
+          <h3>{{ card.title }}</h3>
+          <span class="badge" [class]="card.statusTone">{{ card.statusLabel }}</span>
+        </div>
+        <p class="eval-desc" [class]="card.statusTone">{{ card.description }}</p>
+
+        <div class="eval-counts">
+          <div>
+            <strong>{{ card.documents }}</strong
+            ><span>Documents</span>
+          </div>
+          <div>
+            <strong>{{ card.comments }}</strong
+            ><span>Comments</span>
+          </div>
+        </div>
+
+        <div class="eval-officers">
+          <span>Assigned Officer{{ card.officerInitials.length > 1 ? 's' : '' }} :</span>
+          <div class="officer-stack">
+            @for (initials of card.officerInitials; track initials) {
+              <app-avatar [name]="initials" [size]="28" />
+            }
+          </div>
+        </div>
+
+        <div class="eval-progress-row">
+          <span>Progress</span>
+          <span class="pct" [class.good]="card.progressPct === 100">{{ card.progressPct }}%</span>
+        </div>
+        <div class="progress-track">
+          <div
+            class="progress-fill"
+            [class.good]="card.progressPct === 100"
+            [style.width.%]="card.progressPct"
+          ></div>
+        </div>
+      </div>
+    }
+  </div>
+} @else if (view() === 'evaluation-detail' && activeEvalDetail(); as cfg) {
+  @if (selectedDetail(); as detail) {
+    <div class="detail-head">
+      <h1>{{ cfg.title }}</h1>
+      <div class="header-actions">
+        <button type="button" class="btn-primary" (click)="backFromEvalDetail()">Back</button>
+        <div class="menu-wrap">
+          <button
+            type="button"
+            class="icon-btn more"
+            aria-label="More actions"
+            [attr.aria-expanded]="moreMenuOpen()"
+            (click)="toggleMoreMenu()"
+          >
+            <app-icon name="dots-horizontal" [size]="16" />
+          </button>
+          @if (moreMenuOpen()) {
+            <div class="menu-backdrop" (click)="closeMoreMenu()"></div>
+            <div class="menu-panel" role="menu">
+              <button type="button" role="menuitem" (click)="exportChecklist(); closeMoreMenu()">
+                <app-icon name="download" [size]="14" />
+                Export Checklist
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="eval-detail-grid">
+      <div class="card eval-left">
+        <h2>{{ cfg.checklistTitle }}</h2>
+        <p class="muted-sub">{{ cfg.checklistSubtitle }}</p>
+
+        <div class="table-wrap">
+          <table class="checklist-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Required Documents</th>
+                @if (cfg.rightPanel !== 'map') {
+                  <th>Upload Dates</th>
+                }
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of cfg.checklist; track item.label) {
+                <tr>
+                  <td><input type="checkbox" [checked]="item.checked" disabled /></td>
+                  <td>
+                    <div class="doc-cell">
+                      <button
+                        type="button"
+                        class="doc-info-btn"
+                        [disabled]="!item.filename"
+                        (click)="openDocPreview(item)"
+                        [attr.aria-label]="'Preview ' + item.label"
+                        title="Preview document"
+                      >
+                        <app-icon name="info" [size]="15" />
+                      </button>
+                      @if (item.filename) {
+                        <span class="doc-icon"><app-icon name="file-check" [size]="18" /></span>
+                      }
+                      <div>
+                        <div class="doc-name">{{ item.label }}</div>
+                        @if (item.filename) {
+                          <div class="doc-file">{{ item.filename }}</div>
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  @if (cfg.rightPanel !== 'map') {
+                    <td>Apr 14, 2021</td>
+                  }
+                  <td>
+                    <span
+                      class="status-pill"
+                      [class]="item.status.toLowerCase().replace(' ', '-')"
+                      >{{ item.status }}</span
+                    >
+                  </td>
+                  <td>
+                    <div class="menu-wrap">
+                      <button
+                        type="button"
+                        class="icon-btn more small"
+                        [attr.aria-label]="'Actions for ' + item.label"
+                        [attr.aria-expanded]="checklistMenuFor() === item.label"
+                        (click)="toggleChecklistMenu(item)"
+                      >
+                        <app-icon name="dots-horizontal" [size]="15" />
+                      </button>
+                      @if (checklistMenuFor() === item.label) {
+                        <div class="menu-backdrop" (click)="closeChecklistMenu()"></div>
+                        <div class="menu-panel" role="menu">
+                          <button
+                            type="button"
+                            role="menuitem"
+                            (click)="setChecklistStatus(item, 'Approved')"
+                          >
+                            <app-icon name="check-circle" [size]="14" />
+                            Approve
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            (click)="setChecklistStatus(item, 'Return')"
+                          >
+                            <app-icon name="alert-triangle" [size]="14" />
+                            Return
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            class="danger"
+                            (click)="setChecklistStatus(item, 'Missing')"
+                          >
+                            <app-icon name="alert-triangle" [size]="14" />
+                            Mark Missing
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (cfg.reviewSteps) {
+          <h2 class="review-heading">Workflow/Review Progress</h2>
+          <div class="review-steps">
+            @for (step of cfg.reviewSteps; track step.num) {
+              <div class="review-step">
+                <span class="step-num" [class]="step.status.toLowerCase().replace(' ', '-')">{{
+                  step.num
+                }}</span>
+                <div class="step-text">
+                  <strong>{{ step.label }}</strong>
+                  <span class="step-status" [class]="step.status.toLowerCase().replace(' ', '-')">{{
+                    step.status
+                  }}</span>
+                  @if (step.detail) {
+                    <span class="step-detail">{{ step.detail }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="progress-row">
+          <span>Progress</span>
+          <span class="pct">{{ cfg.progressDone }} / {{ cfg.progressTotal }}</span>
+        </div>
+        <div class="progress-track">
+          <div
+            class="progress-fill good"
+            [style.width.%]="(cfg.progressDone / cfg.progressTotal) * 100"
+          ></div>
+        </div>
+
+        <label class="msg-label">Message</label>
+        <textarea
+          placeholder="Max 150 words"
+          rows="4"
+          [value]="evalMessage()"
+          (input)="evalMessage.set($any($event.target).value)"
+        ></textarea>
+
+        <button type="button" class="msg-send-btn" (click)="sendMessageToApplicant()">
+          Send Message to Applicant
+        </button>
+        <button type="button" class="forward-btn" (click)="forwardEval()">
+          {{ cfg.primaryActionLabel }}
+        </button>
+        <div class="two-col-btns">
+          <button type="button" class="revision-btn" (click)="returnForRevisionEval()">
+            Return for Revision
+          </button>
+          <button type="button" class="reject-btn" (click)="rejectEval()">Reject</button>
+        </div>
+      </div>
+
+      <div class="eval-right">
+        @if (cfg.rightPanel === 'qr' || cfg.rightPanel === 'map') {
+          <div class="card visual-card">
+            @switch (cfg.rightPanel) {
+              @case ('qr') {
+                <p class="bfp-link">
+                  BFP Link:<br />
+                  https://www.foi.gov.ph/agencies/bfp/
+                </p>
+                <p class="or-label">OR</p>
+                <p class="scan-label">Scan the QR</p>
+                <svg viewBox="0 0 100 100" class="qr-code" aria-hidden="true">
+                  <rect width="100" height="100" fill="#fff" />
+                  @for (cell of qrCells; track cell) {
+                    <rect [attr.x]="cell.x" [attr.y]="cell.y" width="6" height="6" fill="#111" />
+                  }
+                </svg>
+              }
+              @case ('map') {
+                <h3 class="map-title">Zoning Map</h3>
+                <div class="zoning-map">
+                  <svg viewBox="0 0 400 260" class="map-svg">
+                    <rect width="400" height="260" fill="#e9eaee" />
+                    <polygon points="0,0 180,0 140,90 0,60" fill="#f5d24a" />
+                    <polygon points="180,0 400,0 400,70 140,90" fill="#f5d24a" />
+                    <polygon points="0,60 140,90 130,180 0,160" fill="#f2967a" />
+                    <polygon points="140,90 320,80 300,170 130,180" fill="#f2967a" />
+                    <polygon points="0,160 130,180 100,260 0,260" fill="#4c6ef5" />
+                    <polygon points="130,180 300,170 260,260 100,260" fill="#4c6ef5" />
+                    <text x="30" y="30" font-size="10" fill="#5c5c33">Multi-Family</text>
+                    <text x="230" y="40" font-size="10" fill="#5c5c33">Single Family</text>
+                    <text x="40" y="120" font-size="10" fill="#7a3a24">Commercial</text>
+                    <text x="20" y="220" font-size="10" fill="#1c2a6b">Industrial</text>
+                  </svg>
+                  <div class="parcel-popup">
+                    <div class="parcel-head">Parcel Information</div>
+                    <div><span>Lot no.</span><strong>123-A</strong></div>
+                    <div><span>TCT no.</span><strong>TC-123456</strong></div>
+                    <div><span>Lot Area</span><strong>800.00 m</strong></div>
+                    <div><span>Zoning</span><strong>C2 (Commercial)</strong></div>
+                    <div><span>Land Use</span><strong>Commercial</strong></div>
+                    <button type="button" class="view-docs-btn" (click)="viewPropertyDocuments()">
+                      View Property Documents
+                    </button>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        }
+
+        <div class="card app-info-card">
+          <h3 class="section-caps">APPLICATION INFORMATION</h3>
+          <div class="app-info-cols">
+            <div>
+              <span class="col-title">APPLICANT</span>
+              <p>{{ detail.row.applicant }}</p>
+              <p class="muted">{{ detail.email }}</p>
+              <p class="muted">{{ detail.phone }}</p>
+            </div>
+            <div>
+              <span class="col-title">PROJECT DETAILS</span>
+              <span class="field-label">Project Type</span>
+              <p>New Constuction</p>
+              <span class="field-label">No. Storeys</span>
+              <p>{{ detail.project.floors }}</p>
+              <span class="field-label">Estimated Cost</span>
+              <p>₱30,230,300</p>
+            </div>
+            <div>
+              <span class="col-title">LOCATION</span>
+              <span class="field-label">Address</span>
+              <p>Lot 12, Block 5,</p>
+              <span class="field-label">Barangay</span>
+              <p>{{ detail.row.location }}</p>
+              <span class="field-label">City/Municipality</span>
+              <p>Castilla, Sorsogon</p>
+            </div>
+          </div>
+
+          <h3 class="section-caps submission-heading">SUBMISSION</h3>
+          <span class="field-label">Date Submitted</span>
+          <p>April 12, 2026</p>
+
+          <h3 class="section-caps timeline-heading">Shared Evaluation Timeline</h3>
+          <div class="shared-timeline">
+            @for (t of sharedTimeline; track t.label) {
+              <div class="shared-timeline-item">
+                <span class="dot"></span>
+                <div>
+                  <strong>{{ t.label }}</strong>
+                  <span class="ts">{{ t.date }}</span>
+                  <div class="who">
+                    <app-avatar [name]="t.who" [size]="20" />
+                    <span
+                      >{{ t.who }}<small>{{ t.role }}</small></span
+                    >
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+} @else if (view() === 'not-found') {
+  <div class="not-found-state">
+    <app-icon name="alert-triangle" [size]="28" />
+    <h1>Application not found</h1>
+    <p>
+      This application ID doesn't match any record. It may have been removed, or the link may be out
+      of date.
+    </p>
+    <button type="button" class="btn-primary" (click)="backToList()">Back to Applications</button>
+  </div>
+}
+
+@if (previewItem(); as doc) {
+  <div class="modal-backdrop" (click)="closeDocPreview()">
+    <div class="modal-box doc-preview-box" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" (click)="closeDocPreview()">&#10005;</button>
+
+      <h2>{{ doc.label }}</h2>
+      <p class="doc-preview-filename">{{ doc.filename }}</p>
+
+      <div class="doc-preview-sheet">
+        <span class="sheet-watermark" [class]="doc.status.toLowerCase().replace(' ', '-')">{{
+          doc.status
+        }}</span>
+
+        <div class="sheet-header">
+          <app-dilg-seal [size]="36" />
+          <div>
+            <strong>Republic of the Philippines</strong>
+            <span>Office of the Building Official</span>
+          </div>
+        </div>
+
+        <h3>{{ doc.label }}</h3>
+
+        <div class="sheet-row">
+          <span>Document No.</span><strong>DOC-{{ doc.filename.length }}2026</strong>
+        </div>
+        <div class="sheet-row"><span>Date Uploaded</span><strong>Apr 14, 2021</strong></div>
+        <div class="sheet-row">
+          <span>File Name</span><strong>{{ doc.filename }}</strong>
+        </div>
+
+        <div class="sheet-lines">
+          <span></span>
+          <span></span>
+          <span class="short"></span>
+        </div>
+
+        <div class="sheet-signature">
+          <div class="sig-line"></div>
+          <span>Authorized Signature</span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="modal-btn cancel" (click)="closeDocPreview()">Close</button>
+        <button type="button" class="modal-btn confirm" (click)="downloadPreviewDoc()">
+          <app-icon name="download" [size]="15" />
+          Download
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showCreate()) {
+  <div class="modal-backdrop" (click)="cancelCreate()">
+    <div class="modal-box create-box" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelCreate()">
+        &#10005;
+      </button>
+      <h2>New Application</h2>
+      <form class="create-form" (ngSubmit)="createApplication()">
+        <label>
+          Applicant Name
+          <input type="text" [(ngModel)]="newApplication.applicant" name="appApplicant" required />
+        </label>
+        <label>
+          Location
+          <input
+            type="text"
+            [(ngModel)]="newApplication.location"
+            name="appLocation"
+            placeholder="Barangay …"
+          />
+        </label>
+        <label>
+          Type
+          <select [(ngModel)]="newApplication.type" name="appType">
+            <option>Residential</option>
+            <option>Commercial</option>
+            <option>Renovation</option>
+          </select>
+        </label>
+        <label>
+          Assigned Officer
+          <input type="text" [(ngModel)]="newApplication.officer" name="appOfficer" />
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelCreate()">Cancel</button>
+          <button type="submit" class="modal-btn confirm">Create Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showNotifyModal()) {
+  <div class="modal-backdrop" (click)="cancelNotify()">
+    <div class="modal-box create-box" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelNotify()">
+        &#10005;
+      </button>
+      <h2>Send Notification</h2>
+      <form class="create-form" (ngSubmit)="sendNotify()">
+        <label>
+          Message
+          <textarea
+            rows="4"
+            [value]="notifyMessage()"
+            (input)="notifyMessage.set($any($event.target).value)"
+            placeholder="Message to the applicant…"
+          ></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelNotify()">Cancel</button>
+          <button type="submit" class="modal-btn confirm">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (deleteTarget()) {
+  <app-confirm-dialog
+    title="Delete application?"
+    [message]="deleteDialogMessage()"
+    confirmLabel="Delete"
+    tone="danger"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  />
+}

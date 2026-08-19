@@ -1,0 +1,232 @@
+@use '../../shared/styles/data-table';
+@use '../../shared/styles/kpi-grid';
+@use '../../shared/styles/modal';
+@use '../../shared/styles/detail-view';
+@use '../../shared/styles/tokens' as *;
+
+.modal-hint {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.82rem;
+  color: $color-ink-300;
+}
+
+.form-error {
+  margin: -0.25rem 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $color-danger;
+}
+
+@keyframes section-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:host {
+  display: block;
+}
+
+.card {
+  background: #fff;
+  border-radius: 0.9rem;
+  padding: 1.5rem 1.6rem;
+  border: 1px solid #eeeef2;
+  animation: section-in 0.4s ease both;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1f2430;
+}
+
+/* Table toolbar */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: #f4f4f7;
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  color: #8b8f9b;
+
+  input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    font-size: 0.86rem;
+    color: #2b2f3a;
+
+    &::placeholder {
+      color: #9a9ea8;
+    }
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.id-cell {
+  font-weight: 700;
+}
+
+.applicant-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 600;
+}
+
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+
+  &.verified {
+    background: #22c55e;
+    color: #fff;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.9;
+    }
+  }
+
+  &.verify {
+    background: #dcfce7;
+    color: #16a34a;
+
+    &:hover {
+      background: #bbf7d0;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &.static {
+    cursor: default;
+  }
+}
+
+/* Detail view — shared structure lives in shared/styles/_detail-view.scss;
+   only page-specific bits stay here. */
+.verified-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #7a7f8c;
+  font-weight: 600;
+}
+
+.status-pill.unsuccessful {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+// ---- Bulk selection bar --------------------------------------------------
+
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+  background: $color-brand-50;
+  border: 1px solid $color-brand-border;
+  border-radius: $radius-md;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $color-ink-700;
+
+  .btn-outline {
+    margin-left: auto;
+
+    &:last-child {
+      margin-left: 0;
+    }
+  }
+
+  .btn-outline.danger {
+    border-color: $color-danger;
+    color: $color-danger;
+
+    &:hover {
+      background: $color-danger;
+      color: $color-surface;
+    }
+  }
+}
+
+// ---- Record payment modal ---------------------------------------------
+
+.create-box {
+  text-align: left;
+  max-width: 420px;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $color-ink-500;
+  }
+
+  input,
+  select {
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-sm;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: $color-ink-700;
+
+    &:focus-visible {
+      outline: none;
+      border-color: $color-brand-600;
+    }
+  }
+
+  .modal-actions {
+    margin-top: 0.4rem;
+  }
+}

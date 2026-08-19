@@ -1,0 +1,21 @@
+<div class="modal-backdrop" (click)="cancelled.emit()">
+  <div class="modal-box" (click)="$event.stopPropagation()" role="alertdialog" aria-modal="true">
+    <button type="button" class="modal-close" aria-label="Close" (click)="cancelled.emit()">&#10005;</button>
+    <h2>{{ title() }}</h2>
+    @if (message()) {
+      <p>{{ message() }}</p>
+    }
+    <div class="modal-actions">
+      <button type="button" class="modal-btn neutral" (click)="cancelled.emit()">{{ cancelLabel() }}</button>
+      <button
+        type="button"
+        class="modal-btn"
+        [class.danger]="tone() === 'danger'"
+        [class.confirm]="tone() !== 'danger'"
+        (click)="confirmed.emit()"
+      >
+        {{ confirmLabel() }}
+      </button>
+    </div>
+  </div>
+</div>
