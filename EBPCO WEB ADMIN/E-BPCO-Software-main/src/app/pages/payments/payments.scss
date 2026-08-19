@@ -4,6 +4,11 @@
 @use '../../shared/styles/detail-view';
 @use '../../shared/styles/tokens' as *;
 
+.doc-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
 .modal-hint {
   margin: -0.5rem 0 1rem;
   font-size: 0.82rem;

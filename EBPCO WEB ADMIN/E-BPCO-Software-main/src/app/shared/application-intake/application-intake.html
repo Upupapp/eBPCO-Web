@@ -1,0 +1,481 @@
+<div class="modal-backdrop" (click)="cancel()">
+  <div
+    class="modal-box intake-box"
+    (click)="$event.stopPropagation()"
+    role="dialog"
+    aria-modal="true"
+    aria-label="New Application"
+  >
+    <button type="button" class="modal-close" aria-label="Close" (click)="cancel()">
+      &#10005;
+    </button>
+    <h2>New Application</h2>
+    <p class="intake-sub">Encode a walk-in or manually submitted application.</p>
+
+    <div class="step-rail" role="tablist" aria-label="Application form sections">
+      @for (step of steps; track step.key; let i = $index) {
+        <button
+          type="button"
+          role="tab"
+          class="step-pill"
+          [class.active]="stepIndex() === i"
+          [class.done]="stepIndex() > i"
+          [attr.aria-selected]="stepIndex() === i"
+          (click)="goToStep(i)"
+        >
+          <span class="step-num">{{ i + 1 }}</span>
+          {{ step.label }}
+        </button>
+      }
+    </div>
+
+    <p class="required-legend"><span class="req-mark">*</span> Required field</p>
+
+    <div class="step-body">
+      @if (currentStep() === 'applicant') {
+        <div class="field-grid">
+          <label class="field">
+            Applicant/User Name <span class="req-mark">*</span>
+            <input
+              type="text"
+              [(ngModel)]="applicant.fullName"
+              name="applicantFullName"
+              placeholder="Juan Dela Cruz"
+            />
+          </label>
+          <label class="field">
+            Applicant Type <span class="optional">(if applicable)</span>
+            <select [(ngModel)]="applicant.applicantType" name="applicantType">
+              @for (t of applicantTypes; track t) {
+                <option [value]="t">{{ t }}</option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            Email Address <span class="req-mark">*</span>
+            <input
+              type="email"
+              [(ngModel)]="applicant.email"
+              name="applicantEmail"
+              placeholder="juan.delacruz@gmail.com"
+            />
+            @if (showStepErrors() && !emailValidation().valid) {
+              <span class="field-error">{{ emailValidation().error }}</span>
+            }
+          </label>
+          <label class="field">
+            Mobile Number <span class="req-mark">*</span>
+            <input
+              type="text"
+              [(ngModel)]="applicant.mobileNumber"
+              name="applicantMobile"
+              [placeholder]="mobileExample"
+            />
+            @if (showStepErrors() && !mobileValidation().valid) {
+              <span class="field-error">{{ mobileValidation().error }}</span>
+            } @else {
+              <span class="field-hint">Example: {{ mobileExample }}</span>
+            }
+          </label>
+          <label class="field">
+            Landline Number <span class="optional">(if applicable)</span>
+            <input
+              type="text"
+              [(ngModel)]="applicant.landlineNumber"
+              name="applicantLandline"
+              [placeholder]="landlineExample"
+            />
+            @if (showStepErrors() && !landlineValidation().valid) {
+              <span class="field-error">{{ landlineValidation().error }}</span>
+            }
+          </label>
+          <label class="field">
+            Barangay <span class="req-mark">*</span>
+            <select [(ngModel)]="applicant.barangay" name="applicantBarangay">
+              @for (b of barangays; track b) {
+                <option [value]="b">{{ b }}</option>
+              }
+            </select>
+          </label>
+          <label class="field span-2">
+            Address Details <span class="req-mark">*</span>
+            <input
+              type="text"
+              [(ngModel)]="applicant.addressLine"
+              name="applicantAddress"
+              placeholder="Purok 1, Street/Sitio"
+            />
+          </label>
+        </div>
+      }
+
+      @if (currentStep() === 'business') {
+        <div class="field-grid">
+          <label class="field span-2">
+            Registered Business Name <span class="req-mark">*</span>
+            <input type="text" [(ngModel)]="business.registeredName" name="bizName" />
+          </label>
+          <label class="field">
+            Trade Name <span class="optional">(if applicable)</span>
+            <input type="text" [(ngModel)]="business.tradeName" name="bizTradeName" />
+          </label>
+          <label class="field">
+            Business Category <span class="req-mark">*</span>
+            <select [(ngModel)]="business.category" name="bizCategory">
+              @for (c of businessCategories; track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+          </label>
+          <label class="field span-2">
+            Business Address <span class="req-mark">*</span>
+            <input
+              type="text"
+              [(ngModel)]="business.addressLine"
+              name="bizAddress"
+              placeholder="Street address"
+            />
+          </label>
+          <label class="field">
+            Barangay <span class="req-mark">*</span>
+            <select [(ngModel)]="business.barangay" name="bizBarangay">
+              @for (b of barangays; track b) {
+                <option [value]="b">{{ b }}</option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            Owner / Authorized Representative <span class="req-mark">*</span>
+            <input
+              type="text"
+              [(ngModel)]="business.ownerOrRepresentative"
+              name="bizOwner"
+              [placeholder]="applicant.fullName"
+            />
+          </label>
+          <label class="field span-2">
+            Registration / Reference Number <span class="optional">(where applicable)</span>
+            <input
+              type="text"
+              [(ngModel)]="business.registrationNumber"
+              name="bizRegNumber"
+              placeholder="DTI/SEC/CDA number"
+            />
+          </label>
+        </div>
+      }
+
+      @if (currentStep() === 'application') {
+        <div class="field-grid">
+          <label class="field">
+            Application Type <span class="req-mark">*</span>
+            <select
+              [(ngModel)]="applicationInfo.serviceDomain"
+              name="serviceDomain"
+              (ngModelChange)="onDomainChange()"
+            >
+              @for (d of serviceDomains; track d) {
+                <option [value]="d">{{ d }}</option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            Permit Type <span class="req-mark">*</span>
+            <select
+              [(ngModel)]="applicationInfo.permitType"
+              name="permitType"
+              (ngModelChange)="onPermitTypeChange()"
+            >
+              <option value="" disabled>Select a permit type…</option>
+              @for (p of permitTypeOptions(); track p) {
+                <option [value]="p">{{ p }}</option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            Transaction Type <span class="req-mark">*</span>
+            <select
+              [(ngModel)]="applicationInfo.applicationAction"
+              name="applicationAction"
+              [disabled]="isBusinessDomain()"
+            >
+              @for (a of applicationActions; track a) {
+                <option [value]="a">{{ a }}</option>
+              }
+            </select>
+            @if (isBusinessDomain()) {
+              <span class="field-hint"
+                >Set automatically from the selected Business Permit type.</span
+              >
+            }
+          </label>
+          <label class="field">
+            Date Received <span class="req-mark">*</span>
+            <input type="date" [(ngModel)]="applicationInfo.dateReceived" name="dateReceived" />
+          </label>
+          <label class="field span-2">
+            Description / Scope of Work <span class="req-mark">*</span>
+            <textarea
+              rows="3"
+              [(ngModel)]="applicationInfo.scopeDescription"
+              name="scopeDescription"
+              placeholder="Briefly describe the business activity or the scope of construction work…"
+            ></textarea>
+          </label>
+          <label class="field">
+            Assigned Evaluator
+            <input
+              type="text"
+              [(ngModel)]="applicationInfo.assignedEvaluator"
+              name="assignedEvaluator"
+            />
+          </label>
+          <label class="field">
+            Assigned Office
+            <input type="text" [value]="responsibleDepartment()?.name ?? '—'" disabled />
+          </label>
+          <label class="field span-2">
+            Initial Remarks <span class="optional">(optional)</span>
+            <textarea
+              rows="2"
+              [(ngModel)]="applicationInfo.initialRemarks"
+              name="initialRemarks"
+            ></textarea>
+          </label>
+        </div>
+      }
+
+      @if (currentStep() === 'documents') {
+        @if (!applicationInfo.permitType) {
+          <p class="empty-note">
+            Select a Permit Type in the previous step to load its required-document checklist.
+          </p>
+        } @else {
+          @if (showStepErrors() && currentStepErrors().length > 0) {
+            <div class="step-error-banner">
+              @for (e of currentStepErrors(); track e) {
+                <p>{{ e }}</p>
+              }
+            </div>
+          }
+          <div class="doc-list">
+            @for (doc of documents(); track doc.requirementId) {
+              <div class="doc-row" [class.attached]="doc.fileName">
+                <div class="doc-row-head">
+                  <span class="doc-label">{{ doc.label }}</span>
+                  <span
+                    class="badge"
+                    [class.required]="doc.required"
+                    [class.optional-badge]="!doc.required"
+                  >
+                    {{ doc.required ? 'Required' : 'Optional' }}
+                  </span>
+                  <span class="doc-dept"
+                    >Reviewed by {{ departmentLabel(doc.reviewingDepartmentId) }}</span
+                  >
+                </div>
+                <div class="doc-row-fields">
+                  <label class="file-field">
+                    File Upload
+                    <input type="file" (change)="onFileChosen(doc, $event)" />
+                    @if (doc.fileName) {
+                      <span class="file-chip"
+                        >{{ doc.fileName }}
+                        <button type="button" (click)="clearFile(doc)" aria-label="Remove file">
+                          &#10005;
+                        </button>
+                      </span>
+                    }
+                  </label>
+                  <label class="field">
+                    Document Type
+                    <input
+                      type="text"
+                      [ngModel]="doc.documentType"
+                      (ngModelChange)="onDocFieldChange(doc, 'documentType', $event)"
+                      [name]="'docType-' + doc.requirementId"
+                    />
+                  </label>
+                  <label class="field">
+                    Issuing Office
+                    <input
+                      type="text"
+                      [ngModel]="doc.issuingOffice"
+                      (ngModelChange)="onDocFieldChange(doc, 'issuingOffice', $event)"
+                      [name]="'docOffice-' + doc.requirementId"
+                      placeholder="Optional"
+                    />
+                  </label>
+                  <label class="field">
+                    Issue Date
+                    <input
+                      type="date"
+                      [ngModel]="doc.issueDate"
+                      (ngModelChange)="onDocFieldChange(doc, 'issueDate', $event)"
+                      [name]="'docIssue-' + doc.requirementId"
+                    />
+                  </label>
+                  <label class="field">
+                    Expiry Date
+                    <input
+                      type="date"
+                      [ngModel]="doc.expiryDate"
+                      (ngModelChange)="onDocFieldChange(doc, 'expiryDate', $event)"
+                      [name]="'docExpiry-' + doc.requirementId"
+                    />
+                  </label>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      @if (currentStep() === 'review') {
+        <div class="review-grid">
+          <section>
+            <h3>Applicant Information</h3>
+            <dl>
+              <div>
+                <dt>Name</dt>
+                <dd>{{ applicant.fullName || '—' }}</dd>
+              </div>
+              <div>
+                <dt>Type</dt>
+                <dd>{{ applicant.applicantType }}</dd>
+              </div>
+              <div>
+                <dt>Email</dt>
+                <dd>{{ emailValidation().normalized || '—' }}</dd>
+              </div>
+              <div>
+                <dt>Mobile</dt>
+                <dd>{{ mobileValidation().normalized || '—' }}</dd>
+              </div>
+              @if (applicant.landlineNumber) {
+                <div>
+                  <dt>Landline</dt>
+                  <dd>{{ landlineValidation().normalized }}</dd>
+                </div>
+              }
+              <div>
+                <dt>Address</dt>
+                <dd>{{ applicant.addressLine }}, Barangay {{ applicant.barangay }}</dd>
+              </div>
+            </dl>
+          </section>
+          <section>
+            <h3>Business Information</h3>
+            <dl>
+              <div>
+                <dt>Registered Name</dt>
+                <dd>{{ business.registeredName || '—' }}</dd>
+              </div>
+              @if (business.tradeName) {
+                <div>
+                  <dt>Trade Name</dt>
+                  <dd>{{ business.tradeName }}</dd>
+                </div>
+              }
+              <div>
+                <dt>Category</dt>
+                <dd>{{ business.category }}</dd>
+              </div>
+              <div>
+                <dt>Address</dt>
+                <dd>{{ business.addressLine }}, Barangay {{ business.barangay }}</dd>
+              </div>
+              <div>
+                <dt>Owner/Representative</dt>
+                <dd>{{ business.ownerOrRepresentative || '—' }}</dd>
+              </div>
+              @if (business.registrationNumber) {
+                <div>
+                  <dt>Registration No.</dt>
+                  <dd>{{ business.registrationNumber }}</dd>
+                </div>
+              }
+            </dl>
+          </section>
+          <section>
+            <h3>Application Information</h3>
+            <dl>
+              <div>
+                <dt>Application Type</dt>
+                <dd>{{ applicationInfo.serviceDomain }}</dd>
+              </div>
+              <div>
+                <dt>Permit Type</dt>
+                <dd>{{ applicationInfo.permitType || '—' }}</dd>
+              </div>
+              <div>
+                <dt>Transaction</dt>
+                <dd>{{ applicationInfo.applicationAction }}</dd>
+              </div>
+              <div>
+                <dt>Date Received</dt>
+                <dd>{{ applicationInfo.dateReceived }}</dd>
+              </div>
+              <div>
+                <dt>Assigned Evaluator</dt>
+                <dd>{{ applicationInfo.assignedEvaluator }}</dd>
+              </div>
+              <div>
+                <dt>Assigned Office</dt>
+                <dd>{{ responsibleDepartment()?.name ?? '—' }}</dd>
+              </div>
+              <div class="span-2">
+                <dt>Scope of Work</dt>
+                <dd>{{ applicationInfo.scopeDescription || '—' }}</dd>
+              </div>
+            </dl>
+          </section>
+          <section>
+            <h3>Documents</h3>
+            @if (documents().length === 0) {
+              <p class="empty-note">No document checklist loaded.</p>
+            } @else {
+              <ul class="review-doc-list">
+                @for (doc of documents(); track doc.requirementId) {
+                  <li [class.missing]="doc.required && !doc.fileName">
+                    <app-icon
+                      [name]="doc.fileName ? 'check-circle' : 'alert-triangle'"
+                      [size]="14"
+                    />
+                    {{ doc.label }} <em>({{ doc.required ? 'Required' : 'Optional' }})</em> —
+                    {{ doc.fileName || 'Not attached' }}
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+          @if (submitError()) {
+            <div class="step-error-banner">
+              <p>{{ submitError() }}</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="modal-actions intake-actions">
+      @if (stepIndex() > 0) {
+        <button type="button" class="modal-btn neutral" (click)="back()">Back</button>
+      } @else {
+        <button type="button" class="modal-btn neutral" (click)="cancel()">Cancel</button>
+      }
+      @if (currentStep() !== 'review') {
+        <button type="button" class="modal-btn confirm" (click)="next()">Next</button>
+      } @else {
+        <button
+          type="button"
+          class="modal-btn confirm"
+          [disabled]="!allStepsValid() || submitting()"
+          (click)="submit()"
+        >
+          {{ submitting() ? 'Creating…' : 'Create Application' }}
+        </button>
+      }
+    </div>
+  </div>
+</div>

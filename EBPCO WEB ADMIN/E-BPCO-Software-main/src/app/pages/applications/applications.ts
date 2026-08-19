@@ -12,16 +12,23 @@ import { FilterPanel } from '../../shared/filter-panel/filter-panel';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
+import { ApplicationRecord } from '../../core/domain/application.model';
 import { ApplicationLifecycleStatus, EvaluationStage } from '../../core/domain/status.model';
 import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS } from '../../core/session/permissions';
+import { ApplicationIntake } from '../../shared/application-intake/application-intake';
+import {
+  DocumentPreview,
+  SampleDocumentKind,
+} from '../../shared/document-preview/document-preview';
+import { ApplicationDocument, DocumentStatus } from '../../core/domain/document.model';
+import { requirementsFor } from '../../core/domain/requirements-catalog';
+import { departmentName } from '../../core/domain/department.model';
 import {
   AppRow,
   AppStatus,
   AppDetail,
   buildDetailFor,
-  DOCUMENTS,
-  DocumentItem,
   COMMENTS,
   CommentItem,
   TIMELINE,
@@ -33,6 +40,15 @@ import {
   EvalKey,
   ChecklistItem,
 } from './applications-data';
+
+/** One row of the real per-application Documents tab — a required-but-not-yet-uploaded requirement has `doc: null` and renders as "Missing". */
+interface DocumentRow {
+  requirementId: string;
+  label: string;
+  required: boolean;
+  departmentName: string;
+  doc: ApplicationDocument | null;
+}
 
 function buildQrCells(): { x: number; y: number }[] {
   const cells: { x: number; y: number }[] = [];
@@ -71,7 +87,7 @@ function buildQrCells(): { x: number; y: number }[] {
 }
 
 type View = 'list' | 'detail' | 'info' | 'evaluations' | 'evaluation-detail' | 'not-found';
-type DetailTab = 'timeline' | 'documents' | 'comments';
+type DetailTab = 'timeline' | 'documents' | 'permit' | 'comments';
 type InfoSection = 'meta' | 'project' | 'type' | 'govid' | 'professional' | 'ownership';
 
 interface RingStat {
@@ -115,6 +131,8 @@ const EVAL_KEY_TO_STAGE: Record<EvalKey, EvaluationStage> = {
     FormsModule,
     FilterPanel,
     ConfirmDialog,
+    ApplicationIntake,
+    DocumentPreview,
   ],
   templateUrl: './applications.html',
   styleUrl: './applications.scss',
@@ -127,6 +145,10 @@ export class Applications {
   protected readonly canCreate = computed(() => {
     const role = this.session.role();
     return role ? ACTION_PERMISSIONS.createApplication(role) : false;
+  });
+  protected readonly canVerifyContact = computed(() => {
+    const role = this.session.role();
+    return role ? ACTION_PERMISSIONS.verifyContact(role) : false;
   });
 
   // Bound to the optional :id route segment (see app.routes.ts) via
@@ -186,7 +208,6 @@ export class Applications {
   // Stages board read/write the same records) rather than an
   // independently hardcoded 10-row array.
   protected readonly rows = computed(() => this.store.applications());
-  protected readonly documents = signal<DocumentItem[]>(DOCUMENTS);
   protected readonly comments = signal<CommentItem[]>(COMMENTS);
   protected readonly timeline = TIMELINE;
   protected readonly sharedTimeline = SHARED_TIMELINE;
@@ -301,6 +322,111 @@ export class Applications {
     return buildDetailFor(row, this.store.getApplicant(row.applicantId));
   });
 
+  // ---- Permit Result tab -------------------------------------------------
+  // Every value here is read straight from the store's own permit/release
+  // records — never a placeholder string — so this tab shows the ACTUAL
+  // result of the process (or an honest "not yet generated" state) rather
+  // than sample/lorem-ipsum content once a real result exists.
+
+  protected readonly permitResult = computed(() => {
+    const row = this.selectedRow();
+    return row ? (this.store.getPermit(row.id) ?? null) : null;
+  });
+
+  protected readonly releaseResult = computed(() => {
+    const row = this.selectedRow();
+    return row ? (this.store.getRelease(row.id) ?? null) : null;
+  });
+
+  protected readonly finalDocumentName = computed(() => {
+    const row = this.selectedRow();
+    return row ? requirementsFor(row.permitType).finalDocument : '';
+  });
+
+  protected readonly canAssessFee = computed(() => {
+    const row = this.selectedRow();
+    const role = this.session.role();
+    return (
+      !!row &&
+      !!role &&
+      ACTION_PERMISSIONS.assessFee(role) &&
+      row.lifecycleStatus === 'Under Evaluation' &&
+      row.assessedAmountCentavos === null
+    );
+  });
+
+  protected readonly canGeneratePermit = computed(() => {
+    const row = this.selectedRow();
+    const role = this.session.role();
+    return (
+      !!row &&
+      !!role &&
+      ACTION_PERMISSIONS.generatePermit(role) &&
+      row.lifecycleStatus === 'Approved' &&
+      row.paymentStatus === 'Paid' &&
+      !this.permitResult()
+    );
+  });
+
+  protected assessFeeAction(): void {
+    const row = this.selectedRow();
+    if (!row || !this.canAssessFee()) return;
+    this.store.assessFee(
+      row.id,
+      this.session.name() || 'Staff',
+      this.session.role() ?? 'Administrator',
+    );
+    this.selectedRow.set(this.store.getById(row.id) ?? row);
+  }
+
+  protected generatePermitAction(): void {
+    const row = this.selectedRow();
+    if (!row || !this.canGeneratePermit()) return;
+    this.store.generatePermit(
+      row.id,
+      this.session.name() || 'Staff',
+      this.session.role() ?? 'Administrator',
+    );
+    this.selectedRow.set(this.store.getById(row.id) ?? row);
+  }
+
+  // ---- Sample document preview (application form / permit / etc.) -----
+
+  protected readonly showDocPreview = signal(false);
+  protected readonly docPreviewKind = signal<SampleDocumentKind>('permit');
+
+  // ---- Contact verification (manual administrator confirmation only) ----
+  // The only verification path this frontend-only mock can honestly
+  // perform — see ApplicationStore.setContactVerification's own doc
+  // comment. Never displays "email sent"/"OTP sent"; this is a plain
+  // administrator action with its own audit trail entry.
+
+  protected verifyContact(
+    channel: 'email' | 'mobile',
+    outcome: 'Verified' | 'Verification Failed',
+  ): void {
+    const row = this.selectedRow();
+    if (!row || !this.canVerifyContact()) return;
+    this.store.setContactVerification(
+      row.applicantId,
+      channel,
+      outcome,
+      'Manual Administrator Confirmation',
+      this.session.name() || 'Administrator',
+    );
+    // Force selectedDetail() to recompute against the freshly updated applicant record.
+    this.selectedRow.set({ ...row });
+  }
+
+  protected openDocumentPreviewModal(kind: SampleDocumentKind): void {
+    this.docPreviewKind.set(kind);
+    this.showDocPreview.set(true);
+  }
+
+  protected closeDocumentPreviewModal(): void {
+    this.showDocPreview.set(false);
+  }
+
   protected readonly activeEvalDetail = computed(() => {
     const key = this.selectedEval();
     return key ? this.evalDetails()[key] : null;
@@ -350,10 +476,6 @@ export class Applications {
   openDocPreview(item: ChecklistItem): void {
     if (!item.filename) return;
     this.previewItem.set({ label: item.label, filename: item.filename, status: item.status });
-  }
-
-  openDocumentPreview(d: DocumentItem): void {
-    this.previewItem.set({ label: d.name, filename: d.filename, status: d.status });
   }
 
   closeDocPreview(): void {
@@ -524,71 +646,28 @@ export class Applications {
     );
   }
 
-  // ---- Add application ------------------------------------------------
+  // ---- Add application (full walk-in intake wizard) --------------------
+  // Gated by `canCreate` (see the "+ Application" button in the template)
+  // — an assisted/onsite filing entry point rather than the previously
+  // open-to-everyone "Create Application" action. The actual form lives
+  // in shared/application-intake (ApplicationIntake) so its 5-section
+  // wizard isn't crammed into this already-large template; this page only
+  // owns whether it's open and what happens once a record comes back.
 
-  protected readonly showCreate = signal(false);
-  protected newApplication = {
-    applicant: '',
-    location: '',
-    type: 'Residential',
-    officer: 'Engr. Ricardo Buenaflor',
-  };
+  protected readonly showIntake = signal(false);
 
   protected openCreate(): void {
     if (!this.canCreate()) return;
-    this.newApplication = {
-      applicant: '',
-      location: '',
-      type: 'Residential',
-      officer: 'Engr. Ricardo Buenaflor',
-    };
-    this.showCreate.set(true);
+    this.showIntake.set(true);
   }
 
   protected cancelCreate(): void {
-    this.showCreate.set(false);
+    this.showIntake.set(false);
   }
 
-  // Gated by `canCreate` (see the "Create" button in the template) — an
-  // assisted/onsite filing entry point rather than the previously
-  // open-to-everyone "Create Application" action. Since this walk-in form
-  // has no business-selection step of its own, it registers a minimal
-  // ad-hoc business/applicant pair rather than fabricating a link to an
-  // existing one.
-  protected createApplication(): void {
-    if (!this.canCreate()) return;
-    const applicant = this.newApplication.applicant.trim();
-    if (!applicant) return;
-    const today = new Date();
-    const dateSubmitted = today.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-    const stamp = Date.now().toString(36).toUpperCase();
-    this.store.create(
-      {
-        businessId: `WALKIN-${stamp}`,
-        businessName: applicant,
-        applicantId: `WALKIN-${stamp}`,
-        applicant,
-        location: this.newApplication.location.trim() || 'N/A',
-        serviceDomain: 'Business Permit',
-        permitType: 'Business Permit',
-        applicationAction: 'New',
-        officer: this.newApplication.officer,
-        dateSubmitted,
-        lifecycleStatus: 'Submitted',
-        evaluationStage: 'Initial',
-        evaluationResult: 'Pending',
-        paymentStatus: 'Not Yet Available',
-        permitReleaseStatus: 'Not Ready',
-        assessedAmountCentavos: null,
-      },
-      this.session.name() || 'Staff',
-      this.session.role() ?? 'Administrator',
-    );
-    this.showCreate.set(false);
+  protected onIntakeCreated(record: ApplicationRecord): void {
+    this.showIntake.set(false);
+    this.router.navigateByUrl(`/applications/${record.id}`);
   }
 
   // ---- Detail-header "Action" (status) menu ----------------------------
@@ -678,24 +757,59 @@ export class Applications {
   }
 
   // ---- Documents tab ----------------------------------------------------
+  // Reads the REAL per-application document checklist (ApplicationStore +
+  // the permit type's own requirements-catalog entry) instead of the old
+  // module-shared mock DOCUMENTS array — every row here is a real
+  // ApplicationDocument, its required/optional flag and reviewing
+  // department come from requirements-catalog.ts, and a required
+  // requirement with no uploaded row yet shows up as a synthetic "Missing"
+  // row rather than silently not appearing.
+
+  protected readonly documentRows = computed<DocumentRow[]>(() => {
+    const row = this.selectedRow();
+    if (!row) return [];
+    const requirements = requirementsFor(row.permitType).documents;
+    const stored = this.store.getDocuments(row.id);
+    const byRequirement = new Map(stored.map((d) => [d.requirementId, d]));
+    return requirements.map((req): DocumentRow => {
+      const doc = byRequirement.get(req.id) ?? null;
+      return {
+        requirementId: req.id,
+        label: req.label,
+        required: req.required,
+        departmentName: departmentName(req.reviewingDepartmentId),
+        doc,
+      };
+    });
+  });
+
+  protected readonly missingRequiredCount = computed(
+    () => this.documentRows().filter((r) => r.required && !r.doc).length,
+  );
+
+  /** The requirements catalog's own source citations for the open application's permit type — surfaced so "reference data pending confirmation" is a visible, sourced fact in the UI, not just a code comment. */
+  protected readonly requirementSources = computed(() => {
+    const row = this.selectedRow();
+    return row ? requirementsFor(row.permitType).sources : [];
+  });
 
   protected readonly docSelectedIds = signal<ReadonlySet<string>>(new Set());
   protected readonly docActionMenuOpen = signal(false);
 
-  protected isDocSelected(d: DocumentItem): boolean {
-    return this.docSelectedIds().has(d.name);
+  protected isDocSelected(r: DocumentRow): boolean {
+    return this.docSelectedIds().has(r.requirementId);
   }
 
   protected readonly allDocsSelected = computed(() => {
-    const docs = this.documents();
-    return docs.length > 0 && docs.every((d) => this.docSelectedIds().has(d.name));
+    const rows = this.documentRows().filter((r) => r.doc);
+    return rows.length > 0 && rows.every((r) => this.docSelectedIds().has(r.requirementId));
   });
 
-  protected toggleDocSelected(d: DocumentItem): void {
+  protected toggleDocSelected(r: DocumentRow): void {
     this.docSelectedIds.update((current) => {
       const next = new Set(current);
-      if (next.has(d.name)) next.delete(d.name);
-      else next.add(d.name);
+      if (next.has(r.requirementId)) next.delete(r.requirementId);
+      else next.add(r.requirementId);
       return next;
     });
   }
@@ -704,9 +818,10 @@ export class Applications {
     const allSelected = this.allDocsSelected();
     this.docSelectedIds.update((current) => {
       const next = new Set(current);
-      for (const d of this.documents()) {
-        if (allSelected) next.delete(d.name);
-        else next.add(d.name);
+      for (const r of this.documentRows()) {
+        if (!r.doc) continue;
+        if (allSelected) next.delete(r.requirementId);
+        else next.add(r.requirementId);
       }
       return next;
     });
@@ -722,30 +837,83 @@ export class Applications {
 
   protected exportSelectedDocs(): void {
     const ids = this.docSelectedIds();
-    const selected = this.documents().filter((d) => ids.has(d.name));
+    const all = this.documentRows();
+    const selected = all.filter((r) => ids.has(r.requirementId));
     downloadCsv(
       'documents',
-      (selected.length > 0 ? selected : this.documents()).map((d) => ({
-        Document: d.name,
-        File: d.filename,
-        'Uploaded Date': d.uploadedDate,
-        Status: d.status,
+      (selected.length > 0 ? selected : all).map((r) => ({
+        Document: r.label,
+        Required: r.required ? 'Required' : 'Optional',
+        'Reviewing Department': r.departmentName,
+        File: r.doc?.fileName ?? '—',
+        'Uploaded Date': r.doc?.uploadedAt ?? '—',
+        Status: r.doc?.status ?? 'Missing',
       })),
     );
     this.closeDocActionMenu();
   }
 
-  protected markSelectedDocsApproved(): void {
+  protected markSelectedDocsAccepted(): void {
+    const row = this.selectedRow();
     const ids = this.docSelectedIds();
-    if (ids.size === 0) {
+    if (!row || ids.size === 0) {
       this.closeDocActionMenu();
       return;
     }
-    this.documents.update((docs) =>
-      docs.map((d) => (ids.has(d.name) ? { ...d, status: 'Approved' } : d)),
-    );
+    const actor = this.session.name() || 'Staff';
+    for (const r of this.documentRows()) {
+      if (r.doc && ids.has(r.requirementId)) {
+        this.store.setDocumentStatus(row.id, r.doc.id, 'Accepted', actor);
+      }
+    }
     this.docSelectedIds.set(new Set());
     this.closeDocActionMenu();
+  }
+
+  protected readonly docRemarksDraft = signal('');
+
+  protected setDocStatus(r: DocumentRow, status: DocumentStatus): void {
+    const row = this.selectedRow();
+    if (!row || !r.doc) return;
+    const actor = this.session.name() || 'Staff';
+    const needsRemarks = status === 'Rejected' || status === 'Revision Required';
+    const remarks = needsRemarks
+      ? this.docRemarksDraft().trim() || r.doc.remarks || undefined
+      : undefined;
+    if (needsRemarks && !remarks) return;
+    this.store.setDocumentStatus(row.id, r.doc.id, status, actor, remarks);
+    this.docRemarksDraft.set('');
+  }
+
+  /** Attaches a first file for a still-Missing required/optional document (no ApplicationDocument row exists yet). */
+  protected attachDocumentFile(r: DocumentRow, event: Event): void {
+    const row = this.selectedRow();
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!row || !file) return;
+    this.store.attachDocument(
+      row.id,
+      r.requirementId,
+      r.label,
+      file.name,
+      this.session.name() || 'Staff',
+    );
+    input.value = '';
+  }
+
+  /** Resubmits over an existing Rejected/Revision Required/Expired document — the store appends the replaced file to `history` rather than discarding it. */
+  protected resubmitDocumentFile(r: DocumentRow, event: Event): void {
+    const row = this.selectedRow();
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!row || !r.doc || !file) return;
+    this.store.resubmitDocument(row.id, r.doc.id, file.name, this.session.name() || 'Staff');
+    input.value = '';
+  }
+
+  protected previewDocumentRow(r: DocumentRow): void {
+    if (!r.doc) return;
+    this.previewItem.set({ label: r.label, filename: r.doc.fileName, status: r.doc.status });
   }
 
   // ---- Comments tab -------------------------------------------------------

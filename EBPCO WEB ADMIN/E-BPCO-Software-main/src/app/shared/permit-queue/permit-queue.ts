@@ -1,26 +1,6 @@
 import { StackedBarSegment } from '../stacked-bar-chart/stacked-bar-chart';
-
-// Mirrors the 16 permit-application wizards offered in E-BPCO Mobile
-// (ebpco-mobile/lib/features/applications/presentation/), using each
-// wizard's exact AppBar title as the canonical permit name.
-export const PERMIT_LABELS = [
-  'Building Permit',
-  'Architectural Permit',
-  'Civil / Structural Permit',
-  'Demolition Permit',
-  'Addition / Extension Permit',
-  'Renovation Permit',
-  'Electrical Permit',
-  'Electronics Permit',
-  'Mechanical Permit',
-  'Plumbing Permit',
-  'Sanitary / Plumbing Permit',
-  'Interior Design Permit',
-  'Fencing Permit',
-  'Sign Permit',
-  'Excavation & Ground Preparation Permit',
-  'Certificate of Occupancy',
-];
+import { ApplicationRecord } from '../../core/domain/application.model';
+import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
 
 // Validated status palette (dataviz skill validate_palette.js — CVD
 // separation, lightness band, and chroma floor all PASS for this trio).
@@ -35,17 +15,23 @@ export interface PermitQueueRow {
   tooltip: string;
 }
 
-// One stacked bar per permit type — bar length is that permit's total queue
-// volume, and the fill is its own Pending/Approved/Rejected split — used by
-// both the admin and tenant dashboards.
-export function buildPermitQueueRows(): PermitQueueRow[] {
-  return PERMIT_LABELS.map((label, i) => {
-    // Deterministic sample counts per permit type/status (demo data, same
-    // spirit as the rest of this dashboard's mock rows) — each segment's
-    // size is driven by this value, not by decorative randomness.
-    const pending = 6 + ((i * 7) % 18);
-    const approved = 14 + ((i * 11) % 34);
-    const rejected = 2 + ((i * 5) % 9);
+/**
+ * One stacked bar per permit type — bar length is that permit's total
+ * queue volume, and the fill is its own Under Review/Approved/Rejected
+ * split. Reads the centralized `ALL_PERMIT_TYPES` catalog (permit.model.ts)
+ * for which bars to draw, and real counts from the shared
+ * `ApplicationStore`'s application pool — the same records every other
+ * page (Applications, Business Stages, Evaluations, Payments, Permit
+ * Release) reads — so this chart's totals can never drift from what the
+ * rest of the app shows. A permit type with zero applications still gets
+ * a (empty) row rather than being silently dropped.
+ */
+export function buildPermitQueueRows(applications: readonly ApplicationRecord[]): PermitQueueRow[] {
+  return ALL_PERMIT_TYPES.map((label) => {
+    const rows = applications.filter((a) => a.permitType === label);
+    const pending = rows.filter((a) => a.status === 'Under Review').length;
+    const approved = rows.filter((a) => a.status === 'Approved').length;
+    const rejected = rows.filter((a) => a.status === 'Rejected').length;
     const values = [pending, approved, rejected];
     const total = pending + approved + rejected;
 
@@ -60,7 +46,9 @@ export function buildPermitQueueRows(): PermitQueueRow[] {
       total,
       segments,
       tooltip: segments
-        .map((s) => `${s.label}: ${s.value} (${total > 0 ? Math.round((s.value / total) * 100) : 0}%)`)
+        .map(
+          (s) => `${s.label}: ${s.value} (${total > 0 ? Math.round((s.value / total) * 100) : 0}%)`,
+        )
         .join(' · '),
     };
   });

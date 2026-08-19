@@ -136,22 +136,29 @@ tbody tr.row-clickable {
   // "under-review", "pending-review", "pending-verification" mirror
   // E-BPCO Mobile's ApplicationStatus/PaymentAssessmentStatus labels
   // ("Under Review", "Pending Review", "Pending Verification").
+  // "uploaded"/"submitted" are the two document-lifecycle states
+  // (document.model.ts's DocumentStatus) between "Missing" and a
+  // reviewer actually opening it — same "still waiting" tone.
   &.pending,
   &.under-review,
   &.pending-review,
   &.pending-verification,
+  &.uploaded,
+  &.submitted,
   &.warning {
     background: $color-warning-bg;
     color: $color-warning;
   }
   // "revision-required" and "overdue" mirror E-BPCO Mobile's
   // ElectricalPermitStatus.revisionRequired and
-  // PaymentAssessmentStatus.overdue labels.
+  // PaymentAssessmentStatus.overdue labels. "expired" is
+  // DocumentStatus's own terminal-but-unresolved state.
   &.rejected,
   &.revision-required,
   &.overdue,
   &.inactive,
   &.missing,
+  &.expired,
   &.critical {
     background: $color-danger-bg;
     color: $color-danger;

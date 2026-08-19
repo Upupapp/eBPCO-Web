@@ -183,7 +183,11 @@ export class Dashboard {
 
   // One stacked bar per permit type — bar length is that permit's total
   // queue volume, and the fill is its own Pending/Approved/Rejected split.
-  protected readonly permitQueueRows = buildPermitQueueRows();
+  // Real counts from the same store every other page reads (see
+  // permit-queue.ts), not a decorative formula.
+  protected readonly permitQueueRows = computed(() =>
+    buildPermitQueueRows(this.store.applications()),
+  );
 
   // Colors are the validated 4-slot categorical palette (dataviz skill
   // validate_palette.js: CVD separation + lightness band + chroma floor all
@@ -403,7 +407,7 @@ export class Dashboard {
   protected exportQueueReport(): void {
     downloadCsv(
       'permit-queue-report',
-      this.permitQueueRows.map((row) => ({
+      this.permitQueueRows().map((row) => ({
         'Permit Type': row.label,
         Total: row.total,
         ...Object.fromEntries(row.segments.map((s) => [s.label, s.value])),

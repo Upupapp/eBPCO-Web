@@ -128,6 +128,14 @@
                   <button type="button" class="icon-btn generate" (click)="generate(row)">
                     <app-icon name="sparkles" [size]="15" />
                   </button>
+                  <button
+                    type="button"
+                    class="icon-btn view"
+                    (click)="previewPermit(row)"
+                    title="Preview permit"
+                  >
+                    <app-icon name="file-check" [size]="15" />
+                  </button>
                   @if (canRelease()) {
                     <button
                       type="button"
@@ -227,6 +235,10 @@
           <app-icon name="sparkles" [size]="15" />
           Generate PDF
         </button>
+        <button type="button" class="btn-outline" (click)="previewPermit(row)">
+          <app-icon name="file-check" [size]="15" />
+          Preview Permit
+        </button>
         @if (canRelease()) {
           <button
             type="button"
@@ -322,3 +334,7 @@
     </tbody>
   </table>
 </div>
+
+@if (previewTarget(); as target) {
+  <app-document-preview [applicationId]="target.id" kind="permit" (closed)="closePermitPreview()" />
+}

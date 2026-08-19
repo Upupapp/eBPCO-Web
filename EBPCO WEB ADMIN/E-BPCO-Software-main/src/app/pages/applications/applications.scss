@@ -484,6 +484,259 @@ h3 {
   color: #9297a3;
 }
 
+.doc-remarks {
+  font-size: 0.74rem;
+  color: $color-danger;
+  margin-top: 0.15rem;
+}
+
+.doc-remarks-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $color-ink-600;
+  margin-bottom: 0.9rem;
+  max-width: 480px;
+
+  .optional {
+    font-weight: 400;
+    color: $color-ink-200;
+  }
+
+  input {
+    font: inherit;
+    font-weight: 400;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-sm;
+  }
+}
+
+.missing-count {
+  color: $color-danger;
+}
+
+.requirement-sources {
+  margin-bottom: 0.9rem;
+  font-size: 0.78rem;
+
+  summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: $color-ink-600;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  a {
+    color: $color-info;
+  }
+}
+
+.source-status {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0.15rem 0.45rem;
+  border-radius: $radius-pill;
+  flex-shrink: 0;
+
+  &.national-law-verified {
+    background: $color-success-bg;
+    color: $color-success;
+  }
+  &.sample-reference-only {
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+  &.pending-castilla-verification {
+    background: $color-danger-bg;
+    color: $color-danger;
+  }
+}
+
+.source-meta {
+  color: $color-ink-200;
+  font-size: 0.72rem;
+}
+
+tr.missing-row {
+  background: $color-danger-bg-soft;
+}
+
+.badge-req {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0.15rem 0.5rem;
+  border-radius: $radius-pill;
+  background: $color-danger-bg;
+  color: $color-danger;
+
+  &.optional-badge {
+    background: $color-bg-muted;
+    color: $color-ink-300;
+  }
+}
+
+.doc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  white-space: normal !important;
+}
+
+.resubmit-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  border-radius: 1rem;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: $color-info-bg;
+  color: $color-info;
+  cursor: pointer;
+
+  input[type='file'] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.preview-btn.danger-text {
+  background: $color-danger-bg;
+  color: $color-danger;
+}
+
+.permit-result-panel {
+  border: 1px solid $color-border-strong;
+  border-radius: $radius-lg;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+
+  &.empty {
+    color: $color-ink-500;
+
+    p {
+      max-width: 480px;
+    }
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: $color-ink-900;
+  }
+}
+
+.permit-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 0.5rem 1.5rem;
+  margin: 0;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  dt {
+    font-size: 0.72rem;
+    color: $color-ink-300;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 700;
+    color: $color-ink-900;
+    font-size: 0.88rem;
+  }
+}
+
+.permit-note {
+  color: $color-ink-300;
+  font-size: 0.85rem;
+}
+
+.permit-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.verify-action {
+  margin-left: 0.3rem;
+  border: none;
+  border-radius: $radius-pill;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: $color-info-bg;
+  color: $color-info;
+
+  &.danger {
+    background: $color-danger-bg;
+    color: $color-danger;
+  }
+}
+
+.verify-pill {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.63rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0.1rem 0.45rem;
+  border-radius: $radius-pill;
+  background: $color-bg-muted;
+  color: $color-ink-300;
+
+  &.verified {
+    background: $color-success-bg;
+    color: $color-success;
+  }
+  &.pending-verification {
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+  &.verification-failed {
+    background: $color-danger-bg;
+    color: $color-danger;
+  }
+}
+
 .preview-btn {
   border: none;
   border-radius: 1rem;

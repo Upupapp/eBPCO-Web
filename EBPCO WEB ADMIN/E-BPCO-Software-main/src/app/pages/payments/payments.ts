@@ -12,7 +12,9 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS } from '../../core/session/permissions';
 import { PaymentStatus } from '../../core/domain/status.model';
-import { AssessmentFeeCentavos, totalAssessmentCentavos } from '../../core/domain/payment.model';
+import { totalAssessmentCentavos } from '../../core/domain/payment.model';
+import { PaymentConfigStore } from '../../core/domain/payment-config-store';
+import { DocumentPreview } from '../../shared/document-preview/document-preview';
 
 // Mirrors E-BPCO Mobile's PaymentAssessmentStatus labels
 // (payment_assessment_model.dart). 'Not Yet Available' rows (not yet
@@ -67,24 +69,13 @@ interface RingStat {
   bars?: number[];
 }
 
-// Same fee schedule the seed uses (application-seed.ts) — kept here only
-// for receipt line-item display, not as a second source of the total.
-const FEE_SCHEDULE_CENTAVOS: AssessmentFeeCentavos = {
-  filing: 25000,
-  processing: 15000,
-  architectural: 30000,
-  structural: 30000,
-  electrical: 25000,
-  others: 15000,
-};
-
 function formatPHP(centavos: number): string {
   return `₱${(centavos / 100).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 @Component({
   selector: 'app-payments',
-  imports: [Topbar, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel],
+  imports: [Topbar, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, DocumentPreview],
   templateUrl: './payments.html',
   styleUrl: './payments.scss',
 })
@@ -92,6 +83,11 @@ export class Payments {
   private readonly store = inject(ApplicationStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  // Fee amounts come from Super Admin Settings' PaymentConfigStore, never
+  // a hardcoded literal in this component — a rate change there is
+  // reflected here for anything not yet assessed, while an already-
+  // recorded PaymentTransaction keeps the amount it was actually paid at.
+  private readonly paymentConfig = inject(PaymentConfigStore);
 
   protected readonly canRecord = computed(() => {
     const role = this.session.role();
@@ -109,14 +105,14 @@ export class Payments {
   // PaymentTransaction history — the same records Applications/Dashboard
   // read, not a locally-invented 10-row table with its own IDs/dates.
   protected readonly rows = computed<PaymentRow[]>(() => {
+    const feeSchedule = this.paymentConfig.feeSchedule();
     return this.store
       .applications()
       .filter((app) => app.paymentStatus !== 'Not Yet Available')
       .map((app): PaymentRow => {
         const txns = this.store.getPayments(app.id);
         const latest = txns[txns.length - 1];
-        const amountCentavos =
-          app.assessedAmountCentavos ?? totalAssessmentCentavos(FEE_SCHEDULE_CENTAVOS);
+        const amountCentavos = app.assessedAmountCentavos ?? totalAssessmentCentavos(feeSchedule);
         const history: HistoryEntry[] = txns.map((t) => ({
           ref: t.referenceNumber,
           amount: formatPHP(t.amountCentavos),
@@ -138,12 +134,12 @@ export class Payments {
           refNo: latest?.referenceNumber ?? `OR-2026-${app.id.slice(-6)}`,
           paymentMethod: latest?.method ?? 'Onsite',
           fees: {
-            filing: formatPHP(FEE_SCHEDULE_CENTAVOS.filing),
-            processing: formatPHP(FEE_SCHEDULE_CENTAVOS.processing),
-            architectural: formatPHP(FEE_SCHEDULE_CENTAVOS.architectural),
-            structural: formatPHP(FEE_SCHEDULE_CENTAVOS.structural),
-            electrical: formatPHP(FEE_SCHEDULE_CENTAVOS.electrical),
-            others: formatPHP(FEE_SCHEDULE_CENTAVOS.others),
+            filing: formatPHP(feeSchedule.filing),
+            processing: formatPHP(feeSchedule.processing),
+            architectural: formatPHP(feeSchedule.architectural),
+            structural: formatPHP(feeSchedule.structural),
+            electrical: formatPHP(feeSchedule.electrical),
+            others: formatPHP(feeSchedule.others),
             total: formatPHP(amountCentavos),
           },
           history,
@@ -286,6 +282,16 @@ export class Payments {
       'payments',
       this.filteredRows().map((row) => this.paymentCsvRow(row)),
     );
+  }
+
+  protected readonly showReceiptPreview = signal(false);
+
+  protected openReceiptPreview(): void {
+    this.showReceiptPreview.set(true);
+  }
+
+  protected closeReceiptPreview(): void {
+    this.showReceiptPreview.set(false);
   }
 
   protected downloadReceipt(): void {

@@ -1,6 +1,8 @@
 import { ApplicationRecord } from '../../core/domain/application.model';
 import { EvaluationStage } from '../../core/domain/status.model';
 import { KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-card';
+import { requirementsFor } from '../../core/domain/requirements-catalog';
+import { departmentName } from '../../core/domain/department.model';
 
 export type EvalTypeKey = 'initial' | 'zoning' | 'fire' | 'obo' | 'final';
 export type Stage = 'pending-review' | 'under-review' | 'returned' | 'passed';
@@ -29,6 +31,8 @@ export interface EvalRow {
   officer: string;
   status: RowStatus;
   stage: Stage;
+  /** The office responsible for THIS row's evaluation card/stage on its own permit type — see requirements-catalog.ts's evaluationSequence (department mapping differs between the Business Permit and Construction Permit domains for the same stage key). */
+  department: string;
 }
 
 const EVAL_KEY_TO_APP_STAGE: Record<EvalTypeKey, EvaluationStage> = {
@@ -152,6 +156,10 @@ function scopedApps(apps: ApplicationRecord[], stageKey: EvalTypeKey): Applicati
 export function buildEvalRows(apps: ApplicationRecord[], stageKey: EvalTypeKey): EvalRow[] {
   return scopedApps(apps, stageKey).map((a) => {
     const stage = toStage(a);
+    const appStage = EVAL_KEY_TO_APP_STAGE[stageKey];
+    const departmentId = requirementsFor(a.permitType).evaluationSequence.find(
+      (s) => s.stage === appStage,
+    )?.departmentId;
     return {
       id: a.id,
       applicant: a.applicant,
@@ -161,6 +169,7 @@ export function buildEvalRows(apps: ApplicationRecord[], stageKey: EvalTypeKey):
       officer: a.officer,
       status: STAGE_STATUS[stage],
       stage,
+      department: departmentId ? departmentName(departmentId) : '—',
     };
   });
 }

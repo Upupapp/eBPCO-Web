@@ -332,6 +332,7 @@
             <th>APPLICANT NAME</th>
             <th>MISSING DOCUMENTS</th>
             <th>TYPE</th>
+            <th>REVIEWING DEPARTMENT</th>
             <th>DATE SUBMITTED</th>
             <th>ASSIGNED OFFICER</th>
             <th>STATUS</th>
@@ -359,6 +360,7 @@
               </td>
               <td>{{ row.missingDocuments }}</td>
               <td>{{ row.type }}</td>
+              <td>{{ row.department }}</td>
               <td>{{ row.dateSubmitted }}</td>
               <td>{{ row.officer }}</td>
               <td>
@@ -478,6 +480,10 @@
           <div>
             <dt>Missing Documents :</dt>
             <dd>{{ row.missingDocuments }}</dd>
+          </div>
+          <div>
+            <dt>Reviewing Department :</dt>
+            <dd>{{ row.department }}</dd>
           </div>
         </dl>
       </div>

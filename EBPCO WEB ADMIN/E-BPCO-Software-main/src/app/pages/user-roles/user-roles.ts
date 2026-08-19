@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Topbar } from '../../shared/topbar/topbar';
 import { KpiCard, KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-card';
@@ -7,6 +7,11 @@ import { Avatar } from '../../shared/avatar/avatar';
 import { Pagination } from '../../shared/pagination/pagination';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
+import { SessionService } from '../../core/session/session.service';
+import { ACTION_PERMISSIONS } from '../../core/session/permissions';
+import { PaymentConfigStore } from '../../core/domain/payment-config-store';
+import { FeeConfig, PaymentMethodConfig } from '../../core/domain/payment-config.model';
+import { departmentName } from '../../core/domain/department.model';
 import {
   buildPermissionMatrix,
   buildSessions,
@@ -14,7 +19,7 @@ import {
   buildWorkload,
 } from './user-detail-data';
 
-type Tab = 'users' | 'roles';
+type Tab = 'users' | 'roles' | 'settings';
 type UserDetailTab = 'profile' | 'permissions' | 'workload' | 'security' | 'activity';
 type UserStatus = 'Active' | 'Inactive' | 'Pending';
 
@@ -189,10 +194,47 @@ const ROLES: RoleRow[] = [
   styleUrl: './user-roles.scss',
 })
 export class UserRoles {
+  private readonly session = inject(SessionService);
+  private readonly paymentConfig = inject(PaymentConfigStore);
+
   protected readonly tabs: { key: Tab; label: string; icon: string }[] = [
     { key: 'users', label: 'Users', icon: 'user' },
     { key: 'roles', label: 'Roles & Permissions', icon: 'shield' },
+    { key: 'settings', label: 'Payment Settings', icon: 'wallet' },
   ];
+
+  // The Payment Settings tab is Super Admin-only (per the "Add Payment
+  // Configuration to Super Admin Settings" requirement) — hidden from the
+  // nav for anyone else, same "hiding a link is not the only check"
+  // pattern as the sidebar/route guard: `configurePayments` is also what
+  // gates the tab's own controls, not just its visibility.
+  protected readonly visibleTabs = computed(() => {
+    const role = this.session.role();
+    const canConfigurePayments = !!role && ACTION_PERMISSIONS.configurePayments(role);
+    return this.tabs.filter((t) => t.key !== 'settings' || canConfigurePayments);
+  });
+
+  protected readonly fees = this.paymentConfig.fees;
+  protected readonly methods = this.paymentConfig.methods;
+
+  protected departmentLabel(id: string): string {
+    return departmentName(id);
+  }
+
+  protected toggleFeeActive(fee: FeeConfig): void {
+    this.paymentConfig.setFeeActive(fee.id, !fee.active);
+  }
+
+  protected onFeeAmountChange(fee: FeeConfig, value: string): void {
+    const pesos = Number(value);
+    if (!Number.isFinite(pesos) || pesos < 0) return;
+    this.paymentConfig.updateFee(fee.id, { amountCentavos: Math.round(pesos * 100) });
+  }
+
+  protected toggleMethodActive(method: PaymentMethodConfig): void {
+    if (!method.domainMethod) return;
+    this.paymentConfig.setMethodActive(method.id, !method.active);
+  }
 
   protected readonly activeTab = signal<Tab>('users');
   protected readonly page = signal(1);
