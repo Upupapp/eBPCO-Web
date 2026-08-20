@@ -4,314 +4,939 @@
   (searchChange)="searchTerm.set($event); onSearchChange()"
 />
 
-@if (view() === 'list') {
-  <section class="kpi-grid">
-    @for (stat of ringStats(); track stat.label) {
-      <app-kpi-card
-        [label]="stat.label"
-        [value]="stat.value"
-        [icon]="stat.icon"
-        [tone]="stat.tone"
-        [illustration]="stat.illustration"
-        [progress]="stat.isTotal ? null : stat.pct"
-        [support]="stat.support ?? ''"
-        [bars]="stat.bars ?? null"
-      />
+<section class="card table-card">
+  <nav class="tab-nav">
+    @for (t of visibleTabs(); track t.key) {
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === t.key"
+        (click)="selectTab(t.key)"
+      >
+        <app-icon [name]="t.icon" [size]="15" />
+        {{ t.label }}
+      </button>
     }
-  </section>
+  </nav>
 
-  <section class="card table-card">
-    <div class="table-toolbar">
-      <div class="search-input">
-        <app-icon name="search" [size]="16" />
-        <input
-          type="text"
-          placeholder="Search Here By Application ID, Applicant Name, or Location"
-          [(ngModel)]="searchTerm"
-          (ngModelChange)="onSearchChange()"
+  <!-- ============================== ASSESSMENTS ============================== -->
+  @if (activeTab() === 'assessments') {
+    @if (assessmentView() === 'list') {
+      <section class="kpi-grid kpi-grid--compact">
+        <app-kpi-card
+          label="Draft"
+          [value]="assessmentSummary().draft.toString()"
+          icon="file-text"
+          tone="neutral"
+          illustration="pending"
+          [progress]="null"
         />
-      </div>
-      <div class="toolbar-actions">
-        <app-filter-panel [activeCount]="activeFilterCount()" (clear)="clearFilters()">
-          <div class="filter-field">
-            <label for="pay-status-filter">Status</label>
-            <select id="pay-status-filter" [(ngModel)]="statusFilter">
-              <option value="All">All Statuses</option>
-              @for (opt of statusOptions; track opt) {
-                <option [value]="opt">{{ opt }}</option>
-              }
-            </select>
-          </div>
-        </app-filter-panel>
-        <button type="button" class="btn-outline" (click)="exportVisible()">
-          <app-icon name="download" [size]="15" />
-          Export
-        </button>
-        @if (canRecord()) {
-          <button type="button" class="btn-primary" (click)="openRecordPayment()">
-            <app-icon name="plus" [size]="15" />
-            Record Payment
+        <app-kpi-card
+          label="For Approval"
+          [value]="assessmentSummary().forApproval.toString()"
+          icon="clock"
+          tone="warning"
+          illustration="pending"
+          [progress]="null"
+        />
+        <app-kpi-card
+          label="Issued"
+          [value]="assessmentSummary().issued.toString()"
+          icon="send"
+          tone="info"
+          illustration="pending"
+          [progress]="null"
+        />
+        <app-kpi-card
+          label="Partially Paid"
+          [value]="assessmentSummary().partiallyPaid.toString()"
+          icon="wallet"
+          tone="warning"
+          illustration="pending"
+          [progress]="null"
+        />
+        <app-kpi-card
+          label="Paid"
+          [value]="assessmentSummary().paid.toString()"
+          icon="check-circle"
+          tone="success"
+          illustration="success"
+          [progress]="null"
+        />
+        <app-kpi-card
+          label="Overdue"
+          [value]="assessmentSummary().overdue.toString()"
+          icon="alert-triangle"
+          tone="danger"
+          illustration="critical"
+          [progress]="null"
+        />
+      </section>
+
+      <div class="table-toolbar">
+        <div class="search-input">
+          <app-icon name="search" [size]="16" />
+          <input
+            type="text"
+            placeholder="Search by Application ID, Applicant, Permit Type, or OPS No."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange()"
+          />
+        </div>
+        <div class="toolbar-actions">
+          <select
+            class="filter-select"
+            [(ngModel)]="assessmentStatusFilter"
+            (ngModelChange)="page.set(1)"
+          >
+            <option value="All">All Statuses</option>
+            @for (opt of assessmentStatusOptions; track opt) {
+              <option [value]="opt">{{ opt }}</option>
+            }
+          </select>
+          <button type="button" class="btn-outline" (click)="exportAssessments()">
+            <app-icon name="download" [size]="15" />
+            Export
           </button>
-        }
+        </div>
       </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Assessment</th>
+              <th>Application</th>
+              <th>Applicant</th>
+              <th>Permit Type</th>
+              <th>Version</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Balance</th>
+              <th>Due Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of pagedAssessmentRows(); track row.assessment.id) {
+              <tr
+                class="row-clickable"
+                tabindex="0"
+                role="button"
+                (click)="openAssessment(row)"
+                (keydown.enter)="openAssessment(row)"
+              >
+                <td class="id-cell">{{ row.assessment.id }}</td>
+                <td>{{ row.applicationId }}</td>
+                <td>
+                  <div class="applicant-cell">
+                    <app-avatar [name]="row.applicant" [size]="28" />
+                    <span class="truncate truncate--name" [title]="row.applicant">{{
+                      row.applicant
+                    }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="truncate truncate--type" [title]="row.permitType">{{
+                    row.permitType
+                  }}</span>
+                </td>
+                <td>v{{ row.assessment.version }}</td>
+                <td>
+                  <span class="status-pill" [class]="statusClass(row.assessment.status)">{{
+                    row.assessment.status
+                  }}</span>
+                </td>
+                <td>{{ formatPHP(row.assessment.totalCentavos) }}</td>
+                <td>{{ formatPHP(row.assessment.balanceCentavos) }}</td>
+                <td>{{ row.assessment.dueDate ?? '—' }}</td>
+              </tr>
+            } @empty {
+              <tr class="table-empty-row">
+                <td colspan="9">No assessments match your search.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pagination
+        [totalItems]="filteredAssessmentRows().length"
+        [pageSize]="pageSize"
+        [(page)]="page"
+      />
+    } @else if (selectedAssessment(); as a) {
+      <div class="detail-head">
+        <h1>Assessment {{ a.id }} (v{{ a.version }})</h1>
+        <div class="header-actions">
+          <span class="status-pill" [class]="statusClass(a.status)">{{ a.status }}</span>
+          @if (selectedAssessmentApp(); as app) {
+            <button type="button" class="btn-outline" (click)="openApplicationRecord(app.id)">
+              View Application
+            </button>
+          }
+          <button type="button" class="btn-primary" (click)="backToAssessments()">
+            Back to List
+          </button>
+        </div>
+      </div>
+
+      <div class="stacked-panels">
+        <div class="summary-card">
+          <div class="card-head">
+            <h2>Line Items</h2>
+          </div>
+
+          <div class="table-wrap">
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>Fee</th>
+                  <th>Family / Authority</th>
+                  <th>Applicability</th>
+                  <th>Amount</th>
+                  <th>Legal Basis</th>
+                  @if (a.status === 'Draft') {
+                    <th>Include</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of a.lineItems; track line.feeRuleId) {
+                  <tr [class.line-excluded]="!line.included">
+                    <td>{{ line.name }}</td>
+                    <td class="muted">{{ line.family }} · {{ line.authority }}</td>
+                    <td>
+                      <span class="status-pill" [class]="statusClass(line.applicability)">{{
+                        line.applicability
+                      }}</span>
+                    </td>
+                    <td>
+                      @if (a.status === 'Draft' && line.requiresAssessorInput) {
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          class="settings-amount-input"
+                          [value]="line.amountCentavos !== null ? line.amountCentavos / 100 : ''"
+                          placeholder="Requires assessor input"
+                          (change)="setLineAmount(a.id, line, $any($event.target).value)"
+                        />
+                      } @else {
+                        {{ formatPHP(line.amountCentavos) }}
+                      }
+                    </td>
+                    <td>
+                      <a
+                        [href]="line.legalBasisUrl"
+                        target="_blank"
+                        rel="noopener"
+                        class="basis-link"
+                        >{{ line.legalBasisTitle }}</a
+                      >
+                      <span
+                        class="status-pill small"
+                        [class]="statusClass(line.verificationStatus)"
+                        >{{ line.verificationStatus }}</span
+                      >
+                    </td>
+                    @if (a.status === 'Draft') {
+                      <td>
+                        <label class="toggle-switch">
+                          <input
+                            type="checkbox"
+                            [checked]="line.included"
+                            [disabled]="line.applicability === 'required'"
+                            (change)="toggleLineIncluded(a.id, line)"
+                          />
+                        </label>
+                      </td>
+                    }
+                  </tr>
+                }
+                <tr class="doc-total">
+                  <td colspan="3">Total</td>
+                  <td>{{ formatPHP(a.totalCentavos) }}</td>
+                  <td colspan="2"></td>
+                </tr>
+                <tr>
+                  <td colspan="3">Amount Paid / Balance</td>
+                  <td colspan="3">
+                    {{ formatPHP(a.amountPaidCentavos) }} / {{ formatPHP(a.balanceCentavos) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          @if (a.hasUnresolvedLines && a.status === 'Draft') {
+            <p class="form-error">
+              One or more included lines still say "Requires assessor input" — enter a real amount
+              for each before this assessment can be submitted for approval.
+            </p>
+          }
+
+          <div class="assessment-actions">
+            @if (a.status === 'Draft') {
+              <label class="due-date-field">
+                Due Date
+                <input
+                  type="date"
+                  [value]="a.dueDate ? a.dueDate : ''"
+                  (change)="updateDueDate(a.id, $any($event.target).value)"
+                />
+              </label>
+              @if (canEditAssessment()) {
+                <button
+                  type="button"
+                  class="btn-primary"
+                  [disabled]="a.hasUnresolvedLines"
+                  (click)="submitForApproval(a)"
+                >
+                  Submit for Approval
+                </button>
+              }
+            } @else if (a.status === 'For Approval' && !a.approvedBy) {
+              @if (canApproveAssessment()) {
+                <button type="button" class="btn-primary" (click)="approveAssessment(a)">
+                  Approve Assessment
+                </button>
+              }
+            } @else if (a.status === 'For Approval' && a.approvedBy) {
+              <span class="muted">Approved by {{ a.approvedBy }}</span>
+              @if (canApproveAssessment()) {
+                <button type="button" class="btn-primary" (click)="issueOrderOfPayment(a)">
+                  Issue Order of Payment
+                </button>
+              }
+            } @else if (
+              a.status === 'Issued' || a.status === 'Partially Paid' || a.status === 'Overdue'
+            ) {
+              @if (canRecordPayment()) {
+                <button type="button" class="btn-primary" (click)="openPaymentForm()">
+                  Record Payment
+                </button>
+              }
+              @if (canEditAssessment() && canReviseSelected()) {
+                <button type="button" class="btn-outline" (click)="reviseAssessment()">
+                  Revise Assessment (new version)
+                </button>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <h3>Payment Transactions</h3>
+          <div class="table-wrap">
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>Transaction</th>
+                  <th>Method</th>
+                  <th>Agency</th>
+                  <th>Reference</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (t of selectedAssessmentTransactions(); track t.id) {
+                  <tr [class.line-excluded]="t.isVoid">
+                    <td class="muted">{{ t.id }}</td>
+                    <td>{{ t.method }}</td>
+                    <td>{{ t.agency }}</td>
+                    <td>{{ t.transactionReference }}</td>
+                    <td>{{ formatPHP(t.amountCentavos) }}</td>
+                    <td>
+                      <span class="status-pill" [class]="statusClass(t.status)">{{
+                        t.isVoid ? 'Voided' : t.status
+                      }}</span>
+                    </td>
+                    <td>{{ t.submittedAt }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="muted">No payment transactions recorded yet.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (selectedAssessmentHistory().length > 1) {
+            <h3>Version History</h3>
+            <div class="table-wrap">
+              <table class="detail-table">
+                <thead>
+                  <tr>
+                    <th>Version</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (v of selectedAssessmentHistory(); track v.id) {
+                    <tr class="row-clickable" (click)="selectedAssessmentId.set(v.id)">
+                      <td>v{{ v.version }}</td>
+                      <td>
+                        <span class="status-pill" [class]="statusClass(v.status)">{{
+                          v.status
+                        }}</span>
+                      </td>
+                      <td>{{ formatPHP(v.totalCentavos) }}</td>
+                      <td>{{ v.createdAt }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  <!-- ============================== TRANSACTIONS ============================== -->
+  @if (activeTab() === 'transactions') {
+    @if (transactionView() === 'list') {
+      <div class="table-toolbar">
+        <div class="search-input">
+          <app-icon name="search" [size]="16" />
+          <input
+            type="text"
+            placeholder="Search by Transaction ID, Reference, or Applicant"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange()"
+          />
+        </div>
+        <div class="toolbar-actions">
+          <app-filter-panel [activeCount]="txnActiveFilterCount()" (clear)="clearTxnFilters()">
+            <div class="filter-field">
+              <label for="txn-permit-filter">Permit Type</label>
+              <select id="txn-permit-filter" [(ngModel)]="txnPermitTypeFilter">
+                <option value="All">All Permit Types</option>
+                @for (opt of permitTypeOptions; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="txn-method-filter">Method</label>
+              <select id="txn-method-filter" [(ngModel)]="txnMethodFilter">
+                <option value="All">All Methods</option>
+                @for (opt of methodOptions; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="txn-agency-filter">Agency</label>
+              <select id="txn-agency-filter" [(ngModel)]="txnAgencyFilter">
+                <option value="All">All Agencies</option>
+                @for (opt of agencyOptions; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </select>
+            </div>
+            <div class="filter-field">
+              <label for="txn-status-filter">Status</label>
+              <select id="txn-status-filter" [(ngModel)]="txnStatusFilter">
+                <option value="All">All Statuses</option>
+                @for (opt of txnStatusOptions; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </select>
+            </div>
+          </app-filter-panel>
+          <button type="button" class="btn-outline" (click)="exportTransactions()">
+            <app-icon name="download" [size]="15" />
+            Export
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Transaction</th>
+              <th>Application</th>
+              <th>Applicant</th>
+              <th>Permit Type</th>
+              <th>Method</th>
+              <th>Agency</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of pagedTransactionRows(); track row.txn.id) {
+              <tr
+                class="row-clickable"
+                [class.line-excluded]="row.txn.isVoid"
+                tabindex="0"
+                role="button"
+                (click)="openTransaction(row)"
+                (keydown.enter)="openTransaction(row)"
+              >
+                <td class="id-cell">{{ row.txn.id }}</td>
+                <td>{{ row.txn.applicationId }}</td>
+                <td>
+                  <span class="truncate truncate--name" [title]="row.applicant">{{
+                    row.applicant
+                  }}</span>
+                </td>
+                <td>
+                  <span class="truncate truncate--type" [title]="row.permitType">{{
+                    row.permitType
+                  }}</span>
+                </td>
+                <td>{{ row.txn.method }}</td>
+                <td>{{ row.txn.agency }}</td>
+                <td>{{ formatPHP(row.txn.amountCentavos) }}</td>
+                <td>
+                  <span class="status-pill" [class]="statusClass(row.txn.status)">{{
+                    row.txn.isVoid ? 'Voided' : row.txn.status
+                  }}</span>
+                </td>
+                <td>{{ row.txn.submittedAt }}</td>
+                <td (click)="$event.stopPropagation()">
+                  @if (row.txn.status === 'Pending Verification' && canVerifyPayment()) {
+                    <button
+                      type="button"
+                      class="pill-btn verify"
+                      (click)="verifyTransaction(row.txn)"
+                    >
+                      Verify
+                    </button>
+                    <button type="button" class="pill-btn reject" (click)="openReject(row.txn)">
+                      Reject
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr class="table-empty-row">
+                <td colspan="10">No transactions match your search.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <app-pagination
+        [totalItems]="filteredTransactionRows().length"
+        [pageSize]="pageSize"
+        [(page)]="page"
+      />
+    } @else if (selectedTransaction(); as t) {
+      <div class="detail-head">
+        <h1>Transaction {{ t.id }}</h1>
+        <div class="header-actions">
+          <span class="status-pill" [class]="statusClass(t.status)">{{
+            t.isVoid ? 'Voided' : t.status
+          }}</span>
+          <button
+            type="button"
+            class="btn-outline"
+            (click)="openApplicationRecord(t.applicationId)"
+          >
+            View Application
+          </button>
+          <button type="button" class="btn-primary" (click)="backToTransactions()">
+            Back to List
+          </button>
+        </div>
+      </div>
+
+      <div class="stacked-panels">
+        <div class="summary-card">
+          <div class="card-head">
+            <h2>Transaction Detail</h2>
+            <div class="doc-actions">
+              <button type="button" class="btn-outline" (click)="openReceiptPreview()">
+                Preview Receipt / Acknowledgment
+              </button>
+            </div>
+          </div>
+          <dl class="detail-fields">
+            <div>
+              <dt>Application:</dt>
+              <dd>{{ t.applicationId }}</dd>
+            </div>
+            <div>
+              <dt>Assessment:</dt>
+              <dd>{{ t.assessmentId }}</dd>
+            </div>
+            <div>
+              <dt>Method:</dt>
+              <dd>{{ t.method }}</dd>
+            </div>
+            <div>
+              <dt>Agency:</dt>
+              <dd>{{ t.agency }}</dd>
+            </div>
+            <div>
+              <dt>Payer Reference:</dt>
+              <dd>{{ t.transactionReference }}</dd>
+            </div>
+            <div>
+              <dt>Amount:</dt>
+              <dd>{{ formatPHP(t.amountCentavos) }}</dd>
+            </div>
+            <div>
+              <dt>Submitted:</dt>
+              <dd>
+                {{ t.submittedAt }}
+                @if (t.recordedBy) {
+                  by {{ t.recordedBy }}
+                }
+              </dd>
+            </div>
+            @if (t.status === 'Verified' || t.isVoid) {
+              <div>
+                <dt>Verified:</dt>
+                <dd>{{ t.verifiedAt }} by {{ t.verifiedBy }}</dd>
+              </div>
+            }
+            @if (t.status === 'Rejected') {
+              <div>
+                <dt>Rejection Reason:</dt>
+                <dd>{{ t.rejectionReason }}</dd>
+              </div>
+            }
+            @if (t.proofFileName) {
+              <div>
+                <dt>Proof of Payment:</dt>
+                <dd>{{ t.proofFileName }}</dd>
+              </div>
+            }
+            <div>
+              <dt>OR No.:</dt>
+              <dd>
+                {{
+                  t.orNumber ??
+                    'Not yet entered — this transaction can only be presented as a Payment Acknowledgment'
+                }}
+              </dd>
+            </div>
+          </dl>
+
+          <div class="assessment-actions">
+            @if (t.status === 'Pending Verification' && canVerifyPayment()) {
+              <button type="button" class="btn-primary" (click)="verifyTransaction(t)">
+                Verify Transaction
+              </button>
+              <button type="button" class="btn-outline" (click)="openReject(t)">Reject</button>
+            }
+            @if (t.status === 'Verified' && !t.isVoid) {
+              @if (!t.orNumber) {
+                <button type="button" class="btn-outline" (click)="openOrForm()">
+                  Attach Official OR Number
+                </button>
+              }
+              @if (canAdjustPayment()) {
+                <button type="button" class="btn-outline" (click)="openAdjust(t, 'Void')">
+                  Void
+                </button>
+                <button type="button" class="btn-outline" (click)="openAdjust(t, 'Reversal')">
+                  Reverse
+                </button>
+                <button type="button" class="btn-outline" (click)="openAdjust(t, 'Refund')">
+                  Refund
+                </button>
+              }
+            }
+          </div>
+
+          @if (selectedTransactionAdjustments().length > 0) {
+            <h3>Adjustments</h3>
+            <div class="table-wrap">
+              <table class="detail-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Reason</th>
+                    <th>By</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (adj of selectedTransactionAdjustments(); track adj.id) {
+                    <tr>
+                      <td>{{ adj.type }}</td>
+                      <td>{{ formatPHP(adj.amountCentavos) }}</td>
+                      <td>{{ adj.reason }}</td>
+                      <td>{{ adj.actor }}</td>
+                      <td>{{ adj.timestamp }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  <!-- ============================== PERMIT FEE MATRIX ============================== -->
+  @if (activeTab() === 'matrix') {
+    <div class="matrix-header">
+      <label for="matrix-permit-type">Permit Type</label>
+      <select id="matrix-permit-type" [(ngModel)]="matrixPermitType">
+        @for (opt of permitTypeOptions; track opt) {
+          <option [value]="opt">{{ opt }}</option>
+        }
+      </select>
     </div>
 
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>APPLICATION ID</th>
-            <th>APPLICANT NAME</th>
-            <th>LOCATION</th>
-            <th>TYPE</th>
-            <th>DATE SUBMITTED</th>
-            <th>AMOUNT</th>
-            <th>STATUS</th>
-            <th>ACTION</th>
+            <th>Fee Family</th>
+            <th>Rule</th>
+            <th>Authority</th>
+            <th>Collecting Office</th>
+            <th>Applicability</th>
+            <th>Formula</th>
+            <th>Legal Basis</th>
+            <th>Verification</th>
           </tr>
         </thead>
         <tbody>
-          @for (row of pagedRows(); track row.id) {
-            <tr
-              class="row-clickable"
-              tabindex="0"
-              role="button"
-              [attr.aria-label]="'View payment ' + row.id + ' for ' + row.applicant"
-              (click)="openDetail(row)"
-              (keydown.enter)="openDetail(row)"
-              (keydown.space)="$event.preventDefault(); openDetail(row)"
-            >
-              <td class="id-cell">{{ row.id }}</td>
+          @for (entry of matrixRows(); track entry.rule.id) {
+            <tr [class.line-excluded]="entry.applicability === 'not-applicable'">
+              <td>{{ entry.rule.family }}</td>
               <td>
-                <div class="applicant-cell">
-                  <app-avatar [name]="row.applicant" [size]="30" />
-                  {{ row.applicant }}
-                </div>
+                {{ entry.rule.name }} <span class="muted">({{ entry.rule.code }})</span>
               </td>
-              <td>{{ row.city }}</td>
-              <td>{{ row.type }}</td>
-              <td>{{ row.dateSubmitted }}</td>
-              <td>{{ row.amount }}</td>
+              <td>{{ entry.rule.authority }}</td>
+              <td>{{ departmentLabel(entry.rule.collectingOfficeId) }}</td>
               <td>
-                <span class="status-pill" [class]="row.status.toLowerCase().replace(/\s+/g, '-')">{{
-                  row.status
+                <span class="status-pill" [class]="statusClass(entry.applicability)">{{
+                  applicabilityLabel(entry.applicability)
                 }}</span>
               </td>
-              <td (click)="$event.stopPropagation()">
-                <div class="actions-cell">
-                  <button
-                    type="button"
-                    class="icon-btn view"
-                    aria-label="View payment"
-                    (click)="openDetail(row)"
-                  >
-                    <app-icon name="eye" [size]="15" />
-                  </button>
-                  @if (row.status === 'Paid') {
-                    <button type="button" class="pill-btn verified" disabled>Verified</button>
-                  } @else if (canVerify() && row.status === 'Pending Verification') {
-                    <button type="button" class="pill-btn verify" (click)="verifyPayment(row)">
-                      Verify
-                    </button>
-                  }
-                </div>
+              <td>{{ calculationSummary(entry.rule) }}</td>
+              <td>
+                <a
+                  [href]="entry.rule.legalBasisUrl"
+                  target="_blank"
+                  rel="noopener"
+                  class="basis-link"
+                  >{{ entry.rule.legalBasisTitle }}</a
+                >
               </td>
-            </tr>
-          } @empty {
-            <tr class="table-empty-row">
-              <td colspan="8">No payments match your search.</td>
+              <td>
+                <span
+                  class="status-pill small"
+                  [class]="statusClass(entry.rule.verificationStatus)"
+                  >{{ entry.rule.verificationStatus }}</span
+                >
+              </td>
             </tr>
           }
         </tbody>
       </table>
     </div>
+  }
 
-    <app-pagination [totalItems]="filteredRows().length" [pageSize]="pageSize" [(page)]="page" />
-  </section>
-} @else if (selectedRow(); as row) {
-  <div class="detail-head">
-    <h1>Payment Details</h1>
-    <div class="header-actions">
-      <span
-        class="pill-btn"
-        [class.verified]="row.status === 'Paid'"
-        [class.verify]="row.status !== 'Paid'"
-        class="static"
-        >{{ row.status }}</span
-      >
-      <button type="button" class="btn-outline" (click)="openApplicationRecord(row)">
-        View Application
-      </button>
-      <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
-    </div>
-  </div>
-
-  <div class="detail-grid">
-    <div class="record-card">
-      <div class="record-banner">
-        <app-icon name="image" [size]="26" />
-        <app-avatar [name]="row.applicant" [size]="72" class="banner-avatar" />
-      </div>
-
-      <div class="record-info">
-        <h2>{{ row.id }} - {{ row.applicant }}</h2>
-        <span class="status-pill" [class]="row.status.toLowerCase().replace(/\s+/g, '-')">{{
-          row.status
-        }}</span>
-
-        <dl class="info-list">
-          <div>
-            <dt>Barangay :</dt>
-            <dd>{{ row.city }}</dd>
-          </div>
-          <div>
-            <dt>Region :</dt>
-            <dd>{{ row.region }}</dd>
-          </div>
-          <div>
-            <dt>Type :</dt>
-            <dd>{{ row.type }}</dd>
-          </div>
-          <div>
-            <dt>Ref No:</dt>
-            <dd>{{ row.refNo }}</dd>
-          </div>
-          <div>
-            <dt>Amount:</dt>
-            <dd>{{ row.amount }}</dd>
-          </div>
-        </dl>
-      </div>
-
-      <div class="record-footer">
-        <div>
-          <strong>{{ row.dateSubmitted }}</strong>
-          <span>Date of Latest Payment</span>
-        </div>
-        <div>
-          <strong>{{ row.paymentMethod }}</strong>
-          <span>Payment Method</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="summary-card">
-      <div class="card-head">
-        <h2>Payment Summary</h2>
-        <div class="doc-actions">
-          <button type="button" class="btn-outline" (click)="openReceiptPreview()">
-            Preview Official Receipt
-          </button>
-          <button type="button" class="btn-outline" (click)="downloadReceipt()">
-            Export CSV
-            <app-icon name="download" [size]="15" />
-          </button>
-        </div>
-      </div>
-
-      <p class="verified-note">This Payment Is {{ row.status }}</p>
-
-      <h3>Fee Breakdown</h3>
+  <!-- ============================== CONFIGURATION ============================== -->
+  @if (activeTab() === 'configuration' && canConfigurePayments()) {
+    <section class="settings-section">
+      <h3>Fee Rules</h3>
+      <p class="muted-sub">
+        Editing an amount or an applicability mapping creates a NEW VERSION of the rule rather than
+        overwriting it — the previous version is kept, marked superseded, and is still visible in
+        Version History below. An assessment already drafted/issued keeps the line-item snapshot it
+        was built with; only assessments drafted after this change use the new version.
+      </p>
       <div class="table-wrap">
-        <table class="detail-table">
+        <table>
           <thead>
             <tr>
-              <th>Filing Fee</th>
-              <th>Processing Fee</th>
-              <th>Architectural</th>
-              <th>Structural</th>
-              <th>Electrical</th>
-              <th>Others</th>
-              <th>Total</th>
+              <th>Rule</th>
+              <th>Family</th>
+              <th>Authority</th>
+              <th>Calculation</th>
+              <th>Verification</th>
+              <th>Version</th>
+              <th>Active</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>{{ row.fees.filing }}</td>
-              <td>{{ row.fees.processing }}</td>
-              <td>{{ row.fees.architectural }}</td>
-              <td>{{ row.fees.structural }}</td>
-              <td>{{ row.fees.electrical }}</td>
-              <td>{{ row.fees.others }}</td>
-              <td>{{ row.fees.total }}</td>
-            </tr>
+            @for (rule of feeRules(); track rule.id) {
+              <tr>
+                <td class="strong-cell">
+                  {{ rule.name }} <span class="muted">({{ rule.code }})</span>
+                </td>
+                <td>{{ rule.family }}</td>
+                <td>{{ rule.authority }}</td>
+                <td>{{ calculationSummary(rule) }}</td>
+                <td>
+                  <span class="status-pill small" [class]="statusClass(rule.verificationStatus)">{{
+                    rule.verificationStatus
+                  }}</span>
+                </td>
+                <td>
+                  v{{ rule.version }}
+                  <button type="button" class="link-btn" (click)="toggleHistory(rule.id)">
+                    history
+                  </button>
+                </td>
+                <td>
+                  <label class="toggle-switch">
+                    <input
+                      type="checkbox"
+                      [checked]="rule.active"
+                      (change)="toggleFeeRuleActive(rule)"
+                    />
+                    <span>{{ rule.active ? 'Active' : 'Inactive' }}</span>
+                  </label>
+                </td>
+                <td>
+                  <button type="button" class="btn-outline" (click)="openEditRule(rule)">
+                    Edit
+                  </button>
+                </td>
+              </tr>
+              @if (historyFor() === rule.id) {
+                <tr>
+                  <td colspan="8">
+                    <div class="table-wrap">
+                      <table class="detail-table">
+                        <thead>
+                          <tr>
+                            <th>Version</th>
+                            <th>Effective</th>
+                            <th>Superseded</th>
+                            <th>Active</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (v of feeRuleHistory(rule.id); track v.id) {
+                            <tr>
+                              <td>v{{ v.version }}</td>
+                              <td>{{ v.effectiveDate }}</td>
+                              <td>{{ v.supersededDate ?? '—' }}</td>
+                              <td>{{ v.active ? 'Yes' : 'No' }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
           </tbody>
         </table>
       </div>
+    </section>
 
-      <h3>Payment History</h3>
+    <section class="settings-section">
+      <h3>Payment Methods</h3>
+      <p class="muted-sub">
+        Only methods marked Active are offered on the payment recording form. Methods without a live
+        integration in this build stay disabled rather than removed.
+      </p>
       <div class="table-wrap">
-        <table class="detail-table">
+        <table>
           <thead>
             <tr>
-              <th>#</th>
-              <th>Amount</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Payment Method</th>
-              <th>Verified By</th>
+              <th>Method</th>
+              <th>Description</th>
+              <th>Active</th>
             </tr>
           </thead>
           <tbody>
-            @for (h of row.history; track h.ref) {
+            @for (method of methods(); track method.id) {
               <tr>
-                <td class="muted">{{ h.ref }}</td>
-                <td>{{ h.amount }}</td>
-                <td>{{ h.date }}</td>
+                <td class="strong-cell">{{ method.name }}</td>
+                <td class="muted">{{ method.description }}</td>
                 <td>
-                  <span class="status-pill" [class]="h.status.toLowerCase()">{{ h.status }}</span>
+                  <label class="toggle-switch">
+                    <input
+                      type="checkbox"
+                      [checked]="method.active"
+                      [disabled]="!method.domainMethod"
+                      (change)="toggleMethodActive(method.id, !method.active, method.domainMethod)"
+                    />
+                    <span>{{ method.active ? 'Active' : 'Inactive' }}</span>
+                  </label>
                 </td>
-                <td class="muted">{{ h.method }}</td>
-                <td>{{ h.verifiedBy || '—' }}</td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="6" class="muted">No payment history yet.</td>
               </tr>
             }
           </tbody>
         </table>
       </div>
-    </div>
-  </div>
-}
+    </section>
+  }
+</section>
 
-@if (showRecordPayment()) {
-  <div class="modal-backdrop" (click)="cancelRecordPayment()">
+<!-- ============================== MODALS ============================== -->
+
+@if (showPaymentForm() && selectedAssessment(); as a) {
+  <div class="modal-backdrop" (click)="cancelPaymentForm()">
     <div class="modal-box create-box" (click)="$event.stopPropagation()">
-      <button type="button" class="modal-close" aria-label="Close" (click)="cancelRecordPayment()">
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelPaymentForm()">
         &#10005;
       </button>
-      <h2>Record Onsite Payment</h2>
-      <p class="modal-hint">
-        Attaches a payment to an existing, already-assessed application — this never creates a new
-        application.
-      </p>
-      <form class="create-form" (ngSubmit)="createPayment()">
+      <h2>Record Payment</h2>
+      <p class="modal-hint">Outstanding balance: {{ formatPHP(a.balanceCentavos) }}</p>
+      <form class="create-form" (ngSubmit)="submitPaymentForm()">
         <label>
-          Application ID
+          Method
+          <select [(ngModel)]="paymentForm.method" name="payMethod">
+            <option value="Onsite">Onsite (Cash)</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+          </select>
+        </label>
+        <label>
+          Collecting Agency
+          <select [(ngModel)]="paymentForm.agency" name="payAgency">
+            <option value="OBO/LGU">OBO / LGU</option>
+            <option value="BFP">BFP</option>
+          </select>
+        </label>
+        <label>
+          Amount (₱)
           <input
-            type="text"
-            [(ngModel)]="newPayment.applicationId"
-            name="payAppId"
-            placeholder="E-BPCO-2026-000123"
+            type="number"
+            min="0"
+            step="0.01"
+            [(ngModel)]="paymentForm.amount"
+            name="payAmount"
             required
           />
         </label>
         <label>
-          Reference Number (optional)
+          Reference Number
           <input
             type="text"
-            [(ngModel)]="newPayment.referenceNumber"
+            [(ngModel)]="paymentForm.reference"
             name="payRef"
-            placeholder="Auto-generated if left blank"
+            required
+            placeholder="Bank/deposit reference or internal counter ref."
           />
         </label>
-        @if (recordPaymentError()) {
-          <p class="form-error">{{ recordPaymentError() }}</p>
+        @if (paymentForm.method === 'Bank Transfer') {
+          <label>
+            Proof of Payment
+            <input type="file" (change)="onProofFileChosen($event)" name="payProof" required />
+          </label>
+        }
+        @if (paymentFormError()) {
+          <p class="form-error">{{ paymentFormError() }}</p>
         }
         <div class="modal-actions">
-          <button type="button" class="modal-btn neutral" (click)="cancelRecordPayment()">
+          <button type="button" class="modal-btn neutral" (click)="cancelPaymentForm()">
             Cancel
           </button>
           <button type="submit" class="modal-btn confirm">Record Payment</button>
@@ -321,9 +946,198 @@
   </div>
 }
 
-@if (showReceiptPreview() && selectedRow(); as row) {
+@if (rejectTarget(); as txn) {
+  <div class="modal-backdrop" (click)="cancelReject()">
+    <div
+      class="modal-box"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Reject transaction"
+    >
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelReject()">
+        &#10005;
+      </button>
+      <h2>Reject Transaction {{ txn.id }}</h2>
+      <form class="create-form" (ngSubmit)="confirmReject()">
+        <label>
+          Reason (required)
+          <textarea [(ngModel)]="rejectReason" name="rejectReason" required rows="3"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelReject()">Cancel</button>
+          <button type="submit" class="modal-btn confirm" [disabled]="!rejectReason.trim()">
+            Reject
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (adjustTarget(); as target) {
+  <div class="modal-backdrop" (click)="cancelAdjust()">
+    <div
+      class="modal-box"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="target.type + ' transaction'"
+    >
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelAdjust()">
+        &#10005;
+      </button>
+      <h2>{{ target.type }} Transaction {{ target.txn.id }}</h2>
+      <p class="modal-hint">
+        This never edits the verified transaction directly — it records an auditable
+        {{ target.type.toLowerCase() }} and excludes this amount from the assessment's balance going
+        forward.
+      </p>
+      <form class="create-form" (ngSubmit)="confirmAdjust()">
+        <label>
+          Reason (required)
+          <textarea [(ngModel)]="adjustReason" name="adjustReason" required rows="3"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelAdjust()">Cancel</button>
+          <button type="submit" class="modal-btn confirm" [disabled]="!adjustReason.trim()">
+            Confirm {{ target.type }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showOrForm() && selectedTransaction(); as t) {
+  <div class="modal-backdrop" (click)="cancelOrForm()">
+    <div
+      class="modal-box"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Attach official OR number"
+    >
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelOrForm()">
+        &#10005;
+      </button>
+      <h2>Attach Official OR Number</h2>
+      <p class="modal-hint">
+        Enter the real OR number from the cashier's receipt book or e-receipting system — never an
+        internally generated id. Until this is entered, generated documents for this transaction
+        read "Payment Acknowledgment", not "Official Receipt".
+      </p>
+      <form class="create-form" (ngSubmit)="submitOrForm()">
+        <label>
+          OR Number
+          <input type="text" [(ngModel)]="orForm.orNumber" name="orNumber" required />
+        </label>
+        <label>
+          OR Date
+          <input type="date" [(ngModel)]="orForm.orDate" name="orDate" required />
+        </label>
+        <label>
+          Issued By
+          <input type="text" [(ngModel)]="orForm.orIssuedBy" name="orIssuedBy" required />
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelOrForm()">Cancel</button>
+          <button type="submit" class="modal-btn confirm">Attach OR Number</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (editingRule(); as rule) {
+  <div class="modal-backdrop" (click)="cancelEditRule()">
+    <div
+      class="modal-box create-box wide-box"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Edit fee rule"
+    >
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelEditRule()">
+        &#10005;
+      </button>
+      <h2>Edit {{ rule.name }}</h2>
+      <p class="modal-hint">
+        Saves as a new version (v{{ rule.version + 1 }}) — the current version is kept for history.
+      </p>
+      <form class="create-form" (ngSubmit)="saveEditRule()">
+        @if (rule.calculationType === 'flat') {
+          <label>
+            Flat Amount (₱)
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              [(ngModel)]="editForm.amount"
+              name="editAmount"
+            />
+          </label>
+        }
+        @if (rule.calculationType === 'per-unit') {
+          <label>
+            Amount per unit ({{ rule.unitLabel }}) (₱)
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              [(ngModel)]="editForm.unitAmount"
+              name="editUnitAmount"
+            />
+          </label>
+        }
+        @if (rule.calculationType === 'percentage') {
+          <label>
+            Percentage Rate (%)
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              [(ngModel)]="editForm.percentageRate"
+              name="editPct"
+            />
+          </label>
+        }
+        <label>
+          Effective Date
+          <input type="date" [(ngModel)]="editForm.effectiveDate" name="editEffective" required />
+        </label>
+
+        <fieldset class="applicability-grid">
+          <legend>Applicability by Permit Type</legend>
+          @for (type of permitTypeOptions; track type) {
+            <div class="applicability-row">
+              <span>{{ type }}</span>
+              <select
+                [ngModel]="editForm.applicability[type]"
+                [name]="'app-' + type"
+                (ngModelChange)="setApplicability(type, $any($event))"
+              >
+                <option value="required">Required</option>
+                <option value="conditional">Conditional</option>
+                <option value="not-applicable">Not Applicable</option>
+              </select>
+            </div>
+          }
+        </fieldset>
+
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelEditRule()">Cancel</button>
+          <button type="submit" class="modal-btn confirm">Save New Version</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showReceiptPreview() && selectedTransaction(); as t) {
   <app-document-preview
-    [applicationId]="row.id"
+    [applicationId]="t.applicationId"
+    [transactionId]="t.id"
     kind="official-receipt"
     (closed)="closeReceiptPreview()"
   />

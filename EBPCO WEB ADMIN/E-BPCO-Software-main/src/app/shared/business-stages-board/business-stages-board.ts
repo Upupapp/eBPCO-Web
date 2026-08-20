@@ -5,7 +5,6 @@ import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { Icon } from '../icon/icon';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord, AppStatus, barangayOf } from '../../core/domain/application.model';
-import { permitShortLabel } from '../../core/domain/permit.model';
 import {
   ApplicationLifecycleStatus,
   EvaluationStage,
@@ -234,10 +233,11 @@ export class BusinessStagesBoard {
     this.barangayFilter() === 'All' ? 'All Barangays' : `Barangay ${this.barangayFilter()}`,
   );
 
-  protected permitShortLabel(app: ApplicationRecord): string {
-    return permitShortLabel(app.permitType);
-  }
-
+  // The full applicant/business/ID/permit-type/date detail this note
+  // represents lives only in this accessible name now (no visual hover
+  // tooltip) — screen readers get the complete information either way,
+  // per "preserve the full information in the accessible label or
+  // tooltip."
   protected noteAriaLabel(app: ApplicationRecord): string {
     return `View application ${app.id} for ${app.applicant}, ${app.businessName}, ${app.permitType}, draggable to another stage`;
   }
@@ -379,22 +379,6 @@ export class BusinessStagesBoard {
       lifecycleStatus: BusinessStagesBoard.COLUMN_TARGET[targetStatus],
     });
     this.store.bringToFront(id);
-  }
-
-  // Only one date field exists on a business record today (no separate
-  // status-history timestamps), but it already represents "when this
-  // record entered its current status" for range-filtering purposes — so
-  // the label just needs to read that way per stage, without inventing
-  // any new data.
-  protected stageDateLabel(app: ApplicationRecord): string {
-    switch (app.status) {
-      case 'Under Review':
-        return `Under Review since ${app.dateSubmitted}`;
-      case 'Approved':
-        return `Approved ${app.dateSubmitted}`;
-      case 'Rejected':
-        return `Rejected ${app.dateSubmitted}`;
-    }
   }
 
   // A deterministic per-card tilt (based on the app's own id, not

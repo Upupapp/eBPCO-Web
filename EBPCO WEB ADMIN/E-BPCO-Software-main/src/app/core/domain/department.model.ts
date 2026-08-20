@@ -30,47 +30,27 @@ export interface Department {
 
 export const DEPARTMENTS: Department[] = [
   {
-    id: 'bplo',
-    name: 'Business Permits and Licensing Office',
-    shortName: 'BPLO',
-    responsibility:
-      'Receives and processes new, renewal, and amendment Business Permit applications; issues the Mayor’s/Business Permit.',
-    formsHandled: ['New Business Permit', 'Business Permit Renewal', 'Business Permit Amendment'],
-    documentsReviewed: [
-      'DTI/SEC/CDA Registration',
-      'Barangay Business Clearance',
-      "Previous Year's Business Permit",
-      'Lease Contract or Land Title',
-      'Community Tax Certificate (Cedula)',
-    ],
-    evaluationStages: ['Initial', 'Final Approval'],
-    contactEmail: 'bplo@castilla.gov.ph',
-    contactPhone: '(056) 000-0001',
-    officeHours: 'Monday–Friday, 8:00 AM–5:00 PM',
-    verified: false,
-  },
-  {
     id: 'obo',
     name: 'Office of the Municipal Engineer / Building Official',
     shortName: 'OBO',
     responsibility:
-      'Evaluates and issues Building Permits and all ancillary construction/engineering permits under the National Building Code (PD 1096).',
+      'Evaluates and issues the Building Permit and every ancillary/certificate permit under the National Building Code (PD 1096) — this office is responsible for all sixteen permit types this system supports.',
     formsHandled: [
-      'New Construction',
-      'Renovation',
-      'Addition / Extension',
-      'Demolition',
-      'Architectural',
-      'Civil / Structural',
-      'Electrical',
-      'Mechanical',
-      'Sanitary / Plumbing',
-      'Plumbing',
-      'Electronics',
-      'Interior',
-      'Fencing',
+      'Building Permit',
+      'Architectural Permit',
+      'Civil / Structural Permit',
+      'Demolition Permit',
+      'Addition / Extension Permit',
+      'Renovation Permit',
+      'Electrical Permit',
+      'Electronics Permit',
+      'Mechanical Permit',
+      'Plumbing Permit',
+      'Sanitary / Plumbing Permit',
+      'Interior Design Permit',
+      'Fencing Permit',
       'Sign Permit',
-      'Excavation',
+      'Excavation & Ground Preparation Permit',
       'Certificate of Occupancy',
     ],
     documentsReviewed: [
@@ -91,7 +71,7 @@ export const DEPARTMENTS: Department[] = [
     name: 'Municipal Planning and Development Office (Zoning Section)',
     shortName: 'MPDO – Zoning',
     responsibility:
-      'Reviews land-use classification, zoning compliance, and locational clearance for both business and construction applications.',
+      'Reviews land-use classification, zoning compliance, and locational clearance for every permit application.',
     formsHandled: ['Locational Clearance', 'Zoning Certification'],
     documentsReviewed: [
       'Locational Clearance',
@@ -130,10 +110,13 @@ export const DEPARTMENTS: Department[] = [
     name: 'Municipal Health Office (Sanitary Permit Unit)',
     shortName: 'MHO',
     responsibility:
-      'Reviews sanitation compliance and issues the Sanitary Permit required for business establishments and occupancy.',
+      'Reviews sanitation compliance and issues the Sanitary Permit referenced by the Sanitary / Plumbing Permit type and Certificate of Occupancy inspections.',
     formsHandled: ['Sanitary Permit'],
     documentsReviewed: ['Sanitary Permit', 'Health Certificate of Employees/Owner'],
-    evaluationStages: ['OBO'],
+    // Not part of the current automated evaluation sequence (see
+    // requirements-catalog.ts's EVAL_SEQUENCE, which routes every stage
+    // through OBO/Zoning/BFP) — kept as a directory entry only.
+    evaluationStages: [],
     contactEmail: 'mho@castilla.gov.ph',
     contactPhone: '(056) 000-0005',
     officeHours: 'Monday–Friday, 8:00 AM–5:00 PM',

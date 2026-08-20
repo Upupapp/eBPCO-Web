@@ -367,7 +367,19 @@ $stage-colors: (
 .stage-col-body {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  // `minmax(0, 1fr)`, NOT plain `1fr` — a bare `1fr` track's minimum
+  // width still defaults to `auto`, i.e. the min-content size of
+  // whatever's inside it. A long unbroken token (a business name, an
+  // E-BPCO-2026-###### id, a permit type like "Sanitary / Plumbing")
+  // pushes that min-content size past the track's fair share of the
+  // column, so the GRID ITSELF grows wider than `.stage-col` and visibly
+  // bleeds into the next stage column — this is the actual bug, not a
+  // z-index/positioning issue, and box-sizing (`border-box` is already
+  // set globally in styles.scss) plays no part in it. `minmax(0, 1fr)`
+  // caps each track's minimum at 0, so the track is always sized from
+  // the *available* column width first and content is what has to wrap/
+  // ellipsis/shrink to fit — never the reverse.
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   // 132px (not the original 104px) — a note now carries 4 text lines
   // (applicant/business/ID/permit type) instead of 3, so the reserved
   // per-row height must match its real rendered height or a note visibly
@@ -425,9 +437,16 @@ $stage-colors: (
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  // A grid/flex item's default `min-width` is `auto` (= its content's
+  // min-content size), which is the OTHER half of the grid-blowout fix
+  // above — belt-and-suspenders with `.stage-col-body`'s
+  // `minmax(0, 1fr)` tracks, so this note can never be the thing forcing
+  // its own column wider than the space it was actually given.
+  min-width: 0;
   width: 100%;
   min-height: $note-min-height;
   text-align: left;
+  box-sizing: border-box; // redundant with the global `*` reset in styles.scss — explicit here since width/padding math on this specific element is exactly what this fix depends on.
   border: 1px solid rgba(20, 20, 20, 0.06);
   border-radius: 5px;
   padding: 0.7rem 0.75rem 0.7rem;
@@ -554,7 +573,16 @@ $stage-colors: (
   }
 }
 
+// `min-width: 0` on all four lines below — each is a flex child of the
+// column-flex `.sticky-note`; without it, a long unbroken string (a
+// business name, an E-BPCO-2026-###### id, "Sanitary / Plumbing") can
+// still assert its own min-content width as a floor even though
+// `overflow`/`text-overflow` are set, in some browsers/layout
+// combinations. Cheap, and removes any remaining doubt on top of the
+// grid-track fix above.
+
 .note-name {
+  min-width: 0;
   font-size: 0.82rem;
   font-weight: 800;
   color: $color-ink-900;
@@ -566,6 +594,7 @@ $stage-colors: (
 }
 
 .note-business {
+  min-width: 0;
   font-size: 0.72rem;
   font-weight: 600;
   color: rgba($color-ink-900, 0.68);
@@ -575,6 +604,7 @@ $stage-colors: (
 }
 
 .note-id {
+  min-width: 0;
   font-size: 0.68rem;
   font-weight: 700;
   color: rgba($color-ink-900, 0.52);
@@ -584,6 +614,7 @@ $stage-colors: (
 }
 
 .note-type {
+  min-width: 0;
   font-size: 0.68rem;
   font-weight: 600;
   color: rgba($color-ink-900, 0.42);
@@ -707,7 +738,7 @@ $stage-colors: (
 
 .stages-board.skeleton .stage-col-body {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   min-height: calc($note-min-height * 3 + 1rem * 2);
   overflow: hidden;
@@ -763,6 +794,17 @@ $stage-colors: (
   .stage-col {
     min-width: 86vw;
     max-width: 92vw;
+  }
+
+  // Below this width, a 2-column note grid leaves each card too narrow
+  // to read comfortably (roughly 160px against a 4-line content stack) —
+  // fall back to one column per row. The reserved min-height switches
+  // from "3 rows of 2" to "6 rows of 1" to match, so the same 6-note
+  // preview still lands the footer at a predictable position instead of
+  // jumping around as notes are added/removed.
+  .stage-col-body {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: calc($note-min-height * 6 + 1rem * 5);
   }
 
   .view-all-btn {

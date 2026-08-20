@@ -191,17 +191,6 @@
                   class="sticky-note"
                   [class]="column.dotClass"
                   [style.--note-rotate]="noteRotation(app.id)"
-                  [attr.title]="
-                    app.applicant +
-                    ' — ' +
-                    app.businessName +
-                    ' (' +
-                    app.id +
-                    ') — ' +
-                    app.permitType +
-                    ' — ' +
-                    stageDateLabel(app)
-                  "
                   [attr.aria-label]="noteAriaLabel(app)"
                   (click)="select(app)"
                   cdkDrag
@@ -212,7 +201,7 @@
                   <span class="note-name">{{ app.applicant }}</span>
                   <span class="note-business">{{ app.businessName }}</span>
                   <span class="note-id">{{ app.id }}</span>
-                  <span class="note-type">{{ permitShortLabel(app) }}</span>
+                  <span class="note-type">{{ app.permitType }}</span>
                 </button>
               }
             }

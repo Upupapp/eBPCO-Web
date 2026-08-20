@@ -1,128 +1,56 @@
-// serviceDomain distinguishes the two structurally separate prototype
-// systems that exist in E-BPCO Mobile — the generic "Business Permit" flow
-// (ApplicationModel/ApplicationType in application_model.dart) and the 15
-// decoupled construction/ancillary/certificate permit wizards (each with
-// its own model file, e.g. architectural_permit_model.dart,
-// electrical_permit_model.dart, ...). A single "Business Application"
-// label would conflate two things mobile itself keeps apart.
-export type ServiceDomain = 'Business Permit' | 'Construction Permit';
-
-// The full permit-type catalog — the single centralized list every
-// surface (Dashboard, Applications, Business Application Stages,
-// Evaluations, Payments, Permit Release, filters, forms, seed data) reads
-// from, so a permit type is defined exactly once. The three Business
-// Permit variants replace the old single generic 'Business Permit' value
-// — mobile's Business Permit flow doesn't distinguish New/Renewal/
-// Amendment as separate *types* the way the construction wizards do, but
-// showing every business-permit sample application as the literal string
-// "Business Permit" gave every business-domain row in the Overall
-// Applications Queue an identical, non-diagnostic label. These three
-// mirror the same New/Renewal/Amendment transaction categories
-// ApplicationAction already tracks, expressed as permit-type labels so
-// the queue, filters, and stage notes have something specific to show.
-// Every value below (past the three Business Permit variants) is copied
-// verbatim from E-BPCO Mobile's own Applications screen —
-// ebpco-mobile/lib/features/applications/presentation/applications_screen.dart's
-// `_PermitOption.title` strings across its Building Permit / Ancillary
-// Permits / Other Permits / Certificates sections — not an independent
-// naming convention invented for the web admin. Two of these are
-// deliberately inconsistent with the rest ('Sign Permit' keeps its
-// suffix, 'Interior' has none) because that inconsistency is what mobile
-// itself actually displays; "fixing" it here would make this list
-// disagree with the app it's supposed to mirror. "Building Permit" is
-// mobile's section HEADER for New Construction/Renovation/Addition-
-// Extension/Demolition, not itself a selectable type — it correctly has
-// no entry of its own here.
+// The single, fixed, complete list of permit types this system supports.
+// Exactly these 16 values, in exactly this order and wording — nothing
+// more, nothing less. There is deliberately no domain/category grouping
+// on top of this list (no "Business Permit" vs "Construction Permit"
+// split, no aliases) — every surface that shows or accepts a permit type
+// (Dashboard, Applications, Business Application Stages, Evaluations,
+// Payments, Permit Release, filters, forms, seed/sample data) reads this
+// exact array/union and nothing else. Do not add, rename, reorder, or
+// alias any entry without updating this file — every other reference to
+// a permit type in the codebase derives from here.
 export type PermitType =
-  | 'New Business Permit'
-  | 'Business Permit Renewal'
-  | 'Business Permit Amendment'
-  | 'New Construction'
-  | 'Renovation'
-  | 'Addition / Extension'
-  | 'Demolition'
-  | 'Architectural'
-  | 'Civil / Structural'
-  | 'Electrical'
-  | 'Mechanical'
-  | 'Sanitary / Plumbing'
-  | 'Plumbing'
-  | 'Electronics'
-  | 'Interior'
-  | 'Fencing'
+  | 'Building Permit'
+  | 'Architectural Permit'
+  | 'Civil / Structural Permit'
+  | 'Demolition Permit'
+  | 'Addition / Extension Permit'
+  | 'Renovation Permit'
+  | 'Electrical Permit'
+  | 'Electronics Permit'
+  | 'Mechanical Permit'
+  | 'Plumbing Permit'
+  | 'Sanitary / Plumbing Permit'
+  | 'Interior Design Permit'
+  | 'Fencing Permit'
   | 'Sign Permit'
-  | 'Excavation'
+  | 'Excavation & Ground Preparation Permit'
   | 'Certificate of Occupancy';
 
-export interface PermitTypeInfo {
-  type: PermitType;
-  domain: ServiceDomain;
-  /** Compact label for tight UI (stage-board sticky notes, table cells) — identical to `type` except for the three Business Permit variants. */
-  shortLabel: string;
-}
-
-// Ordered for display grouping: Business Permit variants first, then the
-// construction/ancillary/certificate types in the same order mobile's own
-// Applications screen groups them (New Applications -> Building Permit /
-// Ancillary Permits / Other Permits / Certificates, in
-// ebpco-mobile/lib/features/applications/presentation/applications_screen.dart).
-export const PERMIT_TYPE_CATALOG: PermitTypeInfo[] = [
-  { type: 'New Business Permit', domain: 'Business Permit', shortLabel: 'New Business Permit' },
-  { type: 'Business Permit Renewal', domain: 'Business Permit', shortLabel: 'BP Renewal' },
-  { type: 'Business Permit Amendment', domain: 'Business Permit', shortLabel: 'BP Amendment' },
-  { type: 'New Construction', domain: 'Construction Permit', shortLabel: 'New Construction' },
-  { type: 'Renovation', domain: 'Construction Permit', shortLabel: 'Renovation' },
-  {
-    type: 'Addition / Extension',
-    domain: 'Construction Permit',
-    shortLabel: 'Addition / Extension',
-  },
-  { type: 'Demolition', domain: 'Construction Permit', shortLabel: 'Demolition' },
-  { type: 'Architectural', domain: 'Construction Permit', shortLabel: 'Architectural' },
-  { type: 'Civil / Structural', domain: 'Construction Permit', shortLabel: 'Civil / Structural' },
-  { type: 'Electrical', domain: 'Construction Permit', shortLabel: 'Electrical' },
-  { type: 'Mechanical', domain: 'Construction Permit', shortLabel: 'Mechanical' },
-  { type: 'Sanitary / Plumbing', domain: 'Construction Permit', shortLabel: 'Sanitary / Plumbing' },
-  { type: 'Plumbing', domain: 'Construction Permit', shortLabel: 'Plumbing' },
-  { type: 'Electronics', domain: 'Construction Permit', shortLabel: 'Electronics' },
-  { type: 'Interior', domain: 'Construction Permit', shortLabel: 'Interior' },
-  { type: 'Fencing', domain: 'Construction Permit', shortLabel: 'Fencing' },
-  { type: 'Sign Permit', domain: 'Construction Permit', shortLabel: 'Sign Permit' },
-  { type: 'Excavation', domain: 'Construction Permit', shortLabel: 'Excavation' },
-  {
-    type: 'Certificate of Occupancy',
-    domain: 'Construction Permit',
-    shortLabel: 'Certificate of Occupancy',
-  },
+/** The full list, in the exact required order — the one place this order is defined. */
+export const ALL_PERMIT_TYPES: PermitType[] = [
+  'Building Permit',
+  'Architectural Permit',
+  'Civil / Structural Permit',
+  'Demolition Permit',
+  'Addition / Extension Permit',
+  'Renovation Permit',
+  'Electrical Permit',
+  'Electronics Permit',
+  'Mechanical Permit',
+  'Plumbing Permit',
+  'Sanitary / Plumbing Permit',
+  'Interior Design Permit',
+  'Fencing Permit',
+  'Sign Permit',
+  'Excavation & Ground Preparation Permit',
+  'Certificate of Occupancy',
 ];
 
-export const ALL_PERMIT_TYPES: PermitType[] = PERMIT_TYPE_CATALOG.map((p) => p.type);
+const ALL_PERMIT_TYPES_SET: ReadonlySet<string> = new Set(ALL_PERMIT_TYPES);
 
-export const BUSINESS_PERMIT_TYPES: PermitType[] = PERMIT_TYPE_CATALOG.filter(
-  (p) => p.domain === 'Business Permit',
-).map((p) => p.type);
-
-export const CONSTRUCTION_PERMIT_TYPES: PermitType[] = PERMIT_TYPE_CATALOG.filter(
-  (p) => p.domain === 'Construction Permit',
-).map((p) => p.type);
-
-const PERMIT_TYPE_BY_VALUE = new Map(PERMIT_TYPE_CATALOG.map((p) => [p.type, p]));
-
-export function permitTypeInfo(type: PermitType): PermitTypeInfo {
-  return PERMIT_TYPE_BY_VALUE.get(type) ?? PERMIT_TYPE_CATALOG[0];
-}
-
-export function permitTypeDomain(type: PermitType): ServiceDomain {
-  return permitTypeInfo(type).domain;
-}
-
-export function permitShortLabel(type: PermitType): string {
-  return permitTypeInfo(type).shortLabel;
-}
-
-/** Permit types belonging to a given service domain — used by the intake form's "Permit Type" select, which is scoped to whichever Application Type/domain the encoder picked first. */
-export function permitTypesForDomain(domain: ServiceDomain): PermitType[] {
-  return PERMIT_TYPE_CATALOG.filter((p) => p.domain === domain).map((p) => p.type);
+/** Runtime validation guard — the one place a permit-type value from an untyped source (form input, URL param, imported data) is checked against the fixed list, so nothing outside these 16 exact strings can ever be accepted. */
+export function isValidPermitType(value: string): value is PermitType {
+  return ALL_PERMIT_TYPES_SET.has(value);
 }
 
 // Mirrors ApplicationType in application_model.dart.

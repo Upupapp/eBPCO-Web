@@ -11,6 +11,7 @@ import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { SessionService } from '../../core/session/session.service';
 import { EvaluationStage } from '../../core/domain/status.model';
+import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
 import {
   buildEvalTypeCards,
   buildEvalRows,
@@ -23,7 +24,13 @@ import {
 
 type View = 'list' | 'detail' | 'record';
 
-const TYPE_OPTIONS = ['Residential', 'Commercial', 'Renovation'] as const;
+// The type filter compares against `row.type` (the permitType projection
+// — see application.model.ts's withProjectedFields), so its options must
+// come from the SAME centralized permit-type list every other filter
+// reads, not an independently invented set. 'Residential'/'Commercial'/
+// 'Renovation' here previously never matched any real permit type at
+// all — this filter had silently never worked.
+const TYPE_OPTIONS = ALL_PERMIT_TYPES;
 
 const EVAL_KEY_TO_APP_STAGE: Record<EvalTypeCard['key'], EvaluationStage> = {
   initial: 'Initial',

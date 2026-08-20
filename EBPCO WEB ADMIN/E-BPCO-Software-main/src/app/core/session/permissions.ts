@@ -138,10 +138,18 @@ export const ACTION_PERMISSIONS = {
   verifyContact: (role: StaffRole): boolean => role === 'Super Admin' || role === 'Administrator',
   assessFee: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Evaluator',
+  /** Editing a Draft assessment's line items/due date, and submitting it for approval. */
+  editAssessment: (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator' || role === 'Payment Officer',
+  /** Approving a submitted assessment and issuing its Order of Payment — kept distinct from drafting/editing so an Evaluator can start an assessment without being able to authorize collection. */
+  approveAssessment: (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator',
   recordPayment: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Payment Officer',
   verifyPayment: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Payment Officer',
+  /** Void/reversal/refund of an already-Verified transaction — more sensitive than recording or verifying a fresh one, so narrowed to admin-level roles. */
+  adjustPayment: (role: StaffRole): boolean => role === 'Super Admin' || role === 'Administrator',
   generatePermit: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Approving Officer',
   releasePermit: (role: StaffRole): boolean =>

@@ -7,7 +7,7 @@ import {
   PermitReleaseStatus,
   coarseStatus,
 } from './status.model';
-import { ApplicationAction, PermitType, ServiceDomain } from './permit.model';
+import { ApplicationAction, PermitType } from './permit.model';
 
 // Re-exported so existing imports of `AppStatus`/`ApplicationRecord` from
 // this file keep working through the migration.
@@ -27,7 +27,6 @@ export interface ApplicationRecord {
   applicantId: string;
   applicant: string;
   location: string;
-  serviceDomain: ServiceDomain;
   permitType: PermitType;
   applicationAction: ApplicationAction;
   officer: string;

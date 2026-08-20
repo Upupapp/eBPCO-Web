@@ -5,11 +5,13 @@
 // that same row, so every business's detail view is fully populated and
 // internally consistent without a second hand-authored dataset per business.
 
+import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
+
 export type PermitStatus = 'Approved' | 'Under Review' | 'Rejected';
 
 export interface LinkedPermit {
   id: string;
-  type: string;
+  type: PermitType;
   status: PermitStatus;
   dateSubmitted: string;
 }
@@ -46,8 +48,19 @@ export interface BusinessDetail {
   };
 }
 
-const PERMIT_TYPES = ['Building Permit', 'Electrical Permit', 'Sign Permit', 'Fire Safety Certificate', 'Certificate of Occupancy'];
-const STAFF_NAMES = ['Liza Fernandez', 'Marco Dizon', 'Angelo Reyes', 'Cristina Ong', 'Paolo Santos', 'Bea Corpuz'];
+// Reads the one centralized permit-type list (permit.model.ts) — never a
+// second, independently-invented set (this used to hardcode its own
+// 5-item list including "Fire Safety Certificate", which isn't a
+// supported permit type at all).
+const PERMIT_TYPES = ALL_PERMIT_TYPES;
+const STAFF_NAMES = [
+  'Liza Fernandez',
+  'Marco Dizon',
+  'Angelo Reyes',
+  'Cristina Ong',
+  'Paolo Santos',
+  'Bea Corpuz',
+];
 
 // Small deterministic PRNG seeded from the business's own ID, so every reload
 // shows the same linked records for the same business instead of reshuffling.
@@ -72,7 +85,8 @@ export function buildBusinessDetail(row: {
 
   const permits: LinkedPermit[] = Array.from({ length: permitCount }, (_, i) => {
     const statusRoll = rand();
-    const status: PermitStatus = statusRoll < 0.55 ? 'Approved' : statusRoll < 0.85 ? 'Under Review' : 'Rejected';
+    const status: PermitStatus =
+      statusRoll < 0.55 ? 'Approved' : statusRoll < 0.85 ? 'Under Review' : 'Rejected';
     return {
       id: `PERMIT-2026-${(100 + i).toString().padStart(6, '0')}`,
       type: PERMIT_TYPES[Math.floor(rand() * PERMIT_TYPES.length)],
@@ -87,8 +101,16 @@ export function buildBusinessDetail(row: {
   // (Valid Government ID, Barangay Clearance, Proof of Business Address).
   const documents: BusinessDocument[] = [
     { name: 'Valid Government ID', status: 'Verified', uploadedDate: row.dateCreated },
-    { name: 'Barangay Clearance', status: rand() > 0.25 ? 'Verified' : 'Pending Review', uploadedDate: row.dateCreated },
-    { name: 'Proof of Business Address', status: rand() > 0.15 ? 'Verified' : 'Missing', uploadedDate: row.dateCreated },
+    {
+      name: 'Barangay Clearance',
+      status: rand() > 0.25 ? 'Verified' : 'Pending Review',
+      uploadedDate: row.dateCreated,
+    },
+    {
+      name: 'Proof of Business Address',
+      status: rand() > 0.15 ? 'Verified' : 'Missing',
+      uploadedDate: row.dateCreated,
+    },
   ];
 
   const staffCount = Math.min(row.userCount - 1, 5);
@@ -138,9 +160,10 @@ export function buildBusinessDetail(row: {
   ];
 
   const pendingCentavos = 1500 + Math.floor(rand() * 8500);
-  const pendingPayments = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(
-    permits.some((p) => p.status !== 'Approved') ? pendingCentavos : 0,
-  );
+  const pendingPayments = new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+  }).format(permits.some((p) => p.status !== 'Approved') ? pendingCentavos : 0);
 
   return {
     permits,

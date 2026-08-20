@@ -6,13 +6,7 @@ import { SessionService } from '../../core/session/session.service';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import { Applicant } from '../../core/domain/applicant.model';
 import { BusinessCategory } from '../../core/domain/business.model';
-import {
-  ApplicationAction,
-  PermitType,
-  ServiceDomain,
-  permitTypeDomain,
-  permitTypesForDomain,
-} from '../../core/domain/permit.model';
+import { ALL_PERMIT_TYPES, ApplicationAction, PermitType } from '../../core/domain/permit.model';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentById, departmentName } from '../../core/domain/department.model';
 import {
@@ -51,17 +45,7 @@ const APPLICANT_TYPES: NonNullable<Applicant['applicantType']>[] = [
   'Authorized Representative',
   'Corporate Officer',
 ];
-const SERVICE_DOMAINS: ServiceDomain[] = ['Business Permit', 'Construction Permit'];
 const APPLICATION_ACTIONS: ApplicationAction[] = ['New', 'Renewal', 'Amendment'];
-
-// A business-domain permit type IS a specific transaction nature — this
-// mirrors application-seed.ts's BUSINESS_ACTION so a Business Permit
-// application never lets its permit type and transaction type disagree.
-const BUSINESS_PERMIT_ACTION: Partial<Record<PermitType, ApplicationAction>> = {
-  'New Business Permit': 'New',
-  'Business Permit Renewal': 'Renewal',
-  'Business Permit Amendment': 'Amendment',
-};
 
 interface DocumentDraft {
   requirementId: string;
@@ -114,8 +98,11 @@ export class ApplicationIntake {
   protected readonly barangays = CASTILLA_BARANGAYS;
   protected readonly businessCategories = BUSINESS_CATEGORIES;
   protected readonly applicantTypes = APPLICANT_TYPES;
-  protected readonly serviceDomains = SERVICE_DOMAINS;
   protected readonly applicationActions = APPLICATION_ACTIONS;
+  // The fixed, complete 16-value permit-type list — every entry, exact
+  // wording and order, nothing filtered out. There is no domain/category
+  // selection step before this one; the permit type IS the full choice.
+  protected readonly permitTypeOptions = ALL_PERMIT_TYPES;
 
   protected readonly mobileExample = MOBILE_FORMAT_EXAMPLE;
   protected readonly landlineExample = LANDLINE_FORMAT_EXAMPLE;
@@ -145,7 +132,6 @@ export class ApplicationIntake {
   };
 
   protected applicationInfo = {
-    serviceDomain: 'Business Permit' as ServiceDomain,
     permitType: '' as PermitType | '',
     applicationAction: 'New' as ApplicationAction,
     scopeDescription: '',
@@ -168,23 +154,10 @@ export class ApplicationIntake {
   // are true `computed()`s, because they only ever read the real
   // `stepIndex`/`attempted` signals.
 
-  protected permitTypeOptions(): PermitType[] {
-    return permitTypesForDomain(this.applicationInfo.serviceDomain);
-  }
-
-  protected isBusinessDomain(): boolean {
-    return this.applicationInfo.serviceDomain === 'Business Permit';
-  }
-
   protected responsibleDepartment() {
     if (!this.applicationInfo.permitType) return null;
     const req = requirementsFor(this.applicationInfo.permitType);
     return departmentById(req.responsibleDepartmentId) ?? null;
-  }
-
-  protected onDomainChange(): void {
-    this.applicationInfo.permitType = '';
-    this.documents.set([]);
   }
 
   protected onPermitTypeChange(): void {
@@ -193,8 +166,6 @@ export class ApplicationIntake {
       this.documents.set([]);
       return;
     }
-    const forcedAction = BUSINESS_PERMIT_ACTION[type];
-    if (forcedAction) this.applicationInfo.applicationAction = forcedAction;
     const req = requirementsFor(type);
     this.documents.set(
       req.documents.map((d): DocumentDraft => ({
@@ -428,7 +399,6 @@ export class ApplicationIntake {
         applicantId: applicant.id,
         applicant: `${applicant.firstName} ${applicant.lastName}`.trim(),
         location: `Barangay ${this.business.barangay}`,
-        serviceDomain: permitTypeDomain(permitType),
         permitType,
         applicationAction: this.applicationInfo.applicationAction,
         officer: this.applicationInfo.assignedEvaluator,

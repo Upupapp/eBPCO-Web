@@ -1,6 +1,11 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { ApplicationRecord, withProjectedFields } from './application.model';
-import { ApplicationLifecycleStatus, canTransition, coarseStatus } from './status.model';
+import {
+  ApplicationLifecycleStatus,
+  PaymentStatus,
+  canTransition,
+  coarseStatus,
+} from './status.model';
 import { buildSeed } from './application-seed';
 import { Applicant, ContactVerification, VerificationMethod } from './applicant.model';
 import { Business } from './business.model';
@@ -12,7 +17,6 @@ import {
   UNRESOLVED_DOCUMENT_STATUSES,
 } from './document.model';
 import { EvaluationRecord } from './evaluation.model';
-import { PaymentTransaction, totalAssessmentCentavos } from './payment.model';
 import { AuditEvent } from './audit.model';
 import { AppNotification } from './notification.model';
 
@@ -24,6 +28,8 @@ function addMonths(date: Date, months: number): Date {
 import { requirementsFor } from './requirements-catalog';
 import { departmentName } from './department.model';
 import { PaymentConfigStore } from './payment-config-store';
+import { AssessmentStore } from './assessment-store';
+import { CollectingAgency } from './payment.model';
 
 /**
  * Single in-memory source of truth for applications and every record
@@ -42,6 +48,7 @@ import { PaymentConfigStore } from './payment-config-store';
 @Injectable({ providedIn: 'root' })
 export class ApplicationStore {
   private readonly paymentConfig = inject(PaymentConfigStore);
+  private readonly assessmentStore = inject(AssessmentStore);
   private readonly seed = buildSeed();
 
   private readonly _applications = signal<ApplicationRecord[]>(this.seed.applications);
@@ -49,11 +56,28 @@ export class ApplicationStore {
   private readonly _applicants = signal<Applicant[]>(this.seed.applicants);
   private readonly _documents = signal<ApplicationDocument[]>(this.seed.documents);
   private readonly _evaluations = signal<EvaluationRecord[]>(this.seed.evaluations);
-  private readonly _payments = signal<PaymentTransaction[]>(this.seed.payments);
   private readonly _permits = signal<GeneratedPermit[]>(this.seed.permits);
   private readonly _releases = signal<PermitReleaseRecord[]>(this.seed.releases);
   private readonly _auditEvents = signal<AuditEvent[]>(this.seed.auditEvents);
   private readonly _notifications = signal<AppNotification[]>(this.seed.notifications);
+
+  constructor() {
+    // The seed builds applications/documents/evaluations/permits/releases
+    // as plain data (see application-seed.ts), but every assessment and
+    // payment transaction is produced by DRIVING AssessmentStore's own
+    // real methods (draft -> submit -> approve -> issue -> pay -> verify)
+    // rather than hand-constructing Assessment/PaymentTransaction rows —
+    // seed data can therefore never violate an invariant the live UI
+    // itself enforces (duplicate references, overpayment, unresolved
+    // lines blocking issuance, etc.).
+    for (const app of this.seed.applications) {
+      this.seedAssessmentFor(app);
+    }
+    this.assessmentStore.refreshOverdueStatuses();
+    for (const app of this.seed.applications) {
+      this.syncPaymentProjection(app.id, app.officer, 'Evaluator');
+    }
+  }
 
   readonly applications = this._applications.asReadonly();
   readonly businesses = this._businesses.asReadonly();
@@ -85,8 +109,19 @@ export class ApplicationStore {
     return this._evaluations().filter((e) => e.applicationId === applicationId);
   }
 
-  getPayments(applicationId: string): PaymentTransaction[] {
-    return this._payments().filter((p) => p.applicationId === applicationId);
+  /** Every assessment version ever drafted for this application, oldest first — see AssessmentStore for the versioning rules (issuing/revising). */
+  getAssessments(applicationId: string) {
+    return this.assessmentStore.getAssessments(applicationId);
+  }
+
+  /** The one assessment version that's still "live" (not superseded/voided), or undefined if none has been drafted yet. */
+  getActiveAssessment(applicationId: string) {
+    return this.assessmentStore.getActiveAssessment(applicationId);
+  }
+
+  /** Every payment transaction ever recorded against this application, across every assessment version. */
+  getTransactions(applicationId: string) {
+    return this.assessmentStore.getTransactionsForApplication(applicationId);
   }
 
   getPermit(applicationId: string): GeneratedPermit | undefined {
@@ -97,8 +132,17 @@ export class ApplicationStore {
     return this._releases().find((r) => r.applicationId === applicationId);
   }
 
+  /**
+   * Merges this store's own audit events with AssessmentStore's (every
+   * draft/submit/approve/issue/pay/verify/reject/void/reversal/refund
+   * action writes there, not here — see AssessmentStore.audit) into one
+   * chronological timeline, so "a complete audit timeline" holds for an
+   * application regardless of which store actually recorded a given
+   * event. AssessmentStore has no dependency back on this class (avoiding
+   * a circular injection), so merging happens here instead.
+   */
   getAuditTrail(applicationId: string): AuditEvent[] {
-    return this._auditEvents()
+    return [...this._auditEvents(), ...this.assessmentStore.auditEvents()]
       .filter((e) => e.applicationId === applicationId)
       .sort((a, b) => a.timestampValue.getTime() - b.timestampValue.getTime());
   }
@@ -306,80 +350,211 @@ export class ApplicationStore {
   }
 
   /**
-   * A cashier/officer recording an onsite payment. Per the "must attach to
-   * an existing assessed application, never generate a new application
-   * ID" rule, this only accepts an application that has already been
-   * assessed (has a non-null `assessedAmountCentavos`) — it appends a
-   * transaction to that application, it never creates one.
+   * A cashier/officer recording an onsite payment against the
+   * application's currently ISSUED assessment, for the full outstanding
+   * balance in one go. Per the "must attach to an existing assessed
+   * application, never generate a new application ID" rule, this only
+   * accepts an application whose active assessment has actually been
+   * issued (an Order of Payment exists) — it appends a transaction, it
+   * never creates an application or an assessment. For a genuine PARTIAL
+   * payment or a specific peso amount/agency, use AssessmentStore's own
+   * `recordOnsitePayment` directly (the Payments > Transactions tab does
+   * this) — this wrapper exists only to keep the existing single-click
+   * call sites (Payments' legacy "Record Payment" action) working
+   * unchanged.
    */
   recordOnsitePayment(applicationId: string, referenceNumber: string, recordedBy: string): boolean {
-    const row = this.getById(applicationId);
-    if (!row || row.assessedAmountCentavos === null) return false;
-
-    const now = new Date();
-    this._payments.update((rows) => [
-      ...rows,
-      {
-        id: `PAY-${applicationId}-${rows.length + 1}`,
-        applicationId,
-        referenceNumber,
-        amountCentavos: row.assessedAmountCentavos!,
-        method: 'Onsite',
-        status: 'Pending Verification',
-        submittedAtValue: now,
-        submittedAt: now.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        }),
-        verifiedAtValue: null,
-        verifiedAt: null,
-        recordedBy,
-      },
-    ]);
-    this._applications.update((rows) =>
-      rows.map((r) =>
-        r.id === applicationId
-          ? withProjectedFields({ ...r, paymentStatus: 'Pending Verification' })
-          : r,
-      ),
-    );
-    this.appAudit(
+    const assessment = this.assessmentStore.getActiveAssessment(applicationId);
+    if (!assessment || assessment.balanceCentavos <= 0) return false;
+    const txn = this.assessmentStore.recordOnsitePayment(
+      assessment.id,
+      assessment.balanceCentavos,
+      referenceNumber,
+      'OBO/LGU',
       recordedBy,
       'Cashier',
-      applicationId,
-      `Onsite payment recorded (${referenceNumber})`,
     );
+    if (!txn) return false;
+    this.syncPaymentProjection(applicationId, recordedBy, 'Cashier');
     return true;
   }
 
-  verifyPayment(applicationId: string, verifiedBy: string): boolean {
-    const row = this.getById(applicationId);
-    if (!row || row.paymentStatus !== 'Pending Verification') return false;
-    const now = new Date();
-    this._payments.update((rows) =>
-      rows.map((p) =>
-        p.applicationId === applicationId && p.status === 'Pending Verification'
-          ? {
-              ...p,
-              status: 'Paid',
-              verifiedAtValue: now,
-              verifiedAt: now.toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-              }),
-            }
-          : p,
-      ),
+  /**
+   * Verifies exactly the ONE transaction named by `transactionId` — never
+   * every pending transaction for the application (that was the old
+   * defect: verifying one payment used to mark every other pending
+   * transaction as paid too). Every caller, including the legacy
+   * single-payment flow, must know which transaction it's verifying.
+   */
+  verifyPayment(applicationId: string, transactionId: string, verifiedBy: string): boolean {
+    const ok = this.assessmentStore.verifyTransaction(transactionId, verifiedBy, 'Payment Officer');
+    if (!ok) return false;
+    this.syncPaymentProjection(applicationId, verifiedBy, 'Payment Officer');
+    return true;
+  }
+
+  /**
+   * Builds the assessment/transaction chain for one seeded application by
+   * driving AssessmentStore's real API to the state its already-assigned
+   * `paymentStatus` implies — never hand-constructs an Assessment/
+   * PaymentTransaction row, so seeded data can't violate an invariant the
+   * live UI enforces (see the constructor's comment above).
+   */
+  private static readonly PAYMENT_ELIGIBLE_STATUSES: ReadonlySet<ApplicationLifecycleStatus> =
+    new Set([
+      'Assessed',
+      'Payment Submitted',
+      'Payment Under Verification',
+      'Payment Verified',
+      'For Approval',
+      'Approved',
+      'Permit Generated',
+      'Ready for Release',
+      'Released',
+      'Completed',
+      'Expired',
+    ]);
+
+  private seedAssessmentFor(app: ApplicationRecord): void {
+    if (!ApplicationStore.PAYMENT_ELIGIBLE_STATUSES.has(app.lifecycleStatus)) return;
+    const draft = this.assessmentStore.draftAssessment(
+      app.id,
+      app.permitType,
+      app.officer,
+      'Evaluator',
     );
+    if (!draft) return;
+    // Resolve every line still awaiting assessor input with a modest,
+    // clearly-a-placeholder sample amount so the seed can demonstrate a
+    // full workflow — this is sample-package data (see the app-wide
+    // SAMPLE DATA convention), never presented as a verified national
+    // rate; each line keeps its own PENDING_LGU_VALIDATION status and
+    // legal-basis citation regardless of this seeded number.
+    for (const line of draft.lineItems) {
+      if (line.amountCentavos === null) {
+        const sample = 15000 + (line.feeRuleId.length % 7) * 5000;
+        this.assessmentStore.setLineAmount(
+          draft.id,
+          line.feeRuleId,
+          sample,
+          app.officer,
+          'Evaluator',
+        );
+      }
+    }
+    if (!this.assessmentStore.submitForApproval(draft.id, app.officer, 'Evaluator')) return;
+    if (
+      !this.assessmentStore.approveAssessment(draft.id, 'Engr. Ricardo Buenaflor', 'Administrator')
+    )
+      return;
+
+    const overdue = app.paymentStatus === 'Overdue';
+    if (
+      !this.assessmentStore.issueOrderOfPayment(
+        draft.id,
+        'Engr. Ricardo Buenaflor',
+        'Administrator',
+        overdue ? -15 : 15,
+      )
+    ) {
+      return;
+    }
+    // 'Not Yet Available' (still 'Assessed') or 'Overdue' (expired, never
+    // paid) both stop here — issued, no transaction recorded.
+    if (app.paymentStatus !== 'Pending Verification' && app.paymentStatus !== 'Paid') return;
+
+    const issued = this.assessmentStore.getAssessmentById(draft.id);
+    if (!issued) return;
+    const txn = this.assessmentStore.recordOnsitePayment(
+      draft.id,
+      issued.balanceCentavos,
+      `OR-2026-${app.id.slice(-6)}`,
+      'OBO/LGU',
+      app.officer,
+      'Cashier',
+    );
+    if (!txn) return;
+    if (app.paymentStatus === 'Paid') {
+      this.assessmentStore.verifyTransaction(txn.id, 'Payment Officer', 'Payment Officer');
+    }
+    // 'Pending Verification' target: leave the transaction unverified.
+  }
+
+  /** Recomputes `paymentStatus`/`assessedAmountCentavos` from the application's active assessment, and advances `lifecycleStatus` one legal hop at a time through the Assessed -> ... -> For Approval sub-sequence when the payment state now supports it. The ONE place that sub-sequence is driven — every payment action (assess, pay, verify, reject, void) funnels through here afterward, so a caller can never leave the lifecycle status stale relative to the payment ledger. */
+  private syncPaymentProjection(applicationId: string, actor: string, role: string): void {
+    const row = this.getById(applicationId);
+    if (!row) return;
+    const assessment = this.assessmentStore.getActiveAssessment(applicationId);
+    const { paymentStatus, assessedAmountCentavos } = this.derivePaymentProjection(assessment);
+
+    const paymentSubSequence: ApplicationLifecycleStatus[] = [
+      'Assessed',
+      'Payment Submitted',
+      'Payment Under Verification',
+      'Payment Verified',
+      'For Approval',
+    ];
+    const idx = paymentSubSequence.indexOf(row.lifecycleStatus);
+    let lifecycleStatus = row.lifecycleStatus;
+    if (idx !== -1) {
+      let targetIdx = idx;
+      if (paymentStatus === 'Pending Verification' || paymentStatus === 'Partially Paid') {
+        targetIdx = Math.max(idx, 2);
+      } else if (paymentStatus === 'Paid') {
+        targetIdx = Math.max(idx, 4);
+      }
+      lifecycleStatus = paymentSubSequence[Math.min(targetIdx, paymentSubSequence.length - 1)];
+    }
+
+    const changed =
+      paymentStatus !== row.paymentStatus ||
+      assessedAmountCentavos !== row.assessedAmountCentavos ||
+      lifecycleStatus !== row.lifecycleStatus;
+    if (!changed) return;
+
     this._applications.update((rows) =>
       rows.map((r) =>
-        r.id === applicationId ? withProjectedFields({ ...r, paymentStatus: 'Paid' }) : r,
+        r.id === applicationId
+          ? withProjectedFields({ ...r, paymentStatus, assessedAmountCentavos, lifecycleStatus })
+          : r,
       ),
     );
-    this.appAudit(verifiedBy, 'Payment Officer', applicationId, 'Payment verified');
-    return true;
+    if (lifecycleStatus !== row.lifecycleStatus) {
+      this.appAudit(actor, role, applicationId, `Status changed to ${lifecycleStatus}`);
+    }
+  }
+
+  private derivePaymentProjection(assessment: ReturnType<AssessmentStore['getActiveAssessment']>): {
+    paymentStatus: PaymentStatus;
+    assessedAmountCentavos: number | null;
+  } {
+    if (!assessment || assessment.status === 'Draft' || assessment.status === 'For Approval') {
+      return { paymentStatus: 'Not Yet Available', assessedAmountCentavos: null };
+    }
+    const assessedAmountCentavos = assessment.totalCentavos;
+    if (assessment.status === 'Paid') return { paymentStatus: 'Paid', assessedAmountCentavos };
+    if (assessment.status === 'Partially Paid')
+      return { paymentStatus: 'Partially Paid', assessedAmountCentavos };
+    if (assessment.status === 'Overdue')
+      return { paymentStatus: 'Overdue', assessedAmountCentavos };
+    const hasPending = this.assessmentStore
+      .getTransactionsForAssessment(assessment.id)
+      .some((t) => t.status === 'Pending Verification');
+    return {
+      paymentStatus: hasPending ? 'Pending Verification' : 'Not Yet Available',
+      assessedAmountCentavos,
+    };
+  }
+
+  /**
+   * Called by the Payments UI after any transaction-level action it
+   * performs directly against AssessmentStore (verify/reject/void/
+   * reversal/refund, or a new manual payment) so the owning application's
+   * projected fields and lifecycle status stay in sync without every
+   * caller having to know the sync/derive rules above.
+   */
+  refreshPaymentProjection(applicationId: string, actor: string, role: string): void {
+    this.syncPaymentProjection(applicationId, actor, role);
   }
 
   /**
@@ -399,7 +574,7 @@ export class ApplicationStore {
     if (this.getRelease(applicationId)) return false; // duplicate release
     const permit = this.getPermit(applicationId);
     if (!permit) return false;
-    if (row.paymentStatus !== 'Paid') return false;
+    if (!this.assessmentStore.canProcessPermit(applicationId)) return false;
     if (row.lifecycleStatus !== 'Ready for Release') return false;
 
     const now = new Date();
@@ -710,20 +885,39 @@ export class ApplicationStore {
 
   // ---- Fee assessment + permit generation --------------------------------
 
-  /** Computes the assessed amount from the CURRENT Super Admin Settings fee schedule (PaymentConfigStore) rather than a hardcoded literal — an application assessed before a settings change keeps its own snapshot (`assessedAmountCentavos`), so editing fees later never rewrites history. */
+  /**
+   * Starts the versioned, rules-based assessment for this application —
+   * drafts it from the fee rules that apply to the application's permit
+   * type (see fee-rule.model.ts / AssessmentStore.draftAssessment).
+   * Fully AUTO-ISSUES the Order of Payment only when every applicable
+   * line already has a real amount (no "Requires assessor input" lines) —
+   * otherwise it stops at Draft and a Payment Officer must finish it from
+   * Payments > Assessments (enter the manual line amounts, submit for
+   * approval, and issue), which is the real required workflow this
+   * one-click Evaluator action can only ever be the FIRST step of. Once a
+   * non-terminal assessment already exists for this application, this
+   * simply returns true without creating a second one (idempotent —
+   * re-clicking "Assess Fee" never forks a duplicate assessment).
+   */
   assessFee(applicationId: string, actor: string, role: string): boolean {
     const row = this.getById(applicationId);
-    if (!row || row.assessedAmountCentavos !== null) return false;
-    const total = totalAssessmentCentavos(this.paymentConfig.feeSchedule());
-    this._applications.update((rows) =>
-      rows.map((r) =>
-        r.id === applicationId ? withProjectedFields({ ...r, assessedAmountCentavos: total }) : r,
-      ),
-    );
+    if (!row) return false;
+    const existing = this.assessmentStore.getActiveAssessment(applicationId);
+    if (existing) return true; // already drafted/issued — nothing more for this one-click action to do
+    const draft = this.assessmentStore.draftAssessment(applicationId, row.permitType, actor, role);
+    if (!draft) return false;
+    if (!draft.hasUnresolvedLines) {
+      if (
+        this.assessmentStore.submitForApproval(draft.id, actor, role) &&
+        this.assessmentStore.approveAssessment(draft.id, actor, role)
+      ) {
+        this.assessmentStore.issueOrderOfPayment(draft.id, actor, role);
+      }
+    }
+    this.syncPaymentProjection(applicationId, actor, role);
     if (row.lifecycleStatus === 'Under Evaluation') {
       this.transitionStatus(applicationId, 'Assessed', actor, role);
     }
-    this.appAudit(actor, role, applicationId, `Fee assessed (₱${(total / 100).toFixed(2)})`);
     return true;
   }
 
@@ -739,7 +933,12 @@ export class ApplicationStore {
   generatePermit(applicationId: string, actor: string, role: string): boolean {
     const row = this.getById(applicationId);
     if (!row) return false;
-    if (row.lifecycleStatus !== 'Approved' || row.paymentStatus !== 'Paid') return false;
+    if (row.lifecycleStatus !== 'Approved') return false;
+    // "Allow permit processing only when all mandatory balances are
+    // verified" — checked against the real assessment (every mandatory
+    // line fully paid via verified, non-voided transactions), not just
+    // the coarse `paymentStatus === 'Paid'` projection.
+    if (!this.assessmentStore.canProcessPermit(applicationId)) return false;
     if (this.getPermit(applicationId)) return false;
     const req = requirementsFor(row.permitType);
     const now = new Date();

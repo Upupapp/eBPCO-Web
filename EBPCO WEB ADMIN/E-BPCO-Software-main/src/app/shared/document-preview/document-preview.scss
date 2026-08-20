@@ -173,6 +173,28 @@
   line-height: 1.5;
 }
 
+.doc-warning {
+  background: $color-warning-bg;
+  color: $color-warning;
+  border-radius: $radius-sm;
+  padding: 0.6rem 0.8rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.doc-flag {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: $color-warning;
+  background: $color-warning-bg;
+  border-radius: $radius-sm;
+  padding: 0.1rem 0.4rem;
+  vertical-align: middle;
+}
+
 .doc-footer {
   margin-top: 2rem;
   padding-top: 0.75rem;
