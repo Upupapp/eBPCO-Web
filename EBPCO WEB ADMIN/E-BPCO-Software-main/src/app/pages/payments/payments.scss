@@ -285,6 +285,100 @@ h3 {
   }
 }
 
+// ---- Payment Transactions table: fixed column rhythm ---------------------
+// `table-layout: fixed` (with the <colgroup> widths declared in the
+// template) instead of the shared table's default `auto` layout — the
+// Action column's "More actions" menu toggles open/closed, and an `auto`
+// layout would recompute every column's width (and therefore the whole
+// table's horizontal scroll alignment) each time that happens. Fixed
+// widths mean opening the menu only ever grows the row's height, never
+// reflows a column boundary out from under content that was already
+// visible.
+.txn-table {
+  table-layout: fixed;
+  // Fills the card's full width (the shared `table` rule already sets
+  // `width: 100%`) — the <colgroup> in the template declares each
+  // column's share as a PERCENTAGE, not a fixed px value, so the 100% is
+  // divided proportionally by actual content weight (Reference/Action get
+  // the largest shares, Method/Agency/Amount the smallest) instead of
+  // either stretching every column equally past what it needs or leaving
+  // dead space after a narrower fixed-px total.
+
+  // `middle` centers every cell's own content within the row — this is
+  // what makes the "Attach OR No." button/Verified pill line up with the
+  // plain text next to them (both button and pill are visibly taller than
+  // a line of text, since they carry their own padding for a comfortable
+  // tap target/badge shape, so top-aligning them would leave their text
+  // sitting lower than the row's plain text — see the two rules right
+  // below for the actual inline-element fix, `vertical-align: middle` on
+  // the <td> alone only centers each cell's *box*, not necessarily an
+  // inline-block/flex child's own text within it).
+  th,
+  td {
+    vertical-align: middle;
+  }
+
+  // The "More actions" menu can make ONE row's Action cell much taller
+  // than its single-line siblings while it's open — `:has()` switches
+  // just THAT row back to top-alignment for as long as the menu stays
+  // open, so the row's data and its actions stay flush together at the
+  // top instead of the short cells re-centering into the middle of the
+  // now-tall row. Every other (closed) row keeps the `middle` alignment
+  // above.
+  tr:has(.txn-menu[open]) td {
+    vertical-align: top;
+  }
+
+  // Method/Amount/Status/Date are short, fixed-shape values — nowrap
+  // keeps them tidy on one line. Transaction ID and Reference are never
+  // truncated with an ellipsis (an OR/reference number must stay fully
+  // readable), so they keep the shared `.detail-table` default of
+  // `white-space: normal` and simply wrap if a value is ever unusually
+  // long, rather than silently hiding part of it.
+  th:nth-child(2),
+  td:nth-child(2),
+  th:nth-child(3),
+  td:nth-child(3),
+  th:nth-child(5),
+  td:nth-child(5),
+  th:nth-child(6),
+  td:nth-child(6),
+  th:nth-child(7),
+  td:nth-child(7) {
+    white-space: nowrap;
+  }
+
+  .status-pill {
+    vertical-align: middle;
+  }
+
+  // The Action column's own share of the row (23%) is wider than its
+  // closed-state content (one chip + the "More actions" trigger) needs —
+  // right-aligning both the header label and the buttons themselves (see
+  // .txn-actions below) keeps them anchored to the card's own right edge
+  // instead of sitting flush-left with a trailing gap of empty space.
+  th:last-child {
+    text-align: right;
+  }
+
+  .txn-actions {
+    justify-content: flex-end;
+  }
+
+  // `.txn-actions-cell` (shared with the Assessments/Transactions list
+  // tables) sets `display: flex` on the <td> itself — fine for those two
+  // tables, whose actions never grow past ~1 line, but here the "More
+  // actions" menu can make this ONE row visibly tall while every sibling
+  // cell stays single-line, and `vertical-align` has no effect on a flex
+  // box. Restoring the plain table-cell display lets `vertical-align:
+  // middle` (above) actually center this cell's content against the rest
+  // of the row — the inner `.txn-actions` div is still its own flex
+  // container, so the buttons themselves keep their row/wrap/gap layout.
+  .txn-actions-cell {
+    display: table-cell;
+  }
+}
+
 // ---- Assessment totals (Total / Amount Paid / Balance) -------------------
 // Pulled out of the Line Items table's own rows (which forced awkward
 // colspans that shifted every time the Draft-only "Include" column
@@ -346,9 +440,8 @@ h3 {
 .txn-actions-cell {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.4rem;
-  min-width: 200px;
 
   .link-btn,
   .pill-btn {
@@ -369,11 +462,17 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
 }
 
 .btn-chip {
   display: inline-flex;
+  // Default inline vertical-align is `baseline`, which — since this chip
+  // is visibly taller than a line of text (its own comfortable tap-target
+  // height, not just its text) — sits it a few px lower than plain text
+  // in a sibling cell even when both cells' boxes start at the same
+  // point. `middle` is what actually lines the chip up with the row.
+  vertical-align: middle;
   align-items: center;
   gap: 0.3rem;
   height: 1.75rem;
@@ -459,14 +558,20 @@ h3 {
 .txn-menu-panel {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 0.2rem;
   margin-top: 0.4rem;
-  padding: 0.5rem;
-  min-width: 160px;
+  padding: 0.4rem;
+  // Sized to fit within the .txn-table's own fixed Action column width
+  // (240px minus cell padding) — the column's width never changes when
+  // this opens (see .txn-table's own comment), so this only needs to fit
+  // the space already reserved for it, not claim more.
+  width: 160px;
+  max-width: 100%;
   background: $color-bg-subtle;
   border: 1px solid $color-border;
   border-radius: $radius-md;
+  box-sizing: border-box;
 }
 
 .txn-menu-label {
@@ -892,12 +997,11 @@ h3 {
 
   // Tablet: the transaction action group wraps onto its own line under
   // the Date column rather than forcing the row wider or overlapping it.
+  // (Only affects the Assessments/Transactions list tables' action cell —
+  // the Payment Transactions table's own Action column has a fixed width
+  // via .txn-table's <colgroup> and doesn't need this.)
   .txn-actions-cell {
     min-width: 160px;
-  }
-
-  .txn-menu-panel {
-    min-width: 150px;
   }
 }
 
