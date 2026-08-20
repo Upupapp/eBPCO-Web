@@ -629,11 +629,33 @@ h3 {
       flex: 1 1 auto;
     }
   }
+
+  // The shared `.modal-actions` (from _modal.scss) stays a centered
+  // side-by-side pair, built for two short words like "Cancel"/"Confirm" —
+  // Payments' own confirm labels ("Record Payment", "Confirm Reversal")
+  // run longer and wrap awkwardly at that width, so on narrow screens
+  // this stacks them full-width instead.
+    flex-direction: column-reverse;
+
+    .modal-btn {
+      width: 100%;
+    }
+  }
 }
 
 @media (max-width: 480px) {
   .create-box,
   .create-box.wide-box {
     max-width: 100%;
+  }
+
+  // Assessment/Transaction ids ("ASMT-E-BPCO-2026-000115-84 (v1)") run
+  // noticeably longer than other pages' detail-view titles — the shared
+  // `.detail-head h1` size (1.6rem) wraps them to 3-4 lines on a phone
+  // width. Scoped down here rather than in the shared partial, since
+  // other pages' shorter titles don't have this problem.
+  .detail-head h1 {
+    font-size: 1.15rem;
+    line-height: 1.35;
   }
 }
