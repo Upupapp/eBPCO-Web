@@ -382,6 +382,7 @@
                   <th>Amount</th>
                   <th>Status</th>
                   <th>Date</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -398,10 +399,24 @@
                       }}</span>
                     </td>
                     <td>{{ t.submittedAt }}</td>
+                    <td>
+                      @if (t.status === 'Pending Verification' && canVerifyPayment()) {
+                        <button
+                          type="button"
+                          class="pill-btn verify"
+                          (click)="verifyTransaction(t)"
+                        >
+                          Verify
+                        </button>
+                        <button type="button" class="pill-btn reject" (click)="openReject(t)">
+                          Reject
+                        </button>
+                      }
+                    </td>
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="7" class="muted">No payment transactions recorded yet.</td>
+                    <td colspan="8" class="muted">No payment transactions recorded yet.</td>
                   </tr>
                 }
               </tbody>

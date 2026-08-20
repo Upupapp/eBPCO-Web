@@ -5,12 +5,10 @@ import { RequirementDocument, requirementsFor } from './requirements-catalog';
 export type RequirementDocumentPatch = Partial<Omit<RequirementDocument, 'id'>>;
 
 function seedDocuments(): Record<PermitType, RequirementDocument[]> {
-  const entries = ALL_PERMIT_TYPES.map(
-    (type): [PermitType, RequirementDocument[]] => [
-      type,
-      requirementsFor(type).documents.map((d) => ({ ...d })),
-    ],
-  );
+  const entries = ALL_PERMIT_TYPES.map((type): [PermitType, RequirementDocument[]] => [
+    type,
+    requirementsFor(type).documents.map((d) => ({ ...d })),
+  ]);
   return Object.fromEntries(entries) as Record<PermitType, RequirementDocument[]>;
 }
 
@@ -33,9 +31,8 @@ function seedDocuments(): Record<PermitType, RequirementDocument[]> {
 export class RequirementsConfigStore {
   private nextSeq = 1;
 
-  private readonly _documentsByType = signal<Record<PermitType, RequirementDocument[]>>(
-    seedDocuments(),
-  );
+  private readonly _documentsByType =
+    signal<Record<PermitType, RequirementDocument[]>>(seedDocuments());
 
   readonly documentsByType = this._documentsByType.asReadonly();
 
