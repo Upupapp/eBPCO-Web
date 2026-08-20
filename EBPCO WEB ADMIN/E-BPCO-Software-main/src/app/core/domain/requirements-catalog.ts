@@ -323,7 +323,7 @@ const BUILDING_PLAN_SET = (prefix: string): RequirementDocument[] => [
   ),
   doc(`${prefix}-elec-plan`, 'Electrical Plans (signed and sealed)', true, 'obo'),
   doc(`${prefix}-mech-plan`, 'Mechanical Plans (signed and sealed, if applicable)', false, 'obo'),
-  doc(`${prefix}-sanitary-plan`, 'Sanitary/Plumbing Plans (signed and sealed)', true, 'obo'),
+  doc(`${prefix}-sanitary-plan`, 'Sanitary / Plumbing Plans (signed and sealed)', true, 'obo'),
   doc(`${prefix}-bom`, 'Bill of Materials and Specifications', true, 'obo'),
   doc(
     `${prefix}-prc`,
@@ -372,8 +372,8 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
     finalDocument: 'Building Permit (Renovation/Alteration)',
   },
   {
-    permitType: 'Addition/Extension',
-    requiredForm: 'Application for Building Permit (Addition/Extension)',
+    permitType: 'Addition / Extension',
+    requiredForm: 'Application for Building Permit (Addition / Extension)',
     professionalDoc: doc(
       'addition-prc',
       'PRC License and PTR of Engineer/Architect of Record',
@@ -381,7 +381,7 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
       'obo',
     ),
     planDocs: [
-      doc('addition-plan', 'Addition/Extension Plans (signed and sealed)', true, 'obo'),
+      doc('addition-plan', 'Addition / Extension Plans (signed and sealed)', true, 'obo'),
       doc(
         'addition-struct-plan',
         'Structural Analysis for the added load (signed and sealed)',
@@ -394,7 +394,7 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
       'Structural site inspection to verify the existing structure can carry the addition; final inspection upon completion.',
     validityMonths: 12,
     validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Building Permit (Addition/Extension)',
+    finalDocument: 'Building Permit (Addition / Extension)',
   },
   {
     permitType: 'Demolition',
@@ -440,8 +440,8 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
     finalDocument: 'Architectural Permit',
   },
   {
-    permitType: 'Civil/Structural',
-    requiredForm: 'Application for Civil/Structural Permit',
+    permitType: 'Civil / Structural',
+    requiredForm: 'Application for Civil / Structural Permit',
     professionalDoc: doc(
       'struct-prc',
       'PRC License and PTR of Civil Engineer of Record',
@@ -456,7 +456,7 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
       'Structural site inspection during key pours/erection stages; final structural inspection.',
     validityMonths: 12,
     validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Civil/Structural Permit',
+    finalDocument: 'Civil / Structural Permit',
   },
   {
     permitType: 'Electrical',
@@ -490,19 +490,19 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
     finalDocument: 'Mechanical Permit',
   },
   {
-    permitType: 'Sanitary/Plumbing',
-    requiredForm: 'Application for Sanitary/Plumbing Permit',
+    permitType: 'Sanitary / Plumbing',
+    requiredForm: 'Application for Sanitary / Plumbing Permit',
     professionalDoc: doc(
       'sanplumb-prc',
       'PRC License and PTR of Sanitary Engineer/Master Plumber of Record',
       true,
       'obo',
     ),
-    planDocs: [doc('sanplumb-plan', 'Sanitary/Plumbing Plans (signed and sealed)', true, 'obo')],
+    planDocs: [doc('sanplumb-plan', 'Sanitary / Plumbing Plans (signed and sealed)', true, 'obo')],
     inspectionRequirements: 'Plumbing rough-in inspection and final sanitary inspection.',
     validityMonths: 12,
     validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Sanitary/Plumbing Permit',
+    finalDocument: 'Sanitary / Plumbing Permit',
   },
   {
     permitType: 'Plumbing',
@@ -543,7 +543,7 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
     finalDocument: 'Electronics Permit',
   },
   {
-    permitType: 'Interior Design',
+    permitType: 'Interior',
     requiredForm: 'Application for Interior Design Permit',
     professionalDoc: doc(
       'interior-prc',
@@ -571,7 +571,7 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
     finalDocument: 'Fencing Permit',
   },
   {
-    permitType: 'Sign',
+    permitType: 'Sign Permit',
     requiredForm: 'Application for Signboard/Billboard Permit',
     professionalDoc: doc(
       'sign-prc',

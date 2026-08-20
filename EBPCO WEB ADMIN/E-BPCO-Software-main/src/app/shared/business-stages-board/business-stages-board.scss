@@ -2,6 +2,13 @@
 @use '../styles/tokens' as *;
 @use '../styles/modal';
 
+// A note's minimum rendered height (name + business name + ID + permit
+// type, 4 lines, plus padding/gaps) — the ONE place this is defined.
+// `.stage-col-body`'s grid-row sizing, its reserved 3-row min-height, and
+// the loading skeleton all derive from this same value so none of them
+// can silently drift out of sync with the note's actual content again.
+$note-min-height: 132px;
+
 // `.card`/`.card-head` are copy-pasted per page throughout this codebase
 // (no shared partial to @use) — matched here to whatever dashboard.scss
 // declares so this pane reads as a native part of the dashboard.
@@ -361,9 +368,13 @@ $stage-colors: (
   position: relative;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-auto-rows: minmax(104px, auto);
+  // 132px (not the original 104px) — a note now carries 4 text lines
+  // (applicant/business/ID/permit type) instead of 3, so the reserved
+  // per-row height must match its real rendered height or a note visibly
+  // overlaps/crowds the row below it.
+  grid-auto-rows: minmax($note-min-height, auto);
   gap: 1rem;
-  min-height: calc(104px * 3 + 1rem * 2);
+  min-height: calc($note-min-height * 3 + 1rem * 2);
   margin-bottom: 0.9rem;
   border-radius: $radius-md;
   transition: background $ease-base;
@@ -415,7 +426,7 @@ $stage-colors: (
   flex-direction: column;
   gap: 0.2rem;
   width: 100%;
-  min-height: 104px;
+  min-height: $note-min-height;
   text-align: left;
   border: 1px solid rgba(20, 20, 20, 0.06);
   border-radius: 5px;
@@ -698,12 +709,12 @@ $stage-colors: (
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
-  min-height: calc(104px * 3 + 1rem * 2);
+  min-height: calc($note-min-height * 3 + 1rem * 2);
   overflow: hidden;
 }
 
 .stages-board.skeleton .skel-note {
-  height: 104px;
+  height: $note-min-height;
   border-radius: 5px;
 }
 
