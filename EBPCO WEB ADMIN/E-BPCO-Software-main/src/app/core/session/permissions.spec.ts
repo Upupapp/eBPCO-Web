@@ -46,3 +46,11 @@ describe('ACTION_PERMISSIONS — payment-assessment workflow enforcement', () =>
     }
   });
 });
+
+describe('ACTION_PERMISSIONS — permit-type requirements configuration', () => {
+  it('configureRequirements (Permit Release > Permit Types document-checklist edits) is limited to Super Admin and Administrator — even a Releasing Officer, who can reach the page, cannot edit', () => {
+    const allowed = allowedRoles(ACTION_PERMISSIONS.configureRequirements);
+    expect(allowed).toEqual(['Super Admin', 'Administrator']);
+    expect(ACTION_PERMISSIONS.configureRequirements('Releasing Officer')).toBe(false);
+  });
+});

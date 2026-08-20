@@ -4,6 +4,7 @@ import {
   ContactVerification,
   unverifiedContact,
 } from '../../core/domain/applicant.model';
+import { Business } from '../../core/domain/business.model';
 
 export type { AppStatus };
 export type EvalKey = 'initial' | 'zoning' | 'fire' | 'obo' | 'final';
@@ -292,6 +293,8 @@ export const EVAL_CARDS: EvalCard[] = [
 
 export interface AppDetail {
   row: AppRow;
+  /** The application's real linked Business — resolved via businessId (never the applicant's name); 'Not provided' only when neither the real Business record nor the legacy businessName can be resolved. */
+  businessLabel: string;
   region: string;
   email: string;
   phone: string;
@@ -321,10 +324,15 @@ export interface AppDetail {
 // `applicant` (the real linked Applicant record) is optional only so this
 // keeps compiling for any not-yet-migrated caller — every current call
 // site passes it, so the real email/mobile number is used rather than a
-// fabricated one.
-export function buildDetailFor(row: AppRow, applicant?: Applicant): AppDetail {
+// fabricated one. `business` is likewise optional (and resolved by the
+// caller via ApplicationStore.getBusiness, never by matching on the
+// applicant's name) — falls back to the application's own denormalized
+// businessName, then to 'Not provided', per getApplicationContext's rule.
+export function buildDetailFor(row: AppRow, applicant?: Applicant, business?: Business): AppDetail {
+  const businessLabel = business?.name || row.businessName || 'Not provided';
   return {
     row,
+    businessLabel,
     region: 'Region V (Bicol Region)',
     email: applicant?.email ?? `${row.applicant.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
     phone: applicant?.mobileNumber ?? '+63 912 345 6789',
@@ -346,7 +354,7 @@ export function buildDetailFor(row: AppRow, applicant?: Applicant): AppDetail {
     },
     applicationType: {
       type: applicant?.applicantType ?? 'Individual',
-      ifCompany: '',
+      ifCompany: businessLabel,
       authorizedRep: '',
       businessPermit: row.permitType,
     },

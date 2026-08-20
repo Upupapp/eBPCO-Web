@@ -452,11 +452,42 @@
   font-weight: 700;
 }
 
-.applicant-cell {
+// Applicant (a person) and Business/Project (the permit's real owner —
+// see ApplicationStore.getApplicationContext) sit stacked in one cell so
+// they're always both visible, on wide and narrow layouts alike, rather
+// than a separate column that has to independently collapse or a
+// tooltip-only disclosure.
+.identity-cell {
   display: flex;
   align-items: center;
   gap: 0.55rem;
+  min-width: 0;
+}
+
+.identity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.identity-name {
   font-weight: 600;
+  color: $color-ink-900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+
+.identity-business {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: $color-ink-300;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
 }
 
 .status-pill.revision-required {

@@ -275,22 +275,34 @@ export class Applications {
   protected readonly pageSize = 10;
   protected readonly searchTerm = signal('');
   protected readonly statusFilter = signal<'All' | AppStatus>('All');
+  /** Stores a real Business.id — canonical, never matched by applicant name. */
+  protected readonly businessFilter = signal<'All' | string>('All');
 
-  protected readonly activeFilterCount = computed(() => (this.statusFilter() === 'All' ? 0 : 1));
+  protected readonly businessOptions = computed(() =>
+    [...this.store.businesses()].sort((a, b) => a.name.localeCompare(b.name)),
+  );
+
+  protected readonly activeFilterCount = computed(
+    () => (this.statusFilter() === 'All' ? 0 : 1) + (this.businessFilter() === 'All' ? 0 : 1),
+  );
 
   protected clearFilters(): void {
     this.statusFilter.set('All');
+    this.businessFilter.set('All');
   }
 
   protected readonly filteredRows = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
     const status = this.statusFilter();
+    const businessId = this.businessFilter();
     return this.rows().filter((r) => {
       if (status !== 'All' && r.status !== status) return false;
+      if (businessId !== 'All' && r.businessId !== businessId) return false;
       if (!term) return true;
       return (
         r.id.toLowerCase().includes(term) ||
         r.applicant.toLowerCase().includes(term) ||
+        r.businessName.toLowerCase().includes(term) ||
         r.location.toLowerCase().includes(term) ||
         r.type.toLowerCase().includes(term)
       );
@@ -319,7 +331,11 @@ export class Applications {
   protected readonly selectedDetail = computed<AppDetail | null>(() => {
     const row = this.selectedRow();
     if (!row) return null;
-    return buildDetailFor(row, this.store.getApplicant(row.applicantId));
+    return buildDetailFor(
+      row,
+      this.store.getApplicant(row.applicantId),
+      this.store.getBusiness(row.businessId),
+    );
   });
 
   // ---- Permit Result tab -------------------------------------------------
@@ -598,6 +614,8 @@ export class Applications {
     return {
       'Application ID': row.id,
       Applicant: row.applicant,
+      'Business ID': row.businessId,
+      'Business / Project': row.businessName,
       Location: row.location,
       Type: row.type,
       'Date Submitted': row.dateSubmitted,

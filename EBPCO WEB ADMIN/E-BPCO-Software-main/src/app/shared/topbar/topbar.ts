@@ -56,7 +56,9 @@ export class Topbar {
     this.onSearchInput('');
   }
 
-  protected readonly unreadCount = computed(() => this.notifications().filter((n) => !n.isRead).length);
+  protected readonly unreadCount = computed(
+    () => this.notifications().filter((n) => !n.isRead).length,
+  );
 
   protected toggleNotifPanel(): void {
     this.notifPanelOpen.update((open) => !open);
@@ -75,6 +77,12 @@ export class Topbar {
 
   protected markAllRead(): void {
     this.store.markAllNotificationsRead();
+  }
+
+  /** The business/project a notification's application belongs to, or null when the notification isn't tied to a real application — resolved through the store's real businessId relationship, never the applicant's name. */
+  protected notifBusinessLabel(applicationId: string | null): string | null {
+    if (!applicationId) return null;
+    return this.store.getApplicationContext(applicationId)?.businessLabel ?? null;
   }
 
   protected selectNotification(id: string, applicationId: string | null): void {

@@ -63,6 +63,122 @@ describe('ApplicationStore — data integrity', () => {
   });
 });
 
+describe('ApplicationStore — getApplicationContext (business/project resolution)', () => {
+  let store: ApplicationStore;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [ApplicationStore] });
+    store = TestBed.inject(ApplicationStore);
+  });
+
+  it('returns undefined for an application id that does not exist', () => {
+    expect(store.getApplicationContext('NOT-A-REAL-ID')).toBeUndefined();
+  });
+
+  it('resolves the real linked Business — never the applicant name standing in for it', () => {
+    for (const app of store.applications()) {
+      const ctx = store.getApplicationContext(app.id)!;
+      const business = store.getBusiness(app.businessId)!;
+      expect(ctx.businessId).toBe(app.businessId);
+      expect(ctx.business).toBe(business);
+      expect(ctx.businessLabel).toBe(business.name);
+      expect(ctx.businessLabel).not.toBe(ctx.applicant);
+    }
+  });
+
+  it('an applicant who owns more than one business resolves each of their applications to the correct distinct business by businessId (never by applicant name)', () => {
+    const ownerCounts = new Map<string, number>();
+    for (const b of store.businesses()) {
+      ownerCounts.set(b.ownerApplicantId, (ownerCounts.get(b.ownerApplicantId) ?? 0) + 1);
+    }
+    const multiBusinessOwnerId = Array.from(ownerCounts.entries()).find(
+      ([, count]) => count > 1,
+    )?.[0];
+    expect(multiBusinessOwnerId).toBeTruthy();
+
+    const ownedBusinessIds = new Set(
+      store
+        .businesses()
+        .filter((b) => b.ownerApplicantId === multiBusinessOwnerId)
+        .map((b) => b.id),
+    );
+    const appsForOwner = store.applications().filter((a) => a.applicantId === multiBusinessOwnerId);
+    expect(appsForOwner.length).toBeGreaterThan(0);
+
+    for (const app of appsForOwner) {
+      const ctx = store.getApplicationContext(app.id)!;
+      expect(ownedBusinessIds.has(ctx.businessId)).toBe(true);
+      expect(ctx.business!.id).toBe(app.businessId);
+    }
+
+    // If this owner's businesses differ in name, confirm two of their
+    // applications with different businessId resolve to different labels
+    // (proving the join is per-application, not collapsed to one name).
+    const distinctBusinessIdsUsed = new Set(appsForOwner.map((a) => a.businessId));
+    if (distinctBusinessIdsUsed.size > 1) {
+      const labels = new Set(
+        appsForOwner.map((a) => store.getApplicationContext(a.id)!.businessLabel),
+      );
+      expect(labels.size).toBeGreaterThan(1);
+    }
+  });
+
+  it('falls back to the legacy businessName, then to "Not provided" — never to the applicant name — when no real Business resolves', () => {
+    const applicant = store.applicants()[0];
+    const record = store.create(
+      {
+        businessId: 'MISSING-BUSINESS-ID',
+        businessName: 'Legacy Denormalized Name',
+        applicantId: applicant.id,
+        applicant: 'Some Applicant Name',
+        location: 'Barangay Poblacion',
+        permitType: 'Building Permit',
+        applicationAction: 'New',
+        officer: 'Test Officer',
+        dateSubmitted: '01 Jan 2026',
+        lifecycleStatus: 'Submitted',
+        evaluationStage: 'Initial',
+        evaluationResult: 'Pending',
+        paymentStatus: 'Not Yet Available',
+        permitReleaseStatus: 'Not Ready',
+        assessedAmountCentavos: null,
+      },
+      'Tester',
+      'Administrator',
+    );
+
+    const ctx = store.getApplicationContext(record.id)!;
+    expect(ctx.business).toBeUndefined();
+    expect(ctx.businessLabel).toBe('Legacy Denormalized Name');
+    expect(ctx.businessLabel).not.toBe(ctx.applicant);
+
+    const record2 = store.create(
+      {
+        businessId: 'MISSING-BUSINESS-ID-2',
+        businessName: '',
+        applicantId: applicant.id,
+        applicant: 'Some Applicant Name',
+        location: 'Barangay Poblacion',
+        permitType: 'Building Permit',
+        applicationAction: 'New',
+        officer: 'Test Officer',
+        dateSubmitted: '01 Jan 2026',
+        lifecycleStatus: 'Submitted',
+        evaluationStage: 'Initial',
+        evaluationResult: 'Pending',
+        paymentStatus: 'Not Yet Available',
+        permitReleaseStatus: 'Not Ready',
+        assessedAmountCentavos: null,
+      },
+      'Tester',
+      'Administrator',
+    );
+    const ctx2 = store.getApplicationContext(record2.id)!;
+    expect(ctx2.businessLabel).toBe('Not provided');
+    expect(ctx2.businessLabel).not.toBe(ctx2.applicant);
+  });
+});
+
 describe('ApplicationStore — KPI selectors match the underlying data', () => {
   let store: ApplicationStore;
 

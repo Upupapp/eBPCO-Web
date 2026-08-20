@@ -14,7 +14,12 @@
         (keydown.escape)="clearSearch()"
       />
       @if (currentSearch()) {
-        <button type="button" class="search-clear" aria-label="Clear search" (click)="clearSearch()">
+        <button
+          type="button"
+          class="search-clear"
+          aria-label="Clear search"
+          (click)="clearSearch()"
+        >
           <app-icon name="x-circle" [size]="15" />
         </button>
       }
@@ -41,7 +46,9 @@
           <div class="panel-head">
             <h2>Notifications</h2>
             @if (unreadCount() > 0) {
-              <button type="button" class="mark-read-btn" (click)="markAllRead()">Mark all as read</button>
+              <button type="button" class="mark-read-btn" (click)="markAllRead()">
+                Mark all as read
+              </button>
             }
           </div>
           <ul class="notif-list">
@@ -58,6 +65,9 @@
                 <span class="notif-body">
                   <span class="notif-title">{{ n.title }}</span>
                   <span class="notif-detail">{{ n.message }}</span>
+                  @if (notifBusinessLabel(n.applicationId); as biz) {
+                    <span class="notif-business">{{ biz }}</span>
+                  }
                   <span class="notif-time">{{ n.createdAt }}</span>
                 </span>
               </li>

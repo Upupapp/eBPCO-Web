@@ -1,9 +1,11 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
+import { permitFormUrl } from '../../core/domain/permit-form-templates';
 
 export type SampleDocumentKind =
   | 'application-form'
@@ -52,6 +54,7 @@ function formatPHP(centavos: number | null): string {
 export class DocumentPreview {
   private readonly store = inject(ApplicationStore);
   private readonly assessmentStore = inject(AssessmentStore);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly applicationId = input.required<string>();
   readonly kind = input.required<SampleDocumentKind>();
@@ -68,11 +71,26 @@ export class DocumentPreview {
     const row = this.row();
     return row ? this.store.getBusiness(row.businessId) : undefined;
   });
+  /** The real linked Business's name -> the application's own denormalized businessName (legacy fallback) -> 'Not provided'. Never the applicant's name — mirrors ApplicationStore.getApplicationContext's fallback rule. */
+  protected readonly businessLabel = computed(() => {
+    const row = this.row();
+    if (!row) return 'Not provided';
+    return this.business()?.name || row.businessName || 'Not provided';
+  });
   protected readonly requirements = computed(() => {
     const row = this.row();
     return row ? requirementsFor(row.permitType) : null;
   });
   protected readonly permit = computed(() => this.store.getPermit(this.applicationId()));
+  /** The official permit form PDF for this application's permit type, bundled under public/assets/permits/. Null when no matching file was provided for that permit type. */
+  protected readonly permitFormUrl = computed(() => {
+    const row = this.row();
+    return row ? permitFormUrl(row.permitType) : null;
+  });
+  protected readonly permitFormSafeUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.permitFormUrl();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
   protected readonly release = computed(() => this.store.getRelease(this.applicationId()));
 
   protected readonly assessment = computed(() =>

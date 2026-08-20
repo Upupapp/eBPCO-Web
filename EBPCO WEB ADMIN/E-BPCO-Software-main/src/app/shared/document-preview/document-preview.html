@@ -15,89 +15,158 @@
     </div>
 
     @if (row(); as row) {
-      <article class="doc-page">
-        <div class="sample-watermark" aria-hidden="true">SAMPLE</div>
-        <header class="doc-header">
-          <div class="doc-letterhead">
-            <strong>Municipality of Castilla</strong>
-            <span>Province of Sorsogon</span>
-          </div>
-          <span class="sample-badge">SAMPLE — NOT AN OFFICIAL DOCUMENT</span>
-        </header>
+      @if (kind() === 'permit' && permitFormSafeUrl(); as formUrl) {
+        <iframe class="doc-pdf-frame-full" [src]="formUrl" title="Permit Form"></iframe>
+      } @else {
+        <article class="doc-page">
+          <div class="sample-watermark" aria-hidden="true">SAMPLE</div>
+          <header class="doc-header">
+            <div class="doc-letterhead">
+              <strong>Municipality of Castilla</strong>
+              <span>Province of Sorsogon</span>
+            </div>
+            <span class="sample-badge">SAMPLE — NOT AN OFFICIAL DOCUMENT</span>
+          </header>
 
-        <h1>{{ title() }}</h1>
+          <h1>{{ title() }}</h1>
 
-        @switch (kind()) {
-          @case ('application-form') {
-            <section>
-              <h2>Applicant Information</h2>
-              <dl class="doc-fields">
-                <div>
-                  <dt>Name</dt>
-                  <dd>{{ row.applicant }}</dd>
-                </div>
-                <div>
-                  <dt>Email</dt>
-                  <dd>{{ applicant()?.email ?? '—' }}</dd>
-                </div>
-                <div>
-                  <dt>Mobile</dt>
-                  <dd>{{ applicant()?.mobileNumber ?? '—' }}</dd>
-                </div>
-                <div>
-                  <dt>Barangay</dt>
-                  <dd>{{ applicant()?.barangay ?? row.location }}</dd>
-                </div>
-              </dl>
-              <h2>Business Information</h2>
-              <dl class="doc-fields">
-                <div>
-                  <dt>Registered Name</dt>
-                  <dd>{{ row.businessName }}</dd>
-                </div>
-                <div>
-                  <dt>Category</dt>
-                  <dd>{{ business()?.category ?? '—' }}</dd>
-                </div>
-                <div>
-                  <dt>Address</dt>
-                  <dd>{{ business()?.street ?? '—' }}, {{ row.location }}</dd>
-                </div>
-              </dl>
-              <h2>Application Information</h2>
-              <dl class="doc-fields">
-                <div>
-                  <dt>Application No.</dt>
-                  <dd>{{ row.id }}</dd>
-                </div>
-                <div>
-                  <dt>Permit Type</dt>
-                  <dd>{{ row.permitType }}</dd>
-                </div>
-                <div>
-                  <dt>Transaction</dt>
-                  <dd>{{ row.applicationAction }}</dd>
-                </div>
-                <div>
-                  <dt>Date Submitted</dt>
-                  <dd>{{ row.dateSubmitted }}</dd>
-                </div>
-                <div>
-                  <dt>Required Form</dt>
-                  <dd>{{ requirements()?.requiredForm }}</dd>
-                </div>
-              </dl>
-            </section>
-          }
-
-          @case ('assessment') {
-            @if (assessment(); as asmt) {
+          @switch (kind()) {
+            @case ('application-form') {
               <section>
+                <h2>Applicant Information</h2>
                 <dl class="doc-fields">
                   <div>
-                    <dt>OPS No.</dt>
-                    <dd>{{ asmt.opsNumber ?? 'Not yet issued (' + asmt.status + ')' }}</dd>
+                    <dt>Name</dt>
+                    <dd>{{ row.applicant }}</dd>
                   </div>
+                  <div>
+                    <dt>Email</dt>
+                    <dd>{{ applicant()?.email ?? '—' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Mobile</dt>
+                    <dd>{{ applicant()?.mobileNumber ?? '—' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Barangay</dt>
+                    <dd>{{ applicant()?.barangay ?? row.location }}</dd>
+                  </div>
+                </dl>
+                <h2>Business Information</h2>
+                <dl class="doc-fields">
+                  <div>
+                    <dt>Registered Name</dt>
+                    <dd>{{ row.businessName }}</dd>
+                  </div>
+                  <div>
+                    <dt>Category</dt>
+                    <dd>{{ business()?.category ?? '—' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Address</dt>
+                    <dd>{{ business()?.street ?? '—' }}, {{ row.location }}</dd>
+                  </div>
+                </dl>
+                <h2>Application Information</h2>
+                <dl class="doc-fields">
+                  <div>
+                    <dt>Application No.</dt>
+                    <dd>{{ row.id }}</dd>
+                  </div>
+                  <div>
+                    <dt>Permit Type</dt>
+                    <dd>{{ row.permitType }}</dd>
+                  </div>
+                  <div>
+                    <dt>Transaction</dt>
+                    <dd>{{ row.applicationAction }}</dd>
+                  </div>
+                  <div>
+                    <dt>Date Submitted</dt>
+                    <dd>{{ row.dateSubmitted }}</dd>
+                  </div>
+                  <div>
+                    <dt>Required Form</dt>
+                    <dd>{{ requirements()?.requiredForm }}</dd>
+                  </div>
+                </dl>
+              </section>
+            }
+
+            @case ('assessment') {
+              @if (assessment(); as asmt) {
+                <section>
+                  <dl class="doc-fields">
+                    <div>
+                      <dt>OPS No.</dt>
+                      <dd>{{ asmt.opsNumber ?? 'Not yet issued (' + asmt.status + ')' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Application No.</dt>
+                      <dd>{{ row.id }}</dd>
+                    </div>
+                    <div>
+                      <dt>Applicant</dt>
+                      <dd>{{ row.applicant }}</dd>
+                    </div>
+                    <div>
+                      <dt>Enterprise / Organization (if applicable)</dt>
+                      <dd>{{ businessLabel() }}</dd>
+                    </div>
+                    <div>
+                      <dt>Permit Type</dt>
+                      <dd>{{ row.permitType }}</dd>
+                    </div>
+                    <div>
+                      <dt>Due Date</dt>
+                      <dd>{{ asmt.dueDate ?? '—' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Assessed By</dt>
+                      <dd>{{ asmt.assessorName }} ({{ asmt.assessorRole }})</dd>
+                    </div>
+                  </dl>
+                  <table class="doc-table">
+                    <thead>
+                      <tr>
+                        <th>Fee</th>
+                        <th>Authority</th>
+                        <th>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (line of feeLines(); track line.label) {
+                        <tr>
+                          <td>
+                            {{ line.label }}
+                            @if (line.requiresAssessorInput) {
+                              <span class="doc-flag">pending assessor input</span>
+                            }
+                          </td>
+                          <td>{{ line.legalBasisTitle }}</td>
+                          <td>{{ line.amount }}</td>
+                        </tr>
+                      }
+                      <tr class="doc-total">
+                        <td colspan="2">Total Amount Due</td>
+                        <td>{{ totalDue() }}</td>
+                      </tr>
+                      <tr>
+                        <td colspan="2">Outstanding Balance</td>
+                        <td>{{ balanceDue() }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p class="doc-note">{{ requirements()?.paymentRequirements }}</p>
+                </section>
+              } @else {
+                <p class="doc-note">No assessment has been drafted yet for this application.</p>
+              }
+            }
+
+            @case ('evaluation-notice') {
+              <section>
+                <dl class="doc-fields">
                   <div>
                     <dt>Application No.</dt>
                     <dd>{{ row.id }}</dd>
@@ -107,239 +176,190 @@
                     <dd>{{ row.applicant }}</dd>
                   </div>
                   <div>
+                    <dt>Enterprise / Organization (if applicable)</dt>
+                    <dd>{{ businessLabel() }}</dd>
+                  </div>
+                  <div>
                     <dt>Permit Type</dt>
                     <dd>{{ row.permitType }}</dd>
-                  </div>
-                  <div>
-                    <dt>Due Date</dt>
-                    <dd>{{ asmt.dueDate ?? '—' }}</dd>
-                  </div>
-                  <div>
-                    <dt>Assessed By</dt>
-                    <dd>{{ asmt.assessorName }} ({{ asmt.assessorRole }})</dd>
                   </div>
                 </dl>
                 <table class="doc-table">
                   <thead>
                     <tr>
-                      <th>Fee</th>
-                      <th>Authority</th>
-                      <th>Amount</th>
+                      <th>Stage</th>
+                      <th>Department</th>
+                      <th>Result</th>
+                      <th>Remarks</th>
                     </tr>
                   </thead>
                   <tbody>
-                    @for (line of feeLines(); track line.label) {
+                    @for (e of evaluations(); track e.id) {
                       <tr>
-                        <td>
-                          {{ line.label }}
-                          @if (line.requiresAssessorInput) {
-                            <span class="doc-flag">pending assessor input</span>
-                          }
-                        </td>
-                        <td>{{ line.legalBasisTitle }}</td>
-                        <td>{{ line.amount }}</td>
+                        <td>{{ e.stage }}</td>
+                        <td>{{ departmentLabel(e.departmentId) }}</td>
+                        <td>{{ e.result }}</td>
+                        <td>{{ e.remarks ?? '—' }}</td>
                       </tr>
                     }
-                    <tr class="doc-total">
-                      <td colspan="2">Total Amount Due</td>
-                      <td>{{ totalDue() }}</td>
-                    </tr>
-                    <tr>
-                      <td colspan="2">Outstanding Balance</td>
-                      <td>{{ balanceDue() }}</td>
-                    </tr>
                   </tbody>
                 </table>
-                <p class="doc-note">{{ requirements()?.paymentRequirements }}</p>
               </section>
-            } @else {
-              <p class="doc-note">No assessment has been drafted yet for this application.</p>
             }
-          }
 
-          @case ('evaluation-notice') {
-            <section>
-              <dl class="doc-fields">
-                <div>
-                  <dt>Application No.</dt>
-                  <dd>{{ row.id }}</dd>
-                </div>
-                <div>
-                  <dt>Applicant</dt>
-                  <dd>{{ row.applicant }}</dd>
-                </div>
-                <div>
-                  <dt>Permit Type</dt>
-                  <dd>{{ row.permitType }}</dd>
-                </div>
-              </dl>
-              <table class="doc-table">
-                <thead>
-                  <tr>
-                    <th>Stage</th>
-                    <th>Department</th>
-                    <th>Result</th>
-                    <th>Remarks</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (e of evaluations(); track e.id) {
-                    <tr>
-                      <td>{{ e.stage }}</td>
-                      <td>{{ departmentLabel(e.departmentId) }}</td>
-                      <td>{{ e.result }}</td>
-                      <td>{{ e.remarks ?? '—' }}</td>
-                    </tr>
+            @case ('official-receipt') {
+              @if (focusedTransaction(); as txn) {
+                <section>
+                  @if (!hasOfficialReceipt()) {
+                    <p class="doc-note doc-warning">
+                      No official OR number has been entered for this transaction yet — this is an
+                      internal acknowledgment of the payment recorded below, not an Official
+                      Receipt. An authorized cashier must key in the real OR number from the receipt
+                      book / e-receipting system before this document can read "Official Receipt".
+                    </p>
                   }
-                </tbody>
-              </table>
-            </section>
-          }
+                  <dl class="doc-fields">
+                    <div>
+                      <dt>{{ hasOfficialReceipt() ? 'OR No.' : 'Internal Transaction Ref.' }}</dt>
+                      <dd>{{ hasOfficialReceipt() ? txn.orNumber : txn.id }}</dd>
+                    </div>
+                    <div>
+                      <dt>Payer Reference</dt>
+                      <dd>{{ txn.transactionReference }}</dd>
+                    </div>
+                    <div>
+                      <dt>Application No.</dt>
+                      <dd>{{ row.id }}</dd>
+                    </div>
+                    <div>
+                      <dt>Received From</dt>
+                      <dd>{{ row.applicant }}</dd>
+                    </div>
+                    <div>
+                      <dt>Enterprise / Organization (if applicable)</dt>
+                      <dd>{{ businessLabel() }}</dd>
+                    </div>
+                    <div>
+                      <dt>Collecting Agency</dt>
+                      <dd>{{ txn.agency }}</dd>
+                    </div>
+                    <div>
+                      <dt>Payment Method</dt>
+                      <dd>{{ txn.method }}</dd>
+                    </div>
+                    <div>
+                      <dt>Date</dt>
+                      <dd>{{ hasOfficialReceipt() ? txn.orDate : txn.submittedAt }}</dd>
+                    </div>
+                    <div>
+                      <dt>Amount</dt>
+                      <dd>{{ txn.amountCentavos / 100 | number: '1.2-2' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Status</dt>
+                      <dd>{{ txn.status }}</dd>
+                    </div>
+                    <div>
+                      <dt>Recorded/Verified By</dt>
+                      <dd>{{ txn.verifiedBy ?? txn.recordedBy ?? row.officer }}</dd>
+                    </div>
+                  </dl>
+                </section>
+              } @else {
+                <p class="doc-note">No payment has been recorded yet for this application.</p>
+              }
+            }
 
-          @case ('official-receipt') {
-            @if (focusedTransaction(); as txn) {
-              <section>
-                @if (!hasOfficialReceipt()) {
-                  <p class="doc-note doc-warning">
-                    No official OR number has been entered for this transaction yet — this is an
-                    internal acknowledgment of the payment recorded below, not an Official Receipt.
-                    An authorized cashier must key in the real OR number from the receipt book /
-                    e-receipting system before this document can read "Official Receipt".
-                  </p>
-                }
-                <dl class="doc-fields">
-                  <div>
-                    <dt>{{ hasOfficialReceipt() ? 'OR No.' : 'Internal Transaction Ref.' }}</dt>
-                    <dd>{{ hasOfficialReceipt() ? txn.orNumber : txn.id }}</dd>
-                  </div>
-                  <div>
-                    <dt>Payer Reference</dt>
-                    <dd>{{ txn.transactionReference }}</dd>
-                  </div>
-                  <div>
-                    <dt>Application No.</dt>
-                    <dd>{{ row.id }}</dd>
-                  </div>
-                  <div>
-                    <dt>Received From</dt>
-                    <dd>{{ row.applicant }}</dd>
-                  </div>
-                  <div>
-                    <dt>Collecting Agency</dt>
-                    <dd>{{ txn.agency }}</dd>
-                  </div>
-                  <div>
-                    <dt>Payment Method</dt>
-                    <dd>{{ txn.method }}</dd>
-                  </div>
-                  <div>
-                    <dt>Date</dt>
-                    <dd>{{ hasOfficialReceipt() ? txn.orDate : txn.submittedAt }}</dd>
-                  </div>
-                  <div>
-                    <dt>Amount</dt>
-                    <dd>{{ txn.amountCentavos / 100 | number: '1.2-2' }}</dd>
-                  </div>
-                  <div>
-                    <dt>Status</dt>
-                    <dd>{{ txn.status }}</dd>
-                  </div>
-                  <div>
-                    <dt>Recorded/Verified By</dt>
-                    <dd>{{ txn.verifiedBy ?? txn.recordedBy ?? row.officer }}</dd>
-                  </div>
-                </dl>
-              </section>
-            } @else {
-              <p class="doc-note">No payment has been recorded yet for this application.</p>
+            @case ('permit') {
+              @if (permit(); as permit) {
+                <section>
+                  <dl class="doc-fields">
+                    <div>
+                      <dt>Permit Number</dt>
+                      <dd>{{ permit.permitNumber }}</dd>
+                    </div>
+                    <div>
+                      <dt>Document</dt>
+                      <dd>{{ requirements()?.finalDocument }}</dd>
+                    </div>
+                    <div>
+                      <dt>Issued To</dt>
+                      <dd>{{ row.applicant }} — {{ row.businessName }}</dd>
+                    </div>
+                    <div>
+                      <dt>Barangay</dt>
+                      <dd>{{ row.location }}</dd>
+                    </div>
+                    <div>
+                      <dt>Permit Type</dt>
+                      <dd>{{ row.permitType }}</dd>
+                    </div>
+                    <div>
+                      <dt>Date Issued</dt>
+                      <dd>{{ permit.issuedDate }}</dd>
+                    </div>
+                    <div>
+                      <dt>Valid Until</dt>
+                      <dd>{{ permit.expiryDate ?? 'No fixed expiry' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Approving Official</dt>
+                      <dd>{{ permit.approvingOfficial }}</dd>
+                    </div>
+                    <div>
+                      <dt>Approving Office</dt>
+                      <dd>{{ permit.approvingOffice }}</dd>
+                    </div>
+                  </dl>
+                  <p class="doc-note">{{ requirements()?.validityRules }}</p>
+                </section>
+              } @else {
+                <p class="doc-note">No permit has been generated yet for this application.</p>
+              }
+            }
+
+            @case ('release-form') {
+              @if (release(); as release) {
+                <section>
+                  <dl class="doc-fields">
+                    <div>
+                      <dt>Permit Number</dt>
+                      <dd>{{ release.permitNumber }}</dd>
+                    </div>
+                    <div>
+                      <dt>Released To</dt>
+                      <dd>{{ release.claimantName }}</dd>
+                    </div>
+                    <div>
+                      <dt>Enterprise / Organization (if applicable)</dt>
+                      <dd>{{ businessLabel() }}</dd>
+                    </div>
+                    <div>
+                      <dt>Release Method</dt>
+                      <dd>{{ release.releaseMethod }}</dd>
+                    </div>
+                    <div>
+                      <dt>Releasing Officer</dt>
+                      <dd>{{ release.releasingOfficer }}</dd>
+                    </div>
+                    <div>
+                      <dt>Released On</dt>
+                      <dd>{{ release.releasedAt }}</dd>
+                    </div>
+                  </dl>
+                  <p class="doc-note">{{ requirements()?.releaseRequirements }}</p>
+                </section>
+              } @else {
+                <p class="doc-note">This application has not been released yet.</p>
+              }
             }
           }
 
-          @case ('permit') {
-            @if (permit(); as permit) {
-              <section>
-                <dl class="doc-fields">
-                  <div>
-                    <dt>Permit Number</dt>
-                    <dd>{{ permit.permitNumber }}</dd>
-                  </div>
-                  <div>
-                    <dt>Document</dt>
-                    <dd>{{ requirements()?.finalDocument }}</dd>
-                  </div>
-                  <div>
-                    <dt>Issued To</dt>
-                    <dd>{{ row.applicant }} — {{ row.businessName }}</dd>
-                  </div>
-                  <div>
-                    <dt>Barangay</dt>
-                    <dd>{{ row.location }}</dd>
-                  </div>
-                  <div>
-                    <dt>Permit Type</dt>
-                    <dd>{{ row.permitType }}</dd>
-                  </div>
-                  <div>
-                    <dt>Date Issued</dt>
-                    <dd>{{ permit.issuedDate }}</dd>
-                  </div>
-                  <div>
-                    <dt>Valid Until</dt>
-                    <dd>{{ permit.expiryDate ?? 'No fixed expiry' }}</dd>
-                  </div>
-                  <div>
-                    <dt>Approving Official</dt>
-                    <dd>{{ permit.approvingOfficial }}</dd>
-                  </div>
-                  <div>
-                    <dt>Approving Office</dt>
-                    <dd>{{ permit.approvingOffice }}</dd>
-                  </div>
-                </dl>
-                <p class="doc-note">{{ requirements()?.validityRules }}</p>
-              </section>
-            } @else {
-              <p class="doc-note">No permit has been generated yet for this application.</p>
-            }
-          }
-
-          @case ('release-form') {
-            @if (release(); as release) {
-              <section>
-                <dl class="doc-fields">
-                  <div>
-                    <dt>Permit Number</dt>
-                    <dd>{{ release.permitNumber }}</dd>
-                  </div>
-                  <div>
-                    <dt>Released To</dt>
-                    <dd>{{ release.claimantName }}</dd>
-                  </div>
-                  <div>
-                    <dt>Release Method</dt>
-                    <dd>{{ release.releaseMethod }}</dd>
-                  </div>
-                  <div>
-                    <dt>Releasing Officer</dt>
-                    <dd>{{ release.releasingOfficer }}</dd>
-                  </div>
-                  <div>
-                    <dt>Released On</dt>
-                    <dd>{{ release.releasedAt }}</dd>
-                  </div>
-                </dl>
-                <p class="doc-note">{{ requirements()?.releaseRequirements }}</p>
-              </section>
-            } @else {
-              <p class="doc-note">This application has not been released yet.</p>
-            }
-          }
-        }
-
-        <footer class="doc-footer">
-          <p>Generated by E-BPCO Web Admin — for demonstration/testing purposes only.</p>
-        </footer>
-      </article>
+          <footer class="doc-footer">
+            <p>Generated by E-BPCO Web Admin — for demonstration/testing purposes only.</p>
+          </footer>
+        </article>
+      }
     } @else {
       <p class="doc-note">Application not found.</p>
     }

@@ -8,6 +8,7 @@ import { Applicant } from '../../core/domain/applicant.model';
 import { BusinessCategory } from '../../core/domain/business.model';
 import { ALL_PERMIT_TYPES, ApplicationAction, PermitType } from '../../core/domain/permit.model';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
+import { RequirementsConfigStore } from '../../core/domain/requirements-config-store';
 import { departmentById, departmentName } from '../../core/domain/department.model';
 import {
   MOBILE_FORMAT_EXAMPLE,
@@ -86,6 +87,7 @@ const STEPS: { key: Step; label: string }[] = [
 export class ApplicationIntake {
   private readonly store = inject(ApplicationStore);
   private readonly session = inject(SessionService);
+  private readonly requirementsConfig = inject(RequirementsConfigStore);
 
   readonly cancelled = output<void>();
   readonly created = output<ApplicationRecord>();
@@ -166,9 +168,12 @@ export class ApplicationIntake {
       this.documents.set([]);
       return;
     }
-    const req = requirementsFor(type);
+    // Reads the LIVE checklist (Permit Release > Permit Types can add,
+    // relabel, or remove entries) rather than the static catalog directly
+    // — see RequirementsConfigStore's own doc comment.
+    const docs = this.requirementsConfig.documentsFor(type);
     this.documents.set(
-      req.documents.map((d): DocumentDraft => ({
+      docs.map((d): DocumentDraft => ({
         requirementId: d.id,
         label: d.label,
         required: d.required,
@@ -282,7 +287,6 @@ export class ApplicationIntake {
   protected next(): void {
     const step = this.currentStep();
     this.attempted.update((set) => new Set(set).add(step));
-    if (this.stepErrors(step).length > 0) return;
     if (this.stepIndex() < this.steps.length - 1) this.stepIndex.update((i) => i + 1);
   }
 
@@ -323,19 +327,6 @@ export class ApplicationIntake {
     if (this.submitting()) return;
     this.submitting.set(true);
     this.submitError.set('');
-    // Defensive re-check — the Review step is reachable only after every
-    // earlier step validated, but this guards against a stale state.
-    for (const step of this.steps) {
-      if (step.key === 'review') continue;
-      if (this.stepErrors(step.key).length > 0) {
-        this.attempted.update((set) => new Set(set).add(step.key));
-        this.submitError.set(
-          'Some required information is missing or invalid — please review the earlier steps.',
-        );
-        this.submitting.set(false);
-        return;
-      }
-    }
     const permitType = this.applicationInfo.permitType;
     if (!permitType) {
       this.submitting.set(false);

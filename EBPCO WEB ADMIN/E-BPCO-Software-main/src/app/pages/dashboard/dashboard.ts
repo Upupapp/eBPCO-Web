@@ -69,6 +69,9 @@ interface OverdueItem {
   text: string;
   agoLabel: string;
   applicationId: string;
+  /** Canonical relationship — see ApplicationStore.getApplicationContext. Never derived from the applicant's name; one applicant can own multiple businesses. */
+  businessId: string;
+  businessName: string;
 }
 
 interface EvaluationStageRow {
@@ -327,6 +330,8 @@ export class Dashboard {
           text: `${a.applicant}'s application is waiting in ${a.evaluationStage} evaluation for ${days} day${days === 1 ? '' : 's'}`,
           agoLabel: a.dateSubmitted,
           applicationId: a.id,
+          businessId: a.businessId,
+          businessName: a.businessName,
         };
       });
   });
@@ -371,6 +376,7 @@ export class Dashboard {
       return (
         row.id.toLowerCase().includes(term) ||
         row.applicant.toLowerCase().includes(term) ||
+        row.businessName.toLowerCase().includes(term) ||
         row.location.toLowerCase().includes(term) ||
         row.type.toLowerCase().includes(term)
       );
@@ -395,6 +401,8 @@ export class Dashboard {
       this.filteredApplications().map((row) => ({
         'Application ID': row.id,
         Applicant: row.applicant,
+        'Business ID': row.businessId,
+        'Business / Project': row.businessName,
         Location: row.location,
         Type: row.type,
         'Date Submitted': row.dateSubmitted,

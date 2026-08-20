@@ -114,6 +114,7 @@ export class Evaluations {
       return (
         r.id.toLowerCase().includes(term) ||
         r.applicant.toLowerCase().includes(term) ||
+        r.businessName.toLowerCase().includes(term) ||
         r.type.toLowerCase().includes(term)
       );
     });
@@ -237,6 +238,8 @@ export class Evaluations {
     return {
       'Application ID': row.id,
       Applicant: row.applicant,
+      'Business ID': row.businessId,
+      'Business / Project': row.businessName,
       'Missing Documents': row.missingDocuments,
       Type: row.type,
       'Reviewing Department': row.department,

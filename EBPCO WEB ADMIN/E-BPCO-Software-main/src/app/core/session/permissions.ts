@@ -155,4 +155,7 @@ export const ACTION_PERMISSIONS = {
   releasePermit: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Releasing Officer',
   configurePayments: (role: StaffRole): boolean => role === 'Super Admin',
+  /** Editing a permit type's required-document checklist (Permit Release > Permit Types). Anyone who can reach Permit Release may VIEW it; only these roles may add/edit/remove a document. */
+  configureRequirements: (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator',
 };

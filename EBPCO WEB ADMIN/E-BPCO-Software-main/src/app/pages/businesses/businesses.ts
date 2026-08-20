@@ -1,4 +1,4 @@
-import { Component, ElementRef, computed, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Topbar } from '../../shared/topbar/topbar';
@@ -10,6 +10,9 @@ import { FilterPanel } from '../../shared/filter-panel/filter-panel';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { buildBusinessDetail } from './business-detail-data';
+import { ApplicationStore } from '../../core/domain/application-store';
+import { Business } from '../../core/domain/business.model';
+import { applicantFullName } from '../../core/domain/applicant.model';
 
 type SubTab = 'analytics' | 'modules' | 'recent-activity';
 type ViewMode = 'list' | 'create' | 'detail';
@@ -58,91 +61,6 @@ interface ActivityItem {
   color: string;
 }
 
-// Each business is a business owner / applicant account from the mobile app
-// (E-BPCO Mobile), not a government unit — LGU Castilla is the system's
-// single LGU, and every business's address is one of its barangays.
-const BUSINESSES: Array<{
-  business: string;
-  owner: string;
-  barangay: string;
-  category: BusinessCategory;
-}> = [
-  {
-    business: 'Villanueva Hardware & Construction Supply',
-    owner: 'Raul Villanueva',
-    barangay: 'Poblacion',
-    category: 'Retail',
-  },
-  {
-    business: 'Simbulan Sari-Sari Store',
-    owner: 'Fe Simbulan',
-    barangay: 'Buenavista',
-    category: 'Retail',
-  },
-  {
-    business: 'Rodrigo Bakeshop',
-    owner: 'David Rodrigo',
-    barangay: 'Cogon',
-    category: 'Food Service',
-  },
-  {
-    business: 'Zaballero Auto Repair Shop',
-    owner: 'Jaime Zaballero',
-    barangay: 'Bonga',
-    category: 'Services',
-  },
-  {
-    business: 'Martirez Rice Mill',
-    owner: 'Denise Martirez',
-    barangay: 'Burabod',
-    category: 'Manufacturing',
-  },
-  {
-    business: 'Nuñez Feeds & Agri Supply',
-    owner: 'Jake Nuñez',
-    barangay: 'Salvacion',
-    category: 'Wholesale',
-  },
-  {
-    business: 'Villareal Eatery',
-    owner: 'Anthony Villareal',
-    barangay: 'San Rafael',
-    category: 'Food Service',
-  },
-  {
-    business: 'Barrera Internet Café',
-    owner: 'Axel Barrera',
-    barangay: 'San Roque',
-    category: 'Services',
-  },
-  {
-    business: 'Morales General Merchandise',
-    owner: 'Glenn Morales',
-    barangay: 'Dangcalan',
-    category: 'Retail',
-  },
-  {
-    business: 'Bermudez Furniture Shop',
-    owner: 'Corazon Bermudez',
-    barangay: 'San Isidro',
-    category: 'Manufacturing',
-  },
-  {
-    business: 'Salazar Water Refilling Station',
-    owner: 'Vicente Salazar',
-    barangay: 'Libtong',
-    category: 'Services',
-  },
-  {
-    business: 'Fajota Trading Corp.',
-    owner: 'Rosalinda Fajota',
-    barangay: 'Loreto',
-    category: 'Wholesale',
-  },
-];
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
 function slugify(value: string): string {
   return value
     .toLowerCase()
@@ -151,24 +69,10 @@ function slugify(value: string): string {
     .replace(/\s+/g, '-');
 }
 
-// Mirrors E-BPCO Mobile's business registration number format exactly
-// (BusinessModel.registrationNumber, e.g. 'REG-2026-000001').
-function buildBusinessRows(count: number): BusinessRow[] {
-  return Array.from({ length: count }, (_, i) => {
-    const { business, owner, barangay, category } = BUSINESSES[i % BUSINESSES.length];
-    return {
-      id: `REG-2026-${(count - i).toString().padStart(6, '0')}`,
-      code: business,
-      category,
-      city: `Barangay ${barangay}`,
-      contactName: owner,
-      contactPhone: `63 9${(10 + (i % 89)).toString().padStart(2, '0')} ${(100 + i * 7).toString().padStart(3, '0')} ${(1000 + i * 37).toString().padStart(4, '0')}`,
-      subdomain: `${slugify(business)}.castillasorsogon.gov.ph`,
-      dateCreated: `${(i % 27) + 1} ${MONTHS[i % 12]} 2024`,
-      userCount: 8 + ((i * 3) % 16),
-      status: i % 5 === 4 ? 'Inactive' : ('Active' as 'Active' | 'Inactive'),
-    };
-  });
+function hashOf(id: string): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  return Math.abs(hash);
 }
 
 interface GrowthPoint {
@@ -198,6 +102,8 @@ const GROWTH_POINTS: GrowthPoint[] = [
   styleUrl: './businesses.scss',
 })
 export class Businesses {
+  private readonly store = inject(ApplicationStore);
+
   constructor(private readonly router: Router) {}
 
   protected readonly view = signal<ViewMode>('list');
@@ -251,7 +157,42 @@ export class Businesses {
     },
   ];
 
-  protected readonly businessRows = signal<BusinessRow[]>(buildBusinessRows(12));
+  // A real Business's registration/contact fields — never a fabricated
+  // dataset — with the owner's contact info joined through the real
+  // `Applicant` (never guessed from the business name). Fields with no
+  // real backing data in the domain model (subdomain, userCount) stay as
+  // deterministic-per-id sample placeholders, matching the "SAMPLE DATA"
+  // precedent used elsewhere in this app, and are cosmetic only — they
+  // carry no permit-ownership meaning.
+  private toBusinessRow(b: Business): BusinessRow {
+    const owner = this.store.getApplicant(b.ownerApplicantId);
+    const seed = hashOf(b.id);
+    return {
+      id: b.id,
+      code: b.name,
+      category: b.category,
+      city: `Barangay ${b.barangay}`,
+      contactName: owner ? applicantFullName(owner) : 'Not provided',
+      contactPhone: owner?.mobileNumber ?? 'Not provided',
+      subdomain: `${slugify(b.name)}.castillasorsogon.gov.ph`,
+      dateCreated: b.dateRegistered,
+      userCount: 8 + (seed % 16),
+      status: b.status,
+    };
+  }
+
+  /** Businesses created through this page's own "+ Business" wizard — kept separate from the real ApplicationStore-backed rows below since they aren't real linkable Business records (see createBusiness's documented limitation). */
+  private readonly locallyCreatedRows = signal<BusinessRow[]>([]);
+  /** Ids removed via confirmDelete — hides a store-backed row from this view rather than mutating shared store data no method exists to delete. */
+  private readonly hiddenIds = signal<ReadonlySet<string>>(new Set());
+
+  protected readonly businessRows = computed<BusinessRow[]>(() => {
+    const hidden = this.hiddenIds();
+    return [
+      ...this.locallyCreatedRows(),
+      ...this.store.businesses().map((b) => this.toBusinessRow(b)),
+    ].filter((r) => !hidden.has(r.id));
+  });
   protected readonly page = signal(1);
   protected readonly pageSize = 10;
   protected readonly searchTerm = signal('');
@@ -310,7 +251,20 @@ export class Businesses {
 
   protected readonly businessDetail = computed(() => {
     const row = this.selectedBusiness();
-    return row ? buildBusinessDetail(row) : null;
+    if (!row) return null;
+    // The canonical join — never the applicant's name, never fabricated.
+    // A business created via this page's own wizard (not a real
+    // ApplicationStore Business) simply has no linked applications yet.
+    // Each application's real generated permit number (once one exists)
+    // is resolved alongside it and kept distinct from the application id.
+    const linked = this.store
+      .applications()
+      .filter((a) => a.businessId === row.id)
+      .map((application) => ({
+        application,
+        permitNumber: this.store.getPermit(application.id)?.permitNumber ?? null,
+      }));
+    return buildBusinessDetail(row, linked);
   });
 
   openDetail(row: BusinessRow): void {
@@ -385,7 +339,8 @@ export class Businesses {
     const target = this.deleteTarget();
     if (!target) return;
     const idsToRemove = target === 'bulk' ? this.selectedIds() : new Set([target.id]);
-    this.businessRows.update((rows) => rows.filter((row) => !idsToRemove.has(row.id)));
+    this.locallyCreatedRows.update((rows) => rows.filter((row) => !idsToRemove.has(row.id)));
+    this.hiddenIds.update((current) => new Set([...current, ...idsToRemove]));
     this.selectedIds.update((current) => {
       const next = new Set(current);
       for (const id of idsToRemove) next.delete(id);
@@ -678,6 +633,15 @@ export class Businesses {
     this.view.set('list');
   }
 
+  /**
+   * Creates a new row for this page's own list — NOT a real
+   * `ApplicationStore` `Business` record, since this store is read-only
+   * from this page's perspective (there's no domain-layer "register a
+   * business" mutation yet, mirroring how the intake form is the one
+   * real place a Business gets created). Documented limitation: an
+   * application filed elsewhere would never link back to a business
+   * created here, since its id was never actually added to the store.
+   */
   createBusiness(): void {
     const name = this.newBusiness.businessName.trim() || 'New Business';
     const code = name.toUpperCase().replace(/\s+/g, '');
@@ -687,7 +651,7 @@ export class Businesses {
       ? this.newBusiness.barangay.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
       : 'N/A';
 
-    this.businessRows.update((rows) => [
+    this.locallyCreatedRows.update((rows) => [
       {
         id: `REG-2026-${nextIdNum.toString().padStart(6, '0')}`,
         code: name,
