@@ -173,6 +173,13 @@
   line-height: 1.5;
 }
 
+.doc-pdf-frame-full {
+  display: block;
+  width: 100%;
+  height: 85vh;
+  border: 0;
+}
+
 .doc-warning {
   background: $color-warning-bg;
   color: $color-warning;

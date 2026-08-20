@@ -5,12 +5,16 @@
 // that same row, so every business's detail view is fully populated and
 // internally consistent without a second hand-authored dataset per business.
 
-import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
+import { PermitType } from '../../core/domain/permit.model';
+import { ApplicationRecord } from '../../core/domain/application.model';
 
 export type PermitStatus = 'Approved' | 'Under Review' | 'Rejected';
 
 export interface LinkedPermit {
-  id: string;
+  /** The application's own id (e.g. "E-BPCO-2026-000116") — always present. */
+  applicationId: string;
+  /** The real generated permit number (see ApplicationStore.generatePermit) — null until one has actually been issued. Never the application id presented as if it were the permit number. */
+  permitNumber: string | null;
   type: PermitType;
   status: PermitStatus;
   dateSubmitted: string;
@@ -48,11 +52,6 @@ export interface BusinessDetail {
   };
 }
 
-// Reads the one centralized permit-type list (permit.model.ts) — never a
-// second, independently-invented set (this used to hardcode its own
-// 5-item list including "Fire Safety Certificate", which isn't a
-// supported permit type at all).
-const PERMIT_TYPES = ALL_PERMIT_TYPES;
 const STAFF_NAMES = [
   'Liza Fernandez',
   'Marco Dizon',
@@ -73,27 +72,32 @@ function seedFrom(id: string): () => number {
   };
 }
 
-export function buildBusinessDetail(row: {
-  id: string;
-  code: string;
-  contactName: string;
-  dateCreated: string;
-  userCount: number;
-}): BusinessDetail {
+export function buildBusinessDetail(
+  row: {
+    id: string;
+    code: string;
+    contactName: string;
+    dateCreated: string;
+    userCount: number;
+  },
+  linkedApplications: { application: ApplicationRecord; permitNumber: string | null }[],
+): BusinessDetail {
   const rand = seedFrom(row.id);
-  const permitCount = 3 + Math.floor(rand() * 4); // 3–6
 
-  const permits: LinkedPermit[] = Array.from({ length: permitCount }, (_, i) => {
-    const statusRoll = rand();
-    const status: PermitStatus =
-      statusRoll < 0.55 ? 'Approved' : statusRoll < 0.85 ? 'Under Review' : 'Rejected';
-    return {
-      id: `PERMIT-2026-${(100 + i).toString().padStart(6, '0')}`,
-      type: PERMIT_TYPES[Math.floor(rand() * PERMIT_TYPES.length)],
-      status,
-      dateSubmitted: `${1 + Math.floor(rand() * 27)} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'][Math.floor(rand() * 6)]} 2026`,
-    };
-  });
+  // The real join — every application whose businessId matches this
+  // business's own id, via ApplicationRecord.businessId (never matched by
+  // applicant name, never a random count). An application's coarse
+  // `status` ('Approved' | 'Under Review' | 'Rejected') is exactly
+  // PermitStatus's own vocabulary, so it maps straight across. The real
+  // permit number (when one has actually been generated) is kept
+  // separate from the application id — never presented as the same thing.
+  const permits: LinkedPermit[] = linkedApplications.map(({ application: a, permitNumber }) => ({
+    applicationId: a.id,
+    permitNumber,
+    type: a.permitType,
+    status: a.status,
+    dateSubmitted: a.dateSubmitted,
+  }));
 
   const approvedPermits = permits.filter((p) => p.status === 'Approved').length;
 
@@ -139,7 +143,7 @@ export function buildBusinessDetail(row: {
     {
       actor: 'Engr. Ricardo Buenaflor',
       title: `${permits[0]?.type ?? 'Building Permit'} application received`,
-      detail: `${permits[0]?.id ?? 'PERMIT-2026-000100'} moved to Under Review.`,
+      detail: `${permits[0]?.applicationId ?? 'No applications yet'} moved to Under Review.`,
       timeAgo: '9 days ago',
     },
     {
@@ -153,7 +157,7 @@ export function buildBusinessDetail(row: {
       title: approvedPermits > 0 ? 'Permit approved' : 'Evaluation in progress',
       detail:
         approvedPermits > 0
-          ? `${permits.find((p) => p.status === 'Approved')?.id} approved and ready for release.`
+          ? `${permits.find((p) => p.status === 'Approved')?.applicationId} approved and ready for release.`
           : 'Application is still under technical review.',
       timeAgo: '1 day ago',
     },

@@ -249,6 +249,17 @@
   font-weight: 600;
 }
 
+// The business/project a notification's application belongs to (see
+// Topbar.notifBusinessLabel) — shown whenever resolvable, never
+// tooltip-only.
+.notif-business {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: $color-ink-400;
+  margin-top: 0.1rem;
+}
+
 .user-chip {
   display: flex;
   align-items: center;

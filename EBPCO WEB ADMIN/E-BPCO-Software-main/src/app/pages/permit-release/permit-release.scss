@@ -2,6 +2,7 @@
 @use '../../shared/styles/kpi-grid';
 @use '../../shared/styles/modal';
 @use '../../shared/styles/detail-view';
+@use '../../shared/styles/tabs';
 @use '../../shared/styles/tokens' as *;
 
 .modal-hint {
@@ -121,11 +122,42 @@
   font-weight: 700;
 }
 
-.applicant-cell {
+// Applicant (a person) and Business/Project (the permit's real owner —
+// see ApplicationStore.getApplicationContext) sit stacked in one cell so
+// they're always both visible, on wide and narrow layouts alike, rather
+// than a separate column that has to independently collapse or a
+// tooltip-only disclosure.
+.identity-cell {
   display: flex;
   align-items: center;
   gap: 0.55rem;
+  min-width: 0;
+}
+
+.identity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.identity-name {
   font-weight: 600;
+  color: $color-ink-900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+
+.identity-business {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: $color-ink-300;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
 }
 
 .status-pill.ready-for-release {
@@ -260,5 +292,171 @@
 
   &:active {
     transform: scale(0.96);
+  }
+}
+
+// ---- Permit Types tab ---------------------------------------------------------
+
+// `.status-pill`'s base shape comes from shared/styles/_data-table.scss —
+// this only adds the tone mapping for the applicability/required-optional
+// vocabulary this tab uses, mirroring payments.scss's own extension of the
+// same shared pill for its identical `required`/`conditional`/
+// `not-applicable` fee-applicability values.
+.status-pill {
+  &.required {
+    background: $color-success-bg;
+    color: $color-success;
+  }
+  &.optional {
+    background: $color-bg-muted;
+    color: $color-ink-300;
+  }
+  &.conditional {
+    background: $color-info-bg-soft;
+    color: $color-info-700;
+  }
+  &.not-applicable {
+    background: $color-bg-muted;
+    color: $color-ink-300;
+  }
+}
+
+.permit-types-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: $color-ink-300;
+}
+
+.permit-type-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.permit-type-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color $ease-fast,
+    background $ease-fast;
+
+  &:hover {
+    border-color: $color-brand-600;
+    background: $color-bg-subtle;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: 2px;
+  }
+
+  app-icon {
+    margin-left: auto;
+    flex-shrink: 0;
+    color: $color-ink-100;
+  }
+}
+
+.permit-type-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: $color-ink-900;
+  min-width: 260px;
+}
+
+.permit-type-meta {
+  font-size: 0.78rem;
+  color: $color-ink-300;
+}
+
+.permit-type-detail-grid {
+  grid-template-columns: 1fr 1fr;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inline-doc-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  background: $color-bg-subtle;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  padding: 0.9rem;
+  margin-bottom: 1rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $color-ink-600;
+
+    input,
+    select {
+      font: inherit;
+      font-weight: 400;
+      padding: 0.5rem 0.6rem;
+      border: 1px solid $color-border-strong;
+      border-radius: $radius-sm;
+      color: $color-ink-900;
+      background: #fff;
+    }
+  }
+
+  .checkbox-field {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+
+    input {
+      width: auto;
+    }
+  }
+
+  .inline-doc-form-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: $color-info;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 0.6rem;
+  text-decoration: underline;
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: 2px;
+  }
+
+  &.danger {
+    color: $color-danger;
   }
 }

@@ -78,7 +78,7 @@
           <app-icon name="search" [size]="16" />
           <input
             type="text"
-            placeholder="Search by Application ID, Applicant, Permit Type, or OPS No."
+            placeholder="Search by Application ID, Applicant, Business/Project, Permit Type, or OPS No."
             [(ngModel)]="searchTerm"
             (ngModelChange)="onSearchChange()"
           />
@@ -108,12 +108,14 @@
               <th>Assessment</th>
               <th>Application</th>
               <th>Applicant</th>
+              <th>Business / Project</th>
               <th>Permit Type</th>
               <th>Version</th>
               <th>Status</th>
               <th>Total</th>
               <th>Balance</th>
               <th>Due Date</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -136,6 +138,11 @@
                   </div>
                 </td>
                 <td>
+                  <span class="truncate truncate--business" [title]="row.businessName">{{
+                    row.businessName
+                  }}</span>
+                </td>
+                <td>
                   <span class="truncate truncate--type" [title]="row.permitType">{{
                     row.permitType
                   }}</span>
@@ -149,10 +156,54 @@
                 <td>{{ formatPHP(row.assessment.totalCentavos) }}</td>
                 <td>{{ formatPHP(row.assessment.balanceCentavos) }}</td>
                 <td>{{ row.assessment.dueDate ?? '—' }}</td>
+                <td (click)="$event.stopPropagation()">
+                  @if (
+                    row.assessment.status === 'Draft' &&
+                    !row.assessment.hasUnresolvedLines &&
+                    canEditAssessment()
+                  ) {
+                    <button
+                      type="button"
+                      class="pill-btn verify"
+                      [attr.aria-label]="'Submit assessment ' + row.assessment.id + ' for approval'"
+                      (click)="submitForApproval(row.assessment)"
+                    >
+                      Submit
+                    </button>
+                  } @else if (
+                    row.assessment.status === 'For Approval' &&
+                    !row.assessment.approvedBy &&
+                    canApproveAssessment()
+                  ) {
+                    <button
+                      type="button"
+                      class="pill-btn verify"
+                      [attr.aria-label]="'Approve assessment ' + row.assessment.id"
+                      (click)="approveAssessment(row.assessment)"
+                    >
+                      Approve
+                    </button>
+                  } @else if (
+                    row.assessment.status === 'For Approval' &&
+                    row.assessment.approvedBy &&
+                    canApproveAssessment()
+                  ) {
+                    <button
+                      type="button"
+                      class="pill-btn verify"
+                      [attr.aria-label]="
+                        'Issue order of payment for assessment ' + row.assessment.id
+                      "
+                      (click)="issueOrderOfPayment(row.assessment)"
+                    >
+                      Issue OP
+                    </button>
+                  }
+                </td>
               </tr>
             } @empty {
               <tr class="table-empty-row">
-                <td colspan="9">No assessments match your search.</td>
+                <td colspan="11">No assessments match your search.</td>
               </tr>
             }
           </tbody>
@@ -165,7 +216,14 @@
       />
     } @else if (selectedAssessment(); as a) {
       <div class="detail-head">
-        <h1>Assessment {{ a.id }} (v{{ a.version }})</h1>
+        <div class="detail-head-text">
+          <h1>Assessment {{ a.id }} (v{{ a.version }})</h1>
+          @if (selectedAssessmentApp(); as app) {
+            <p class="detail-subtitle">
+              {{ app.applicant }} · {{ app.businessName || 'Not provided' }}
+            </p>
+          }
+        </div>
         <div class="header-actions">
           <span class="status-pill" [class]="statusClass(a.status)">{{ a.status }}</span>
           @if (selectedAssessmentApp(); as app) {
@@ -193,7 +251,6 @@
                   <th>Family / Authority</th>
                   <th>Applicability</th>
                   <th>Amount</th>
-                  <th>Legal Basis</th>
                   @if (a.status === 'Draft') {
                     <th>Include</th>
                   }
@@ -206,7 +263,7 @@
                     <td class="muted">{{ line.family }} · {{ line.authority }}</td>
                     <td>
                       <span class="status-pill" [class]="statusClass(line.applicability)">{{
-                        line.applicability
+                        applicabilityLabel(line.applicability)
                       }}</span>
                     </td>
                     <td>
@@ -223,20 +280,6 @@
                       } @else {
                         {{ formatPHP(line.amountCentavos) }}
                       }
-                    </td>
-                    <td>
-                      <a
-                        [href]="line.legalBasisUrl"
-                        target="_blank"
-                        rel="noopener"
-                        class="basis-link"
-                        >{{ line.legalBasisTitle }}</a
-                      >
-                      <span
-                        class="status-pill small"
-                        [class]="statusClass(line.verificationStatus)"
-                        >{{ line.verificationStatus }}</span
-                      >
                     </td>
                     @if (a.status === 'Draft') {
                       <td>
@@ -255,7 +298,9 @@
                 <tr class="doc-total">
                   <td colspan="3">Total</td>
                   <td>{{ formatPHP(a.totalCentavos) }}</td>
-                  <td colspan="2"></td>
+                  @if (a.status === 'Draft') {
+                    <td></td>
+                  }
                 </tr>
                 <tr>
                   <td colspan="3">Amount Paid / Balance</td>
@@ -405,7 +450,7 @@
           <app-icon name="search" [size]="16" />
           <input
             type="text"
-            placeholder="Search by Transaction ID, Reference, or Applicant"
+            placeholder="Search by Transaction ID, Reference, Applicant, or Business/Project"
             [(ngModel)]="searchTerm"
             (ngModelChange)="onSearchChange()"
           />
@@ -463,6 +508,7 @@
               <th>Transaction</th>
               <th>Application</th>
               <th>Applicant</th>
+              <th>Business / Project</th>
               <th>Permit Type</th>
               <th>Method</th>
               <th>Agency</th>
@@ -487,6 +533,11 @@
                 <td>
                   <span class="truncate truncate--name" [title]="row.applicant">{{
                     row.applicant
+                  }}</span>
+                </td>
+                <td>
+                  <span class="truncate truncate--business" [title]="row.businessName">{{
+                    row.businessName
                   }}</span>
                 </td>
                 <td>
@@ -520,7 +571,7 @@
               </tr>
             } @empty {
               <tr class="table-empty-row">
-                <td colspan="10">No transactions match your search.</td>
+                <td colspan="11">No transactions match your search.</td>
               </tr>
             }
           </tbody>
@@ -533,7 +584,14 @@
       />
     } @else if (selectedTransaction(); as t) {
       <div class="detail-head">
-        <h1>Transaction {{ t.id }}</h1>
+        <div class="detail-head-text">
+          <h1>Transaction {{ t.id }}</h1>
+          @if (selectedTransactionApp(); as app) {
+            <p class="detail-subtitle">
+              {{ app.applicant }} · {{ app.businessName || 'Not provided' }}
+            </p>
+          }
+        </div>
         <div class="header-actions">
           <span class="status-pill" [class]="statusClass(t.status)">{{
             t.isVoid ? 'Voided' : t.status
@@ -704,8 +762,6 @@
             <th>Collecting Office</th>
             <th>Applicability</th>
             <th>Formula</th>
-            <th>Legal Basis</th>
-            <th>Verification</th>
           </tr>
         </thead>
         <tbody>
@@ -723,22 +779,6 @@
                 }}</span>
               </td>
               <td>{{ calculationSummary(entry.rule) }}</td>
-              <td>
-                <a
-                  [href]="entry.rule.legalBasisUrl"
-                  target="_blank"
-                  rel="noopener"
-                  class="basis-link"
-                  >{{ entry.rule.legalBasisTitle }}</a
-                >
-              </td>
-              <td>
-                <span
-                  class="status-pill small"
-                  [class]="statusClass(entry.rule.verificationStatus)"
-                  >{{ entry.rule.verificationStatus }}</span
-                >
-              </td>
             </tr>
           }
         </tbody>
@@ -764,7 +804,6 @@
               <th>Family</th>
               <th>Authority</th>
               <th>Calculation</th>
-              <th>Verification</th>
               <th>Version</th>
               <th>Active</th>
               <th>Actions</th>
@@ -779,11 +818,6 @@
                 <td>{{ rule.family }}</td>
                 <td>{{ rule.authority }}</td>
                 <td>{{ calculationSummary(rule) }}</td>
-                <td>
-                  <span class="status-pill small" [class]="statusClass(rule.verificationStatus)">{{
-                    rule.verificationStatus
-                  }}</span>
-                </td>
                 <td>
                   v{{ rule.version }}
                   <button type="button" class="link-btn" (click)="toggleHistory(rule.id)">
@@ -808,7 +842,7 @@
               </tr>
               @if (historyFor() === rule.id) {
                 <tr>
-                  <td colspan="8">
+                  <td colspan="7">
                     <div class="table-wrap">
                       <table class="detail-table">
                         <thead>

@@ -299,7 +299,7 @@
         <app-icon name="search" [size]="16" />
         <input
           type="text"
-          placeholder="Search Here By Application ID, Applicant Name, or Location"
+          placeholder="Search Here By Application ID, Applicant Name, Business/Project, or Type"
           [(ngModel)]="searchTerm"
           (ngModelChange)="onSearchChange()"
         />
@@ -353,9 +353,14 @@
               <td (click)="$event.stopPropagation()"><input type="checkbox" /></td>
               <td class="id-cell">{{ row.id }}</td>
               <td>
-                <div class="applicant-cell">
+                <div class="identity-cell">
                   <app-avatar [name]="row.applicant" [size]="30" />
-                  {{ row.applicant }}
+                  <div class="identity-text">
+                    <span class="identity-name" [title]="row.applicant">{{ row.applicant }}</span>
+                    <span class="identity-business" [title]="row.businessName || 'Not provided'">{{
+                      row.businessName || 'Not provided'
+                    }}</span>
+                  </div>
                 </div>
               </td>
               <td>{{ row.missingDocuments }}</td>
@@ -370,12 +375,19 @@
               </td>
               <td (click)="$event.stopPropagation()">
                 <div class="actions-cell">
-                  <button type="button" class="review-btn" (click)="openRecord(row)">Review</button>
+                  <button
+                    type="button"
+                    class="review-btn"
+                    [attr.aria-label]="'Review application ' + row.id"
+                    (click)="openRecord(row)"
+                  >
+                    Review
+                  </button>
                   <div class="menu-wrap">
                     <button
                       type="button"
                       class="icon-btn more small"
-                      aria-label="More actions"
+                      [attr.aria-label]="'More actions for application ' + row.id"
                       [attr.aria-expanded]="openMenuFor() === row.id"
                       (click)="toggleRowMenu(row)"
                     >
@@ -433,7 +445,7 @@
             </tr>
           } @empty {
             <tr class="table-empty-row">
-              <td colspan="9">No applications match your search.</td>
+              <td colspan="10">No applications match your search.</td>
             </tr>
           }
         </tbody>
@@ -469,6 +481,10 @@
         }}</span>
 
         <dl class="info-list">
+          <div>
+            <dt>Business / Project :</dt>
+            <dd>{{ row.businessName || 'Not provided' }}</dd>
+          </div>
           <div>
             <dt>Type :</dt>
             <dd>{{ row.type }}</dd>

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Topbar } from '../../shared/topbar/topbar';
@@ -44,6 +44,8 @@ interface AssessmentRow {
   assessment: Assessment;
   applicationId: string;
   applicant: string;
+  /** Canonical relationship — see ApplicationStore.getApplicationContext. Never derived from `applicant`; one applicant can own multiple businesses. */
+  businessId: string;
   businessName: string;
   permitType: string;
 }
@@ -51,6 +53,8 @@ interface AssessmentRow {
 interface TransactionRow {
   txn: PaymentTransaction;
   applicant: string;
+  businessId: string;
+  businessName: string;
   permitType: string;
   assessmentVersion: number;
 }
@@ -68,11 +72,26 @@ export class Payments {
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
 
+  /** Bound to the `?tab=` query param (via withComponentInputBinding) — lets another page (Permit Release > Permit Types' "Manage Fee Rules" link) land directly on a specific tab. */
+  readonly tab = input<PaymentsTab | null>(null);
+  /** Bound to the `?permitType=` query param — pre-selects the Permit Fee Matrix tab's own permit-type filter. */
+  readonly queryPermitType = input<PermitType | null>(null, { alias: 'permitType' });
+
   constructor() {
     // A due-date-derived status ('Overdue') is only ever true "as of
     // now" — refresh once per page load rather than trusting whatever
     // was computed at seed/construction time.
     this.assessmentStore.refreshOverdueStatuses();
+
+    // Applies the incoming query params once, the same way selectTab()
+    // would — deliberately NOT re-run on every input change so the
+    // user's own subsequent tab clicks aren't overridden.
+    effect(() => {
+      const tab = this.tab();
+      const permitType = this.queryPermitType();
+      if (tab) this.activeTab.set(tab);
+      if (permitType) this.matrixPermitType.set(permitType);
+    });
   }
 
   // ---- Tabs ---------------------------------------------------------------
@@ -131,14 +150,16 @@ export class Payments {
 
   private applicationLabel(applicationId: string): {
     applicant: string;
+    businessId: string;
     businessName: string;
     permitType: string;
   } {
-    const app = this.store.getById(applicationId);
+    const ctx = this.store.getApplicationContext(applicationId);
     return {
-      applicant: app?.applicant ?? '—',
-      businessName: app?.businessName ?? '—',
-      permitType: app?.permitType ?? '—',
+      applicant: ctx?.applicant ?? '—',
+      businessId: ctx?.businessId ?? '',
+      businessName: ctx?.businessLabel ?? 'Not provided',
+      permitType: ctx?.permitType ?? '—',
     };
   }
 
@@ -178,6 +199,7 @@ export class Payments {
       return (
         r.applicationId.toLowerCase().includes(term) ||
         r.applicant.toLowerCase().includes(term) ||
+        r.businessName.toLowerCase().includes(term) ||
         r.permitType.toLowerCase().includes(term) ||
         (r.assessment.opsNumber ?? '').toLowerCase().includes(term)
       );
@@ -448,6 +470,8 @@ export class Payments {
         return {
           txn,
           applicant: app.applicant,
+          businessId: app.businessId,
+          businessName: app.businessName,
           permitType: app.permitType,
           assessmentVersion: assessment?.version ?? 0,
         };
@@ -487,6 +511,7 @@ export class Payments {
         r.txn.id.toLowerCase().includes(term) ||
         r.txn.transactionReference.toLowerCase().includes(term) ||
         r.applicant.toLowerCase().includes(term) ||
+        r.businessName.toLowerCase().includes(term) ||
         r.txn.applicationId.toLowerCase().includes(term)
       );
     });
@@ -502,6 +527,11 @@ export class Payments {
   protected readonly selectedTransaction = computed(() => {
     const id = this.selectedTransactionId();
     return id ? this.assessmentStore.getTransactionById(id) : undefined;
+  });
+  /** The applicant/business context for the currently open transaction — mirrors selectedAssessmentApp above; this detail view previously showed neither. */
+  protected readonly selectedTransactionApp = computed(() => {
+    const t = this.selectedTransaction();
+    return t ? this.store.getById(t.applicationId) : undefined;
   });
   protected readonly selectedTransactionAdjustments = computed(() => {
     const id = this.selectedTransactionId();
@@ -723,6 +753,8 @@ export class Payments {
         'Assessment ID': r.assessment.id,
         'Application ID': r.applicationId,
         Applicant: r.applicant,
+        'Business ID': r.businessId,
+        'Business / Project': r.businessName,
         'Permit Type': r.permitType,
         Version: r.assessment.version,
         Status: r.assessment.status,
@@ -741,6 +773,8 @@ export class Payments {
         'Transaction ID': r.txn.id,
         'Application ID': r.txn.applicationId,
         Applicant: r.applicant,
+        'Business ID': r.businessId,
+        'Business / Project': r.businessName,
         'Permit Type': r.permitType,
         Method: r.txn.method,
         Agency: r.txn.agency,

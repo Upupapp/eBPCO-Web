@@ -1,4 +1,9 @@
-<app-topbar title="Dashboard" [searchTerm]="searchTerm()" (searchChange)="searchTerm.set($event)" />
+<app-topbar
+  title="Dashboard"
+  [searchTerm]="searchTerm()"
+  searchPlaceholder="Search Recent Applications by ID, Applicant, Business/Project, or Location"
+  (searchChange)="searchTerm.set($event)"
+/>
 
 @if (view() === 'list') {
   <section class="kpi-grid">
@@ -125,6 +130,7 @@
             <span class="overdue-dot" [style.background]="item.color"></span>
             <div class="overdue-body">
               <p>{{ item.text }}</p>
+              <p class="overdue-business">{{ item.businessName || 'Not provided' }}</p>
               <div class="overdue-footer">
                 <span class="ago">Submitted {{ item.agoLabel }}</span>
                 <button
@@ -267,9 +273,14 @@
             >
               <td class="id-cell">{{ row.id }}</td>
               <td>
-                <div class="applicant-cell">
+                <div class="identity-cell">
                   <app-avatar [name]="row.applicant" [size]="30" />
-                  {{ row.applicant }}
+                  <div class="identity-text">
+                    <span class="identity-name" [title]="row.applicant">{{ row.applicant }}</span>
+                    <span class="identity-business" [title]="row.businessName || 'Not provided'">{{
+                      row.businessName || 'Not provided'
+                    }}</span>
+                  </div>
                 </div>
               </td>
               <td>{{ row.location }}</td>

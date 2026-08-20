@@ -567,16 +567,18 @@
               <table class="detail-table">
                 <thead>
                   <tr>
-                    <th>Permit ID</th>
+                    <th>Application No.</th>
+                    <th>Permit No.</th>
                     <th>Type</th>
                     <th>Submitted</th>
                     <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (p of detail.permits; track p.id) {
+                  @for (p of detail.permits; track p.applicationId) {
                     <tr>
-                      <td class="muted">{{ p.id }}</td>
+                      <td class="muted">{{ p.applicationId }}</td>
+                      <td class="muted">{{ p.permitNumber ?? 'Not yet issued' }}</td>
                       <td>{{ p.type }}</td>
                       <td class="muted">{{ p.dateSubmitted }}</td>
                       <td>
@@ -586,6 +588,10 @@
                           >{{ p.status }}</span
                         >
                       </td>
+                    </tr>
+                  } @empty {
+                    <tr class="table-empty-row">
+                      <td colspan="5">No applications are linked to this business yet.</td>
                     </tr>
                   }
                 </tbody>

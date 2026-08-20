@@ -445,7 +445,7 @@
         <button
           type="button"
           class="modal-btn confirm"
-          [disabled]="!allStepsValid() || submitting()"
+          [disabled]="submitting()"
           (click)="submit()"
         >
           {{ submitting() ? 'Creating…' : 'Create Application' }}

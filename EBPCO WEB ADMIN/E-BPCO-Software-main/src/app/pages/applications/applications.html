@@ -26,7 +26,7 @@
         <app-icon name="search" [size]="16" />
         <input
           type="text"
-          placeholder="Search Here By Application ID, Applicant Name, or Location"
+          placeholder="Search Here By Application ID, Applicant Name, Business/Project, or Location"
           [(ngModel)]="searchTerm"
           (ngModelChange)="onSearchChange()"
         />
@@ -39,6 +39,15 @@
               <option value="All">All Statuses</option>
               @for (opt of statusOptions; track opt) {
                 <option [value]="opt">{{ opt }}</option>
+              }
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="app-business-filter">Business / Project</label>
+            <select id="app-business-filter" [(ngModel)]="businessFilter">
+              <option value="All">All Businesses</option>
+              @for (b of businessOptions(); track b.id) {
+                <option [value]="b.id">{{ b.name }}</option>
               }
             </select>
           </div>
@@ -113,9 +122,14 @@
               </td>
               <td class="id-cell">{{ row.id }}</td>
               <td>
-                <div class="applicant-cell">
+                <div class="identity-cell">
                   <app-avatar [name]="row.applicant" [size]="30" />
-                  {{ row.applicant }}
+                  <div class="identity-text">
+                    <span class="identity-name" [title]="row.applicant">{{ row.applicant }}</span>
+                    <span class="identity-business" [title]="row.businessName || 'Not provided'">{{
+                      row.businessName || 'Not provided'
+                    }}</span>
+                  </div>
                 </div>
               </td>
               <td>{{ row.location }}</td>
@@ -132,7 +146,7 @@
                   <button
                     type="button"
                     class="icon-btn view"
-                    aria-label="View application"
+                    [attr.aria-label]="'View application ' + row.id"
                     (click)="openDetail(row)"
                   >
                     <app-icon name="eye" [size]="15" />
@@ -140,7 +154,7 @@
                   <button
                     type="button"
                     class="icon-btn edit"
-                    aria-label="Edit application"
+                    [attr.aria-label]="'Edit application ' + row.id"
                     (click)="openDetail(row)"
                   >
                     <app-icon name="edit" [size]="15" />
@@ -236,6 +250,10 @@
 
         <dl class="info-list">
           <div>
+            <dt>Business / Project :</dt>
+            <dd>{{ detail.businessLabel }}</dd>
+          </div>
+          <div>
             <dt>City :</dt>
             <dd>{{ detail.row.location }}</dd>
           </div>
@@ -251,11 +269,21 @@
             <dt>Email :</dt>
             <dd>
               {{ detail.email }}
-              <span
-                class="verify-pill"
-                [class]="detail.emailVerification.status.toLowerCase().replace(' ', '-')"
-                >{{ detail.emailVerification.status }}</span
-              >
+              @if (detail.emailVerification.status === 'Verified') {
+                <app-icon
+                  name="check-circle"
+                  [size]="15"
+                  class="verified-check"
+                  aria-hidden="true"
+                />
+                <span class="sr-only">Verified</span>
+              } @else {
+                <span
+                  class="verify-pill"
+                  [class]="detail.emailVerification.status.toLowerCase().replace(' ', '-')"
+                  >{{ detail.emailVerification.status }}</span
+                >
+              }
               @if (canVerifyContact() && detail.emailVerification.status !== 'Verified') {
                 <button
                   type="button"
@@ -278,11 +306,21 @@
             <dt>Phone :</dt>
             <dd>
               {{ detail.phone }}
-              <span
-                class="verify-pill"
-                [class]="detail.mobileVerification.status.toLowerCase().replace(' ', '-')"
-                >{{ detail.mobileVerification.status }}</span
-              >
+              @if (detail.mobileVerification.status === 'Verified') {
+                <app-icon
+                  name="check-circle"
+                  [size]="15"
+                  class="verified-check"
+                  aria-hidden="true"
+                />
+                <span class="sr-only">Verified</span>
+              } @else {
+                <span
+                  class="verify-pill"
+                  [class]="detail.mobileVerification.status.toLowerCase().replace(' ', '-')"
+                  >{{ detail.mobileVerification.status }}</span
+                >
+              }
               @if (canVerifyContact() && detail.mobileVerification.status !== 'Verified') {
                 <button
                   type="button"
@@ -818,6 +856,7 @@
     <app-avatar [name]="detail.row.applicant" [size]="64" />
     <div class="info-header-text">
       <h2>{{ detail.row.id }} - {{ detail.row.applicant }}</h2>
+      <p class="info-header-business">{{ detail.businessLabel }}</p>
       <span class="status-pill" [class]="detail.row.status.toLowerCase().replace(/\s+/g, '-')">{{
         detail.row.status
       }}</span>
@@ -914,7 +953,12 @@
               <option>{{ detail.applicationType.type }}</option>
             </select>
             <label>If Company:</label>
-            <input type="text" disabled placeholder="Company name" />
+            <input
+              type="text"
+              disabled
+              [value]="detail.applicationType.ifCompany"
+              placeholder="Not provided"
+            />
             <label>Authorized Representative</label>
             <input type="text" disabled placeholder="Select" />
             <label>Business Permit</label>
@@ -1327,6 +1371,8 @@
               <p>{{ detail.row.applicant }}</p>
               <p class="muted">{{ detail.email }}</p>
               <p class="muted">{{ detail.phone }}</p>
+              <span class="field-label">Business / Project</span>
+              <p>{{ detail.businessLabel }}</p>
             </div>
             <div>
               <span class="col-title">PROJECT DETAILS</span>

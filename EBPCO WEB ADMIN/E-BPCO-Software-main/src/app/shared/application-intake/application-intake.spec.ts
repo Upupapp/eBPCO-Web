@@ -32,7 +32,7 @@ function attachAllRequiredDocuments(component: any): void {
   }
 }
 
-describe('ApplicationIntake — validation blocks incomplete steps', () => {
+describe('ApplicationIntake — step navigation is never blocked, but validation feedback is still detectable', () => {
   let fixture: ReturnType<typeof TestBed.createComponent<ApplicationIntake>>;
   let component: any;
 
@@ -48,25 +48,22 @@ describe('ApplicationIntake — validation blocks incomplete steps', () => {
     expect(component.showStepErrors()).toBe(false);
   });
 
-  it('next() refuses to advance past Applicant while required fields are empty, and surfaces errors', () => {
+  it('next() advances past Applicant even while required fields are empty — validation no longer blocks progress', () => {
+    expect(component.currentStepErrors().length).toBeGreaterThan(0); // still detects the empty fields
     component.next();
-    expect(component.stepIndex()).toBe(0);
-    expect(component.showStepErrors()).toBe(true);
-    expect(component.currentStepErrors().length).toBeGreaterThan(0);
+    expect(component.stepIndex()).toBe(1);
   });
 
-  it('rejects an invalid email/mobile with specific field errors, even when other fields are filled', () => {
+  it('detects an invalid email/mobile with specific field errors, even when other fields are filled', () => {
     fillApplicant(component);
     component.applicant.email = 'not-an-email';
     component.applicant.mobileNumber = '123';
-    component.next();
-    expect(component.stepIndex()).toBe(0);
     const errors: string[] = component.currentStepErrors();
     expect(errors.some((e) => /email/i.test(e))).toBe(true);
     expect(errors.some((e) => /mobile/i.test(e))).toBe(true);
   });
 
-  it('preserves every entered value after a failed validation attempt (nothing is cleared)', () => {
+  it('preserves every entered value after calling next() on an invalid step (nothing is cleared)', () => {
     fillApplicant(component);
     component.applicant.email = 'not-an-email';
     component.next();
@@ -75,26 +72,29 @@ describe('ApplicationIntake — validation blocks incomplete steps', () => {
     expect(component.applicant.mobileNumber).toBe('09171234567');
   });
 
-  it('advances once Applicant is valid, then blocks on an incomplete Business step', () => {
+  it('advances through every step in sequence regardless of validation state', () => {
     fillApplicant(component);
     component.next();
     expect(component.stepIndex()).toBe(1);
-    component.next();
-    expect(component.stepIndex()).toBe(1); // Business step incomplete — stays put
+    component.next(); // Business left blank
+    expect(component.stepIndex()).toBe(2);
+    component.next(); // Application left blank
+    expect(component.stepIndex()).toBe(3);
+    expect(component.currentStep()).toBe('documents');
   });
 
-  it('blocks the Documents step while any required document has no file attached', () => {
+  it('reaches Review even with required documents left unattached, and allStepsValid() correctly reports it as invalid', () => {
     fillApplicant(component);
     component.next();
     fillBusiness(component);
     component.next();
     fillApplication(component, 'Building Permit');
     component.next();
-    expect(component.currentStep()).toBe('documents');
     component.next(); // no files attached yet
-    expect(component.stepIndex()).toBe(3); // still on Documents
+    expect(component.currentStep()).toBe('review');
+    expect(component.allStepsValid()).toBe(false);
     const errors: string[] = component.currentStepErrors();
-    expect(errors.some((e) => /required document/i.test(e))).toBe(true);
+    expect(errors).toEqual([]); // 'review' itself carries no field errors of its own
   });
 });
 

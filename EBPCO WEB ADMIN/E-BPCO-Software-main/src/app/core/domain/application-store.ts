@@ -9,7 +9,7 @@ import {
 import { buildSeed } from './application-seed';
 import { Applicant, ContactVerification, VerificationMethod } from './applicant.model';
 import { Business } from './business.model';
-import { GeneratedPermit, PermitReleaseRecord, ReleaseMethod } from './permit.model';
+import { GeneratedPermit, PermitReleaseRecord, PermitType, ReleaseMethod } from './permit.model';
 import {
   ApplicationDocument,
   DocumentHistoryEntry,
@@ -99,6 +99,45 @@ export class ApplicationStore {
 
   getApplicant(applicantId: string): Applicant | undefined {
     return this._applicants().find((a) => a.id === applicantId);
+  }
+
+  /**
+   * The one place "which applicant, and which BUSINESS, does this
+   * application belong to" is resolved — every table/detail/export/
+   * notification that needs that context should call this instead of
+   * re-deriving its own join. `businessId` is the canonical relationship;
+   * it is never derived from the applicant's name (one applicant can own
+   * multiple businesses — see the seed's Raul Villanueva/Grace Fajota
+   * multi-business owners). `businessLabel` resolves in this order: the
+   * real linked `Business.name` -> the application's own denormalized
+   * `businessName` (a legacy display fallback for a stale/unresolvable
+   * businessId) -> the literal string 'Not provided'. It never falls
+   * back to the applicant's name.
+   */
+  getApplicationContext(applicationId: string):
+    | {
+        applicationId: string;
+        applicant: string;
+        applicantId: string;
+        businessId: string;
+        business: Business | undefined;
+        businessLabel: string;
+        permitType: PermitType;
+      }
+    | undefined {
+    const app = this.getById(applicationId);
+    if (!app) return undefined;
+    const business = this.getBusiness(app.businessId);
+    const businessLabel = business?.name || app.businessName || 'Not provided';
+    return {
+      applicationId: app.id,
+      applicant: app.applicant,
+      applicantId: app.applicantId,
+      businessId: app.businessId,
+      business,
+      businessLabel,
+      permitType: app.permitType,
+    };
   }
 
   getDocuments(applicationId: string): ApplicationDocument[] {

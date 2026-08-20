@@ -11,8 +11,20 @@ import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS } from '../../core/session/permissions';
-import { ReleaseMethod } from '../../core/domain/permit.model';
+import { ALL_PERMIT_TYPES, PermitType, ReleaseMethod } from '../../core/domain/permit.model';
 import { DocumentPreview } from '../../shared/document-preview/document-preview';
+import { requirementsFor, RequirementDocument } from '../../core/domain/requirements-catalog';
+import { RequirementsConfigStore } from '../../core/domain/requirements-config-store';
+import { PaymentConfigStore } from '../../core/domain/payment-config-store';
+import { DEPARTMENTS, departmentName } from '../../core/domain/department.model';
+import { FeeApplicability } from '../../core/domain/fee-rule.model';
+
+type PermitReleaseTab = 'release' | 'permit-types';
+
+function formatPHP(centavos: number | null): string {
+  if (centavos === null) return 'Requires assessor input';
+  return `₱${(centavos / 100).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 // 'Ready for Release' mirrors E-BPCO Mobile's ApplicationStatus.released
 // display label exactly (application_model.dart) — from the applicant's
@@ -24,6 +36,9 @@ type PermitStatus = 'Ready for Release' | 'Released';
 interface ReleaseRow {
   id: string;
   applicant: string;
+  /** Canonical relationship — see ApplicationStore.getApplicationContext. Never derived from `applicant`; one applicant can own multiple businesses. */
+  businessId: string;
+  businessName: string;
   city: string;
   type: string;
   approvalStatus: string;
@@ -54,11 +69,163 @@ export class PermitRelease {
   private readonly store = inject(ApplicationStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  private readonly requirementsConfig = inject(RequirementsConfigStore);
+  private readonly paymentConfig = inject(PaymentConfigStore);
 
   protected readonly canRelease = computed(() => {
     const role = this.session.role();
     return role ? ACTION_PERMISSIONS.releasePermit(role) : false;
   });
+
+  // ---- Tabs -----------------------------------------------------------------
+
+  protected readonly tabs: { key: PermitReleaseTab; label: string; icon: string }[] = [
+    { key: 'release', label: 'Release Queue', icon: 'file-check' },
+    { key: 'permit-types', label: 'Permit Types', icon: 'gear' },
+  ];
+
+  protected readonly activeTab = signal<PermitReleaseTab>('release');
+
+  protected selectTab(tab: PermitReleaseTab): void {
+    this.activeTab.set(tab);
+  }
+
+  // ---- Permit Types: the required-document checklist + a fee-rule summary
+  // per permit type. Every one of the fixed 16 permit types is shown here —
+  // this office (OBO) is the responsible department for all of them (see
+  // department.model.ts), so there is no meaningful subset to filter down
+  // to; viewing is open to anyone who can reach Permit Release at all,
+  // while editing the checklist is narrowed further (see canConfigureRequirements).
+
+  protected readonly canConfigureRequirements = computed(() => {
+    const role = this.session.role();
+    return !!role && ACTION_PERMISSIONS.configureRequirements(role);
+  });
+
+  protected readonly permitTypes = ALL_PERMIT_TYPES;
+  protected readonly departmentOptions = DEPARTMENTS;
+
+  protected readonly selectedPermitType = signal<PermitType | null>(null);
+
+  protected selectPermitType(type: PermitType): void {
+    this.selectedPermitType.set(type);
+    this.cancelAddDocument();
+    this.cancelEditDocument();
+  }
+
+  protected backToPermitTypesList(): void {
+    this.selectedPermitType.set(null);
+  }
+
+  protected referenceFor(type: PermitType) {
+    return requirementsFor(type);
+  }
+
+  protected departmentLabel(id: string): string {
+    return departmentName(id);
+  }
+
+  protected readonly selectedDocuments = computed<RequirementDocument[]>(() => {
+    const type = this.selectedPermitType();
+    return type ? this.requirementsConfig.documentsFor(type) : [];
+  });
+
+  protected requirementsConfigDocCount(type: PermitType): number {
+    return this.requirementsConfig.documentsFor(type).length;
+  }
+
+  protected readonly selectedFeeRules = computed(() => {
+    const type = this.selectedPermitType();
+    return type ? this.paymentConfig.feeRulesForPermitType(type) : [];
+  });
+
+  protected feeAmountSummary(ruleId: string): string {
+    const entry = this.selectedFeeRules().find((e) => e.rule.id === ruleId);
+    if (!entry) return '—';
+    const rule = entry.rule;
+    if (rule.requiresAssessorInput) return 'Requires assessor input';
+    if (rule.flatAmountCentavos !== null) return formatPHP(rule.flatAmountCentavos);
+    return 'Formula-based';
+  }
+
+  protected applicabilityLabel(a: FeeApplicability): string {
+    return a === 'required' ? 'Required' : a === 'conditional' ? 'Conditional' : 'Not Applicable';
+  }
+
+  goToFeeMatrix(type: PermitType): void {
+    this.router.navigate(['/payments'], { queryParams: { tab: 'matrix', permitType: type } });
+  }
+
+  // ---- Permit Types: add/edit/remove a required document ----------------
+
+  protected readonly addDocumentOpen = signal(false);
+  protected newDocument = { label: '', required: true, reviewingDepartmentId: 'obo' };
+
+  protected startAddDocument(): void {
+    if (!this.canConfigureRequirements()) return;
+    this.newDocument = { label: '', required: true, reviewingDepartmentId: 'obo' };
+    this.addDocumentOpen.set(true);
+  }
+
+  protected cancelAddDocument(): void {
+    this.addDocumentOpen.set(false);
+  }
+
+  protected confirmAddDocument(): void {
+    const type = this.selectedPermitType();
+    if (!type || !this.canConfigureRequirements()) return;
+    const label = this.newDocument.label.trim();
+    if (!label) return;
+    this.requirementsConfig.addDocument(type, {
+      label,
+      required: this.newDocument.required,
+      reviewingDepartmentId: this.newDocument.reviewingDepartmentId,
+    });
+    this.addDocumentOpen.set(false);
+  }
+
+  protected readonly editingDocumentId = signal<string | null>(null);
+  protected editDraft = { label: '', required: true, reviewingDepartmentId: 'obo' };
+
+  protected startEditDocument(doc: RequirementDocument): void {
+    if (!this.canConfigureRequirements()) return;
+    this.editDraft = {
+      label: doc.label,
+      required: doc.required,
+      reviewingDepartmentId: doc.reviewingDepartmentId,
+    };
+    this.editingDocumentId.set(doc.id);
+  }
+
+  protected cancelEditDocument(): void {
+    this.editingDocumentId.set(null);
+  }
+
+  protected confirmEditDocument(): void {
+    const type = this.selectedPermitType();
+    const id = this.editingDocumentId();
+    if (!type || !id || !this.canConfigureRequirements()) return;
+    const label = this.editDraft.label.trim();
+    if (!label) return;
+    this.requirementsConfig.updateDocument(type, id, {
+      label,
+      required: this.editDraft.required,
+      reviewingDepartmentId: this.editDraft.reviewingDepartmentId,
+    });
+    this.editingDocumentId.set(null);
+  }
+
+  protected removeDocument(doc: RequirementDocument): void {
+    const type = this.selectedPermitType();
+    if (!type || !this.canConfigureRequirements()) return;
+    this.requirementsConfig.removeDocument(type, doc.id);
+  }
+
+  protected resetDocumentsToDefault(): void {
+    const type = this.selectedPermitType();
+    if (!type || !this.canConfigureRequirements()) return;
+    this.requirementsConfig.resetToDefault(type);
+  }
 
   // Every row is an application whose permit has actually been generated —
   // read from the same store Applications/Payments/Dashboard read, with
@@ -70,6 +237,8 @@ export class PermitRelease {
       .map((app): ReleaseRow => ({
         id: app.id,
         applicant: app.applicant,
+        businessId: app.businessId,
+        businessName: app.businessName,
         city: app.location,
         type: app.permitType,
         approvalStatus: 'Approved',
@@ -142,6 +311,7 @@ export class PermitRelease {
       return (
         r.id.toLowerCase().includes(term) ||
         r.applicant.toLowerCase().includes(term) ||
+        r.businessName.toLowerCase().includes(term) ||
         r.city.toLowerCase().includes(term) ||
         r.type.toLowerCase().includes(term)
       );
@@ -202,6 +372,8 @@ export class PermitRelease {
     return {
       'Application ID': row.id,
       Applicant: row.applicant,
+      'Business ID': row.businessId,
+      'Business / Project': row.businessName,
       Location: row.city,
       Type: row.type,
       'Approval Status': row.approvalStatus,

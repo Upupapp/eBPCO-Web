@@ -25,6 +25,9 @@ export interface EvalTypeCard {
 export interface EvalRow {
   id: string;
   applicant: string;
+  /** Canonical relationship — see ApplicationStore.getApplicationContext. Never derived from `applicant`; one applicant can own multiple businesses. */
+  businessId: string;
+  businessName: string;
   missingDocuments: number;
   type: string;
   dateSubmitted: string;
@@ -163,6 +166,8 @@ export function buildEvalRows(apps: ApplicationRecord[], stageKey: EvalTypeKey):
     return {
       id: a.id,
       applicant: a.applicant,
+      businessId: a.businessId,
+      businessName: a.businessName,
       missingDocuments: missingDocCount(a.id),
       type: a.permitType,
       dateSubmitted: a.dateSubmitted,
