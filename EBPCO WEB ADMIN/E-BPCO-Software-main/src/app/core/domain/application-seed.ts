@@ -15,14 +15,11 @@ import {
   GeneratedPermit,
   PermitReleaseRecord,
   PermitType,
-  permitTypeDomain,
 } from './permit.model';
 import { ApplicationDocument, DocumentHistoryEntry, DocumentStatus } from './document.model';
 import { EvaluationRecord } from './evaluation.model';
-import { PaymentTransaction, totalAssessmentCentavos } from './payment.model';
 import { AuditEvent } from './audit.model';
 import { AppNotification } from './notification.model';
-import { DEFAULT_FEE_CONFIGS, feeScheduleCentavos } from './payment-config.model';
 import { RequirementDocument, requirementsFor } from './requirements-catalog';
 import { departmentName } from './department.model';
 
@@ -83,47 +80,33 @@ const LOCATIONS = [
 
 // The centralized permit-type catalog (permit.model.ts) IS the "one
 // centralized list" this weighting reuses — no separate/duplicated type
-// list lives here. Weighted so Business Permit filings (the highest
-// real-world volume for a municipal BPLO) dominate, with the 16
-// construction/ancillary/certificate types sharing the remainder — no
-// application in this dataset is ever assigned the old generic
-// "Business Permit" value; every one gets one of the specific types
-// below.
+// list lives here, and every weight key is one of the exact 16 supported
+// values (no aliases). Weighted toward Building Permit and Renovation
+// Permit as the highest real-world volume, with the remaining ancillary/
+// certificate types sharing the rest.
 const PERMIT_WEIGHTS: [PermitType, number][] = [
-  ['New Business Permit', 0.18],
-  ['Business Permit Renewal', 0.16],
-  ['Business Permit Amendment', 0.06],
-  ['New Construction', 0.09],
-  ['Renovation', 0.08],
-  ['Addition / Extension', 0.05],
-  ['Demolition', 0.02],
-  ['Architectural', 0.03],
-  ['Civil / Structural', 0.03],
-  ['Electrical', 0.05],
-  ['Mechanical', 0.02],
-  ['Sanitary / Plumbing', 0.03],
-  ['Plumbing', 0.02],
-  ['Electronics', 0.02],
-  ['Interior', 0.02],
-  ['Fencing', 0.03],
-  ['Sign Permit', 0.04],
-  ['Excavation', 0.02],
-  ['Certificate of Occupancy', 0.05],
+  ['Building Permit', 0.2],
+  ['Architectural Permit', 0.05],
+  ['Civil / Structural Permit', 0.05],
+  ['Demolition Permit', 0.03],
+  ['Addition / Extension Permit', 0.06],
+  ['Renovation Permit', 0.1],
+  ['Electrical Permit', 0.08],
+  ['Electronics Permit', 0.03],
+  ['Mechanical Permit', 0.04],
+  ['Plumbing Permit', 0.04],
+  ['Sanitary / Plumbing Permit', 0.05],
+  ['Interior Design Permit', 0.04],
+  ['Fencing Permit', 0.06],
+  ['Sign Permit', 0.06],
+  ['Excavation & Ground Preparation Permit', 0.04],
+  ['Certificate of Occupancy', 0.07],
 ];
 
-// Business-domain permit types carry a fixed, matching transaction nature
-// (a "New Business Permit" application IS a New transaction) — only the
-// construction domain rolls ApplicationAction independently, since a
-// Renovation/Electrical/etc. permit can genuinely be filed as New or as a
-// Renewal of a prior ancillary permit.
-const BUSINESS_ACTION: Record<string, ApplicationAction> = {
-  'New Business Permit': 'New',
-  'Business Permit Renewal': 'Renewal',
-  'Business Permit Amendment': 'Amendment',
-};
-const CONSTRUCTION_ACTIONS: ApplicationAction[] = ['New', 'New', 'New', 'Renewal', 'Amendment'];
-
-const FEE_SCHEDULE_CENTAVOS = feeScheduleCentavos(DEFAULT_FEE_CONFIGS);
+// A permit can genuinely be filed as New, a Renewal of a prior permit, or
+// an Amendment to one already on file — rolled independently of which of
+// the 16 permit types it is.
+const APPLICATION_ACTIONS: ApplicationAction[] = ['New', 'New', 'New', 'Renewal', 'Amendment'];
 
 // Weighted lifecycle-status buckets — sums to 1. Skewed toward a realistic
 // operational funnel: more mid-pipeline volume than either extreme, with
@@ -189,8 +172,7 @@ function guessIssuingOffice(requirement: RequirementDocument, barangay: string):
   if (id.includes('brgy')) return `Barangay ${barangay} Hall`;
   if (id.includes('fsic') || id.includes('fire'))
     return 'Bureau of Fire Protection – Castilla Fire Station';
-  if (id.includes('sanitary') && requirement.reviewingDepartmentId === 'health')
-    return 'Municipal Health Office';
+  if (id.includes('sanitary')) return 'Municipal Health Office';
   if (id.includes('prc')) return 'Professional Regulation Commission';
   if (id.includes('locational') || id.includes('zoning'))
     return 'Municipal Planning and Development Office';
@@ -300,7 +282,6 @@ export interface SeedResult {
   applications: ApplicationRecord[];
   documents: ApplicationDocument[];
   evaluations: EvaluationRecord[];
-  payments: PaymentTransaction[];
   permits: GeneratedPermit[];
   releases: PermitReleaseRecord[];
   auditEvents: AuditEvent[];
@@ -313,7 +294,6 @@ interface BuildContext {
   applications: ApplicationRecord[];
   documents: ApplicationDocument[];
   evaluations: EvaluationRecord[];
-  payments: PaymentTransaction[];
   permits: GeneratedPermit[];
   releases: PermitReleaseRecord[];
   auditEvents: AuditEvent[];
@@ -352,8 +332,7 @@ function buildApplicationBundle(
   const pos = derivePipelinePosition(lifecycleStatus);
   const officer = OFFICERS[Math.floor(rand() * OFFICERS.length)];
   const applicationAction: ApplicationAction =
-    BUSINESS_ACTION[permitType] ??
-    CONSTRUCTION_ACTIONS[Math.floor(rand() * CONSTRUCTION_ACTIONS.length)];
+    APPLICATION_ACTIONS[Math.floor(rand() * APPLICATION_ACTIONS.length)];
 
   const id = `E-BPCO-2026-${String(100 + index).padStart(6, '0')}`;
 
@@ -364,7 +343,6 @@ function buildApplicationBundle(
     applicantId: applicant.id,
     applicant: `${applicant.firstName} ${applicant.lastName}`,
     location: `Barangay ${business.barangay}`,
-    serviceDomain: permitTypeDomain(permitType),
     permitType,
     applicationAction,
     officer,
@@ -375,10 +353,11 @@ function buildApplicationBundle(
     evaluationResult: pos.evaluationResult,
     paymentStatus: pos.paymentStatus,
     permitReleaseStatus: pos.permitReleaseStatus,
-    assessedAmountCentavos:
-      pos.paymentStatus === 'Not Yet Available'
-        ? null
-        : totalAssessmentCentavos(FEE_SCHEDULE_CENTAVOS),
+    // Always starts null — ApplicationStore's constructor drives the real
+    // AssessmentStore workflow for every eligible seed record (see
+    // ApplicationStore.seedAssessmentFor) and then re-derives this field
+    // from that real assessment, instead of a flat total computed here.
+    assessedAmountCentavos: null,
   });
   ctx.applications.push(record);
 
@@ -522,34 +501,14 @@ function buildApplicationBundle(
     }
   }
 
-  // Payment — only once assessed.
+  // Payment — the assessment/transaction chain itself is built by
+  // ApplicationStore's constructor DRIVING AssessmentStore's real API
+  // (see ApplicationStore.seedAssessmentFor) rather than hand-constructed
+  // here, since this is a plain pure function with no access to that
+  // stateful service. `pos.paymentStatus` (already computed above) is the
+  // target state that pass reproduces.
   if (pos.paymentStatus !== 'Not Yet Available') {
     cursor = addHours(cursor, 24);
-    const amount = totalAssessmentCentavos(FEE_SCHEDULE_CENTAVOS);
-    const method = rand() < 0.6 ? 'Onsite' : 'Bank Transfer';
-    ctx.payments.push({
-      id: `PAY-${id}`,
-      applicationId: id,
-      referenceNumber: `OR-2026-${String(400000 + index * 41).padStart(6, '0')}`,
-      amountCentavos: amount,
-      method,
-      status: pos.paymentStatus,
-      submittedAtValue: cursor,
-      submittedAt: formatDate(cursor),
-      verifiedAtValue: pos.paymentStatus === 'Paid' ? addHours(cursor, 12) : null,
-      verifiedAt: pos.paymentStatus === 'Paid' ? formatDate(addHours(cursor, 12)) : null,
-      recordedBy: method === 'Onsite' ? officer : null,
-    });
-    ctx.auditEvents.push({
-      id: `AUD-${id}-pay`,
-      applicationId: id,
-      actor: method === 'Onsite' ? officer : applicant.firstName + ' ' + applicant.lastName,
-      role: method === 'Onsite' ? 'Cashier' : 'Applicant',
-      action: `Payment ${pos.paymentStatus === 'Paid' ? 'verified' : 'recorded'} (${method})`,
-      timestampValue: cursor,
-      timestamp: formatDate(cursor),
-      remarks: null,
-    });
   }
 
   // Permit + release — only once generated/released.
@@ -748,7 +707,6 @@ export function buildSeed(referenceDate: Date = new Date()): SeedResult {
     applications: [],
     documents: [],
     evaluations: [],
-    payments: [],
     permits: [],
     releases: [],
     auditEvents: [],
@@ -765,7 +723,7 @@ export function buildSeed(referenceDate: Date = new Date()): SeedResult {
     const applicant = applicants.find((a) => a.id === business.ownerApplicantId)!;
     buildApplicationBundle(ctx, cursor, business, applicant, permitType, {
       forcedStatus: 'Completed',
-      forceRevisionLoop: permitType === 'Renovation',
+      forceRevisionLoop: permitType === 'Renovation Permit',
       daysAgo: 20 + (cursor % 30),
     });
     cursor++;
@@ -808,7 +766,6 @@ export function buildSeed(referenceDate: Date = new Date()): SeedResult {
     applications: ctx.applications,
     documents: ctx.documents,
     evaluations: ctx.evaluations,
-    payments: ctx.payments,
     permits: ctx.permits,
     releases: ctx.releases,
     auditEvents: ctx.auditEvents,

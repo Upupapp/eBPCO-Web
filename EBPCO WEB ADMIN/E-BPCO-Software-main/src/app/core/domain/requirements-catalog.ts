@@ -1,36 +1,32 @@
-import { PermitType, ALL_PERMIT_TYPES, permitTypeDomain } from './permit.model';
+import { PermitType, ALL_PERMIT_TYPES } from './permit.model';
 import { EvaluationStage } from './status.model';
 
 // Per-application-type requirement definitions — the single source every
 // surface (the intake form's dynamic checklist, the Documents tab, the
 // Evaluation view, the Workflow view, the Forms library) reads instead of
-// each one inventing its own document list.
+// each one inventing its own document list. Exactly one entry per value
+// in `ALL_PERMIT_TYPES` (permit.model.ts) — no extra entries, no
+// alternate names for the same type.
 //
 // SOURCE / VERIFICATION NOTICE: every entry's `sources` array records
 // exactly where its content came from — see the `SRC_*` constants below
 // for the real citations (title, URL, jurisdiction, effective date,
 // verification status) gathered via live research on 2026-08-20. Two
 // kinds of source appear:
-//   - NATIONAL_LAW_VERIFIED: a national statute/IRR/circular fetched and
-//     quoted directly (PD 1096, RA 9514, the DILG/DTI/ARTA BPLS circular,
-//     DTI's own registration portal) — these apply to every Philippine
-//     LGU, Castilla included, as a legal baseline.
+//   - NATIONAL_LAW_VERIFIED: a national statute/IRR fetched and quoted
+//     directly (PD 1096, RA 9514) — applies to every Philippine LGU,
+//     Castilla included, as a legal baseline.
 //   - SAMPLE_REFERENCE_ONLY: another LGU's own published document (Office
 //     of the City Building Official, Puerto Princesa) used ONLY as a
 //     structural example of how a Unified Application/checklist is laid
 //     out — never presented as Castilla's own requirement.
 //   - PENDING_CASTILLA_VERIFICATION: the Municipality of Castilla's own
-//     Citizen's Charter/BPLO checklist was not accessible during this
+//     Citizen's Charter/OBO checklist was not accessible during this
 //     research pass (castillasorsogon.gov.ph blocked automated fetches);
 //     every entry below carries this source so the gap is explicit rather
 //     than silently assumed away.
-// The national circular itself (ARTA-DTI-DILG-DICT JMC No. 01 s. 2021)
-// states that documents not listed in an LGU's OWN Citizen's Charter must
-// not be required — meaning the exact per-document checklist is
-// genuinely LGU-determined, not something this catalog can finalize
-// without Castilla's own published list. `verified` stays `false` on
-// every entry until that confirmation happens — do not flip it without
-// that step.
+// `verified` stays `false` on every entry until Castilla's own office
+// confirms it — do not flip it without that step.
 export interface RequirementDocument {
   id: string;
   label: string;
@@ -64,7 +60,7 @@ export interface ApplicationTypeRequirements {
   paymentRequirements: string;
   inspectionRequirements: string;
   validityRules: string;
-  /** Whole months of validity from issuance, or null when the permit type carries no fixed expiry (e.g. most Certificates). Drives ApplicationStore.generatePermit's expiry date. */
+  /** Whole months of validity from issuance, or null when the permit type carries no fixed expiry (e.g. Certificate of Occupancy). Drives ApplicationStore.generatePermit's expiry date. */
   validityMonths: number | null;
   finalDocument: string;
   releaseRequirements: string;
@@ -93,29 +89,10 @@ const SRC_PD1096: RequirementSource = {
 
 const SRC_RA9514: RequirementSource = {
   title:
-    'Republic Act No. 9514 — Fire Code of the Philippines of 2008, Sec. 5(g) & 7(a) (Fire Safety Inspection Certificate is a prerequisite to any occupancy/business/operating permit)',
+    'Republic Act No. 9514 — Fire Code of the Philippines of 2008, Sec. 5(g) & 7(a) (Fire Safety Inspection Certificate is a prerequisite to any occupancy/operating permit)',
   url: 'https://lawphil.net/statutes/repacts/ra2008/ra_9514_2008.html',
   jurisdiction: 'Republic of the Philippines — national law, binds every LGU including Castilla',
   effectiveDate: '2008-12-19',
-  verificationStatus: 'NATIONAL_LAW_VERIFIED',
-};
-
-const SRC_BPLS_JMC: RequirementSource = {
-  title:
-    'ARTA-DTI-DILG-DICT Joint Memorandum Circular No. 01, s. 2021 — Guidelines for Processing Business Permits, Related Clearances and Licenses (mandates a Unified Application Form; a document NOT listed in an LGU’s own Citizen’s Charter may not be required)',
-  url: 'https://www.dilg.gov.ph/issuances/jc/Revised-Standards-in-Processing-Business-Permits-and-Licenses-in-All-Cities-and-Municipalities-/65',
-  jurisdiction:
-    'Republic of the Philippines — national guidance to all LGUs; does not itself fix Castilla’s specific checklist',
-  effectiveDate: '2021-01-01',
-  verificationStatus: 'NATIONAL_LAW_VERIFIED',
-};
-
-const SRC_DTI_BNRS: RequirementSource = {
-  title:
-    'DTI Business Name Registration System (BNRS) — official registration portal (5-year certificate validity)',
-  url: 'https://bnrs.dti.gov.ph/registration',
-  jurisdiction: 'Republic of the Philippines — Department of Trade and Industry (national)',
-  effectiveDate: '2026-08-20',
   verificationStatus: 'NATIONAL_LAW_VERIFIED',
 };
 
@@ -131,21 +108,15 @@ const SRC_PPC_OCBO: RequirementSource = {
 
 const SRC_CASTILLA_PENDING: RequirementSource = {
   title:
-    "Municipality of Castilla, Sorsogon — official Citizen's Charter / BPLO documentary checklist",
+    "Municipality of Castilla, Sorsogon — official Citizen's Charter / OBO documentary checklist",
   url: 'https://www.castillasorsogon.gov.ph/',
   jurisdiction: 'Municipality of Castilla, Sorsogon',
   effectiveDate:
-    'UNKNOWN — not accessible to automated research as of 2026-08-20; obtain directly from the Municipality of Castilla BPLO/OBO before production use',
+    'UNKNOWN — not accessible to automated research as of 2026-08-20; obtain directly from the Municipality of Castilla OBO before production use',
   verificationStatus: 'PENDING_CASTILLA_VERIFICATION',
 };
 
-const BUSINESS_SOURCES: RequirementSource[] = [
-  SRC_BPLS_JMC,
-  SRC_RA9514,
-  SRC_DTI_BNRS,
-  SRC_CASTILLA_PENDING,
-];
-const CONSTRUCTION_SOURCES: RequirementSource[] = [
+const PERMIT_SOURCES: RequirementSource[] = [
   SRC_PD1096,
   SRC_RA9514,
   SRC_PPC_OCBO,
@@ -162,95 +133,11 @@ function doc(
   return { id, label, required, reviewingDepartmentId, description };
 }
 
-// ---- Business Permit variants ---------------------------------------------
-
-const BUSINESS_BASE_DOCS: RequirementDocument[] = [
-  doc(
-    'bp-dti',
-    'DTI Certificate of Registration (sole proprietorship) or SEC/CDA Certificate (partnership/corporation/cooperative)',
-    true,
-    'bplo',
-  ),
-  doc('bp-brgy-clearance', 'Barangay Business Clearance', true, 'bplo'),
-  doc('bp-lease', 'Lease Contract or Land Title/Tax Declaration of business address', true, 'bplo'),
-  doc('bp-locational', 'Locational Clearance / Zoning Certification', true, 'zoning'),
-  doc('bp-fsic', 'Fire Safety Inspection Certificate (FSIC)', true, 'bfp'),
-  doc('bp-sanitary', 'Sanitary Permit', true, 'health'),
-  doc('bp-cedula', 'Community Tax Certificate (Cedula)', true, 'bplo'),
-  doc('bp-id', 'Valid Government-Issued ID of Owner/Authorized Representative', true, 'bplo'),
-  doc(
-    'bp-authorization',
-    'Special Power of Attorney / Authorization Letter (if filed by a representative)',
-    false,
-    'bplo',
-  ),
-  doc('bp-insurance', 'Fire Insurance Policy (if applicable to business type)', false, 'bfp'),
-];
-
-const BUSINESS_EVAL_SEQUENCE: EvaluationSequenceStep[] = [
-  { stage: 'Initial', departmentId: 'bplo' },
-  { stage: 'Zoning', departmentId: 'zoning' },
-  { stage: 'Fire Safety', departmentId: 'bfp' },
-  { stage: 'OBO', departmentId: 'health' },
-  { stage: 'Final Approval', departmentId: 'mayor' },
-];
-
-function businessRequirements(
-  permitType: Extract<
-    PermitType,
-    'New Business Permit' | 'Business Permit Renewal' | 'Business Permit Amendment'
-  >,
-): ApplicationTypeRequirements {
-  const isRenewal = permitType === 'Business Permit Renewal';
-  const isAmendment = permitType === 'Business Permit Amendment';
-  const documents = isRenewal
-    ? [
-        doc('bp-prev-permit', "Previous Year's Business Permit", true, 'bplo'),
-        ...BUSINESS_BASE_DOCS,
-      ]
-    : isAmendment
-      ? [
-          doc('bp-prev-permit', 'Current Business Permit (to be amended)', true, 'bplo'),
-          doc(
-            'bp-amendment-basis',
-            'Proof of change (e.g. updated DTI/SEC record, new lease contract)',
-            true,
-            'bplo',
-          ),
-          ...BUSINESS_BASE_DOCS,
-        ]
-      : BUSINESS_BASE_DOCS;
-  return {
-    permitType,
-    requiredForm: isRenewal
-      ? 'Unified/Application Form for Business Permit Renewal'
-      : isAmendment
-        ? 'Application Form for Business Permit Amendment'
-        : 'Unified/Application Form for New Business Permit',
-    documents,
-    responsibleDepartmentId: 'bplo',
-    evaluationSequence: BUSINESS_EVAL_SEQUENCE,
-    paymentRequirements:
-      'Mayor’s Permit fee, business tax (computed from declared gross receipts/capital), and regulatory fees (sanitary, zoning, fire code) assessed by the Municipal Treasurer’s Office.',
-    inspectionRequirements:
-      'Fire safety inspection by BFP and sanitary inspection by the Municipal Health Office prior to approval; zoning site verification for new locations.',
-    validityRules:
-      'Valid for one (1) calendar year from date of issuance; must be renewed on or before January 20 of the following year.',
-    validityMonths: 12,
-    finalDocument: 'Business Permit (Mayor’s Permit)',
-    releaseRequirements:
-      'Full payment verified and Business Permit signed by the Municipal Mayor or authorized representative.',
-    sourceNote:
-      "Legal basis: ARTA-DTI-DILG-DICT JMC No. 01 s.2021 (Unified Application Form) and RA 9514 Sec. 5(g) (FSIC prerequisite); DTI BNRS for the registration certificate. The exact per-document checklist and fee schedule are set by Castilla's own Citizen's Charter, which was not accessible during this research pass — see `sources` below.",
-    effectiveDate: EFFECTIVE_DATE,
-    verified: false,
-    sources: BUSINESS_SOURCES,
-  };
-}
-
-// ---- Construction / ancillary / certificate permit types ------------------
-
-const CONSTRUCTION_EVAL_SEQUENCE: EvaluationSequenceStep[] = [
+// Every permit type routes through the same office sequence — there is
+// only one workflow domain in this system now (see the "one shared
+// source of truth, no categories" requirement on the permit-type list
+// itself), so a single evaluation sequence applies uniformly.
+const EVAL_SEQUENCE: EvaluationSequenceStep[] = [
   { stage: 'Initial', departmentId: 'obo' },
   { stage: 'Zoning', departmentId: 'zoning' },
   { stage: 'Fire Safety', departmentId: 'bfp' },
@@ -258,7 +145,7 @@ const CONSTRUCTION_EVAL_SEQUENCE: EvaluationSequenceStep[] = [
   { stage: 'Final Approval', departmentId: 'obo' },
 ];
 
-interface ConstructionSpec {
+interface PermitSpec {
   permitType: PermitType;
   requiredForm: string;
   professionalDoc: RequirementDocument | null;
@@ -270,7 +157,7 @@ interface ConstructionSpec {
   finalDocument: string;
 }
 
-const CONSTRUCTION_COMMON_DOCS = (prefix: string): RequirementDocument[] => [
+const COMMON_DOCS = (prefix: string): RequirementDocument[] => [
   doc(`${prefix}-land-title`, 'Land Title or Tax Declaration of the property', true, 'obo'),
   doc(
     `${prefix}-owner-consent`,
@@ -283,10 +170,10 @@ const CONSTRUCTION_COMMON_DOCS = (prefix: string): RequirementDocument[] => [
   doc(`${prefix}-id`, 'Valid Government-Issued ID of Applicant/Owner', true, 'obo'),
 ];
 
-function constructionRequirements(spec: ConstructionSpec): ApplicationTypeRequirements {
+function buildRequirements(spec: PermitSpec): ApplicationTypeRequirements {
   const prefix = spec.permitType.toLowerCase().replace(/[^a-z]+/g, '-');
   const documents = [
-    ...CONSTRUCTION_COMMON_DOCS(prefix),
+    ...COMMON_DOCS(prefix),
     ...spec.planDocs,
     ...(spec.professionalDoc ? [spec.professionalDoc] : []),
     ...(spec.extraDocs ?? []),
@@ -296,9 +183,9 @@ function constructionRequirements(spec: ConstructionSpec): ApplicationTypeRequir
     requiredForm: spec.requiredForm,
     documents,
     responsibleDepartmentId: 'obo',
-    evaluationSequence: CONSTRUCTION_EVAL_SEQUENCE,
+    evaluationSequence: EVAL_SEQUENCE,
     paymentRequirements:
-      'Building permit fee, line-item fees per discipline (architectural/structural/electrical/mechanical/sanitary as applicable), and other regulatory fees assessed by the Municipal Treasurer’s Office based on project cost/floor area.',
+      'Building/permit fee, line-item fees per discipline (architectural/structural/electrical/mechanical/sanitary as applicable), and other regulatory fees assessed by the Municipal Treasurer’s Office based on project cost/floor area.',
     inspectionRequirements: spec.inspectionRequirements,
     validityRules: spec.validityRules,
     validityMonths: spec.validityMonths,
@@ -309,7 +196,7 @@ function constructionRequirements(spec: ConstructionSpec): ApplicationTypeRequir
       "Legal basis: PD 1096 (National Building Code) for the permit itself and RA 9514 Sec. 5(g) where a Fire Safety Inspection Certificate is required; Puerto Princesa OCBO's published checklist used only as a structural example of the Unified Application/Ancillary Permit format. Castilla's own OBO checklist and fee schedule were not accessible during this research pass — see `sources` below.",
     effectiveDate: EFFECTIVE_DATE,
     verified: false,
-    sources: CONSTRUCTION_SOURCES,
+    sources: PERMIT_SOURCES,
   };
 }
 
@@ -333,12 +220,14 @@ const BUILDING_PLAN_SET = (prefix: string): RequirementDocument[] => [
   ),
 ];
 
-const CONSTRUCTION_SPECS: ConstructionSpec[] = [
+// One entry per value in `ALL_PERMIT_TYPES` — same order, exact same
+// spelling, no extras.
+const PERMIT_SPECS: PermitSpec[] = [
   {
-    permitType: 'New Construction',
-    requiredForm: 'Application for Building Permit (New Construction)',
+    permitType: 'Building Permit',
+    requiredForm: 'Unified Application Form for Building Permit',
     professionalDoc: null,
-    planDocs: BUILDING_PLAN_SET('new-construction'),
+    planDocs: BUILDING_PLAN_SET('building-permit'),
     inspectionRequirements:
       'Site inspection prior to permit issuance; periodic inspections during construction; final inspection before Certificate of Occupancy.',
     validityMonths: 12,
@@ -347,57 +236,37 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
     finalDocument: 'Building Permit',
   },
   {
-    permitType: 'Renovation',
-    requiredForm: 'Application for Building Permit (Renovation/Alteration)',
+    permitType: 'Architectural Permit',
+    requiredForm: 'Application for Architectural Permit',
+    professionalDoc: doc('arch-prc', 'PRC License and PTR of Architect of Record', true, 'obo'),
+    planDocs: [doc('arch-plan', 'Architectural Plans (signed and sealed)', true, 'obo')],
+    inspectionRequirements:
+      'Included as part of the overall Building Permit site inspection when filed jointly; independent site check when filed standalone.',
+    validityMonths: 12,
+    validityRules: 'Valid for twelve (12) months from issuance.',
+    finalDocument: 'Architectural Permit',
+  },
+  {
+    permitType: 'Civil / Structural Permit',
+    requiredForm: 'Application for Civil / Structural Permit',
     professionalDoc: doc(
-      'renovation-prc',
-      'PRC License and PTR of Engineer/Architect of Record',
+      'struct-prc',
+      'PRC License and PTR of Civil Engineer of Record',
       true,
       'obo',
     ),
     planDocs: [
-      doc('renovation-plan', 'Renovation/Alteration Plans (signed and sealed)', true, 'obo'),
-      doc(
-        'renovation-existing-permit',
-        'Copy of Original Building Permit (if available)',
-        false,
-        'obo',
-      ),
-      doc('renovation-bom', 'Bill of Materials and Specifications', true, 'obo'),
+      doc('struct-plan', 'Structural Plans (signed and sealed)', true, 'obo'),
+      doc('struct-analysis', 'Structural Design Analysis', true, 'obo'),
     ],
     inspectionRequirements:
-      'Site inspection to confirm scope matches submitted plans; final inspection upon completion.',
+      'Structural site inspection during key pours/erection stages; final structural inspection.',
     validityMonths: 12,
     validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Building Permit (Renovation/Alteration)',
+    finalDocument: 'Civil / Structural Permit',
   },
   {
-    permitType: 'Addition / Extension',
-    requiredForm: 'Application for Building Permit (Addition / Extension)',
-    professionalDoc: doc(
-      'addition-prc',
-      'PRC License and PTR of Engineer/Architect of Record',
-      true,
-      'obo',
-    ),
-    planDocs: [
-      doc('addition-plan', 'Addition / Extension Plans (signed and sealed)', true, 'obo'),
-      doc(
-        'addition-struct-plan',
-        'Structural Analysis for the added load (signed and sealed)',
-        true,
-        'obo',
-      ),
-      doc('addition-bom', 'Bill of Materials and Specifications', true, 'obo'),
-    ],
-    inspectionRequirements:
-      'Structural site inspection to verify the existing structure can carry the addition; final inspection upon completion.',
-    validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Building Permit (Addition / Extension)',
-  },
-  {
-    permitType: 'Demolition',
+    permitType: 'Demolition Permit',
     requiredForm: 'Application for Demolition Permit',
     professionalDoc: doc(
       'demolition-prc',
@@ -429,37 +298,57 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
     finalDocument: 'Demolition Permit',
   },
   {
-    permitType: 'Architectural',
-    requiredForm: 'Application for Architectural Permit',
-    professionalDoc: doc('arch-prc', 'PRC License and PTR of Architect of Record', true, 'obo'),
-    planDocs: [doc('arch-plan', 'Architectural Plans (signed and sealed)', true, 'obo')],
-    inspectionRequirements:
-      'Included as part of the overall Building Permit site inspection when filed jointly; independent site check when filed standalone.',
-    validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Architectural Permit',
-  },
-  {
-    permitType: 'Civil / Structural',
-    requiredForm: 'Application for Civil / Structural Permit',
+    permitType: 'Addition / Extension Permit',
+    requiredForm: 'Application for Building Permit (Addition / Extension)',
     professionalDoc: doc(
-      'struct-prc',
-      'PRC License and PTR of Civil Engineer of Record',
+      'addition-prc',
+      'PRC License and PTR of Engineer/Architect of Record',
       true,
       'obo',
     ),
     planDocs: [
-      doc('struct-plan', 'Structural Plans (signed and sealed)', true, 'obo'),
-      doc('struct-analysis', 'Structural Design Analysis', true, 'obo'),
+      doc('addition-plan', 'Addition / Extension Plans (signed and sealed)', true, 'obo'),
+      doc(
+        'addition-struct-plan',
+        'Structural Analysis for the added load (signed and sealed)',
+        true,
+        'obo',
+      ),
+      doc('addition-bom', 'Bill of Materials and Specifications', true, 'obo'),
     ],
     inspectionRequirements:
-      'Structural site inspection during key pours/erection stages; final structural inspection.',
+      'Structural site inspection to verify the existing structure can carry the addition; final inspection upon completion.',
     validityMonths: 12,
     validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Civil / Structural Permit',
+    finalDocument: 'Addition / Extension Permit',
   },
   {
-    permitType: 'Electrical',
+    permitType: 'Renovation Permit',
+    requiredForm: 'Application for Building Permit (Renovation/Alteration)',
+    professionalDoc: doc(
+      'renovation-prc',
+      'PRC License and PTR of Engineer/Architect of Record',
+      true,
+      'obo',
+    ),
+    planDocs: [
+      doc('renovation-plan', 'Renovation/Alteration Plans (signed and sealed)', true, 'obo'),
+      doc(
+        'renovation-existing-permit',
+        'Copy of Original Building Permit (if available)',
+        false,
+        'obo',
+      ),
+      doc('renovation-bom', 'Bill of Materials and Specifications', true, 'obo'),
+    ],
+    inspectionRequirements:
+      'Site inspection to confirm scope matches submitted plans; final inspection upon completion.',
+    validityMonths: 12,
+    validityRules: 'Valid for twelve (12) months from issuance.',
+    finalDocument: 'Renovation Permit',
+  },
+  {
+    permitType: 'Electrical Permit',
     requiredForm: 'Application for Electrical Permit',
     professionalDoc: doc(
       'elec-prc',
@@ -475,52 +364,7 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
     finalDocument: 'Electrical Permit',
   },
   {
-    permitType: 'Mechanical',
-    requiredForm: 'Application for Mechanical Permit',
-    professionalDoc: doc(
-      'mech-prc',
-      'PRC License and PTR of Professional Mechanical Engineer of Record',
-      true,
-      'obo',
-    ),
-    planDocs: [doc('mech-plan', 'Mechanical Plans (signed and sealed)', true, 'obo')],
-    inspectionRequirements: 'Mechanical equipment installation inspection prior to operation.',
-    validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Mechanical Permit',
-  },
-  {
-    permitType: 'Sanitary / Plumbing',
-    requiredForm: 'Application for Sanitary / Plumbing Permit',
-    professionalDoc: doc(
-      'sanplumb-prc',
-      'PRC License and PTR of Sanitary Engineer/Master Plumber of Record',
-      true,
-      'obo',
-    ),
-    planDocs: [doc('sanplumb-plan', 'Sanitary / Plumbing Plans (signed and sealed)', true, 'obo')],
-    inspectionRequirements: 'Plumbing rough-in inspection and final sanitary inspection.',
-    validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Sanitary / Plumbing Permit',
-  },
-  {
-    permitType: 'Plumbing',
-    requiredForm: 'Application for Plumbing Permit',
-    professionalDoc: doc(
-      'plumb-prc',
-      'PRC License and PTR of Master Plumber of Record',
-      true,
-      'obo',
-    ),
-    planDocs: [doc('plumb-plan', 'Plumbing Layout Plans (signed and sealed)', true, 'obo')],
-    inspectionRequirements: 'Plumbing rough-in and final inspection.',
-    validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Plumbing Permit',
-  },
-  {
-    permitType: 'Electronics',
+    permitType: 'Electronics Permit',
     requiredForm: 'Application for Electronics Permit',
     professionalDoc: doc(
       'electronics-prc',
@@ -543,7 +387,52 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
     finalDocument: 'Electronics Permit',
   },
   {
-    permitType: 'Interior',
+    permitType: 'Mechanical Permit',
+    requiredForm: 'Application for Mechanical Permit',
+    professionalDoc: doc(
+      'mech-prc',
+      'PRC License and PTR of Professional Mechanical Engineer of Record',
+      true,
+      'obo',
+    ),
+    planDocs: [doc('mech-plan', 'Mechanical Plans (signed and sealed)', true, 'obo')],
+    inspectionRequirements: 'Mechanical equipment installation inspection prior to operation.',
+    validityMonths: 12,
+    validityRules: 'Valid for twelve (12) months from issuance.',
+    finalDocument: 'Mechanical Permit',
+  },
+  {
+    permitType: 'Plumbing Permit',
+    requiredForm: 'Application for Plumbing Permit',
+    professionalDoc: doc(
+      'plumb-prc',
+      'PRC License and PTR of Master Plumber of Record',
+      true,
+      'obo',
+    ),
+    planDocs: [doc('plumb-plan', 'Plumbing Layout Plans (signed and sealed)', true, 'obo')],
+    inspectionRequirements: 'Plumbing rough-in and final inspection.',
+    validityMonths: 12,
+    validityRules: 'Valid for twelve (12) months from issuance.',
+    finalDocument: 'Plumbing Permit',
+  },
+  {
+    permitType: 'Sanitary / Plumbing Permit',
+    requiredForm: 'Application for Sanitary / Plumbing Permit',
+    professionalDoc: doc(
+      'sanplumb-prc',
+      'PRC License and PTR of Sanitary Engineer/Master Plumber of Record',
+      true,
+      'obo',
+    ),
+    planDocs: [doc('sanplumb-plan', 'Sanitary / Plumbing Plans (signed and sealed)', true, 'obo')],
+    inspectionRequirements: 'Plumbing rough-in inspection and final sanitary inspection.',
+    validityMonths: 12,
+    validityRules: 'Valid for twelve (12) months from issuance.',
+    finalDocument: 'Sanitary / Plumbing Permit',
+  },
+  {
+    permitType: 'Interior Design Permit',
     requiredForm: 'Application for Interior Design Permit',
     professionalDoc: doc(
       'interior-prc',
@@ -561,7 +450,7 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
     finalDocument: 'Interior Design Permit',
   },
   {
-    permitType: 'Fencing',
+    permitType: 'Fencing Permit',
     requiredForm: 'Application for Fencing Permit',
     professionalDoc: null,
     planDocs: [doc('fencing-plan', 'Fence Plan / Site Development Plan', true, 'obo')],
@@ -593,8 +482,8 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
     finalDocument: 'Sign Permit',
   },
   {
-    permitType: 'Excavation',
-    requiredForm: 'Application for Excavation Permit',
+    permitType: 'Excavation & Ground Preparation Permit',
+    requiredForm: 'Application for Excavation & Ground Preparation Permit',
     professionalDoc: doc(
       'excavation-prc',
       'PRC License and PTR of Engineer of Record',
@@ -614,7 +503,7 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
       'Pre-excavation site inspection for shoring/safety measures; ongoing monitoring for deep excavations.',
     validityMonths: 6,
     validityRules: 'Valid for six (6) months from issuance.',
-    finalDocument: 'Excavation Permit',
+    finalDocument: 'Excavation & Ground Preparation Permit',
   },
   {
     permitType: 'Certificate of Occupancy',
@@ -637,14 +526,10 @@ const CONSTRUCTION_SPECS: ConstructionSpec[] = [
 
 // ---- Assembled catalog ------------------------------------------------------
 
-export const REQUIREMENTS_CATALOG: Record<PermitType, ApplicationTypeRequirements> = {
-  'New Business Permit': businessRequirements('New Business Permit'),
-  'Business Permit Renewal': businessRequirements('Business Permit Renewal'),
-  'Business Permit Amendment': businessRequirements('Business Permit Amendment'),
-  ...Object.fromEntries(
-    CONSTRUCTION_SPECS.map((spec) => [spec.permitType, constructionRequirements(spec)]),
-  ),
-} as Record<PermitType, ApplicationTypeRequirements>;
+export const REQUIREMENTS_CATALOG: Record<PermitType, ApplicationTypeRequirements> =
+  Object.fromEntries(
+    PERMIT_SPECS.map((spec) => [spec.permitType, buildRequirements(spec)]),
+  ) as Record<PermitType, ApplicationTypeRequirements>;
 
 // Every catalog entry references a real PermitType from the centralized
 // list (never a duplicate/inconsistent name) — asserted here rather than
@@ -659,9 +544,4 @@ export function assertCatalogComplete(): void {
 
 export function requirementsFor(permitType: PermitType): ApplicationTypeRequirements {
   return REQUIREMENTS_CATALOG[permitType];
-}
-
-/** True if `type` is one of the three Business Permit variants — the requirements catalog's own domain check, kept here rather than re-deriving `permitTypeDomain` at every call site. */
-export function isBusinessPermitType(type: PermitType): boolean {
-  return permitTypeDomain(type) === 'Business Permit';
 }

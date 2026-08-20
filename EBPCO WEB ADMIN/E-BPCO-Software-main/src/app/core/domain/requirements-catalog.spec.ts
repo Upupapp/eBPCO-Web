@@ -2,7 +2,6 @@ import { ALL_PERMIT_TYPES } from './permit.model';
 import {
   REQUIREMENTS_CATALOG,
   assertCatalogComplete,
-  isBusinessPermitType,
   requirementsFor,
 } from './requirements-catalog';
 
@@ -82,9 +81,8 @@ describe('Requirements catalog — per-entry shape', () => {
     }
   });
 
-  it('a construction-domain entry never cites a source claiming to BE an official Castilla document', () => {
+  it('no entry ever cites a source claiming to BE an official Castilla document', () => {
     for (const type of ALL_PERMIT_TYPES) {
-      if (isBusinessPermitType(type)) continue;
       const sources = requirementsFor(type).sources;
       // The one non-national, non-pending source used for construction
       // types is Puerto Princesa's own document — must be explicitly
@@ -100,20 +98,9 @@ describe('Requirements catalog — per-entry shape', () => {
   });
 });
 
-describe('Requirements catalog — Business Permit variants', () => {
-  it('New/Renewal/Amendment each require a distinguishing document beyond the shared base checklist', () => {
-    const nw = requirementsFor('New Business Permit').documents.map((d) => d.id);
-    const renewal = requirementsFor('Business Permit Renewal').documents.map((d) => d.id);
-    const amendment = requirementsFor('Business Permit Amendment').documents.map((d) => d.id);
-    expect(renewal).toContain('bp-prev-permit');
-    expect(amendment).toContain('bp-amendment-basis');
-    expect(nw).not.toContain('bp-prev-permit');
-  });
-});
-
-describe('Requirements catalog — Renovation (mandatory sample type)', () => {
+describe('Requirements catalog — Renovation Permit (mandatory sample type)', () => {
   it('has a real, non-generic required form and final document', () => {
-    const renovation = requirementsFor('Renovation');
+    const renovation = requirementsFor('Renovation Permit');
     expect(renovation.requiredForm.toLowerCase()).toContain('renovation');
     expect(renovation.finalDocument.toLowerCase()).toContain('permit');
     expect(renovation.validityMonths).toBeGreaterThan(0);

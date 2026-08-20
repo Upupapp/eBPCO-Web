@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ApplicationIntake } from './application-intake';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
+import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
 
 function fillApplicant(component: any): void {
   component.applicant.fullName = 'Juan Dela Cruz';
@@ -87,7 +88,7 @@ describe('ApplicationIntake — validation blocks incomplete steps', () => {
     component.next();
     fillBusiness(component);
     component.next();
-    fillApplication(component, 'New Business Permit');
+    fillApplication(component, 'Building Permit');
     component.next();
     expect(component.currentStep()).toBe('documents');
     component.next(); // no files attached yet
@@ -108,48 +109,43 @@ describe('ApplicationIntake — dynamic document checklist', () => {
   });
 
   it("changing the permit type reloads the checklist to match that type's own requirements", () => {
-    component.applicationInfo.permitType = 'New Business Permit';
+    component.applicationInfo.permitType = 'Building Permit';
     component.onPermitTypeChange();
-    const businessDocs = component
+    const buildingDocs = component
       .documents()
       .map((d: any) => d.requirementId)
       .sort();
-    expect(businessDocs).toEqual(
-      requirementsFor('New Business Permit')
+    expect(buildingDocs).toEqual(
+      requirementsFor('Building Permit')
         .documents.map((d) => d.id)
         .sort(),
     );
 
-    component.applicationInfo.serviceDomain = 'Construction Permit';
-    component.onDomainChange();
-    component.applicationInfo.permitType = 'Renovation';
+    component.applicationInfo.permitType = 'Renovation Permit';
     component.onPermitTypeChange();
     const renovationDocs = component
       .documents()
       .map((d: any) => d.requirementId)
       .sort();
     expect(renovationDocs).toEqual(
-      requirementsFor('Renovation')
+      requirementsFor('Renovation Permit')
         .documents.map((d) => d.id)
         .sort(),
     );
-    expect(renovationDocs).not.toEqual(businessDocs);
+    expect(renovationDocs).not.toEqual(buildingDocs);
   });
 
-  it('switching the Application Type domain clears the permit type and checklist', () => {
-    component.applicationInfo.permitType = 'New Business Permit';
+  it('offers exactly the fixed 16-value permit-type list, in the required order, with no domain/category selection step', () => {
+    expect(component.permitTypeOptions).toEqual(ALL_PERMIT_TYPES);
+  });
+
+  it('clearing the permit type back to empty clears the checklist too', () => {
+    component.applicationInfo.permitType = 'Building Permit';
     component.onPermitTypeChange();
     expect(component.documents().length).toBeGreaterThan(0);
-    component.onDomainChange();
-    expect(component.applicationInfo.permitType).toBe('');
-    expect(component.documents().length).toBe(0);
-  });
-
-  it('a Business Permit permit type auto-locks the transaction type to match (New/Renewal/Amendment)', () => {
-    component.applicationInfo.permitType = 'Business Permit Renewal';
+    component.applicationInfo.permitType = '';
     component.onPermitTypeChange();
-    expect(component.applicationInfo.applicationAction).toBe('Renewal');
-    expect(component.isBusinessDomain()).toBe(true);
+    expect(component.documents().length).toBe(0);
   });
 });
 
@@ -169,7 +165,7 @@ describe('ApplicationIntake — creation goes through the shared store honestly'
     component.next();
     fillBusiness(component);
     component.next();
-    fillApplication(component, 'New Business Permit');
+    fillApplication(component, 'Building Permit');
     component.next();
     attachAllRequiredDocuments(component);
     component.next();
@@ -231,7 +227,7 @@ describe('ApplicationIntake — creation goes through the shared store honestly'
     // `output()` API's subscribe surface for a plain unit test.
     const created = store.applications()[0];
     const docs = store.getDocuments(created.id);
-    const requiredCount = requirementsFor('New Business Permit').documents.filter(
+    const requiredCount = requirementsFor('Building Permit').documents.filter(
       (d) => d.required,
     ).length;
     expect(docs.length).toBeGreaterThanOrEqual(requiredCount);

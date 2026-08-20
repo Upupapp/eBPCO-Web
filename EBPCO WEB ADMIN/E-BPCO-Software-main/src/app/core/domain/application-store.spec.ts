@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ApplicationStore } from './application-store';
+import { AssessmentStore } from './assessment-store';
 import { PaymentConfigStore } from './payment-config-store';
 import { ALL_PERMIT_TYPES } from './permit.model';
 import { requirementsFor } from './requirements-catalog';
@@ -41,7 +42,8 @@ describe('ApplicationStore — data integrity', () => {
         expect(appIds.has(doc.applicationId)).toBe(true);
       for (const ev of store.getEvaluations(app.id))
         expect(appIds.has(ev.applicationId)).toBe(true);
-      for (const pay of store.getPayments(app.id)) expect(appIds.has(pay.applicationId)).toBe(true);
+      for (const pay of store.getTransactions(app.id))
+        expect(appIds.has(pay.applicationId)).toBe(true);
     }
   });
 
@@ -172,13 +174,17 @@ describe('ApplicationStore — payment and permit-release prerequisites', () => 
   });
 
   it('recordOnsitePayment attaches to an existing assessed application without creating a new ID', () => {
-    const app = store.applications().find((a) => a.assessedAmountCentavos !== null);
+    const app = store
+      .applications()
+      .find((a) => (store.getActiveAssessment(a.id)?.balanceCentavos ?? 0) > 0);
     if (!app) return;
     const before = store.applications().length;
     const ok = store.recordOnsitePayment(app.id, 'OR-TEST-2', 'Cashier');
     expect(ok).toBe(true);
     expect(store.applications().length).toBe(before);
-    expect(store.getPayments(app.id).some((p) => p.referenceNumber === 'OR-TEST-2')).toBe(true);
+    expect(store.getTransactions(app.id).some((p) => p.transactionReference === 'OR-TEST-2')).toBe(
+      true,
+    );
   });
 
   it('releasePermit refuses release without an approved+paid+generated-permit application', () => {
@@ -240,12 +246,13 @@ describe('ApplicationStore — mutations propagate immediately', () => {
     expect(store.getById(app.id)!.lifecycleStatus).toBe('Received');
   });
 
-  it('a payment verification is reflected in both getPayments() and the application record', () => {
+  it('a payment verification is reflected in both getTransactions() and the application record', () => {
     const app = store.applications().find((a) => a.paymentStatus === 'Pending Verification');
     if (!app) return;
-    store.verifyPayment(app.id, 'Officer');
+    const pending = store.getTransactions(app.id).find((t) => t.status === 'Pending Verification')!;
+    store.verifyPayment(app.id, pending.id, 'Officer');
     expect(store.getById(app.id)!.paymentStatus).toBe('Paid');
-    expect(store.getPayments(app.id).some((p) => p.status === 'Paid')).toBe(true);
+    expect(store.getTransactions(app.id).some((p) => p.status === 'Verified')).toBe(true);
   });
 });
 
@@ -282,11 +289,11 @@ describe('ApplicationStore — seed-data validity', () => {
   it('the guaranteed Renovation sample has a complete audit trail from submission through release', () => {
     const renovation = store
       .applications()
-      .find((a) => a.permitType === 'Renovation' && a.lifecycleStatus === 'Completed')!;
+      .find((a) => a.permitType === 'Renovation Permit' && a.lifecycleStatus === 'Completed')!;
     expect(renovation).toBeTruthy();
     expect(store.getPermit(renovation.id)).toBeTruthy();
     expect(store.getRelease(renovation.id)).toBeTruthy();
-    expect(store.getPayments(renovation.id).some((p) => p.status === 'Paid')).toBe(true);
+    expect(store.getTransactions(renovation.id).some((p) => p.status === 'Verified')).toBe(true);
     const audit = store.getAuditTrail(renovation.id);
     expect(audit.length).toBeGreaterThan(3);
   });
@@ -294,7 +301,7 @@ describe('ApplicationStore — seed-data validity', () => {
   it('the guaranteed Renovation sample demonstrates a real revision loop (not just a straight pass)', () => {
     const renovation = store
       .applications()
-      .find((a) => a.permitType === 'Renovation' && a.lifecycleStatus === 'Completed')!;
+      .find((a) => a.permitType === 'Renovation Permit' && a.lifecycleStatus === 'Completed')!;
     const evaluations = store.getEvaluations(renovation.id);
     expect(evaluations.some((e) => e.result === 'Revision Required')).toBe(true);
     // ...followed by an eventual Passed on the same stage, proving the loop resolved.
@@ -356,8 +363,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
         applicantId: `TEST-APL-${stamp}`,
         applicant: 'Test Applicant',
         location: 'Barangay Poblacion',
-        serviceDomain: 'Business Permit',
-        permitType: 'New Business Permit',
+        permitType: 'Building Permit',
         applicationAction: 'New',
         officer: 'Test Officer',
         dateSubmitted: '01 Jan 2026',
@@ -376,7 +382,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('attachDocument creates a new document tied to the right requirement, defaulting to Submitted', () => {
     const appId = freshApplication();
-    const requirement = requirementsFor('New Business Permit').documents[0];
+    const requirement = requirementsFor('Building Permit').documents[0];
     expect(store.getDocuments(appId).length).toBe(0);
     const created = store.attachDocument(
       appId,
@@ -391,7 +397,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('resubmitDocument replaces the file/status but preserves the prior version in history', () => {
     const appId = freshApplication();
-    const requirement = requirementsFor('New Business Permit').documents[0];
+    const requirement = requirementsFor('Building Permit').documents[0];
     const created = store.attachDocument(
       appId,
       requirement.id,
@@ -412,7 +418,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('attachDocument called again for the SAME requirement resubmits (via history) instead of creating a duplicate row', () => {
     const appId = freshApplication();
-    const requirement = requirementsFor('New Business Permit').documents[0];
+    const requirement = requirementsFor('Building Permit').documents[0];
     store.attachDocument(appId, requirement.id, requirement.label, 'first.pdf', 'Tester');
     store.attachDocument(appId, requirement.id, requirement.label, 'replacement.pdf', 'Tester');
     const docs = store.getDocuments(appId).filter((d) => d.requirementId === requirement.id);
@@ -423,7 +429,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('setDocumentStatus refuses Rejected/Revision Required without remarks', () => {
     const appId = freshApplication();
-    const requirement = requirementsFor('New Business Permit').documents[0];
+    const requirement = requirementsFor('Building Permit').documents[0];
     const created = store.attachDocument(
       appId,
       requirement.id,
@@ -444,7 +450,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('canApprove is false while even one required document remains unresolved', () => {
     const appId = freshApplication();
-    const requirements = requirementsFor('New Business Permit').documents.filter((d) => d.required);
+    const requirements = requirementsFor('Building Permit').documents.filter((d) => d.required);
     requirements.forEach((req, i) => {
       const doc = store.attachDocument(appId, req.id, req.label, `${req.id}.pdf`, 'Tester');
       if (i < requirements.length - 1)
@@ -456,7 +462,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('canApprove is true only once every required document is Accepted; optional documents never block it', () => {
     const appId = freshApplication();
-    const requirements = requirementsFor('New Business Permit').documents;
+    const requirements = requirementsFor('Building Permit').documents;
     for (const req of requirements) {
       const doc = store.attachDocument(appId, req.id, req.label, `${req.id}.pdf`, 'Tester');
       if (req.required) store.setDocumentStatus(appId, doc.id, 'Accepted', 'Evaluator');
@@ -479,8 +485,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
         applicantId: `TEST-APL-${stamp}`,
         applicant: 'Test Applicant',
         location: 'Barangay Poblacion',
-        serviceDomain: 'Business Permit',
-        permitType: 'New Business Permit',
+        permitType: 'Building Permit',
         applicationAction: 'New',
         officer: 'Test Officer',
         dateSubmitted: '01 Jan 2026',
@@ -507,7 +512,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('transitionStatus to Approved succeeds once every required document is Accepted', () => {
     const appId = applicationAtForApproval();
-    for (const req of requirementsFor('New Business Permit').documents.filter((d) => d.required)) {
+    for (const req of requirementsFor('Building Permit').documents.filter((d) => d.required)) {
       const doc = store.attachDocument(appId, req.id, req.label, `${req.id}.pdf`, 'Tester');
       store.setDocumentStatus(appId, doc.id, 'Accepted', 'Evaluator');
     }
@@ -623,48 +628,71 @@ describe('ApplicationStore — contact verification (never fabricated)', () => {
   });
 });
 
-describe('ApplicationStore — fee assessment reads live config and preserves history', () => {
+describe('ApplicationStore — fee assessment reads the live fee-rule catalog and preserves history', () => {
   let store: ApplicationStore;
+  let assessmentStore: AssessmentStore;
   let paymentConfig: PaymentConfigStore;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [ApplicationStore, PaymentConfigStore] });
+    TestBed.configureTestingModule({
+      providers: [ApplicationStore, AssessmentStore, PaymentConfigStore],
+    });
     store = TestBed.inject(ApplicationStore);
+    assessmentStore = TestBed.inject(AssessmentStore);
     paymentConfig = TestBed.inject(PaymentConfigStore);
   });
 
-  it('assessFee sets assessedAmountCentavos from the CURRENT PaymentConfigStore schedule, not a hardcoded literal', () => {
-    paymentConfig.updateFee('filing', { amountCentavos: 123400 });
+  it('assessFee drafts a real, rules-based assessment built from the current fee-rule catalog for that permit type', () => {
     const app = store
       .applications()
       .find((a) => a.assessedAmountCentavos === null && a.lifecycleStatus === 'Under Evaluation');
-    if (!app) return;
-    store.assessFee(app.id, 'Tester', 'Evaluator');
-    const updated = store.getById(app.id)!;
-    expect(updated.assessedAmountCentavos).not.toBeNull();
-    // The filing line alone was bumped to 1234.00 pesos — the total must
-    // reflect it (>= that one line, since other active lines add more).
-    expect(updated.assessedAmountCentavos!).toBeGreaterThanOrEqual(123400);
-  });
-
-  it('changing a fee AFTER assessment never rewrites the already-assessed amount (no silent recalculation of historical figures)', () => {
-    const app = store
-      .applications()
-      .find((a) => a.assessedAmountCentavos === null && a.lifecycleStatus === 'Under Evaluation');
-    if (!app) return;
-    store.assessFee(app.id, 'Tester', 'Evaluator');
-    const assessedAmount = store.getById(app.id)!.assessedAmountCentavos;
-
-    paymentConfig.updateFee('filing', { amountCentavos: 999999 });
-
-    expect(store.getById(app.id)!.assessedAmountCentavos).toBe(assessedAmount);
-  });
-
-  it('assessFee refuses to re-assess an application that already has an amount', () => {
-    const app = store.applications().find((a) => a.assessedAmountCentavos !== null);
     if (!app) return;
     const ok = store.assessFee(app.id, 'Tester', 'Evaluator');
-    expect(ok).toBe(false);
+    expect(ok).toBe(true);
+    const draft = assessmentStore.getActiveAssessment(app.id);
+    expect(draft).toBeTruthy();
+    expect(draft!.lineItems.length).toBeGreaterThan(0);
+    expect(draft!.lineItems.some((l) => l.feeRuleId === 'filing-fee')).toBe(true);
+  });
+
+  it('once issued, changing a fee rule AFTER assessment never rewrites the already-issued line-item snapshot (no silent recalculation of historical figures)', () => {
+    const app = store
+      .applications()
+      .find((a) => a.assessedAmountCentavos === null && a.lifecycleStatus === 'Under Evaluation');
+    if (!app) return;
+    store.assessFee(app.id, 'Tester', 'Evaluator');
+    const draft = assessmentStore.getActiveAssessment(app.id)!;
+    for (const line of draft.lineItems) {
+      if (line.amountCentavos === null) {
+        assessmentStore.setLineAmount(draft.id, line.feeRuleId, 10000, 'Tester', 'Evaluator');
+      }
+    }
+    assessmentStore.submitForApproval(draft.id, 'Tester', 'Evaluator');
+    assessmentStore.approveAssessment(draft.id, 'Admin', 'Administrator');
+    assessmentStore.issueOrderOfPayment(draft.id, 'Admin', 'Administrator');
+    store.refreshPaymentProjection(app.id, 'Admin', 'Administrator');
+    const assessedAmount = store.getById(app.id)!.assessedAmountCentavos;
+    expect(assessedAmount).not.toBeNull();
+
+    paymentConfig.updateFeeRule('filing-fee', { flatAmountCentavos: 999999 }, 'Tester');
+
+    expect(store.getById(app.id)!.assessedAmountCentavos).toBe(assessedAmount);
+    const filingLine = assessmentStore
+      .getAssessmentById(draft.id)!
+      .lineItems.find((l) => l.feeRuleId === 'filing-fee')!;
+    expect(filingLine.amountCentavos).not.toBe(999999);
+  });
+
+  it('assessFee is idempotent — calling it again after a draft already exists never forks a second assessment', () => {
+    const app = store
+      .applications()
+      .find((a) => a.assessedAmountCentavos === null && a.lifecycleStatus === 'Under Evaluation');
+    if (!app) return;
+    store.assessFee(app.id, 'Tester', 'Evaluator');
+    const countBefore = assessmentStore.getAssessments(app.id).length;
+    const ok = store.assessFee(app.id, 'Tester', 'Evaluator');
+    expect(ok).toBe(true);
+    expect(assessmentStore.getAssessments(app.id).length).toBe(countBefore);
   });
 });
 
@@ -706,12 +734,129 @@ describe('ApplicationStore — permit generation', () => {
   });
 });
 
-describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
+describe('ApplicationStore — permit processing is blocked until every mandatory balance is verified (partial payment)', () => {
   let store: ApplicationStore;
+  let assessmentStore: AssessmentStore;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [ApplicationStore] });
+    TestBed.configureTestingModule({ providers: [ApplicationStore, AssessmentStore] });
     store = TestBed.inject(ApplicationStore);
+    assessmentStore = TestBed.inject(AssessmentStore);
+  });
+
+  it('generatePermit refuses while the assessment is only Partially Paid, and succeeds once the balance reaches zero', () => {
+    const applicant = store.addApplicant({
+      firstName: 'Partial',
+      lastName: 'Payer',
+      email: 'partial.payer@gmail.com',
+      mobileNumber: '+63 917 555 0001',
+      landlineNumber: null,
+      applicantType: 'Individual',
+      addressLine: 'Purok 1, Rizal Street',
+      barangay: 'Poblacion',
+      emailVerification: {
+        status: 'Unverified',
+        method: null,
+        verifiedBy: null,
+        verifiedAtValue: null,
+        verifiedAt: null,
+      },
+      mobileVerification: {
+        status: 'Unverified',
+        method: null,
+        verifiedBy: null,
+        verifiedAtValue: null,
+        verifiedAt: null,
+      },
+    });
+    const business = store.addBusiness({
+      name: 'Partial Payer Store',
+      category: 'Retail',
+      ownerApplicantId: applicant.id,
+      street: '1 Rizal Street',
+      barangay: 'Poblacion',
+      city: 'Castilla',
+      province: 'Sorsogon',
+      registrationNumber: 'PENDING',
+      status: 'Active',
+    });
+    const record = store.create(
+      {
+        businessId: business.id,
+        businessName: business.name,
+        applicantId: applicant.id,
+        applicant: 'Partial Payer',
+        location: 'Barangay Poblacion',
+        permitType: 'Fencing Permit',
+        applicationAction: 'New',
+        officer: 'Engr. Tester',
+        dateSubmitted: '01 Jan 2026',
+        lifecycleStatus: 'Approved',
+        evaluationStage: 'Final Approval',
+        evaluationResult: 'Passed',
+        paymentStatus: 'Not Yet Available',
+        permitReleaseStatus: 'Not Ready',
+        assessedAmountCentavos: null,
+      },
+      'Engr. Tester',
+      'Administrator',
+    );
+
+    const draft = assessmentStore.draftAssessment(
+      record.id,
+      'Fencing Permit',
+      'Tester',
+      'Evaluator',
+    )!;
+    for (const line of draft.lineItems) {
+      if (line.amountCentavos === null)
+        assessmentStore.setLineAmount(draft.id, line.feeRuleId, 20000, 'Tester', 'Evaluator');
+    }
+    assessmentStore.submitForApproval(draft.id, 'Tester', 'Evaluator');
+    assessmentStore.approveAssessment(draft.id, 'Admin', 'Administrator');
+    assessmentStore.issueOrderOfPayment(draft.id, 'Admin', 'Administrator');
+    const issued = assessmentStore.getAssessmentById(draft.id)!;
+
+    const half = Math.floor(issued.balanceCentavos / 2);
+    const t1 = assessmentStore.recordOnsitePayment(
+      issued.id,
+      half,
+      'OR-BLOCK-1',
+      'OBO/LGU',
+      'Cashier',
+      'Payment Officer',
+    )!;
+    assessmentStore.verifyTransaction(t1.id, 'Officer', 'Payment Officer');
+    store.refreshPaymentProjection(record.id, 'Officer', 'Payment Officer');
+
+    expect(store.getById(record.id)!.paymentStatus).toBe('Partially Paid');
+    expect(store.generatePermit(record.id, 'Officer', 'Approving Officer')).toBe(false);
+
+    const remaining = assessmentStore.getAssessmentById(draft.id)!.balanceCentavos;
+    const t2 = assessmentStore.recordOnsitePayment(
+      issued.id,
+      remaining,
+      'OR-BLOCK-2',
+      'OBO/LGU',
+      'Cashier',
+      'Payment Officer',
+    )!;
+    assessmentStore.verifyTransaction(t2.id, 'Officer', 'Payment Officer');
+    store.refreshPaymentProjection(record.id, 'Officer', 'Payment Officer');
+
+    expect(store.getById(record.id)!.paymentStatus).toBe('Paid');
+    expect(store.generatePermit(record.id, 'Officer', 'Approving Officer')).toBe(true);
+  });
+});
+
+describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
+  let store: ApplicationStore;
+  let assessmentStore: AssessmentStore;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [ApplicationStore, AssessmentStore] });
+    store = TestBed.inject(ApplicationStore);
+    assessmentStore = TestBed.inject(AssessmentStore);
   });
 
   it('walks a brand-new Renovation application through every real stage to a released permit, entirely through public store methods', () => {
@@ -764,8 +909,7 @@ describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
         applicantId: applicant.id,
         applicant: 'Maria Santos',
         location: 'Barangay Cogon',
-        serviceDomain: 'Construction Permit',
-        permitType: 'Renovation',
+        permitType: 'Renovation Permit',
         applicationAction: 'New',
         officer: actor,
         dateSubmitted: '01 Jan 2026',
@@ -783,7 +927,7 @@ describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
     expect(record.evaluationResult).toBe('Pending'); // honest starting state — nothing fabricated as complete
 
     // 5. Required documents are attached.
-    const requirements = requirementsFor('Renovation').documents;
+    const requirements = requirementsFor('Renovation Permit').documents;
     for (const req of requirements) {
       store.attachDocument(record.id, req.id, req.label, `${req.id}.pdf`, actor);
     }
@@ -821,24 +965,49 @@ describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
     // fee amount is a separate, explicit act — assessFee() below.
     expect(store.getById(record.id)!.lifecycleStatus).toBe('Assessed');
 
-    // 9-11. Fees assessed from configuration (not fabricated by the status
-    // change alone), payment recorded and verified.
+    // 9-11. Fees assessed through the real rules-based workflow: draft ->
+    // resolve every "Requires assessor input" line -> submit for approval
+    // -> approve -> issue the Order of Payment -> record payment ->
+    // verify that ONE transaction. `assessFee` only drafts (never
+    // fabricates a total) since Renovation Permit's building-formula line
+    // requires assessor input; the rest is driven directly against
+    // AssessmentStore, exactly as the Payments > Assessments tab does.
     expect(store.getById(record.id)!.assessedAmountCentavos).toBeNull();
     expect(store.assessFee(record.id, actor, adminRole)).toBe(true);
+    const draft = assessmentStore.getActiveAssessment(record.id)!;
+    expect(draft.status).toBe('Draft');
+    for (const line of draft.lineItems) {
+      if (line.amountCentavos === null) {
+        assessmentStore.setLineAmount(draft.id, line.feeRuleId, 20000, actor, adminRole);
+      }
+    }
+    expect(assessmentStore.submitForApproval(draft.id, actor, adminRole)).toBe(true);
+    expect(assessmentStore.approveAssessment(draft.id, actor, adminRole)).toBe(true);
+    expect(assessmentStore.issueOrderOfPayment(draft.id, actor, adminRole)).toBe(true);
+    store.refreshPaymentProjection(record.id, actor, adminRole);
     expect(store.getById(record.id)!.assessedAmountCentavos).not.toBeNull();
-    expect(store.transitionStatus(record.id, 'Payment Submitted', actor, adminRole)).toBe(true);
+    // Issued but not yet paid — the lifecycle status stays at 'Assessed'
+    // rather than being fabricated forward.
+    expect(store.getById(record.id)!.lifecycleStatus).toBe('Assessed');
+
+    // Recording and verifying a payment now advances lifecycleStatus
+    // automatically (see ApplicationStore.syncPaymentProjection) — this
+    // is the direct fix for "payment actions do not consistently advance
+    // lifecycle status", so no separate manual transitionStatus call is
+    // needed for the Payment Submitted / Payment Under Verification /
+    // Payment Verified hops.
     expect(store.recordOnsitePayment(record.id, 'OR-RENOVATION-TEST', 'Cashier')).toBe(true);
-    expect(store.transitionStatus(record.id, 'Payment Under Verification', actor, adminRole)).toBe(
-      true,
-    );
-    expect(store.verifyPayment(record.id, 'Payment Officer')).toBe(true);
+    expect(store.getById(record.id)!.paymentStatus).toBe('Pending Verification');
+    expect(store.getById(record.id)!.lifecycleStatus).toBe('Payment Under Verification');
+
+    const pendingTxn = store
+      .getTransactions(record.id)
+      .find((t) => t.status === 'Pending Verification')!;
+    expect(store.verifyPayment(record.id, pendingTxn.id, 'Payment Officer')).toBe(true);
     expect(store.getById(record.id)!.paymentStatus).toBe('Paid');
-    // verifyPayment updates the payment *status* field only — the
-    // lifecycle status itself still needs its own explicit transition.
-    expect(store.transitionStatus(record.id, 'Payment Verified', actor, adminRole)).toBe(true);
+    expect(store.getById(record.id)!.lifecycleStatus).toBe('For Approval');
 
     // 12. Final approval — blocked-then-allowed once documents are resolved (already Accepted above).
-    expect(store.transitionStatus(record.id, 'For Approval', actor, adminRole)).toBe(true);
     expect(store.transitionStatus(record.id, 'Approved', actor, 'Approving Officer')).toBe(true);
 
     // 13-14. Permit generated with a real number/office; previewable via GeneratedPermit fields.

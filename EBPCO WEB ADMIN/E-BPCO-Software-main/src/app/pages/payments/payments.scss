@@ -2,25 +2,24 @@
 @use '../../shared/styles/kpi-grid';
 @use '../../shared/styles/modal';
 @use '../../shared/styles/detail-view';
+@use '../../shared/styles/tabs';
 @use '../../shared/styles/tokens' as *;
 
-.doc-actions {
-  display: flex;
-  gap: 0.6rem;
-}
-
-.modal-hint {
-  margin: -0.5rem 0 1rem;
-  font-size: 0.82rem;
-  color: $color-ink-300;
-}
-
-.form-error {
-  margin: -0.25rem 0 0.75rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: $color-danger;
-}
+// ---------------------------------------------------------------------------
+// Layout notes for this file:
+//
+// `.card`/`.table-card`, `.table-toolbar`/`.search-input`/`.toolbar-actions`,
+// and `.create-box`/`.create-form` are the same page-local patterns already
+// duplicated (identically) across applications.scss, evaluations.scss,
+// permit-release.scss, dashboard.scss, and user-roles.scss — Angular's
+// emulated view encapsulation scopes each page's copy to that page's own
+// template, so redeclaring them here is the established project convention,
+// not an accident. Structural pieces already provided by the shared
+// `_detail-view.scss` partial (`.detail-head`, `.header-actions`,
+// `.summary-card`, `.card-head`, `.detail-table`) are NOT redeclared here —
+// only genuine Payments-specific additions/overrides are, so nothing in this
+// file silently shadows the shared partial with a slightly different value.
+// ---------------------------------------------------------------------------
 
 @keyframes section-in {
   from {
@@ -37,11 +36,20 @@
   display: block;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+// ---- Page card shell --------------------------------------------------------
+// Identical values to $color-surface/$radius-xl/$color-border — token-backed
+// instead of the raw hex/rem literals the other pages still carry, per this
+// pass's "use existing SCSS tokens wherever possible" requirement.
+
 .card {
-  background: #fff;
-  border-radius: 0.9rem;
+  background: $color-surface;
+  border-radius: $radius-xl;
   padding: 1.5rem 1.6rem;
-  border: 1px solid #eeeef2;
+  border: 1px solid $color-border;
   animation: section-in 0.4s ease both;
 }
 
@@ -49,10 +57,22 @@ h2 {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 800;
-  color: #1f2430;
+  color: $color-ink-900;
 }
 
-/* Table toolbar */
+h3 {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: $color-ink-700;
+  margin: 1.5rem 0 0.6rem;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+// ---- Table toolbar (search + filters + export) -------------------------------
+
 .table-toolbar {
   display: flex;
   align-items: center;
@@ -63,26 +83,28 @@ h2 {
 }
 
 .search-input {
-  flex: 1;
-  min-width: 260px;
+  flex: 1 1 260px;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  background: #f4f4f7;
-  border-radius: 0.5rem;
+  background: $color-bg-muted;
+  border-radius: $radius-md;
   padding: 0.65rem 0.9rem;
-  color: #8b8f9b;
+  color: $color-ink-200;
+  box-sizing: border-box;
 
   input {
     border: none;
     outline: none;
     background: transparent;
     flex: 1;
+    min-width: 0;
     font-size: 0.86rem;
-    color: #2b2f3a;
+    color: $color-ink-700;
 
     &::placeholder {
-      color: #9a9ea8;
+      color: $color-ink-100;
     }
   }
 }
@@ -91,6 +113,41 @@ h2 {
   display: flex;
   align-items: center;
   gap: 0.7rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $color-ink-500;
+  min-width: 160px;
+
+  select {
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-sm;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.82rem;
+    color: $color-ink-700;
+    box-sizing: border-box;
+    width: 100%;
+  }
+}
+
+// Every toolbar/filter/form control shares one height rhythm so a search
+// box, a `<select>`, and a button never visibly step up or down against
+// each other in the same row.
+.table-toolbar,
+.matrix-header {
+  select,
+  .search-input,
+  .btn-outline,
+  .btn-primary {
+    min-height: 2.35rem;
+  }
 }
 
 .id-cell {
@@ -100,105 +157,385 @@ h2 {
 .applicant-cell {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+// ---- Long-content truncation -------------------------------------------------
+// Applicant names, permit types, rule names, and reference numbers can all
+// run long — this keeps a table row's height (and every other cell/button's
+// alignment) stable instead of wrapping to a second line or forcing the
+// column wider. The full value is always still available via the browser's
+// native title tooltip.
+
+.truncate {
+  display: inline-block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.truncate--name {
+  max-width: 180px;
+}
+
+.truncate--type {
+  max-width: 220px;
+}
+
+// ---- Status pills for the payment-workflow vocabulary ------------------------
+// `.status-pill`'s base shape (padding/radius/font) comes from
+// shared/styles/_data-table.scss — this only adds the tone mapping for
+// values that vocabulary doesn't already know about, plus the `.small`
+// secondary-badge size used for a line item's verification status.
+
+.status-pill {
+  white-space: nowrap;
+
+  &.draft,
+  &.for-approval {
+    background: $color-info-bg;
+    color: $color-info;
+  }
+  &.issued,
+  &.conditional {
+    background: $color-info-bg-soft;
+    color: $color-info-700;
+  }
+  &.partially-paid {
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+  &.superseded,
+  &.voided,
+  &.not-applicable {
+    background: $color-bg-muted;
+    color: $color-ink-300;
+  }
+  &.required,
+  &.national-law-verified,
+  &.local-charter-verified {
+    background: $color-success-bg;
+    color: $color-success;
+  }
+  &.pending-lgu-validation,
+  &.sample-reference-only,
+  &.pending-castilla-verification {
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+
+  &.small {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.66rem;
+    margin-left: 0.4rem;
+  }
+}
+
+.line-excluded {
+  opacity: 0.55;
+}
+
+// ---- Detail views -------------------------------------------------------------
+// A dedicated stacked layout (not the shared `.detail-grid`'s 340px/1fr
+// two-column contract, which Payments' detail pages don't use — every
+// Payments detail view is a vertical sequence of full-width panels).
+
+.stacked-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+// `.summary-card`/`.card-head`/`.detail-table` structure/padding already
+// come from shared/styles/_detail-view.scss (imported above) — only the
+// cell-wrapping behavior is overridden here, since Payments' fee names and
+// legal-basis citations genuinely need to wrap (the shared default is
+// `white-space: nowrap`, built for short label/value pairs elsewhere).
+.detail-table {
+  th,
+  td {
+    white-space: normal;
+  }
+}
+
+.doc-total td {
+  font-weight: 800;
+  border-top: 2px solid $color-ink-900;
+}
+
+.assessment-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.due-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
   font-weight: 600;
+  color: $color-ink-500;
+
+  input {
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-sm;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.82rem;
+    box-sizing: border-box;
+  }
+}
+
+.settings-amount-input {
+  border: 1px solid $color-border-strong;
+  border-radius: $radius-sm;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.82rem;
+  width: 120px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.basis-link {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 0.76rem;
+  color: $color-info;
+  text-decoration: none;
+  max-width: 240px;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .pill-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 1rem;
-  padding: 0.35rem 0.9rem;
-  font-size: 0.78rem;
-  font-weight: 700;
   border: none;
+  border-radius: $radius-pill;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.74rem;
+  font-weight: 700;
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    transform 0.15s ease;
+  white-space: nowrap;
 
-  &.verified {
-    background: #22c55e;
-    color: #fff;
-
-    &:disabled {
-      cursor: default;
-      opacity: 0.9;
-    }
+  &:not(:last-child) {
+    margin-right: 0.4rem;
   }
 
   &.verify {
-    background: #dcfce7;
-    color: #16a34a;
-
-    &:hover {
-      background: #bbf7d0;
-    }
+    background: $color-success-bg;
+    color: $color-success;
   }
-
-  &:active {
-    transform: scale(0.95);
-  }
-
-  &.static {
-    cursor: default;
+  &.reject {
+    background: $color-danger-bg;
+    color: $color-danger;
   }
 }
 
-/* Detail view — shared structure lives in shared/styles/_detail-view.scss;
-   only page-specific bits stay here. */
-.verified-note {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #7a7f8c;
+.link-btn {
+  background: none;
+  border: none;
+  color: $color-info;
+  font-size: 0.74rem;
   font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.4rem;
+  text-decoration: underline;
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: 2px;
+  }
 }
 
-.status-pill.unsuccessful {
-  background: #fee2e2;
-  color: #dc2626;
-}
+// ---- Permit Fee Matrix tab ------------------------------------------------
 
-// ---- Bulk selection bar --------------------------------------------------
-
-.bulk-bar {
+.matrix-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 0.9rem;
-  margin-bottom: 1rem;
-  background: $color-brand-50;
-  border: 1px solid $color-brand-border;
-  border-radius: $radius-md;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: $color-ink-700;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
 
-  .btn-outline {
-    margin-left: auto;
-
-    &:last-child {
-      margin-left: 0;
-    }
+  label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: $color-ink-700;
   }
 
-  .btn-outline.danger {
-    border-color: $color-danger;
-    color: $color-danger;
-
-    &:hover {
-      background: $color-danger;
-      color: $color-surface;
-    }
+  select {
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-sm;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    width: 100%;
+    max-width: 320px;
+    box-sizing: border-box;
   }
 }
 
-// ---- Record payment modal ---------------------------------------------
+// ---- Configuration tab ---------------------------------------------------
+
+.settings-section {
+  margin-bottom: 2rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .muted-sub {
+    font-size: 0.82rem;
+    color: $color-ink-300;
+    line-height: 1.5;
+    margin: 0.25rem 0 1.25rem;
+    max-width: 780px;
+  }
+}
+
+.toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $color-ink-500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.strong-cell {
+  font-weight: 700;
+  color: $color-ink-900;
+}
+
+.muted {
+  color: $color-ink-300;
+}
+
+.applicability-grid {
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  max-height: 260px;
+  overflow-y: auto;
+
+  legend {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $color-ink-500;
+    padding: 0 0.3rem;
+  }
+}
+
+.applicability-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px dotted $color-border;
+  font-size: 0.78rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  span {
+    min-width: 0;
+    flex: 1 1 160px;
+  }
+
+  select {
+    flex-shrink: 0;
+    width: 9.5rem;
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-sm;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.76rem;
+    box-sizing: border-box;
+  }
+}
+
+// ---- Transaction detail's own compact key/value list --------------------
+// Deliberately named apart from the shared `.info-list` (a single-column
+// flex list of full-width rows) — this is a denser two-column grid of short
+// label/value pairs, a different layout under the same generic name would
+// otherwise silently shadow the shared one.
+
+.detail-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1.5rem;
+  margin: 0.75rem 0 0;
+
+  div {
+    display: flex;
+    gap: 0.4rem;
+    min-width: 0;
+    font-size: 0.82rem;
+    border-bottom: 1px dotted $color-border-strong;
+    padding-bottom: 0.4rem;
+  }
+
+  dt {
+    flex-shrink: 0;
+    min-width: 130px;
+    color: $color-ink-300;
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+    font-weight: 700;
+    color: $color-ink-900;
+    overflow-wrap: break-word;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ---- Modals ---------------------------------------------------------------
+// `.create-box`/`.create-form` mirror the identical pattern already used by
+// applications.scss/dashboard.scss/user-roles.scss for their own "+ Create"
+// modals — Payments' Record Payment / Reject / Adjust / Attach-OR / Edit-Rule
+// dialogs use the same class names in the template but this file never
+// defined them, so those forms were silently falling back to the base
+// `.modal-box`'s centered text and completely unstyled inputs. This restores
+// the shared look.
+
+.modal-box {
+  max-height: min(88vh, 720px);
+  overflow-y: auto;
+}
 
 .create-box {
   text-align: left;
-  max-width: 420px;
+  max-width: 440px;
+
+  // The Edit Fee Rule dialog carries a scrollable 16-row applicability
+  // fieldset on top of the standard fields — needs more width than a plain
+  // "add one record" form, so it gets its own modifier rather than widening
+  // every create-box dialog in this file.
+  &.wide-box {
+    max-width: 640px;
+  }
 }
 
 .create-form {
@@ -217,13 +554,18 @@ h2 {
   }
 
   input,
-  select {
+  select,
+  textarea {
     border: 1px solid $color-border-strong;
     border-radius: $radius-sm;
     padding: 0.6rem 0.7rem;
     font-size: 0.88rem;
     font-weight: 600;
     color: $color-ink-700;
+    font-family: inherit;
+    box-sizing: border-box;
+    width: 100%;
+    resize: vertical;
 
     &:focus-visible {
       outline: none;
@@ -233,5 +575,65 @@ h2 {
 
   .modal-actions {
     margin-top: 0.4rem;
+  }
+}
+
+.modal-hint {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.82rem;
+  color: $color-ink-300;
+  line-height: 1.5;
+}
+
+.form-error {
+  margin: -0.25rem 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $color-danger;
+}
+
+.doc-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+// The shared `.header-actions` (from _detail-view.scss) doesn't wrap by
+// itself — fine on the wider pages it was built for, but Payments' detail
+// headers can carry a status pill plus two buttons, which needs to wrap
+// rather than clip on a narrow viewport.
+.header-actions {
+  flex-wrap: wrap;
+}
+
+// ---- Responsive --------------------------------------------------------------
+
+@media (max-width: 720px) {
+  .table-toolbar {
+    align-items: stretch;
+  }
+
+  .toolbar-actions {
+    justify-content: flex-start;
+  }
+
+  .assessment-actions,
+  .header-actions,
+  .doc-actions {
+    width: 100%;
+    flex-wrap: wrap;
+
+    .btn-primary,
+    .btn-outline {
+      flex: 1 1 auto;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .create-box,
+  .create-box.wide-box {
+    max-width: 100%;
   }
 }

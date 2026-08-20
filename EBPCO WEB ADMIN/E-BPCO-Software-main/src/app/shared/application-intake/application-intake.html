@@ -167,19 +167,7 @@
 
       @if (currentStep() === 'application') {
         <div class="field-grid">
-          <label class="field">
-            Application Type <span class="req-mark">*</span>
-            <select
-              [(ngModel)]="applicationInfo.serviceDomain"
-              name="serviceDomain"
-              (ngModelChange)="onDomainChange()"
-            >
-              @for (d of serviceDomains; track d) {
-                <option [value]="d">{{ d }}</option>
-              }
-            </select>
-          </label>
-          <label class="field">
+          <label class="field span-2">
             Permit Type <span class="req-mark">*</span>
             <select
               [(ngModel)]="applicationInfo.permitType"
@@ -187,27 +175,18 @@
               (ngModelChange)="onPermitTypeChange()"
             >
               <option value="" disabled>Select a permit type…</option>
-              @for (p of permitTypeOptions(); track p) {
+              @for (p of permitTypeOptions; track p) {
                 <option [value]="p">{{ p }}</option>
               }
             </select>
           </label>
           <label class="field">
             Transaction Type <span class="req-mark">*</span>
-            <select
-              [(ngModel)]="applicationInfo.applicationAction"
-              name="applicationAction"
-              [disabled]="isBusinessDomain()"
-            >
+            <select [(ngModel)]="applicationInfo.applicationAction" name="applicationAction">
               @for (a of applicationActions; track a) {
                 <option [value]="a">{{ a }}</option>
               }
             </select>
-            @if (isBusinessDomain()) {
-              <span class="field-hint"
-                >Set automatically from the selected Business Permit type.</span
-              >
-            }
           </label>
           <label class="field">
             Date Received <span class="req-mark">*</span>
@@ -400,10 +379,6 @@
           <section>
             <h3>Application Information</h3>
             <dl>
-              <div>
-                <dt>Application Type</dt>
-                <dd>{{ applicationInfo.serviceDomain }}</dd>
-              </div>
               <div>
                 <dt>Permit Type</dt>
                 <dd>{{ applicationInfo.permitType || '—' }}</dd>

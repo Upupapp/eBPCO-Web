@@ -46,7 +46,7 @@ describe('buildPermitQueueRows — cross-module count consistency', () => {
 
   it('reacts to a newly created application immediately — the new row total goes up by exactly one', () => {
     const before = buildPermitQueueRows(store.applications()).find(
-      (r) => r.label === 'Fencing',
+      (r) => r.label === 'Fencing Permit',
     )!.total;
     store.create(
       {
@@ -55,8 +55,7 @@ describe('buildPermitQueueRows — cross-module count consistency', () => {
         applicantId: 'TEST-APL',
         applicant: 'Test Applicant',
         location: 'Barangay Poblacion',
-        serviceDomain: 'Construction Permit',
-        permitType: 'Fencing',
+        permitType: 'Fencing Permit',
         applicationAction: 'New',
         officer: 'Test Officer',
         dateSubmitted: '01 Jan 2026',
@@ -71,7 +70,7 @@ describe('buildPermitQueueRows — cross-module count consistency', () => {
       'Administrator',
     );
     const after = buildPermitQueueRows(store.applications()).find(
-      (r) => r.label === 'Fencing',
+      (r) => r.label === 'Fencing Permit',
     )!.total;
     expect(after).toBe(before + 1);
   });

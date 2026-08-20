@@ -98,7 +98,10 @@ export const VALID_TRANSITIONS: Record<ApplicationLifecycleStatus, ApplicationLi
   Expired: [],
 };
 
-export function canTransition(from: ApplicationLifecycleStatus, to: ApplicationLifecycleStatus): boolean {
+export function canTransition(
+  from: ApplicationLifecycleStatus,
+  to: ApplicationLifecycleStatus,
+): boolean {
   return VALID_TRANSITIONS[from]?.includes(to) ?? false;
 }
 
@@ -134,7 +137,13 @@ export const LIFECYCLE_TO_MOBILE_LABEL: Record<ApplicationLifecycleStatus, strin
 export type CoarseStatus = 'Approved' | 'Under Review' | 'Rejected';
 
 export function coarseStatus(status: ApplicationLifecycleStatus): CoarseStatus {
-  if (status === 'Approved' || status === 'Permit Generated' || status === 'Ready for Release' || status === 'Released' || status === 'Completed') {
+  if (
+    status === 'Approved' ||
+    status === 'Permit Generated' ||
+    status === 'Ready for Release' ||
+    status === 'Released' ||
+    status === 'Completed'
+  ) {
     return 'Approved';
   }
   if (status === 'Rejected' || status === 'Cancelled' || status === 'Expired') {
@@ -146,12 +155,24 @@ export function coarseStatus(status: ApplicationLifecycleStatus): CoarseStatus {
 // Internal evaluation stages the web admin's review pipeline uses —
 // unchanged from the app's existing evaluation-card ordering.
 export type EvaluationStage = 'Initial' | 'Zoning' | 'Fire Safety' | 'OBO' | 'Final Approval';
-export const EVALUATION_STAGE_ORDER: EvaluationStage[] = ['Initial', 'Zoning', 'Fire Safety', 'OBO', 'Final Approval'];
+export const EVALUATION_STAGE_ORDER: EvaluationStage[] = [
+  'Initial',
+  'Zoning',
+  'Fire Safety',
+  'OBO',
+  'Final Approval',
+];
 
 export type EvaluationResult = 'Pending' | 'Passed' | 'Revision Required' | 'Rejected';
 
 // Mirrors PaymentAssessmentStatus in
-// ebpco-mobile/lib/core/models/payment_assessment_model.dart.
-export type PaymentStatus = 'Not Yet Available' | 'Pending Verification' | 'Paid' | 'Overdue';
+// ebpco-mobile/lib/core/models/payment_assessment_model.dart, extended
+// with 'Partially Paid' — the versioned Assessment/PaymentTransaction
+// model (see assessment.model.ts) supports genuine partial payment of a
+// staged/legally-prescribed charge, which mobile's coarser 4-value status
+// has no room to represent; every consumer of this type must handle it
+// explicitly rather than falling through a default case.
+export type PaymentStatus =
+  'Not Yet Available' | 'Pending Verification' | 'Partially Paid' | 'Paid' | 'Overdue';
 
 export type PermitReleaseStatus = 'Not Ready' | 'Ready for Release' | 'Released';
