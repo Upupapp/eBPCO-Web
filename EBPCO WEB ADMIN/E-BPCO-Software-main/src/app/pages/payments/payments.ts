@@ -615,8 +615,14 @@ export class Payments {
 
   protected readonly orForm = { orNumber: '', orDate: '', orIssuedBy: '' };
   protected readonly showOrForm = signal(false);
+  // Explicit target rather than reading `selectedTransaction()` — this form
+  // is opened from more than one table (the standalone Transaction detail
+  // view AND the Payment Transactions table nested in an Assessment's
+  // detail view), and only the former actually sets `selectedTransactionId`.
+  protected readonly orFormTarget = signal<PaymentTransaction | null>(null);
 
-  protected openOrForm(): void {
+  protected openOrForm(txn: PaymentTransaction): void {
+    this.orFormTarget.set(txn);
     this.orForm.orNumber = '';
     this.orForm.orDate = new Date().toISOString().slice(0, 10);
     this.orForm.orIssuedBy = this.session.name() || '';
@@ -625,10 +631,11 @@ export class Payments {
 
   protected cancelOrForm(): void {
     this.showOrForm.set(false);
+    this.orFormTarget.set(null);
   }
 
   protected submitOrForm(): void {
-    const txn = this.selectedTransaction();
+    const txn = this.orFormTarget();
     if (!txn || !this.orForm.orNumber.trim()) return;
     this.assessmentStore.attachOfficialReceipt(
       txn.id,
@@ -637,6 +644,7 @@ export class Payments {
       this.orForm.orIssuedBy,
     );
     this.showOrForm.set(false);
+    this.orFormTarget.set(null);
   }
 
   protected readonly showReceiptPreview = signal(false);

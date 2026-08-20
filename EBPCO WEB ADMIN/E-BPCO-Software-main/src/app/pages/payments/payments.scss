@@ -64,7 +64,7 @@ h3 {
   font-size: 0.92rem;
   font-weight: 800;
   color: $color-ink-700;
-  margin: 1.5rem 0 0.6rem;
+  margin: 1.5rem 0 0.5rem;
 
   &:first-child {
     margin-top: 0;
@@ -186,6 +186,28 @@ h3 {
   max-width: 220px;
 }
 
+// The application's real linked Business (see
+// ApplicationStore.getApplicationContext) — never the applicant's name.
+.truncate--business {
+  max-width: 200px;
+  font-weight: 600;
+  color: $color-ink-700;
+}
+
+// Assessment/Transaction detail headers previously showed neither the
+// applicant nor the business at all — wraps the `<h1>` so a subtitle line
+// can sit directly under it instead of crowding into `.header-actions`.
+.detail-head-text {
+  min-width: 0;
+}
+
+.detail-subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: $color-ink-300;
+}
+
 // ---- Status pills for the payment-workflow vocabulary ------------------------
 // `.status-pill`'s base shape (padding/radius/font) comes from
 // shared/styles/_data-table.scss — this only adds the tone mapping for
@@ -263,9 +285,234 @@ h3 {
   }
 }
 
-.doc-total td {
-  font-weight: 800;
-  border-top: 2px solid $color-ink-900;
+// ---- Assessment totals (Total / Amount Paid / Balance) -------------------
+// Pulled out of the Line Items table's own rows (which forced awkward
+// colspans that shifted every time the Draft-only "Include" column
+// appeared/disappeared) into its own definition list directly under the
+// table — a clean 8px rhythm, and the grand total reads unambiguously
+// heavier than the two supporting figures beneath it.
+.assessment-totals {
+  margin: 1rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid $color-border;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.assessment-totals-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+
+  dt {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: $color-ink-300;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: $color-ink-700;
+  }
+
+  &--grand {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed $color-border-strong;
+
+    dt {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: $color-ink-900;
+    }
+
+    dd {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: $color-ink-900;
+    }
+  }
+}
+
+// Both the main tables' Action column (.pill-btn Verify/Reject) and the
+// Assessment detail's Payment Transactions table can show several buttons
+// in one cell at once (Verify+Reject, or Attach OR + a "More actions"
+// menu) — flex-wrap with a real gap instead of relying on `.link-btn`'s
+// own `margin-left` keeps them evenly spaced instead of crowding together
+// or wrapping raggedly.
+.txn-actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.4rem;
+  min-width: 200px;
+
+  .link-btn,
+  .pill-btn {
+    margin: 0;
+  }
+}
+
+// ---- Transaction actions: primary chip(s) + grouped overflow menu --------
+// Replaces the old flat row of underlined text links ("Attach OR No. Void
+// Reverse Refund") with a clear hierarchy: the safe/common action (Verify,
+// or Attach OR Number once a payment is Verified) stays visible as an
+// icon+label chip; the destructive/less-frequent Void/Reverse/Refund
+// actions live behind a "More actions" menu, grouped under Corrections /
+// Refunds headings. Deliberately a native <details>/<summary> disclosure
+// (no JS/signal needed) — see the .txn-menu-panel note below for why it's
+// kept in normal document flow rather than floated.
+.txn-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 1.75rem;
+  border-radius: $radius-pill;
+  padding: 0 0.65rem;
+  border: 1px solid transparent;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background $ease-fast,
+    border-color $ease-fast;
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: 2px;
+  }
+
+  &.success {
+    background: $color-success-bg;
+    color: $color-success;
+  }
+  &.danger {
+    background: $color-danger-bg;
+    color: $color-danger;
+  }
+  &.neutral {
+    background: $color-surface;
+    border-color: $color-border-strong;
+    color: $color-ink-600;
+
+    &:hover {
+      border-color: $color-brand-600;
+      color: $color-brand-600;
+    }
+  }
+}
+
+.txn-menu {
+  position: relative;
+
+  // Hide the default disclosure triangle/marker so the trigger reads as a
+  // plain icon button, not a list item.
+  summary {
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+}
+
+.txn-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: $color-bg-muted;
+  color: $color-ink-400;
+  cursor: pointer;
+  transition: background $ease-fast;
+
+  &:hover {
+    background: $color-border-strong;
+    color: $color-ink-700;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: 2px;
+  }
+}
+
+// A deliberately IN-FLOW panel (not `position: absolute`) — this cell sits
+// inside `.table-wrap`, which needs `overflow-x: auto` for the table's own
+// horizontal-scroll-on-narrow-screens behavior, and any child positioned to
+// visually escape that box would get clipped by it. Opening the menu grows
+// just that one row's height instead, which stays fully visible and never
+// gets cut off or requires a second scroll container.
+.txn-menu-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  margin-top: 0.4rem;
+  padding: 0.5rem;
+  min-width: 160px;
+  background: $color-bg-subtle;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+}
+
+.txn-menu-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: $color-ink-100;
+  padding: 0.3rem 0.4rem 0.1rem;
+
+  &:first-child {
+    padding-top: 0.1rem;
+  }
+}
+
+.txn-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: $radius-sm;
+  padding: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  color: $color-ink-600;
+  transition: background $ease-fast;
+
+  &:hover {
+    background: $color-bg-muted;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: -2px;
+  }
+
+  &.warning {
+    color: $color-warning;
+  }
+  &.danger {
+    color: $color-danger;
+  }
 }
 
 .assessment-actions {
@@ -401,7 +648,7 @@ h3 {
     color: $color-ink-300;
     line-height: 1.5;
     margin: 0.25rem 0 1.25rem;
-    max-width: 780px;
+    max-width: 100%;
   }
 }
 
@@ -635,11 +882,47 @@ h3 {
   // Payments' own confirm labels ("Record Payment", "Confirm Reversal")
   // run longer and wrap awkwardly at that width, so on narrow screens
   // this stacks them full-width instead.
+  .modal-actions {
     flex-direction: column-reverse;
 
     .modal-btn {
       width: 100%;
     }
+  }
+
+  // Tablet: the transaction action group wraps onto its own line under
+  // the Date column rather than forcing the row wider or overlapping it.
+  .txn-actions-cell {
+    min-width: 160px;
+  }
+
+  .txn-menu-panel {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 560px) {
+  // Mobile: the primary chip and the "More actions" trigger stack into a
+  // single full-width action area per row instead of staying side by side —
+  // still inside the table's own horizontal scroll (consistent with every
+  // other data table in this app), but the actions themselves never need
+  // a second, separate scroll to reach.
+  .txn-actions {
+    width: 100%;
+    align-items: stretch;
+
+    .btn-chip {
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+  }
+
+  .txn-menu {
+    align-self: flex-start;
+  }
+
+  .assessment-totals-row {
+    flex-wrap: wrap;
   }
 }
 

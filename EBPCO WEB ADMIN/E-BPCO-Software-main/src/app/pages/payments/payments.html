@@ -156,7 +156,7 @@
                 <td>{{ formatPHP(row.assessment.totalCentavos) }}</td>
                 <td>{{ formatPHP(row.assessment.balanceCentavos) }}</td>
                 <td>{{ row.assessment.dueDate ?? '—' }}</td>
-                <td (click)="$event.stopPropagation()">
+                <td class="txn-actions-cell" (click)="$event.stopPropagation()">
                   @if (
                     row.assessment.status === 'Draft' &&
                     !row.assessment.hasUnresolvedLines &&
@@ -295,22 +295,24 @@
                     }
                   </tr>
                 }
-                <tr class="doc-total">
-                  <td colspan="3">Total</td>
-                  <td>{{ formatPHP(a.totalCentavos) }}</td>
-                  @if (a.status === 'Draft') {
-                    <td></td>
-                  }
-                </tr>
-                <tr>
-                  <td colspan="3">Amount Paid / Balance</td>
-                  <td colspan="3">
-                    {{ formatPHP(a.amountPaidCentavos) }} / {{ formatPHP(a.balanceCentavos) }}
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
+
+          <dl class="assessment-totals">
+            <div class="assessment-totals-row assessment-totals-row--grand">
+              <dt>Total</dt>
+              <dd>{{ formatPHP(a.totalCentavos) }}</dd>
+            </div>
+            <div class="assessment-totals-row">
+              <dt>Amount Paid</dt>
+              <dd>{{ formatPHP(a.amountPaidCentavos) }}</dd>
+            </div>
+            <div class="assessment-totals-row">
+              <dt>Balance</dt>
+              <dd>{{ formatPHP(a.balanceCentavos) }}</dd>
+            </div>
+          </dl>
 
           @if (a.hasUnresolvedLines && a.status === 'Draft') {
             <p class="form-error">
@@ -399,18 +401,92 @@
                       }}</span>
                     </td>
                     <td>{{ t.submittedAt }}</td>
-                    <td>
+                    <td class="txn-actions-cell">
                       @if (t.status === 'Pending Verification' && canVerifyPayment()) {
-                        <button
-                          type="button"
-                          class="pill-btn verify"
-                          (click)="verifyTransaction(t)"
-                        >
-                          Verify
-                        </button>
-                        <button type="button" class="pill-btn reject" (click)="openReject(t)">
-                          Reject
-                        </button>
+                        <div class="txn-actions">
+                          <button
+                            type="button"
+                            class="btn-chip success"
+                            title="Verify this payment"
+                            (click)="verifyTransaction(t)"
+                          >
+                            <app-icon name="check-circle" [size]="14" />
+                            Verify
+                          </button>
+                          <button
+                            type="button"
+                            class="btn-chip danger"
+                            title="Reject this payment"
+                            (click)="openReject(t)"
+                          >
+                            <app-icon name="x-circle" [size]="14" />
+                            Reject
+                          </button>
+                        </div>
+                      }
+                      @if (t.status === 'Verified' && !t.isVoid) {
+                        <div class="txn-actions">
+                          @if (!t.orNumber) {
+                            <button
+                              type="button"
+                              class="btn-chip neutral"
+                              title="Attach the official receipt number"
+                              (click)="openOrForm(t)"
+                            >
+                              <app-icon name="file-check" [size]="14" />
+                              Attach OR No.
+                            </button>
+                          }
+                          @if (canAdjustPayment()) {
+                            <details class="txn-menu">
+                              <summary
+                                class="txn-menu-trigger"
+                                title="More actions"
+                                [attr.aria-label]="'More actions for transaction ' + t.id"
+                              >
+                                <app-icon name="dots-vertical" [size]="16" />
+                              </summary>
+                              <div
+                                class="txn-menu-panel"
+                                role="menu"
+                                [attr.aria-label]="'More actions for transaction ' + t.id"
+                              >
+                                <span class="txn-menu-label">Corrections</span>
+                                <button
+                                  type="button"
+                                  role="menuitem"
+                                  class="txn-menu-item warning"
+                                  title="Reverse this transaction"
+                                  (click)="openAdjust(t, 'Reversal')"
+                                >
+                                  <app-icon name="alert-triangle" [size]="14" />
+                                  Reverse
+                                </button>
+                                <button
+                                  type="button"
+                                  role="menuitem"
+                                  class="txn-menu-item danger"
+                                  title="Void this transaction"
+                                  (click)="openAdjust(t, 'Void')"
+                                >
+                                  <app-icon name="x-circle" [size]="14" />
+                                  Void
+                                </button>
+                                <span class="txn-menu-label">Refunds</span>
+                                <button
+                                  type="button"
+                                  role="menuitem"
+                                  class="txn-menu-item danger"
+                                  title="Refund this transaction"
+                                  (click)="openAdjust(t, 'Refund')"
+                                >
+                                  <app-icon name="wallet" [size]="14" />
+                                  Refund
+                                </button>
+                              </div>
+                            </details>
+                          }
+                        </div>
                       }
                     </td>
                   </tr>
@@ -569,7 +645,7 @@
                   }}</span>
                 </td>
                 <td>{{ row.txn.submittedAt }}</td>
-                <td (click)="$event.stopPropagation()">
+                <td class="txn-actions-cell" (click)="$event.stopPropagation()">
                   @if (row.txn.status === 'Pending Verification' && canVerifyPayment()) {
                     <button
                       type="button"
@@ -706,7 +782,7 @@
             }
             @if (t.status === 'Verified' && !t.isVoid) {
               @if (!t.orNumber) {
-                <button type="button" class="btn-outline" (click)="openOrForm()">
+                <button type="button" class="btn-outline" (click)="openOrForm(t)">
                   Attach Official OR Number
                 </button>
               }
@@ -1058,7 +1134,7 @@
   </div>
 }
 
-@if (showOrForm() && selectedTransaction(); as t) {
+@if (showOrForm() && orFormTarget(); as t) {
   <div class="modal-backdrop" (click)="cancelOrForm()">
     <div
       class="modal-box"
