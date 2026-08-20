@@ -20,24 +20,37 @@ export type ServiceDomain = 'Business Permit' | 'Construction Permit';
 // mirror the same New/Renewal/Amendment transaction categories
 // ApplicationAction already tracks, expressed as permit-type labels so
 // the queue, filters, and stage notes have something specific to show.
+// Every value below (past the three Business Permit variants) is copied
+// verbatim from E-BPCO Mobile's own Applications screen —
+// ebpco-mobile/lib/features/applications/presentation/applications_screen.dart's
+// `_PermitOption.title` strings across its Building Permit / Ancillary
+// Permits / Other Permits / Certificates sections — not an independent
+// naming convention invented for the web admin. Two of these are
+// deliberately inconsistent with the rest ('Sign Permit' keeps its
+// suffix, 'Interior' has none) because that inconsistency is what mobile
+// itself actually displays; "fixing" it here would make this list
+// disagree with the app it's supposed to mirror. "Building Permit" is
+// mobile's section HEADER for New Construction/Renovation/Addition-
+// Extension/Demolition, not itself a selectable type — it correctly has
+// no entry of its own here.
 export type PermitType =
   | 'New Business Permit'
   | 'Business Permit Renewal'
   | 'Business Permit Amendment'
   | 'New Construction'
   | 'Renovation'
-  | 'Addition/Extension'
+  | 'Addition / Extension'
   | 'Demolition'
   | 'Architectural'
-  | 'Civil/Structural'
+  | 'Civil / Structural'
   | 'Electrical'
   | 'Mechanical'
-  | 'Sanitary/Plumbing'
+  | 'Sanitary / Plumbing'
   | 'Plumbing'
   | 'Electronics'
-  | 'Interior Design'
+  | 'Interior'
   | 'Fencing'
-  | 'Sign'
+  | 'Sign Permit'
   | 'Excavation'
   | 'Certificate of Occupancy';
 
@@ -59,18 +72,22 @@ export const PERMIT_TYPE_CATALOG: PermitTypeInfo[] = [
   { type: 'Business Permit Amendment', domain: 'Business Permit', shortLabel: 'BP Amendment' },
   { type: 'New Construction', domain: 'Construction Permit', shortLabel: 'New Construction' },
   { type: 'Renovation', domain: 'Construction Permit', shortLabel: 'Renovation' },
-  { type: 'Addition/Extension', domain: 'Construction Permit', shortLabel: 'Addition/Extension' },
+  {
+    type: 'Addition / Extension',
+    domain: 'Construction Permit',
+    shortLabel: 'Addition / Extension',
+  },
   { type: 'Demolition', domain: 'Construction Permit', shortLabel: 'Demolition' },
   { type: 'Architectural', domain: 'Construction Permit', shortLabel: 'Architectural' },
-  { type: 'Civil/Structural', domain: 'Construction Permit', shortLabel: 'Civil/Structural' },
+  { type: 'Civil / Structural', domain: 'Construction Permit', shortLabel: 'Civil / Structural' },
   { type: 'Electrical', domain: 'Construction Permit', shortLabel: 'Electrical' },
   { type: 'Mechanical', domain: 'Construction Permit', shortLabel: 'Mechanical' },
-  { type: 'Sanitary/Plumbing', domain: 'Construction Permit', shortLabel: 'Sanitary/Plumbing' },
+  { type: 'Sanitary / Plumbing', domain: 'Construction Permit', shortLabel: 'Sanitary / Plumbing' },
   { type: 'Plumbing', domain: 'Construction Permit', shortLabel: 'Plumbing' },
   { type: 'Electronics', domain: 'Construction Permit', shortLabel: 'Electronics' },
-  { type: 'Interior Design', domain: 'Construction Permit', shortLabel: 'Interior Design' },
+  { type: 'Interior', domain: 'Construction Permit', shortLabel: 'Interior' },
   { type: 'Fencing', domain: 'Construction Permit', shortLabel: 'Fencing' },
-  { type: 'Sign', domain: 'Construction Permit', shortLabel: 'Sign' },
+  { type: 'Sign Permit', domain: 'Construction Permit', shortLabel: 'Sign Permit' },
   { type: 'Excavation', domain: 'Construction Permit', shortLabel: 'Excavation' },
   {
     type: 'Certificate of Occupancy',

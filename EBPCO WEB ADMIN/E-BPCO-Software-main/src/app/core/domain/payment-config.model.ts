@@ -55,7 +55,7 @@ export const DEFAULT_FEE_CONFIGS: FeeConfig[] = [
     applicablePermitTypes: [
       'New Construction',
       'Renovation',
-      'Addition/Extension',
+      'Addition / Extension',
       'Architectural',
     ],
     collectingOfficeId: 'treasury',
@@ -70,8 +70,8 @@ export const DEFAULT_FEE_CONFIGS: FeeConfig[] = [
     applicablePermitTypes: [
       'New Construction',
       'Renovation',
-      'Addition/Extension',
-      'Civil/Structural',
+      'Addition / Extension',
+      'Civil / Structural',
     ],
     collectingOfficeId: 'treasury',
     effectiveDate: '2026-01-01',
@@ -82,7 +82,7 @@ export const DEFAULT_FEE_CONFIGS: FeeConfig[] = [
     name: 'Electrical Line Item',
     description: 'Charged when an electrical plan review is part of the application.',
     amountCentavos: 25000,
-    applicablePermitTypes: ['New Construction', 'Renovation', 'Addition/Extension', 'Electrical'],
+    applicablePermitTypes: ['New Construction', 'Renovation', 'Addition / Extension', 'Electrical'],
     collectingOfficeId: 'treasury',
     effectiveDate: '2026-01-01',
     active: true,
