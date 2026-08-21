@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Router } from '@angular/router';
 import { Topbar } from '../../shared/topbar/topbar';
 import { Icon } from '../../shared/icon/icon';
@@ -61,7 +62,17 @@ interface TransactionRow {
 
 @Component({
   selector: 'app-payments',
-  imports: [Topbar, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, DocumentPreview],
+  imports: [
+    Topbar,
+    Icon,
+    Avatar,
+    KpiCard,
+    Pagination,
+    FormsModule,
+    FilterPanel,
+    DocumentPreview,
+    OverlayModule,
+  ],
   templateUrl: './payments.html',
   styleUrl: './payments.scss',
 })
@@ -611,6 +622,34 @@ export class Payments {
           : this.assessmentStore.refundTransaction(txn.id, actor, role, this.adjustReason);
     if (ok) this.store.refreshPaymentProjection(txn.applicationId, actor, role);
     this.adjustTarget.set(null);
+  }
+
+  // ---- Payment Transactions table: "More actions" overlay menu ----------
+  // A real CDK-overlay popover (not an in-flow disclosure) — it renders
+  // into the CDK overlay container, layered above everything including
+  // the table's own `.table-wrap` scroll clipping, so opening/closing it
+  // never changes the row's height or the table's width/column layout.
+
+  /** The one transaction (by id) whose "More actions" menu is open, or null — never more than one at a time. */
+  protected readonly openMenuTxnId = signal<string | null>(null);
+
+  /** Bottom-start by default, flipping to top-start if the panel would run past the viewport bottom (e.g. the last row in a long table). */
+  protected readonly txnMenuPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 4 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -4 },
+  ];
+
+  protected toggleTxnMenu(id: string): void {
+    this.openMenuTxnId.update((current) => (current === id ? null : id));
+  }
+
+  protected closeTxnMenu(): void {
+    this.openMenuTxnId.set(null);
+  }
+
+  /** cdkConnectedOverlay only emits keydown events while the overlay is open — Escape is the one key it doesn't already close on by itself. */
+  protected onTxnMenuKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') this.closeTxnMenu();
   }
 
   protected readonly orForm = { orNumber: '', orDate: '', orIssuedBy: '' };

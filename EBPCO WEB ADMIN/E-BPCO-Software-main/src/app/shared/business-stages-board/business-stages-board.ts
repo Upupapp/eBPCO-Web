@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { Icon } from '../icon/icon';
+import { Pagination } from '../pagination/pagination';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord, AppStatus, barangayOf } from '../../core/domain/application.model';
 import {
@@ -19,6 +20,18 @@ interface StageFilterOption {
 }
 
 type PresetKey = 'all' | 'week' | 'month' | 'last7' | 'last30' | 'custom';
+
+type ViewMode = 'board' | 'list';
+
+// The List view's own filter — narrows the flat table to one status,
+// independent of the board's own columns (Board always shows all three
+// side by side; this only ever affects List's flattened table).
+type ListStatusFilterKey = 'All' | AppStatus;
+
+interface ListStatusFilterOption {
+  value: ListStatusFilterKey;
+  label: string;
+}
 
 interface PresetOption {
   value: PresetKey;
@@ -72,7 +85,7 @@ const PREVIEW_COUNT = 6;
 
 @Component({
   selector: 'app-business-stages-board',
-  imports: [Icon, DragDropModule, FormsModule],
+  imports: [Icon, DragDropModule, FormsModule, Pagination],
   templateUrl: './business-stages-board.html',
   styleUrl: './business-stages-board.scss',
 })
@@ -101,6 +114,49 @@ export class BusinessStagesBoard {
     { value: 'All', label: 'All Permit Stages' },
     ...EVALUATION_STAGE_ORDER.map((stage) => ({ value: stage, label: stage })),
   ];
+
+  // Board (the drag-and-drop Kanban columns) is the default — List is a
+  // flat, scannable table of the same filtered applications for anyone
+  // who'd rather scan/search a list than drag sticky notes.
+  protected readonly viewMode = signal<ViewMode>('board');
+
+  protected setViewMode(mode: ViewMode): void {
+    this.viewMode.set(mode);
+  }
+
+  // ---- List view's own Status filter ---------------------------------------
+  // The board's three columns already separate applications by status, so
+  // this has no effect there — it only narrows the List view's own
+  // flattened table down to one status at a time.
+  protected readonly listStatusFilterOptions: ListStatusFilterOption[] = [
+    { value: 'All', label: 'All Statuses' },
+    { value: 'Under Review', label: 'Under Review' },
+    { value: 'Approved', label: 'Approved' },
+    { value: 'Rejected', label: 'Rejected' },
+  ];
+
+  protected readonly listStatusFilter = signal<ListStatusFilterKey>('All');
+  protected readonly listStatusFilterOpen = signal(false);
+
+  protected toggleListStatusFilterMenu(): void {
+    this.listStatusFilterOpen.update((open) => !open);
+  }
+
+  protected closeListStatusFilterMenu(): void {
+    this.listStatusFilterOpen.set(false);
+  }
+
+  protected selectListStatusFilter(value: ListStatusFilterKey): void {
+    this.listStatusFilter.set(value);
+    this.listStatusFilterOpen.set(false);
+    this.listPage.set(1);
+  }
+
+  protected readonly selectedListStatusFilterLabel = computed(
+    () =>
+      this.listStatusFilterOptions.find((option) => option.value === this.listStatusFilter())
+        ?.label ?? 'All Statuses',
+  );
 
   protected readonly loading = signal(false);
   protected readonly error = signal(false);
@@ -152,6 +208,7 @@ export class BusinessStagesBoard {
 
   protected selectPreset(value: PresetKey): void {
     this.preset.set(value);
+    this.listPage.set(1);
     if (value !== 'custom') {
       this.filterOpen.set(false);
     } else {
@@ -164,15 +221,19 @@ export class BusinessStagesBoard {
     this.customStart.set(this.draftStart());
     this.customEnd.set(this.draftEnd());
     this.filterOpen.set(false);
+    this.listPage.set(1);
   }
 
   protected clearFilter(): void {
     this.preset.set('all');
     this.stageFilter.set('All');
     this.barangayFilter.set('All');
+    this.listStatusFilter.set('All');
     this.filterOpen.set(false);
     this.stageFilterOpen.set(false);
     this.barangayOpen.set(false);
+    this.listStatusFilterOpen.set(false);
+    this.listPage.set(1);
   }
 
   protected readonly selectedPresetLabel = computed(() => {
@@ -195,6 +256,7 @@ export class BusinessStagesBoard {
   protected selectStageFilter(value: StageFilterKey): void {
     this.stageFilter.set(value);
     this.stageFilterOpen.set(false);
+    this.listPage.set(1);
   }
 
   protected readonly selectedStageFilterLabel = computed(
@@ -227,6 +289,7 @@ export class BusinessStagesBoard {
   protected selectBarangay(value: string): void {
     this.barangayFilter.set(value);
     this.barangayOpen.set(false);
+    this.listPage.set(1);
   }
 
   protected readonly selectedBarangayLabel = computed(() =>
@@ -300,6 +363,38 @@ export class BusinessStagesBoard {
   protected readonly totalCount = computed(() =>
     this.columns().reduce((sum, column) => sum + column.apps.length, 0),
   );
+
+  // The List view's own flattening of the exact same filtered set the
+  // board columns show (same range/stage/barangay filters) — grouped by
+  // stage in the same Under Review → Approved → Rejected order rather
+  // than re-sorted, so switching views never looks like a different
+  // dataset, just a different shape of the same one.
+  protected readonly listApps = computed<ApplicationRecord[]>(() => {
+    const flat = this.columns().flatMap((column) => column.apps);
+    const status = this.listStatusFilter();
+    return status === 'All' ? flat : flat.filter((app) => app.status === status);
+  });
+
+  // Same page-size convention as every other paginated table in this app
+  // (Applications, Payments, Permit Release, …) — the flat List view can
+  // easily run to dozens of rows, so it paginates instead of rendering
+  // everything at once the way the board's own bounded 6-per-column
+  // preview does.
+  protected readonly listPageSize = 10;
+  protected readonly listPage = signal(1);
+
+  protected readonly pagedListApps = computed<ApplicationRecord[]>(() => {
+    const start = (this.listPage() - 1) * this.listPageSize;
+    return this.listApps().slice(start, start + this.listPageSize);
+  });
+
+  // Mirrors the board's own per-column "View all N" footer button — jumps
+  // to the real Applications table instead of growing this pane further.
+  // The List view spans every stage at once (not just one column), so it
+  // hands off without a `status` filter rather than picking one arbitrarily.
+  protected viewAllInApplications(): void {
+    this.router.navigateByUrl('/applications');
+  }
 
   // Each stage previews a fixed handful of notes — the board is meant to
   // be a quick visual overview, not a second copy of the Overall

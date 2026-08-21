@@ -29,22 +29,32 @@
       }
     </div>
 
-    <p class="required-legend"><span class="req-mark">*</span> Required field</p>
+    <p class="required-legend">
+      <span class="field-label-required" aria-hidden="true">*</span> Required field
+    </p>
 
     <div class="step-body">
       @if (currentStep() === 'applicant') {
         <div class="field-grid">
           <label class="field">
-            Applicant/User Name <span class="req-mark">*</span>
+            <span class="field-label"
+              >Applicant/User Name&nbsp;<span class="field-label-required" aria-hidden="true"
+                >*</span
+              ></span
+            >
             <input
               type="text"
+              required
+              aria-required="true"
               [(ngModel)]="applicant.fullName"
               name="applicantFullName"
               placeholder="Juan Dela Cruz"
             />
           </label>
           <label class="field">
-            Applicant Type <span class="optional">(if applicable)</span>
+            <span class="field-label"
+              >Applicant Type&nbsp;<span class="field-meta-inline">(if applicable)</span></span
+            >
             <select [(ngModel)]="applicant.applicantType" name="applicantType">
               @for (t of applicantTypes; track t) {
                 <option [value]="t">{{ t }}</option>
@@ -52,9 +62,15 @@
             </select>
           </label>
           <label class="field">
-            Email Address <span class="req-mark">*</span>
+            <span class="field-label"
+              >Email Address&nbsp;<span class="field-label-required" aria-hidden="true"
+                >*</span
+              ></span
+            >
             <input
               type="email"
+              required
+              aria-required="true"
               [(ngModel)]="applicant.email"
               name="applicantEmail"
               placeholder="juan.delacruz@gmail.com"
@@ -64,9 +80,15 @@
             }
           </label>
           <label class="field">
-            Mobile Number <span class="req-mark">*</span>
+            <span class="field-label"
+              >Mobile Number&nbsp;<span class="field-label-required" aria-hidden="true"
+                >*</span
+              ></span
+            >
             <input
               type="text"
+              required
+              aria-required="true"
               [(ngModel)]="applicant.mobileNumber"
               name="applicantMobile"
               [placeholder]="mobileExample"
@@ -78,7 +100,9 @@
             }
           </label>
           <label class="field">
-            Landline Number <span class="optional">(if applicable)</span>
+            <span class="field-label"
+              >Landline Number&nbsp;<span class="field-meta-inline">(if applicable)</span></span
+            >
             <input
               type="text"
               [(ngModel)]="applicant.landlineNumber"
@@ -90,17 +114,30 @@
             }
           </label>
           <label class="field">
-            Barangay <span class="req-mark">*</span>
-            <select [(ngModel)]="applicant.barangay" name="applicantBarangay">
+            <span class="field-label"
+              >Barangay&nbsp;<span class="field-label-required" aria-hidden="true">*</span></span
+            >
+            <select
+              required
+              aria-required="true"
+              [(ngModel)]="applicant.barangay"
+              name="applicantBarangay"
+            >
               @for (b of barangays; track b) {
                 <option [value]="b">{{ b }}</option>
               }
             </select>
           </label>
           <label class="field span-2">
-            Address Details <span class="req-mark">*</span>
+            <span class="field-label"
+              >Address Details&nbsp;<span class="field-label-required" aria-hidden="true"
+                >*</span
+              ></span
+            >
             <input
               type="text"
+              required
+              aria-required="true"
               [(ngModel)]="applicant.addressLine"
               name="applicantAddress"
               placeholder="Purok 1, Street/Sitio"
@@ -112,49 +149,95 @@
       @if (currentStep() === 'business') {
         <div class="field-grid">
           <label class="field span-2">
-            Registered Business Name <span class="req-mark">*</span>
-            <input type="text" [(ngModel)]="business.registeredName" name="bizName" />
+            <span class="field-label"
+              >Registered Business Name&nbsp;<span class="field-label-required" aria-hidden="true"
+                >*</span
+              ></span
+            >
+            <input
+              type="text"
+              required
+              aria-required="true"
+              [(ngModel)]="business.registeredName"
+              name="bizName"
+            />
           </label>
           <label class="field">
-            Trade Name <span class="optional">(if applicable)</span>
+            <span class="field-label"
+              >Trade Name&nbsp;<span class="field-meta-inline">(if applicable)</span></span
+            >
             <input type="text" [(ngModel)]="business.tradeName" name="bizTradeName" />
           </label>
           <label class="field">
-            Business Category <span class="req-mark">*</span>
-            <select [(ngModel)]="business.category" name="bizCategory">
+            <span class="field-label"
+              >Business Category&nbsp;<span class="field-label-required" aria-hidden="true"
+                >*</span
+              ></span
+            >
+            <select
+              required
+              aria-required="true"
+              [(ngModel)]="business.category"
+              name="bizCategory"
+            >
               @for (c of businessCategories; track c) {
                 <option [value]="c">{{ c }}</option>
               }
             </select>
           </label>
           <label class="field span-2">
-            Business Address <span class="req-mark">*</span>
+            <span class="field-label"
+              >Business Address&nbsp;<span class="field-label-required" aria-hidden="true"
+                >*</span
+              ></span
+            >
             <input
               type="text"
+              required
+              aria-required="true"
               [(ngModel)]="business.addressLine"
               name="bizAddress"
               placeholder="Street address"
             />
           </label>
           <label class="field">
-            Barangay <span class="req-mark">*</span>
-            <select [(ngModel)]="business.barangay" name="bizBarangay">
+            <span class="field-label"
+              >Barangay&nbsp;<span class="field-label-required" aria-hidden="true">*</span></span
+            >
+            <select
+              required
+              aria-required="true"
+              [(ngModel)]="business.barangay"
+              name="bizBarangay"
+            >
               @for (b of barangays; track b) {
                 <option [value]="b">{{ b }}</option>
               }
             </select>
           </label>
           <label class="field">
-            Owner / Authorized Representative <span class="req-mark">*</span>
+            <span class="field-label"
+              >Owner / Authorized Representative&nbsp;<span
+                class="field-label-required"
+                aria-hidden="true"
+                >*</span
+              ></span
+            >
             <input
               type="text"
+              required
+              aria-required="true"
               [(ngModel)]="business.ownerOrRepresentative"
               name="bizOwner"
               [placeholder]="applicant.fullName"
             />
           </label>
           <label class="field span-2">
-            Registration / Reference Number <span class="optional">(where applicable)</span>
+            <span class="field-label"
+              >Registration / Reference Number&nbsp;<span class="field-meta-inline"
+                >(where applicable)</span
+              ></span
+            >
             <input
               type="text"
               [(ngModel)]="business.registrationNumber"
@@ -168,8 +251,12 @@
       @if (currentStep() === 'application') {
         <div class="field-grid">
           <label class="field span-2">
-            Permit Type <span class="req-mark">*</span>
+            <span class="field-label"
+              >Permit Type&nbsp;<span class="field-label-required" aria-hidden="true">*</span></span
+            >
             <select
+              required
+              aria-required="true"
               [(ngModel)]="applicationInfo.permitType"
               name="permitType"
               (ngModelChange)="onPermitTypeChange()"
@@ -181,28 +268,55 @@
             </select>
           </label>
           <label class="field">
-            Transaction Type <span class="req-mark">*</span>
-            <select [(ngModel)]="applicationInfo.applicationAction" name="applicationAction">
+            <span class="field-label"
+              >Transaction Type&nbsp;<span class="field-label-required" aria-hidden="true"
+                >*</span
+              ></span
+            >
+            <select
+              required
+              aria-required="true"
+              [(ngModel)]="applicationInfo.applicationAction"
+              name="applicationAction"
+            >
               @for (a of applicationActions; track a) {
                 <option [value]="a">{{ a }}</option>
               }
             </select>
           </label>
           <label class="field">
-            Date Received <span class="req-mark">*</span>
-            <input type="date" [(ngModel)]="applicationInfo.dateReceived" name="dateReceived" />
+            <span class="field-label"
+              >Date Received&nbsp;<span class="field-label-required" aria-hidden="true"
+                >*</span
+              ></span
+            >
+            <input
+              type="date"
+              required
+              aria-required="true"
+              [(ngModel)]="applicationInfo.dateReceived"
+              name="dateReceived"
+            />
           </label>
           <label class="field span-2">
-            Description / Scope of Work <span class="req-mark">*</span>
+            <span class="field-label"
+              >Description / Scope of Work&nbsp;<span
+                class="field-label-required"
+                aria-hidden="true"
+                >*</span
+              ></span
+            >
             <textarea
               rows="3"
+              required
+              aria-required="true"
               [(ngModel)]="applicationInfo.scopeDescription"
               name="scopeDescription"
               placeholder="Briefly describe the business activity or the scope of construction work…"
             ></textarea>
           </label>
           <label class="field">
-            Assigned Evaluator
+            <span class="field-label">Assigned Evaluator</span>
             <input
               type="text"
               [(ngModel)]="applicationInfo.assignedEvaluator"
@@ -210,11 +324,13 @@
             />
           </label>
           <label class="field">
-            Assigned Office
+            <span class="field-label">Assigned Office</span>
             <input type="text" [value]="responsibleDepartment()?.name ?? '—'" disabled />
           </label>
           <label class="field span-2">
-            Initial Remarks <span class="optional">(optional)</span>
+            <span class="field-label"
+              >Initial Remarks&nbsp;<span class="field-meta-inline">(optional)</span></span
+            >
             <textarea
               rows="2"
               [(ngModel)]="applicationInfo.initialRemarks"
@@ -255,7 +371,7 @@
                 </div>
                 <div class="doc-row-fields">
                   <label class="file-field">
-                    File Upload
+                    <span class="field-label">File Upload</span>
                     <input type="file" (change)="onFileChosen(doc, $event)" />
                     @if (doc.fileName) {
                       <span class="file-chip"
@@ -267,7 +383,7 @@
                     }
                   </label>
                   <label class="field">
-                    Document Type
+                    <span class="field-label">Document Type</span>
                     <input
                       type="text"
                       [ngModel]="doc.documentType"
@@ -276,7 +392,7 @@
                     />
                   </label>
                   <label class="field">
-                    Issuing Office
+                    <span class="field-label">Issuing Office</span>
                     <input
                       type="text"
                       [ngModel]="doc.issuingOffice"
@@ -286,7 +402,7 @@
                     />
                   </label>
                   <label class="field">
-                    Issue Date
+                    <span class="field-label">Issue Date</span>
                     <input
                       type="date"
                       [ngModel]="doc.issueDate"
@@ -295,7 +411,7 @@
                     />
                   </label>
                   <label class="field">
-                    Expiry Date
+                    <span class="field-label">Expiry Date</span>
                     <input
                       type="date"
                       [ngModel]="doc.expiryDate"
