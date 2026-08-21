@@ -63,6 +63,17 @@ h2 {
   color: $color-ink-500;
 }
 
+// Groups the filters and the Board/List toggle together on the header's
+// right side — the toggle sits last (the true right edge), so the filters
+// themselves end up shifted slightly left of where they used to sit
+// (flush against the card's own edge) instead of competing with it.
+.stages-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
 // ---- Filters: permit stage + date range ---------------------------------
 
 .filters-group {
@@ -230,6 +241,206 @@ h2 {
       outline: 2px solid $color-brand-focus-ring;
       outline-offset: 2px;
     }
+  }
+}
+
+// ---- Board / List display-mode toggle --------------------------------------
+
+.view-toggle {
+  display: inline-flex;
+  border: 1px solid $color-border-strong;
+  border-radius: $radius-md;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: none;
+  background: $color-surface;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: $color-ink-500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background $ease-base,
+    color $ease-base;
+
+  &:not(:last-child) {
+    border-right: 1px solid $color-border-strong;
+  }
+
+  &:hover {
+    color: $color-brand-600;
+  }
+
+  &.active {
+    background: $color-brand-50;
+    color: $color-brand-600;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: -2px;
+  }
+}
+
+// ---- List view --------------------------------------------------------------
+// A flat, scannable table of the exact same filtered applications the
+// board's columns show — for anyone who'd rather scan/search a list than
+// drag sticky notes. Fully self-contained (this component never @use's
+// the shared data-table partial — see the note above `.apply-btn`).
+
+.stages-list {
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+  }
+
+  thead th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: $color-ink-100;
+    letter-spacing: 0.03em;
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid $color-border;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 0.8rem 0.75rem;
+    font-size: 0.85rem;
+    color: $color-ink-700;
+    border-bottom: 1px solid $color-border;
+    white-space: nowrap;
+  }
+
+  tbody tr.row-clickable {
+    cursor: pointer;
+    transition: background $ease-fast;
+
+    &:hover {
+      background: $color-surface;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-brand-focus-ring;
+      outline-offset: -2px;
+    }
+  }
+}
+
+.list-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.list-identity-name {
+  font-weight: 700;
+  color: $color-ink-900;
+}
+
+.list-identity-business {
+  font-size: 0.76rem;
+  color: $color-ink-300;
+}
+
+.muted {
+  color: $color-ink-300;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: $radius-pill;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &.under-review {
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+  &.approved {
+    background: $color-success-bg;
+    color: $color-success;
+  }
+  &.rejected {
+    background: $color-danger-bg;
+    color: $color-danger;
+  }
+}
+
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: $color-info-bg-soft;
+  color: $color-info;
+  transition: transform $ease-fast;
+
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
+.list-empty-row td {
+  text-align: center;
+  padding: 2.5rem 0.75rem;
+  color: $color-ink-300;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: normal;
+}
+
+// Mirrors the board's own per-column "View all N" footer button (same
+// shape/weight), but neutral/brand-colored rather than per-stage-tinted —
+// the List view spans every stage at once, so there's no single accent
+// color that would make sense here.
+.list-view-all {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 40px;
+  margin-top: 0.75rem;
+  padding: 0 0.5rem;
+  border: none;
+  border-top: 1px dashed $color-border-strong;
+  border-radius: 0 0 $radius-sm $radius-sm;
+  background: transparent;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: $color-brand-600;
+  cursor: pointer;
+  transition: background $ease-fast;
+
+  span {
+    flex: 1;
+    text-align: center;
+  }
+
+  &:hover {
+    background: $color-brand-50;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-brand-focus-ring;
+    outline-offset: -2px;
   }
 }
 
@@ -762,6 +973,22 @@ $stage-colors: (
 }
 
 @media (max-width: 640px) {
+  .stages-header-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .view-toggle {
+    width: 100%;
+  }
+
+  .view-toggle-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 44px;
+  }
+
   .filters-group {
     width: 100%;
     flex-direction: column;

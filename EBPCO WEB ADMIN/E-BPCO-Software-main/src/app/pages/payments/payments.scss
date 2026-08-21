@@ -309,24 +309,13 @@ h3 {
   // plain text next to them (both button and pill are visibly taller than
   // a line of text, since they carry their own padding for a comfortable
   // tap target/badge shape, so top-aligning them would leave their text
-  // sitting lower than the row's plain text — see the two rules right
-  // below for the actual inline-element fix, `vertical-align: middle` on
-  // the <td> alone only centers each cell's *box*, not necessarily an
-  // inline-block/flex child's own text within it).
+  // sitting lower than the row's plain text). The "More actions" menu is
+  // a CDK overlay popover now (not in-flow), so opening it never changes
+  // this cell's own height — `middle` alignment never has to fight a
+  // menu-open tall row the way it used to.
   th,
   td {
     vertical-align: middle;
-  }
-
-  // The "More actions" menu can make ONE row's Action cell much taller
-  // than its single-line siblings while it's open — `:has()` switches
-  // just THAT row back to top-alignment for as long as the menu stays
-  // open, so the row's data and its actions stay flush together at the
-  // top instead of the short cells re-centering into the middle of the
-  // now-tall row. Every other (closed) row keeps the `middle` alignment
-  // above.
-  tr:has(.txn-menu[open]) td {
-    vertical-align: top;
   }
 
   // Method/Amount/Status/Date are short, fixed-shape values — nowrap
@@ -352,17 +341,12 @@ h3 {
     vertical-align: middle;
   }
 
-  // The Action column's own share of the row (23%) is wider than its
-  // closed-state content (one chip + the "More actions" trigger) needs —
-  // right-aligning both the header label and the buttons themselves (see
-  // .txn-actions below) keeps them anchored to the card's own right edge
-  // instead of sitting flush-left with a trailing gap of empty space.
+  // Right-align the Action column's header title (not just its button/menu
+  // content) so it reads flush with the numeric columns like Amount above
+  // it, instead of the title sitting flush-left while only the data sits
+  // flush-right underneath it.
   th:last-child {
     text-align: right;
-  }
-
-  .txn-actions {
-    justify-content: flex-end;
   }
 
   // `.txn-actions-cell` (shared with the Assessments/Transactions list
@@ -455,13 +439,20 @@ h3 {
 // or Attach OR Number once a payment is Verified) stays visible as an
 // icon+label chip; the destructive/less-frequent Void/Reverse/Refund
 // actions live behind a "More actions" menu, grouped under Corrections /
-// Refunds headings. Deliberately a native <details>/<summary> disclosure
-// (no JS/signal needed) — see the .txn-menu-panel note below for why it's
-// kept in normal document flow rather than floated.
+// Refunds headings. The menu itself is a real CDK overlay popover (see
+// `openMenuTxnId`/`txnMenuPositions` in payments.ts and the
+// `.txn-menu-panel` rule below) rather than an in-flow disclosure, so it
+// never affects this row's own height.
 .txn-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  // Fills the Action cell (a block-level flex container defaults to the
+  // cell's full content width) and pushes its buttons flush right, so the
+  // trigger/chips line up under the right-aligned "Action" header instead
+  // of sitting stranded at the cell's left edge under a mostly-empty
+  // column.
+  justify-content: flex-end;
   gap: 0.5rem;
 }
 
@@ -500,30 +491,6 @@ h3 {
     background: $color-danger-bg;
     color: $color-danger;
   }
-  &.neutral {
-    background: $color-surface;
-    border-color: $color-border-strong;
-    color: $color-ink-600;
-
-    &:hover {
-      border-color: $color-brand-600;
-      color: $color-brand-600;
-    }
-  }
-}
-
-.txn-menu {
-  position: relative;
-
-  // Hide the default disclosure triangle/marker so the trigger reads as a
-  // plain icon button, not a list item.
-  summary {
-    list-style: none;
-
-    &::-webkit-details-marker {
-      display: none;
-    }
-  }
 }
 
 .txn-menu-trigger {
@@ -532,7 +499,9 @@ h3 {
   justify-content: center;
   width: 1.75rem;
   height: 1.75rem;
+  border: none;
   border-radius: 50%;
+  padding: 0;
   background: $color-bg-muted;
   color: $color-ink-400;
   cursor: pointer;
@@ -547,30 +516,35 @@ h3 {
     outline: 2px solid $color-brand-focus-ring;
     outline-offset: 2px;
   }
+
+  // Marks the trigger itself while its menu is open, independent of
+  // hover — the CDK overlay panel renders elsewhere in the DOM (into the
+  // shared overlay container), so this is the only visual cue on the
+  // trigger's own row that its menu is active.
+  &[aria-expanded='true'] {
+    background: $color-border-strong;
+    color: $color-ink-700;
+  }
 }
 
-// A deliberately IN-FLOW panel (not `position: absolute`) — this cell sits
-// inside `.table-wrap`, which needs `overflow-x: auto` for the table's own
-// horizontal-scroll-on-narrow-screens behavior, and any child positioned to
-// visually escape that box would get clipped by it. Opening the menu grows
-// just that one row's height instead, which stays fully visible and never
-// gets cut off or requires a second scroll container.
+// A real floating popover — rendered by the CDK overlay into its own
+// top-level container, positioned against `.txn-menu-trigger` (see
+// `txnMenuPositions` in payments.ts) and layered above everything,
+// including the table's own `.table-wrap` horizontal-scroll clipping.
+// Opening/closing it never touches the table's layout: it isn't a
+// descendant of the row it belongs to, so it can't change that row's
+// height or any column's width.
 .txn-menu-panel {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 0.2rem;
-  margin-top: 0.4rem;
   padding: 0.4rem;
-  // Sized to fit within the .txn-table's own fixed Action column width
-  // (240px minus cell padding) — the column's width never changes when
-  // this opens (see .txn-table's own comment), so this only needs to fit
-  // the space already reserved for it, not claim more.
-  width: 160px;
-  max-width: 100%;
-  background: $color-bg-subtle;
+  width: 170px;
+  background: $color-surface;
   border: 1px solid $color-border;
   border-radius: $radius-md;
+  box-shadow: $shadow-card-hover;
   box-sizing: border-box;
 }
 
@@ -1021,7 +995,7 @@ h3 {
     }
   }
 
-  .txn-menu {
+  .txn-menu-trigger {
     align-self: flex-start;
   }
 

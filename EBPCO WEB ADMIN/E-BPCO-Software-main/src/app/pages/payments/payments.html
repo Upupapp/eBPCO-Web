@@ -378,14 +378,14 @@
           <div class="table-wrap">
             <table class="detail-table txn-table">
               <colgroup>
-                <col style="width: 15%" />
+                <col style="width: 16%" />
                 <col style="width: 8%" />
-                <col style="width: 8%" />
-                <col style="width: 17%" />
                 <col style="width: 9%" />
+                <col style="width: 22%" />
+                <col style="width: 10%" />
+                <col style="width: 12%" />
                 <col style="width: 11%" />
-                <col style="width: 9%" />
-                <col style="width: 23%" />
+                <col style="width: 12%" />
               </colgroup>
               <thead>
                 <tr>
@@ -438,65 +438,84 @@
                       }
                       @if (t.status === 'Verified' && !t.isVoid) {
                         <div class="txn-actions">
-                          @if (!t.orNumber) {
+                          @if (!t.orNumber || canAdjustPayment()) {
                             <button
                               type="button"
-                              class="btn-chip neutral"
-                              title="Attach the official receipt number"
-                              (click)="openOrForm(t)"
+                              class="txn-menu-trigger"
+                              cdkOverlayOrigin
+                              #txnMenuOrigin="cdkOverlayOrigin"
+                              title="More actions"
+                              [attr.aria-label]="'More actions for transaction ' + t.id"
+                              aria-haspopup="menu"
+                              [attr.aria-expanded]="openMenuTxnId() === t.id"
+                              (click)="toggleTxnMenu(t.id)"
                             >
-                              <app-icon name="file-check" [size]="14" />
-                              Attach OR No.
+                              <app-icon name="dots-vertical" [size]="16" />
                             </button>
-                          }
-                          @if (canAdjustPayment()) {
-                            <details class="txn-menu">
-                              <summary
-                                class="txn-menu-trigger"
-                                title="More actions"
-                                [attr.aria-label]="'More actions for transaction ' + t.id"
-                              >
-                                <app-icon name="dots-vertical" [size]="16" />
-                              </summary>
+                            <ng-template
+                              cdkConnectedOverlay
+                              [cdkConnectedOverlayOrigin]="txnMenuOrigin"
+                              [cdkConnectedOverlayOpen]="openMenuTxnId() === t.id"
+                              [cdkConnectedOverlayPositions]="txnMenuPositions"
+                              cdkConnectedOverlayHasBackdrop
+                              cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+                              (backdropClick)="closeTxnMenu()"
+                              (detach)="closeTxnMenu()"
+                              (overlayKeydown)="onTxnMenuKeydown($event)"
+                            >
                               <div
                                 class="txn-menu-panel"
                                 role="menu"
                                 [attr.aria-label]="'More actions for transaction ' + t.id"
                               >
-                                <span class="txn-menu-label">Corrections</span>
-                                <button
-                                  type="button"
-                                  role="menuitem"
-                                  class="txn-menu-item warning"
-                                  title="Reverse this transaction"
-                                  (click)="openAdjust(t, 'Reversal')"
-                                >
-                                  <app-icon name="alert-triangle" [size]="14" />
-                                  Reverse
-                                </button>
-                                <button
-                                  type="button"
-                                  role="menuitem"
-                                  class="txn-menu-item danger"
-                                  title="Void this transaction"
-                                  (click)="openAdjust(t, 'Void')"
-                                >
-                                  <app-icon name="x-circle" [size]="14" />
-                                  Void
-                                </button>
-                                <span class="txn-menu-label">Refunds</span>
-                                <button
-                                  type="button"
-                                  role="menuitem"
-                                  class="txn-menu-item danger"
-                                  title="Refund this transaction"
-                                  (click)="openAdjust(t, 'Refund')"
-                                >
-                                  <app-icon name="wallet" [size]="14" />
-                                  Refund
-                                </button>
+                                @if (!t.orNumber) {
+                                  <button
+                                    type="button"
+                                    role="menuitem"
+                                    class="txn-menu-item"
+                                    title="Attach the official receipt number"
+                                    (click)="openOrForm(t); closeTxnMenu()"
+                                  >
+                                    <app-icon name="file-check" [size]="14" />
+                                    Attach OR No.
+                                  </button>
+                                }
+                                @if (canAdjustPayment()) {
+                                  <span class="txn-menu-label">Corrections</span>
+                                  <button
+                                    type="button"
+                                    role="menuitem"
+                                    class="txn-menu-item warning"
+                                    title="Reverse this transaction"
+                                    (click)="openAdjust(t, 'Reversal'); closeTxnMenu()"
+                                  >
+                                    <app-icon name="alert-triangle" [size]="14" />
+                                    Reverse
+                                  </button>
+                                  <button
+                                    type="button"
+                                    role="menuitem"
+                                    class="txn-menu-item danger"
+                                    title="Void this transaction"
+                                    (click)="openAdjust(t, 'Void'); closeTxnMenu()"
+                                  >
+                                    <app-icon name="x-circle" [size]="14" />
+                                    Void
+                                  </button>
+                                  <span class="txn-menu-label">Refunds</span>
+                                  <button
+                                    type="button"
+                                    role="menuitem"
+                                    class="txn-menu-item danger"
+                                    title="Refund this transaction"
+                                    (click)="openAdjust(t, 'Refund'); closeTxnMenu()"
+                                  >
+                                    <app-icon name="wallet" [size]="14" />
+                                    Refund
+                                  </button>
+                                }
                               </div>
-                            </details>
+                            </ng-template>
                           }
                         </div>
                       }

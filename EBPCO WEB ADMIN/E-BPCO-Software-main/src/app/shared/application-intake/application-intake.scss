@@ -79,14 +79,42 @@
   text-align: left;
 }
 
-.req-mark {
-  color: $color-danger;
+// ---- Shared field-label pattern ------------------------------------------
+// `.field` is `display: flex` (stacks the label row above the control) —
+// every DIRECT child of a flex container gets blockified by the browser,
+// which used to land a bare `<span class="req-mark">*</span>` sibling of
+// the label text on its own row instead of staying inline with it (flex
+// items always start a new line in a column-direction flex container,
+// even an inline-level `<span>`). `.field-label` is the fix: it's the one
+// flex-item child that represents "the whole label row", and everything
+// inside it — the text plus `.field-label-required`/`.field-meta-inline`
+// — lives in NORMAL inline flow (not flex), so it wraps together as one
+// unit instead of splitting onto separate lines.
+.field-label {
+  display: block;
 }
 
-.optional {
+// A non-breaking space (see the template) sits between the label text and
+// this, and `white-space: nowrap` keeps the mark itself from ever being
+// severed from its own last character — between them, the indicator can
+// never end up alone on its own line, even when the label text itself
+// wraps on a narrow screen.
+.field-label-required {
+  color: $color-danger;
+  white-space: nowrap;
+  // Real requiredness comes from the control's own `required`/
+  // `aria-required` attributes (see the template) — this glyph is a
+  // sighted-user affordance only, so it's `aria-hidden` and shouldn't
+  // itself be announced as if it were the semantic source of truth.
+  margin-left: 0.15rem;
+}
+
+.field-meta-inline {
   color: $color-ink-200;
   font-weight: 400;
   font-size: 0.75rem;
+  white-space: nowrap;
+  margin-left: 0.3rem;
 }
 
 .step-body {

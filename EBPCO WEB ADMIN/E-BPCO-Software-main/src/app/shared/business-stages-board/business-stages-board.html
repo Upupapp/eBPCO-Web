@@ -5,124 +5,185 @@
       <p class="stages-subtitle">Track businesses across each stage of the application process.</p>
     </div>
 
-    <div class="filters-group">
-      <div class="filter-wrap">
-        <button
-          type="button"
-          class="filter-trigger"
-          [class.active]="stageFilterOpen()"
-          [attr.aria-expanded]="stageFilterOpen()"
-          (click)="toggleStageFilterMenu()"
-        >
-          <app-icon name="filter" [size]="15" />
-          {{ selectedStageFilterLabel() }}
-          <app-icon name="chevron-down" [size]="14" />
-        </button>
+    <div class="stages-header-actions">
+      <div class="filters-group">
+        <div class="filter-wrap">
+          <button
+            type="button"
+            class="filter-trigger"
+            [class.active]="stageFilterOpen()"
+            [attr.aria-expanded]="stageFilterOpen()"
+            (click)="toggleStageFilterMenu()"
+          >
+            <app-icon name="filter" [size]="15" />
+            {{ selectedStageFilterLabel() }}
+            <app-icon name="chevron-down" [size]="14" />
+          </button>
 
-        @if (stageFilterOpen()) {
-          <div class="filter-backdrop" (click)="closeStageFilterMenu()"></div>
-          <div class="filter-menu" role="menu">
-            @for (option of stageFilterOptions; track option.value) {
-              <button
-                type="button"
-                class="filter-option"
-                role="menuitemradio"
-                [attr.aria-checked]="stageFilter() === option.value"
-                [class.active]="stageFilter() === option.value"
-                (click)="selectStageFilter(option.value)"
-              >
-                {{ option.label }}
-              </button>
-            }
-          </div>
-        }
-      </div>
+          @if (stageFilterOpen()) {
+            <div class="filter-backdrop" (click)="closeStageFilterMenu()"></div>
+            <div class="filter-menu" role="menu">
+              @for (option of stageFilterOptions; track option.value) {
+                <button
+                  type="button"
+                  class="filter-option"
+                  role="menuitemradio"
+                  [attr.aria-checked]="stageFilter() === option.value"
+                  [class.active]="stageFilter() === option.value"
+                  (click)="selectStageFilter(option.value)"
+                >
+                  {{ option.label }}
+                </button>
+              }
+            </div>
+          }
+        </div>
 
-      <div class="filter-wrap">
-        <button
-          type="button"
-          class="filter-trigger"
-          [class.active]="barangayOpen()"
-          [attr.aria-expanded]="barangayOpen()"
-          (click)="toggleBarangayMenu()"
-          (keydown.escape)="closeBarangayMenu()"
-        >
-          <app-icon name="map" [size]="15" />
-          {{ selectedBarangayLabel() }}
-          <app-icon name="chevron-down" [size]="14" />
-        </button>
+        <div class="filter-wrap">
+          <button
+            type="button"
+            class="filter-trigger"
+            [class.active]="barangayOpen()"
+            [attr.aria-expanded]="barangayOpen()"
+            (click)="toggleBarangayMenu()"
+            (keydown.escape)="closeBarangayMenu()"
+          >
+            <app-icon name="map" [size]="15" />
+            {{ selectedBarangayLabel() }}
+            <app-icon name="chevron-down" [size]="14" />
+          </button>
 
-        @if (barangayOpen()) {
-          <div class="filter-backdrop" (click)="closeBarangayMenu()"></div>
-          <div class="filter-menu" role="menu" aria-label="Filter by barangay">
-            @for (option of barangayOptions(); track option) {
-              <button
-                type="button"
-                class="filter-option"
-                role="menuitemradio"
-                [attr.aria-checked]="barangayFilter() === option"
-                [class.active]="barangayFilter() === option"
-                (click)="selectBarangay(option)"
-              >
-                {{ option === 'All' ? 'All Barangays' : 'Barangay ' + option }}
-              </button>
-            }
-          </div>
-        }
-      </div>
+          @if (barangayOpen()) {
+            <div class="filter-backdrop" (click)="closeBarangayMenu()"></div>
+            <div class="filter-menu" role="menu" aria-label="Filter by barangay">
+              @for (option of barangayOptions(); track option) {
+                <button
+                  type="button"
+                  class="filter-option"
+                  role="menuitemradio"
+                  [attr.aria-checked]="barangayFilter() === option"
+                  [class.active]="barangayFilter() === option"
+                  (click)="selectBarangay(option)"
+                >
+                  {{ option === 'All' ? 'All Barangays' : 'Barangay ' + option }}
+                </button>
+              }
+            </div>
+          }
+        </div>
 
-      <div class="filter-wrap">
-        <button
-          type="button"
-          class="filter-trigger"
-          [class.active]="filterOpen()"
-          [attr.aria-expanded]="filterOpen()"
-          (click)="toggleFilterMenu()"
-        >
-          <app-icon name="calendar" [size]="15" />
-          {{ selectedPresetLabel() }}
-          <app-icon name="chevron-down" [size]="14" />
-        </button>
+        <div class="filter-wrap">
+          <button
+            type="button"
+            class="filter-trigger"
+            [class.active]="filterOpen()"
+            [attr.aria-expanded]="filterOpen()"
+            (click)="toggleFilterMenu()"
+          >
+            <app-icon name="calendar" [size]="15" />
+            {{ selectedPresetLabel() }}
+            <app-icon name="chevron-down" [size]="14" />
+          </button>
 
-        @if (filterOpen()) {
-          <div class="filter-backdrop" (click)="closeFilterMenu()"></div>
-          <div class="filter-menu" role="menu">
-            @for (option of presetOptions; track option.value) {
-              <button
-                type="button"
-                class="filter-option"
-                role="menuitemradio"
-                [attr.aria-checked]="preset() === option.value"
-                [class.active]="preset() === option.value"
-                (click)="selectPreset(option.value)"
-              >
-                {{ option.label }}
-              </button>
-            }
+          @if (filterOpen()) {
+            <div class="filter-backdrop" (click)="closeFilterMenu()"></div>
+            <div class="filter-menu" role="menu">
+              @for (option of presetOptions; track option.value) {
+                <button
+                  type="button"
+                  class="filter-option"
+                  role="menuitemradio"
+                  [attr.aria-checked]="preset() === option.value"
+                  [class.active]="preset() === option.value"
+                  (click)="selectPreset(option.value)"
+                >
+                  {{ option.label }}
+                </button>
+              }
 
-            @if (preset() === 'custom') {
-              <div class="custom-range">
-                <label>
-                  Start date
-                  <input
-                    type="date"
-                    [value]="draftStart()"
-                    (change)="draftStart.set($any($event.target).value)"
-                  />
-                </label>
-                <label>
-                  End date
-                  <input
-                    type="date"
-                    [value]="draftEnd()"
-                    (change)="draftEnd.set($any($event.target).value)"
-                  />
-                </label>
-                <button type="button" class="apply-btn" (click)="applyCustomRange()">Apply</button>
+              @if (preset() === 'custom') {
+                <div class="custom-range">
+                  <label>
+                    Start date
+                    <input
+                      type="date"
+                      [value]="draftStart()"
+                      (change)="draftStart.set($any($event.target).value)"
+                    />
+                  </label>
+                  <label>
+                    End date
+                    <input
+                      type="date"
+                      [value]="draftEnd()"
+                      (change)="draftEnd.set($any($event.target).value)"
+                    />
+                  </label>
+                  <button type="button" class="apply-btn" (click)="applyCustomRange()">
+                    Apply
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        @if (viewMode() === 'list') {
+          <div class="filter-wrap">
+            <button
+              type="button"
+              class="filter-trigger"
+              [class.active]="listStatusFilterOpen()"
+              [attr.aria-expanded]="listStatusFilterOpen()"
+              (click)="toggleListStatusFilterMenu()"
+            >
+              <app-icon name="check-circle" [size]="15" />
+              {{ selectedListStatusFilterLabel() }}
+              <app-icon name="chevron-down" [size]="14" />
+            </button>
+
+            @if (listStatusFilterOpen()) {
+              <div class="filter-backdrop" (click)="closeListStatusFilterMenu()"></div>
+              <div class="filter-menu" role="menu" aria-label="Filter by status">
+                @for (option of listStatusFilterOptions; track option.value) {
+                  <button
+                    type="button"
+                    class="filter-option"
+                    role="menuitemradio"
+                    [attr.aria-checked]="listStatusFilter() === option.value"
+                    [class.active]="listStatusFilter() === option.value"
+                    (click)="selectListStatusFilter(option.value)"
+                  >
+                    {{ option.label }}
+                  </button>
+                }
               </div>
             }
           </div>
         }
+      </div>
+
+      <div class="view-toggle" role="group" aria-label="Board display mode">
+        <button
+          type="button"
+          class="view-toggle-btn"
+          [class.active]="viewMode() === 'board'"
+          [attr.aria-pressed]="viewMode() === 'board'"
+          (click)="setViewMode('board')"
+        >
+          <app-icon name="workflow" [size]="15" />
+          Board
+        </button>
+        <button
+          type="button"
+          class="view-toggle-btn"
+          [class.active]="viewMode() === 'list'"
+          [attr.aria-pressed]="viewMode() === 'list'"
+          (click)="setViewMode('list')"
+        >
+          <app-icon name="logs" [size]="15" />
+          List
+        </button>
       </div>
     </div>
   </div>
@@ -158,6 +219,79 @@
       <p>No business applications found for this period.</p>
       <button type="button" class="btn-outline" (click)="clearFilter()">Reset Filter</button>
     </div>
+  } @else if (viewMode() === 'list') {
+    <div class="stages-list">
+      <table>
+        <thead>
+          <tr>
+            <th>Applicant / Business</th>
+            <th>Application ID</th>
+            <th>Permit Type</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (app of pagedListApps(); track app.id) {
+            <tr
+              class="row-clickable"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'View application ' + app.id + ' for ' + app.applicant"
+              (click)="select(app)"
+              (keydown.enter)="select(app)"
+              (keydown.space)="$event.preventDefault(); select(app)"
+            >
+              <td>
+                <div class="list-identity">
+                  <span class="list-identity-name">{{ app.applicant }}</span>
+                  <span class="list-identity-business">{{
+                    app.businessName || 'Not provided'
+                  }}</span>
+                </div>
+              </td>
+              <td class="muted">{{ app.id }}</td>
+              <td>{{ app.permitType }}</td>
+              <td>{{ app.location }}</td>
+              <td>
+                <span class="status-pill" [class]="app.status.toLowerCase().replace(' ', '-')">{{
+                  app.status
+                }}</span>
+              </td>
+              <td (click)="$event.stopPropagation()">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [attr.aria-label]="'View application ' + app.id"
+                  (click)="select(app)"
+                >
+                  <app-icon name="eye" [size]="15" />
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr class="list-empty-row">
+              <td colspan="6">No applications match this filter.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (listApps().length > 0) {
+      <app-pagination
+        [totalItems]="listApps().length"
+        [pageSize]="listPageSize"
+        [(page)]="listPage"
+      />
+    }
+
+    <button type="button" class="list-view-all" (click)="viewAllInApplications()">
+      <app-icon name="logs" [size]="14" />
+      <span>View all in Applications</span>
+      <app-icon name="chevron-right" [size]="13" />
+    </button>
   } @else {
     <div class="stages-board">
       @for (column of columns(); track column.status) {
