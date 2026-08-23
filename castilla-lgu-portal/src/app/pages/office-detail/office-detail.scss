@@ -1,0 +1,234 @@
+@use '../../shared/styles/tokens' as *;
+@use '../../shared/styles/mixins' as *;
+
+.detail-header {
+  background: $color-bg-subtle;
+  border-bottom: 1px solid $color-border;
+  padding-block: 3rem 3rem;
+}
+
+.detail-header-inner {
+  @include container;
+  max-width: $content-max;
+}
+
+.back-link {
+  display: inline-block;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: $color-ink-400;
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+
+  &:hover {
+    color: $color-brand-600;
+  }
+}
+
+.office-category {
+  @include eyebrow;
+  margin-bottom: 0.6rem;
+}
+
+.office-title {
+  font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.2rem);
+  font-weight: 800;
+  color: $color-ink-900;
+  line-height: 1.2;
+}
+
+.office-tagline {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  color: $color-ink-500;
+  max-width: 40rem;
+  line-height: 1.55;
+}
+
+.detail-body {
+  padding-block: 3rem 4rem;
+}
+
+.detail-body-inner {
+  @include container;
+  max-width: $content-max;
+  display: grid;
+  grid-template-columns: 1fr 20rem;
+  gap: 3rem;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.detail-block {
+  h2 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: $color-ink-900;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid $color-border;
+  }
+
+  p {
+    font-size: 0.96rem;
+    line-height: 1.65;
+    color: $color-ink-600;
+  }
+}
+
+.head-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.head-avatar {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: $color-brand-700;
+  background: $color-brand-100;
+}
+
+.head-name {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: $color-ink-900;
+}
+
+.head-position {
+  font-size: 0.84rem;
+  color: $color-ink-400;
+  margin-top: 0.1rem;
+}
+
+.services-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+
+  li {
+    font-size: 0.94rem;
+    line-height: 1.5;
+    color: $color-ink-600;
+  }
+}
+
+.related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  a {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: $color-brand-600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.detail-sidebar {
+  align-self: start;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: 1.75rem;
+  background: $color-bg-subtle;
+  height: fit-content;
+
+  h2 {
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: $color-ink-900;
+    margin-bottom: 0.6rem;
+  }
+}
+
+.contact-list {
+  margin: 1.1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  dt {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: $color-ink-300;
+    margin-bottom: 0.2rem;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $color-ink-900;
+  }
+}
+
+.back-footer {
+  @include container;
+  max-width: $content-max;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid $color-border;
+
+  a {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: $color-brand-600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.not-found {
+  @include container;
+  max-width: 32rem;
+  padding-block: 6rem;
+  text-align: center;
+
+  .eyebrow {
+    @include eyebrow;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: $color-ink-900;
+    margin-bottom: 1.25rem;
+  }
+
+  a {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: $color-brand-600;
+    text-decoration: none;
+  }
+}

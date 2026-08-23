@@ -1,0 +1,198 @@
+@use '../../shared/styles/tokens' as *;
+@use '../../shared/styles/mixins' as *;
+
+.page-intro {
+  padding-block: 4rem 1rem;
+}
+
+.page-intro-inner {
+  @include container;
+}
+
+// ---- Featured Mayor ---------------------------------------------------------
+
+.mayor-feature {
+  padding-block: 1.5rem 3rem;
+}
+
+.mayor-feature-inner {
+  @include container;
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  border: 1px solid $color-border;
+  border-radius: $radius-xl;
+  padding: 2.5rem;
+  background: linear-gradient(120deg, $color-bg-subtle 0%, $color-surface 60%);
+
+  @media (max-width: 680px) {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem 1.5rem;
+  }
+}
+
+.mayor-photo {
+  flex-shrink: 0;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(155deg, $color-brand-600, $color-brand-700);
+  box-shadow: 0 0 0 5px $color-gold-100, $shadow-card-hover;
+}
+
+.mayor-label {
+  @include eyebrow;
+  margin-bottom: 0.5rem;
+}
+
+.mayor-name {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: $color-ink-900;
+}
+
+.mayor-position {
+  margin-top: 0.3rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: $color-ink-500;
+  margin-bottom: 0.75rem;
+}
+
+// ---- Other officials ---------------------------------------------------------
+
+.officials {
+  padding-block: 1rem 4.5rem;
+}
+
+.officials-inner {
+  @include container;
+}
+
+.officials-heading {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: $color-ink-900;
+  margin-bottom: 1.25rem;
+}
+
+.official-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid $color-border;
+  list-style: none;
+
+  &.featured {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid $color-border;
+    border-radius: $radius-lg;
+    background: $color-bg-subtle;
+  }
+}
+
+.official-avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: $color-brand-700;
+  background: $color-brand-100;
+}
+
+.official-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.official-name {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: $color-ink-900;
+}
+
+.official-position {
+  font-size: 0.82rem;
+  color: $color-ink-400;
+  margin-top: 0.1rem;
+}
+
+.sb-heading {
+  margin-top: 1rem;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: $color-ink-700;
+  padding-top: 1rem;
+  border-top: 1px solid $color-border;
+}
+
+.sb-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 2.5rem;
+
+  @media (max-width: 680px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ---- Government structure diagram --------------------------------------------
+
+.structure {
+  background: $color-ink-900;
+  padding-block: 4.5rem;
+}
+
+.structure-inner {
+  @include container;
+}
+
+.structure-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  max-width: 26rem;
+  margin-inline: auto;
+}
+
+.structure-node {
+  width: 100%;
+  text-align: center;
+  padding: 1.1rem 1.5rem;
+  border-radius: $radius-lg;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.98rem;
+
+  &.primary {
+    background: $color-brand-600;
+    border-color: $color-brand-600;
+    font-size: 1.05rem;
+  }
+}
+
+.structure-connector {
+  width: 2px;
+  height: 2.25rem;
+  background: rgba(255, 255, 255, 0.25);
+}

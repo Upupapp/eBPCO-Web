@@ -1,0 +1,68 @@
+// Castilla LGU Portal — design tokens.
+// Brand red is inherited from the municipality's existing E-BPCO digital
+// system so both properties read as one LGU identity. Gold is added here,
+// drawn from the official seal's rope border and gold field, giving this
+// public-facing portal its own distinct warmth apart from the red-forward
+// transactional admin system.
+
+// Brand red (shared institutional identity)
+$color-brand-700: #a5182a;
+$color-brand-600: #c81e2c;
+$color-brand-500: #dc2626;
+$color-brand-100: #fdeceb;
+$color-brand-50: #fdf6f6;
+$color-brand-border: #f0c9c9;
+$color-brand-focus-ring: rgba(200, 30, 44, 0.25);
+
+// Gold accent (seal-derived, Castilla-distinctive)
+$color-gold-800: #7a5209;
+$color-gold-700: #96690f;
+$color-gold-600: #b8860f;
+$color-gold-500: #cc9a2e;
+$color-gold-100: #faefd6;
+$color-gold-50: #fdf8ee;
+$color-gold-border: #ecd9a8;
+
+// Neutrals
+$color-ink-900: #1f2430;
+$color-ink-700: #2b2f3a;
+$color-ink-600: #454a58;
+$color-ink-500: #565c6b;
+$color-ink-400: #6b7080;
+$color-ink-300: #7a7f8c;
+$color-ink-200: #8b8f9b;
+$color-ink-100: #9a9ea8;
+$color-ink-050: #9297a3;
+
+$color-border: #eeeef2;
+$color-border-strong: #e6e6ec;
+$color-surface: #ffffff;
+$color-bg: #f4f5f7;
+$color-bg-subtle: #fafafc;
+$color-bg-muted: #f4f4f7;
+
+// Semantic (support only)
+$color-success: #16a34a;
+$color-success-bg-soft: #e7fbef;
+$color-warning: #b45309;
+$color-warning-bg-soft: #fef8ea;
+$color-info: #2563eb;
+$color-info-bg-soft: #e8f1ff;
+
+// Elevation / shape
+$radius-sm: 0.4rem;
+$radius-md: 0.5rem;
+$radius-lg: 0.85rem;
+$radius-xl: 0.9rem;
+$radius-pill: 1rem;
+
+$shadow-card: 0 1px 2px rgba(20, 20, 40, 0.04);
+$shadow-card-hover: 0 10px 22px rgba(20, 20, 40, 0.08);
+
+$ease-base: 0.2s ease;
+$ease-fast: 0.15s ease;
+
+// Layout
+$content-max: 76rem;
+$content-max-wide: 84rem;
+$header-height: 4.5rem;

@@ -1,0 +1,451 @@
+@use '../../shared/styles/tokens' as *;
+@use '../../shared/styles/mixins' as *;
+
+// ---- Hero -----------------------------------------------------------------
+// Full-bleed photographic hero. .hero-photo points at
+// public/assets/hero/castilla-municipal-hall.jpg (a real photo of the
+// Castilla Town Hall). $color-ink-900 is just the load-in/fallback color.
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  // Fills exactly one screen on load; scrolling reveals the sections below.
+  // Cancels <main>'s header-clearance padding so the photo runs full-bleed
+  // behind the (transparent, on this page) fixed header, then re-adds it as
+  // padding so the actual content still clears the header visually.
+  min-height: 100vh;
+  min-height: 100svh;
+  margin-top: -#{$header-height};
+  padding-top: $header-height;
+  display: flex;
+  align-items: center;
+}
+
+.hero-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  // Photo URL is bound at runtime in the template (see home.html), not
+  // referenced here via url() — the production build resolves CSS url()
+  // references at build time and would hard-fail if that file were ever
+  // renamed/removed without updating this too.
+  background-color: $color-ink-900;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  @media (max-width: 1024px) {
+    background-position: 65% center;
+  }
+}
+
+// Directional scrim: strongest over the text on the left, easing off toward
+// the right so the building stays visible.
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 8, 12, 0.92) 0%,
+    rgba(35, 10, 15, 0.8) 28%,
+    rgba(25, 12, 18, 0.45) 55%,
+    rgba(15, 15, 20, 0.2) 100%
+  );
+}
+
+// Restrained brand-red atmosphere on top of the readability scrim — not a
+// full red wash, just enough to feel art-directed rather than a plain
+// darkened photo.
+.hero-tint {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0.6;
+  background: linear-gradient(
+    100deg,
+    rgba(165, 24, 42, 0.32) 0%,
+    rgba(200, 30, 44, 0.14) 38%,
+    transparent 70%
+  );
+}
+
+.hero-inner {
+  @include container;
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 0;
+
+  > * {
+    max-width: min(520px, 100%);
+  }
+
+  // The heading runs at a much larger type size than the rest of the
+  // content column, so it needs more room or "Municipality of" itself
+  // wraps mid-phrase on wide viewports — only the intentional break
+  // between "Municipality of" and "Castilla" should ever happen.
+  > .hero-title {
+    max-width: min(900px, 100%);
+  }
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: $color-brand-100;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid $color-brand-600;
+  border-radius: $radius-sm;
+  padding: 0.35rem 0.75rem;
+  margin-bottom: 1.25rem;
+  opacity: 0;
+  animation: hero-rise 0.6s ease 0.15s both;
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $color-brand-600;
+  }
+}
+
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  font-size: clamp(3.5rem, 5vw, 5.5rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 0.98;
+}
+
+.hero-title-line-1 {
+  color: #fff;
+  opacity: 0;
+  animation: hero-rise 0.7s ease 0.3s both;
+}
+
+.hero-title-line-2 {
+  color: $color-brand-600;
+  opacity: 0;
+  animation: hero-rise 0.7s ease 0.45s both;
+}
+
+.hero-rule {
+  display: block;
+  width: 55px;
+  height: 2px;
+  background: $color-brand-600;
+  margin: 1.5rem 0 1.25rem;
+  opacity: 0;
+  animation: hero-rise 0.5s ease 0.6s both;
+}
+
+.hero-province {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: $color-brand-50;
+  margin-bottom: 0.875rem;
+  opacity: 0;
+  animation: hero-rise 0.6s ease 0.7s both;
+}
+
+.hero-copy {
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: 1.75rem;
+  opacity: 0;
+  animation: hero-rise 0.6s ease 0.8s both;
+}
+
+.hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  opacity: 0;
+  animation: hero-rise 0.6s ease 0.95s both;
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border-radius: $radius-sm;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background $ease-base,
+    border-color $ease-base,
+    box-shadow $ease-base,
+    transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+
+  span {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover span {
+    transform: translateX(4px);
+  }
+}
+
+.btn-primary {
+  background: $color-brand-600;
+  color: #fff;
+  border: 1px solid $color-brand-600;
+
+  &:hover {
+    background: $color-brand-700;
+    border-color: $color-brand-700;
+    box-shadow: 0 12px 24px rgba(165, 24, 42, 0.45);
+  }
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  color: #fff;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: #fff;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-inner > * {
+    max-width: 100%;
+  }
+
+  // The desktop clamp is sized for a ~520–900px column; on phone widths its
+  // own minimum still doesn't leave "Municipality of" room to stay on one
+  // line, breaking the intentional two-line split. Scale it down further.
+  .hero-title {
+    font-size: clamp(2.1rem, 10vw, 2.75rem);
+  }
+
+  .hero-ctas {
+    flex-direction: column;
+    align-self: stretch;
+
+    .btn-primary,
+    .btn-secondary {
+      justify-content: center;
+    }
+  }
+}
+
+// ---- Quick nav --------------------------------------------------------------
+
+.quick-nav {
+  border-bottom: 1px solid $color-border;
+  background: $color-surface;
+}
+
+.quick-nav-inner {
+  @include container;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.quick-nav-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.75rem 1.5rem;
+  text-decoration: none;
+  border-right: 1px solid $color-border;
+  transition: background $ease-fast;
+
+  &:nth-child(4n) {
+    border-right: none;
+  }
+
+  &:hover {
+    background: $color-bg-subtle;
+
+    .quick-nav-arrow {
+      transform: translateX(2px);
+      color: $color-brand-600;
+    }
+  }
+}
+
+.quick-nav-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: $color-ink-900;
+}
+
+.quick-nav-desc {
+  font-size: 0.86rem;
+  color: $color-ink-400;
+  line-height: 1.4;
+}
+
+.quick-nav-arrow {
+  position: absolute;
+  top: 1.75rem;
+  right: 1.5rem;
+  color: $color-ink-100;
+  transition:
+    transform $ease-fast,
+    color $ease-fast;
+}
+
+@media (max-width: 900px) {
+  .quick-nav-item:nth-child(2n) {
+    border-right: none;
+  }
+  .quick-nav-item:nth-child(4n) {
+    border-right: 1px solid $color-border;
+  }
+  .quick-nav-item:nth-child(-n + 2) {
+    border-bottom: 1px solid $color-border;
+  }
+}
+
+@media (max-width: 560px) {
+  .quick-nav-item {
+    border-right: none !important;
+    border-bottom: 1px solid $color-border;
+  }
+}
+
+// ---- Castilla at a Glance ----------------------------------------------------
+
+.glance {
+  padding-block: 4.5rem;
+}
+
+.glance-inner {
+  @include container;
+  display: grid;
+  grid-template-columns: minmax(0, 17rem) 1px 1fr;
+  gap: 3rem;
+  align-items: start;
+
+  @media (max-width: 780px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.glance-divider {
+  background: $color-border;
+
+  @media (max-width: 780px) {
+    display: none;
+  }
+}
+
+.glance-heading {
+  .eyebrow {
+    @include eyebrow;
+    margin-bottom: 0.6rem;
+  }
+
+  h2 {
+    font-size: clamp(1.7rem, 1.4rem + 1vw, 2.2rem);
+    font-weight: 800;
+    color: $color-ink-900;
+    line-height: 1.15;
+  }
+
+  .glance-lede {
+    margin-top: 0.9rem;
+    font-size: 0.94rem;
+    line-height: 1.6;
+    color: $color-ink-500;
+  }
+}
+
+.glance-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.glance-field {
+  padding: 1.1rem 1.25rem 1.1rem 0;
+  border-bottom: 1px solid $color-border;
+
+  &:nth-child(odd) {
+    padding-left: 0;
+  }
+
+  &:nth-child(even) {
+    padding-left: 1.25rem;
+    border-left: 1px solid $color-border;
+
+    @media (max-width: 560px) {
+      border-left: none;
+      padding-left: 0;
+    }
+  }
+
+  dt {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $color-ink-300;
+    margin-bottom: 0.35rem;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: $color-ink-900;
+  }
+}

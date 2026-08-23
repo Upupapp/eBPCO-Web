@@ -1,0 +1,76 @@
+<section class="page-intro">
+  <div class="page-intro-inner">
+    <app-section-heading
+      eyebrow="Your Local Government"
+      heading="Who runs the municipality"
+      subtitle="Meet the elected leadership of LGU Castilla and the legislative council that serves alongside them."
+    />
+  </div>
+</section>
+
+<section class="mayor-feature">
+  <div class="mayor-feature-inner">
+    <div class="mayor-photo" aria-hidden="true">{{ mayor.initials }}</div>
+    <div class="mayor-text">
+      <p class="mayor-label">Office of the Municipal Mayor</p>
+      <h2 class="mayor-name">{{ mayor.name }}</h2>
+      <p class="mayor-position">{{ mayor.position }}</p>
+    </div>
+  </div>
+</section>
+
+<section class="officials">
+  <div class="officials-inner">
+    <h2 class="officials-heading">Other Elected Officials</h2>
+
+    <div class="official-row featured">
+      <div class="official-avatar" aria-hidden="true">{{ viceMayor.initials }}</div>
+      <div class="official-info">
+        <p class="official-name">{{ viceMayor.name }}</p>
+        <p class="official-position">{{ viceMayor.position }}</p>
+      </div>
+    </div>
+
+    <h3 class="sb-heading">Sangguniang Bayan Members</h3>
+    <ul class="sb-grid">
+      @for (member of sbMembers; track member.position) {
+        <li class="official-row">
+          <div class="official-avatar" aria-hidden="true">{{ member.initials }}</div>
+          <div class="official-info">
+            <p class="official-name">{{ member.name }}</p>
+            <p class="official-position">{{ member.position }}</p>
+          </div>
+        </li>
+      }
+      @for (member of sbExOfficio; track member.position) {
+        <li class="official-row">
+          <div class="official-avatar" aria-hidden="true">{{ member.initials }}</div>
+          <div class="official-info">
+            <p class="official-name">{{ member.name }}</p>
+            <p class="official-position">{{ member.position }}</p>
+          </div>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<section class="structure">
+  <div class="structure-inner">
+    <app-section-heading
+      align="center"
+      [dark]="true"
+      eyebrow="Government Structure"
+      heading="Municipal Government Structure"
+      subtitle="A simplified view of how leadership, administration, and offices connect."
+    />
+
+    <div class="structure-diagram">
+      <div class="structure-node primary">Municipal Mayor</div>
+      <div class="structure-connector" aria-hidden="true"></div>
+      <div class="structure-node">Municipal Administration &amp; Departments</div>
+      <div class="structure-connector" aria-hidden="true"></div>
+      <div class="structure-node">Municipal Offices</div>
+    </div>
+  </div>
+</section>

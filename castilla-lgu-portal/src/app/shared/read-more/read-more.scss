@@ -1,0 +1,22 @@
+@use '../styles/tokens' as *;
+
+.read-more-text {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: $color-ink-600;
+}
+
+.read-more-toggle {
+  margin-top: 0.6rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: $color-brand-600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

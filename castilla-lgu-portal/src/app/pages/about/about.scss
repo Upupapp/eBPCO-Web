@@ -1,0 +1,93 @@
+@use '../../shared/styles/tokens' as *;
+@use '../../shared/styles/mixins' as *;
+
+.page-intro {
+  padding-block: 4rem 1rem;
+}
+
+.page-intro-inner {
+  @include container;
+}
+
+.overview-text {
+  max-width: 42rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: $color-ink-600;
+  margin-top: -0.75rem;
+}
+
+.about-grid {
+  padding-block: 2rem 4rem;
+}
+
+.about-grid-inner {
+  @include container;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.about-card {
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: 1.75rem;
+  background: $color-surface;
+
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: $color-ink-900;
+    margin-bottom: 0.6rem;
+  }
+
+  .card-text {
+    margin-top: 0.9rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: $color-ink-500;
+  }
+}
+
+.identity {
+  background: $color-bg-subtle;
+  border-top: 1px solid $color-border;
+  padding-block: 4rem;
+}
+
+.identity-inner {
+  @include container;
+  display: flex;
+  align-items: center;
+  gap: 3.5rem;
+
+  @media (max-width: 760px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 2rem;
+  }
+}
+
+.identity-seal {
+  flex-shrink: 0;
+}
+
+.identity-text {
+  max-width: 38rem;
+
+  .eyebrow {
+    @include eyebrow;
+    margin-bottom: 0.6rem;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: $color-ink-900;
+    margin-bottom: 1rem;
+  }
+}

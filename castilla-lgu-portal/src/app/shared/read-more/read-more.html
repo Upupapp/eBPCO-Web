@@ -1,0 +1,6 @@
+<p class="read-more-text">{{ displayText(text()) }}</p>
+@if (isLong(text())) {
+  <button type="button" class="read-more-toggle" (click)="toggle()">
+    {{ expanded() ? 'Read less' : 'Read more' }}
+  </button>
+}
