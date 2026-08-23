@@ -1,0 +1,37 @@
+<section class="page-intro">
+  <div class="page-intro-inner">
+    <app-section-heading
+      eyebrow="About Castilla"
+      heading="Who and where is Castilla"
+      subtitle="A concise overview of the municipality, its history, and its official identity."
+    />
+    <p class="overview-text">{{ overview }}</p>
+  </div>
+</section>
+
+<section class="about-grid">
+  <div class="about-grid-inner">
+    <article class="about-card">
+      <h3>History</h3>
+      <p class="card-text">{{ history }}</p>
+    </article>
+
+    <article class="about-card">
+      <h3>Mission</h3>
+      <p class="card-text">{{ mission }}</p>
+    </article>
+  </div>
+</section>
+
+<section class="identity">
+  <div class="identity-inner">
+    <div class="identity-seal">
+      <app-seal [size]="220" [dimensional]="true" />
+    </div>
+    <div class="identity-text">
+      <p class="eyebrow">Municipal Identity</p>
+      <h2>The Official Seal of Castilla</h2>
+      <app-read-more [text]="sealDescription" [collapsedChars]="180" />
+    </div>
+  </div>
+</section>

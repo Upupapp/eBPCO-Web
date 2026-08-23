@@ -1,0 +1,58 @@
+<section class="page-intro">
+  <div class="page-intro-inner">
+    <app-section-heading
+      eyebrow="Municipal Offices"
+      heading="Find the right office for your concern"
+      subtitle="Search or browse the offices of LGU Castilla by category."
+    />
+
+    <div class="directory-controls">
+      <div class="search-field">
+        <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true">
+          <circle cx="9" cy="9" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6" />
+          <line x1="14" y1="14" x2="18.5" y2="18.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+        </svg>
+        <label class="sr-only" for="office-search">Search municipal offices</label>
+        <input
+          id="office-search"
+          type="text"
+          placeholder="Search municipal offices…"
+          [value]="searchTerm()"
+          (input)="onSearchInput($any($event.target).value)"
+        />
+      </div>
+
+      <div class="category-filters" role="group" aria-label="Filter offices by category">
+        <button type="button" [class.active]="activeCategory() === 'all'" (click)="setCategory('all')">
+          All Offices
+        </button>
+        @for (category of categories; track category.id) {
+          <button
+            type="button"
+            [class.active]="activeCategory() === category.id"
+            (click)="setCategory(category.id)"
+          >
+            {{ category.label }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="office-list">
+  <div class="office-list-inner">
+    @for (office of filteredOffices(); track office.slug) {
+      <a class="office-entry" [routerLink]="['/offices', office.slug]">
+        <div class="office-entry-main">
+          <p class="office-category">{{ categoryLabel(office.category) }}</p>
+          <h3 class="office-name">{{ office.name }}</h3>
+          <p class="office-desc">{{ office.shortDescription }}</p>
+        </div>
+        <span class="office-link">View Office Details <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    } @empty {
+      <p class="empty-state">No offices match your search. Try a different keyword or category.</p>
+    }
+  </div>
+</section>

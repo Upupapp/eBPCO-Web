@@ -1,0 +1,16 @@
+@use './shared/styles/tokens' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+main {
+  flex: 1;
+  // The header is position: fixed (so it can float transparently over the
+  // home hero), which takes it out of normal flow — every page needs this
+  // padding to keep its content clear of it. The home hero cancels this
+  // itself (see .hero { margin-top }) so it can run full-bleed to the top.
+  padding-top: $header-height;
+}

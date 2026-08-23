@@ -1,0 +1,9 @@
+<div class="section-heading" [class.center]="align() === 'center'" [class.dark]="dark()">
+  @if (eyebrow()) {
+    <p class="eyebrow">{{ eyebrow() }}</p>
+  }
+  <h2 class="heading">{{ heading() }}</h2>
+  @if (subtitle()) {
+    <p class="subtitle">{{ subtitle() }}</p>
+  }
+</div>

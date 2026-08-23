@@ -1,0 +1,46 @@
+@use '../styles/tokens' as *;
+@use '../styles/mixins' as *;
+
+.section-heading {
+  max-width: 42rem;
+  margin-bottom: 2.5rem;
+
+  &.center {
+    margin-inline: auto;
+    text-align: center;
+  }
+}
+
+.eyebrow {
+  @include eyebrow;
+  margin-bottom: 0.6rem;
+}
+
+.heading {
+  font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.3rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: $color-ink-900;
+  line-height: 1.15;
+}
+
+.subtitle {
+  margin-top: 0.7rem;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: $color-ink-500;
+}
+
+.section-heading.dark {
+  .eyebrow {
+    color: $color-gold-500;
+  }
+
+  .heading {
+    color: #fff;
+  }
+
+  .subtitle {
+    color: rgba(255, 255, 255, 0.62);
+  }
+}

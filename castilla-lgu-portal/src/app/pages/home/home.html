@@ -1,0 +1,76 @@
+<section class="hero">
+  <div
+    class="hero-photo"
+    [style.background-image]="'url(assets/hero/castilla-municipal-hall.jpg)'"
+    aria-hidden="true"
+  ></div>
+  <div class="hero-overlay" aria-hidden="true"></div>
+  <div class="hero-tint" aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <p class="hero-badge">
+      <span class="badge-dot" aria-hidden="true"></span>
+      LGU Information Portal
+    </p>
+
+    <h1 class="hero-title">
+      <span class="hero-title-line-1">Municipality of</span>
+      <span class="hero-title-line-2">{{ municipalityShortName }}</span>
+    </h1>
+
+    <span class="hero-rule" aria-hidden="true"></span>
+
+    <p class="hero-province">Province of {{ provinceName }}</p>
+
+    <p class="hero-copy">
+      Welcome to the official information portal of the Municipality of Castilla, Sorsogon. Learn who leads the
+      municipality, which offices serve residents and businesses, and how to reach LGU Castilla.
+    </p>
+
+    <div class="hero-ctas">
+      <a class="btn-primary" routerLink="/about">
+        Learn More About Castilla
+        <span aria-hidden="true">&rarr;</span>
+      </a>
+      <a class="btn-secondary" routerLink="/offices">
+        View Offices
+        <span aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<nav class="quick-nav" aria-label="Portal sections">
+  <div class="quick-nav-inner">
+    @for (item of quickNav; track item.path) {
+      <a class="quick-nav-item" [routerLink]="item.path">
+        <span class="quick-nav-title">{{ item.title }}</span>
+        <span class="quick-nav-desc">{{ item.description }}</span>
+        <span class="quick-nav-arrow" aria-hidden="true">&rarr;</span>
+      </a>
+    }
+  </div>
+</nav>
+
+<section class="glance">
+  <div class="glance-inner">
+    <div class="glance-heading">
+      <p class="eyebrow">Castilla at a Glance</p>
+      <h2>{{ municipalityName }}</h2>
+      <p class="glance-lede">
+        A coastal municipality in the province of Sorsogon, Bicol Region, Philippines.
+      </p>
+    </div>
+
+    <div class="glance-divider" aria-hidden="true"></div>
+
+    <dl class="glance-grid">
+      @for (field of profileFields; track field.label) {
+        <div class="glance-field">
+          <dt>{{ field.label }}</dt>
+          <dd>{{ field.value }}</dd>
+        </div>
+      }
+    </dl>
+  </div>
+</section>
