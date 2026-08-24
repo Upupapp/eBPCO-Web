@@ -1,12 +1,127 @@
 @use '../../shared/styles/tokens' as *;
 @use '../../shared/styles/mixins' as *;
 
-.page-intro {
-  padding-block: 4rem 1rem;
+// ---- Intro: editorial two-column (heading/copy + Castilla Hall visual) -----
+// No icon beside the paragraph, by explicit instruction — the previous
+// direction paired the subtitle with a circular people/government icon;
+// this version relies purely on typography, spacing, and the red divider
+// for hierarchy. Same structural pattern as about.scss's .intro (Angular's
+// per-component style encapsulation means reusing these class names here
+// doesn't collide with the About page's own .intro rules).
+
+.intro {
+  padding: 80px 0 56px;
 }
 
-.page-intro-inner {
-  @include container;
+.intro-inner {
+  @include container(1500px);
+  display: grid;
+  grid-template-columns: minmax(0, 38%) 1fr;
+  gap: 3rem;
+  align-items: center;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: minmax(0, 42%) 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+.intro-text {
+  &.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s ease;
+  }
+
+  &.reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .eyebrow {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: $color-brand-600;
+    margin: 0;
+  }
+}
+
+.intro-rule {
+  display: block;
+  width: 42px;
+  height: 2px;
+  background: $color-brand-600;
+  margin-top: 16px;
+  margin-bottom: 1.75rem;
+}
+
+.intro-heading {
+  display: flex;
+  flex-direction: column;
+  font-size: clamp(3.2rem, 4.4vw, 4.9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: $color-ink-900;
+  margin-bottom: 1.75rem;
+
+  .accent {
+    color: $color-brand-600;
+  }
+
+  @media (max-width: 560px) {
+    font-size: clamp(2.5rem, 11vw, 3.4rem);
+  }
+}
+
+// No icon here — typography and spacing alone carry the hierarchy from
+// heading to copy.
+.intro-copy {
+  max-width: 520px;
+  margin-top: 26px;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: $color-ink-500;
+}
+
+// Same pre-stylized architectural artwork treatment as about.scss's
+// .intro-art — see that file for the rationale (already-tinted transparent
+// PNG, so only sizing/opacity/edge-fade are needed, no filter chain).
+.intro-art {
+  position: relative;
+  width: calc(100% + 20px);
+  margin-right: -20px;
+  -webkit-mask-image: linear-gradient(to left, black 55%, rgba(0, 0, 0, 0.55) 78%, transparent 100%);
+  mask-image: linear-gradient(to left, black 55%, rgba(0, 0, 0, 0.55) 78%, transparent 100%);
+  pointer-events: none;
+  user-select: none;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    opacity: 0.55;
+    filter: saturate(0.9) brightness(1.05);
+  }
+
+  @media (max-width: 860px) {
+    width: min(620px, 92%);
+    margin: 0 auto;
+  }
+
+  @media (max-width: 560px) {
+    width: min(420px, 94%);
+  }
 }
 
 // ---- Featured Mayor ---------------------------------------------------------
@@ -17,18 +132,71 @@
 
 .mayor-feature-inner {
   @include container;
+  position: relative;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 2.5rem;
+  overflow: hidden;
   border: 1px solid $color-border;
   border-radius: $radius-xl;
   padding: 2.5rem;
   background: linear-gradient(120deg, $color-bg-subtle 0%, $color-surface 60%);
 
+  @media (max-width: 860px) {
+    .mayor-feature-aside {
+      display: none;
+    }
+  }
+
   @media (max-width: 680px) {
     flex-direction: column;
     text-align: center;
     padding: 2rem 1.5rem;
+  }
+}
+
+.mayor-feature-main {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+
+  @media (max-width: 680px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+// Institutional mark filling the space where a mayoral quote/signature
+// might otherwise go — explicitly not that. Nothing here is attributed to
+// the Mayor personally.
+.mayor-feature-aside {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  z-index: 1;
+}
+
+.mayor-feature-seal {
+  width: 64px;
+  height: 64px;
+  opacity: 0.9;
+}
+
+.mayor-feature-institution {
+  margin: 0;
+  text-align: right;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: $color-ink-400;
+
+  span {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: $color-ink-700;
   }
 }
 

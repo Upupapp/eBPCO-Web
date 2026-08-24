@@ -283,7 +283,12 @@
 
 .info-section {
   background: #fdfdfd;
-  padding: 90px 0 100px;
+  // Bottom padding kept modest: the footer already carries its own 5rem
+  // top margin site-wide (site-footer.scss), so stacking this section's
+  // own full 100px on top of that was double-spacing the page specifically
+  // here — other pages' last section before the footer end around 4rem,
+  // which this now matches.
+  padding: 40px 0 0rem;
 }
 
 // ---- Quick links (top row) ------------------------------------------------
