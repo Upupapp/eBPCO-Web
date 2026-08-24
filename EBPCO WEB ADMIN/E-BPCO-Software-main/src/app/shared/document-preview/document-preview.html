@@ -17,6 +17,11 @@
     @if (row(); as row) {
       @if (kind() === 'permit' && permitFormSafeUrl(); as formUrl) {
         <iframe class="doc-pdf-frame-full" [src]="formUrl" title="Permit Form"></iframe>
+        @if (permitChecklistUrl(); as checklistUrl) {
+          <a class="doc-checklist-link no-print" [href]="checklistUrl" target="_blank" rel="noopener">
+            View Documentary Requirements Checklist (Building Permit &amp; Occupancy)
+          </a>
+        }
       } @else {
         <article class="doc-page">
           <div class="sample-watermark" aria-hidden="true">SAMPLE</div>

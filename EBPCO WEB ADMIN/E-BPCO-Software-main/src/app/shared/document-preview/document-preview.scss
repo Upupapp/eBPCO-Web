@@ -180,6 +180,20 @@
   border: 0;
 }
 
+.doc-checklist-link {
+  display: block;
+  padding: 0.7rem 1.25rem;
+  background: $color-surface;
+  border-top: 1px solid $color-border;
+  color: $color-brand-600;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .doc-warning {
   background: $color-warning-bg;
   color: $color-warning;

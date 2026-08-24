@@ -21,6 +21,10 @@ import '../features/applications/presentation/excavation_permit/excavation_appli
 import '../features/applications/presentation/excavation_permit/excavation_permit_wizard_screen.dart';
 import '../features/applications/presentation/fencing_permit/fencing_application_submitted_screen.dart';
 import '../features/applications/presentation/fencing_permit/fencing_permit_wizard_screen.dart';
+import '../features/applications/presentation/fsec_permit/fsec_application_submitted_screen.dart';
+import '../features/applications/presentation/fsec_permit/fsec_permit_wizard_screen.dart';
+import '../features/applications/presentation/fsic_permit/fsic_application_submitted_screen.dart';
+import '../features/applications/presentation/fsic_permit/fsic_permit_wizard_screen.dart';
 import '../features/applications/presentation/interior_design_permit/interior_design_application_submitted_screen.dart';
 import '../features/applications/presentation/interior_design_permit/interior_design_permit_wizard_screen.dart';
 import '../features/applications/presentation/mechanical_permit/mechanical_application_submitted_screen.dart';
@@ -39,6 +43,8 @@ import '../features/applications/presentation/demolition_permit/demolition_permi
 import '../features/applications/presentation/new_application_screen.dart';
 import '../features/applications/presentation/renovation_permit/renovation_application_submitted_screen.dart';
 import '../features/applications/presentation/renovation_permit/renovation_permit_wizard_screen.dart';
+import '../features/applications/presentation/zoning_permit/zoning_application_submitted_screen.dart';
+import '../features/applications/presentation/zoning_permit/zoning_permit_wizard_screen.dart';
 import '../features/authentication/presentation/forgot_password_screen.dart';
 import '../features/authentication/presentation/login_screen.dart';
 import '../features/authentication/presentation/register_screen.dart';
@@ -180,6 +186,22 @@ class AppRouter {
             return DemolitionApplicationSubmittedScreen(
               referenceNumber:
                   extra?['referenceNumber'] as String? ?? 'DEM-UNKNOWN',
+              submissionDate:
+                  extra?['submissionDate'] as DateTime? ?? DateTime.now(),
+            );
+          },
+        ),
+        GoRoute(
+          path: '/applications/new/zoning-permit',
+          builder: (context, state) => const ZoningPermitWizardScreen(),
+        ),
+        GoRoute(
+          path: '/applications/new/zoning-permit/submitted',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, Object?>?;
+            return ZoningApplicationSubmittedScreen(
+              referenceNumber:
+                  extra?['referenceNumber'] as String? ?? 'ZLC-UNKNOWN',
               submissionDate:
                   extra?['submissionDate'] as DateTime? ?? DateTime.now(),
             );
@@ -379,6 +401,26 @@ class AppRouter {
           },
         ),
         GoRoute(
+          path: '/applications/new/fsec-permit',
+          builder: (context, state) => const FsecPermitWizardScreen(),
+        ),
+        GoRoute(
+          path: '/applications/new/fsec-permit/submitted',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, Object?>?;
+            return FsecApplicationSubmittedScreen(
+              referenceNumber:
+                  extra?['referenceNumber'] as String? ?? 'FSEC-UNKNOWN',
+              submissionDate:
+                  extra?['submissionDate'] as DateTime? ?? DateTime.now(),
+              relatedBuildingPermitApplicationNumber:
+                  extra?['relatedBuildingPermitApplicationNumber']
+                      as String? ??
+                  '',
+            );
+          },
+        ),
+        GoRoute(
           path: '/applications/new/certificate-of-occupancy',
           builder: (context, state) =>
               const CertificateOfOccupancyWizardScreen(),
@@ -396,6 +438,27 @@ class AppRouter {
                   extra?['buildingPermitNumber'] as String? ?? '',
               certificateType:
                   extra?['certificateType'] as String? ?? 'Full',
+            );
+          },
+        ),
+        GoRoute(
+          path: '/applications/new/fsic-permit',
+          builder: (context, state) => const FsicPermitWizardScreen(),
+        ),
+        GoRoute(
+          path: '/applications/new/fsic-permit/submitted',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, Object?>?;
+            return FsicApplicationSubmittedScreen(
+              referenceNumber:
+                  extra?['referenceNumber'] as String? ?? 'FSIC-UNKNOWN',
+              submissionDate:
+                  extra?['submissionDate'] as DateTime? ?? DateTime.now(),
+              relatedOccupancyPermitNumber:
+                  extra?['relatedOccupancyPermitNumber'] as String? ?? '',
+              relatedOccupancyPermitStatus:
+                  extra?['relatedOccupancyPermitStatus'] as String? ??
+                      'Pending',
             );
           },
         ),

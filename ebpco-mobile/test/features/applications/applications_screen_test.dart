@@ -234,7 +234,7 @@ void main() {
     await tester.pumpWidget(_wrapWithRouter());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Renovation'));
+    await tester.tap(find.text('Renovation / Alteration'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
@@ -375,30 +375,30 @@ void main() {
   );
 
   testWidgets(
-    'Sanitary / Plumbing opens the Sanitary / Plumbing Permit wizard at Step 1',
+    'Sanitary opens the Sanitary Permit wizard at Step 1',
     (tester) async {
       await useTallSurface(tester);
       await tester.pumpWidget(_wrapWithRouter());
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.text('Sanitary / Plumbing'));
+      await tester.ensureVisible(find.text('Sanitary'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Sanitary / Plumbing'));
+      await tester.tap(find.text('Sanitary'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
       expect(
-        find.widgetWithText(AppBar, 'Sanitary / Plumbing Permit'),
+        find.widgetWithText(AppBar, 'Sanitary Permit'),
         findsOneWidget,
       );
       expect(find.text('Step 1 of 9'), findsOneWidget);
       expect(find.text('Applicant Information'), findsOneWidget);
-      expect(find.text('Sanitary / Plumbing Permit'), findsWidgets);
+      expect(find.text('Sanitary Permit'), findsWidgets);
     },
   );
 
   testWidgets(
-    'Plumbing opens the Plumbing Permit wizard at Step 1, not the Sanitary / Plumbing wizard',
+    'Plumbing opens the Plumbing Permit wizard at Step 1, not the Sanitary wizard',
     (tester) async {
       await useTallSurface(tester);
       await tester.pumpWidget(_wrapWithRouter());
@@ -415,7 +415,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.widgetWithText(AppBar, 'Sanitary / Plumbing Permit'),
+        find.widgetWithText(AppBar, 'Sanitary Permit'),
         findsNothing,
       );
       expect(find.text('Step 1 of 9'), findsOneWidget);
@@ -448,15 +448,15 @@ void main() {
   );
 
   testWidgets(
-    'Interior opens the Interior Design Permit wizard at Step 1',
+    'Interior Design opens the Interior Design Permit wizard at Step 1',
     (tester) async {
       await useTallSurface(tester);
       await tester.pumpWidget(_wrapWithRouter());
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.text('Interior'));
+      await tester.ensureVisible(find.text('Interior Design'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Interior'));
+      await tester.tap(find.text('Interior Design'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
@@ -515,7 +515,7 @@ void main() {
   );
 
   testWidgets(
-    'Excavation opens the Excavation & Ground Preparation Permit wizard at Step 1',
+    'Excavation opens the Excavation Permit wizard at Step 1',
     (tester) async {
       await useTallSurface(tester);
       await tester.pumpWidget(_wrapWithRouter());
@@ -528,7 +528,7 @@ void main() {
       expect(tester.takeException(), isNull);
 
       expect(
-        find.widgetWithText(AppBar, 'Excavation & Ground Preparation Permit'),
+        find.widgetWithText(AppBar, 'Excavation Permit'),
         findsOneWidget,
       );
       expect(find.text('Step 1 of 9'), findsOneWidget);

@@ -3,7 +3,7 @@ import { AssessmentStore } from './assessment-store';
 import { PaymentConfigStore } from './payment-config-store';
 
 function draftAndResolve(store: AssessmentStore, applicationId: string, amount = 10000) {
-  const draft = store.draftAssessment(applicationId, 'Building Permit', 'Tester', 'Evaluator')!;
+  const draft = store.draftAssessment(applicationId, 'Building Permit – New Construction', 'Tester', 'Evaluator')!;
   for (const line of draft.lineItems) {
     if (line.amountCentavos === null)
       store.setLineAmount(draft.id, line.feeRuleId, amount, 'Tester', 'Evaluator');
@@ -20,7 +20,7 @@ describe('AssessmentStore — draft / review / issue lifecycle', () => {
   });
 
   it('draftAssessment builds line items from the fee rules that apply to the permit type, with required lines always included', () => {
-    const draft = store.draftAssessment('APP-1', 'Building Permit', 'Tester', 'Evaluator')!;
+    const draft = store.draftAssessment('APP-1', 'Building Permit – New Construction', 'Tester', 'Evaluator')!;
     expect(draft.status).toBe('Draft');
     expect(draft.version).toBe(1);
     const filing = draft.lineItems.find((l) => l.feeRuleId === 'filing-fee')!;
@@ -29,13 +29,13 @@ describe('AssessmentStore — draft / review / issue lifecycle', () => {
   });
 
   it('refuses to draft a second assessment while a non-terminal one already exists for the application', () => {
-    store.draftAssessment('APP-2', 'Building Permit', 'Tester', 'Evaluator');
-    const second = store.draftAssessment('APP-2', 'Building Permit', 'Tester', 'Evaluator');
+    store.draftAssessment('APP-2', 'Building Permit – New Construction', 'Tester', 'Evaluator');
+    const second = store.draftAssessment('APP-2', 'Building Permit – New Construction', 'Tester', 'Evaluator');
     expect(second).toBeNull();
   });
 
   it('submitForApproval is refused while any included line still has amountCentavos === null (Requires assessor input)', () => {
-    const draft = store.draftAssessment('APP-3', 'Building Permit', 'Tester', 'Evaluator')!;
+    const draft = store.draftAssessment('APP-3', 'Building Permit – New Construction', 'Tester', 'Evaluator')!;
     expect(draft.hasUnresolvedLines).toBe(true);
     expect(store.submitForApproval(draft.id, 'Tester', 'Evaluator')).toBe(false);
   });
@@ -61,7 +61,7 @@ describe('AssessmentStore — draft / review / issue lifecycle', () => {
   });
 
   it('setLineIncluded refuses to drop a required line, but can toggle a conditional one', () => {
-    const draft = store.draftAssessment('APP-6', 'Building Permit', 'Tester', 'Evaluator')!;
+    const draft = store.draftAssessment('APP-6', 'Building Permit – New Construction', 'Tester', 'Evaluator')!;
     const requiredLine = draft.lineItems.find((l) => l.applicability === 'required')!;
     expect(
       store.setLineIncluded(draft.id, requiredLine.feeRuleId, false, 'Tester', 'Evaluator'),
@@ -119,7 +119,7 @@ describe('AssessmentStore — snapshot immutability and versioning', () => {
 
     const revised = store.reviseIssuedAssessment(
       draft.id,
-      'Building Permit',
+      'Building Permit – New Construction',
       'Admin',
       'Administrator',
     );
@@ -147,7 +147,7 @@ describe('AssessmentStore — snapshot immutability and versioning', () => {
 
     const revised = store.reviseIssuedAssessment(
       draft.id,
-      'Building Permit',
+      'Building Permit – New Construction',
       'Admin',
       'Administrator',
     );

@@ -23,6 +23,7 @@ export class SiteHeader {
     { label: 'About Castilla', path: '/about' },
     { label: 'Local Government', path: '/local-government' },
     { label: 'Offices', path: '/offices' },
+    { label: 'Permits & Services', path: '/permits' },
     { label: 'Contact', path: '/contact' },
   ];
 

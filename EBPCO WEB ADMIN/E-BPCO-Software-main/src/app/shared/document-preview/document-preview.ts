@@ -5,7 +5,7 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
-import { permitFormUrl } from '../../core/domain/permit-form-templates';
+import { permitFormUrl, permitChecklistUrl } from '../../core/domain/permit-form-templates';
 
 export type SampleDocumentKind =
   | 'application-form'
@@ -90,6 +90,11 @@ export class DocumentPreview {
   protected readonly permitFormSafeUrl = computed<SafeResourceUrl | null>(() => {
     const url = this.permitFormUrl();
     return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
+  /** The real Castilla OBO documentary-requirements checklist for this application's permit type, when it applies (Building Permit family + Certificate of Occupancy). Plain URL, not sanitized as a resource — opened as a normal link, not embedded in an iframe. */
+  protected readonly permitChecklistUrl = computed(() => {
+    const row = this.row();
+    return row ? permitChecklistUrl(row.permitType) : null;
   });
   protected readonly release = computed(() => this.store.getRelease(this.applicationId()));
 

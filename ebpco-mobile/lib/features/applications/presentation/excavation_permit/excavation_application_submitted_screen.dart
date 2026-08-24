@@ -58,13 +58,13 @@ class ExcavationApplicationSubmittedScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
-                  'Excavation & Ground Preparation Permit Submitted!',
+                  'Excavation Permit Submitted!',
                   style: AppTypography.pageTitle,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Your Excavation & Ground Preparation Permit application '
+                  'Your Excavation Permit application '
                   'has been submitted for initial review. You will be '
                   'notified once the Office of the Building Official '
                   'completes the assessment of your application.',
@@ -106,7 +106,7 @@ class ExcavationApplicationSubmittedScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.sm),
                       const _InfoRow(
                         label: 'Application Type',
-                        value: 'Excavation & Ground Preparation Permit',
+                        value: 'Excavation Permit',
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       _InfoRow(

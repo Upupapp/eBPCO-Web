@@ -1,0 +1,64 @@
+<section class="page-intro">
+  <div class="page-intro-inner">
+    <app-section-heading
+      eyebrow="Permits &amp; Services"
+      heading="Browse the permits and clearances LGU Castilla issues"
+      subtitle="Search or browse by issuing office to see what's required before you apply."
+    />
+
+    <p class="disclaimer">
+      <app-placeholder-tag label="Content pending LGU confirmation" />
+      These summaries reflect general Philippine LGU, Building Code, and Fire Code practice, condensed for citizens.
+      They have not yet been confirmed against Castilla's own citizen's charter and may change once verified.
+    </p>
+
+    <div class="directory-controls">
+      <div class="search-field">
+        <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true">
+          <circle cx="9" cy="9" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6" />
+          <line x1="14" y1="14" x2="18.5" y2="18.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+        </svg>
+        <label class="sr-only" for="permit-search">Search permits and services</label>
+        <input
+          id="permit-search"
+          type="text"
+          placeholder="Search permits and services…"
+          [value]="searchTerm()"
+          (input)="onSearchInput($any($event.target).value)"
+        />
+      </div>
+
+      <div class="category-filters" role="group" aria-label="Filter permits by issuing office">
+        <button type="button" [class.active]="activeGroup() === 'all'" (click)="setGroup('all')">
+          All Offices
+        </button>
+        @for (group of groups; track group.id) {
+          <button type="button" [class.active]="activeGroup() === group.id" (click)="setGroup(group.id)">
+            {{ group.label }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="permit-list">
+  <div class="permit-list-inner">
+    @for (entry of groupedPermits(); track entry.group.id) {
+      <div class="permit-group">
+        <h2 class="group-heading">{{ entry.group.label }}</h2>
+        @for (permit of entry.permits; track permit.slug) {
+          <a class="permit-entry" [routerLink]="['/permits', permit.slug]">
+            <div class="permit-entry-main">
+              <h3 class="permit-name">{{ permit.name }}</h3>
+              <p class="permit-desc">{{ permit.description }}</p>
+            </div>
+            <span class="permit-link">View Requirements <span aria-hidden="true">&rarr;</span></span>
+          </a>
+        }
+      </div>
+    } @empty {
+      <p class="empty-state">No permits or services match your search. Try a different keyword or office.</p>
+    }
+  </div>
+</section>

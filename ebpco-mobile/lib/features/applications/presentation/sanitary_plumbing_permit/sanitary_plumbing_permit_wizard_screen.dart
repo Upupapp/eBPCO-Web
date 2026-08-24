@@ -254,7 +254,7 @@ class _SanitaryPlumbingPermitWizardScreenState
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Sanitary / Plumbing Permit'),
+          title: const Text('Sanitary Permit'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             tooltip: 'Exit',
@@ -373,7 +373,7 @@ class _WizardProgressHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Complete your Sanitary / Plumbing Permit application step by step.',
+            'Complete your Sanitary Permit application step by step.',
             style: AppTypography.bodyMuted,
           ),
           const SizedBox(height: AppSpacing.sm),

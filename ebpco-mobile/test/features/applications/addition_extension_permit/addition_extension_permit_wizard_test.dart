@@ -399,7 +399,7 @@ void main() {
       );
       expect(find.textContaining('ADX-'), findsOneWidget);
       expect(
-        find.text('Building Permit — Addition / Extension'),
+        find.text('Building Permit – Addition / Extension'),
         findsOneWidget,
       );
       expect(find.text('Addition'), findsOneWidget);

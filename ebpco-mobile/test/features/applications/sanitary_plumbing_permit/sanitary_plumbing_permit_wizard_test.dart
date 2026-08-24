@@ -363,7 +363,7 @@ void main() {
 
       expect(find.text('Step 1 of 9'), findsOneWidget);
       expect(find.text('Applicant Information'), findsOneWidget);
-      expect(find.text('Sanitary / Plumbing Permit'), findsWidgets);
+      expect(find.text('Sanitary Permit'), findsWidgets);
     },
   );
 
@@ -418,7 +418,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(
-        find.text('Sanitary / Plumbing Application Submitted!'),
+        find.text('Sanitary Application Submitted!'),
         findsOneWidget,
       );
       expect(find.textContaining('SAN-'), findsOneWidget);

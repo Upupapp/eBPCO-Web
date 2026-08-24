@@ -18,13 +18,13 @@ describe('RequirementsConfigStore', () => {
   });
 
   it('addDocument appends a new document with a real generated id, without touching existing rows', () => {
-    const before = store.documentsFor('Building Permit').length;
-    const created = store.addDocument('Building Permit', {
+    const before = store.documentsFor('Building Permit – New Construction').length;
+    const created = store.addDocument('Building Permit – New Construction', {
       label: 'Notarized Deed of Sale',
       required: true,
       reviewingDepartmentId: 'obo',
     });
-    const after = store.documentsFor('Building Permit');
+    const after = store.documentsFor('Building Permit – New Construction');
     expect(after.length).toBe(before + 1);
     expect(created.id).toBeTruthy();
     expect(after.some((d) => d.id === created.id && d.label === 'Notarized Deed of Sale')).toBe(
@@ -34,7 +34,7 @@ describe('RequirementsConfigStore', () => {
 
   it('addDocument only affects the permit type it was added to', () => {
     const beforeElectrical = store.documentsFor('Electrical Permit').length;
-    store.addDocument('Building Permit', {
+    store.addDocument('Building Permit – New Construction', {
       label: 'Extra Document',
       required: false,
       reviewingDepartmentId: 'obo',
@@ -43,41 +43,41 @@ describe('RequirementsConfigStore', () => {
   });
 
   it('updateDocument patches only the matching document, leaving the rest untouched', () => {
-    const original = store.documentsFor('Building Permit');
+    const original = store.documentsFor('Building Permit – New Construction');
     const target = original[0];
-    store.updateDocument('Building Permit', target.id, { label: 'Updated Label' });
-    const updated = store.documentsFor('Building Permit');
+    store.updateDocument('Building Permit – New Construction', target.id, { label: 'Updated Label' });
+    const updated = store.documentsFor('Building Permit – New Construction');
     expect(updated[0].label).toBe('Updated Label');
     expect(updated.slice(1)).toEqual(original.slice(1));
   });
 
   it('removeDocument removes exactly the targeted document', () => {
-    const original = store.documentsFor('Building Permit');
+    const original = store.documentsFor('Building Permit – New Construction');
     const target = original[0];
-    store.removeDocument('Building Permit', target.id);
-    const after = store.documentsFor('Building Permit');
+    store.removeDocument('Building Permit – New Construction', target.id);
+    const after = store.documentsFor('Building Permit – New Construction');
     expect(after.length).toBe(original.length - 1);
     expect(after.some((d) => d.id === target.id)).toBe(false);
   });
 
   it('resetToDefault discards every edit and restores the original catalog checklist', () => {
-    const original = requirementsFor('Building Permit').documents;
-    store.addDocument('Building Permit', {
+    const original = requirementsFor('Building Permit – New Construction').documents;
+    store.addDocument('Building Permit – New Construction', {
       label: 'Temp Doc',
       required: false,
       reviewingDepartmentId: 'obo',
     });
-    store.removeDocument('Building Permit', original[0].id);
-    expect(store.documentsFor('Building Permit')).not.toEqual(original);
+    store.removeDocument('Building Permit – New Construction', original[0].id);
+    expect(store.documentsFor('Building Permit – New Construction')).not.toEqual(original);
 
-    store.resetToDefault('Building Permit');
-    expect(store.documentsFor('Building Permit')).toEqual(original);
+    store.resetToDefault('Building Permit – New Construction');
+    expect(store.documentsFor('Building Permit – New Construction')).toEqual(original);
   });
 
   it('mutating the array returned by documentsFor() does not affect the store’s own state (defensive copy at seed time)', () => {
-    const docs = store.documentsFor('Building Permit');
+    const docs = store.documentsFor('Building Permit – New Construction');
     const originalLength = docs.length;
     docs.push({ id: 'rogue', label: 'Rogue', required: false, reviewingDepartmentId: 'obo' });
-    expect(store.documentsFor('Building Permit').length).toBe(originalLength);
+    expect(store.documentsFor('Building Permit – New Construction').length).toBe(originalLength);
   });
 });

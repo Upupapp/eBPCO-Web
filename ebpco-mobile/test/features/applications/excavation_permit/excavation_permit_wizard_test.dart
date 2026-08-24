@@ -390,7 +390,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(
-        find.text('Excavation & Ground Preparation Permit Submitted!'),
+        find.text('Excavation Permit Submitted!'),
         findsOneWidget,
       );
       expect(find.textContaining('EGP-'), findsOneWidget);

@@ -74,7 +74,7 @@ class RenovationApplicationSubmittedScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.sm),
                       const _InfoRow(
                         label: 'Application Type',
-                        value: 'Building Permit — Renovation',
+                        value: 'Building Permit – Renovation / Alteration',
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       const _InfoRow(

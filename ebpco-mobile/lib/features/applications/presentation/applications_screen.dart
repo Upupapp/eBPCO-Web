@@ -44,7 +44,7 @@ class ApplicationsScreen extends StatelessWidget {
     ),
     _PermitOption(
       icon: Icons.handyman_outlined,
-      title: 'Renovation',
+      title: 'Renovation / Alteration',
       description:
           'For improving, remodeling, or upgrading an existing structure without significantly increasing its size or floor area.',
       routePath: '/applications/new/renovation-permit',
@@ -62,6 +62,13 @@ class ApplicationsScreen extends StatelessWidget {
       description:
           'For safely removing or tearing down an existing structure, building, or portion of a property.',
       routePath: '/applications/new/demolition-permit',
+    ),
+    _PermitOption(
+      icon: Icons.map_outlined,
+      title: 'Zoning / Locational Clearance',
+      description:
+          'For confirming that a proposed land use or structure complies with the zoning ordinance before filing a Building Permit.',
+      routePath: '/applications/new/zoning-permit',
     ),
   ];
 
@@ -94,7 +101,7 @@ class ApplicationsScreen extends StatelessWidget {
     ),
     _PermitOption(
       icon: Icons.plumbing_outlined,
-      title: 'Sanitary / Plumbing',
+      title: 'Sanitary',
       description:
           'For water supply, drainage, plumbing fixtures, and sanitary sewage disposal system installations.',
       routePath: '/applications/new/sanitary-plumbing-permit',
@@ -115,7 +122,7 @@ class ApplicationsScreen extends StatelessWidget {
     ),
     _PermitOption(
       icon: Icons.chair_outlined,
-      title: 'Interior',
+      title: 'Interior Design',
       description: 'For interior design and fit-out of enclosed spaces.',
       routePath: '/applications/new/interior-design-permit',
     ),
@@ -147,11 +154,25 @@ class ApplicationsScreen extends StatelessWidget {
 
   static const _certificateOptions = [
     _PermitOption(
+      icon: Icons.local_fire_department_outlined,
+      title: 'FSEC for Building Permit (BFP)',
+      description:
+          'Fire Safety Evaluation Clearance — a Bureau of Fire Protection prerequisite for Building Permit approval.',
+      routePath: '/applications/new/fsec-permit',
+    ),
+    _PermitOption(
       icon: Icons.verified_outlined,
       title: 'Certificate of Occupancy',
       description:
           'Apply for a certificate of occupancy after building completion.',
       routePath: '/applications/new/certificate-of-occupancy',
+    ),
+    _PermitOption(
+      icon: Icons.verified_user_outlined,
+      title: 'FSIC for Occupancy Permit (BFP)',
+      description:
+          'Fire Safety Inspection Certificate — a Bureau of Fire Protection prerequisite for a Certificate of Occupancy.',
+      routePath: '/applications/new/fsic-permit',
     ),
   ];
 
