@@ -11,6 +11,7 @@ export const MAYOR: Official = {
   office: 'Office of the Municipal Mayor',
   initials: 'IM',
   isPlaceholder: false,
+  photoUrl: 'assets/officials/mayor-isagani-mendoza.jpg',
 };
 
 export const VICE_MAYOR: Official = {
