@@ -13,7 +13,9 @@ export type IconName =
   | 'landscape'
   | 'mail'
   | 'id'
-  | 'calendar';
+  | 'calendar'
+  | 'clock'
+  | 'target';
 
 @Component({
   selector: 'app-icon',
