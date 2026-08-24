@@ -45,6 +45,11 @@
   color: #fff;
   background: linear-gradient(155deg, $color-brand-600, $color-brand-700);
   box-shadow: 0 0 0 5px $color-gold-100, $shadow-card-hover;
+
+  &.mayor-photo--image {
+    object-fit: cover;
+    background: $color-bg-muted;
+  }
 }
 
 .mayor-label {

@@ -10,7 +10,11 @@
 
 <section class="mayor-feature">
   <div class="mayor-feature-inner">
-    <div class="mayor-photo" aria-hidden="true">{{ mayor.initials }}</div>
+    @if (mayor.photoUrl) {
+      <img class="mayor-photo mayor-photo--image" [src]="mayor.photoUrl" [alt]="mayor.name" />
+    } @else {
+      <div class="mayor-photo" aria-hidden="true">{{ mayor.initials }}</div>
+    }
     <div class="mayor-text">
       <p class="mayor-label">Office of the Municipal Mayor</p>
       <h2 class="mayor-name">{{ mayor.name }}</h2>

@@ -5,7 +5,6 @@
     aria-hidden="true"
   ></div>
   <div class="hero-overlay" aria-hidden="true"></div>
-  <div class="hero-tint" aria-hidden="true"></div>
 
   <div class="hero-inner">
     <p class="hero-badge">
@@ -40,37 +39,76 @@
   </div>
 </section>
 
-<nav class="quick-nav" aria-label="Portal sections">
-  <div class="quick-nav-inner">
-    @for (item of quickNav; track item.path) {
-      <a class="quick-nav-item" [routerLink]="item.path">
-        <span class="quick-nav-title">{{ item.title }}</span>
-        <span class="quick-nav-desc">{{ item.description }}</span>
-        <span class="quick-nav-arrow" aria-hidden="true">&rarr;</span>
-      </a>
-    }
-  </div>
-</nav>
+<section class="info-section">
+  <nav class="quick-links-container" aria-label="Portal sections">
+    <div class="quick-links-wrapper reveal">
+      <div class="quick-links-grid">
+        @for (item of quickNav; track item.path) {
+          <a class="quick-link-card" [routerLink]="item.path">
+            <span class="quick-link-icon"><app-icon [name]="item.icon" [size]="20" /></span>
+            <span class="quick-link-body">
+              <span class="quick-link-title">{{ item.title }}</span>
+              <span class="quick-link-desc">{{ item.description }}</span>
+            </span>
+            <span class="quick-link-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        }
+      </div>
+    </div>
+  </nav>
 
-<section class="glance">
   <div class="glance-inner">
-    <div class="glance-heading">
+    <div class="glance-intro reveal">
       <p class="eyebrow">Castilla at a Glance</p>
-      <h2>{{ municipalityName }}</h2>
-      <p class="glance-lede">
-        A coastal municipality in the province of Sorsogon, Bicol Region, Philippines.
-      </p>
+      <span class="glance-rule" aria-hidden="true"></span>
+      <h2 class="glance-heading">
+        <span class="glance-heading-line-1">Municipality of</span>
+        <span class="glance-heading-line-2">{{ municipalityShortName }}</span>
+      </h2>
+      <p class="glance-lede">A coastal municipality in the province of Sorsogon, Bicol Region, Philippines.</p>
+
+      <!--
+        Architectural engraving-style treatment of the actual hero photo
+        (assets/hero/castilla-municipal-hall.jpg) — not a hand-drawn SVG
+        facade. The same real building the hero shows in full color is
+        reused here, desaturated, brightened, and tinted pale brand-red so
+        it reads as a faint architectural watermark rather than a repeated
+        photo. See .hall-art in home.scss for the filter/mask treatment.
+      -->
+      <div class="hall-art" aria-hidden="true">
+        <img src="assets/hero/castilla-municipal-hall.jpg" alt="" />
+      </div>
     </div>
 
-    <div class="glance-divider" aria-hidden="true"></div>
+    <div class="glance-data">
+      <img class="glance-watermark" src="assets/logos/castilla-seal.png" alt="" aria-hidden="true" />
 
-    <dl class="glance-grid">
-      @for (field of profileFields; track field.label) {
-        <div class="glance-field">
-          <dt>{{ field.label }}</dt>
-          <dd>{{ field.value }}</dd>
-        </div>
-      }
-    </dl>
+      <dl class="glance-grid reveal">
+        @for (field of profileFields; track field.label) {
+          <div class="glance-field">
+            <span class="glance-field-icon"><app-icon [name]="fieldIcon(field.label)" [size]="18" /></span>
+            <div class="glance-field-text">
+              <dt>{{ field.label }}</dt>
+              <dd>
+                @switch (field.label) {
+                  @case ('Population') {
+                    {{ populationCount() | number: '1.0-0' }} (2020 Census)
+                  }
+                  @case ('Land Area') {
+                    {{ landAreaCount() | number: '1.2-2' }} km²
+                  }
+                  @case ('Number of Barangays') {
+                    {{ barangaysCount() | number: '1.0-0' }}
+                  }
+                  @default {
+                    {{ field.value }}
+                  }
+                }
+              </dd>
+            </div>
+          </div>
+        }
+      </dl>
+    </div>
   </div>
 </section>

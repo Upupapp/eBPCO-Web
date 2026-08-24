@@ -23,7 +23,14 @@
 
 .hero-photo {
   position: absolute;
-  inset: 0;
+  // Deliberately oversized (60px top/bottom buffer) rather than inset:0 —
+  // Home's parallax scroll handler translates this element by up to ±60px,
+  // and the buffer means that never exposes an edge inside the hero's
+  // overflow:hidden box. Static image, no motion, if reduced-motion is set.
+  left: 0;
+  right: 0;
+  top: -60px;
+  height: calc(100% + 120px);
   z-index: 0;
   // Photo URL is bound at runtime in the template (see home.html), not
   // referenced here via url() — the production build resolves CSS url()
@@ -31,60 +38,58 @@
   // renamed/removed without updating this too.
   background-color: $color-ink-900;
   background-size: cover;
-  background-position: center;
+  // The building sits center-right in the source photo — 55% keeps its
+  // facade and signage in frame while still giving the left-side text a
+  // clean run of sky/wall to sit against.
+  background-position: 55% center;
   background-repeat: no-repeat;
+  will-change: transform;
 
   @media (max-width: 1024px) {
-    background-position: 65% center;
+    background-position: 70% center;
   }
 }
 
-// Directional scrim: strongest over the text on the left, easing off toward
-// the right so the building stays visible.
+// Single controlled scrim: strongest over the text on the left, easing off
+// toward the right so the building stays visible — the brand-red comes
+// from the gradient's own color stops (a deep burgundy-black, not a
+// separate red wash layer), which is what keeps this reading as
+// charcoal/burgundy rather than the warm orange/brown a flat dark tint
+// plus a separate red overlay used to produce.
 .hero-overlay {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    rgba(15, 8, 12, 0.92) 0%,
-    rgba(35, 10, 15, 0.8) 28%,
-    rgba(25, 12, 18, 0.45) 55%,
-    rgba(15, 15, 20, 0.2) 100%
-  );
-}
-
-// Restrained brand-red atmosphere on top of the readability scrim — not a
-// full red wash, just enough to feel art-directed rather than a plain
-// darkened photo.
-.hero-tint {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  mix-blend-mode: overlay;
-  opacity: 0.6;
-  background: linear-gradient(
-    100deg,
-    rgba(165, 24, 42, 0.32) 0%,
-    rgba(200, 30, 44, 0.14) 38%,
-    transparent 70%
-  );
+  background:
+    linear-gradient(180deg, rgba(10, 5, 8, 0.35) 0%, transparent 20%),
+    linear-gradient(
+      90deg,
+      rgba(10, 5, 8, 0.96) 0%,
+      rgba(18, 6, 10, 0.9) 18%,
+      rgba(45, 9, 15, 0.72) 35%,
+      rgba(20, 12, 16, 0.38) 58%,
+      rgba(8, 12, 20, 0.12) 100%
+    );
 }
 
 .hero-inner {
-  @include container;
   position: relative;
   z-index: 3;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
   gap: 0;
+  // ~7–9% from the left edge on wide screens, not the shared site
+  // container's centered box — the hero composes around the photo, so the
+  // text column anchors to the frame itself rather than to body-copy width.
+  padding-left: clamp(1.5rem, 8vw, 7.5rem);
+  padding-right: 1.5rem;
 
   > * {
-    max-width: min(520px, 100%);
+    max-width: min(600px, 100%);
   }
 
   // The heading runs at a much larger type size than the rest of the
@@ -92,7 +97,7 @@
   // wraps mid-phrase on wide viewports — only the intentional break
   // between "Municipality of" and "Castilla" should ever happen.
   > .hero-title {
-    max-width: min(900px, 100%);
+    max-width: min(950px, 100%);
   }
 }
 
@@ -100,18 +105,18 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: $color-brand-100;
+  color: rgba(255, 255, 255, 0.9);
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid $color-brand-600;
-  border-radius: $radius-sm;
-  padding: 0.35rem 0.75rem;
-  margin-bottom: 1.25rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.7rem;
+  margin-bottom: 2.25rem;
   opacity: 0;
-  animation: hero-rise 0.6s ease 0.15s both;
+  animation: hero-rise 0.5s ease 0.1s both;
 
   .badge-dot {
     width: 6px;
@@ -124,50 +129,51 @@
 .hero-title {
   display: flex;
   flex-direction: column;
-  font-size: clamp(3.5rem, 5vw, 5.5rem);
+  font-size: clamp(4rem, 5.5vw, 6rem);
   font-weight: 800;
-  letter-spacing: -0.01em;
-  line-height: 0.98;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
 }
 
 .hero-title-line-1 {
   color: #fff;
   opacity: 0;
-  animation: hero-rise 0.7s ease 0.3s both;
+  animation: hero-rise 0.5s ease 0.18s both;
 }
 
 .hero-title-line-2 {
   color: $color-brand-600;
   opacity: 0;
-  animation: hero-rise 0.7s ease 0.45s both;
+  animation: hero-rise 0.5s ease 0.24s both;
 }
 
 .hero-rule {
   display: block;
-  width: 55px;
+  width: 52px;
   height: 2px;
   background: $color-brand-600;
-  margin: 1.5rem 0 1.25rem;
+  margin: 2.125rem 0 1.625rem;
   opacity: 0;
-  animation: hero-rise 0.5s ease 0.6s both;
+  animation: hero-rise 0.45s ease 0.28s both;
 }
 
 .hero-province {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: $color-brand-50;
-  margin-bottom: 0.875rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1.375rem;
   opacity: 0;
-  animation: hero-rise 0.6s ease 0.7s both;
+  animation: hero-rise 0.5s ease 0.32s both;
 }
 
 .hero-copy {
-  font-size: 1.02rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.82);
-  margin-bottom: 1.75rem;
+  max-width: 560px;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 2rem;
   opacity: 0;
-  animation: hero-rise 0.6s ease 0.8s both;
+  animation: hero-rise 0.5s ease 0.34s both;
 }
 
 .hero-ctas {
@@ -175,13 +181,13 @@
   flex-wrap: wrap;
   gap: 0.9rem;
   opacity: 0;
-  animation: hero-rise 0.6s ease 0.95s both;
+  animation: hero-rise 0.5s ease 0.42s both;
 }
 
 @keyframes hero-rise {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -197,7 +203,7 @@
   padding: 0.85rem 1.5rem;
   font-size: 0.92rem;
   font-weight: 700;
-  border-radius: $radius-sm;
+  border-radius: 8px;
   text-decoration: none;
   white-space: nowrap;
   transition:
@@ -236,8 +242,8 @@
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   color: #fff;
 
   &:hover {
@@ -270,19 +276,57 @@
   }
 }
 
-// ---- Quick nav --------------------------------------------------------------
+// ---- Post-hero info section ---------------------------------------------
+// One shared light section holding the quick-links row and the "Castilla at
+// a Glance" profile — a single background/padding rhythm carries the eye
+// from the dark cinematic hero into the bright civic-data layout below it.
 
-.quick-nav {
-  border-bottom: 1px solid $color-border;
-  background: $color-surface;
+.info-section {
+  background: #fdfdfd;
+  padding: 90px 0 100px;
 }
 
-.quick-nav-inner {
-  @include container;
+// ---- Quick links (top row) ------------------------------------------------
+
+.quick-links-container {
+  @include container(1500px);
+}
+
+// The reveal transform lives on this one wrapper, not on the individual
+// cards — cards need their own fast hover transform (translateY(-2px)),
+// and a single element can't carry two different transition durations for
+// the same `transform` property (see the CSS-transition-shorthand pitfall
+// noted elsewhere in this codebase). Fading the row in as one unit sidesteps
+// that entirely.
+.quick-links-wrapper {
+  background: $color-brand-50;
+  border: 1px solid rgba(240, 201, 201, 0.5);
+  border-radius: 22px;
+  padding: 18px;
+
+  &.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s ease;
+  }
+
+  &.reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quick-links-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
 
-  @media (max-width: 900px) {
+  // Four columns get too narrow for the title/description text to stay
+  // legible well before 900px — switch to 2x2 while there's still enough
+  // width per card to breathe.
+  @media (max-width: 1180px) {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -291,123 +335,319 @@
   }
 }
 
-.quick-nav-item {
+.quick-link-card {
   position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding: 1.75rem 1.5rem;
+  align-items: flex-start;
+  gap: 14px;
+  min-height: 128px;
+  padding: 22px 34px 24px 20px;
+  background: $color-surface;
+  border: 1px solid rgba(31, 36, 48, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(31, 36, 48, 0.04);
   text-decoration: none;
-  border-right: 1px solid $color-border;
-  transition: background $ease-fast;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
 
-  &:nth-child(4n) {
-    border-right: none;
-  }
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(200, 30, 44, 0.35);
+    box-shadow: 0 10px 28px rgba(31, 36, 48, 0.07);
 
-  &:hover {
-    background: $color-bg-subtle;
+    .quick-link-icon {
+      background: rgba(200, 30, 44, 0.14);
+    }
 
-    .quick-nav-arrow {
-      transform: translateX(2px);
-      color: $color-brand-600;
+    .quick-link-arrow {
+      transform: translateX(3px);
+      color: $color-brand-700;
     }
   }
 }
 
-.quick-nav-title {
+.quick-link-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: $color-brand-100;
+  color: $color-brand-600;
+  transition: background 0.22s ease;
+}
+
+.quick-link-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.quick-link-title {
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 700;
   color: $color-ink-900;
 }
 
-.quick-nav-desc {
+.quick-link-desc {
   font-size: 0.86rem;
-  color: $color-ink-400;
-  line-height: 1.4;
+  line-height: 1.5;
+  color: $color-ink-500;
 }
 
-.quick-nav-arrow {
+.quick-link-arrow {
   position: absolute;
-  top: 1.75rem;
-  right: 1.5rem;
-  color: $color-ink-100;
+  right: 18px;
+  bottom: 16px;
+  color: $color-brand-600;
   transition:
-    transform $ease-fast,
-    color $ease-fast;
-}
-
-@media (max-width: 900px) {
-  .quick-nav-item:nth-child(2n) {
-    border-right: none;
-  }
-  .quick-nav-item:nth-child(4n) {
-    border-right: 1px solid $color-border;
-  }
-  .quick-nav-item:nth-child(-n + 2) {
-    border-bottom: 1px solid $color-border;
-  }
-}
-
-@media (max-width: 560px) {
-  .quick-nav-item {
-    border-right: none !important;
-    border-bottom: 1px solid $color-border;
-  }
+    transform 0.22s ease,
+    color 0.22s ease;
 }
 
 // ---- Castilla at a Glance ----------------------------------------------------
 
-.glance {
-  padding-block: 4.5rem;
-}
-
 .glance-inner {
-  @include container;
+  @include container(1500px);
+  position: relative;
+  margin-top: 80px;
   display: grid;
-  grid-template-columns: minmax(0, 17rem) 1px 1fr;
-  gap: 3rem;
+  grid-template-columns: minmax(0, 32%) 1fr;
+  gap: 4rem;
   align-items: start;
+
+  @media (max-width: 1180px) {
+    grid-template-columns: minmax(0, 35%) 1fr;
+    gap: 2.5rem;
+  }
 
   @media (max-width: 780px) {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 2.75rem;
   }
 }
 
-.glance-divider {
-  background: $color-border;
+.glance-intro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  // No fixed min-height. On desktop/tablet .hall-art is absolutely
+  // positioned (see below) so it never adds to this column's own height —
+  // that height is just the text block. Without that, the grid row (grid
+  // align-items:start does NOT stretch children) would be forced to the
+  // *taller* of the two columns whenever text+illustration outgrew the
+  // facts grid, stranding a large blank gap below the last fact.
+
+  &.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s ease;
+  }
+
+  &.reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .eyebrow {
+    color: $color-brand-600;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+
+  .glance-rule {
+    display: block;
+    width: 58px;
+    height: 2px;
+    background: $color-brand-600;
+    margin-bottom: 1.5rem;
+  }
+
+  .glance-heading {
+    display: flex;
+    flex-direction: column;
+    // Sized so "Municipality of" stays on its own single line inside the
+    // narrow intro column at every breakpoint — unlike the hero title (a
+    // fixed ~600px column), this column is a *percentage* of the viewport
+    // (32% / 35% / 100%), so a viewport-vw-based clamp doesn't track it;
+    // sizes are tuned per breakpoint against the column's actual width
+    // instead. Only the intentional break before "Castilla" should happen.
+    font-size: 2.7rem;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    margin-bottom: 1.5rem;
+
+    @media (max-width: 1180px) {
+      font-size: 2.1rem;
+    }
+
+    @media (max-width: 780px) {
+      font-size: clamp(2.2rem, 6vw, 3.2rem);
+    }
+  }
+
+  .glance-heading-line-1 {
+    color: $color-ink-900;
+  }
+
+  .glance-heading-line-2 {
+    color: $color-brand-600;
+  }
+
+  .glance-lede {
+    max-width: 380px;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: $color-ink-500;
+    margin-bottom: 2rem;
+  }
+
+  // Architectural-engraving treatment of the real hero photo (the actual
+  // Castilla Municipal Hall, not a drawn facade). A wide crop biased toward
+  // the entrance/balcony/signage band (object-position) keeps the night
+  // photo's near-black sky and dark ground-floor glass out of frame — those
+  // would otherwise survive the grayscale pass as a hard dark patch. The
+  // filter chain desaturates and flattens it toward pale tones; the ::after
+  // multiply layer is what gives it a rose-ink cast instead of gray; the
+  // radial mask dissolves it into the page rather than leaving a visible
+  // photo-rectangle edge.
+  //
+  // On desktop/tablet (two-column grid) it's absolutely positioned, anchored
+  // to the bottom of this text block via top:calc(100% + Npx) — NOT left in
+  // normal flow. A grid row with align-items:start doesn't stretch its
+  // columns to match each other, so an in-flow illustration that made this
+  // (shorter) text column taller than the facts column dragged the whole
+  // row taller with it, stranding a large blank gap below the last fact.
+  // Below 780px the columns stack into one, so .glance-data now follows
+  // .glance-intro directly in normal flow — there the illustration switches
+  // back to position:static so it still pushes the facts grid down properly
+  // instead of floating over it.
+  .hall-art {
+    position: absolute;
+    top: calc(100% + 30px);
+    left: -15%;
+    overflow: hidden;
+    width: min(640px, 148%);
+    aspect-ratio: 2 / 1;
+    // Tighter horizontal radius than vertical: the left edge (where the
+    // bleed runs past the column into the page gutter) needed its own
+    // dissolve too, not just a hard viewport clip — a wide flat ellipse
+    // kept the left edge at full strength right up to the crop line.
+    -webkit-mask-image: radial-gradient(ellipse 58% 82% at 34% 58%, black 0%, black 32%, rgba(0, 0, 0, 0.5) 62%, transparent 92%);
+    mask-image: radial-gradient(ellipse 58% 82% at 34% 58%, black 0%, black 32%, rgba(0, 0, 0, 0.5) 62%, transparent 92%);
+    pointer-events: none;
+    user-select: none;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 80%;
+      filter: grayscale(1) contrast(0.7) brightness(1.65) sepia(0.12);
+      opacity: 0.48;
+    }
+
+    // Pale brand-red cast, multiplied over the desaturated photo — this is
+    // what keeps the result reading as rose architectural ink rather than
+    // a faded gray photograph.
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: $color-brand-600;
+      mix-blend-mode: multiply;
+      opacity: 0.07;
+    }
+
+    @media (max-width: 1180px) {
+      top: calc(100% + 26px);
+      left: -10%;
+      width: min(500px, 122%);
+    }
+
+    @media (max-width: 780px) {
+      position: static;
+      display: block;
+      top: auto;
+      left: auto;
+      width: min(400px, 88%);
+      margin: 26px auto 0 -3%;
+    }
+
+    @media (max-width: 560px) {
+      width: min(300px, 82%);
+      margin: 20px 0 0 -2%;
+    }
+  }
+}
+
+.glance-data {
+  position: relative;
+  overflow: hidden;
+}
+
+// Large, near-invisible seal mark bleeding off the container's right edge —
+// purely decorative, so it's clipped by .glance-data's overflow:hidden
+// rather than being allowed to widen the page.
+.glance-watermark {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  right: -110px;
+  transform: translateY(-50%);
+  width: 460px;
+  height: auto;
+  opacity: 0.03;
+  pointer-events: none;
+  user-select: none;
 
   @media (max-width: 780px) {
+    width: 260px;
+    right: -80px;
+    opacity: 0.03;
+  }
+
+  @media (max-width: 560px) {
     display: none;
   }
 }
 
-.glance-heading {
-  .eyebrow {
-    @include eyebrow;
-    margin-bottom: 0.6rem;
-  }
+// Scroll entrance for the field grid — a beat behind the intro column.
+// Toggled by Home's IntersectionObserver, not CSS alone, so it fires once
+// rather than replaying on every scroll.
+.glance-grid.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+  transition-delay: 0.1s;
+}
 
-  h2 {
-    font-size: clamp(1.7rem, 1.4rem + 1vw, 2.2rem);
-    font-weight: 800;
-    color: $color-ink-900;
-    line-height: 1.15;
-  }
-
-  .glance-lede {
-    margin-top: 0.9rem;
-    font-size: 0.94rem;
-    line-height: 1.6;
-    color: $color-ink-500;
-  }
+.glance-grid.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .glance-grid {
+  position: relative;
+  z-index: 1;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
 
   @media (max-width: 560px) {
@@ -416,36 +656,65 @@
 }
 
 .glance-field {
-  padding: 1.1rem 1.25rem 1.1rem 0;
-  border-bottom: 1px solid $color-border;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 30px 24px 30px 0;
+  border-bottom: 1px solid rgba(31, 36, 48, 0.08);
+
+  &:last-child {
+    border-bottom: none;
+  }
 
   &:nth-child(odd) {
     padding-left: 0;
   }
 
   &:nth-child(even) {
-    padding-left: 1.25rem;
-    border-left: 1px solid $color-border;
+    padding-left: 24px;
+    border-left: 1px solid rgba(31, 36, 48, 0.08);
 
     @media (max-width: 560px) {
       border-left: none;
       padding-left: 0;
     }
   }
+}
 
+.glance-field-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: $color-brand-50;
+  color: $color-brand-600;
+}
+
+.glance-field-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.glance-field {
   dt {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
-    color: $color-ink-300;
-    margin-bottom: 0.35rem;
+    color: $color-ink-400;
+    margin: 0;
   }
 
   dd {
     margin: 0;
-    font-size: 0.98rem;
+    font-size: 1rem;
     font-weight: 700;
     color: $color-ink-900;
+    line-height: 1.35;
   }
 }
