@@ -88,7 +88,7 @@ describe('ApplicationIntake — step navigation is never blocked, but validation
     component.next();
     fillBusiness(component);
     component.next();
-    fillApplication(component, 'Building Permit');
+    fillApplication(component, 'Building Permit – New Construction');
     component.next();
     component.next(); // no files attached yet
     expect(component.currentStep()).toBe('review');
@@ -109,26 +109,26 @@ describe('ApplicationIntake — dynamic document checklist', () => {
   });
 
   it("changing the permit type reloads the checklist to match that type's own requirements", () => {
-    component.applicationInfo.permitType = 'Building Permit';
+    component.applicationInfo.permitType = 'Building Permit – New Construction';
     component.onPermitTypeChange();
     const buildingDocs = component
       .documents()
       .map((d: any) => d.requirementId)
       .sort();
     expect(buildingDocs).toEqual(
-      requirementsFor('Building Permit')
+      requirementsFor('Building Permit – New Construction')
         .documents.map((d) => d.id)
         .sort(),
     );
 
-    component.applicationInfo.permitType = 'Renovation Permit';
+    component.applicationInfo.permitType = 'Building Permit – Renovation / Alteration';
     component.onPermitTypeChange();
     const renovationDocs = component
       .documents()
       .map((d: any) => d.requirementId)
       .sort();
     expect(renovationDocs).toEqual(
-      requirementsFor('Renovation Permit')
+      requirementsFor('Building Permit – Renovation / Alteration')
         .documents.map((d) => d.id)
         .sort(),
     );
@@ -140,7 +140,7 @@ describe('ApplicationIntake — dynamic document checklist', () => {
   });
 
   it('clearing the permit type back to empty clears the checklist too', () => {
-    component.applicationInfo.permitType = 'Building Permit';
+    component.applicationInfo.permitType = 'Building Permit – New Construction';
     component.onPermitTypeChange();
     expect(component.documents().length).toBeGreaterThan(0);
     component.applicationInfo.permitType = '';
@@ -165,7 +165,7 @@ describe('ApplicationIntake — creation goes through the shared store honestly'
     component.next();
     fillBusiness(component);
     component.next();
-    fillApplication(component, 'Building Permit');
+    fillApplication(component, 'Building Permit – New Construction');
     component.next();
     attachAllRequiredDocuments(component);
     component.next();
@@ -227,7 +227,7 @@ describe('ApplicationIntake — creation goes through the shared store honestly'
     // `output()` API's subscribe surface for a plain unit test.
     const created = store.applications()[0];
     const docs = store.getDocuments(created.id);
-    const requiredCount = requirementsFor('Building Permit').documents.filter(
+    const requiredCount = requirementsFor('Building Permit – New Construction').documents.filter(
       (d) => d.required,
     ).length;
     expect(docs.length).toBeGreaterThanOrEqual(requiredCount);

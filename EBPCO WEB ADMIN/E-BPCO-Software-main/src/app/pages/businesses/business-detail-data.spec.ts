@@ -28,7 +28,7 @@ function makeApp(overrides: Partial<ApplicationRecord> = {}): ApplicationRecord 
     applicantId: 'APL-001',
     applicant: 'Raul Villanueva',
     location: 'Barangay Poblacion',
-    permitType: 'Building Permit' as const,
+    permitType: 'Building Permit – New Construction' as const,
     applicationAction: 'New' as const,
     officer: 'Engr. Tester',
     dateSubmitted: '01 Jan 2026',

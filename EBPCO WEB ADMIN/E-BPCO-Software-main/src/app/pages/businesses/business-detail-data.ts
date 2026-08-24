@@ -142,7 +142,7 @@ export function buildBusinessDetail(
     },
     {
       actor: 'Engr. Ricardo Buenaflor',
-      title: `${permits[0]?.type ?? 'Building Permit'} application received`,
+      title: `${permits[0]?.type ?? 'Building Permit – New Construction'} application received`,
       detail: `${permits[0]?.applicationId ?? 'No applications yet'} moved to Under Review.`,
       timeAgo: '9 days ago',
     },

@@ -80,32 +80,35 @@ const LOCATIONS = [
 
 // The centralized permit-type catalog (permit.model.ts) IS the "one
 // centralized list" this weighting reuses — no separate/duplicated type
-// list lives here, and every weight key is one of the exact 16 supported
-// values (no aliases). Weighted toward Building Permit and Renovation
-// Permit as the highest real-world volume, with the remaining ancillary/
-// certificate types sharing the rest.
+// list lives here, and every weight key is one of the exact 19 supported
+// values (no aliases). Weighted toward Building Permit – New Construction
+// and Building Permit – Renovation / Alteration as the highest real-world
+// volume, with the remaining ancillary/certificate types sharing the rest.
 const PERMIT_WEIGHTS: [PermitType, number][] = [
-  ['Building Permit', 0.2],
+  ['Building Permit – New Construction', 0.14],
+  ['Building Permit – Renovation / Alteration', 0.07],
+  ['Building Permit – Addition / Extension', 0.06],
+  ['Demolition Permit', 0.03],
+  ['Zoning / Locational Clearance', 0.03],
   ['Architectural Permit', 0.05],
   ['Civil / Structural Permit', 0.05],
-  ['Demolition Permit', 0.03],
-  ['Addition / Extension Permit', 0.06],
-  ['Renovation Permit', 0.1],
   ['Electrical Permit', 0.08],
-  ['Electronics Permit', 0.03],
   ['Mechanical Permit', 0.04],
+  ['Sanitary Permit', 0.05],
   ['Plumbing Permit', 0.04],
-  ['Sanitary / Plumbing Permit', 0.05],
+  ['Electronics Permit', 0.03],
   ['Interior Design Permit', 0.04],
   ['Fencing Permit', 0.06],
   ['Sign Permit', 0.06],
-  ['Excavation & Ground Preparation Permit', 0.04],
+  ['Excavation Permit', 0.04],
+  ['FSEC for Building Permit (BFP)', 0.03],
   ['Certificate of Occupancy', 0.07],
+  ['FSIC for Occupancy Permit (BFP)', 0.03],
 ];
 
 // A permit can genuinely be filed as New, a Renewal of a prior permit, or
 // an Amendment to one already on file — rolled independently of which of
-// the 16 permit types it is.
+// the 19 permit types it is.
 const APPLICATION_ACTIONS: ApplicationAction[] = ['New', 'New', 'New', 'Renewal', 'Amendment'];
 
 // Weighted lifecycle-status buckets — sums to 1. Skewed toward a realistic
@@ -723,7 +726,7 @@ export function buildSeed(referenceDate: Date = new Date()): SeedResult {
     const applicant = applicants.find((a) => a.id === business.ownerApplicantId)!;
     buildApplicationBundle(ctx, cursor, business, applicant, permitType, {
       forcedStatus: 'Completed',
-      forceRevisionLoop: permitType === 'Renovation Permit',
+      forceRevisionLoop: permitType === 'Building Permit – Renovation / Alteration',
       daysAgo: 20 + (cursor % 30),
     });
     cursor++;

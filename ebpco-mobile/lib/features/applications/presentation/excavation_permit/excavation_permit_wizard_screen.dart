@@ -28,7 +28,7 @@ class _StepMeta {
   const _StepMeta({required this.title, required this.subtitle});
 }
 
-/// Excavation & Ground Preparation Permit application wizard — a full
+/// Excavation Permit application wizard — a full
 /// 9-step flow based on the official EGPP form (Boxes 1–7), completely
 /// separate from every other permit in this app: its own model
 /// ([ExcavationPermitDraft]), its own provider
@@ -59,7 +59,7 @@ class _ExcavationPermitWizardScreenState
     _StepMeta(
       title: 'Owner / Applicant Information',
       subtitle:
-          'Provide the applicant details for the Excavation & Ground Preparation Permit.',
+          'Provide the applicant details for the Excavation Permit.',
     ),
     _StepMeta(
       title: 'Construction Location',
@@ -68,7 +68,7 @@ class _ExcavationPermitWizardScreenState
     _StepMeta(
       title: 'Scope of Work',
       subtitle:
-          'Select the project scope covered by the Excavation & Ground Preparation Permit.',
+          'Select the project scope covered by the Excavation Permit.',
     ),
     _StepMeta(
       title: 'Occupancy Classification',
@@ -251,7 +251,7 @@ class _ExcavationPermitWizardScreenState
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Excavation & Ground Preparation Permit'),
+          title: const Text('Excavation Permit'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             tooltip: 'Exit',
@@ -370,7 +370,7 @@ class _WizardProgressHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Complete your Excavation & Ground Preparation Permit '
+            'Complete your Excavation Permit '
             'application step by step.',
             style: AppTypography.bodyMuted,
           ),

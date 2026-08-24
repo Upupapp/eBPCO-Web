@@ -325,7 +325,10 @@
 
 .quick-links-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  // auto-fit rather than a fixed repeat(4, …) so a 5th card (or any future
+  // addition) settles into an even row instead of wrapping as a lone,
+  // orphaned card under a fixed 4-column grid.
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 14px;
 
   // Four columns get too narrow for the title/description text to stay

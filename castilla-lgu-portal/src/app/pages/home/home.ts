@@ -53,6 +53,12 @@ export class Home implements AfterViewInit, OnDestroy {
     },
     { title: 'Municipal Offices', description: 'Find the office you need.', path: '/offices', icon: 'briefcase' },
     {
+      title: 'Permits & Services',
+      description: 'See what LGU Castilla issues and what you need to apply.',
+      path: '/permits',
+      icon: 'id',
+    },
+    {
       title: 'Contact & Location',
       description: 'Get in touch with LGU Castilla.',
       path: '/contact',

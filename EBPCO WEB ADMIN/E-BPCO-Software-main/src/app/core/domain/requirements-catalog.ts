@@ -25,8 +25,16 @@ import { EvaluationStage } from './status.model';
 //     research pass (castillasorsogon.gov.ph blocked automated fetches);
 //     every entry below carries this source so the gap is explicit rather
 //     than silently assumed away.
+//   - CASTILLA_OFFICIAL_FORM_VERIFIED: the actual official Municipality of
+//     Castilla (or its local BFP Castilla Fire Station) application form
+//     was obtained directly — bundled under public/assets/permits/ and
+//     reviewed in full — so its `url` points to that bundled copy rather
+//     than an external https link. This is the strongest verification
+//     level short of a written confirmation from the office itself.
 // `verified` stays `false` on every entry until Castilla's own office
-// confirms it — do not flip it without that step.
+// confirms it, OR the entry is built directly from an actual Castilla/BFP
+// Castilla form obtained and reviewed in full (see CASTILLA_OFFICIAL_FORM_VERIFIED
+// above) — do not flip it without one of those two conditions.
 export interface RequirementDocument {
   id: string;
   label: string;
@@ -41,7 +49,10 @@ export interface EvaluationSequenceStep {
 }
 
 export type SourceVerificationStatus =
-  'NATIONAL_LAW_VERIFIED' | 'SAMPLE_REFERENCE_ONLY' | 'PENDING_CASTILLA_VERIFICATION';
+  | 'NATIONAL_LAW_VERIFIED'
+  | 'SAMPLE_REFERENCE_ONLY'
+  | 'PENDING_CASTILLA_VERIFICATION'
+  | 'CASTILLA_OFFICIAL_FORM_VERIFIED';
 
 export interface RequirementSource {
   title: string;
@@ -116,6 +127,54 @@ const SRC_CASTILLA_PENDING: RequirementSource = {
   verificationStatus: 'PENDING_CASTILLA_VERIFICATION',
 };
 
+const SRC_BFP_ARTA_CHARTER: RequirementSource = {
+  title: "Bureau of Fire Protection — CY 2021 Updates on BFP Citizen's Charter (ARTA)",
+  url: 'https://bfp.gov.ph/wp-content/uploads/2021/12/1-CY-2021-Updates-on-BFP-Citizens-Charter-for-ARTA-Final.pdf',
+  jurisdiction:
+    'Bureau of Fire Protection — national agency; a general/national-level citizen\'s charter, NOT the Municipality of Castilla\'s own BFP station checklist',
+  effectiveDate: '2021-12-01',
+  verificationStatus: 'SAMPLE_REFERENCE_ONLY',
+};
+
+// The actual Municipality of Castilla MPDO Locational Clearance / Certificate
+// of Zoning Compliance form (FM-MPD-12, updated August 2024), obtained
+// directly from "LGU Castilla BPCO Forms" and bundled at
+// public/assets/permits/Zoning-Locational-Clearance-Form.pdf.
+const SRC_CASTILLA_MPDO_ZONING_FORM: RequirementSource = {
+  title:
+    'Municipality of Castilla, Sorsogon — Municipal Planning and Development Office, "Application for Locational Clearance / Certificate of Zoning Compliance" (Form FM-MPD-12)',
+  url: '/assets/permits/Zoning-Locational-Clearance-Form.pdf',
+  jurisdiction: 'Municipality of Castilla, Sorsogon — Municipal Planning and Development Office (Zoning Section)',
+  effectiveDate: '2024-08-01',
+  verificationStatus: 'CASTILLA_OFFICIAL_FORM_VERIFIED',
+};
+
+// The actual BFP Castilla Fire Station Fire Safety Evaluation Clearance
+// application form (BFP-QSF-FSED-001 Rev.02), obtained directly from "LGU
+// Castilla BPCO Forms" and bundled at
+// public/assets/permits/FSEC-for-Building-Permit-BFP.pdf.
+const SRC_CASTILLA_BFP_FSEC_FORM: RequirementSource = {
+  title:
+    'Bureau of Fire Protection — Castilla Fire Station (Sorsogon Provincial Office, Region 5), "Fire Safety Evaluation Clearance Application Form" (BFP-QSF-FSED-001 Rev.02)',
+  url: '/assets/permits/FSEC-for-Building-Permit-BFP.pdf',
+  jurisdiction: 'Bureau of Fire Protection — Castilla Fire Station, Municipality of Castilla, Sorsogon',
+  effectiveDate: '2020-08-24',
+  verificationStatus: 'CASTILLA_OFFICIAL_FORM_VERIFIED',
+};
+
+// The actual BFP Castilla Fire Station Fire Safety Inspection Certificate
+// application form (BFP-QSF-FSED-002 Rev.02), obtained directly from "LGU
+// Castilla BPCO Forms" and bundled at
+// public/assets/permits/FSIC-for-Occupancy-Permit-BFP.pdf.
+const SRC_CASTILLA_BFP_FSIC_FORM: RequirementSource = {
+  title:
+    'Bureau of Fire Protection — Castilla Fire Station (Sorsogon Provincial Office, Region 5), "Fire Safety Inspection Certificate Application Form" (BFP-QSF-FSED-002 Rev.02)',
+  url: '/assets/permits/FSIC-for-Occupancy-Permit-BFP.pdf',
+  jurisdiction: 'Bureau of Fire Protection — Castilla Fire Station, Municipality of Castilla, Sorsogon',
+  effectiveDate: '2020-08-24',
+  verificationStatus: 'CASTILLA_OFFICIAL_FORM_VERIFIED',
+};
+
 const PERMIT_SOURCES: RequirementSource[] = [
   SRC_PD1096,
   SRC_RA9514,
@@ -155,9 +214,23 @@ interface PermitSpec {
   validityMonths: number | null;
   validityRules: string;
   finalDocument: string;
+  /** Defaults to 'obo'. Overridden for types routed to another office (Zoning, BFP). */
+  responsibleDepartmentId?: string;
+  /** Defaults to PERMIT_SOURCES (PD1096/RA9514/PPC-OCBO/Castilla-pending). Overridden for types whose honest sourcing is different (e.g. BFP citizen's charters for FSEC/FSIC). */
+  sources?: RequirementSource[];
+  /** Defaults to the generic PD1096/RA9514/OCBO paragraph below. */
+  sourceNote?: string;
+  /** Defaults to the generic building/permit-fee paragraph below. */
+  paymentRequirements?: string;
+  /** Defaults to the generic "OBO final sign-off" paragraph below. */
+  releaseRequirements?: string;
+  /** True only for Zoning/Locational Clearance, whose own checklist would otherwise circularly require "Locational Clearance" as one of its own documents. */
+  skipLocationalCommonDoc?: boolean;
+  /** Defaults to false. Set true only when this entry's documents were built directly from an actual Castilla/BFP Castilla form (CASTILLA_OFFICIAL_FORM_VERIFIED source) rather than a national-law baseline, a same-format sample, or a pending placeholder. */
+  verified?: boolean;
 }
 
-const COMMON_DOCS = (prefix: string): RequirementDocument[] => [
+const COMMON_DOCS = (prefix: string, opts?: { skipLocational?: boolean }): RequirementDocument[] => [
   doc(`${prefix}-land-title`, 'Land Title or Tax Declaration of the property', true, 'obo'),
   doc(
     `${prefix}-owner-consent`,
@@ -166,14 +239,25 @@ const COMMON_DOCS = (prefix: string): RequirementDocument[] => [
     'obo',
   ),
   doc(`${prefix}-brgy-clearance`, 'Barangay Clearance', true, 'zoning'),
-  doc(`${prefix}-locational`, 'Locational Clearance / Zoning Certification', true, 'zoning'),
+  ...(opts?.skipLocational
+    ? []
+    : [doc(`${prefix}-locational`, 'Locational Clearance / Zoning Certification', true, 'zoning')]),
   doc(`${prefix}-id`, 'Valid Government-Issued ID of Applicant/Owner', true, 'obo'),
 ];
+
+const DEFAULT_PAYMENT_REQUIREMENTS =
+  'Building/permit fee, line-item fees per discipline (architectural/structural/electrical/mechanical/sanitary as applicable), and other regulatory fees assessed by the Municipal Treasurer’s Office based on project cost/floor area.';
+
+const DEFAULT_RELEASE_REQUIREMENTS =
+  'Full payment verified, OBO final sign-off recorded, and permit signed by the Municipal Engineer/Building Official.';
+
+const DEFAULT_SOURCE_NOTE =
+  "Legal basis: PD 1096 (National Building Code) for the permit itself and RA 9514 Sec. 5(g) where a Fire Safety Inspection Certificate is required; Puerto Princesa OCBO's published checklist used only as a structural example of the Unified Application/Ancillary Permit format. Castilla's own OBO checklist and fee schedule were not accessible during this research pass — see `sources` below.";
 
 function buildRequirements(spec: PermitSpec): ApplicationTypeRequirements {
   const prefix = spec.permitType.toLowerCase().replace(/[^a-z]+/g, '-');
   const documents = [
-    ...COMMON_DOCS(prefix),
+    ...COMMON_DOCS(prefix, { skipLocational: spec.skipLocationalCommonDoc }),
     ...spec.planDocs,
     ...(spec.professionalDoc ? [spec.professionalDoc] : []),
     ...(spec.extraDocs ?? []),
@@ -182,21 +266,18 @@ function buildRequirements(spec: PermitSpec): ApplicationTypeRequirements {
     permitType: spec.permitType,
     requiredForm: spec.requiredForm,
     documents,
-    responsibleDepartmentId: 'obo',
+    responsibleDepartmentId: spec.responsibleDepartmentId ?? 'obo',
     evaluationSequence: EVAL_SEQUENCE,
-    paymentRequirements:
-      'Building/permit fee, line-item fees per discipline (architectural/structural/electrical/mechanical/sanitary as applicable), and other regulatory fees assessed by the Municipal Treasurer’s Office based on project cost/floor area.',
+    paymentRequirements: spec.paymentRequirements ?? DEFAULT_PAYMENT_REQUIREMENTS,
     inspectionRequirements: spec.inspectionRequirements,
     validityRules: spec.validityRules,
     validityMonths: spec.validityMonths,
     finalDocument: spec.finalDocument,
-    releaseRequirements:
-      'Full payment verified, OBO final sign-off recorded, and permit signed by the Municipal Engineer/Building Official.',
-    sourceNote:
-      "Legal basis: PD 1096 (National Building Code) for the permit itself and RA 9514 Sec. 5(g) where a Fire Safety Inspection Certificate is required; Puerto Princesa OCBO's published checklist used only as a structural example of the Unified Application/Ancillary Permit format. Castilla's own OBO checklist and fee schedule were not accessible during this research pass — see `sources` below.",
+    releaseRequirements: spec.releaseRequirements ?? DEFAULT_RELEASE_REQUIREMENTS,
+    sourceNote: spec.sourceNote ?? DEFAULT_SOURCE_NOTE,
     effectiveDate: EFFECTIVE_DATE,
-    verified: false,
-    sources: PERMIT_SOURCES,
+    verified: spec.verified ?? false,
+    sources: spec.sources ?? PERMIT_SOURCES,
   };
 }
 
@@ -224,46 +305,66 @@ const BUILDING_PLAN_SET = (prefix: string): RequirementDocument[] => [
 // spelling, no extras.
 const PERMIT_SPECS: PermitSpec[] = [
   {
-    permitType: 'Building Permit',
-    requiredForm: 'Unified Application Form for Building Permit',
+    permitType: 'Building Permit – New Construction',
+    requiredForm: 'Application for Building Permit (New Construction)',
     professionalDoc: null,
-    planDocs: BUILDING_PLAN_SET('building-permit'),
+    planDocs: BUILDING_PLAN_SET('building-permit-new-construction'),
     inspectionRequirements:
       'Site inspection prior to permit issuance; periodic inspections during construction; final inspection before Certificate of Occupancy.',
     validityMonths: 12,
     validityRules:
       'Valid for twelve (12) months from issuance; work must commence within one year or the permit lapses and must be renewed.',
-    finalDocument: 'Building Permit',
+    finalDocument: 'Building Permit – New Construction',
   },
   {
-    permitType: 'Architectural Permit',
-    requiredForm: 'Application for Architectural Permit',
-    professionalDoc: doc('arch-prc', 'PRC License and PTR of Architect of Record', true, 'obo'),
-    planDocs: [doc('arch-plan', 'Architectural Plans (signed and sealed)', true, 'obo')],
-    inspectionRequirements:
-      'Included as part of the overall Building Permit site inspection when filed jointly; independent site check when filed standalone.',
-    validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Architectural Permit',
-  },
-  {
-    permitType: 'Civil / Structural Permit',
-    requiredForm: 'Application for Civil / Structural Permit',
+    permitType: 'Building Permit – Renovation / Alteration',
+    requiredForm: 'Application for Building Permit (Renovation / Alteration)',
     professionalDoc: doc(
-      'struct-prc',
-      'PRC License and PTR of Civil Engineer of Record',
+      'renovation-prc',
+      'PRC License and PTR of Engineer/Architect of Record',
       true,
       'obo',
     ),
     planDocs: [
-      doc('struct-plan', 'Structural Plans (signed and sealed)', true, 'obo'),
-      doc('struct-analysis', 'Structural Design Analysis', true, 'obo'),
+      doc('renovation-plan', 'Renovation/Alteration Plans (signed and sealed)', true, 'obo'),
+      doc(
+        'renovation-existing-permit',
+        'Copy of Original Building Permit (if available)',
+        false,
+        'obo',
+      ),
+      doc('renovation-bom', 'Bill of Materials and Specifications', true, 'obo'),
     ],
     inspectionRequirements:
-      'Structural site inspection during key pours/erection stages; final structural inspection.',
+      'Site inspection to confirm scope matches submitted plans; final inspection upon completion.',
     validityMonths: 12,
     validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Civil / Structural Permit',
+    finalDocument: 'Building Permit – Renovation / Alteration',
+  },
+  {
+    permitType: 'Building Permit – Addition / Extension',
+    requiredForm: 'Application for Building Permit (Addition / Extension)',
+    professionalDoc: doc(
+      'addition-prc',
+      'PRC License and PTR of Engineer/Architect of Record',
+      true,
+      'obo',
+    ),
+    planDocs: [
+      doc('addition-plan', 'Addition / Extension Plans (signed and sealed)', true, 'obo'),
+      doc(
+        'addition-struct-plan',
+        'Structural Analysis for the added load (signed and sealed)',
+        true,
+        'obo',
+      ),
+      doc('addition-bom', 'Bill of Materials and Specifications', true, 'obo'),
+    ],
+    inspectionRequirements:
+      'Structural site inspection to verify the existing structure can carry the addition; final inspection upon completion.',
+    validityMonths: 12,
+    validityRules: 'Valid for twelve (12) months from issuance.',
+    finalDocument: 'Building Permit – Addition / Extension',
   },
   {
     permitType: 'Demolition Permit',
@@ -298,54 +399,82 @@ const PERMIT_SPECS: PermitSpec[] = [
     finalDocument: 'Demolition Permit',
   },
   {
-    permitType: 'Addition / Extension Permit',
-    requiredForm: 'Application for Building Permit (Addition / Extension)',
-    professionalDoc: doc(
-      'addition-prc',
-      'PRC License and PTR of Engineer/Architect of Record',
-      true,
-      'obo',
-    ),
+    // Document list matches the real Municipality of Castilla MPDO form
+    // FM-MPD-12 "Application for Locational Clearance / Certificate of
+    // Zoning Compliance" exactly (see SRC_CASTILLA_MPDO_ZONING_FORM) —
+    // obtained directly from "LGU Castilla BPCO Forms", not general PH LGU
+    // practice.
+    permitType: 'Zoning / Locational Clearance',
+    requiredForm:
+      'Application for Locational Clearance / Certificate of Zoning Compliance (Form FM-MPD-12)',
+    professionalDoc: null,
     planDocs: [
-      doc('addition-plan', 'Addition / Extension Plans (signed and sealed)', true, 'obo'),
       doc(
-        'addition-struct-plan',
-        'Structural Analysis for the added load (signed and sealed)',
+        'zoning-letter-request',
+        'Notarized Letter Request addressed to the Zoning Administrator',
         true,
-        'obo',
+        'zoning',
       ),
-      doc('addition-bom', 'Bill of Materials and Specifications', true, 'obo'),
+      doc('zoning-site-plan', 'Site Development Plan', true, 'zoning'),
+      doc('zoning-vicinity-map', 'Vicinity Map', true, 'zoning'),
+      doc('zoning-sketch-plan', 'Sketch Plan of the House', true, 'zoning'),
+      doc('zoning-bom', 'Bill of Materials', true, 'zoning'),
+    ],
+    extraDocs: [
+      doc('zoning-ownership', 'Proof of Ownership', true, 'zoning'),
+      doc('zoning-tax-dec', 'Tax Declaration / Certificate of Title (COT) / OCT', true, 'zoning'),
+      doc('zoning-land-tax', 'Land Tax Receipt (Current Year)', true, 'zoning'),
+      doc('zoning-brgy-building-clearance', 'Barangay Building Clearance', true, 'zoning'),
+      doc('zoning-cedula', 'Cedula (Photocopy)', true, 'zoning'),
+      doc('zoning-dpwh', 'DPWH Clearance (if applicable)', false, 'zoning'),
+      doc('zoning-ecc', 'Environmental Compliance Certificate / ECC (if applicable)', false, 'zoning'),
     ],
     inspectionRequirements:
-      'Structural site inspection to verify the existing structure can carry the addition; final inspection upon completion.',
+      "Ocular site inspection and preparation of a project evaluation report by the Zoning Officer, per FM-MPD-12's own stated procedure.",
     validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Addition / Extension Permit',
+    validityRules:
+      "Valid for twelve (12) months from issuance, per standard LGU clearance practice — the Castilla MPDO form itself does not print a fixed validity period on its face.",
+    finalDocument: 'Zoning / Locational Clearance',
+    responsibleDepartmentId: 'zoning',
+    skipLocationalCommonDoc: true,
+    verified: true,
+    sourceNote:
+      "This clearance is a prerequisite before filing a Building Permit application (its output is the 'Locational Clearance / Zoning Certification' document required by every other permit type's checklist). Document list and procedure transcribed directly from the Municipality of Castilla's own MPDO form FM-MPD-12, obtained and reviewed in full — see `sources` below.",
+    paymentRequirements:
+      "Zoning fee ('Locational / Zoning of Land' line item) computed and assessed by the Zoning Administrator, per the Unified Application Form's own Box 6 fee schedule.",
+    releaseRequirements:
+      'Order of Payment issued and paid, evaluation and decision encoded, then the Locational / Zoning Clearance is approved and issued by the Zoning Administrator.',
+    sources: [SRC_CASTILLA_MPDO_ZONING_FORM],
   },
   {
-    permitType: 'Renovation Permit',
-    requiredForm: 'Application for Building Permit (Renovation/Alteration)',
+    permitType: 'Architectural Permit',
+    requiredForm: 'Application for Architectural Permit',
+    professionalDoc: doc('arch-prc', 'PRC License and PTR of Architect of Record', true, 'obo'),
+    planDocs: [doc('arch-plan', 'Architectural Plans (signed and sealed)', true, 'obo')],
+    inspectionRequirements:
+      'Included as part of the overall Building Permit site inspection when filed jointly; independent site check when filed standalone.',
+    validityMonths: 12,
+    validityRules: 'Valid for twelve (12) months from issuance.',
+    finalDocument: 'Architectural Permit',
+  },
+  {
+    permitType: 'Civil / Structural Permit',
+    requiredForm: 'Application for Civil / Structural Permit',
     professionalDoc: doc(
-      'renovation-prc',
-      'PRC License and PTR of Engineer/Architect of Record',
+      'struct-prc',
+      'PRC License and PTR of Civil Engineer of Record',
       true,
       'obo',
     ),
     planDocs: [
-      doc('renovation-plan', 'Renovation/Alteration Plans (signed and sealed)', true, 'obo'),
-      doc(
-        'renovation-existing-permit',
-        'Copy of Original Building Permit (if available)',
-        false,
-        'obo',
-      ),
-      doc('renovation-bom', 'Bill of Materials and Specifications', true, 'obo'),
+      doc('struct-plan', 'Structural Plans (signed and sealed)', true, 'obo'),
+      doc('struct-analysis', 'Structural Design Analysis', true, 'obo'),
     ],
     inspectionRequirements:
-      'Site inspection to confirm scope matches submitted plans; final inspection upon completion.',
+      'Structural site inspection during key pours/erection stages; final structural inspection.',
     validityMonths: 12,
     validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Renovation Permit',
+    finalDocument: 'Civil / Structural Permit',
   },
   {
     permitType: 'Electrical Permit',
@@ -362,6 +491,51 @@ const PERMIT_SPECS: PermitSpec[] = [
     validityMonths: 12,
     validityRules: 'Valid for twelve (12) months from issuance.',
     finalDocument: 'Electrical Permit',
+  },
+  {
+    permitType: 'Mechanical Permit',
+    requiredForm: 'Application for Mechanical Permit',
+    professionalDoc: doc(
+      'mech-prc',
+      'PRC License and PTR of Professional Mechanical Engineer of Record',
+      true,
+      'obo',
+    ),
+    planDocs: [doc('mech-plan', 'Mechanical Plans (signed and sealed)', true, 'obo')],
+    inspectionRequirements: 'Mechanical equipment installation inspection prior to operation.',
+    validityMonths: 12,
+    validityRules: 'Valid for twelve (12) months from issuance.',
+    finalDocument: 'Mechanical Permit',
+  },
+  {
+    permitType: 'Sanitary Permit',
+    requiredForm: 'Application for Sanitary Permit',
+    professionalDoc: doc(
+      'sanplumb-prc',
+      'PRC License and PTR of Sanitary Engineer/Master Plumber of Record',
+      true,
+      'obo',
+    ),
+    planDocs: [doc('sanplumb-plan', 'Sanitary / Plumbing Plans (signed and sealed)', true, 'obo')],
+    inspectionRequirements: 'Plumbing rough-in inspection and final sanitary inspection.',
+    validityMonths: 12,
+    validityRules: 'Valid for twelve (12) months from issuance.',
+    finalDocument: 'Sanitary Permit',
+  },
+  {
+    permitType: 'Plumbing Permit',
+    requiredForm: 'Application for Plumbing Permit',
+    professionalDoc: doc(
+      'plumb-prc',
+      'PRC License and PTR of Master Plumber of Record',
+      true,
+      'obo',
+    ),
+    planDocs: [doc('plumb-plan', 'Plumbing Layout Plans (signed and sealed)', true, 'obo')],
+    inspectionRequirements: 'Plumbing rough-in and final inspection.',
+    validityMonths: 12,
+    validityRules: 'Valid for twelve (12) months from issuance.',
+    finalDocument: 'Plumbing Permit',
   },
   {
     permitType: 'Electronics Permit',
@@ -385,51 +559,6 @@ const PERMIT_SPECS: PermitSpec[] = [
     validityMonths: 12,
     validityRules: 'Valid for twelve (12) months from issuance.',
     finalDocument: 'Electronics Permit',
-  },
-  {
-    permitType: 'Mechanical Permit',
-    requiredForm: 'Application for Mechanical Permit',
-    professionalDoc: doc(
-      'mech-prc',
-      'PRC License and PTR of Professional Mechanical Engineer of Record',
-      true,
-      'obo',
-    ),
-    planDocs: [doc('mech-plan', 'Mechanical Plans (signed and sealed)', true, 'obo')],
-    inspectionRequirements: 'Mechanical equipment installation inspection prior to operation.',
-    validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Mechanical Permit',
-  },
-  {
-    permitType: 'Plumbing Permit',
-    requiredForm: 'Application for Plumbing Permit',
-    professionalDoc: doc(
-      'plumb-prc',
-      'PRC License and PTR of Master Plumber of Record',
-      true,
-      'obo',
-    ),
-    planDocs: [doc('plumb-plan', 'Plumbing Layout Plans (signed and sealed)', true, 'obo')],
-    inspectionRequirements: 'Plumbing rough-in and final inspection.',
-    validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Plumbing Permit',
-  },
-  {
-    permitType: 'Sanitary / Plumbing Permit',
-    requiredForm: 'Application for Sanitary / Plumbing Permit',
-    professionalDoc: doc(
-      'sanplumb-prc',
-      'PRC License and PTR of Sanitary Engineer/Master Plumber of Record',
-      true,
-      'obo',
-    ),
-    planDocs: [doc('sanplumb-plan', 'Sanitary / Plumbing Plans (signed and sealed)', true, 'obo')],
-    inspectionRequirements: 'Plumbing rough-in inspection and final sanitary inspection.',
-    validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Sanitary / Plumbing Permit',
   },
   {
     permitType: 'Interior Design Permit',
@@ -482,8 +611,8 @@ const PERMIT_SPECS: PermitSpec[] = [
     finalDocument: 'Sign Permit',
   },
   {
-    permitType: 'Excavation & Ground Preparation Permit',
-    requiredForm: 'Application for Excavation & Ground Preparation Permit',
+    permitType: 'Excavation Permit',
+    requiredForm: 'Application for Excavation Permit',
     professionalDoc: doc(
       'excavation-prc',
       'PRC License and PTR of Engineer of Record',
@@ -503,7 +632,55 @@ const PERMIT_SPECS: PermitSpec[] = [
       'Pre-excavation site inspection for shoring/safety measures; ongoing monitoring for deep excavations.',
     validityMonths: 6,
     validityRules: 'Valid for six (6) months from issuance.',
-    finalDocument: 'Excavation & Ground Preparation Permit',
+    finalDocument: 'Excavation Permit',
+  },
+  {
+    // Document list matches the real BFP Castilla Fire Station form
+    // BFP-QSF-FSED-001 "Fire Safety Evaluation Clearance Application Form"
+    // exactly (see SRC_CASTILLA_BFP_FSEC_FORM) — obtained directly from
+    // "LGU Castilla BPCO Forms", not a national-charter generalization.
+    permitType: 'FSEC for Building Permit (BFP)',
+    requiredForm:
+      'Fire Safety Evaluation Clearance Application Form (BFP-QSF-FSED-001, BFP Castilla Fire Station)',
+    professionalDoc: null,
+    planDocs: [
+      doc(
+        'fsec-plan-set',
+        'Three (3) complete sets of proposed plans: Architectural, Civil/Structural, Electrical, Mechanical, Plumbing, Electronics, Sanitary, and Fire Protection documents',
+        true,
+        'bfp',
+      ),
+    ],
+    extraDocs: [
+      doc('fsec-fscr', 'Fire Safety Compliance Report (FSCR), one (1) set (if necessary)', false, 'bfp'),
+      doc(
+        'fsec-cost-estimate',
+        "Cost Estimate of the building, including labor cost, signed and sealed by the designer/contractor and duly notarized, one (1) set",
+        true,
+        'bfp',
+      ),
+      doc(
+        'fsec-hotworks-clearance',
+        'Fire Safety Clearance for Welding, Cutting, and other Hot Work Operations (if required)',
+        false,
+        'bfp',
+      ),
+    ],
+    inspectionRequirements:
+      "Plan evaluation by BFP Castilla Fire Station personnel (CRO, FCA, FCCA, C,FSES, BPE, CFM/MFM per the form's own monitoring routing); the Fire Marshal approves or disapproves the FSEC application.",
+    validityMonths: 12,
+    validityRules:
+      'Serves as a prerequisite to Building Permit issuance under RA 9514; the form itself does not print a fixed validity/expiry period.',
+    finalDocument: 'FSEC for Building Permit (BFP)',
+    responsibleDepartmentId: 'bfp',
+    verified: true,
+    sourceNote:
+      "Legal basis: RA 9514 (Fire Code of the Philippines of 2008) — plan evaluation for fire-safety compliance is a statutory prerequisite to a Building Permit. Document list transcribed directly from the actual BFP Castilla Fire Station FSEC application form (BFP-QSF-FSED-001), obtained and reviewed in full — see `sources` below. (An authorized representative must present an authorization letter and a copy of the owner's ID, per the form's own note.)",
+    paymentRequirements:
+      "Fire Code Construction Tax and related fire-code fees under RA 9514 and its IRR, collected by BFP (see the Unified Application Form's own Box 6 'FOR FIRE SAFETY (BFP)' fee lines).",
+    releaseRequirements:
+      'Full payment verified and FSEC signed/certified by the BFP Castilla Fire Station Customer Relation Officer and Fire Marshal.',
+    sources: [SRC_RA9514, SRC_CASTILLA_BFP_FSEC_FORM, SRC_BFP_ARTA_CHARTER],
   },
   {
     permitType: 'Certificate of Occupancy',
@@ -521,6 +698,52 @@ const PERMIT_SPECS: PermitSpec[] = [
     validityRules:
       'Valid for the life of the structure unless a change in use, occupancy, or ownership requires re-certification.',
     finalDocument: 'Certificate of Occupancy',
+  },
+  {
+    // Document list matches the real BFP Castilla Fire Station form
+    // BFP-QSF-FSED-002 "Fire Safety Inspection Certificate Application
+    // Form" — specifically its "FSIC FOR CERTIFICATE OF OCCUPANCY" section
+    // (see SRC_CASTILLA_BFP_FSIC_FORM); the form's separate "FSIC FOR
+    // BUSINESS PERMIT" section (new/renewal business) does not apply to
+    // this permit type and is intentionally excluded here.
+    permitType: 'FSIC for Occupancy Permit (BFP)',
+    requiredForm:
+      'Fire Safety Inspection Certificate Application Form — FSIC for Certificate of Occupancy (BFP-QSF-FSED-002, BFP Castilla Fire Station)',
+    professionalDoc: null,
+    planDocs: [
+      doc(
+        'fsic-asbuilt',
+        'As-Built Plan (if necessary)',
+        false,
+        'bfp',
+      ),
+    ],
+    extraDocs: [
+      doc('fsic-obo-endorsement', 'Endorsement from the Office of the Building Official (OBO)', true, 'bfp'),
+      doc('fsic-completion-cert', 'Certificate of Completion', true, 'bfp'),
+      doc(
+        'fsic-assessment-copy',
+        'Certified True Copy of the Assessment Fee for securing the Certificate of Occupancy from OBO',
+        true,
+        'bfp',
+      ),
+      doc('fsic-fsccr', 'Fire Safety Compliance and Commissioning Report (FSCCR), one (1) set (if necessary)', false, 'bfp'),
+    ],
+    inspectionRequirements:
+      "Final fire safety inspection by BFP Castilla Fire Station personnel confirming the completed building complies with fire safety standards, per the form's own monitoring routing (CRO, FCA, FCCA, C,FSES, FSI, CFM/MFM).",
+    validityMonths: 12,
+    validityRules:
+      'A final FSIC is a statutory prerequisite to a Certificate of Occupancy under RA 9514 Sec. 5(g)/7(a); the form itself does not print a fixed validity/expiry period for the occupancy FSIC.',
+    finalDocument: 'FSIC for Occupancy Permit (BFP)',
+    responsibleDepartmentId: 'bfp',
+    verified: true,
+    sourceNote:
+      "Legal basis: RA 9514 Sec. 5(g)/7(a) — a final Fire Safety Inspection Certificate is a statutory prerequisite to occupancy. This entry exposes FSIC as its own independently-filable permit type for applicants who file the fire inspection separately from the Certificate of Occupancy application itself (which retains its own bundled `coo-fsic` document requirement in the Certificate of Occupancy entry, unchanged). Document list transcribed directly from the actual BFP Castilla Fire Station FSIC application form (BFP-QSF-FSED-002), obtained and reviewed in full — see `sources` below.",
+    paymentRequirements:
+      "Fire code assessment fee under RA 9514 and its IRR, assessed by BFP and collected through/coordinated with the Municipal Treasurer's Office.",
+    releaseRequirements:
+      'Full payment verified and FSIC signed/certified by the BFP Castilla Fire Station Customer Relation Officer and Fire Marshal.',
+    sources: [SRC_RA9514, SRC_CASTILLA_BFP_FSIC_FORM, SRC_BFP_ARTA_CHARTER],
   },
 ];
 

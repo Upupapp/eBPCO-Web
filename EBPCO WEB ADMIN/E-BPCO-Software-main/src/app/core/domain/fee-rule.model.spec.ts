@@ -1,15 +1,15 @@
 import { ALL_PERMIT_TYPES } from './permit.model';
 import { FEE_RULES, feeMatrixFor, feeRulesForPermitType } from './fee-rule.model';
 
-describe('Fee rule catalog — all 16 permit mappings', () => {
-  it('every one of the 16 permit types has at least one REQUIRED fee line (the generic filing fee, at minimum)', () => {
+describe('Fee rule catalog — all 19 permit mappings', () => {
+  it('every one of the 19 permit types has at least one REQUIRED fee line (the generic filing fee, at minimum)', () => {
     for (const type of ALL_PERMIT_TYPES) {
       const entries = feeRulesForPermitType(type);
       expect(entries.some((e) => e.applicability === 'required')).toBe(true);
     }
   });
 
-  it('the filing fee applies to all 16 permit types, and only the filing fee is universal', () => {
+  it('the filing fee applies to all 19 permit types, and only the filing fee is universal', () => {
     const filingFee = FEE_RULES.find((r) => r.id === 'filing-fee')!;
     for (const type of ALL_PERMIT_TYPES) {
       expect(filingFee.applicability[type]).toBe('required');
@@ -28,11 +28,11 @@ describe('Fee rule catalog — all 16 permit mappings', () => {
 });
 
 describe('Fee rule catalog — official fee families per the task specification', () => {
-  it('Building, Addition/Extension, and Renovation Permit all require the building-permit-fee family', () => {
+  it('Building Permit – New Construction, Addition/Extension, and Renovation/Alteration all require the building-permit-fee family', () => {
     for (const type of [
-      'Building Permit',
-      'Addition / Extension Permit',
-      'Renovation Permit',
+      'Building Permit – New Construction',
+      'Building Permit – Addition / Extension',
+      'Building Permit – Renovation / Alteration',
     ] as const) {
       const entries = feeRulesForPermitType(type);
       expect(
@@ -46,7 +46,7 @@ describe('Fee rule catalog — official fee families per the task specification'
       ['Electrical Permit', 'electrical-permit-fee'],
       ['Mechanical Permit', 'mechanical-permit-fee'],
       ['Plumbing Permit', 'plumbing-sanitary-permit-fee'],
-      ['Sanitary / Plumbing Permit', 'plumbing-sanitary-permit-fee'],
+      ['Sanitary Permit', 'plumbing-sanitary-permit-fee'],
       ['Electronics Permit', 'electronics-permit-fee'],
     ];
     for (const [type, ruleId] of expected) {
@@ -57,16 +57,16 @@ describe('Fee rule catalog — official fee families per the task specification'
     }
   });
 
-  it('Plumbing Permit and Sanitary / Plumbing Permit share exactly ONE rule id — never two separately-charged plumbing lines', () => {
+  it('Plumbing Permit and Sanitary Permit share exactly ONE rule id — never two separately-charged plumbing lines', () => {
     // Excludes the generic filing fee, which is legitimately "required"
-    // for every one of the 16 types — the thing under test is whether
+    // for every one of the 19 types — the thing under test is whether
     // there are two independent PLUMBING-specific fee rules, not whether
     // any required rule happens to touch these two types.
     const plumbingRules = FEE_RULES.filter(
       (r) =>
         r.family.toLowerCase().includes('plumbing') &&
         (r.applicability['Plumbing Permit'] === 'required' ||
-          r.applicability['Sanitary / Plumbing Permit'] === 'required'),
+          r.applicability['Sanitary Permit'] === 'required'),
     );
     expect(plumbingRules.length).toBe(1);
     expect(plumbingRules[0].id).toBe('plumbing-sanitary-permit-fee');
@@ -74,7 +74,7 @@ describe('Fee rule catalog — official fee families per the task specification'
     const plumbingEntries = feeRulesForPermitType('Plumbing Permit').filter(
       (e) => e.applicability === 'required',
     );
-    const sanitaryEntries = feeRulesForPermitType('Sanitary / Plumbing Permit').filter(
+    const sanitaryEntries = feeRulesForPermitType('Sanitary Permit').filter(
       (e) => e.applicability === 'required',
     );
     expect(plumbingEntries.map((e) => e.rule.id)).toEqual(sanitaryEntries.map((e) => e.rule.id));
@@ -85,7 +85,7 @@ describe('Fee rule catalog — official fee families per the task specification'
       ['Demolition Permit', 'demolition-accessory-fee'],
       ['Fencing Permit', 'fencing-accessory-fee'],
       ['Sign Permit', 'sign-accessory-fee'],
-      ['Excavation & Ground Preparation Permit', 'excavation-accessory-fee'],
+      ['Excavation Permit', 'excavation-accessory-fee'],
     ];
     for (const [type, ruleId] of expected) {
       const entries = feeRulesForPermitType(type as (typeof ALL_PERMIT_TYPES)[number]);
@@ -108,6 +108,20 @@ describe('Fee rule catalog — official fee families per the task specification'
         (e) => e.rule.id === 'fire-code-assessment-fee' && e.applicability === 'required',
       ),
     ).toBe(true);
+  });
+
+  it('FSEC for Building Permit (BFP) and FSIC for Occupancy Permit (BFP) each require the fire code assessment fee', () => {
+    for (const type of [
+      'FSEC for Building Permit (BFP)',
+      'FSIC for Occupancy Permit (BFP)',
+    ] as const) {
+      const entries = feeRulesForPermitType(type as (typeof ALL_PERMIT_TYPES)[number]);
+      expect(
+        entries.some(
+          (e) => e.rule.id === 'fire-code-assessment-fee' && e.applicability === 'required',
+        ),
+      ).toBe(true);
+    }
   });
 
   it('Architectural, Civil / Structural, and Interior Design Permit have NO dedicated required national formula of their own — only the generic filing fee is required, per the task instruction not to invent one', () => {

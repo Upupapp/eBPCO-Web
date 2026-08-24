@@ -17,6 +17,8 @@ import 'core/providers/electrical_permit_provider.dart';
 import 'core/providers/electronics_permit_provider.dart';
 import 'core/providers/excavation_permit_provider.dart';
 import 'core/providers/fencing_permit_provider.dart';
+import 'core/providers/fsec_permit_provider.dart';
+import 'core/providers/fsic_permit_provider.dart';
 import 'core/providers/interior_design_permit_provider.dart';
 import 'core/providers/mechanical_permit_provider.dart';
 import 'core/providers/navigation_provider.dart';
@@ -26,6 +28,7 @@ import 'core/providers/renovation_permit_provider.dart';
 import 'core/providers/sanitary_plumbing_permit_provider.dart';
 import 'core/providers/settings_provider.dart';
 import 'core/providers/sign_permit_provider.dart';
+import 'core/providers/zoning_permit_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'routes/app_router.dart';
 
@@ -116,6 +119,15 @@ class _EbpcoAppState extends State<EbpcoApp> {
         ),
         ChangeNotifierProvider<CertificateOfOccupancyProvider>(
           create: (_) => CertificateOfOccupancyProvider(),
+        ),
+        ChangeNotifierProvider<ZoningPermitProvider>(
+          create: (_) => ZoningPermitProvider(),
+        ),
+        ChangeNotifierProvider<FsecPermitProvider>(
+          create: (_) => FsecPermitProvider(),
+        ),
+        ChangeNotifierProvider<FsicPermitProvider>(
+          create: (_) => FsicPermitProvider(),
         ),
         ChangeNotifierProvider<SettingsProvider>(
           create: (_) => SettingsProvider(),

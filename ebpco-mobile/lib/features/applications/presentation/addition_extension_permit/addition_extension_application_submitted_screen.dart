@@ -76,7 +76,7 @@ class AdditionExtensionApplicationSubmittedScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.sm),
                       const _InfoRow(
                         label: 'Application Type',
-                        value: 'Building Permit — Addition / Extension',
+                        value: 'Building Permit – Addition / Extension',
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       const _InfoRow(

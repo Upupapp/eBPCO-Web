@@ -1,5 +1,5 @@
 // The single, fixed, complete list of permit types this system supports.
-// Exactly these 16 values, in exactly this order and wording — nothing
+// Exactly these 19 values, in exactly this order and wording — nothing
 // more, nothing less. There is deliberately no domain/category grouping
 // on top of this list (no "Business Permit" vs "Construction Permit"
 // split, no aliases) — every surface that shows or accepts a permit type
@@ -9,41 +9,47 @@
 // alias any entry without updating this file — every other reference to
 // a permit type in the codebase derives from here.
 export type PermitType =
-  | 'Building Permit'
+  | 'Building Permit – New Construction'
+  | 'Building Permit – Renovation / Alteration'
+  | 'Building Permit – Addition / Extension'
+  | 'Demolition Permit'
+  | 'Zoning / Locational Clearance'
   | 'Architectural Permit'
   | 'Civil / Structural Permit'
-  | 'Demolition Permit'
-  | 'Addition / Extension Permit'
-  | 'Renovation Permit'
   | 'Electrical Permit'
-  | 'Electronics Permit'
   | 'Mechanical Permit'
+  | 'Sanitary Permit'
   | 'Plumbing Permit'
-  | 'Sanitary / Plumbing Permit'
+  | 'Electronics Permit'
   | 'Interior Design Permit'
   | 'Fencing Permit'
   | 'Sign Permit'
-  | 'Excavation & Ground Preparation Permit'
-  | 'Certificate of Occupancy';
+  | 'Excavation Permit'
+  | 'FSEC for Building Permit (BFP)'
+  | 'Certificate of Occupancy'
+  | 'FSIC for Occupancy Permit (BFP)';
 
 /** The full list, in the exact required order — the one place this order is defined. */
 export const ALL_PERMIT_TYPES: PermitType[] = [
-  'Building Permit',
+  'Building Permit – New Construction',
+  'Building Permit – Renovation / Alteration',
+  'Building Permit – Addition / Extension',
+  'Demolition Permit',
+  'Zoning / Locational Clearance',
   'Architectural Permit',
   'Civil / Structural Permit',
-  'Demolition Permit',
-  'Addition / Extension Permit',
-  'Renovation Permit',
   'Electrical Permit',
-  'Electronics Permit',
   'Mechanical Permit',
+  'Sanitary Permit',
   'Plumbing Permit',
-  'Sanitary / Plumbing Permit',
+  'Electronics Permit',
   'Interior Design Permit',
   'Fencing Permit',
   'Sign Permit',
-  'Excavation & Ground Preparation Permit',
+  'Excavation Permit',
+  'FSEC for Building Permit (BFP)',
   'Certificate of Occupancy',
+  'FSIC for Occupancy Permit (BFP)',
 ];
 
 const ALL_PERMIT_TYPES_SET: ReadonlySet<string> = new Set(ALL_PERMIT_TYPES);

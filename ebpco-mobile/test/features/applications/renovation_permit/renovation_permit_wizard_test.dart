@@ -354,7 +354,10 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Renovation Application Submitted!'), findsOneWidget);
       expect(find.textContaining('REN-'), findsOneWidget);
-      expect(find.text('Building Permit — Renovation'), findsOneWidget);
+      expect(
+        find.text('Building Permit – Renovation / Alteration'),
+        findsOneWidget,
+      );
     },
   );
 

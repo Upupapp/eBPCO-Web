@@ -56,13 +56,13 @@ class SanitaryPlumbingApplicationSubmittedScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
-                  'Sanitary / Plumbing Application Submitted!',
+                  'Sanitary Application Submitted!',
                   style: AppTypography.pageTitle,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Your Sanitary / Plumbing Permit application has been '
+                  'Your Sanitary Permit application has been '
                   'submitted for initial review. You will be notified '
                   'once the Office of the Building Official completes '
                   'the assessment of your application.',
@@ -104,7 +104,7 @@ class SanitaryPlumbingApplicationSubmittedScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.sm),
                       const _InfoRow(
                         label: 'Application Type',
-                        value: 'Sanitary / Plumbing Permit',
+                        value: 'Sanitary Permit',
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       _InfoRow(

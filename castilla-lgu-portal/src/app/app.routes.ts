@@ -25,6 +25,15 @@ export const routes: Routes = [
       import('./pages/office-detail/office-detail').then((m) => m.OfficeDetail),
   },
   {
+    path: 'permits',
+    loadComponent: () => import('./pages/permits/permits').then((m) => m.Permits),
+  },
+  {
+    path: 'permits/:slug',
+    loadComponent: () =>
+      import('./pages/permit-detail/permit-detail').then((m) => m.PermitDetail),
+  },
+  {
     path: 'contact',
     loadComponent: () => import('./pages/contact/contact').then((m) => m.Contact),
   },

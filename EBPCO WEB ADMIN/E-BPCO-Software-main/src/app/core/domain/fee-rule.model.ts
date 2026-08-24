@@ -242,7 +242,11 @@ export const FEE_RULES: FeeRule[] = [
     maximumCentavos: null,
     requiresAssessorInput: true,
     applicability: applicabilityFor(
-      ['Building Permit', 'Addition / Extension Permit', 'Renovation Permit'],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
       ['Architectural Permit', 'Civil / Structural Permit'],
     ),
     legalBasisUrl: SRC_DPWH_2016.url,
@@ -274,7 +278,11 @@ export const FEE_RULES: FeeRule[] = [
     requiresAssessorInput: true,
     applicability: applicabilityFor(
       ['Electrical Permit'],
-      ['Building Permit', 'Addition / Extension Permit', 'Renovation Permit'],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
     ),
     legalBasisUrl: SRC_DPWH_2016.url,
     legalBasisTitle: SRC_DPWH_2016.title,
@@ -304,7 +312,11 @@ export const FEE_RULES: FeeRule[] = [
     requiresAssessorInput: true,
     applicability: applicabilityFor(
       ['Mechanical Permit'],
-      ['Building Permit', 'Addition / Extension Permit', 'Renovation Permit'],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
     ),
     legalBasisUrl: SRC_DPWH_2016.url,
     legalBasisTitle: SRC_DPWH_2016.title,
@@ -323,7 +335,7 @@ export const FEE_RULES: FeeRule[] = [
     authority: 'DPWH',
     collectingOfficeId: 'obo',
     description:
-      'Plumbing fixture fee per the DPWH fee schedule. Shared by Plumbing Permit and Sanitary / Plumbing Permit — the same underlying fixture-count formula, never charged as two separate line items on one assessment.',
+      'Plumbing fixture fee per the DPWH fee schedule. Shared by Plumbing Permit and Sanitary Permit — the same underlying fixture-count formula, never charged as two separate line items on one assessment.',
     calculationType: 'per-unit',
     requiredInputs: ['fixtureCount'],
     flatAmountCentavos: null,
@@ -336,8 +348,12 @@ export const FEE_RULES: FeeRule[] = [
     maximumCentavos: null,
     requiresAssessorInput: true,
     applicability: applicabilityFor(
-      ['Plumbing Permit', 'Sanitary / Plumbing Permit'],
-      ['Building Permit', 'Addition / Extension Permit', 'Renovation Permit'],
+      ['Plumbing Permit', 'Sanitary Permit'],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
     ),
     legalBasisUrl: SRC_DPWH_2016.url,
     legalBasisTitle: SRC_DPWH_2016.title,
@@ -458,7 +474,7 @@ export const FEE_RULES: FeeRule[] = [
   rule({
     id: 'excavation-accessory-fee',
     code: 'DPWH-ACC-EXC',
-    name: 'Excavation & Ground Preparation Permit Fee',
+    name: 'Excavation Permit Fee',
     family: 'DPWH Accessory & Ancillary Structure Fee',
     authority: 'DPWH',
     collectingOfficeId: 'obo',
@@ -475,7 +491,7 @@ export const FEE_RULES: FeeRule[] = [
     minimumCentavos: null,
     maximumCentavos: null,
     requiresAssessorInput: true,
-    applicability: applicabilityFor(['Excavation & Ground Preparation Permit']),
+    applicability: applicabilityFor(['Excavation Permit']),
     legalBasisUrl: SRC_DPWH_2016.url,
     legalBasisTitle: SRC_DPWH_2016.title,
     verificationStatus: 'PENDING_LGU_VALIDATION',
@@ -511,8 +527,9 @@ export const FEE_RULES: FeeRule[] = [
   }),
 
   // Fire Code Assessment (BFP, RA 9514) — required on Certificate of
-  // Occupancy (final FSIC is a statutory prerequisite — see SRC_RA9514),
-  // conditional ancillary line on the building-formula types.
+  // Occupancy and on the standalone FSEC/FSIC types themselves (final
+  // FSIC is a statutory prerequisite — see SRC_RA9514), conditional
+  // ancillary line on the building-formula types.
   rule({
     id: 'fire-code-assessment-fee',
     code: 'BFP-FSIC-01',
@@ -534,8 +551,12 @@ export const FEE_RULES: FeeRule[] = [
     maximumCentavos: null,
     requiresAssessorInput: true,
     applicability: applicabilityFor(
-      ['Certificate of Occupancy'],
-      ['Building Permit', 'Addition / Extension Permit', 'Renovation Permit'],
+      ['Certificate of Occupancy', 'FSEC for Building Permit (BFP)', 'FSIC for Occupancy Permit (BFP)'],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
     ),
     legalBasisUrl: SRC_RA9514.url,
     legalBasisTitle: SRC_RA9514.title,

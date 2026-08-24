@@ -34,23 +34,23 @@ export const DEPARTMENTS: Department[] = [
     name: 'Office of the Municipal Engineer / Building Official',
     shortName: 'OBO',
     responsibility:
-      'Evaluates and issues the Building Permit and every ancillary/certificate permit under the National Building Code (PD 1096) — this office is responsible for all sixteen permit types this system supports.',
+      "Evaluates and issues the Building Permit and every ancillary/certificate permit under the National Building Code (PD 1096) — this office is responsible for sixteen of this system's nineteen permit types (all except Zoning/Locational Clearance and the BFP-issued FSEC/FSIC).",
     formsHandled: [
-      'Building Permit',
+      'Building Permit – New Construction',
+      'Building Permit – Renovation / Alteration',
+      'Building Permit – Addition / Extension',
+      'Demolition Permit',
       'Architectural Permit',
       'Civil / Structural Permit',
-      'Demolition Permit',
-      'Addition / Extension Permit',
-      'Renovation Permit',
       'Electrical Permit',
-      'Electronics Permit',
       'Mechanical Permit',
+      'Sanitary Permit',
       'Plumbing Permit',
-      'Sanitary / Plumbing Permit',
+      'Electronics Permit',
       'Interior Design Permit',
       'Fencing Permit',
       'Sign Permit',
-      'Excavation & Ground Preparation Permit',
+      'Excavation Permit',
       'Certificate of Occupancy',
     ],
     documentsReviewed: [
@@ -72,7 +72,7 @@ export const DEPARTMENTS: Department[] = [
     shortName: 'MPDO – Zoning',
     responsibility:
       'Reviews land-use classification, zoning compliance, and locational clearance for every permit application.',
-    formsHandled: ['Locational Clearance', 'Zoning Certification'],
+    formsHandled: ['Zoning / Locational Clearance'],
     documentsReviewed: [
       'Locational Clearance',
       'Land Use/Zoning Compliance Certificate',
@@ -90,10 +90,7 @@ export const DEPARTMENTS: Department[] = [
     shortName: 'BFP Castilla',
     responsibility:
       'Conducts fire safety inspection and issues the Fire Safety Inspection Certificate (FSIC) required under RA 9514 (Fire Code of the Philippines).',
-    formsHandled: [
-      'Fire Safety Evaluation Clearance (FSEC)',
-      'Fire Safety Inspection Certificate (FSIC)',
-    ],
+    formsHandled: ['FSEC for Building Permit (BFP)', 'FSIC for Occupancy Permit (BFP)'],
     documentsReviewed: [
       'Fire Safety Inspection Certificate',
       'Fire Safety Evaluation Report',
