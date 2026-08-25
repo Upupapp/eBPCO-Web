@@ -29,21 +29,62 @@ function formatPHP(centavos: number | null): string {
   return `₱${(centavos / 100).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+const ONES = [
+  '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+  'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen',
+];
+const TENS = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+const GROUPS = ['', ' Thousand', ' Million', ' Billion'];
+
+function threeDigitsToWords(value: number): string {
+  let n = value;
+  let str = '';
+  if (n >= 100) {
+    str += `${ONES[Math.floor(n / 100)]} Hundred `;
+    n %= 100;
+  }
+  if (n >= 20) {
+    str += `${TENS[Math.floor(n / 10)]} `;
+    n %= 10;
+  }
+  if (n > 0) str += `${ONES[n]} `;
+  return str.trim();
+}
+
+function pesosToWords(pesos: number): string {
+  if (pesos === 0) return 'Zero';
+  let n = Math.floor(pesos);
+  const parts: string[] = [];
+  let groupIndex = 0;
+  while (n > 0) {
+    const chunk = n % 1000;
+    if (chunk > 0) parts.unshift(`${threeDigitsToWords(chunk)}${GROUPS[groupIndex]}`);
+    n = Math.floor(n / 1000);
+    groupIndex++;
+  }
+  return parts.join(' ');
+}
+
+/** Standard Philippine peso amount-in-words phrasing, e.g. "One Thousand Two Hundred Fifty Pesos and 00/100" — the same convention printed on a real Official Receipt. */
+function amountInWords(centavos: number): string {
+  const pesos = Math.floor(centavos / 100);
+  const cents = Math.round(centavos % 100);
+  return `${pesosToWords(pesos)} Peso${pesos === 1 ? '' : 's'} and ${cents.toString().padStart(2, '0')}/100`;
+}
+
 /**
- * Renders one printable SAMPLE document (application form, assessment,
- * evaluation notice, official receipt / payment acknowledgment,
- * permit/clearance, or release form), populated entirely from the real
- * ApplicationStore/AssessmentStore records for `applicationId` — never
- * invented figures. Every document carries a persistent "SAMPLE — Not an
- * Official Document" banner and no real LGU seal/signature image, so it
- * can never be mistaken for an actual Castilla-issued document.
+ * Renders one printable document (application form, assessment, evaluation
+ * notice, official receipt / payment acknowledgment, permit/clearance, or
+ * release form), populated entirely from the real ApplicationStore/
+ * AssessmentStore records for `applicationId` — never invented figures.
  *
  * The 'official-receipt' kind is the one place the "never present a
  * placeholder OR number as an official receipt" rule is enforced: the
  * title and header both read "Payment Acknowledgment" unless the
  * transaction being shown actually carries a real, cashier-entered
  * `orNumber` (see AssessmentStore.attachOfficialReceipt) — an internally
- * generated transaction id is never substituted for one.
+ * generated transaction id is never substituted for one, and the PAID
+ * stamp only ever renders once that real OR number is on file.
  */
 @Component({
   selector: 'app-document-preview',
@@ -120,6 +161,19 @@ export class DocumentPreview {
 
   /** True only once the focused transaction carries a real, cashier-entered OR number — see the module notice above. */
   protected readonly hasOfficialReceipt = computed(() => !!this.focusedTransaction()?.orNumber);
+
+  protected readonly amountInWordsText = computed(() => {
+    const txn = this.focusedTransaction();
+    return txn ? amountInWords(txn.amountCentavos) : '';
+  });
+
+  protected readonly generatedOn = new Date().toLocaleString('en-PH', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 
   protected readonly title = computed(() => {
     if (this.kind() === 'official-receipt' && !this.hasOfficialReceipt()) {
