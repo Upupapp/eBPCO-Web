@@ -65,11 +65,13 @@ function pesosToWords(pesos: number): string {
   return parts.join(' ');
 }
 
-/** Standard Philippine peso amount-in-words phrasing, e.g. "One Thousand Two Hundred Fifty Pesos and 00/100" — the same convention printed on a real Official Receipt. */
+/** Amount-in-words phrasing with centavos spelled out (not as a "XX/100" fraction), e.g. "One Thousand Two Hundred Fifty Pesos and Fifty Centavos" — omitted entirely when there are no centavos. */
 function amountInWords(centavos: number): string {
   const pesos = Math.floor(centavos / 100);
   const cents = Math.round(centavos % 100);
-  return `${pesosToWords(pesos)} Peso${pesos === 1 ? '' : 's'} and ${cents.toString().padStart(2, '0')}/100`;
+  const pesosPart = `${pesosToWords(pesos)} Peso${pesos === 1 ? '' : 's'}`;
+  if (cents === 0) return pesosPart;
+  return `${pesosPart} and ${threeDigitsToWords(cents)} Centavo${cents === 1 ? '' : 's'}`;
 }
 
 /**
