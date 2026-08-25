@@ -41,12 +41,12 @@ describe('Fee rule catalog — official fee families per the task specification'
     }
   });
 
-  it('Electrical, Mechanical, Plumbing/Sanitary, and Electronics each require their own formula family', () => {
+  it('Electrical, Mechanical, Plumbing, Sanitary, and Electronics each require their own formula family', () => {
     const expected: [string, string][] = [
       ['Electrical Permit', 'electrical-permit-fee'],
       ['Mechanical Permit', 'mechanical-permit-fee'],
-      ['Plumbing Permit', 'plumbing-sanitary-permit-fee'],
-      ['Sanitary Permit', 'plumbing-sanitary-permit-fee'],
+      ['Plumbing Permit', 'plumbing-permit-fee'],
+      ['Sanitary Permit', 'sanitary-permit-fee'],
       ['Electronics Permit', 'electronics-permit-fee'],
     ];
     for (const [type, ruleId] of expected) {
@@ -57,27 +57,17 @@ describe('Fee rule catalog — official fee families per the task specification'
     }
   });
 
-  it('Plumbing Permit and Sanitary Permit share exactly ONE rule id — never two separately-charged plumbing lines', () => {
-    // Excludes the generic filing fee, which is legitimately "required"
-    // for every one of the 19 types — the thing under test is whether
-    // there are two independent PLUMBING-specific fee rules, not whether
-    // any required rule happens to touch these two types.
-    const plumbingRules = FEE_RULES.filter(
-      (r) =>
-        r.family.toLowerCase().includes('plumbing') &&
-        (r.applicability['Plumbing Permit'] === 'required' ||
-          r.applicability['Sanitary Permit'] === 'required'),
-    );
-    expect(plumbingRules.length).toBe(1);
-    expect(plumbingRules[0].id).toBe('plumbing-sanitary-permit-fee');
-    // And both types resolve to that same single rule instance, not two independent copies.
+  it('Plumbing Permit and Sanitary Permit are billed under two independent rule ids — matching the real Castilla Unified Application Form\'s Box 6, which lists them as separate line items', () => {
     const plumbingEntries = feeRulesForPermitType('Plumbing Permit').filter(
       (e) => e.applicability === 'required',
     );
     const sanitaryEntries = feeRulesForPermitType('Sanitary Permit').filter(
       (e) => e.applicability === 'required',
     );
-    expect(plumbingEntries.map((e) => e.rule.id)).toEqual(sanitaryEntries.map((e) => e.rule.id));
+    expect(plumbingEntries.some((e) => e.rule.id === 'plumbing-permit-fee')).toBe(true);
+    expect(sanitaryEntries.some((e) => e.rule.id === 'sanitary-permit-fee')).toBe(true);
+    // Never the same rule id doing double duty for both.
+    expect(plumbingEntries.map((e) => e.rule.id)).not.toEqual(sanitaryEntries.map((e) => e.rule.id));
   });
 
   it('Demolition, Fencing, Sign, and Excavation each require the DPWH accessory fee family, under distinct rule ids for their own physical basis', () => {
@@ -124,20 +114,71 @@ describe('Fee rule catalog — official fee families per the task specification'
     }
   });
 
-  it('Architectural, Civil / Structural, and Interior Design Permit have NO dedicated required national formula of their own — only the generic filing fee is required, per the task instruction not to invent one', () => {
+  it('Architectural, Civil / Structural, and Interior Design Permit each require their own fee line — per the real Castilla Unified Application Form\'s Box 6, which lists all three as separate assessed items', () => {
+    const expected: [string, string][] = [
+      ['Architectural Permit', 'architectural-permit-fee'],
+      ['Civil / Structural Permit', 'civil-structural-permit-fee'],
+      ['Interior Design Permit', 'interior-design-permit-fee'],
+    ];
+    for (const [type, ruleId] of expected) {
+      const entries = feeRulesForPermitType(type as (typeof ALL_PERMIT_TYPES)[number]);
+      const requiredIds = entries.filter((e) => e.applicability === 'required').map((e) => e.rule.id);
+      expect(requiredIds.sort()).toEqual(['filing-fee', ruleId].sort());
+    }
+  });
+
+  it('Building Permit sub-types conditionally carry Line and Grade and Hotworks fees, per Box 6 — line items with no confirmed rate yet', () => {
     for (const type of [
-      'Architectural Permit',
-      'Civil / Structural Permit',
-      'Interior Design Permit',
+      'Building Permit – New Construction',
+      'Building Permit – Addition / Extension',
+      'Building Permit – Renovation / Alteration',
     ] as const) {
       const entries = feeRulesForPermitType(type as (typeof ALL_PERMIT_TYPES)[number]);
-      const requiredIds = entries
-        .filter((e) => e.applicability === 'required')
-        .map((e) => e.rule.id);
-      expect(requiredIds).toEqual(['filing-fee']);
-      // No rule family is literally named after these three types.
-      expect(FEE_RULES.some((r) => r.family.toLowerCase().includes('architectural'))).toBe(false);
-      expect(FEE_RULES.some((r) => r.family.toLowerCase().includes('interior design'))).toBe(false);
+      const lineAndGrade = entries.find((e) => e.rule.id === 'line-and-grade-fee');
+      expect(lineAndGrade?.applicability).toBe('required');
+      const hotworks = entries.find((e) => e.rule.id === 'hotworks-fee');
+      expect(hotworks?.applicability).toBe('conditional');
+    }
+  });
+
+  it('Building Permit sub-types require the Locational / Zoning of Land fee, per Box 6\'s "FOR ZONING (ZONING ADMINISTRATOR)" line', () => {
+    for (const type of [
+      'Building Permit – New Construction',
+      'Building Permit – Addition / Extension',
+      'Building Permit – Renovation / Alteration',
+    ] as const) {
+      const entries = feeRulesForPermitType(type as (typeof ALL_PERMIT_TYPES)[number]);
+      expect(entries.find((e) => e.rule.id === 'locational-zoning-fee')?.applicability).toBe(
+        'required',
+      );
+    }
+  });
+
+  it('Building Permit sub-types conditionally carry Fencing, Electronics, Surcharges, and Penalties, per Box 6\'s "FOR BUILDING / STRUCTURE (OBO)" list', () => {
+    for (const type of [
+      'Building Permit – New Construction',
+      'Building Permit – Addition / Extension',
+      'Building Permit – Renovation / Alteration',
+    ] as const) {
+      const entries = feeRulesForPermitType(type as (typeof ALL_PERMIT_TYPES)[number]);
+      for (const ruleId of [
+        'fencing-accessory-fee',
+        'electronics-permit-fee',
+        'surcharges-fee',
+        'penalties-fee',
+      ]) {
+        expect(entries.find((e) => e.rule.id === ruleId)?.applicability).toBe('conditional');
+      }
+    }
+  });
+
+  it('FSEC and FSIC each conditionally carry the Hotworks fee too', () => {
+    for (const type of [
+      'FSEC for Building Permit (BFP)',
+      'FSIC for Occupancy Permit (BFP)',
+    ] as const) {
+      const entries = feeRulesForPermitType(type as (typeof ALL_PERMIT_TYPES)[number]);
+      expect(entries.find((e) => e.rule.id === 'hotworks-fee')?.applicability).toBe('conditional');
     }
   });
 });
@@ -155,7 +196,13 @@ describe('Fee rule catalog — honesty about unverified amounts', () => {
   it('every rule cites at least one source with a real URL', () => {
     for (const rule of FEE_RULES) {
       expect(rule.sources.length).toBeGreaterThan(0);
-      for (const src of rule.sources) expect(src.url).toMatch(/^https:\/\//);
+      for (const src of rule.sources) {
+        // SRC_CASTILLA_UNIFIED_FORM points at the actual official form
+        // bundled under public/assets/permits/ (obtained and reviewed in
+        // full) rather than an external https link — see its own
+        // accessNote for why that's still an honest, checkable citation.
+        expect(src.url).toMatch(/^(https:\/\/|\/assets\/permits\/)/);
+      }
     }
   });
 });

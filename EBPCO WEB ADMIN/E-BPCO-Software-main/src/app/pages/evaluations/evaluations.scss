@@ -2,7 +2,176 @@
 @use '../../shared/styles/kpi-grid';
 @use '../../shared/styles/detail-view';
 @use '../../shared/styles/menu-popover';
+@use '../../shared/styles/modal';
 @use '../../shared/styles/tokens' as *;
+
+// ---- Record view: real Documents / Timeline / Actions -----------------
+
+.record-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+
+  .revision-remarks-label {
+    padding: 0;
+    width: 100%;
+  }
+}
+
+.revision-remarks-input.inline {
+  width: auto;
+  flex: 1;
+  min-width: 200px;
+  margin: 0;
+}
+
+.btn-outline.danger {
+  border-color: $color-danger;
+  color: $color-danger;
+
+  &:hover {
+    background: $color-danger-bg-soft;
+    border-color: $color-danger;
+    color: $color-danger;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ---- Document preview modal (mirrors applications.scss's own doc-preview
+// sheet — kept as a duplicate small stylesheet rather than a shared
+// partial, matching the same local-component precedent as the preview
+// signal/methods themselves in evaluations.ts) ---------------------------
+
+.doc-preview-box {
+  max-width: 420px;
+  text-align: left;
+
+  h2 {
+    font-size: 1.05rem;
+    margin: 0 0 0.2rem;
+  }
+}
+
+.doc-preview-filename {
+  margin: 0 0 1.25rem;
+  font-size: 0.82rem;
+  color: $color-ink-300;
+}
+
+.doc-preview-sheet {
+  position: relative;
+  background: $color-bg-subtle;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  padding: 1.4rem 1.5rem;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+
+  h3 {
+    margin: 0.9rem 0 0.9rem;
+    font-size: 0.92rem;
+    text-align: center;
+    color: $color-ink-900;
+  }
+}
+
+.sheet-watermark {
+  position: absolute;
+  top: 0.9rem;
+  right: -2rem;
+  transform: rotate(30deg);
+  padding: 0.2rem 2.5rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: $color-success;
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.55;
+
+  &.pending,
+  &.for-review {
+    color: $color-warning;
+  }
+
+  &.return,
+  &.reject,
+  &.missing {
+    color: $color-danger;
+  }
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid $color-border;
+
+  strong {
+    display: block;
+    font-size: 0.82rem;
+    color: $color-ink-900;
+  }
+
+  span {
+    font-size: 0.74rem;
+    color: $color-ink-300;
+  }
+}
+
+.sheet-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.35rem 0;
+  font-size: 0.78rem;
+
+  span {
+    color: $color-ink-300;
+  }
+
+  strong {
+    color: $color-ink-700;
+    font-weight: 700;
+    text-align: right;
+  }
+}
+
+.eval-action-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: $radius-md;
+  background: $color-warning-bg-soft;
+  color: $color-warning;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+
+  span {
+    flex: 1;
+  }
+}
+
+.eval-action-error-dismiss {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0.1rem;
+}
 
 .revision-remarks-label {
   display: block;

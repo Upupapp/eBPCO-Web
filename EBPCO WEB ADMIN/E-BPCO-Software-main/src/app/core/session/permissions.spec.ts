@@ -47,6 +47,15 @@ describe('ACTION_PERMISSIONS — payment-assessment workflow enforcement', () =>
   });
 });
 
+describe('ACTION_PERMISSIONS — application approval', () => {
+  it('approveApplication (the Applications detail page\'s "Mark Approved" quick action) is limited to Super Admin, Administrator, and Approving Officer — same tier as generatePermit, never an Evaluator', () => {
+    const allowed = allowedRoles(ACTION_PERMISSIONS.approveApplication);
+    expect(allowed).toEqual(['Super Admin', 'Administrator', 'Approving Officer']);
+    expect(ACTION_PERMISSIONS.approveApplication('Evaluator')).toBe(false);
+    for (const role of allowed) expect(ACTION_PERMISSIONS.generatePermit(role)).toBe(true);
+  });
+});
+
 describe('ACTION_PERMISSIONS — permit-type requirements configuration', () => {
   it('configureRequirements (Permit Release > Permit Types document-checklist edits) is limited to Super Admin and Administrator — even a Releasing Officer, who can reach the page, cannot edit', () => {
     const allowed = allowedRoles(ACTION_PERMISSIONS.configureRequirements);

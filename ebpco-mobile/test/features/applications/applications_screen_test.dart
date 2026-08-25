@@ -14,12 +14,15 @@ import 'package:ebpco_user_app/core/providers/electrical_permit_provider.dart';
 import 'package:ebpco_user_app/core/providers/electronics_permit_provider.dart';
 import 'package:ebpco_user_app/core/providers/excavation_permit_provider.dart';
 import 'package:ebpco_user_app/core/providers/fencing_permit_provider.dart';
+import 'package:ebpco_user_app/core/providers/fsec_permit_provider.dart';
+import 'package:ebpco_user_app/core/providers/fsic_permit_provider.dart';
 import 'package:ebpco_user_app/core/providers/interior_design_permit_provider.dart';
 import 'package:ebpco_user_app/core/providers/mechanical_permit_provider.dart';
 import 'package:ebpco_user_app/core/providers/plumbing_permit_provider.dart';
 import 'package:ebpco_user_app/core/providers/renovation_permit_provider.dart';
 import 'package:ebpco_user_app/core/providers/sanitary_plumbing_permit_provider.dart';
 import 'package:ebpco_user_app/core/providers/sign_permit_provider.dart';
+import 'package:ebpco_user_app/core/providers/zoning_permit_provider.dart';
 import 'package:ebpco_user_app/features/applications/presentation/addition_extension_permit/addition_extension_permit_wizard_screen.dart';
 import 'package:ebpco_user_app/features/applications/presentation/applications_screen.dart';
 import 'package:ebpco_user_app/features/applications/presentation/architectural_permit/architectural_permit_wizard_screen.dart';
@@ -31,12 +34,15 @@ import 'package:ebpco_user_app/features/applications/presentation/electrical_per
 import 'package:ebpco_user_app/features/applications/presentation/electronics_permit/electronics_permit_wizard_screen.dart';
 import 'package:ebpco_user_app/features/applications/presentation/excavation_permit/excavation_permit_wizard_screen.dart';
 import 'package:ebpco_user_app/features/applications/presentation/fencing_permit/fencing_permit_wizard_screen.dart';
+import 'package:ebpco_user_app/features/applications/presentation/fsec_permit/fsec_permit_wizard_screen.dart';
+import 'package:ebpco_user_app/features/applications/presentation/fsic_permit/fsic_permit_wizard_screen.dart';
 import 'package:ebpco_user_app/features/applications/presentation/interior_design_permit/interior_design_permit_wizard_screen.dart';
 import 'package:ebpco_user_app/features/applications/presentation/mechanical_permit/mechanical_permit_wizard_screen.dart';
 import 'package:ebpco_user_app/features/applications/presentation/plumbing_permit/plumbing_permit_wizard_screen.dart';
 import 'package:ebpco_user_app/features/applications/presentation/renovation_permit/renovation_permit_wizard_screen.dart';
 import 'package:ebpco_user_app/features/applications/presentation/sanitary_plumbing_permit/sanitary_plumbing_permit_wizard_screen.dart';
 import 'package:ebpco_user_app/features/applications/presentation/sign_permit/sign_permit_wizard_screen.dart';
+import 'package:ebpco_user_app/features/applications/presentation/zoning_permit/zoning_permit_wizard_screen.dart';
 
 Widget _wrapWithRouter() {
   final router = GoRouter(
@@ -67,6 +73,10 @@ Widget _wrapWithRouter() {
       GoRoute(
         path: '/applications/new/demolition-permit',
         builder: (context, state) => const DemolitionPermitWizardScreen(),
+      ),
+      GoRoute(
+        path: '/applications/new/zoning-permit',
+        builder: (context, state) => const ZoningPermitWizardScreen(),
       ),
       GoRoute(
         path: '/applications/new/architectural-permit',
@@ -116,9 +126,17 @@ Widget _wrapWithRouter() {
         builder: (context, state) => const ExcavationPermitWizardScreen(),
       ),
       GoRoute(
+        path: '/applications/new/fsec-permit',
+        builder: (context, state) => const FsecPermitWizardScreen(),
+      ),
+      GoRoute(
         path: '/applications/new/certificate-of-occupancy',
         builder: (context, state) =>
             const CertificateOfOccupancyWizardScreen(),
+      ),
+      GoRoute(
+        path: '/applications/new/fsic-permit',
+        builder: (context, state) => const FsicPermitWizardScreen(),
       ),
     ],
   );
@@ -172,6 +190,15 @@ Widget _wrapWithRouter() {
       ),
       ChangeNotifierProvider<CertificateOfOccupancyProvider>(
         create: (_) => CertificateOfOccupancyProvider(),
+      ),
+      ChangeNotifierProvider<ZoningPermitProvider>(
+        create: (_) => ZoningPermitProvider(),
+      ),
+      ChangeNotifierProvider<FsecPermitProvider>(
+        create: (_) => FsecPermitProvider(),
+      ),
+      ChangeNotifierProvider<FsicPermitProvider>(
+        create: (_) => FsicPermitProvider(),
       ),
     ],
     child: MaterialApp.router(routerConfig: router),
@@ -281,6 +308,30 @@ void main() {
     expect(find.text('Applicant Information'), findsOneWidget);
     expect(find.text('Demolition'), findsWidgets);
   });
+
+  testWidgets(
+    'Zoning / Locational Clearance opens the Zoning wizard at Step 1',
+    (tester) async {
+      await useTallSurface(tester);
+      await tester.pumpWidget(_wrapWithRouter());
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(
+        find.text('Zoning / Locational Clearance'),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Zoning / Locational Clearance'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      expect(
+        find.widgetWithText(AppBar, 'Zoning / Locational Clearance'),
+        findsOneWidget,
+      );
+      expect(find.text('Step 1 of 4'), findsOneWidget);
+      expect(find.text('Applicant Information'), findsWidgets);
+    },
+  );
 
   testWidgets(
     'Architectural opens the Architectural Permit wizard at Step 1',
@@ -537,6 +588,30 @@ void main() {
   );
 
   testWidgets(
+    'FSEC for Building Permit (BFP) opens the FSEC wizard at Step 1',
+    (tester) async {
+      await useTallSurface(tester);
+      await tester.pumpWidget(_wrapWithRouter());
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(
+        find.text('FSEC for Building Permit (BFP)'),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('FSEC for Building Permit (BFP)'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      expect(
+        find.widgetWithText(AppBar, 'FSEC for Building Permit (BFP)'),
+        findsOneWidget,
+      );
+      expect(find.text('Step 1 of 6'), findsOneWidget);
+      expect(find.text('Related Building Permit'), findsWidgets);
+    },
+  );
+
+  testWidgets(
     'Certificate of Occupancy opens the Certificate of Occupancy wizard at Step 1',
     (tester) async {
       await useTallSurface(tester);
@@ -555,6 +630,30 @@ void main() {
       );
       expect(find.text('Step 1 of 5'), findsOneWidget);
       expect(find.text('Related Building Permit'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'FSIC for Occupancy Permit (BFP) opens the FSIC wizard at Step 1',
+    (tester) async {
+      await useTallSurface(tester);
+      await tester.pumpWidget(_wrapWithRouter());
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(
+        find.text('FSIC for Occupancy Permit (BFP)'),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('FSIC for Occupancy Permit (BFP)'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      expect(
+        find.widgetWithText(AppBar, 'FSIC for Occupancy Permit (BFP)'),
+        findsOneWidget,
+      );
+      expect(find.text('Step 1 of 5'), findsOneWidget);
+      expect(find.text('Related Occupancy Permit'), findsWidgets);
     },
   );
 }

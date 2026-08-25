@@ -5,15 +5,19 @@ import {
   requirementsFor,
 } from './requirements-catalog';
 
-// The 3 new BFP/zoning types added in the 19-item catalog rework carry
-// honest sourcing that has nothing to do with Puerto Princesa's OCBO
-// checklist (used only as a structural reference for the building-code
-// types) — they need their own assertions rather than being forced
-// through the Puerto-Princesa-specific checks below.
+// Types whose documentary requirements are built directly from a real,
+// bundled Castilla/BFP Castilla form (CASTILLA_OFFICIAL_FORM_VERIFIED —
+// see requirements-catalog.ts) rather than a national-law baseline, a
+// same-format sample, or a pending placeholder. They carry honest sourcing
+// that has nothing to do with Puerto Princesa's OCBO checklist (used only
+// as a structural reference for the still-unverified building-code types)
+// — they need their own assertions rather than being forced through the
+// Puerto-Princesa-specific checks below.
 const NEW_BFP_ZONING_TYPES: PermitType[] = [
   'Zoning / Locational Clearance',
   'FSEC for Building Permit (BFP)',
   'FSIC for Occupancy Permit (BFP)',
+  'Building Permit – New Construction',
 ];
 const PUERTO_PRINCESA_REFERENCED_TYPES = ALL_PERMIT_TYPES.filter(
   (t) => !NEW_BFP_ZONING_TYPES.includes(t),
@@ -65,11 +69,11 @@ describe('Requirements catalog — per-entry shape', () => {
     }
   });
 
-  // Zoning/FSEC/FSIC are the only 3 entries built directly from an actual
-  // Castilla/BFP Castilla form obtained and reviewed in full (see
-  // requirements-catalog.ts's CASTILLA_OFFICIAL_FORM_VERIFIED sources) —
-  // every other entry stays unverified/pending until Castilla's own office
-  // confirms it directly.
+  // Zoning/FSEC/FSIC/Building Permit – New Construction are the only 4
+  // entries built directly from an actual Castilla/BFP Castilla form
+  // obtained and reviewed in full (see requirements-catalog.ts's
+  // CASTILLA_OFFICIAL_FORM_VERIFIED sources) — every other entry stays
+  // unverified/pending until Castilla's own office confirms it directly.
   const CASTILLA_FORM_VERIFIED_TYPES: PermitType[] = NEW_BFP_ZONING_TYPES;
   const NOT_YET_CASTILLA_VERIFIED_TYPES = ALL_PERMIT_TYPES.filter(
     (t) => !CASTILLA_FORM_VERIFIED_TYPES.includes(t),
@@ -81,7 +85,7 @@ describe('Requirements catalog — per-entry shape', () => {
     }
   });
 
-  it('Zoning, FSEC, and FSIC are marked verified — built directly from the actual Castilla/BFP Castilla forms on hand', () => {
+  it('Zoning, FSEC, FSIC, and Building Permit – New Construction are marked verified — built directly from the actual Castilla/BFP Castilla forms on hand', () => {
     for (const type of CASTILLA_FORM_VERIFIED_TYPES) {
       expect(requirementsFor(type).verified).toBe(true);
     }
@@ -118,7 +122,7 @@ describe('Requirements catalog — per-entry shape', () => {
     }
   });
 
-  it('Zoning, FSEC, and FSIC each carry a CASTILLA_OFFICIAL_FORM_VERIFIED source instead — the gap is closed, not just pending', () => {
+  it('Zoning, FSEC, FSIC, and Building Permit – New Construction each carry a CASTILLA_OFFICIAL_FORM_VERIFIED source instead — the gap is closed, not just pending', () => {
     for (const type of CASTILLA_FORM_VERIFIED_TYPES) {
       const sources = requirementsFor(type).sources;
       expect(sources.some((s) => s.verificationStatus === 'CASTILLA_OFFICIAL_FORM_VERIFIED')).toBe(

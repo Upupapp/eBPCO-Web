@@ -357,6 +357,16 @@
       }
     </div>
   }
+
+  @if (dropError(); as message) {
+    <div class="drop-error-banner" role="alert">
+      <app-icon name="alert-triangle" [size]="16" />
+      <span>{{ message }}</span>
+      <button type="button" class="drop-error-dismiss" aria-label="Dismiss" (click)="dismissDropError()">
+        &#10005;
+      </button>
+    </div>
+  }
 </section>
 
 @if (pendingReject(); as pending) {

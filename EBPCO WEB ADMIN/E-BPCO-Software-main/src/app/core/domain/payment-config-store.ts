@@ -1,5 +1,10 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { DEFAULT_PAYMENT_METHODS, PaymentMethodConfig } from './payment-config.model';
+import {
+  DEFAULT_BANK_INFO,
+  DEFAULT_PAYMENT_METHODS,
+  OfficeBankInfo,
+  PaymentMethodConfig,
+} from './payment-config.model';
 import { FEE_RULES, FeeRule, feeMatrixFor, feeRulesForPermitType } from './fee-rule.model';
 import { PermitType } from './permit.model';
 
@@ -22,10 +27,12 @@ function formatDate(d: Date): string {
 export class PaymentConfigStore {
   private readonly _feeRules = signal<FeeRule[]>(FEE_RULES);
   private readonly _methods = signal<PaymentMethodConfig[]>(DEFAULT_PAYMENT_METHODS);
+  private readonly _bankInfo = signal<OfficeBankInfo>(DEFAULT_BANK_INFO);
   private nextRuleSeq = 1000;
 
   readonly feeRules = this._feeRules.asReadonly();
   readonly methods = this._methods.asReadonly();
+  readonly bankInfo = this._bankInfo.asReadonly();
 
   readonly activeFeeRules = computed(() => this._feeRules().filter((r) => r.active));
   readonly activeMethods = computed(() => this._methods().filter((m) => m.active));
@@ -107,5 +114,13 @@ export class PaymentConfigStore {
 
   setMethodActive(id: string, active: boolean): void {
     this.updateMethod(id, { active });
+  }
+
+  updateBankInfo(patch: Omit<OfficeBankInfo, 'lastUpdated' | 'lastUpdatedBy'>, actor: string): void {
+    this._bankInfo.set({
+      ...patch,
+      lastUpdated: formatDate(new Date()),
+      lastUpdatedBy: actor,
+    });
   }
 }

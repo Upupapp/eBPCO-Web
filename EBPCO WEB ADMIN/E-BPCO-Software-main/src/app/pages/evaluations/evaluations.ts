@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Topbar } from '../../shared/topbar/topbar';
 import { Icon } from '../../shared/icon/icon';
 import { Avatar } from '../../shared/avatar/avatar';
@@ -10,17 +11,42 @@ import { FilterPanel } from '../../shared/filter-panel/filter-panel';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { SessionService } from '../../core/session/session.service';
-import { EvaluationStage } from '../../core/domain/status.model';
+import { EVALUATION_STAGE_ORDER, EvaluationStage } from '../../core/domain/status.model';
 import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
+import { ApplicationRecord } from '../../core/domain/application.model';
+import { Applicant } from '../../core/domain/applicant.model';
+import { ApplicationDocument } from '../../core/domain/document.model';
+import { requirementsFor } from '../../core/domain/requirements-catalog';
+import { departmentName } from '../../core/domain/department.model';
 import {
   buildEvalTypeCards,
   buildEvalRows,
   buildEvalRingStats,
   STAGE_TABS,
   EvalTypeCard,
+  EvalTypeKey,
   EvalRow,
   Stage,
 } from './evaluations-data';
+
+/** One row of the record view's real Documents Checklist — read-only here (Accept/Reject stays an Applications-Documents-tab-only action). A required requirement with no uploaded row yet shows up as a synthetic "Missing" row rather than silently not appearing. */
+interface RecordDocumentRow {
+  requirementId: string;
+  label: string;
+  required: boolean;
+  departmentName: string;
+  doc: ApplicationDocument | null;
+}
+
+/** One step of the record view's real 5-stage evaluation stepper — `result`/`evaluatorLabel` are null until that stage has actually been evaluated at least once. */
+interface RecordEvalStep {
+  stage: EvaluationStage;
+  result: 'Pending' | 'Passed' | 'Revision Required' | 'Rejected' | null;
+  /** "{evaluator}, {evaluatedAt}" (or just the evaluator name if no date) — precomputed here so the template never nests an `@if` inside an interpolation. */
+  evaluatorLabel: string | null;
+  isCurrent: boolean;
+  isDone: boolean;
+}
 
 type View = 'list' | 'detail' | 'record';
 
@@ -55,7 +81,7 @@ const STEP_TONE_ACCENT: Record<KpiTone, string> = {
 
 @Component({
   selector: 'app-evaluations',
-  imports: [Topbar, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel],
+  imports: [Topbar, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, OverlayModule],
   templateUrl: './evaluations.html',
   styleUrl: './evaluations.scss',
 })
@@ -68,6 +94,12 @@ export class Evaluations {
   // app.config.ts) so a link like `/evaluations?stage=zoning` lands
   // directly on that stage's detail view, e.g. from a dashboard stage row.
   readonly stage = input<string>();
+
+  // Bound to the `?applicationId=` query param — lets Applications' own
+  // "Evaluate" button link straight to one application's real evaluation
+  // record here, instead of hosting a second, duplicate review screen
+  // itself (see applyApplicationIdParam below).
+  readonly applicationId = input<string>();
 
   // Card counts, rows, and ring totals all read from the same
   // store-backed application pool every other page uses — a card's count
@@ -137,6 +169,102 @@ export class Evaluations {
     return STEP_TONE_ACCENT[tone];
   }
 
+  // ---- Record view: real data (documents, stepper, timeline) -----------
+  // Replaces the old Applications-page "Evaluate" flow's mock
+  // EVAL_CARDS/EVAL_DETAILS content — every field below reads straight off
+  // ApplicationStore instead of a hardcoded placeholder record.
+
+  protected readonly recordApplication = computed<ApplicationRecord | null>(() => {
+    const row = this.selectedRow();
+    return row ? (this.store.getById(row.id) ?? null) : null;
+  });
+
+  protected readonly recordApplicant = computed<Applicant | null>(() => {
+    const app = this.recordApplication();
+    return app ? (this.store.getApplicant(app.applicantId) ?? null) : null;
+  });
+
+  protected readonly recordDocumentRows = computed<RecordDocumentRow[]>(() => {
+    const app = this.recordApplication();
+    if (!app) return [];
+    const requirements = requirementsFor(app.permitType).documents;
+    const stored = this.store.getDocuments(app.id);
+    const byRequirement = new Map(stored.map((d) => [d.requirementId, d]));
+    return requirements.map((req) => ({
+      requirementId: req.id,
+      label: req.label,
+      required: req.required,
+      departmentName: departmentName(req.reviewingDepartmentId),
+      doc: byRequirement.get(req.id) ?? null,
+    }));
+  });
+
+  protected readonly recordMissingRequiredCount = computed(
+    () => this.recordDocumentRows().filter((r) => r.required && !r.doc).length,
+  );
+
+  protected readonly recordEvaluationSteps = computed<RecordEvalStep[]>(() => {
+    const app = this.recordApplication();
+    if (!app) return [];
+    const records = this.store.getEvaluations(app.id);
+    const currentIdx = EVALUATION_STAGE_ORDER.indexOf(app.evaluationStage);
+    return EVALUATION_STAGE_ORDER.map((stage, idx) => {
+      const stageRecords = records.filter((r) => r.stage === stage);
+      const latest =
+        stageRecords.length > 0
+          ? stageRecords.reduce((a, b) =>
+              (b.evaluatedAtValue?.getTime() ?? 0) > (a.evaluatedAtValue?.getTime() ?? 0) ? b : a,
+            )
+          : null;
+      const evaluatorLabel = latest
+        ? latest.evaluatedAt
+          ? `${latest.evaluator}, ${latest.evaluatedAt}`
+          : latest.evaluator
+        : null;
+      return {
+        stage,
+        result: latest?.result ?? null,
+        evaluatorLabel,
+        isCurrent: idx === currentIdx,
+        isDone: idx < currentIdx,
+      };
+    });
+  });
+
+  protected readonly recordAuditTrail = computed(() => {
+    const row = this.selectedRow();
+    return row ? this.store.getAuditTrail(row.id) : [];
+  });
+
+  // ---- Record view: document preview modal ------------------------------
+  // Mirrors applications.ts's own `previewItem`/`closeDocPreview`/
+  // `downloadPreviewDoc` (its real Documents-tab preview) — kept local
+  // here rather than extracted into a shared component, matching that
+  // existing precedent.
+
+  protected readonly previewItem = signal<{
+    label: string;
+    filename: string;
+    status: string;
+  } | null>(null);
+
+  protected openDocPreview(r: RecordDocumentRow): void {
+    if (!r.doc) return;
+    this.previewItem.set({ label: r.label, filename: r.doc.fileName, status: r.doc.status });
+  }
+
+  protected closeDocPreview(): void {
+    this.previewItem.set(null);
+  }
+
+  protected downloadPreviewDoc(): void {
+    const doc = this.previewItem();
+    if (!doc) return;
+    downloadCsv(`document-${doc.label.replace(/\s+/g, '-').toLowerCase()}`, [
+      { Document: doc.label, File: doc.filename, Status: doc.status },
+    ]);
+  }
+
   openCard(card: EvalTypeCard): void {
     this.selectedCard.set(card);
     this.activeStage.set('pending-review');
@@ -154,6 +282,24 @@ export class Evaluations {
       this.appliedStageParam = true;
       this.openCard(card);
     }
+  });
+
+  private appliedApplicationIdParam = false;
+  private readonly applyApplicationIdParam = effect(() => {
+    const id = this.applicationId();
+    if (!id || this.appliedApplicationIdParam) return;
+    const app = this.store.getById(id);
+    if (!app) return;
+    const cardKey = (Object.entries(EVAL_KEY_TO_APP_STAGE) as [EvalTypeKey, EvaluationStage][]).find(
+      ([, stage]) => stage === app.evaluationStage,
+    )?.[0];
+    const card = cardKey && this.cards().find((c) => c.key === cardKey);
+    if (!card) return;
+    const row = buildEvalRows(this.applications(), card.key).find((r) => r.id === id);
+    if (!row) return;
+    this.appliedApplicationIdParam = true;
+    this.selectedCard.set(card);
+    this.openRecord(row);
   });
 
   selectStage(stage: Stage): void {
@@ -190,8 +336,35 @@ export class Evaluations {
   protected readonly openMenuFor = signal<string | null>(null);
   protected readonly revisionRemarks = signal('');
 
+  // The per-row "more actions" menu is rendered via CDK Overlay, in its
+  // own signal, rather than sharing `openMenuFor` with the header menu —
+  // this row lives inside `.table-wrap` (overflow-x: auto), which was
+  // clipping the old absolutely-positioned `.menu-panel` and forcing a
+  // scroll to see it. The overlay renders into its own top-level
+  // container instead, so it always floats above everything. Mirrors
+  // payments.ts's `openMenuTxnId`/`txnMenuPositions` pattern. The header
+  // menu (toggleHeaderMenu) isn't inside any scrollable ancestor and
+  // keeps using the original in-flow `.menu-panel` via `openMenuFor`.
+  protected readonly openRowMenuId = signal<string | null>(null);
+
+  protected readonly rowMenuPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 4 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -4 },
+  ];
+
   protected toggleRowMenu(row: EvalRow): void {
-    this.openMenuFor.update((current) => (current === row.id ? null : row.id));
+    this.openRowMenuId.update((current) => {
+      const next = current === row.id ? null : row.id;
+      // Reset the shared remarks field whenever a *different* row's menu
+      // opens — this field used to carry over whatever text was left in
+      // it from the previously-opened row (nothing cleared it except a
+      // successful submit), so leftover remarks from one application
+      // could silently get attached to a completely different one's
+      // "Return for Revision" if a staffer didn't notice the box was
+      // already pre-filled.
+      if (next !== null && next !== current) this.revisionRemarks.set('');
+      return next;
+    });
   }
 
   protected toggleHeaderMenu(): void {
@@ -200,6 +373,12 @@ export class Evaluations {
 
   protected closeMenu(): void {
     this.openMenuFor.set(null);
+    this.openRowMenuId.set(null);
+  }
+
+  /** cdkConnectedOverlay only emits keydown events while the overlay is open — Escape is the one key it doesn't already close on by itself. */
+  protected onRowMenuKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') this.closeMenu();
   }
 
   // Real mutations now go through the store's validated
@@ -207,11 +386,20 @@ export class Evaluations {
   // lifecycle status — the row disappears from this stage/tab because the
   // underlying application really moved, not because a local-only field
   // changed.
+  /** Surfaces a `recordEvaluation` refusal — e.g. Advance Stage on a row that's genuinely Rejected/Revision Required (every row in the "Returned" tab is), which the store now refuses rather than silently force-passing. */
+  protected readonly actionError = signal<string | null>(null);
+
   protected advanceStage(row: EvalRow): void {
     const card = this.selectedCard();
     if (!card) return;
+    this.actionError.set(null);
     const actor = this.session.name() || 'Staff';
-    this.store.recordEvaluation(row.id, EVAL_KEY_TO_APP_STAGE[card.key], 'Passed', actor);
+    const ok = this.store.recordEvaluation(row.id, EVAL_KEY_TO_APP_STAGE[card.key], 'Passed', actor);
+    if (!ok) {
+      this.actionError.set(
+        `Can't advance ${row.applicant}'s application — it's currently Rejected or Revision Required, not actively Under Evaluation. Open it in Applications to see its real status.`,
+      );
+    }
     this.closeMenu();
   }
 
@@ -220,6 +408,7 @@ export class Evaluations {
     if (!card) return;
     const remarks = this.revisionRemarks().trim();
     if (!remarks) return;
+    this.actionError.set(null);
     const actor = this.session.name() || 'Staff';
     const ok = this.store.recordEvaluation(
       row.id,
@@ -228,7 +417,13 @@ export class Evaluations {
       actor,
       remarks,
     );
-    if (ok) this.revisionRemarks.set('');
+    if (ok) {
+      this.revisionRemarks.set('');
+    } else {
+      this.actionError.set(
+        `Can't return ${row.applicant}'s application for revision from its current status.`,
+      );
+    }
     this.closeMenu();
   }
 

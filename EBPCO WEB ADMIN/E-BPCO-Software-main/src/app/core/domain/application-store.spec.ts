@@ -255,7 +255,12 @@ describe('ApplicationStore — status transitions', () => {
   });
 
   it('recordEvaluation requires remarks for Revision Required and Rejected results', () => {
-    const app = store.applications().find((a) => a.evaluationResult === 'Pending');
+    // Must genuinely be 'Under Evaluation' — that's the only lifecycle
+    // status Revision Required is a legal transition from among the
+    // seed's likely candidates (Document Verification/For Approval also
+    // qualify, but Under Evaluation is the common case and what
+    // evaluationStage/evaluationResult actually describe).
+    const app = store.applications().find((a) => a.lifecycleStatus === 'Under Evaluation');
     if (!app) return;
     expect(store.recordEvaluation(app.id, app.evaluationStage, 'Revision Required', 'Tester')).toBe(
       false,
@@ -269,6 +274,31 @@ describe('ApplicationStore — status transitions', () => {
         'Missing document',
       ),
     ).toBe(true);
+  });
+
+  it('recordEvaluation refuses to force-pass a stage once the application is already Rejected/Revision Required — it must not silently corrupt evaluationStage/evaluationResult out of sync with the real lifecycleStatus', () => {
+    const app = store.applications().find((a) => a.lifecycleStatus === 'Under Evaluation');
+    if (!app) return;
+    const sentBack = store.recordEvaluation(
+      app.id,
+      app.evaluationStage,
+      'Revision Required',
+      'Tester',
+      'Needs fixing',
+    );
+    expect(sentBack).toBe(true);
+    expect(store.getById(app.id)!.lifecycleStatus).toBe('Revision Required');
+
+    // This is the exact scenario the Evaluations page's "Advance Stage"
+    // menu item used to allow: a row genuinely sitting in the "Returned"
+    // tab (Revision Required) getting force-passed anyway.
+    const before = store.getById(app.id)!;
+    const forcedPass = store.recordEvaluation(app.id, before.evaluationStage, 'Passed', 'Tester');
+    expect(forcedPass).toBe(false);
+    const after = store.getById(app.id)!;
+    expect(after.lifecycleStatus).toBe('Revision Required');
+    expect(after.evaluationStage).toBe(before.evaluationStage);
+    expect(after.evaluationResult).toBe(before.evaluationResult);
   });
 });
 
@@ -841,6 +871,16 @@ describe('ApplicationStore — permit generation', () => {
     expect(permit.approvingOfficial).toBe('Engr. Test Officer');
     expect(permit.approvingOffice).toBeTruthy();
     expect(store.getById(app.id)!.lifecycleStatus).toBe('Ready for Release');
+    // Regression guard: transitionStatus used to only ever write
+    // lifecycleStatus, never the separate permitReleaseStatus field —
+    // seed data hand-computed both together, masking that the live
+    // generatePermit() path left permitReleaseStatus stuck at
+    // 'Not Ready' forever. permit-release.ts's Release Queue filters on
+    // `permitReleaseStatus !== 'Not Ready'`, so a real (non-seeded)
+    // application could reach 'Ready for Release' with a real permit
+    // and still never appear in the Release Queue at all — no error,
+    // no button, just silently invisible.
+    expect(store.getById(app.id)!.permitReleaseStatus).toBe('Ready for Release');
   });
 
   it('refuses to generate a second permit for the same application', () => {
@@ -1133,6 +1173,10 @@ describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
     const permit = store.getPermit(record.id)!;
     expect(permit.permitNumber).toBeTruthy();
     expect(store.getById(record.id)!.lifecycleStatus).toBe('Ready for Release');
+    // This is the exact scenario the permitReleaseStatus regression above
+    // guards — a real, freshly-created (not seeded) application must
+    // actually become visible in the Permit Release Queue at this point.
+    expect(store.getById(record.id)!.permitReleaseStatus).toBe('Ready for Release');
 
     // 15-17. Permit released; release + receipt recorded.
     expect(

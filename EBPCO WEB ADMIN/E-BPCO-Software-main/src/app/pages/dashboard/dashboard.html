@@ -165,7 +165,7 @@
       <div class="status-body">
         <div class="status-chart">
           <app-donut-chart
-            [segments]="statusSegments"
+            [segments]="statusSegments()"
             [size]="212"
             [ringWidth]="29"
             [showLabels]="false"
@@ -174,7 +174,7 @@
           />
         </div>
         <ul class="status-legend">
-          @for (seg of statusSegments; track seg.label) {
+          @for (seg of statusSegments(); track seg.label) {
             <li>
               <span class="legend-head"><i [style.background]="seg.color"></i>{{ seg.label }}</span>
               <span class="legend-value">
@@ -218,8 +218,8 @@
     </div>
 
     <div class="overview-legend">
-      <span><i style="background: #2563eb"></i>New Application: <strong>50</strong></span>
-      <span><i style="background: #f59e0b"></i>Approved Application: <strong>500</strong></span>
+      <span><i style="background: #2563eb"></i>New Application: <strong>{{ newApplicationCount() }}</strong></span>
+      <span><i style="background: #f59e0b"></i>Approved Application: <strong>{{ approvedApplicationCount() }}</strong></span>
     </div>
 
     <app-area-chart />

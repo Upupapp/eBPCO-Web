@@ -226,6 +226,27 @@
         </div>
         <div class="header-actions">
           <span class="status-pill" [class]="statusClass(a.status)">{{ a.status }}</span>
+          @if (latestReceiptTransaction(); as t) {
+            <button
+              type="button"
+              class="btn-outline"
+              title="View the official receipt for this payment"
+              (click)="openEmbeddedReceipt(t)"
+            >
+              <app-icon name="file-check" [size]="15" />
+              View Receipt
+            </button>
+          } @else if (verifiedTxnMissingOr(); as t) {
+            <button
+              type="button"
+              class="btn-outline"
+              title="No official receipt yet — attach the OR number issued by the Treasurer's Office to make it viewable"
+              (click)="openOrForm(t)"
+            >
+              <app-icon name="file-check" [size]="15" />
+              Attach OR Number
+            </button>
+          }
           @if (selectedAssessmentApp(); as app) {
             <button type="button" class="btn-outline" (click)="openApplicationRecord(app.id)">
               View Application
@@ -381,9 +402,9 @@
                 <col style="width: 16%" />
                 <col style="width: 8%" />
                 <col style="width: 9%" />
-                <col style="width: 22%" />
+                <col style="width: 16%" />
                 <col style="width: 10%" />
-                <col style="width: 12%" />
+                <col style="width: 18%" />
                 <col style="width: 11%" />
                 <col style="width: 12%" />
               </colgroup>
@@ -438,6 +459,17 @@
                       }
                       @if (t.status === 'Verified' && !t.isVoid) {
                         <div class="txn-actions">
+                          @if (t.orNumber) {
+                            <button
+                              type="button"
+                              class="btn-chip info"
+                              title="View the official receipt for this payment"
+                              (click)="openEmbeddedReceipt(t)"
+                            >
+                              <app-icon name="file-check" [size]="14" />
+                              View Receipt
+                            </button>
+                          }
                           @if (!t.orNumber || canAdjustPayment()) {
                             <button
                               type="button"
@@ -910,6 +942,20 @@
 
   <!-- ============================== CONFIGURATION ============================== -->
   @if (activeTab() === 'configuration' && canConfigurePayments()) {
+    <nav class="tab-nav">
+      @for (t of configSubTabs; track t.key) {
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="configSubTab() === t.key"
+          (click)="configSubTab.set(t.key)"
+        >
+          {{ t.label }}
+        </button>
+      }
+    </nav>
+
+    @if (configSubTab() === 'fee-rules') {
     <section class="settings-section">
       <h3>Fee Rules</h3>
       <p class="muted-sub">
@@ -995,7 +1041,9 @@
         </table>
       </div>
     </section>
+    }
 
+    @if (configSubTab() === 'payment-methods') {
     <section class="settings-section">
       <h3>Payment Methods</h3>
       <p class="muted-sub">
@@ -1033,6 +1081,209 @@
         </table>
       </div>
     </section>
+    }
+
+    @if (configSubTab() === 'bank-information') {
+      <section class="settings-section">
+        <h3>Bank Information</h3>
+        <p class="muted-sub">
+          The office's own receiving-bank account — shown to applicants who choose "Bank Payment"
+          as their method, and used to verify a submitted proof-of-payment actually matches the
+          right account.
+        </p>
+
+        @if (!editingBankInfo()) {
+          @if (bankInfo().accountNumber) {
+            <dl class="info-grid with-dividers">
+              <div>
+                <dt>Bank Name</dt>
+                <dd>{{ bankInfo().bankName }}</dd>
+              </div>
+              <div>
+                <dt>Account Name</dt>
+                <dd>{{ bankInfo().accountName }}</dd>
+              </div>
+              <div>
+                <dt>Account Number</dt>
+                <dd>{{ bankInfo().accountNumber }}</dd>
+              </div>
+              <div>
+                <dt>Branch</dt>
+                <dd>{{ bankInfo().branch || 'Not provided' }}</dd>
+              </div>
+            </dl>
+            <p class="muted-sub">
+              Last updated {{ bankInfo().lastUpdated }} by {{ bankInfo().lastUpdatedBy }}
+            </p>
+          } @else {
+            <p class="muted-sub">
+              Not yet configured — "Bank Payment" cannot be verified against a real account until
+              this is filled in.
+            </p>
+          }
+          <button type="button" class="btn-outline" (click)="openEditBankInfo()">
+            {{ bankInfo().accountNumber ? 'Edit' : 'Configure' }} Bank Information
+          </button>
+        } @else {
+          <form class="create-form" (ngSubmit)="saveBankInfo()">
+            <label>
+              Bank Name
+              <input type="text" [(ngModel)]="bankInfoForm.bankName" name="bankName" required />
+            </label>
+            <label>
+              Account Name
+              <input
+                type="text"
+                [(ngModel)]="bankInfoForm.accountName"
+                name="accountName"
+                required
+              />
+            </label>
+            <label>
+              Account Number
+              <input
+                type="text"
+                [(ngModel)]="bankInfoForm.accountNumber"
+                name="accountNumber"
+                required
+              />
+            </label>
+            <label>
+              Branch <span class="optional">(optional)</span>
+              <input type="text" [(ngModel)]="bankInfoForm.branch" name="branch" />
+            </label>
+            <div class="modal-actions">
+              <button type="button" class="modal-btn neutral" (click)="cancelEditBankInfo()">
+                Cancel
+              </button>
+              <button type="submit" class="modal-btn confirm">Save</button>
+            </div>
+          </form>
+        }
+      </section>
+    }
+
+    @if (configSubTab() === 'payroll') {
+      <section class="settings-section">
+        <div class="card-head">
+          <div>
+            <h3>Payroll</h3>
+            <p class="muted-sub">
+              The office's own staff/collecting-officer roster and monthly salary. Starts empty —
+              add each real staff member; nothing here is a fabricated figure.
+            </p>
+          </div>
+          <button type="button" class="btn-outline" (click)="openAddPayroll()">
+            <app-icon name="plus" [size]="15" />
+            Add Staff
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Monthly Salary</th>
+                <th>Date Hired</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (staff of payrollRows(); track staff.id) {
+                <tr>
+                  <td class="strong-cell">{{ staff.name }}</td>
+                  <td>{{ staff.position }}</td>
+                  <td>
+                    {{
+                      staff.monthlySalaryCentavos !== null
+                        ? formatPHP(staff.monthlySalaryCentavos)
+                        : 'Not set'
+                    }}
+                  </td>
+                  <td class="muted">{{ staff.dateHired ?? '—' }}</td>
+                  <td>
+                    <label class="toggle-switch">
+                      <input
+                        type="checkbox"
+                        [checked]="staff.status === 'Active'"
+                        (change)="togglePayrollStatus(staff)"
+                      />
+                      <span>{{ staff.status }}</span>
+                    </label>
+                  </td>
+                  <td>
+                    <button type="button" class="btn-outline" (click)="openEditPayroll(staff)">
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="muted">
+                    No staff on the payroll roster yet — click "Add Staff" to add the first one.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (editingPayrollId(); as id) {
+          <div class="modal-backdrop" (click)="cancelEditPayroll()">
+            <div class="modal-box create-box" (click)="$event.stopPropagation()">
+              <button
+                type="button"
+                class="modal-close"
+                aria-label="Close"
+                (click)="cancelEditPayroll()"
+              >
+                &#10005;
+              </button>
+              <h2>{{ id === 'new' ? 'Add Staff' : 'Edit Staff' }}</h2>
+              <form class="create-form" (ngSubmit)="savePayroll()">
+                <label>
+                  Name
+                  <input type="text" [(ngModel)]="payrollForm.name" name="staffName" required />
+                </label>
+                <label>
+                  Position
+                  <input
+                    type="text"
+                    [(ngModel)]="payrollForm.position"
+                    name="staffPosition"
+                    required
+                    placeholder="e.g. Collecting Officer, Payment Officer"
+                  />
+                </label>
+                <label>
+                  Monthly Salary (₱) <span class="optional">(optional)</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    [(ngModel)]="payrollForm.monthlySalary"
+                    name="staffSalary"
+                  />
+                </label>
+                <label>
+                  Date Hired <span class="optional">(optional)</span>
+                  <input type="date" [(ngModel)]="payrollForm.dateHired" name="staffDateHired" />
+                </label>
+                <div class="modal-actions">
+                  <button type="button" class="modal-btn neutral" (click)="cancelEditPayroll()">
+                    Cancel
+                  </button>
+                  <button type="submit" class="modal-btn confirm">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        }
+      </section>
+    }
   }
 </section>
 
@@ -1061,6 +1312,12 @@
             <option value="BFP">BFP</option>
           </select>
         </label>
+        @if (paymentForm.method === 'Onsite' && wherePaidInfo(paymentForm.agency); as where) {
+          <p class="modal-hint where-to-pay">
+            Pay onsite at: <strong>{{ where.name }}</strong> · {{ where.contactPhone }} ·
+            {{ where.officeHours }}
+          </p>
+        }
         <label>
           Amount (₱)
           <input
@@ -1296,5 +1553,14 @@
     [transactionId]="t.id"
     kind="official-receipt"
     (closed)="closeReceiptPreview()"
+  />
+}
+
+@if (embeddedReceiptTxn(); as t) {
+  <app-document-preview
+    [applicationId]="t.applicationId"
+    [transactionId]="t.id"
+    kind="official-receipt"
+    (closed)="closeEmbeddedReceipt()"
   />
 }

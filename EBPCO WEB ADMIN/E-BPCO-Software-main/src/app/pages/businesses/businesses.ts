@@ -109,53 +109,64 @@ export class Businesses {
   protected readonly view = signal<ViewMode>('list');
   protected readonly activeSubTab = signal<SubTab>('analytics');
 
-  // Total Users is the reference figure everything else is a share of, so
-  // its ring reads as a full circle (100%) and the other three fill in
-  // proportion to it instead of using unrelated, hand-picked percentages.
-  private static readonly TOTAL_USERS = 1524;
-
-  protected readonly ringStats: RingStat[] = [
-    {
-      label: 'Total Users',
-      value: '1,524',
-      icon: 'users',
-      tone: 'info',
-      illustration: 'users',
-      pct: 100,
-      isTotal: true,
-      support: 'Across all registered businesses',
-    },
-    {
-      label: 'Active Businesses',
-      value: '849',
-      icon: 'check-circle',
-      tone: 'success',
-      illustration: 'success',
-      pct: Math.round((849 / Businesses.TOTAL_USERS) * 100),
-      isTotal: false,
-      support: `${Math.round((849 / Businesses.TOTAL_USERS) * 100)}% of total users`,
-    },
-    {
-      label: 'Inactive Businesses',
-      value: '376',
-      icon: 'building',
-      tone: 'danger',
-      illustration: 'critical',
-      pct: Math.round((376 / Businesses.TOTAL_USERS) * 100),
-      isTotal: false,
-      support: `${Math.round((376 / Businesses.TOTAL_USERS) * 100)}% of total users`,
-    },
-    {
-      label: 'Total Businesses',
-      value: '1,225',
-      icon: 'building',
-      tone: 'violet',
-      illustration: 'businesses',
-      pct: Math.round((1225 / Businesses.TOTAL_USERS) * 100),
-      isTotal: false,
-      support: `${Math.round((1225 / Businesses.TOTAL_USERS) * 100)}% of total users`,
-    },
-  ];
+  // These four cards used to be hardcoded ("Total Users: 1,524", "Active
+  // Businesses: 849", …) sitting directly above a table that shows the
+  // real ~17-row seed dataset — a staffer had no way to tell the ring
+  // numbers were placeholders wildly mismatched with the real data right
+  // below them. Now genuinely derived from the store, same discipline
+  // Dashboard/Evaluations/User Roles already document for their own KPI
+  // cards. "Total Users" reads `applicants()` (each real Applicant is a
+  // registered owner/user) as the closest real analogue — Active/
+  // Inactive/Total Businesses read `Business.status` directly.
+  protected readonly ringStats = computed<RingStat[]>(() => {
+    const totalUsers = this.store.applicants().length || 1;
+    const businesses = this.store.businesses();
+    const active = businesses.filter((b) => b.status === 'Active').length;
+    const inactive = businesses.filter((b) => b.status === 'Inactive').length;
+    const total = businesses.length;
+    return [
+      {
+        label: 'Total Users',
+        value: totalUsers.toLocaleString(),
+        icon: 'users',
+        tone: 'info',
+        illustration: 'users',
+        pct: 100,
+        isTotal: true,
+        support: 'Across all registered businesses',
+      },
+      {
+        label: 'Active Businesses',
+        value: active.toLocaleString(),
+        icon: 'check-circle',
+        tone: 'success',
+        illustration: 'success',
+        pct: Math.round((active / totalUsers) * 100),
+        isTotal: false,
+        support: `${Math.round((active / totalUsers) * 100)}% of total users`,
+      },
+      {
+        label: 'Inactive Businesses',
+        value: inactive.toLocaleString(),
+        icon: 'building',
+        tone: 'danger',
+        illustration: 'critical',
+        pct: Math.round((inactive / totalUsers) * 100),
+        isTotal: false,
+        support: `${Math.round((inactive / totalUsers) * 100)}% of total users`,
+      },
+      {
+        label: 'Total Businesses',
+        value: total.toLocaleString(),
+        icon: 'building',
+        tone: 'violet',
+        illustration: 'businesses',
+        pct: Math.round((total / totalUsers) * 100),
+        isTotal: false,
+        support: `${Math.round((total / totalUsers) * 100)}% of total users`,
+      },
+    ];
+  });
 
   // A real Business's registration/contact fields — never a fabricated
   // dataset — with the owner's contact info joined through the real
@@ -325,13 +336,19 @@ export class Businesses {
     this.deleteTarget.set(null);
   }
 
+  // Honest about the actual (session-local, non-persistent) effect —
+  // "removed from the platform" previously implied a real deletion, but
+  // this only hides the row from this view via a component-local signal;
+  // it isn't written back to ApplicationStore (no delete method exists
+  // there) and resets the moment this page is left and re-entered.
   protected readonly deleteDialogMessage = computed(() => {
     const target = this.deleteTarget();
     if (target === 'bulk') {
       const n = this.selectedIds().size;
-      return `This will remove ${n} selected business${n === 1 ? '' : 's'} from the platform.`;
+      return `This will hide ${n} selected business${n === 1 ? '' : 's'} from this view for the rest of your visit (it isn't a permanent delete in this prototype).`;
     }
-    if (target) return `This will remove ${target.code} (${target.id}) from the platform.`;
+    if (target)
+      return `This will hide ${target.code} (${target.id}) from this view for the rest of your visit (it isn't a permanent delete in this prototype).`;
     return '';
   });
 

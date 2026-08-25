@@ -20,6 +20,7 @@ import {
   EVALUATION_STAGE_ORDER,
   EvaluationResult,
   EvaluationStage,
+  coarseStatus,
 } from '../../core/domain/status.model';
 
 interface StatCardData {
@@ -196,18 +197,65 @@ export class Dashboard {
   // validate_palette.js: CVD separation + lightness band + chroma floor all
   // PASS) — info blue, success green, warning amber, and a 4th violet slot
   // for "Return" so it doesn't collide with the Pending/warning meaning.
-  protected readonly statusSegments: DonutSegment[] = [
-    { label: 'For Evaluation', value: 30, color: '#2563eb' },
-    { label: 'Approved', value: 20, color: '#16a34a' },
-    { label: 'Return', value: 20, color: '#7c3aed' },
-    { label: 'Pending', value: 30, color: '#f59e0b' },
-  ];
+  // Values used to be hardcoded (30/20/20/30, always summing to a tidy
+  // 100 regardless of how many real applications existed) — now a real
+  // partition of every non-terminal application's lifecycleStatus:
+  // 'Under Evaluation' -> For Evaluation, the coarse "Approved" bucket
+  // (Approved/Permit Generated/Ready for Release/Released/Completed) ->
+  // Approved, 'Revision Required' -> Return, everything else still in
+  // the pipeline (Draft/Submitted/Received/Document Verification/
+  // Assessed/payment sub-statuses/For Approval) -> Pending. Rejected/
+  // Cancelled/Expired are terminal exits, not an active processing
+  // status, so they're excluded from this breakdown entirely (same as
+  // the widget's own 4 labels, which never included a Rejected slice).
+  protected readonly statusSegments = computed<DonutSegment[]>(() => {
+    const apps = this.store.applications();
+    let forEvaluation = 0;
+    let approved = 0;
+    let returned = 0;
+    let pending = 0;
+    for (const app of apps) {
+      if (app.lifecycleStatus === 'Under Evaluation') forEvaluation++;
+      else if (coarseStatus(app.lifecycleStatus) === 'Approved') approved++;
+      else if (app.lifecycleStatus === 'Revision Required') returned++;
+      else if (
+        app.lifecycleStatus !== 'Rejected' &&
+        app.lifecycleStatus !== 'Cancelled' &&
+        app.lifecycleStatus !== 'Expired'
+      ) {
+        pending++;
+      }
+    }
+    return [
+      { label: 'For Evaluation', value: forEvaluation, color: '#2563eb' },
+      { label: 'Approved', value: approved, color: '#16a34a' },
+      { label: 'Return', value: returned, color: '#7c3aed' },
+      { label: 'Pending', value: pending, color: '#f59e0b' },
+    ];
+  });
 
-  protected readonly statusTotal = this.statusSegments.reduce((sum, s) => sum + s.value, 0);
+  protected readonly statusTotal = computed(() =>
+    this.statusSegments().reduce((sum, s) => sum + s.value, 0),
+  );
 
   protected statusPercent(seg: DonutSegment): number {
-    return Math.round((seg.value / this.statusTotal) * 100);
+    const total = this.statusTotal();
+    return total === 0 ? 0 : Math.round((seg.value / total) * 100);
   }
+
+  // "Application Overview" card's legend — used to be hardcoded ("New
+  // Application: 50", "Approved Application: 500") regardless of how many
+  // real applications existed. "New" reads the single, unambiguous
+  // just-filed status; "Approved" reuses the same coarse-Approved bucket
+  // (Approved/Permit Generated/Ready for Release/Released/Completed)
+  // already used for the status donut above, for one consistent
+  // definition of "approved" across this page.
+  protected readonly newApplicationCount = computed(
+    () => this.store.applications().filter((a) => a.lifecycleStatus === 'Submitted').length,
+  );
+  protected readonly approvedApplicationCount = computed(
+    () => this.store.applications().filter((a) => coarseStatus(a.lifecycleStatus) === 'Approved').length,
+  );
 
   // Top businesses by application volume — real counts from the store,
   // not a hand-picked list.

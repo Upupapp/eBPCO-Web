@@ -406,6 +406,21 @@ export class PermitRelease {
   protected readonly generateTarget = signal<ReleaseRow | null>(null);
 
   generate(row?: ReleaseRow): void {
+    // Actually generate the permit record here (mirroring the Applications
+    // page's own "Generate {finalDocumentName}" button) rather than only
+    // opening a print preview over whatever may or may not already exist —
+    // previously this modal never called ApplicationStore.generatePermit(),
+    // so a staffer working exclusively from this page had no way to create
+    // a permit that didn't already exist.
+    if (row && !this.store.getPermit(row.id)) {
+      const application = this.store.getById(row.id);
+      if (
+        application?.lifecycleStatus === 'Approved' &&
+        application.paymentStatus === 'Paid'
+      ) {
+        this.store.generatePermit(row.id, this.session.name() || 'Approving Officer', this.session.role() ?? 'Administrator');
+      }
+    }
     this.generateTarget.set(row ?? null);
     this.showGenerateModal.set(true);
   }

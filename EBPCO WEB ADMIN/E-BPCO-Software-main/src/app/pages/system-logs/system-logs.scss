@@ -5,6 +5,19 @@
 @use '../../shared/styles/kpi-grid';
 @use '../../shared/styles/tokens' as *;
 
+.prototype-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: $radius-md;
+  background: $color-info-bg-soft;
+  color: $color-ink-600;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
 @keyframes section-in {
   from {
     opacity: 0;

@@ -120,6 +120,28 @@ const SRC_CASTILLA_CHARTER: FeeRuleSource = {
     'Fetch returned HTTP 403 Forbidden (consistent with the earlier requirements-catalog.ts research pass finding castillasorsogon.gov.ph unreachable to automated fetches) — no amount from this charter is transcribed here; PENDING_LGU_VALIDATION until Castilla OBO/Treasury confirms directly.',
 };
 
+// The actual Municipality of Castilla "Unified Application Form for
+// Building Permit" (back-to-back), obtained directly from "LGU Castilla
+// BPCO Forms" and reviewed in full. Box 6 of this form ("Assessed Fees,"
+// filled by the Processing and Evaluation Division) is the source of
+// truth that Architectural, Civil/Structural, Sanitary, Plumbing, and
+// Interior are each billed as their own separate line item locally, and
+// that "Line and Grade (Geodetic)" and "Hotworks" are real fee lines with
+// no equivalent anywhere in the previously-modeled DPWH-only catalog. The
+// form itself is a blank application form, not a published fee schedule
+// — it names every line item Castilla actually assesses, but prints no
+// peso amounts, so every new rule sourced from it is PENDING_LGU_VALIDATION
+// like everything else authority-DPWH/BFP in this file.
+const SRC_CASTILLA_UNIFIED_FORM: FeeRuleSource = {
+  title:
+    'Municipality of Castilla, Sorsogon — "Unified Application Form for Building Permit" (Box 6: Assessed Fees)',
+  url: '/assets/permits/New-Construction.pdf',
+  publisher: 'Municipality of Castilla, Sorsogon — Office of the Building Official',
+  effectiveDate: '2026-08-24',
+  accessNote:
+    "Obtained directly and reviewed in full (bundled at public/assets/permits/New-Construction.pdf) — confirms these fee lines are genuinely assessed by Castilla, but the form itself prints no peso amounts, so every rate here remains PENDING_LGU_VALIDATION until an assessor or the Citizen's Charter confirms the actual figure.",
+};
+
 const SRC_RA9514: FeeRuleSource = {
   title: 'Republic Act No. 9514 — Fire Code of the Philippines of 2008',
   url: 'https://lawphil.net/statutes/repacts/ra2008/ra_9514_2008.html',
@@ -143,6 +165,7 @@ const ALL_SOURCES = [
   SRC_DPWH_2016,
   SRC_JMC_2018,
   SRC_CASTILLA_CHARTER,
+  SRC_CASTILLA_UNIFIED_FORM,
   SRC_RA9514,
   SRC_BFP_MC2021_020,
 ];
@@ -324,18 +347,20 @@ export const FEE_RULES: FeeRule[] = [
     sources: [SRC_DPWH_2016],
   }),
 
-  // Plumbing / Sanitary — ONE shared rule for both permit types so a
-  // project that files under either name is never charged twice for the
-  // same underlying plumbing-fixture fee family.
+  // Plumbing and Sanitary — two independent rules. These used to share
+  // ONE rule (on the theory that a project filed under either name draws
+  // from the same fixture-count formula) — but the real Castilla Unified
+  // Application Form's Box 6 lists "SANITARY" and "PLUMBING" as two
+  // separate assessed-fee line items, so they're billed independently
+  // here to match.
   rule({
-    id: 'plumbing-sanitary-permit-fee',
+    id: 'plumbing-permit-fee',
     code: 'DPWH-PLB-01',
-    name: 'Plumbing / Sanitary Permit Fee',
-    family: 'Plumbing / Sanitary Permit Fee',
+    name: 'Plumbing Permit Fee',
+    family: 'Plumbing Permit Fee',
     authority: 'DPWH',
     collectingOfficeId: 'obo',
-    description:
-      'Plumbing fixture fee per the DPWH fee schedule. Shared by Plumbing Permit and Sanitary Permit — the same underlying fixture-count formula, never charged as two separate line items on one assessment.',
+    description: 'Plumbing fixture fee per the DPWH fee schedule.',
     calculationType: 'per-unit',
     requiredInputs: ['fixtureCount'],
     flatAmountCentavos: null,
@@ -348,7 +373,7 @@ export const FEE_RULES: FeeRule[] = [
     maximumCentavos: null,
     requiresAssessorInput: true,
     applicability: applicabilityFor(
-      ['Plumbing Permit', 'Sanitary Permit'],
+      ['Plumbing Permit'],
       [
         'Building Permit – New Construction',
         'Building Permit – Addition / Extension',
@@ -358,7 +383,39 @@ export const FEE_RULES: FeeRule[] = [
     legalBasisUrl: SRC_DPWH_2016.url,
     legalBasisTitle: SRC_DPWH_2016.title,
     verificationStatus: 'PENDING_LGU_VALIDATION',
-    sources: [SRC_DPWH_2016],
+    sources: [SRC_DPWH_2016, SRC_CASTILLA_UNIFIED_FORM],
+  }),
+  rule({
+    id: 'sanitary-permit-fee',
+    code: 'DPWH-SAN-01',
+    name: 'Sanitary Permit Fee',
+    family: 'Sanitary Permit Fee',
+    authority: 'DPWH',
+    collectingOfficeId: 'obo',
+    description: 'Sanitary installation fee per the DPWH fee schedule, billed separately from the Plumbing Permit Fee per Castilla\'s own Box 6 assessment sheet.',
+    calculationType: 'per-unit',
+    requiredInputs: ['fixtureCount'],
+    flatAmountCentavos: null,
+    unitAmountCentavos: null,
+    unitLabel: 'per plumbing fixture',
+    percentageOf: null,
+    percentageRate: null,
+    brackets: null,
+    minimumCentavos: null,
+    maximumCentavos: null,
+    requiresAssessorInput: true,
+    applicability: applicabilityFor(
+      ['Sanitary Permit'],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
+    ),
+    legalBasisUrl: SRC_DPWH_2016.url,
+    legalBasisTitle: SRC_DPWH_2016.title,
+    verificationStatus: 'PENDING_LGU_VALIDATION',
+    sources: [SRC_DPWH_2016, SRC_CASTILLA_UNIFIED_FORM],
   }),
 
   // Electronics formula.
@@ -381,11 +438,21 @@ export const FEE_RULES: FeeRule[] = [
     minimumCentavos: null,
     maximumCentavos: null,
     requiresAssessorInput: true,
-    applicability: applicabilityFor(['Electronics Permit']),
+    // Also billed as a conditional Box 6 ("FOR BUILDING / STRUCTURE (OBO)")
+    // line item on a Building Permit filing whose scope includes
+    // electronics/communications work — see SRC_CASTILLA_UNIFIED_FORM.
+    applicability: applicabilityFor(
+      ['Electronics Permit'],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
+    ),
     legalBasisUrl: SRC_DPWH_2016.url,
     legalBasisTitle: SRC_DPWH_2016.title,
     verificationStatus: 'PENDING_LGU_VALIDATION',
-    sources: [SRC_DPWH_2016],
+    sources: [SRC_DPWH_2016, SRC_CASTILLA_UNIFIED_FORM],
   }),
 
   // DPWH accessory-structure fees — Demolition, Fencing, Sign, Excavation.
@@ -439,11 +506,21 @@ export const FEE_RULES: FeeRule[] = [
     minimumCentavos: null,
     maximumCentavos: null,
     requiresAssessorInput: true,
-    applicability: applicabilityFor(['Fencing Permit']),
+    // Also billed as a conditional Box 6 ("FOR BUILDING / STRUCTURE (OBO)")
+    // line item on a Building Permit filing whose scope includes fencing
+    // — see SRC_CASTILLA_UNIFIED_FORM.
+    applicability: applicabilityFor(
+      ['Fencing Permit'],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
+    ),
     legalBasisUrl: SRC_DPWH_2016.url,
     legalBasisTitle: SRC_DPWH_2016.title,
     verificationStatus: 'PENDING_LGU_VALIDATION',
-    sources: [SRC_DPWH_2016],
+    sources: [SRC_DPWH_2016, SRC_CASTILLA_UNIFIED_FORM],
   }),
   rule({
     id: 'sign-accessory-fee',
@@ -563,16 +640,300 @@ export const FEE_RULES: FeeRule[] = [
     verificationStatus: 'PENDING_LGU_VALIDATION',
     sources: [SRC_RA9514, SRC_BFP_MC2021_020],
   }),
-];
 
-// Architectural Permit, Civil / Structural Permit, and Interior Design
-// Permit deliberately have NO dedicated rule of their own beyond the
-// generic Filing Fee and (for the first two) a conditional line under the
-// Building Permit Fee family — the DPWH 2016 schedule does not name a
-// separate flat formula for these three, and the task instructs not to
-// invent one. If Castilla later configures an authorized local charge for
-// one of these with a verified legal basis, add it here as a new FeeRule
-// rather than reusing/renaming an unrelated family.
+  // Architectural, Civil/Structural, and Interior each used to have NO
+  // dedicated rule beyond the generic Filing Fee (the DPWH 2016 schedule
+  // names no separate flat formula for them, and no real local rate had
+  // been confirmed) — but the real Castilla Unified Application Form's
+  // Box 6 lists all three as their own separately-assessed line items, so
+  // they're modeled here even though the peso amount remains unconfirmed.
+  rule({
+    id: 'architectural-permit-fee',
+    code: 'CASTILLA-ARC-01',
+    name: 'Architectural Fee',
+    family: 'Architectural Fee',
+    authority: 'LGU',
+    collectingOfficeId: 'obo',
+    description:
+      "Architectural-discipline assessment line under Box 6 (\"FOR BUILDING / STRUCTURE (OBO)\") of Castilla's Unified Application Form — a real local line item with no confirmed rate yet.",
+    calculationType: 'manual',
+    requiredInputs: [],
+    flatAmountCentavos: null,
+    unitAmountCentavos: null,
+    unitLabel: null,
+    percentageOf: null,
+    percentageRate: null,
+    brackets: null,
+    minimumCentavos: null,
+    maximumCentavos: null,
+    requiresAssessorInput: true,
+    applicability: applicabilityFor(
+      ['Architectural Permit'],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
+    ),
+    legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
+    legalBasisTitle: SRC_CASTILLA_UNIFIED_FORM.title,
+    verificationStatus: 'PENDING_LGU_VALIDATION',
+    sources: [SRC_CASTILLA_UNIFIED_FORM],
+  }),
+  rule({
+    id: 'civil-structural-permit-fee',
+    code: 'CASTILLA-CVL-01',
+    name: 'Civil / Structural Fee',
+    family: 'Civil / Structural Fee',
+    authority: 'LGU',
+    collectingOfficeId: 'obo',
+    description:
+      "Civil/Structural-discipline assessment line under Box 6 of Castilla's Unified Application Form — a real local line item with no confirmed rate yet.",
+    calculationType: 'manual',
+    requiredInputs: [],
+    flatAmountCentavos: null,
+    unitAmountCentavos: null,
+    unitLabel: null,
+    percentageOf: null,
+    percentageRate: null,
+    brackets: null,
+    minimumCentavos: null,
+    maximumCentavos: null,
+    requiresAssessorInput: true,
+    applicability: applicabilityFor(
+      ['Civil / Structural Permit'],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
+    ),
+    legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
+    legalBasisTitle: SRC_CASTILLA_UNIFIED_FORM.title,
+    verificationStatus: 'PENDING_LGU_VALIDATION',
+    sources: [SRC_CASTILLA_UNIFIED_FORM],
+  }),
+  rule({
+    id: 'interior-design-permit-fee',
+    code: 'CASTILLA-INT-01',
+    name: 'Interior Fee',
+    family: 'Interior Fee',
+    authority: 'LGU',
+    collectingOfficeId: 'obo',
+    description:
+      "Interior-discipline assessment line under Box 6 of Castilla's Unified Application Form — a real local line item with no confirmed rate yet. Previously Interior Design Permit had no dedicated fee line at all.",
+    calculationType: 'manual',
+    requiredInputs: [],
+    flatAmountCentavos: null,
+    unitAmountCentavos: null,
+    unitLabel: null,
+    percentageOf: null,
+    percentageRate: null,
+    brackets: null,
+    minimumCentavos: null,
+    maximumCentavos: null,
+    requiresAssessorInput: true,
+    applicability: applicabilityFor(
+      ['Interior Design Permit'],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
+    ),
+    legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
+    legalBasisTitle: SRC_CASTILLA_UNIFIED_FORM.title,
+    verificationStatus: 'PENDING_LGU_VALIDATION',
+    sources: [SRC_CASTILLA_UNIFIED_FORM],
+  }),
+
+  // "Line and Grade (Geodetic)" — a real OBO fee line under Box 6 with no
+  // dedicated PermitType of its own; it's a geodetic-survey verification
+  // charge on any Building Permit filing, not a separate ancillary permit.
+  rule({
+    id: 'line-and-grade-fee',
+    code: 'CASTILLA-LNG-01',
+    name: 'Line and Grade (Geodetic) Fee',
+    family: 'Line and Grade Fee',
+    authority: 'LGU',
+    collectingOfficeId: 'obo',
+    description:
+      "Geodetic line-and-grade verification fee under Box 6 (\"FOR BUILDING / STRUCTURE (OBO)\") of Castilla's Unified Application Form — a real local line item with no confirmed rate yet, and no equivalent in any national DPWH schedule reviewed so far.",
+    calculationType: 'manual',
+    requiredInputs: [],
+    flatAmountCentavos: null,
+    unitAmountCentavos: null,
+    unitLabel: null,
+    percentageOf: null,
+    percentageRate: null,
+    brackets: null,
+    minimumCentavos: null,
+    maximumCentavos: null,
+    requiresAssessorInput: true,
+    applicability: applicabilityFor([
+      'Building Permit – New Construction',
+      'Building Permit – Addition / Extension',
+      'Building Permit – Renovation / Alteration',
+    ]),
+    legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
+    legalBasisTitle: SRC_CASTILLA_UNIFIED_FORM.title,
+    verificationStatus: 'PENDING_LGU_VALIDATION',
+    sources: [SRC_CASTILLA_UNIFIED_FORM],
+  }),
+
+  // "Hotworks" — a real BFP fee line under Box 6, distinct from the Fire
+  // Code Construction Tax (fire-code-assessment-fee above) — this one
+  // specifically covers welding/cutting/hot-work operations, applicable
+  // wherever such work is declared on a Building Permit filing or an FSEC/
+  // FSIC application (both already reference an optional "Fire Safety
+  // Clearance for Welding, Cutting, and other Hot Work Operations"
+  // document — this is the fee line that document pairs with).
+  rule({
+    id: 'hotworks-fee',
+    code: 'CASTILLA-HOT-01',
+    name: 'Hotworks Fee',
+    family: 'Fire Code Assessment',
+    authority: 'BFP',
+    collectingOfficeId: 'bfp',
+    description:
+      "Fee for a Fire Safety Clearance covering welding, cutting, and other hot-work operations, under Box 6 (\"FOR FIRE SAFETY (BFP)\") of Castilla's Unified Application Form — distinct from the Fire Code Construction Tax; a real local line item with no confirmed rate yet.",
+    calculationType: 'manual',
+    requiredInputs: [],
+    flatAmountCentavos: null,
+    unitAmountCentavos: null,
+    unitLabel: null,
+    percentageOf: null,
+    percentageRate: null,
+    brackets: null,
+    minimumCentavos: null,
+    maximumCentavos: null,
+    requiresAssessorInput: true,
+    applicability: applicabilityFor(
+      [],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+        'FSEC for Building Permit (BFP)',
+        'FSIC for Occupancy Permit (BFP)',
+      ],
+    ),
+    legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
+    legalBasisTitle: SRC_CASTILLA_UNIFIED_FORM.title,
+    verificationStatus: 'PENDING_LGU_VALIDATION',
+    sources: [SRC_CASTILLA_UNIFIED_FORM],
+  }),
+
+  // "Locational / Zoning of Land" — Box 6's own "FOR ZONING (ZONING
+  // ADMINISTRATOR)" line, assessed on the same Unified Application Form
+  // alongside the OBO/BFP lines above (the Locational Clearance document
+  // is already a required intake document for a Building Permit — this is
+  // the monetary assessment tied to that same clearance).
+  rule({
+    id: 'locational-zoning-fee',
+    code: 'CASTILLA-ZON-01',
+    name: 'Locational / Zoning of Land Fee',
+    family: 'Locational / Zoning Fee',
+    authority: 'LGU',
+    collectingOfficeId: 'zoning',
+    description:
+      'Zoning Administrator assessment under Box 6 ("FOR ZONING (ZONING ADMINISTRATOR)") of Castilla\'s Unified Application Form — a real local line item with no confirmed rate yet.',
+    calculationType: 'manual',
+    requiredInputs: [],
+    flatAmountCentavos: null,
+    unitAmountCentavos: null,
+    unitLabel: null,
+    percentageOf: null,
+    percentageRate: null,
+    brackets: null,
+    minimumCentavos: null,
+    maximumCentavos: null,
+    requiresAssessorInput: true,
+    applicability: applicabilityFor([
+      'Building Permit – New Construction',
+      'Building Permit – Addition / Extension',
+      'Building Permit – Renovation / Alteration',
+    ]),
+    legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
+    legalBasisTitle: SRC_CASTILLA_UNIFIED_FORM.title,
+    verificationStatus: 'PENDING_LGU_VALIDATION',
+    sources: [SRC_CASTILLA_UNIFIED_FORM],
+  }),
+
+  // "Surcharges" and "Penalties" — Box 6's own two line items under "FOR
+  // BUILDING / STRUCTURE (OBO)", distinct from every discipline fee above:
+  // situational charges an assessor adds only when they apply (e.g. late
+  // filing, work started without a permit) rather than a fee family every
+  // application draws from. Conditional rather than required for exactly
+  // that reason — included so an assessor can add one during assessment,
+  // never assumed to apply by default.
+  rule({
+    id: 'surcharges-fee',
+    code: 'CASTILLA-SUR-01',
+    name: 'Surcharges',
+    family: 'Surcharges & Penalties',
+    authority: 'LGU',
+    collectingOfficeId: 'obo',
+    description:
+      'Surcharge assessed under Box 6 of Castilla\'s Unified Application Form for situations such as late filing or construction started ahead of permit issuance — a real local line item with no confirmed rate/basis yet.',
+    calculationType: 'manual',
+    requiredInputs: [],
+    flatAmountCentavos: null,
+    unitAmountCentavos: null,
+    unitLabel: null,
+    percentageOf: null,
+    percentageRate: null,
+    brackets: null,
+    minimumCentavos: null,
+    maximumCentavos: null,
+    requiresAssessorInput: true,
+    applicability: applicabilityFor(
+      [],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
+    ),
+    legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
+    legalBasisTitle: SRC_CASTILLA_UNIFIED_FORM.title,
+    verificationStatus: 'PENDING_LGU_VALIDATION',
+    sources: [SRC_CASTILLA_UNIFIED_FORM],
+  }),
+  rule({
+    id: 'penalties-fee',
+    code: 'CASTILLA-PEN-01',
+    name: 'Penalties',
+    family: 'Surcharges & Penalties',
+    authority: 'LGU',
+    collectingOfficeId: 'obo',
+    description:
+      'Penalty assessed under Box 6 of Castilla\'s Unified Application Form for violations found during evaluation/inspection — a real local line item with no confirmed rate/basis yet.',
+    calculationType: 'manual',
+    requiredInputs: [],
+    flatAmountCentavos: null,
+    unitAmountCentavos: null,
+    unitLabel: null,
+    percentageOf: null,
+    percentageRate: null,
+    brackets: null,
+    minimumCentavos: null,
+    maximumCentavos: null,
+    requiresAssessorInput: true,
+    applicability: applicabilityFor(
+      [],
+      [
+        'Building Permit – New Construction',
+        'Building Permit – Addition / Extension',
+        'Building Permit – Renovation / Alteration',
+      ],
+    ),
+    legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
+    legalBasisTitle: SRC_CASTILLA_UNIFIED_FORM.title,
+    verificationStatus: 'PENDING_LGU_VALIDATION',
+    sources: [SRC_CASTILLA_UNIFIED_FORM],
+  }),
+];
 
 const FEE_RULE_BY_ID = new Map(FEE_RULES.map((r) => [r.id, r]));
 
