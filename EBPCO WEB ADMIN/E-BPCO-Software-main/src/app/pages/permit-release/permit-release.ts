@@ -499,6 +499,20 @@ export class PermitRelease {
     this.previewTarget.set(null);
   }
 
+  // Separate from previewTarget/kind="permit" above — <app-document-preview>
+  // takes one fixed `kind` per instance, so viewing the payment receipt
+  // needs its own target/instance rather than a second value the same
+  // signal could hold.
+  protected readonly receiptPreviewTarget = signal<ReleaseRow | null>(null);
+
+  protected previewReceipt(row: ReleaseRow): void {
+    this.receiptPreviewTarget.set(row);
+  }
+
+  protected closeReceiptPreview(): void {
+    this.receiptPreviewTarget.set(null);
+  }
+
   openDetail(row: ReleaseRow): void {
     this.selectedRow.set(row);
     this.view.set('detail');

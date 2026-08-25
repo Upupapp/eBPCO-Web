@@ -272,6 +272,10 @@
             <app-icon name="file-check" [size]="15" />
             Preview Permit
           </button>
+          <button type="button" class="btn-outline" (click)="previewReceipt(row)">
+            <app-icon name="file-check" [size]="15" />
+            View Receipt
+          </button>
           @if (canRelease()) {
             <button
               type="button"
@@ -379,6 +383,14 @@
       [applicationId]="target.id"
       kind="permit"
       (closed)="closePermitPreview()"
+    />
+  }
+
+  @if (receiptPreviewTarget(); as target) {
+    <app-document-preview
+      [applicationId]="target.id"
+      kind="official-receipt"
+      (closed)="closeReceiptPreview()"
     />
   }
 } @else if (activeTab() === 'permit-types') {

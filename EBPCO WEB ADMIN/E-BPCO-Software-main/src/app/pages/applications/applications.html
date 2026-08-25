@@ -805,6 +805,14 @@
                     <app-icon name="file-check" [size]="14" />
                     Preview / Download {{ finalDocumentName() }}
                   </button>
+                  <button
+                    type="button"
+                    class="btn-outline"
+                    (click)="openDocumentPreviewModal('official-receipt')"
+                  >
+                    <app-icon name="file-check" [size]="14" />
+                    View Receipt
+                  </button>
                   @if (releaseResult()) {
                     <button
                       type="button"
