@@ -828,7 +828,14 @@ export const FEE_RULES: FeeRule[] = [
   // ADMINISTRATOR)" line, assessed on the same Unified Application Form
   // alongside the OBO/BFP lines above (the Locational Clearance document
   // is already a required intake document for a Building Permit — this is
-  // the monetary assessment tied to that same clearance).
+  // the monetary assessment tied to that same clearance). Also required
+  // directly for 'Zoning / Locational Clearance' itself — this is the fee
+  // FOR that clearance, not just an ancillary line on someone else's
+  // filing; requirements-catalog.ts's own paymentRequirements text for
+  // that type already promised this exact line, but it was never actually
+  // wired into this rule's applicability, so filing a standalone Zoning
+  // application drafted a ₱250-filing-fee-only assessment with nothing
+  // else to pay — a real gap, not an intentional omission.
   rule({
     id: 'locational-zoning-fee',
     code: 'CASTILLA-ZON-01',
@@ -853,6 +860,7 @@ export const FEE_RULES: FeeRule[] = [
       'Building Permit – New Construction',
       'Building Permit – Addition / Extension',
       'Building Permit – Renovation / Alteration',
+      'Zoning / Locational Clearance',
     ]),
     legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
     legalBasisTitle: SRC_CASTILLA_UNIFIED_FORM.title,

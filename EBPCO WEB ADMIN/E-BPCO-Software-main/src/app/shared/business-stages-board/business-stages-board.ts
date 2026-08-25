@@ -13,6 +13,7 @@ import {
   canTransition,
 } from '../../core/domain/status.model';
 import { SessionService } from '../../core/session/session.service';
+import { ToastService } from '../toast/toast.service';
 
 type StageFilterKey = 'All' | EvaluationStage;
 
@@ -95,6 +96,7 @@ export class BusinessStagesBoard {
   private readonly store = inject(ApplicationStore);
   private readonly router = inject(Router);
   private readonly session = inject(SessionService);
+  private readonly toast = inject(ToastService);
 
   readonly selectApplication = output<ApplicationRecord>();
 
@@ -505,6 +507,7 @@ export class BusinessStagesBoard {
     const ok = this.store.transitionStatus(app.id, target, actor, role, remarks);
     if (ok) {
       this.store.bringToFront(app.id);
+      this.toast.success(`${app.applicant}'s application moved to "${targetStatus}".`);
     } else {
       this.dropError.set(
         `Can't move ${app.applicant}'s application to "${targetStatus}" — it doesn't meet the requirements for that stage yet (e.g. required documents not all Accepted).`,

@@ -8,6 +8,7 @@ import { Avatar } from '../../shared/avatar/avatar';
 import { KpiCard, KpiTone } from '../../shared/kpi-card/kpi-card';
 import { Pagination } from '../../shared/pagination/pagination';
 import { FilterPanel } from '../../shared/filter-panel/filter-panel';
+import { ToastService } from '../../shared/toast/toast.service';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { SessionService } from '../../core/session/session.service';
@@ -89,6 +90,7 @@ export class Evaluations {
   private readonly store = inject(ApplicationStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   // Bound to the `?stage=` query param (see withComponentInputBinding in
   // app.config.ts) so a link like `/evaluations?stage=zoning` lands
@@ -265,6 +267,7 @@ export class Evaluations {
     downloadCsv(`document-${doc.label.replace(/\s+/g, '-').toLowerCase()}`, [
       { Document: doc.label, File: doc.filename, Status: doc.status },
     ]);
+    this.toast.success('Downloaded.');
   }
 
   openCard(card: EvalTypeCard): void {
@@ -406,9 +409,11 @@ export class Evaluations {
     const actor = this.session.name() || 'Staff';
     const ok = this.store.recordEvaluation(row.id, EVAL_KEY_TO_APP_STAGE[card.key], 'Passed', actor);
     if (!ok) {
-      this.actionError.set(
-        `Can't advance ${row.applicant}'s application — it's currently Rejected or Revision Required, not actively Under Evaluation. Open it in Applications to see its real status.`,
-      );
+      const message = `Can't advance ${row.applicant}'s application — it's currently Rejected or Revision Required, not actively Under Evaluation. Open it in Applications to see its real status.`;
+      this.actionError.set(message);
+      this.toast.error(message);
+    } else {
+      this.toast.success(`${row.applicant}'s application advanced past ${card.title}.`);
     }
     this.closeMenu();
   }
@@ -430,10 +435,11 @@ export class Evaluations {
     );
     if (ok) {
       this.revisionRemarks.set('');
+      this.toast.success(`${row.applicant}'s application returned for revision.`);
     } else {
-      this.actionError.set(
-        `Can't return ${row.applicant}'s application for revision from its current status.`,
-      );
+      const message = `Can't return ${row.applicant}'s application for revision from its current status.`;
+      this.actionError.set(message);
+      this.toast.error(message);
     }
     this.closeMenu();
   }
@@ -457,17 +463,21 @@ export class Evaluations {
   }
 
   protected exportVisible(): void {
+    const rows = this.stageRows();
     downloadCsv(
       'evaluations',
-      this.stageRows().map((row) => this.evalCsvRow(row)),
+      rows.map((row) => this.evalCsvRow(row)),
     );
+    this.toast.success(`Exported ${rows.length} row${rows.length === 1 ? '' : 's'}.`);
   }
 
   protected exportAll(): void {
+    const rows = this.cardRows();
     downloadCsv(
       'all-evaluations',
-      this.cardRows().map((row) => this.evalCsvRow(row)),
+      rows.map((row) => this.evalCsvRow(row)),
     );
+    this.toast.success(`Exported ${rows.length} row${rows.length === 1 ? '' : 's'}.`);
     this.closeMenu();
   }
 
@@ -475,5 +485,6 @@ export class Evaluations {
     const row = this.selectedRow();
     if (!row) return;
     downloadCsv(`evaluation-${row.id}`, [this.evalCsvRow(row)]);
+    this.toast.success('Exported.');
   }
 }

@@ -8,6 +8,7 @@ import { Pagination } from '../../shared/pagination/pagination';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { SessionService } from '../../core/session/session.service';
+import { ToastService } from '../../shared/toast/toast.service';
 import {
   buildPermissionMatrix,
   buildSessions,
@@ -191,6 +192,7 @@ const ROLES: RoleRow[] = [
 })
 export class UserRoles {
   private readonly session = inject(SessionService);
+  private readonly toast = inject(ToastService);
 
   // Payment fee-rule/method configuration moved to Payments > Configuration
   // (still Super Admin-only, gated by the same ACTION_PERMISSIONS.configurePayments)
@@ -371,10 +373,12 @@ export class UserRoles {
   }
 
   protected exportUsers(): void {
+    const rows = this.filteredUsers();
     downloadCsv(
       'users',
-      this.filteredUsers().map((row) => this.userCsvRow(row)),
+      rows.map((row) => this.userCsvRow(row)),
     );
+    this.toast.success(`Exported ${rows.length} row${rows.length === 1 ? '' : 's'}.`);
   }
 
   // ---- Delete -------------------------------------------------------------
@@ -394,6 +398,7 @@ export class UserRoles {
     if (!target) return;
     this.users.update((rows) => rows.filter((row) => row.email !== target.email));
     this.deleteTarget.set(null);
+    this.toast.success(`"${target.name}" removed.`);
   }
 
   // ---- Add user -----------------------------------------------------------
@@ -412,11 +417,19 @@ export class UserRoles {
 
   protected createUser(): void {
     const name = this.newUser.name.trim();
-    if (!name) return;
+    if (!name) {
+      this.toast.error('Enter a name before adding this user.');
+      return;
+    }
+    const email = this.newUser.email.trim() || emailFor(name);
+    if (this.users().some((u) => u.email.toLowerCase() === email.toLowerCase())) {
+      this.toast.error(`A user with the email "${email}" already exists.`);
+      return;
+    }
     this.users.update((rows) => [
       {
         name,
-        email: this.newUser.email.trim() || emailFor(name),
+        email,
         role: this.newUser.role,
         department: this.newUser.department,
         status: 'Pending',
@@ -425,6 +438,7 @@ export class UserRoles {
       ...rows,
     ]);
     this.showAddUser.set(false);
+    this.toast.success(`"${name}" invited.`);
   }
 
   // ---- Role card actions ---------------------------------------------
@@ -444,6 +458,7 @@ export class UserRoles {
     if (!edited) return;
     this.roles.update((rows) => rows.map((r) => (r.name === edited.name ? edited : r)));
     this.editingRole.set(null);
+    this.toast.success(`"${edited.name}" role updated.`);
   }
 
   protected viewUsersForRole(roleName: string): void {

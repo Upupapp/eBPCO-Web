@@ -11,6 +11,7 @@ import { KpiCard, KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-car
 import { Pagination } from '../../shared/pagination/pagination';
 import { FilterPanel } from '../../shared/filter-panel/filter-panel';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
+import { ToastService } from '../../shared/toast/toast.service';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord } from '../../core/domain/application.model';
@@ -133,6 +134,7 @@ export class Applications {
   private readonly router = inject(Router);
   private readonly titleService = inject(Title);
   private readonly session = inject(SessionService);
+  private readonly toast = inject(ToastService);
   protected readonly canCreate = computed(() => {
     const role = this.session.role();
     return role ? ACTION_PERMISSIONS.createApplication(role) : false;
@@ -473,23 +475,33 @@ export class Applications {
 
   protected assessFeeAction(): void {
     const row = this.selectedRow();
-    if (!row || !this.canAssessFee()) return;
-    this.store.assessFee(
+    if (!row || !this.canAssessFee()) {
+      this.toast.error("Can't assess a fee for this application in its current state.");
+      return;
+    }
+    const ok = this.store.assessFee(
       row.id,
       this.session.name() || 'Staff',
       this.session.role() ?? 'Administrator',
     );
+    if (ok) this.toast.success('Fee assessment drafted.');
+    else this.toast.error("Couldn't draft a fee assessment for this application.");
     this.selectedRow.set(this.store.getById(row.id) ?? row);
   }
 
   protected generatePermitAction(): void {
     const row = this.selectedRow();
-    if (!row || !this.canGeneratePermit()) return;
-    this.store.generatePermit(
+    if (!row || !this.canGeneratePermit()) {
+      this.toast.error("Can't generate a permit yet — the application must be Approved and fully paid.");
+      return;
+    }
+    const ok = this.store.generatePermit(
       row.id,
       this.session.name() || 'Staff',
       this.session.role() ?? 'Administrator',
     );
+    if (ok) this.toast.success(`${this.finalDocumentName()} generated.`);
+    else this.toast.error("Couldn't generate the permit for this application.");
     this.selectedRow.set(this.store.getById(row.id) ?? row);
   }
 
@@ -509,13 +521,19 @@ export class Applications {
     outcome: 'Verified' | 'Verification Failed',
   ): void {
     const row = this.selectedRow();
-    if (!row || !this.canVerifyContact()) return;
+    if (!row || !this.canVerifyContact()) {
+      this.toast.error("You don't have permission to verify this contact.");
+      return;
+    }
     this.store.setContactVerification(
       row.applicantId,
       channel,
       outcome,
       'Manual Administrator Confirmation',
       this.session.name() || 'Administrator',
+    );
+    this.toast.success(
+      `${channel === 'email' ? 'Email' : 'Mobile number'} marked "${outcome}".`,
     );
     // Force selectedDetail() to recompute against the freshly updated applicant record.
     this.selectedRow.set({ ...row });
@@ -571,6 +589,7 @@ export class Applications {
     downloadCsv(`document-${doc.label.replace(/\s+/g, '-').toLowerCase()}`, [
       { Document: doc.label, File: doc.filename, Status: doc.status },
     ]);
+    this.toast.success('Downloaded.');
   }
 
   // ---- Row status mutation --------------------------------------------
@@ -592,11 +611,12 @@ export class Applications {
     const role = this.session.role() ?? 'Administrator';
     const ok = this.store.transitionStatus(id, target, actor, role, remarks);
     if (!ok) {
-      this.quickActionError.set(
-        `Couldn't move this application to "${target}" — it no longer meets the requirements for that step (re-check its documents/role access and try again).`,
-      );
+      const message = `Couldn't move this application to "${target}" — it no longer meets the requirements for that step (re-check its documents/role access and try again).`;
+      this.quickActionError.set(message);
+      this.toast.error(message);
       return;
     }
+    this.toast.success(`Status updated to "${target}".`);
     const current = this.selectedRow();
     if (current && current.id === id) {
       const refreshed = this.store.getById(id);
@@ -674,6 +694,11 @@ export class Applications {
       this.session.name() || 'Staff',
       this.session.role() ?? 'Administrator',
     );
+    this.toast.success(
+      idsToRemove.size === 1
+        ? 'Application moved to Cancelled.'
+        : `${idsToRemove.size} applications moved to Cancelled.`,
+    );
     this.selectedIds.update((current) => {
       const next = new Set(current);
       for (const id of idsToRemove) next.delete(id);
@@ -702,16 +727,19 @@ export class Applications {
   }
 
   protected exportVisible(): void {
+    const rows = this.filteredRows();
     downloadCsv(
       'applications',
-      this.filteredRows().map((row) => this.appCsvRow(row)),
+      rows.map((row) => this.appCsvRow(row)),
     );
+    this.toast.success(`Exported ${rows.length} application${rows.length === 1 ? '' : 's'}.`);
   }
 
   protected exportDetail(): void {
     const row = this.selectedRow();
     if (!row) return;
     downloadCsv(`application-${row.id}`, [this.appCsvRow(row)]);
+    this.toast.success('Exported.');
   }
 
   // ---- Add application (full walk-in intake wizard) --------------------
@@ -878,6 +906,7 @@ export class Applications {
     this.store.updateFields(row.id, { location, officer });
     this.selectedRow.set({ ...row, location, officer });
     this.editingProfile.set(false);
+    this.toast.success('Profile updated.');
   }
 
   // ---- Documents tab ----------------------------------------------------
@@ -979,6 +1008,7 @@ export class Applications {
         Status: r.doc?.status ?? 'Missing',
       })),
     );
+    this.toast.success('Exported.');
     this.closeDocActionMenu();
   }
 
@@ -986,15 +1016,19 @@ export class Applications {
     const row = this.selectedRow();
     const ids = this.docSelectedIds();
     if (!row || ids.size === 0) {
+      this.toast.error('Select at least one document first.');
       this.closeDocActionMenu();
       return;
     }
     const actor = this.session.name() || 'Staff';
+    let count = 0;
     for (const r of this.documentRows()) {
       if (r.doc && ids.has(r.requirementId)) {
         this.store.setDocumentStatus(row.id, r.doc.id, 'Accepted', actor);
+        count++;
       }
     }
+    this.toast.success(`${count} document${count === 1 ? '' : 's'} marked Accepted.`);
     this.docSelectedIds.set(new Set());
     this.closeDocActionMenu();
   }
@@ -1009,8 +1043,12 @@ export class Applications {
     const remarks = needsRemarks
       ? this.docRemarksDraft().trim() || r.doc.remarks || undefined
       : undefined;
-    if (needsRemarks && !remarks) return;
+    if (needsRemarks && !remarks) {
+      this.toast.error(`Add remarks before marking this document "${status}".`);
+      return;
+    }
     this.store.setDocumentStatus(row.id, r.doc.id, status, actor, remarks);
+    this.toast.success(`"${r.label}" marked "${status}".`);
     this.docRemarksDraft.set('');
   }
 
@@ -1027,6 +1065,7 @@ export class Applications {
       file.name,
       this.session.name() || 'Staff',
     );
+    this.toast.success(`"${r.label}" attached.`);
     input.value = '';
   }
 
@@ -1037,6 +1076,7 @@ export class Applications {
     const file = input.files?.[0];
     if (!row || !r.doc || !file) return;
     this.store.resubmitDocument(row.id, r.doc.id, file.name, this.session.name() || 'Staff');
+    this.toast.success(`"${r.label}" resubmitted.`);
     input.value = '';
   }
 
@@ -1096,6 +1136,7 @@ export class Applications {
     downloadCsv(`timeline-entry-${t.num}`, [
       { Event: t.event, Date: t.date, Time: t.time, Detail: t.detail },
     ]);
+    this.toast.success('Exported.');
   }
 
 }

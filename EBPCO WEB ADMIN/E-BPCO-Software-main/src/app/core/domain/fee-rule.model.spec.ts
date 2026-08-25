@@ -154,6 +154,16 @@ describe('Fee rule catalog — official fee families per the task specification'
     }
   });
 
+  it('Zoning / Locational Clearance itself requires the Locational / Zoning of Land fee — not just Building Permit filings referencing the same clearance', () => {
+    // Previously missing: this type had NO dedicated fee-line test at all,
+    // so nothing failed when its only real assessed amount was the
+    // universal ₱250 filing fee — every other type in this file has a
+    // test like this one for its own line.
+    const entries = feeRulesForPermitType('Zoning / Locational Clearance');
+    const requiredIds = entries.filter((e) => e.applicability === 'required').map((e) => e.rule.id);
+    expect(requiredIds.sort()).toEqual(['filing-fee', 'locational-zoning-fee'].sort());
+  });
+
   it('Building Permit sub-types conditionally carry Fencing, Electronics, Surcharges, and Penalties, per Box 6\'s "FOR BUILDING / STRUCTURE (OBO)" list', () => {
     for (const type of [
       'Building Permit – New Construction',

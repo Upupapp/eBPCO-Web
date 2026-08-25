@@ -7,6 +7,7 @@ import { Avatar } from '../../shared/avatar/avatar';
 import { KpiCard, KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-card';
 import { Pagination } from '../../shared/pagination/pagination';
 import { FilterPanel } from '../../shared/filter-panel/filter-panel';
+import { ToastService } from '../../shared/toast/toast.service';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { SessionService } from '../../core/session/session.service';
@@ -69,6 +70,7 @@ export class PermitRelease {
   private readonly store = inject(ApplicationStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
   private readonly requirementsConfig = inject(RequirementsConfigStore);
   private readonly paymentConfig = inject(PaymentConfigStore);
 
@@ -173,14 +175,21 @@ export class PermitRelease {
 
   protected confirmAddDocument(): void {
     const type = this.selectedPermitType();
-    if (!type || !this.canConfigureRequirements()) return;
+    if (!type || !this.canConfigureRequirements()) {
+      this.toast.error("You don't have permission to configure requirements.");
+      return;
+    }
     const label = this.newDocument.label.trim();
-    if (!label) return;
+    if (!label) {
+      this.toast.error('Enter a document label before adding it.');
+      return;
+    }
     this.requirementsConfig.addDocument(type, {
       label,
       required: this.newDocument.required,
       reviewingDepartmentId: this.newDocument.reviewingDepartmentId,
     });
+    this.toast.success(`"${label}" added to the checklist.`);
     this.addDocumentOpen.set(false);
   }
 
@@ -204,27 +213,42 @@ export class PermitRelease {
   protected confirmEditDocument(): void {
     const type = this.selectedPermitType();
     const id = this.editingDocumentId();
-    if (!type || !id || !this.canConfigureRequirements()) return;
+    if (!type || !id || !this.canConfigureRequirements()) {
+      this.toast.error("You don't have permission to configure requirements.");
+      return;
+    }
     const label = this.editDraft.label.trim();
-    if (!label) return;
+    if (!label) {
+      this.toast.error('Enter a document label before saving.');
+      return;
+    }
     this.requirementsConfig.updateDocument(type, id, {
       label,
       required: this.editDraft.required,
       reviewingDepartmentId: this.editDraft.reviewingDepartmentId,
     });
+    this.toast.success(`"${label}" updated.`);
     this.editingDocumentId.set(null);
   }
 
   protected removeDocument(doc: RequirementDocument): void {
     const type = this.selectedPermitType();
-    if (!type || !this.canConfigureRequirements()) return;
+    if (!type || !this.canConfigureRequirements()) {
+      this.toast.error("You don't have permission to configure requirements.");
+      return;
+    }
     this.requirementsConfig.removeDocument(type, doc.id);
+    this.toast.success(`"${doc.label}" removed from the checklist.`);
   }
 
   protected resetDocumentsToDefault(): void {
     const type = this.selectedPermitType();
-    if (!type || !this.canConfigureRequirements()) return;
+    if (!type || !this.canConfigureRequirements()) {
+      this.toast.error("You don't have permission to configure requirements.");
+      return;
+    }
     this.requirementsConfig.resetToDefault(type);
+    this.toast.success('Checklist reset to default.');
   }
 
   // Every row is an application whose permit has actually been generated —
@@ -384,20 +408,22 @@ export class PermitRelease {
   }
 
   protected exportVisible(): void {
+    const rows = this.filteredRows();
     downloadCsv(
       'permit-releases',
-      this.filteredRows().map((row) => this.releaseCsvRow(row)),
+      rows.map((row) => this.releaseCsvRow(row)),
     );
+    this.toast.success(`Exported ${rows.length} row${rows.length === 1 ? '' : 's'}.`);
   }
 
   protected exportSelected(): void {
     const ids = this.selectedIds();
+    const rows = this.rows().filter((row) => ids.has(row.id));
     downloadCsv(
       'permit-releases-selected',
-      this.rows()
-        .filter((row) => ids.has(row.id))
-        .map((row) => this.releaseCsvRow(row)),
+      rows.map((row) => this.releaseCsvRow(row)),
     );
+    this.toast.success(`Exported ${rows.length} row${rows.length === 1 ? '' : 's'}.`);
   }
 
   // ---- Generate / print ---------------------------------------------------
@@ -414,11 +440,19 @@ export class PermitRelease {
     // a permit that didn't already exist.
     if (row && !this.store.getPermit(row.id)) {
       const application = this.store.getById(row.id);
-      if (
-        application?.lifecycleStatus === 'Approved' &&
-        application.paymentStatus === 'Paid'
-      ) {
-        this.store.generatePermit(row.id, this.session.name() || 'Approving Officer', this.session.role() ?? 'Administrator');
+      if (application?.lifecycleStatus === 'Approved' && application.paymentStatus === 'Paid') {
+        const ok = this.store.generatePermit(
+          row.id,
+          this.session.name() || 'Approving Officer',
+          this.session.role() ?? 'Administrator',
+        );
+        if (ok) this.toast.success('Permit generated.');
+        else this.toast.error("Couldn't generate the permit for this application.");
+      } else {
+        this.toast.error(
+          "Can't generate a permit yet — the application must be Approved and fully paid.",
+        );
+        return;
       }
     }
     this.generateTarget.set(row ?? null);
@@ -468,7 +502,9 @@ export class PermitRelease {
     if (!row) return;
     const claimant = this.claimantName.trim();
     if (!claimant) {
-      this.releaseError.set('Claimant name is required.');
+      const message = 'Claimant name is required.';
+      this.releaseError.set(message);
+      this.toast.error(message);
       return;
     }
     const ok = this.store.releasePermit(
@@ -478,11 +514,13 @@ export class PermitRelease {
       this.releaseMethod,
     );
     if (!ok) {
-      this.releaseError.set(
-        'This application is not eligible for release yet (needs an approved status, verified payment, and generated permit), or has already been released.',
-      );
+      const message =
+        'This application is not eligible for release yet (needs an approved status, verified payment, and generated permit), or has already been released.';
+      this.releaseError.set(message);
+      this.toast.error(message);
       return;
     }
+    this.toast.success(`Permit released to ${claimant}.`);
     this.releaseTarget.set(null);
   }
 
