@@ -430,13 +430,18 @@
                           <app-icon name="eye" [size]="14" />
                           View Record
                         </button>
-                        @if (row.stage !== 'passed') {
+                        @if (!row.isCurrentStage) {
+                          <span class="menu-empty-note">
+                            Already moved past this stage — no action to take here.
+                          </span>
+                        }
+                        @if (row.isCurrentStage && row.stage !== 'passed') {
                           <button type="button" role="menuitem" (click)="advanceStage(row)">
                             <app-icon name="check-circle" [size]="14" />
                             Advance Stage
                           </button>
                         }
-                        @if (row.stage !== 'returned') {
+                        @if (row.isCurrentStage && row.stage !== 'returned') {
                           <label
                             class="revision-remarks-label"
                             [for]="'revision-remarks-' + row.id"

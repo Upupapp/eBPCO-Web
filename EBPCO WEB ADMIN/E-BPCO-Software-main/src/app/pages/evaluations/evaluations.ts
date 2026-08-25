@@ -396,6 +396,12 @@ export class Evaluations {
   protected advanceStage(row: EvalRow): void {
     const card = this.selectedCard();
     if (!card) return;
+    // Defense in depth — the row menu already hides this action once
+    // `!row.isCurrentStage` (the application has genuinely moved past
+    // this stage), but never trust the UI filter alone: acting anyway
+    // would call recordEvaluation for THIS stage while the application is
+    // actually being evaluated at a later one.
+    if (!row.isCurrentStage) return;
     this.actionError.set(null);
     const actor = this.session.name() || 'Staff';
     const ok = this.store.recordEvaluation(row.id, EVAL_KEY_TO_APP_STAGE[card.key], 'Passed', actor);
@@ -410,6 +416,7 @@ export class Evaluations {
   protected returnForRevision(row: EvalRow): void {
     const card = this.selectedCard();
     if (!card) return;
+    if (!row.isCurrentStage) return;
     const remarks = this.revisionRemarks().trim();
     if (!remarks) return;
     this.actionError.set(null);
