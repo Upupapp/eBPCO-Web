@@ -223,19 +223,25 @@
                       book / e-receipting system before this document can read "Official Receipt".
                     </p>
                   }
+
+                  <div class="receipt-or-box">
+                    <div>
+                      <span class="receipt-or-label">{{
+                        hasOfficialReceipt() ? 'Official Receipt No.' : 'Internal Reference No.'
+                      }}</span>
+                      <span class="receipt-or-number">{{
+                        hasOfficialReceipt() ? txn.orNumber : txn.id
+                      }}</span>
+                    </div>
+                    <div>
+                      <span class="receipt-or-label">Date</span>
+                      <span class="receipt-or-number">{{
+                        hasOfficialReceipt() ? txn.orDate : txn.submittedAt
+                      }}</span>
+                    </div>
+                  </div>
+
                   <dl class="doc-fields">
-                    <div>
-                      <dt>{{ hasOfficialReceipt() ? 'OR No.' : 'Internal Transaction Ref.' }}</dt>
-                      <dd>{{ hasOfficialReceipt() ? txn.orNumber : txn.id }}</dd>
-                    </div>
-                    <div>
-                      <dt>Payer Reference</dt>
-                      <dd>{{ txn.transactionReference }}</dd>
-                    </div>
-                    <div>
-                      <dt>Application No.</dt>
-                      <dd>{{ row.id }}</dd>
-                    </div>
                     <div>
                       <dt>Received From</dt>
                       <dd>{{ row.applicant }}</dd>
@@ -245,21 +251,73 @@
                       <dd>{{ businessLabel() }}</dd>
                     </div>
                     <div>
-                      <dt>Collecting Agency</dt>
-                      <dd>{{ txn.agency }}</dd>
+                      <dt>Application No.</dt>
+                      <dd>{{ row.id }}</dd>
+                    </div>
+                    <div>
+                      <dt>Payer Reference</dt>
+                      <dd>{{ txn.transactionReference }}</dd>
                     </div>
                     <div>
                       <dt>Payment Method</dt>
                       <dd>{{ txn.method }}</dd>
                     </div>
                     <div>
-                      <dt>Date</dt>
-                      <dd>{{ hasOfficialReceipt() ? txn.orDate : txn.submittedAt }}</dd>
+                      <dt>Collecting Agency</dt>
+                      <dd>{{ txn.agency }}</dd>
                     </div>
-                    <div>
-                      <dt>Amount</dt>
-                      <dd>{{ txn.amountCentavos / 100 | number: '1.2-2' }}</dd>
+                  </dl>
+
+                  <h2>Particulars</h2>
+                  <table class="doc-table">
+                    <thead>
+                      <tr>
+                        <th>Particulars</th>
+                        <th>Authority</th>
+                        <th>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (line of feeLines(); track line.label) {
+                        <tr>
+                          <td>
+                            {{ line.label }}
+                            @if (line.requiresAssessorInput) {
+                              <span class="doc-flag">pending assessor input</span>
+                            }
+                          </td>
+                          <td>{{ line.legalBasisTitle }}</td>
+                          <td>{{ line.amount }}</td>
+                        </tr>
+                      } @empty {
+                        <tr>
+                          <td colspan="3" class="doc-note">
+                            No itemized assessment on file for this application — see the amount
+                            received below.
+                          </td>
+                        </tr>
+                      }
+                      @if (feeLines().length > 0) {
+                        <tr class="doc-total">
+                          <td colspan="2">Total Assessed</td>
+                          <td>{{ totalDue() }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+
+                  <div class="receipt-amount-row">
+                    <span>Amount Received (this payment)</span>
+                    <strong>₱{{ txn.amountCentavos / 100 | number: '1.2-2' }}</strong>
+                  </div>
+                  @if (assessment()) {
+                    <div class="receipt-amount-row muted">
+                      <span>Outstanding Balance</span>
+                      <span>{{ balanceDue() }}</span>
                     </div>
+                  }
+
+                  <dl class="doc-fields receipt-meta">
                     <div>
                       <dt>Status</dt>
                       <dd>{{ txn.status }}</dd>
@@ -269,6 +327,14 @@
                       <dd>{{ txn.verifiedBy ?? txn.recordedBy ?? row.officer }}</dd>
                     </div>
                   </dl>
+
+                  <div class="doc-signature">
+                    <div class="doc-signature-line"></div>
+                    <span
+                      >{{ txn.verifiedBy ?? txn.recordedBy ?? row.officer }}<br />Collecting
+                      Officer</span
+                    >
+                  </div>
                 </section>
               } @else {
                 <p class="doc-note">No payment has been recorded yet for this application.</p>
