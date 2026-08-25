@@ -9,6 +9,7 @@ import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
 import { AuditEvent } from '../../core/domain/audit.model';
+import { ToastService } from '../../shared/toast/toast.service';
 
 type LogTabKey = 'activity' | 'access' | 'error' | 'security' | 'events';
 
@@ -354,6 +355,7 @@ export interface SystemEventRow {
 export class SystemLogs {
   private readonly store = inject(ApplicationStore);
   private readonly assessmentStore = inject(AssessmentStore);
+  private readonly toast = inject(ToastService);
 
   protected readonly tabs: { key: LogTabKey; label: string; icon: string }[] = [
     { key: 'activity', label: 'Activity logs', icon: 'logs' },
@@ -987,7 +989,14 @@ export class SystemLogs {
   protected copyLogId(): void {
     const log = this.selectedLog();
     if (!log) return;
-    navigator.clipboard?.writeText(log.logId).catch(() => undefined);
+    if (!navigator.clipboard) {
+      this.toast.error("Couldn't copy the log ID — clipboard access isn't available.");
+      return;
+    }
+    navigator.clipboard.writeText(log.logId).then(
+      () => this.toast.success('Log ID copied.'),
+      () => this.toast.error("Couldn't copy the log ID."),
+    );
   }
 
   protected exportLogDetail(): void {
@@ -1003,6 +1012,7 @@ export class SystemLogs {
     };
     for (const f of log.fields) row[f.label] = f.value;
     downloadCsv(`${log.logId}`, [row]);
+    this.toast.success(`Exported ${log.logId}.`);
   }
 
   // Purely presentational — never changes what's displayed, only whether
@@ -1052,28 +1062,36 @@ export class SystemLogs {
         break;
     }
     this.deleteTarget.set(null);
+    this.toast.success('Log entry deleted.');
   }
 
   // ---- Export -----------------------------------------------------------
 
   protected exportCurrentTab(): void {
     const tab = this.activeTab();
+    let count = 0;
     switch (tab) {
       case 'activity':
+        count = this.filteredActivityRows().length;
         downloadCsv(`system-logs-${tab}`, this.filteredActivityRows());
         break;
       case 'access':
+        count = this.filteredAccessRows().length;
         downloadCsv(`system-logs-${tab}`, this.filteredAccessRows());
         break;
       case 'error':
+        count = this.filteredErrorRows().length;
         downloadCsv(`system-logs-${tab}`, this.filteredErrorRows());
         break;
       case 'security':
+        count = this.filteredSecurityRows().length;
         downloadCsv(`system-logs-${tab}`, this.filteredSecurityRows());
         break;
       case 'events':
+        count = this.filteredEventRows().length;
         downloadCsv(`system-logs-${tab}`, this.filteredEventRows());
         break;
     }
+    this.toast.success(`Exported ${count} row${count === 1 ? '' : 's'}.`);
   }
 }

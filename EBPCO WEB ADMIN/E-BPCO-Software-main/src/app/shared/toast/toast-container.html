@@ -1,0 +1,11 @@
+<div class="toast-stack" aria-live="polite">
+  @for (t of service.toasts(); track t.id) {
+    <div class="toast" [class]="t.tone" role="status">
+      <app-icon [name]="toneIcon(t.tone)" [size]="17" />
+      <span>{{ t.text }}</span>
+      <button type="button" class="toast-dismiss" aria-label="Dismiss" (click)="service.dismiss(t.id)">
+        &#10005;
+      </button>
+    </div>
+  }
+</div>

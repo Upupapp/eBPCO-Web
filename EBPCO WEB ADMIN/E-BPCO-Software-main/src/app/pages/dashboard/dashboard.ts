@@ -14,6 +14,7 @@ import { buildPermitQueueRows } from '../../shared/permit-queue/permit-queue';
 import { BusinessStagesBoard } from '../../shared/business-stages-board/business-stages-board';
 import { FilterPanel } from '../../shared/filter-panel/filter-panel';
 import { downloadCsv } from '../../shared/utils/export-csv';
+import { ToastService } from '../../shared/toast/toast.service';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import {
@@ -125,6 +126,7 @@ const STAGE_TO_EVAL_KEY: Record<EvaluationStage, string> = {
 })
 export class Dashboard {
   private readonly store = inject(ApplicationStore);
+  private readonly toast = inject(ToastService);
 
   constructor(private readonly router: Router) {}
 
@@ -444,9 +446,10 @@ export class Dashboard {
   // page now, not here.
 
   protected exportVisible(): void {
+    const rows = this.filteredApplications();
     downloadCsv(
       'recent-applications',
-      this.filteredApplications().map((row) => ({
+      rows.map((row) => ({
         'Application ID': row.id,
         Applicant: row.applicant,
         'Business ID': row.businessId,
@@ -458,17 +461,20 @@ export class Dashboard {
         Status: row.status,
       })),
     );
+    this.toast.success(`Exported ${rows.length} row${rows.length === 1 ? '' : 's'}.`);
   }
 
   protected exportQueueReport(): void {
+    const rows = this.permitQueueRows();
     downloadCsv(
       'permit-queue-report',
-      this.permitQueueRows().map((row) => ({
+      rows.map((row) => ({
         'Permit Type': row.label,
         Total: row.total,
         ...Object.fromEntries(row.segments.map((s) => [s.label, s.value])),
       })),
     );
+    this.toast.success(`Exported ${rows.length} row${rows.length === 1 ? '' : 's'}.`);
   }
 
   protected goToAllApplications(): void {

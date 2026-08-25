@@ -13,6 +13,7 @@ import { buildBusinessDetail } from './business-detail-data';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { Business } from '../../core/domain/business.model';
 import { applicantFullName } from '../../core/domain/applicant.model';
+import { ToastService } from '../../shared/toast/toast.service';
 
 type SubTab = 'analytics' | 'modules' | 'recent-activity';
 type ViewMode = 'list' | 'create' | 'detail';
@@ -103,6 +104,7 @@ const GROWTH_POINTS: GrowthPoint[] = [
 })
 export class Businesses {
   private readonly store = inject(ApplicationStore);
+  private readonly toast = inject(ToastService);
 
   constructor(private readonly router: Router) {}
 
@@ -364,6 +366,11 @@ export class Businesses {
       return next;
     });
     this.deleteTarget.set(null);
+    this.toast.success(
+      idsToRemove.size === 1
+        ? 'Business hidden from this view.'
+        : `${idsToRemove.size} businesses hidden from this view.`,
+    );
   }
 
   // ---- Export -----------------------------------------------------------
@@ -384,16 +391,22 @@ export class Businesses {
   }
 
   protected exportVisible(): void {
+    const rows = this.filteredBusinessRows();
     downloadCsv(
       'businesses',
-      this.filteredBusinessRows().map((row) => this.businessCsvRow(row)),
+      rows.map((row) => this.businessCsvRow(row)),
     );
+    this.toast.success(`Exported ${rows.length} row${rows.length === 1 ? '' : 's'}.`);
   }
 
   protected exportDetail(): void {
     const row = this.selectedBusiness();
-    if (!row) return;
+    if (!row) {
+      this.toast.error('No business selected to export.');
+      return;
+    }
     downloadCsv(`business-${row.id}`, [this.businessCsvRow(row)]);
+    this.toast.success(`Exported ${row.code}.`);
   }
 
   protected readonly moduleUsage: ModuleUsage[] = [
@@ -618,12 +631,17 @@ export class Businesses {
   }
 
   protected toggleModule(name: string): void {
+    let nowEnabled = false;
     this.enabledModules.update((current) => {
       const next = new Set(current);
       if (next.has(name)) next.delete(name);
-      else next.add(name);
+      else {
+        next.add(name);
+        nowEnabled = true;
+      }
       return next;
     });
+    this.toast.success(`"${name}" ${nowEnabled ? 'enabled' : 'disabled'} for businesses.`);
   }
 
   protected openCatalog(): void {
@@ -660,7 +678,19 @@ export class Businesses {
    * created here, since its id was never actually added to the store.
    */
   createBusiness(): void {
-    const name = this.newBusiness.businessName.trim() || 'New Business';
+    const name = this.newBusiness.businessName.trim();
+    if (!name) {
+      this.toast.error('Enter a business name before creating this registration.');
+      return;
+    }
+    if (!this.newBusiness.password) {
+      this.toast.error('Set a password for this business account before creating it.');
+      return;
+    }
+    if (this.newBusiness.password !== this.newBusiness.confirmPassword) {
+      this.toast.error('Password and confirm password do not match.');
+      return;
+    }
     const code = name.toUpperCase().replace(/\s+/g, '');
     const nextIdNum =
       Math.max(...this.businessRows().map((r) => parseInt(r.id.replace('REG-2026-', ''), 10))) + 1;
@@ -686,5 +716,6 @@ export class Businesses {
 
     this.view.set('list');
     this.page.set(1);
+    this.toast.success(`"${name}" registered.`);
   }
 }

@@ -8,6 +8,7 @@ import { Avatar } from '../../shared/avatar/avatar';
 import { KpiCard } from '../../shared/kpi-card/kpi-card';
 import { Pagination } from '../../shared/pagination/pagination';
 import { FilterPanel } from '../../shared/filter-panel/filter-panel';
+import { ToastService } from '../../shared/toast/toast.service';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
@@ -87,6 +88,7 @@ export class Payments {
   protected readonly payrollStore = inject(PayrollStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   /** Bound to the `?tab=` query param (via withComponentInputBinding) — lets another page (Permit Release > Permit Types' "Manage Fee Rules" link) land directly on a specific tab. */
   readonly tab = input<PaymentsTab | null>(null);
@@ -354,30 +356,48 @@ export class Payments {
   }
 
   protected submitForApproval(assessment: Assessment): void {
-    if (!this.canEditAssessment()) return;
-    this.assessmentStore.submitForApproval(
+    if (!this.canEditAssessment()) {
+      this.toast.error("You don't have permission to submit this assessment for approval.");
+      return;
+    }
+    const ok = this.assessmentStore.submitForApproval(
       assessment.id,
       this.session.name() || 'Staff',
       this.session.role() ?? 'Payment Officer',
     );
+    if (ok) this.toast.success('Assessment submitted for approval.');
+    else this.toast.error("Couldn't submit this assessment for approval from its current status.");
   }
 
   protected approveAssessment(assessment: Assessment): void {
-    if (!this.canApproveAssessment()) return;
-    this.assessmentStore.approveAssessment(
+    if (!this.canApproveAssessment()) {
+      this.toast.error("You don't have permission to approve this assessment.");
+      return;
+    }
+    const ok = this.assessmentStore.approveAssessment(
       assessment.id,
       this.session.name() || 'Administrator',
       this.session.role() ?? 'Administrator',
     );
+    if (ok) this.toast.success('Assessment approved.');
+    else this.toast.error("Couldn't approve this assessment from its current status.");
   }
 
   protected issueOrderOfPayment(assessment: Assessment): void {
-    if (!this.canApproveAssessment()) return;
-    this.assessmentStore.issueOrderOfPayment(
+    if (!this.canApproveAssessment()) {
+      this.toast.error("You don't have permission to issue an Order of Payment.");
+      return;
+    }
+    const ok = this.assessmentStore.issueOrderOfPayment(
       assessment.id,
       this.session.name() || 'Administrator',
       this.session.role() ?? 'Administrator',
     );
+    if (!ok) {
+      this.toast.error("Couldn't issue an Order of Payment — the assessment must be approved first.");
+      return;
+    }
+    this.toast.success('Order of Payment issued.');
     this.store.refreshPaymentProjection(
       assessment.applicationId,
       this.session.name() || 'Administrator',
@@ -395,7 +415,10 @@ export class Payments {
   protected reviseAssessment(): void {
     const a = this.selectedAssessment();
     const app = this.selectedAssessmentApp();
-    if (!a || !app || !this.canEditAssessment() || !this.canReviseSelected()) return;
+    if (!a || !app || !this.canEditAssessment() || !this.canReviseSelected()) {
+      this.toast.error("Can't revise this assessment from its current status.");
+      return;
+    }
     const revised = this.assessmentStore.reviseIssuedAssessment(
       a.id,
       app.permitType,
@@ -409,6 +432,9 @@ export class Payments {
         this.session.role() ?? 'Payment Officer',
       );
       this.selectedAssessmentId.set(revised.id);
+      this.toast.success('New assessment version drafted.');
+    } else {
+      this.toast.error("Couldn't create a new assessment version.");
     }
   }
 
@@ -425,7 +451,10 @@ export class Payments {
   } = { method: 'Onsite', agency: 'OBO/LGU', amount: '', reference: '', proofFileName: '' };
 
   protected openPaymentForm(): void {
-    if (!this.canRecordPayment()) return;
+    if (!this.canRecordPayment()) {
+      this.toast.error("You don't have permission to record a payment.");
+      return;
+    }
     const balance = this.selectedAssessment()?.balanceCentavos ?? 0;
     this.paymentForm = {
       method: 'Onsite',
@@ -455,7 +484,10 @@ export class Payments {
 
   protected submitPaymentForm(): void {
     const a = this.selectedAssessment();
-    if (!a || !this.canRecordPayment()) return;
+    if (!a || !this.canRecordPayment()) {
+      this.toast.error("You don't have permission to record a payment.");
+      return;
+    }
     const amountCentavos = Math.round(Number(this.paymentForm.amount) * 100);
     const actor = this.session.name() || 'Cashier';
     const role = this.session.role() ?? 'Payment Officer';
@@ -479,15 +511,17 @@ export class Payments {
             role,
           );
     if (!txn) {
-      this.paymentFormError.set(
+      const message =
         this.paymentForm.method === 'Bank Transfer' && !this.paymentForm.proofFileName
           ? 'A proof-of-payment file is required for a bank transfer.'
-          : 'Could not record this payment — check the amount (must not exceed the outstanding balance) and that the reference number hasn’t already been used.',
-      );
+          : 'Could not record this payment — check the amount (must not exceed the outstanding balance) and that the reference number hasn’t already been used.';
+      this.paymentFormError.set(message);
+      this.toast.error(message);
       return;
     }
     this.store.refreshPaymentProjection(a.applicationId, actor, role);
     this.showPaymentForm.set(false);
+    this.toast.success('Payment recorded.');
   }
 
   // ---- Tab 2: Transactions --------------------------------------------------
@@ -594,11 +628,17 @@ export class Payments {
   }
 
   protected verifyTransaction(txn: PaymentTransaction): void {
-    if (!this.canVerifyPayment()) return;
+    if (!this.canVerifyPayment()) {
+      this.toast.error("You don't have permission to verify this payment.");
+      return;
+    }
     const actor = this.session.name() || 'Payment Officer';
     const role = this.session.role() ?? 'Payment Officer';
     if (this.assessmentStore.verifyTransaction(txn.id, actor, role)) {
       this.store.refreshPaymentProjection(txn.applicationId, actor, role);
+      this.toast.success('Payment verified.');
+    } else {
+      this.toast.error("Couldn't verify this transaction from its current status.");
     }
   }
 
@@ -606,7 +646,10 @@ export class Payments {
   protected rejectReason = '';
 
   protected openReject(txn: PaymentTransaction): void {
-    if (!this.canVerifyPayment()) return;
+    if (!this.canVerifyPayment()) {
+      this.toast.error("You don't have permission to reject this payment.");
+      return;
+    }
     this.rejectReason = '';
     this.rejectTarget.set(txn);
   }
@@ -617,11 +660,17 @@ export class Payments {
 
   protected confirmReject(): void {
     const txn = this.rejectTarget();
-    if (!txn || !this.rejectReason.trim()) return;
+    if (!txn || !this.rejectReason.trim()) {
+      this.toast.error('Add a reason before rejecting this payment.');
+      return;
+    }
     const actor = this.session.name() || 'Payment Officer';
     const role = this.session.role() ?? 'Payment Officer';
     if (this.assessmentStore.rejectTransaction(txn.id, actor, role, this.rejectReason)) {
       this.store.refreshPaymentProjection(txn.applicationId, actor, role);
+      this.toast.success('Payment rejected.');
+    } else {
+      this.toast.error("Couldn't reject this transaction from its current status.");
     }
     this.rejectTarget.set(null);
   }
@@ -633,7 +682,10 @@ export class Payments {
   protected adjustReason = '';
 
   protected openAdjust(txn: PaymentTransaction, type: 'Void' | 'Reversal' | 'Refund'): void {
-    if (!this.canAdjustPayment()) return;
+    if (!this.canAdjustPayment()) {
+      this.toast.error("You don't have permission to adjust this payment.");
+      return;
+    }
     this.adjustReason = '';
     this.adjustTarget.set({ txn, type });
   }
@@ -644,7 +696,10 @@ export class Payments {
 
   protected confirmAdjust(): void {
     const target = this.adjustTarget();
-    if (!target || !this.adjustReason.trim()) return;
+    if (!target || !this.adjustReason.trim()) {
+      this.toast.error('Add a reason before continuing.');
+      return;
+    }
     const actor = this.session.name() || 'Administrator';
     const role = this.session.role() ?? 'Administrator';
     const { txn, type } = target;
@@ -654,7 +709,13 @@ export class Payments {
         : type === 'Reversal'
           ? this.assessmentStore.reverseTransaction(txn.id, actor, role, this.adjustReason)
           : this.assessmentStore.refundTransaction(txn.id, actor, role, this.adjustReason);
-    if (ok) this.store.refreshPaymentProjection(txn.applicationId, actor, role);
+    const pastTense = type === 'Void' ? 'voided' : type === 'Reversal' ? 'reversed' : 'refunded';
+    if (ok) {
+      this.store.refreshPaymentProjection(txn.applicationId, actor, role);
+      this.toast.success(`Transaction ${pastTense}.`);
+    } else {
+      this.toast.error(`Couldn't ${type.toLowerCase()} this transaction.`);
+    }
     this.adjustTarget.set(null);
   }
 
@@ -709,13 +770,17 @@ export class Payments {
 
   protected submitOrForm(): void {
     const txn = this.orFormTarget();
-    if (!txn || !this.orForm.orNumber.trim()) return;
+    if (!txn || !this.orForm.orNumber.trim()) {
+      this.toast.error('Enter the OR number before saving.');
+      return;
+    }
     this.assessmentStore.attachOfficialReceipt(
       txn.id,
       this.orForm.orNumber,
       this.orForm.orDate,
       this.orForm.orIssuedBy,
     );
+    this.toast.success('Official Receipt attached.');
     this.showOrForm.set(false);
     this.orFormTarget.set(null);
   }
@@ -775,8 +840,12 @@ export class Payments {
   protected readonly methods = this.paymentConfig.methods;
 
   protected toggleFeeRuleActive(rule: FeeRule): void {
-    if (!this.canConfigurePayments()) return;
+    if (!this.canConfigurePayments()) {
+      this.toast.error("You don't have permission to change fee rules.");
+      return;
+    }
     this.paymentConfig.setFeeRuleActive(rule.id, !rule.active);
+    this.toast.success(`"${rule.name}" ${rule.active ? 'deactivated' : 'activated'}.`);
   }
 
   protected toggleMethodActive(
@@ -784,8 +853,16 @@ export class Payments {
     active: boolean,
     domainMethod: string | null,
   ): void {
-    if (!this.canConfigurePayments() || !domainMethod) return;
+    if (!this.canConfigurePayments()) {
+      this.toast.error("You don't have permission to change payment methods.");
+      return;
+    }
+    if (!domainMethod) {
+      this.toast.error('This method has no live integration in this build yet.');
+      return;
+    }
     this.paymentConfig.setMethodActive(methodId, active);
+    this.toast.success(`Payment method ${active ? 'activated' : 'deactivated'}.`);
   }
 
   protected readonly editingRule = signal<FeeRule | null>(null);
@@ -820,7 +897,10 @@ export class Payments {
 
   protected saveEditRule(): void {
     const rule = this.editingRule();
-    if (!rule || !this.canConfigurePayments()) return;
+    if (!rule || !this.canConfigurePayments()) {
+      this.toast.error("You don't have permission to edit fee rules.");
+      return;
+    }
     const patch: Partial<FeeRule> = {
       applicability: this.editForm.applicability,
       effectiveDate: this.editForm.effectiveDate || undefined,
@@ -838,6 +918,7 @@ export class Payments {
     }
     this.paymentConfig.updateFeeRule(rule.id, patch, this.session.name() || 'Super Admin');
     this.editingRule.set(null);
+    this.toast.success(`"${rule.name}" updated to a new version.`);
   }
 
   protected readonly historyFor = signal<string | null>(null);
@@ -872,13 +953,21 @@ export class Payments {
   }
 
   protected saveBankInfo(): void {
-    if (!this.canConfigurePayments()) return;
+    if (!this.canConfigurePayments()) {
+      this.toast.error("You don't have permission to edit bank information.");
+      return;
+    }
     const { bankName, accountName, accountNumber, branch } = this.bankInfoForm;
+    if (!bankName.trim() || !accountName.trim() || !accountNumber.trim()) {
+      this.toast.error('Bank Name, Account Name, and Account Number are required.');
+      return;
+    }
     this.paymentConfig.updateBankInfo(
       { bankName: bankName.trim(), accountName: accountName.trim(), accountNumber: accountNumber.trim(), branch: branch.trim() },
       this.session.name() || 'Super Admin',
     );
     this.editingBankInfo.set(false);
+    this.toast.success('Bank information saved.');
   }
 
   // ---- Tab 4: Configuration — Payroll sub-tab --------------------------------
@@ -919,9 +1008,16 @@ export class Payments {
   }
 
   protected savePayroll(): void {
-    if (!this.canConfigurePayments()) return;
+    if (!this.canConfigurePayments()) {
+      this.toast.error("You don't have permission to edit payroll.");
+      return;
+    }
     const id = this.editingPayrollId();
-    if (!id || !this.payrollForm.name.trim() || !this.payrollForm.position.trim()) return;
+    if (!id) return;
+    if (!this.payrollForm.name.trim() || !this.payrollForm.position.trim()) {
+      this.toast.error('Name and Position are required.');
+      return;
+    }
     const actor = this.session.name() || 'Super Admin';
     const patch = {
       name: this.payrollForm.name.trim(),
@@ -933,27 +1029,31 @@ export class Payments {
     };
     if (id === 'new') {
       this.payrollStore.addStaff(patch, actor);
+      this.toast.success(`"${patch.name}" added to the payroll roster.`);
     } else {
       this.payrollStore.updateStaff(id, patch, actor);
+      this.toast.success(`"${patch.name}" updated.`);
     }
     this.editingPayrollId.set(null);
   }
 
   protected togglePayrollStatus(staff: PayrollStaffMember): void {
-    if (!this.canConfigurePayments()) return;
-    this.payrollStore.setStaffStatus(
-      staff.id,
-      staff.status === 'Active' ? 'Inactive' : 'Active',
-      this.session.name() || 'Super Admin',
-    );
+    if (!this.canConfigurePayments()) {
+      this.toast.error("You don't have permission to change payroll status.");
+      return;
+    }
+    const nextStatus = staff.status === 'Active' ? 'Inactive' : 'Active';
+    this.payrollStore.setStaffStatus(staff.id, nextStatus, this.session.name() || 'Super Admin');
+    this.toast.success(`"${staff.name}" marked ${nextStatus}.`);
   }
 
   // ---- Export ---------------------------------------------------------------
 
   protected exportAssessments(): void {
+    const rows = this.filteredAssessmentRows();
     downloadCsv(
       'assessments',
-      this.filteredAssessmentRows().map((r) => ({
+      rows.map((r) => ({
         'Assessment ID': r.assessment.id,
         'Application ID': r.applicationId,
         Applicant: r.applicant,
@@ -968,12 +1068,14 @@ export class Payments {
         'Due Date': r.assessment.dueDate ?? '',
       })),
     );
+    this.toast.success(`Exported ${rows.length} assessment${rows.length === 1 ? '' : 's'}.`);
   }
 
   protected exportTransactions(): void {
+    const rows = this.filteredTransactionRows();
     downloadCsv(
       'transactions',
-      this.filteredTransactionRows().map((r) => ({
+      rows.map((r) => ({
         'Transaction ID': r.txn.id,
         'Application ID': r.txn.applicationId,
         Applicant: r.applicant,
@@ -989,5 +1091,6 @@ export class Payments {
         'Submitted At': r.txn.submittedAt,
       })),
     );
+    this.toast.success(`Exported ${rows.length} transaction${rows.length === 1 ? '' : 's'}.`);
   }
 }

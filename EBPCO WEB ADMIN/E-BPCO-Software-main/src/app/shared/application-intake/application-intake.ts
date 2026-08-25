@@ -17,6 +17,7 @@ import {
   validateLandlineNumber,
   validateMobileNumber,
 } from '../utils/validators';
+import { ToastService } from '../toast/toast.service';
 
 // Same barangay list the seed data and the Business Stages board's
 // filter draw from (application-seed.ts's LOCATIONS) — kept as its own
@@ -88,6 +89,7 @@ export class ApplicationIntake {
   private readonly store = inject(ApplicationStore);
   private readonly session = inject(SessionService);
   private readonly requirementsConfig = inject(RequirementsConfigStore);
+  private readonly toast = inject(ToastService);
 
   readonly cancelled = output<void>();
   readonly created = output<ApplicationRecord>();
@@ -325,8 +327,25 @@ export class ApplicationIntake {
 
   protected submit(): void {
     if (this.submitting()) return;
-    this.submitting.set(true);
     this.submitError.set('');
+    // `next()` marks a step attempted but always advances regardless of
+    // errors, so a staffer can click through to Review with earlier
+    // sections still invalid — this is the actual gate before anything
+    // gets written to the store.
+    const invalidStep = this.steps.find(
+      (s) => s.key !== 'review' && this.stepErrors(s.key).length > 0,
+    );
+    if (invalidStep) {
+      this.attempted.update((set) => new Set(set).add(invalidStep.key));
+      this.stepIndex.set(this.steps.indexOf(invalidStep));
+      this.submitError.set(
+        `Fix the issues in "${invalidStep.label}" before creating this application.`,
+      );
+      this.toast.error(`Fix the issues in "${invalidStep.label}" before creating this application.`);
+      return;
+    }
+
+    this.submitting.set(true);
     const permitType = this.applicationInfo.permitType;
     if (!permitType) {
       this.submitting.set(false);
@@ -426,6 +445,7 @@ export class ApplicationIntake {
       this.store.addNote(record.id, actor, role, this.applicationInfo.initialRemarks.trim());
     }
 
+    this.toast.success(`Application ${record.id} created for ${business.name}.`);
     this.created.emit(record);
   }
 }
