@@ -14,11 +14,13 @@ export type EvalTypeKey = 'initial' | 'zoning' | 'fire' | 'obo' | 'final';
 // stage still shows here, under this stage's own Passed tab, rather than
 // disappearing the moment it advances.
 export type Stage = 'under-review' | 'returned' | 'passed';
-// Mirrors E-BPCO Mobile's per-document evaluation labels
-// (ElectricalDocumentEvaluationStatus in electrical_permit_model.dart):
-// pendingReview -> 'Pending Review', accepted -> 'Accepted',
-// revisionRequired -> 'Revision Required'.
-export type RowStatus = 'Accepted' | 'Pending Review' | 'Revision Required';
+// Loosely mirrors E-BPCO Mobile's per-document evaluation labels
+// (ElectricalDocumentEvaluationStatus in electrical_permit_model.dart) —
+// accepted -> 'Accepted', revisionRequired -> 'Revision Required'. Mobile's
+// own 'pendingReview' is spelled 'Under Review' here to match this one
+// merged Stage bucket's tab label (see Stage/STAGE_TABS above) rather than
+// carrying two different words for the same thing.
+export type RowStatus = 'Accepted' | 'Under Review' | 'Revision Required';
 
 export interface EvalTypeCard {
   key: EvalTypeKey;
@@ -42,6 +44,16 @@ export interface EvalRow {
   officer: string;
   status: RowStatus;
   stage: Stage;
+  /**
+   * False when this row is showing up under a stage's own "Passed" tab
+   * for a stage the application has genuinely moved past already (the
+   * application's real `evaluationStage` is now later than this card's).
+   * Advance Stage / Return for Revision must never be offered on such a
+   * row — acting on it would call `recordEvaluation` for THIS stage while
+   * the application is actually being evaluated at a LATER one, silently
+   * attributing the action to the wrong stage.
+   */
+  isCurrentStage: boolean;
   /** The office responsible for THIS row's evaluation card/stage on its own permit type — see requirements-catalog.ts's evaluationSequence (department mapping differs between the Business Permit and Construction Permit domains for the same stage key). */
   department: string;
 }
@@ -100,7 +112,7 @@ const CARD_META: Omit<EvalTypeCard, 'count'>[] = [
 // Status is derived from stage (not stored independently) so a row's badge
 // never contradicts the stage tab it's filed under.
 export const STAGE_STATUS: Record<Stage, RowStatus> = {
-  'under-review': 'Pending Review',
+  'under-review': 'Under Review',
   returned: 'Revision Required',
   passed: 'Accepted',
 };
@@ -201,6 +213,7 @@ export function buildEvalRows(
       officer: a.officer,
       status: STAGE_STATUS[stage],
       stage,
+      isCurrentStage: a.evaluationStage === appStage,
       department: departmentId ? departmentName(departmentId) : '—',
     };
   });
