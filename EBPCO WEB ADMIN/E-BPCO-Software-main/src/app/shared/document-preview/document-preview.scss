@@ -216,6 +216,90 @@
   vertical-align: middle;
 }
 
+// ---- Official Receipt — OR box, itemized total, signature ----------------
+
+.receipt-or-box {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  background: $color-bg-subtle;
+  border: 1px dashed $color-border-strong;
+  border-radius: $radius-md;
+  padding: 0.75rem 1.1rem;
+  margin-bottom: 1.1rem;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  > div:last-child {
+    text-align: right;
+  }
+}
+
+.receipt-or-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: $color-ink-300;
+}
+
+.receipt-or-number {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: $color-ink-900;
+  font-variant-numeric: tabular-nums;
+}
+
+.receipt-amount-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: $radius-sm;
+  background: $color-success-bg;
+  color: $color-success;
+  font-weight: 700;
+
+  strong {
+    font-size: 1.15rem;
+  }
+
+  &.muted {
+    background: transparent;
+    color: $color-ink-300;
+    font-weight: 600;
+    font-size: 0.82rem;
+    padding: 0.3rem 0.75rem;
+  }
+}
+
+.receipt-meta {
+  margin-top: 1.1rem;
+}
+
+.doc-signature {
+  margin-top: 2rem;
+  text-align: center;
+
+  .doc-signature-line {
+    width: 55%;
+    margin: 0 auto 0.4rem;
+    border-top: 1px solid $color-ink-300;
+  }
+
+  span {
+    font-size: 0.76rem;
+    color: $color-ink-300;
+    line-height: 1.4;
+  }
+}
+
 .doc-footer {
   margin-top: 2rem;
   padding-top: 0.75rem;
