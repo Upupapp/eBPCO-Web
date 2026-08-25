@@ -1,11 +1,19 @@
 import { ApplicationRecord } from '../../core/domain/application.model';
-import { EvaluationStage } from '../../core/domain/status.model';
+import { EVALUATION_STAGE_ORDER, EvaluationStage } from '../../core/domain/status.model';
+import { EvaluationRecord } from '../../core/domain/evaluation.model';
 import { KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-card';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 
 export type EvalTypeKey = 'initial' | 'zoning' | 'fire' | 'obo' | 'final';
-export type Stage = 'pending-review' | 'under-review' | 'returned' | 'passed';
+// Previously 4 buckets ('pending-review' and 'under-review' both meaning
+// "nobody has ruled on this yet") — collapsed to 3, since the distinction
+// never meant anything an admin could act on differently. 'passed' is a
+// PERMANENT fact once a stage has a real Passed EvaluationRecord (see
+// stageBucket below) — an application that has since moved on to a later
+// stage still shows here, under this stage's own Passed tab, rather than
+// disappearing the moment it advances.
+export type Stage = 'under-review' | 'returned' | 'passed';
 // Mirrors E-BPCO Mobile's per-document evaluation labels
 // (ElectricalDocumentEvaluationStatus in electrical_permit_model.dart):
 // pendingReview -> 'Pending Review', accepted -> 'Accepted',
@@ -92,7 +100,6 @@ const CARD_META: Omit<EvalTypeCard, 'count'>[] = [
 // Status is derived from stage (not stored independently) so a row's badge
 // never contradicts the stage tab it's filed under.
 export const STAGE_STATUS: Record<Stage, RowStatus> = {
-  'pending-review': 'Pending Review',
   'under-review': 'Pending Review',
   returned: 'Revision Required',
   passed: 'Accepted',
@@ -106,60 +113,80 @@ export function buildEvalTypeCards(apps: ApplicationRecord[]): EvalTypeCard[] {
   }));
 }
 
-function hashOf(id: string): number {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0;
-  return Math.abs(hash);
-}
-
-// `ApplicationRecord.evaluationStage` only tracks the ONE evaluation
-// moment currently relevant to an application (it advances the stage the
-// instant a result is reached), so every application camped at a given
-// stage in this snapshot shares the exact same `evaluationResult` — e.g.
-// every app AT "Fire Safety" got there via the single 'Revision Required'
-// lifecycle status, so 100% of them would be 'Revision Required'. Taken
-// at face value, that leaves 3 of this page's 4 stage tabs permanently
-// empty for every evaluation type. A genuinely unambiguous result
-// (Revision Required / Rejected) still stays truthful — those rows really
-// were sent back — but everything else is spread deterministically
-// across the remaining tabs in realistic proportions (weighted by
-// whether the app has actually finished evaluating elsewhere), so every
-// tab has real, stable rows instead of just one.
-function toStage(app: ApplicationRecord): Stage {
-  if (app.evaluationResult === 'Revision Required' || app.evaluationResult === 'Rejected') {
-    return 'returned';
-  }
-  const roll = hashOf(app.id) % 100;
-  if (app.evaluationResult === 'Passed') {
-    if (roll < 60) return 'passed';
-    if (roll < 82) return 'pending-review';
-    return 'under-review';
-  }
-  if (roll < 40) return 'pending-review';
-  if (roll < 72) return 'under-review';
-  if (roll < 86) return 'returned';
-  return 'passed';
-}
-
 function missingDocCount(id: string): number {
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0;
   return Math.abs(hash) % 4;
 }
 
+/** True once a real EvaluationRecord shows this application actually passed this specific stage — a permanent fact, unaffected by whatever happens at a LATER stage afterward (see stageBucket below). */
+function hasPassedStage(
+  applicationId: string,
+  appStage: EvaluationStage,
+  allEvaluations: EvaluationRecord[],
+): boolean {
+  return allEvaluations.some(
+    (r) => r.applicationId === applicationId && r.stage === appStage && r.result === 'Passed',
+  );
+}
+
+/**
+ * The one real-data rule both `buildEvalRows` and `buildEvalRingStats` key
+ * off, replacing the old hash-randomized `toStage()` simulation:
+ *  - 'passed' once a real EvaluationRecord shows this stage was actually
+ *    passed — permanent, so an application that has since moved on to a
+ *    later stage still shows here, under THIS stage's own Passed tab,
+ *    rather than vanishing from it the moment it advances.
+ *  - 'returned' while the application is CURRENTLY sitting at this stage
+ *    with lifecycleStatus Revision Required/Rejected.
+ *  - 'under-review' while currently sitting at this stage with no result
+ *    yet — the old 'pending-review'/'under-review' split never meant
+ *    anything an admin could act on differently, so it's one bucket now.
+ */
+function stageBucket(
+  app: ApplicationRecord,
+  appStage: EvaluationStage,
+  allEvaluations: EvaluationRecord[],
+): Stage {
+  if (hasPassedStage(app.id, appStage, allEvaluations)) return 'passed';
+  if (app.lifecycleStatus === 'Revision Required' || app.lifecycleStatus === 'Rejected') {
+    return 'returned';
+  }
+  return 'under-review';
+}
+
 // The one filter both `buildEvalRows` and `buildEvalRingStats` key off —
 // keeping it in one place is what guarantees the ring header above the
 // table always matches the table's own rows, for whichever evaluation
-// type is currently open.
-function scopedApps(apps: ApplicationRecord[], stageKey: EvalTypeKey): ApplicationRecord[] {
-  return apps.filter((a) => a.evaluationStage === EVAL_KEY_TO_APP_STAGE[stageKey]);
+// type is currently open. An application belongs to this stage's table
+// either because it's CURRENTLY here, or because it genuinely passed
+// through here already (see hasPassedStage) and moved on — never because
+// it hasn't reached this stage yet.
+function scopedApps(
+  apps: ApplicationRecord[],
+  stageKey: EvalTypeKey,
+  allEvaluations: EvaluationRecord[],
+): ApplicationRecord[] {
+  const appStage = EVAL_KEY_TO_APP_STAGE[stageKey];
+  const stageIdx = EVALUATION_STAGE_ORDER.indexOf(appStage);
+  return apps.filter((a) => {
+    if (a.evaluationStage === appStage) return true;
+    return (
+      EVALUATION_STAGE_ORDER.indexOf(a.evaluationStage) > stageIdx &&
+      hasPassedStage(a.id, appStage, allEvaluations)
+    );
+  });
 }
 
-/** Every row for a card's stage — reads from the same store-backed pool every other page uses, instead of a fixed 10-row list. */
-export function buildEvalRows(apps: ApplicationRecord[], stageKey: EvalTypeKey): EvalRow[] {
-  return scopedApps(apps, stageKey).map((a) => {
-    const stage = toStage(a);
-    const appStage = EVAL_KEY_TO_APP_STAGE[stageKey];
+/** Every row for a card's stage — reads from the same store-backed pool every other page uses, instead of a fixed 10-row list. `allEvaluations` (ApplicationStore.evaluations()) is what makes 'passed' a real, permanent fact rather than a guess — defaults to empty for callers (tests) that don't care about cross-stage history. */
+export function buildEvalRows(
+  apps: ApplicationRecord[],
+  stageKey: EvalTypeKey,
+  allEvaluations: EvaluationRecord[] = [],
+): EvalRow[] {
+  const appStage = EVAL_KEY_TO_APP_STAGE[stageKey];
+  return scopedApps(apps, stageKey, allEvaluations).map((a) => {
+    const stage = stageBucket(a, appStage, allEvaluations);
     const departmentId = requirementsFor(a.permitType).evaluationSequence.find(
       (s) => s.stage === appStage,
     )?.departmentId;
@@ -193,20 +220,23 @@ export interface EvalRingStat {
 
 /**
  * Scoped to the one evaluation type whose detail view is open, and its
- * 3-way breakdown is aggregated from the exact same `toStage()` call the
- * table below uses — so "Total Applications" here always equals that
- * type's card count on the list page, and Revision Required + Pending
- * Review + Accepted always sums to it exactly.
+ * 3-way breakdown is aggregated from the exact same `stageBucket()` call
+ * the table below uses — so "Total Applications" here always equals the
+ * table's own row count for that stage (now genuinely "currently here, or
+ * already passed through" — not just "currently here"), and Revision
+ * Required + Under Review + Accepted always sums to it exactly.
  */
 export function buildEvalRingStats(
   apps: ApplicationRecord[],
   stageKey: EvalTypeKey,
+  allEvaluations: EvaluationRecord[] = [],
 ): EvalRingStat[] {
-  const scoped = scopedApps(apps, stageKey);
+  const appStage = EVAL_KEY_TO_APP_STAGE[stageKey];
+  const scoped = scopedApps(apps, stageKey, allEvaluations);
   const total = scoped.length || 1;
-  const stages = scoped.map(toStage);
+  const stages = scoped.map((a) => stageBucket(a, appStage, allEvaluations));
   const revisionRequired = stages.filter((s) => s === 'returned').length;
-  const pendingReview = stages.filter((s) => s === 'pending-review' || s === 'under-review').length;
+  const underReview = stages.filter((s) => s === 'under-review').length;
   const accepted = stages.filter((s) => s === 'passed').length;
   return [
     {
@@ -217,8 +247,8 @@ export function buildEvalRingStats(
       illustration: 'applications',
       pct: 100,
       isTotal: true,
-      support: 'Revision Required · Pending Review · Accepted',
-      bars: [revisionRequired, pendingReview, accepted],
+      support: 'Revision Required · Under Review · Accepted',
+      bars: [revisionRequired, underReview, accepted],
     },
     {
       label: 'Revision Required',
@@ -231,14 +261,14 @@ export function buildEvalRingStats(
       support: `${Math.round((revisionRequired / total) * 100)}% of all applications`,
     },
     {
-      label: 'Pending Review',
-      value: String(pendingReview),
+      label: 'Under Review',
+      value: String(underReview),
       icon: 'clock',
       tone: 'warning',
       illustration: 'pending',
-      pct: Math.round((pendingReview / total) * 100),
+      pct: Math.round((underReview / total) * 100),
       isTotal: false,
-      support: `${Math.round((pendingReview / total) * 100)}% of all applications`,
+      support: `${Math.round((underReview / total) * 100)}% of all applications`,
     },
     {
       label: 'Accepted',
@@ -254,7 +284,6 @@ export function buildEvalRingStats(
 }
 
 export const STAGE_TABS: { key: Stage; label: string; icon: string }[] = [
-  { key: 'pending-review', label: 'Pending Review', icon: 'alert-circle' },
   { key: 'under-review', label: 'Under Review', icon: 'eye' },
   { key: 'returned', label: 'Returned', icon: 'alert-triangle' },
   { key: 'passed', label: 'Passed', icon: 'check-circle' },

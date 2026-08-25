@@ -105,6 +105,8 @@ export class Evaluations {
   // store-backed application pool every other page uses — a card's count
   // always equals the number of rows you actually see under it.
   private readonly applications = computed(() => this.store.applications());
+  /** Real per-application-per-stage evaluation history — what makes the "Passed" tab a permanent record instead of a guess (see evaluations-data.ts's stageBucket/hasPassedStage). */
+  private readonly allEvaluations = computed(() => this.store.evaluations());
   protected readonly cards = computed(() => buildEvalTypeCards(this.applications()));
   protected readonly stageTabs = STAGE_TABS;
   protected readonly typeOptions = TYPE_OPTIONS;
@@ -117,9 +119,9 @@ export class Evaluations {
   // of the whole application pool.
   protected readonly ringStats = computed(() => {
     const card = this.selectedCard();
-    return card ? buildEvalRingStats(this.applications(), card.key) : [];
+    return card ? buildEvalRingStats(this.applications(), card.key, this.allEvaluations()) : [];
   });
-  protected readonly activeStage = signal<Stage>('pending-review');
+  protected readonly activeStage = signal<Stage>('under-review');
   protected readonly page = signal(1);
   protected readonly pageSize = 10;
   protected readonly searchTerm = signal('');
@@ -133,7 +135,7 @@ export class Evaluations {
 
   protected readonly cardRows = computed(() => {
     const card = this.selectedCard();
-    return card ? buildEvalRows(this.applications(), card.key) : [];
+    return card ? buildEvalRows(this.applications(), card.key, this.allEvaluations()) : [];
   });
 
   protected readonly stageRows = computed(() => {
@@ -267,7 +269,7 @@ export class Evaluations {
 
   openCard(card: EvalTypeCard): void {
     this.selectedCard.set(card);
-    this.activeStage.set('pending-review');
+    this.activeStage.set('under-review');
     this.searchTerm.set('');
     this.page.set(1);
     this.view.set('detail');
@@ -295,7 +297,9 @@ export class Evaluations {
     )?.[0];
     const card = cardKey && this.cards().find((c) => c.key === cardKey);
     if (!card) return;
-    const row = buildEvalRows(this.applications(), card.key).find((r) => r.id === id);
+    const row = buildEvalRows(this.applications(), card.key, this.allEvaluations()).find(
+      (r) => r.id === id,
+    );
     if (!row) return;
     this.appliedApplicationIdParam = true;
     this.selectedCard.set(card);
