@@ -5,6 +5,15 @@
 />
 
 @if (view() === 'list') {
+  <div class="prototype-disclaimer" role="note">
+    <app-icon name="info" [size]="16" />
+    <span>
+      This page is a UI prototype — creating a user or editing a role's permissions here does not
+      change real access control. The system's actual sign-in roles and action permissions are
+      defined in code (<code>core/session/permissions.ts</code>) and are not editable from here yet.
+    </span>
+  </div>
+
   <section class="kpi-grid">
     @for (s of stats(); track s.label) {
       <app-kpi-card

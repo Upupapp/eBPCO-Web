@@ -189,22 +189,36 @@
         <button
           type="button"
           class="btn-outline"
+          cdkOverlayOrigin
+          #actionMenuOrigin1="cdkOverlayOrigin"
+          aria-haspopup="menu"
           [attr.aria-expanded]="actionMenuOpen()"
           (click)="toggleActionMenu()"
         >
           Action
         </button>
-        @if (actionMenuOpen()) {
-          <div class="menu-backdrop" (click)="closeActionMenu()"></div>
-          <div class="menu-panel" role="menu">
-            @for (opt of statusOptions; track opt) {
-              <button type="button" role="menuitem" (click)="setStatus(opt)">
+        <ng-template
+          cdkConnectedOverlay
+          [cdkConnectedOverlayOrigin]="actionMenuOrigin1"
+          [cdkConnectedOverlayOpen]="actionMenuOpen()"
+          [cdkConnectedOverlayPositions]="headerMenuPositions"
+          cdkConnectedOverlayHasBackdrop
+          cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+          (backdropClick)="closeActionMenu()"
+          (detach)="closeActionMenu()"
+          (overlayKeydown)="onActionMenuKeydown($event)"
+        >
+          <div class="overlay-menu-panel" role="menu">
+            @for (action of availableStatusActions(); track action.target) {
+              <button type="button" role="menuitem" (click)="setStatus(action.target)">
                 <app-icon name="check-circle" [size]="14" />
-                Mark {{ opt }}
+                {{ action.label }}
               </button>
+            } @empty {
+              <span class="menu-empty-note">No status change available from the current stage.</span>
             }
           </div>
-        }
+        </ng-template>
       </div>
       <button type="button" class="btn-primary" (click)="openEvaluations()">Evaluate</button>
       <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
@@ -212,15 +226,27 @@
         <button
           type="button"
           class="icon-btn more"
+          cdkOverlayOrigin
+          #moreMenuOrigin1="cdkOverlayOrigin"
           aria-label="More actions"
+          aria-haspopup="menu"
           [attr.aria-expanded]="moreMenuOpen()"
           (click)="toggleMoreMenu()"
         >
           <app-icon name="dots-horizontal" [size]="16" />
         </button>
-        @if (moreMenuOpen()) {
-          <div class="menu-backdrop" (click)="closeMoreMenu()"></div>
-          <div class="menu-panel" role="menu">
+        <ng-template
+          cdkConnectedOverlay
+          [cdkConnectedOverlayOrigin]="moreMenuOrigin1"
+          [cdkConnectedOverlayOpen]="moreMenuOpen()"
+          [cdkConnectedOverlayPositions]="headerMenuPositions"
+          cdkConnectedOverlayHasBackdrop
+          cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+          (backdropClick)="closeMoreMenu()"
+          (detach)="closeMoreMenu()"
+          (overlayKeydown)="onMoreMenuKeydown($event)"
+        >
+          <div class="overlay-menu-panel" role="menu">
             <button type="button" role="menuitem" (click)="exportDetail(); closeMoreMenu()">
               <app-icon name="download" [size]="14" />
               Export Application
@@ -230,10 +256,45 @@
               Delete Application
             </button>
           </div>
-        }
+        </ng-template>
       </div>
     </div>
   </div>
+
+  @if (quickActionError(); as message) {
+    <div class="quick-action-error" role="alert">
+      <app-icon name="alert-triangle" [size]="16" />
+      <span>{{ message }}</span>
+      <button type="button" class="quick-action-error-dismiss" aria-label="Dismiss" (click)="quickActionError.set(null)">
+        &#10005;
+      </button>
+    </div>
+  }
+
+  @if (approvalBlockedByDocs()) {
+    <div class="quick-action-error" role="alert">
+      <app-icon name="alert-triangle" [size]="16" />
+      <span>
+        Payment is complete, but this application can't be approved yet — {{
+          approvalBlockingDocs().length
+        }}
+        required document{{ approvalBlockingDocs().length === 1 ? ' is' : 's are' }} not yet
+        Accepted:
+        {{ approvalBlockingDocs().map((r) => r.label).join(', ') }}. Resolve
+        {{ approvalBlockingDocs().length === 1 ? 'it' : 'them' }} in the Documents tab, then
+        Mark Approved will appear in the Action menu.
+      </span>
+      <button
+        type="button"
+        class="quick-action-error-dismiss"
+        aria-label="Go to Documents tab"
+        title="Go to Documents tab"
+        (click)="selectDetailTab('documents')"
+      >
+        <app-icon name="chevron-right" [size]="14" />
+      </button>
+    </div>
+  }
 
   <div class="detail-grid">
     <div class="applicant-card">
@@ -404,20 +465,38 @@
           @case ('timeline') {
             <h2>Activity Summary</h2>
             <p class="summary-line">
-              This Application Is <strong>{{ detail.row.status }}</strong>
+              This Application Is Currently At
+              <strong>{{ offSequenceStatus() ?? detail.row.lifecycleStatus }}</strong>
             </p>
+
+            <h3>Lifecycle Progress</h3>
+            <ol class="lifecycle-stepper">
+              @for (step of lifecycleStepper(); track step.status) {
+                <li
+                  [class.is-past]="step.isPast"
+                  [class.is-current]="step.isCurrent"
+                >
+                  {{ step.status }}
+                </li>
+              }
+            </ol>
+            @if (offSequenceStatus(); as off) {
+              <p class="off-sequence-note">
+                Off the standard happy path — currently <strong>{{ off }}</strong>.
+              </p>
+            }
 
             <h3>Quick Information :</h3>
             <div class="quick-info">
               <ul>
                 <li>Assigned To: {{ detail.row.officer }}</li>
-                <li>Current Step: {{ detail.row.status }}</li>
-                <li>Days In Current Step: 2 Days</li>
+                <li>Current Step: {{ detail.row.lifecycleStatus }}</li>
+                <li>Days In Current Step: {{ daysInCurrentStep() }} Days</li>
               </ul>
-              <span class="elapsed">Total Elapsed Time: 9 Days</span>
+              <span class="elapsed">Total Elapsed Time: {{ totalElapsedDays() }} Days</span>
             </div>
 
-            <h3>Projects</h3>
+            <h3>Audit Trail</h3>
             <div class="table-wrap">
               <table>
                 <thead>
@@ -431,7 +510,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (t of timeline; track t.num) {
+                  @for (t of realTimeline(); track t.num) {
                     <tr>
                       <td class="muted">{{ t.num }}</td>
                       <td class="strong-cell">{{ t.event }}</td>
@@ -449,6 +528,10 @@
                           <app-icon name="download" [size]="14" />
                         </button>
                       </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="6" class="muted">No audit events recorded yet.</td>
                     </tr>
                   }
                 </tbody>
@@ -479,15 +562,27 @@
                 <button
                   type="button"
                   class="btn-outline"
+                  cdkOverlayOrigin
+                  #docActionMenuOrigin="cdkOverlayOrigin"
+                  aria-haspopup="menu"
                   [attr.aria-expanded]="docActionMenuOpen()"
                   (click)="toggleDocActionMenu()"
                 >
                   Action
                   <app-icon name="chevron-down" [size]="14" />
                 </button>
-                @if (docActionMenuOpen()) {
-                  <div class="menu-backdrop" (click)="closeDocActionMenu()"></div>
-                  <div class="menu-panel" role="menu">
+                <ng-template
+                  cdkConnectedOverlay
+                  [cdkConnectedOverlayOrigin]="docActionMenuOrigin"
+                  [cdkConnectedOverlayOpen]="docActionMenuOpen()"
+                  [cdkConnectedOverlayPositions]="headerMenuPositions"
+                  cdkConnectedOverlayHasBackdrop
+                  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+                  (backdropClick)="closeDocActionMenu()"
+                  (detach)="closeDocActionMenu()"
+                  (overlayKeydown)="onDocActionMenuKeydown($event)"
+                >
+                  <div class="overlay-menu-panel" role="menu">
                     <button type="button" role="menuitem" (click)="exportSelectedDocs()">
                       <app-icon name="download" [size]="14" />
                       Export {{ docSelectedIds().size > 0 ? 'Selected' : 'All' }}
@@ -497,7 +592,7 @@
                       Mark Selected Accepted
                     </button>
                   </div>
-                }
+                </ng-template>
               </div>
             </div>
 
@@ -829,15 +924,27 @@
         <button
           type="button"
           class="icon-btn more"
+          cdkOverlayOrigin
+          #moreMenuOrigin2="cdkOverlayOrigin"
           aria-label="More actions"
+          aria-haspopup="menu"
           [attr.aria-expanded]="moreMenuOpen()"
           (click)="toggleMoreMenu()"
         >
           <app-icon name="dots-horizontal" [size]="16" />
         </button>
-        @if (moreMenuOpen()) {
-          <div class="menu-backdrop" (click)="closeMoreMenu()"></div>
-          <div class="menu-panel" role="menu">
+        <ng-template
+          cdkConnectedOverlay
+          [cdkConnectedOverlayOrigin]="moreMenuOrigin2"
+          [cdkConnectedOverlayOpen]="moreMenuOpen()"
+          [cdkConnectedOverlayPositions]="headerMenuPositions"
+          cdkConnectedOverlayHasBackdrop
+          cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+          (backdropClick)="closeMoreMenu()"
+          (detach)="closeMoreMenu()"
+          (overlayKeydown)="onMoreMenuKeydown($event)"
+        >
+          <div class="overlay-menu-panel" role="menu">
             <button type="button" role="menuitem" (click)="exportDetail(); closeMoreMenu()">
               <app-icon name="download" [size]="14" />
               Export Application
@@ -847,7 +954,7 @@
               Delete Application
             </button>
           </div>
-        }
+        </ng-template>
       </div>
     </div>
   </div>
@@ -1032,394 +1139,6 @@
       </div>
     </div>
   </div>
-} @else if (view() === 'evaluations' && selectedDetail(); as detail) {
-  <div class="detail-head">
-    <h1>{{ detail.row.applicant }} Evaluation's</h1>
-    <div class="header-actions">
-      <div class="menu-wrap">
-        <button
-          type="button"
-          class="btn-primary"
-          [attr.aria-expanded]="actionMenuOpen()"
-          (click)="toggleActionMenu()"
-        >
-          Action
-        </button>
-        @if (actionMenuOpen()) {
-          <div class="menu-backdrop" (click)="closeActionMenu()"></div>
-          <div class="menu-panel" role="menu">
-            @for (opt of statusOptions; track opt) {
-              <button type="button" role="menuitem" (click)="setStatus(opt)">
-                <app-icon name="check-circle" [size]="14" />
-                Mark {{ opt }}
-              </button>
-            }
-          </div>
-        }
-      </div>
-      <button type="button" class="btn-primary" (click)="backFromEvaluations()">Back</button>
-      <div class="menu-wrap">
-        <button
-          type="button"
-          class="icon-btn more"
-          aria-label="More actions"
-          [attr.aria-expanded]="moreMenuOpen()"
-          (click)="toggleMoreMenu()"
-        >
-          <app-icon name="dots-horizontal" [size]="16" />
-        </button>
-        @if (moreMenuOpen()) {
-          <div class="menu-backdrop" (click)="closeMoreMenu()"></div>
-          <div class="menu-panel" role="menu">
-            <button type="button" role="menuitem" (click)="exportEvalSummary(); closeMoreMenu()">
-              <app-icon name="download" [size]="14" />
-              Export Evaluation Summary
-            </button>
-          </div>
-        }
-      </div>
-    </div>
-  </div>
-
-  <div class="eval-grid">
-    @for (card of evalCards(); track card.key) {
-      <div class="card eval-card" (click)="openEvalDetail(card.key)">
-        <div class="eval-card-head">
-          <h3>{{ card.title }}</h3>
-          <span class="badge" [class]="card.statusTone">{{ card.statusLabel }}</span>
-        </div>
-        <p class="eval-desc" [class]="card.statusTone">{{ card.description }}</p>
-
-        <div class="eval-counts">
-          <div>
-            <strong>{{ card.documents }}</strong
-            ><span>Documents</span>
-          </div>
-          <div>
-            <strong>{{ card.comments }}</strong
-            ><span>Comments</span>
-          </div>
-        </div>
-
-        <div class="eval-officers">
-          <span>Assigned Officer{{ card.officerInitials.length > 1 ? 's' : '' }} :</span>
-          <div class="officer-stack">
-            @for (initials of card.officerInitials; track initials) {
-              <app-avatar [name]="initials" [size]="28" />
-            }
-          </div>
-        </div>
-
-        <div class="eval-progress-row">
-          <span>Progress</span>
-          <span class="pct" [class.good]="card.progressPct === 100">{{ card.progressPct }}%</span>
-        </div>
-        <div class="progress-track">
-          <div
-            class="progress-fill"
-            [class.good]="card.progressPct === 100"
-            [style.width.%]="card.progressPct"
-          ></div>
-        </div>
-      </div>
-    }
-  </div>
-} @else if (view() === 'evaluation-detail' && activeEvalDetail(); as cfg) {
-  @if (selectedDetail(); as detail) {
-    <div class="detail-head">
-      <h1>{{ cfg.title }}</h1>
-      <div class="header-actions">
-        <button type="button" class="btn-primary" (click)="backFromEvalDetail()">Back</button>
-        <div class="menu-wrap">
-          <button
-            type="button"
-            class="icon-btn more"
-            aria-label="More actions"
-            [attr.aria-expanded]="moreMenuOpen()"
-            (click)="toggleMoreMenu()"
-          >
-            <app-icon name="dots-horizontal" [size]="16" />
-          </button>
-          @if (moreMenuOpen()) {
-            <div class="menu-backdrop" (click)="closeMoreMenu()"></div>
-            <div class="menu-panel" role="menu">
-              <button type="button" role="menuitem" (click)="exportChecklist(); closeMoreMenu()">
-                <app-icon name="download" [size]="14" />
-                Export Checklist
-              </button>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-
-    <div class="eval-detail-grid">
-      <div class="card eval-left">
-        <h2>{{ cfg.checklistTitle }}</h2>
-        <p class="muted-sub">{{ cfg.checklistSubtitle }}</p>
-
-        <div class="table-wrap">
-          <table class="checklist-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Required Documents</th>
-                @if (cfg.rightPanel !== 'map') {
-                  <th>Upload Dates</th>
-                }
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of cfg.checklist; track item.label) {
-                <tr>
-                  <td><input type="checkbox" [checked]="item.checked" disabled /></td>
-                  <td>
-                    <div class="doc-cell">
-                      <button
-                        type="button"
-                        class="doc-info-btn"
-                        [disabled]="!item.filename"
-                        (click)="openDocPreview(item)"
-                        [attr.aria-label]="'Preview ' + item.label"
-                        title="Preview document"
-                      >
-                        <app-icon name="info" [size]="15" />
-                      </button>
-                      @if (item.filename) {
-                        <span class="doc-icon"><app-icon name="file-check" [size]="18" /></span>
-                      }
-                      <div>
-                        <div class="doc-name">{{ item.label }}</div>
-                        @if (item.filename) {
-                          <div class="doc-file">{{ item.filename }}</div>
-                        }
-                      </div>
-                    </div>
-                  </td>
-                  @if (cfg.rightPanel !== 'map') {
-                    <td>Apr 14, 2021</td>
-                  }
-                  <td>
-                    <span
-                      class="status-pill"
-                      [class]="item.status.toLowerCase().replace(' ', '-')"
-                      >{{ item.status }}</span
-                    >
-                  </td>
-                  <td>
-                    <div class="menu-wrap">
-                      <button
-                        type="button"
-                        class="icon-btn more small"
-                        [attr.aria-label]="'Actions for ' + item.label"
-                        [attr.aria-expanded]="checklistMenuFor() === item.label"
-                        (click)="toggleChecklistMenu(item)"
-                      >
-                        <app-icon name="dots-horizontal" [size]="15" />
-                      </button>
-                      @if (checklistMenuFor() === item.label) {
-                        <div class="menu-backdrop" (click)="closeChecklistMenu()"></div>
-                        <div class="menu-panel" role="menu">
-                          <button
-                            type="button"
-                            role="menuitem"
-                            (click)="setChecklistStatus(item, 'Approved')"
-                          >
-                            <app-icon name="check-circle" [size]="14" />
-                            Approve
-                          </button>
-                          <button
-                            type="button"
-                            role="menuitem"
-                            (click)="setChecklistStatus(item, 'Return')"
-                          >
-                            <app-icon name="alert-triangle" [size]="14" />
-                            Return
-                          </button>
-                          <button
-                            type="button"
-                            role="menuitem"
-                            class="danger"
-                            (click)="setChecklistStatus(item, 'Missing')"
-                          >
-                            <app-icon name="alert-triangle" [size]="14" />
-                            Mark Missing
-                          </button>
-                        </div>
-                      }
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-        @if (cfg.reviewSteps) {
-          <h2 class="review-heading">Workflow/Review Progress</h2>
-          <div class="review-steps">
-            @for (step of cfg.reviewSteps; track step.num) {
-              <div class="review-step">
-                <span class="step-num" [class]="step.status.toLowerCase().replace(' ', '-')">{{
-                  step.num
-                }}</span>
-                <div class="step-text">
-                  <strong>{{ step.label }}</strong>
-                  <span class="step-status" [class]="step.status.toLowerCase().replace(' ', '-')">{{
-                    step.status
-                  }}</span>
-                  @if (step.detail) {
-                    <span class="step-detail">{{ step.detail }}</span>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-        }
-
-        <div class="progress-row">
-          <span>Progress</span>
-          <span class="pct">{{ cfg.progressDone }} / {{ cfg.progressTotal }}</span>
-        </div>
-        <div class="progress-track">
-          <div
-            class="progress-fill good"
-            [style.width.%]="(cfg.progressDone / cfg.progressTotal) * 100"
-          ></div>
-        </div>
-
-        <label class="msg-label">Message</label>
-        <textarea
-          placeholder="Max 150 words"
-          rows="4"
-          [value]="evalMessage()"
-          (input)="evalMessage.set($any($event.target).value)"
-        ></textarea>
-
-        <button type="button" class="msg-send-btn" (click)="sendMessageToApplicant()">
-          Send Message to Applicant
-        </button>
-        <button type="button" class="forward-btn" (click)="forwardEval()">
-          {{ cfg.primaryActionLabel }}
-        </button>
-        <div class="two-col-btns">
-          <button type="button" class="revision-btn" (click)="returnForRevisionEval()">
-            Return for Revision
-          </button>
-          <button type="button" class="reject-btn" (click)="rejectEval()">Reject</button>
-        </div>
-      </div>
-
-      <div class="eval-right">
-        @if (cfg.rightPanel === 'qr' || cfg.rightPanel === 'map') {
-          <div class="card visual-card">
-            @switch (cfg.rightPanel) {
-              @case ('qr') {
-                <p class="bfp-link">
-                  BFP Link:<br />
-                  https://www.foi.gov.ph/agencies/bfp/
-                </p>
-                <p class="or-label">OR</p>
-                <p class="scan-label">Scan the QR</p>
-                <svg viewBox="0 0 100 100" class="qr-code" aria-hidden="true">
-                  <rect width="100" height="100" fill="#fff" />
-                  @for (cell of qrCells; track cell) {
-                    <rect [attr.x]="cell.x" [attr.y]="cell.y" width="6" height="6" fill="#111" />
-                  }
-                </svg>
-              }
-              @case ('map') {
-                <h3 class="map-title">Zoning Map</h3>
-                <div class="zoning-map">
-                  <svg viewBox="0 0 400 260" class="map-svg">
-                    <rect width="400" height="260" fill="#e9eaee" />
-                    <polygon points="0,0 180,0 140,90 0,60" fill="#f5d24a" />
-                    <polygon points="180,0 400,0 400,70 140,90" fill="#f5d24a" />
-                    <polygon points="0,60 140,90 130,180 0,160" fill="#f2967a" />
-                    <polygon points="140,90 320,80 300,170 130,180" fill="#f2967a" />
-                    <polygon points="0,160 130,180 100,260 0,260" fill="#4c6ef5" />
-                    <polygon points="130,180 300,170 260,260 100,260" fill="#4c6ef5" />
-                    <text x="30" y="30" font-size="10" fill="#5c5c33">Multi-Family</text>
-                    <text x="230" y="40" font-size="10" fill="#5c5c33">Single Family</text>
-                    <text x="40" y="120" font-size="10" fill="#7a3a24">Commercial</text>
-                    <text x="20" y="220" font-size="10" fill="#1c2a6b">Industrial</text>
-                  </svg>
-                  <div class="parcel-popup">
-                    <div class="parcel-head">Parcel Information</div>
-                    <div><span>Lot no.</span><strong>123-A</strong></div>
-                    <div><span>TCT no.</span><strong>TC-123456</strong></div>
-                    <div><span>Lot Area</span><strong>800.00 m</strong></div>
-                    <div><span>Zoning</span><strong>C2 (Commercial)</strong></div>
-                    <div><span>Land Use</span><strong>Commercial</strong></div>
-                    <button type="button" class="view-docs-btn" (click)="viewPropertyDocuments()">
-                      View Property Documents
-                    </button>
-                  </div>
-                </div>
-              }
-            }
-          </div>
-        }
-
-        <div class="card app-info-card">
-          <h3 class="section-caps">APPLICATION INFORMATION</h3>
-          <div class="app-info-cols">
-            <div>
-              <span class="col-title">APPLICANT</span>
-              <p>{{ detail.row.applicant }}</p>
-              <p class="muted">{{ detail.email }}</p>
-              <p class="muted">{{ detail.phone }}</p>
-              <span class="field-label">Business / Project</span>
-              <p>{{ detail.businessLabel }}</p>
-            </div>
-            <div>
-              <span class="col-title">PROJECT DETAILS</span>
-              <span class="field-label">Project Type</span>
-              <p>New Constuction</p>
-              <span class="field-label">No. Storeys</span>
-              <p>{{ detail.project.floors }}</p>
-              <span class="field-label">Estimated Cost</span>
-              <p>₱30,230,300</p>
-            </div>
-            <div>
-              <span class="col-title">LOCATION</span>
-              <span class="field-label">Address</span>
-              <p>Lot 12, Block 5,</p>
-              <span class="field-label">Barangay</span>
-              <p>{{ detail.row.location }}</p>
-              <span class="field-label">City/Municipality</span>
-              <p>Castilla, Sorsogon</p>
-            </div>
-          </div>
-
-          <h3 class="section-caps submission-heading">SUBMISSION</h3>
-          <span class="field-label">Date Submitted</span>
-          <p>April 12, 2026</p>
-
-          <h3 class="section-caps timeline-heading">Shared Evaluation Timeline</h3>
-          <div class="shared-timeline">
-            @for (t of sharedTimeline; track t.label) {
-              <div class="shared-timeline-item">
-                <span class="dot"></span>
-                <div>
-                  <strong>{{ t.label }}</strong>
-                  <span class="ts">{{ t.date }}</span>
-                  <div class="who">
-                    <app-avatar [name]="t.who" [size]="20" />
-                    <span
-                      >{{ t.who }}<small>{{ t.role }}</small></span
-                    >
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-      </div>
-    </div>
-  }
 } @else if (view() === 'not-found') {
   <div class="not-found-state">
     <app-icon name="alert-triangle" [size]="28" />
@@ -1518,6 +1237,44 @@
         <div class="modal-actions">
           <button type="button" class="modal-btn neutral" (click)="cancelNotify()">Cancel</button>
           <button type="submit" class="modal-btn confirm">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (quickRejectTarget(); as rejectRow) {
+  <div class="modal-backdrop" (click)="cancelQuickReject()">
+    <div class="modal-box create-box" (click)="$event.stopPropagation()" role="alertdialog" aria-modal="true">
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelQuickReject()">
+        &#10005;
+      </button>
+      <h2>Reject application?</h2>
+      <p class="modal-hint">
+        {{ rejectRow.applicant }}'s application ({{ rejectRow.id }}) will move to Rejected.
+      </p>
+      <form class="create-form" (ngSubmit)="confirmQuickReject()">
+        <label>
+          Reason <span class="optional">(required)</span>
+          <textarea
+            rows="3"
+            required
+            [value]="quickRejectRemarks()"
+            (input)="quickRejectRemarks.set($any($event.target).value)"
+            placeholder="Explain why this application is being rejected…"
+          ></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelQuickReject()">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="modal-btn danger"
+            [disabled]="!quickRejectRemarks().trim()"
+          >
+            Reject Application
+          </button>
         </div>
       </form>
     </div>

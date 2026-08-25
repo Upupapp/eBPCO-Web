@@ -33,6 +33,32 @@
       }
     </nav>
 
+    @if (activeTab() === 'activity') {
+      <div class="prototype-disclaimer" role="note">
+        <app-icon name="info" [size]="16" />
+        <span
+          >Backed by this app's real audit trail — every row here is a genuine action taken in
+          Applications or Payments.</span
+        >
+      </div>
+    } @else {
+      <div class="prototype-disclaimer" role="note">
+        <app-icon name="info" [size]="16" />
+        <span
+          >Sample data for preview only. This prototype doesn't yet track real
+          {{
+            activeTab() === 'access'
+              ? 'sign-ins/sessions'
+              : activeTab() === 'error'
+                ? 'application errors'
+                : activeTab() === 'security'
+                  ? 'security events'
+                  : 'system/deployment events'
+          }}, so nothing on this tab reflects real activity.</span
+        >
+      </div>
+    }
+
     <div class="filter-bar">
       <div class="filter-item date-filter">
         <app-icon name="calendar" [size]="15" />
@@ -110,7 +136,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (row of pagedActivityRows(); track row.timestamp + row.user) {
+              @for (row of pagedActivityRows(); track row.id) {
                 <tr
                   class="row-clickable"
                   tabindex="0"
@@ -155,14 +181,7 @@
                       >
                         <app-icon name="edit" [size]="14" />
                       </button>
-                      <button
-                        type="button"
-                        class="icon-btn del"
-                        aria-label="Delete"
-                        (click)="requestDelete(row)"
-                      >
-                        <app-icon name="trash" [size]="14" />
-                      </button>
+                      <!-- No delete here — this tab now reads the real, append-only audit trail (ApplicationStore/AssessmentStore auditEvents), which nothing in the app ever removes once written. See audit.model.ts. -->
                     </div>
                   </td>
                 </tr>

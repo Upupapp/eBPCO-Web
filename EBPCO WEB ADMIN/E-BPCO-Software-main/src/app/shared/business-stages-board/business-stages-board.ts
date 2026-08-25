@@ -10,7 +10,9 @@ import {
   ApplicationLifecycleStatus,
   EvaluationStage,
   EVALUATION_STAGE_ORDER,
+  canTransition,
 } from '../../core/domain/status.model';
+import { SessionService } from '../../core/session/session.service';
 
 type StageFilterKey = 'All' | EvaluationStage;
 
@@ -92,6 +94,7 @@ const PREVIEW_COUNT = 6;
 export class BusinessStagesBoard {
   private readonly store = inject(ApplicationStore);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   readonly selectApplication = output<ApplicationRecord>();
 
@@ -424,11 +427,19 @@ export class BusinessStagesBoard {
 
   // This board is a quick, informal overview, not the real per-stage
   // workflow (see Applications/Evaluations/Payments/Permit Release for
-  // that) — so a drag here is meant to move a card freely between all
-  // three buckets, no restrictions. Each column resolves to one canonical
-  // lifecycle status and is written directly via `updateFields` (which
-  // skips ApplicationStore's stricter `transitionStatus` validation on
-  // purpose) so every drop always succeeds.
+  // that) — but a drop is now routed through ApplicationStore's validated
+  // `transitionStatus()` rather than the old `updateFields()` bypass.
+  // The bypass used to let a card be dragged straight to "Approved"
+  // regardless of the application's real evaluation/payment progress,
+  // leaving `paymentStatus` untouched — which made `canGeneratePermit()`
+  // permanently false (it requires `paymentStatus === 'Paid'`) with no
+  // error shown anywhere: the application read "Approved" in every
+  // list/badge but could never actually get a permit generated. Each
+  // column still resolves to one canonical target status; an illegal drop
+  // (e.g. dragging a card into Approved before it has actually reached
+  // 'For Approval' — evaluation and payment complete) is now refused and
+  // surfaced via `dropError` instead of silently "succeeding" into a dead
+  // end.
   private static readonly COLUMN_TARGET: Record<AppStatus, ApplicationLifecycleStatus> = {
     'Under Review': 'Under Evaluation',
     Approved: 'Approved',
@@ -438,12 +449,17 @@ export class BusinessStagesBoard {
   // A drop into Rejected pauses on a small "why?" prompt — rejecting is the
   // one move on this board worth a moment's explanation — but the prompt is
   // informational only: typing nothing and clicking OK still completes the
-  // move. Every other column moves immediately, no prompt.
+  // move (transitionStatus requires non-empty remarks for a Rejected
+  // target, so an empty field falls back to a default note rather than
+  // silently failing the transition the user just confirmed).
   protected readonly pendingReject = signal<{
     app: ApplicationRecord;
     targetStatus: AppStatus;
   } | null>(null);
   protected readonly rejectRemarks = signal('');
+
+  /** Set when a drop is refused as an illegal transition — cleared on the next drop attempt or manual dismiss. */
+  protected readonly dropError = signal<string | null>(null);
 
   protected onDrop(event: CdkDragDrop<ApplicationRecord[]>, targetStatus: AppStatus): void {
     const app = event.item.data as ApplicationRecord;
@@ -452,13 +468,13 @@ export class BusinessStagesBoard {
       this.pendingReject.set({ app, targetStatus });
       return;
     }
-    this.moveApp(app.id, targetStatus);
+    this.moveApp(app, targetStatus);
   }
 
   protected confirmReject(): void {
     const pending = this.pendingReject();
     if (!pending) return;
-    this.moveApp(pending.app.id, pending.targetStatus);
+    this.moveApp(pending.app, pending.targetStatus);
     this.pendingReject.set(null);
   }
 
@@ -466,14 +482,34 @@ export class BusinessStagesBoard {
     this.pendingReject.set(null);
   }
 
+  protected dismissDropError(): void {
+    this.dropError.set(null);
+  }
+
   // Moves the dragged app to the front of the shared store (not just a
-  // status swap in place) so it lands at the top of its new column and
-  // the drag visibly does something, even for a same-column drop.
-  private moveApp(id: string, targetStatus: AppStatus): void {
-    this.store.updateFields(id, {
-      lifecycleStatus: BusinessStagesBoard.COLUMN_TARGET[targetStatus],
-    });
-    this.store.bringToFront(id);
+  // status swap in place) so a legal move visibly does something, even
+  // for a same-column drop.
+  private moveApp(app: ApplicationRecord, targetStatus: AppStatus): void {
+    this.dropError.set(null);
+    const target = BusinessStagesBoard.COLUMN_TARGET[targetStatus];
+    if (!canTransition(app.lifecycleStatus, target)) {
+      this.dropError.set(
+        `Can't move ${app.applicant}'s application straight to "${targetStatus}" from its current stage (${app.lifecycleStatus}) — open it in Applications/Evaluations/Payments to see what's still needed.`,
+      );
+      return;
+    }
+    const actor = this.session.name() || 'Staff';
+    const role = this.session.role() ?? 'Administrator';
+    const remarks =
+      target === 'Rejected' ? this.rejectRemarks().trim() || 'Rejected via Business Stages board' : undefined;
+    const ok = this.store.transitionStatus(app.id, target, actor, role, remarks);
+    if (ok) {
+      this.store.bringToFront(app.id);
+    } else {
+      this.dropError.set(
+        `Can't move ${app.applicant}'s application to "${targetStatus}" — it doesn't meet the requirements for that stage yet (e.g. required documents not all Accepted).`,
+      );
+    }
   }
 
   // A deterministic per-card tilt (based on the app's own id, not

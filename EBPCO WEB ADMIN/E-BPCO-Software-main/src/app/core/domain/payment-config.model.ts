@@ -15,6 +15,31 @@ export interface PaymentMethodConfig {
   active: boolean;
 }
 
+// The office's own receiving-bank details — referenced by the "Bank
+// Payment" method above ("Deposited or transferred to the LGU's official
+// bank account") but never actually specified anywhere until now. Starts
+// entirely blank rather than a fabricated bank name/account number — a
+// real Municipal Treasurer's Office must fill this in before "Bank
+// Payment" is presented to applicants as a genuinely usable method.
+export interface OfficeBankInfo {
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  branch: string;
+  /** ISO date string (yyyy-MM-dd) of the last edit, or null if never configured. */
+  lastUpdated: string | null;
+  lastUpdatedBy: string | null;
+}
+
+export const DEFAULT_BANK_INFO: OfficeBankInfo = {
+  bankName: '',
+  accountName: '',
+  accountNumber: '',
+  branch: '',
+  lastUpdated: null,
+  lastUpdatedBy: null,
+};
+
 export const DEFAULT_PAYMENT_METHODS: PaymentMethodConfig[] = [
   {
     id: 'cash-onsite',

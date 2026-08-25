@@ -12,10 +12,13 @@ import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
 import { PaymentConfigStore } from '../../core/domain/payment-config-store';
+import { DEFAULT_BANK_INFO, OfficeBankInfo } from '../../core/domain/payment-config.model';
+import { PayrollStore } from '../../core/domain/payroll-store';
+import { PayrollStaffMember } from '../../core/domain/payroll.model';
 import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS } from '../../core/session/permissions';
 import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
-import { departmentName } from '../../core/domain/department.model';
+import { departmentById, departmentName } from '../../core/domain/department.model';
 import {
   Assessment,
   AssessmentLineItem,
@@ -31,6 +34,7 @@ import { FeeApplicability, FeeRule } from '../../core/domain/fee-rule.model';
 import { DocumentPreview } from '../../shared/document-preview/document-preview';
 
 type PaymentsTab = 'assessments' | 'transactions' | 'matrix' | 'configuration';
+type ConfigSubTab = 'fee-rules' | 'payment-methods' | 'bank-information' | 'payroll';
 
 function formatPHP(centavos: number | null): string {
   if (centavos === null) return 'Requires assessor input';
@@ -80,6 +84,7 @@ export class Payments {
   private readonly store = inject(ApplicationStore);
   protected readonly assessmentStore = inject(AssessmentStore);
   protected readonly paymentConfig = inject(PaymentConfigStore);
+  protected readonly payrollStore = inject(PayrollStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
 
@@ -253,6 +258,29 @@ export class Payments {
     return a ? this.assessmentStore.getTransactionsForAssessment(a.id) : [];
   });
 
+  /** The most recent transaction with a real OR number attached, for a one-click "View Receipt" in the Assessment detail header — null (button hidden) rather than opening an empty/fake receipt when no OR has actually been issued yet, even if the assessment itself already shows Paid. */
+  protected readonly latestReceiptTransaction = computed(() => {
+    const withOr = this.selectedAssessmentTransactions().filter((t) => t.orNumber && !t.isVoid);
+    if (withOr.length === 0) return null;
+    return withOr.reduce((latest, t) =>
+      t.submittedAtValue.getTime() > latest.submittedAtValue.getTime() ? t : latest,
+    );
+  });
+
+  /**
+   * A verified, paid transaction that still has no OR number — Verify and
+   * "Attach OR No." are two separate real steps (see openOrForm below), so
+   * an assessment can genuinely show "Paid" with no receipt to view yet.
+   * Surfaced here so the Assessment detail header can point straight at
+   * the actual missing step instead of just having no "View Receipt"
+   * button and no explanation why.
+   */
+  protected readonly verifiedTxnMissingOr = computed(() =>
+    this.selectedAssessmentTransactions().find(
+      (t) => t.status === 'Verified' && !t.isVoid && !t.orNumber,
+    ),
+  );
+
   openAssessment(row: AssessmentRow): void {
     this.selectedAssessmentId.set(row.assessment.id);
     this.assessmentView.set('detail');
@@ -408,6 +436,12 @@ export class Payments {
     };
     this.paymentFormError.set('');
     this.showPaymentForm.set(true);
+  }
+
+  /** "Where to pay" for the Record Payment modal's currently selected Collecting Agency — the real Treasury/BFP office name, contact number, and office hours from department.model.ts, never surfaced anywhere in the payment flow before. */
+  protected wherePaidInfo(agency: CollectingAgency): { name: string; contactPhone: string; officeHours: string } | null {
+    const dept = departmentById(agency === 'BFP' ? 'bfp' : 'treasury');
+    return dept ? { name: dept.name, contactPhone: dept.contactPhone, officeHours: dept.officeHours } : null;
   }
 
   protected cancelPaymentForm(): void {
@@ -694,6 +728,23 @@ export class Payments {
     this.showReceiptPreview.set(false);
   }
 
+  // Same `<app-document-preview kind="official-receipt">` the standalone
+  // Transactions tab's own detail view already uses (see
+  // showReceiptPreview/selectedTransaction above) — this just gives the
+  // Payment Transactions table nested inside an Assessment's detail view
+  // (a different transaction list, `selectedAssessmentTransactions`) its
+  // own entry point into the same real receipt view, since that table has
+  // no `selectedTransactionId` of its own to key off of.
+  protected readonly embeddedReceiptTxn = signal<PaymentTransaction | null>(null);
+
+  protected openEmbeddedReceipt(txn: PaymentTransaction): void {
+    this.embeddedReceiptTxn.set(txn);
+  }
+
+  protected closeEmbeddedReceipt(): void {
+    this.embeddedReceiptTxn.set(null);
+  }
+
   openApplicationRecord(applicationId: string): void {
     this.router.navigateByUrl(`/applications/${applicationId}`);
   }
@@ -711,6 +762,14 @@ export class Payments {
   }
 
   // ---- Tab 4: Configuration ---------------------------------------------------
+
+  protected readonly configSubTabs: { key: ConfigSubTab; label: string }[] = [
+    { key: 'fee-rules', label: 'Fee Rules' },
+    { key: 'payment-methods', label: 'Payment Methods' },
+    { key: 'bank-information', label: 'Bank Information' },
+    { key: 'payroll', label: 'Payroll' },
+  ];
+  protected readonly configSubTab = signal<ConfigSubTab>('fee-rules');
 
   protected readonly feeRules = this.paymentConfig.activeFeeRules;
   protected readonly methods = this.paymentConfig.methods;
@@ -789,6 +848,104 @@ export class Payments {
 
   protected feeRuleHistory(ruleId: string): FeeRule[] {
     return this.paymentConfig.feeRuleHistory(ruleId);
+  }
+
+  // ---- Tab 4: Configuration — Bank Information sub-tab ----------------------
+  // The office's own receiving-bank details, referenced by the "Bank
+  // Payment" method (Payment Methods sub-tab) but never specified anywhere
+  // until now. Edits replace the whole record in one go (unlike fee rules,
+  // there's no versioning need here — this isn't something an issued
+  // assessment snapshots).
+
+  protected readonly bankInfo = this.paymentConfig.bankInfo;
+  protected readonly editingBankInfo = signal(false);
+  protected bankInfoForm: OfficeBankInfo = { ...DEFAULT_BANK_INFO };
+
+  protected openEditBankInfo(): void {
+    if (!this.canConfigurePayments()) return;
+    this.bankInfoForm = { ...this.bankInfo() };
+    this.editingBankInfo.set(true);
+  }
+
+  protected cancelEditBankInfo(): void {
+    this.editingBankInfo.set(false);
+  }
+
+  protected saveBankInfo(): void {
+    if (!this.canConfigurePayments()) return;
+    const { bankName, accountName, accountNumber, branch } = this.bankInfoForm;
+    this.paymentConfig.updateBankInfo(
+      { bankName: bankName.trim(), accountName: accountName.trim(), accountNumber: accountNumber.trim(), branch: branch.trim() },
+      this.session.name() || 'Super Admin',
+    );
+    this.editingBankInfo.set(false);
+  }
+
+  // ---- Tab 4: Configuration — Payroll sub-tab --------------------------------
+  // A real staff/collecting-officer roster — starts empty, an admin adds
+  // each real person themselves. See payroll.model.ts for why this is a
+  // roster (who's on payroll, position, monthly salary), not a payslip/
+  // deductions engine.
+
+  protected readonly payrollRows = this.payrollStore.staff;
+  protected readonly editingPayrollId = signal<string | null>(null);
+  protected payrollForm: {
+    name: string;
+    position: string;
+    monthlySalary: string;
+    dateHired: string;
+  } = { name: '', position: '', monthlySalary: '', dateHired: '' };
+
+  protected openAddPayroll(): void {
+    if (!this.canConfigurePayments()) return;
+    this.payrollForm = { name: '', position: '', monthlySalary: '', dateHired: '' };
+    this.editingPayrollId.set('new');
+  }
+
+  protected openEditPayroll(staff: PayrollStaffMember): void {
+    if (!this.canConfigurePayments()) return;
+    this.payrollForm = {
+      name: staff.name,
+      position: staff.position,
+      monthlySalary:
+        staff.monthlySalaryCentavos !== null ? (staff.monthlySalaryCentavos / 100).toFixed(2) : '',
+      dateHired: staff.dateHired ?? '',
+    };
+    this.editingPayrollId.set(staff.id);
+  }
+
+  protected cancelEditPayroll(): void {
+    this.editingPayrollId.set(null);
+  }
+
+  protected savePayroll(): void {
+    if (!this.canConfigurePayments()) return;
+    const id = this.editingPayrollId();
+    if (!id || !this.payrollForm.name.trim() || !this.payrollForm.position.trim()) return;
+    const actor = this.session.name() || 'Super Admin';
+    const patch = {
+      name: this.payrollForm.name.trim(),
+      position: this.payrollForm.position.trim(),
+      monthlySalaryCentavos: this.payrollForm.monthlySalary
+        ? Math.round(Number(this.payrollForm.monthlySalary) * 100)
+        : null,
+      dateHired: this.payrollForm.dateHired || null,
+    };
+    if (id === 'new') {
+      this.payrollStore.addStaff(patch, actor);
+    } else {
+      this.payrollStore.updateStaff(id, patch, actor);
+    }
+    this.editingPayrollId.set(null);
+  }
+
+  protected togglePayrollStatus(staff: PayrollStaffMember): void {
+    if (!this.canConfigurePayments()) return;
+    this.payrollStore.setStaffStatus(
+      staff.id,
+      staff.status === 'Active' ? 'Inactive' : 'Active',
+      this.session.name() || 'Super Admin',
+    );
   }
 
   // ---- Export ---------------------------------------------------------------

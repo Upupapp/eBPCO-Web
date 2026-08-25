@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { Topbar } from '../../shared/topbar/topbar';
@@ -13,7 +14,12 @@ import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord } from '../../core/domain/application.model';
-import { ApplicationLifecycleStatus, EvaluationStage } from '../../core/domain/status.model';
+import {
+  ApplicationLifecycleStatus,
+  LIFECYCLE_SEQUENCE,
+  canTransition,
+} from '../../core/domain/status.model';
+import { AuditEvent } from '../../core/domain/audit.model';
 import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS } from '../../core/session/permissions';
 import { ApplicationIntake } from '../../shared/application-intake/application-intake';
@@ -21,7 +27,11 @@ import {
   DocumentPreview,
   SampleDocumentKind,
 } from '../../shared/document-preview/document-preview';
-import { ApplicationDocument, DocumentStatus } from '../../core/domain/document.model';
+import {
+  ApplicationDocument,
+  DocumentStatus,
+  UNRESOLVED_DOCUMENT_STATUSES,
+} from '../../core/domain/document.model';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 import {
@@ -33,12 +43,6 @@ import {
   CommentItem,
   TIMELINE,
   TimelineItem,
-  SHARED_TIMELINE,
-  EVAL_CARDS,
-  EvalCard,
-  EVAL_DETAILS,
-  EvalKey,
-  ChecklistItem,
 } from './applications-data';
 
 /** One row of the real per-application Documents tab — a required-but-not-yet-uploaded requirement has `doc: null` and renders as "Missing". */
@@ -50,43 +54,7 @@ interface DocumentRow {
   doc: ApplicationDocument | null;
 }
 
-function buildQrCells(): { x: number; y: number }[] {
-  const cells: { x: number; y: number }[] = [];
-  const size = 15;
-  let seed = 42;
-  const rand = () => {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    return (seed / 0x7fffffff) % 1;
-  };
-  for (let row = 0; row < size; row++) {
-    for (let col = 0; col < size; col++) {
-      const inFinder =
-        (row < 4 && col < 4) || (row < 4 && col > size - 5) || (row > size - 5 && col < 4);
-      if (inFinder) {
-        continue;
-      }
-      if (rand() > 0.55) {
-        cells.push({ x: col * 6 + 4, y: row * 6 + 4 });
-      }
-    }
-  }
-  for (const [ox, oy] of [
-    [0, 0],
-    [size - 4, 0],
-    [0, size - 4],
-  ]) {
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 4; c++) {
-        if (r === 0 || r === 3 || c === 0 || c === 3) {
-          cells.push({ x: (ox + c) * 6 + 4, y: (oy + r) * 6 + 4 });
-        }
-      }
-    }
-  }
-  return cells;
-}
-
-type View = 'list' | 'detail' | 'info' | 'evaluations' | 'evaluation-detail' | 'not-found';
+type View = 'list' | 'detail' | 'info' | 'not-found';
 type DetailTab = 'timeline' | 'documents' | 'permit' | 'comments';
 type InfoSection = 'meta' | 'project' | 'type' | 'govid' | 'professional' | 'ownership';
 
@@ -108,16 +76,38 @@ interface PreviewDoc {
   status: string;
 }
 
-const EVAL_ORDER: EvalKey[] = ['initial', 'zoning', 'fire', 'obo', 'final'];
+interface LifecycleStep {
+  status: ApplicationLifecycleStatus;
+  isPast: boolean;
+  isCurrent: boolean;
+}
+
 const STATUS_OPTIONS: AppStatus[] = ['Approved', 'Under Review', 'Rejected'];
 
-const EVAL_KEY_TO_STAGE: Record<EvalKey, EvaluationStage> = {
-  initial: 'Initial',
-  zoning: 'Zoning',
-  fire: 'Fire Safety',
-  obo: 'OBO',
-  final: 'Final Approval',
-};
+/**
+ * Real next-step actions for the detail page's "Action" menu, covering the
+ * full VALID_TRANSITIONS chain (status.model.ts) rather than the old
+ * coarse-status-driven menu, which could only ever target 'Approved',
+ * 'Rejected', or a hardcoded 'Under Evaluation' — the latter silently
+ * no-op'd from every status before Document Verification. Each entry is
+ * only offered when canTransition(row.lifecycleStatus, target) is true
+ * (see availableStatusActions) — but that alone isn't sufficient for
+ * 'Approved': `transitionStatus` also enforces `canApprove()` (every
+ * required document must be Accepted) and there was previously no role
+ * gate on this menu at all, so "Mark Approved" could be shown (and
+ * clicked, silently no-op'ing) for an application with unresolved
+ * documents, by any role that could open the page. `availableStatusActions`
+ * now filters 'Approved' by both `canApprove()` and
+ * `ACTION_PERMISSIONS.approveApplication`, so an illegal/unauthorized
+ * action is never shown rather than shown-and-then-silently-failing.
+ */
+const STATUS_ACTIONS: { label: string; target: ApplicationLifecycleStatus }[] = [
+  { label: 'Mark Received', target: 'Received' },
+  { label: 'Verify Documents', target: 'Document Verification' },
+  { label: 'Send to Evaluation', target: 'Under Evaluation' },
+  { label: 'Mark Approved', target: 'Approved' },
+  { label: 'Mark Rejected', target: 'Rejected' },
+];
 
 @Component({
   selector: 'app-applications',
@@ -133,6 +123,7 @@ const EVAL_KEY_TO_STAGE: Record<EvalKey, EvaluationStage> = {
     ConfirmDialog,
     ApplicationIntake,
     DocumentPreview,
+    OverlayModule,
   ],
   templateUrl: './applications.html',
   styleUrl: './applications.scss',
@@ -210,10 +201,109 @@ export class Applications {
   protected readonly rows = computed(() => this.store.applications());
   protected readonly comments = signal<CommentItem[]>(COMMENTS);
   protected readonly timeline = TIMELINE;
-  protected readonly sharedTimeline = SHARED_TIMELINE;
-  protected readonly evalCards = signal<EvalCard[]>(EVAL_CARDS);
-  protected readonly evalDetails = signal(EVAL_DETAILS);
+  /**
+   * The real position of the selected application within the "happy path"
+   * LIFECYCLE_SEQUENCE — replaces the old static "Current Step"/canned
+   * timeline text, which always showed the coarse Approved/Under
+   * Review/Rejected status regardless of the row's real lifecycleStatus.
+   * When the row is on an off-path status (Revision Required/Rejected/
+   * Cancelled/Expired), no step is marked current — offSequenceStatus
+   * below carries that instead.
+   */
+  protected readonly lifecycleStepper = computed<LifecycleStep[]>(() => {
+    const row = this.selectedRow();
+    if (!row) return [];
+    const idx = LIFECYCLE_SEQUENCE.indexOf(row.lifecycleStatus);
+    return LIFECYCLE_SEQUENCE.map((status, i) => ({
+      status,
+      isPast: idx !== -1 && i < idx,
+      isCurrent: status === row.lifecycleStatus,
+    }));
+  });
+  protected readonly offSequenceStatus = computed<ApplicationLifecycleStatus | null>(() => {
+    const row = this.selectedRow();
+    if (!row) return null;
+    return (LIFECYCLE_SEQUENCE as ApplicationLifecycleStatus[]).includes(row.lifecycleStatus)
+      ? null
+      : row.lifecycleStatus;
+  });
+  /** Real per-application audit trail (ApplicationStore.getAuditTrail), most-recent-first — replaces the shared static TIMELINE mock rows. */
+  protected readonly realTimeline = computed<TimelineItem[]>(() => {
+    const row = this.selectedRow();
+    if (!row) return [];
+    const events = this.store.getAuditTrail(row.id);
+    return events
+      .map((e: AuditEvent, i: number) => {
+        const [date, time] = e.timestamp.split(',').map((s) => s.trim());
+        return {
+          num: String(i + 1).padStart(2, '0'),
+          event: e.action,
+          date: date ?? e.timestamp,
+          time: time ?? '',
+          detail: e.remarks ? `${e.remarks} — ${e.actor} (${e.role})` : `${e.actor} (${e.role})`,
+        };
+      })
+      .reverse();
+  });
+  /** Days since the row's lifecycleStatus last changed, per its own audit trail — replaces the static "2 Days" placeholder. */
+  protected readonly daysInCurrentStep = computed<number>(() => {
+    const row = this.selectedRow();
+    if (!row) return 0;
+    const events = this.store.getAuditTrail(row.id);
+    const lastStatusChange = [...events]
+      .reverse()
+      .find((e) => e.action === `Status changed to ${row.lifecycleStatus}`);
+    const since = lastStatusChange?.timestampValue ?? row.dateValue;
+    return Math.max(0, Math.floor((Date.now() - since.getTime()) / 86_400_000));
+  });
+  /** Days since the application was first submitted — replaces the static "9 Days" placeholder. */
+  protected readonly totalElapsedDays = computed<number>(() => {
+    const row = this.selectedRow();
+    if (!row) return 0;
+    return Math.max(0, Math.floor((Date.now() - row.dateValue.getTime()) / 86_400_000));
+  });
   protected readonly statusOptions = STATUS_OPTIONS;
+  /** Detail page's "Action" menu — only the legal, currently-eligible, and role-authorized next steps from the selected row's real lifecycleStatus, per STATUS_ACTIONS above. */
+  protected readonly availableStatusActions = computed(() => {
+    const row = this.selectedRow();
+    const role = this.session.role();
+    if (!row) return [];
+    return STATUS_ACTIONS.filter((a) => {
+      if (!canTransition(row.lifecycleStatus, a.target)) return false;
+      if (a.target === 'Approved') {
+        if (!this.store.canApprove(row.id)) return false;
+        if (!role || !ACTION_PERMISSIONS.approveApplication(role)) return false;
+      }
+      return true;
+    });
+  });
+
+  /**
+   * Mirrors `ApplicationStore.canApprove()`'s own rule (every required
+   * document must be Accepted — payment/lifecycle status plays no part in
+   * it) so the UI can name WHICH documents are still blocking approval,
+   * instead of "Mark Approved" just silently disappearing from the Action
+   * menu with no explanation. That's confusing precisely when it matters
+   * most — an application can legitimately reach 'For Approval' with a
+   * fully paid, verified assessment while a document requirement is still
+   * unresolved (nothing earlier in the pipeline re-checks documents), so
+   * "payment says Paid" and "documents aren't all Accepted yet" are two
+   * genuinely independent facts admins need to see are different.
+   */
+  protected readonly approvalBlockingDocs = computed(() =>
+    this.documentRows().filter(
+      (r) => r.required && (!r.doc || UNRESOLVED_DOCUMENT_STATUSES.has(r.doc.status)),
+    ),
+  );
+
+  protected readonly approvalBlockedByDocs = computed(() => {
+    const row = this.selectedRow();
+    if (!row) return false;
+    if (!canTransition(row.lifecycleStatus, 'Approved')) return false;
+    const role = this.session.role();
+    if (!role || !ACTION_PERMISSIONS.approveApplication(role)) return false;
+    return this.approvalBlockingDocs().length > 0;
+  });
 
   // Every value/percentage here is derived from the same store the table
   // below reads — the ring totals always equal the visible row breakdown
@@ -322,11 +412,8 @@ export class Applications {
   protected readonly detailTab = signal<DetailTab>('timeline');
   protected readonly openSection = signal<InfoSection | null>('meta');
   protected readonly selectedRow = signal<AppRow | null>(null);
-  protected readonly selectedEval = signal<EvalKey | null>(null);
   protected readonly newMessage = signal('');
   protected readonly previewItem = signal<PreviewDoc | null>(null);
-
-  protected readonly qrCells = buildQrCells();
 
   protected readonly selectedDetail = computed<AppDetail | null>(() => {
     const row = this.selectedRow();
@@ -443,11 +530,6 @@ export class Applications {
     this.showDocPreview.set(false);
   }
 
-  protected readonly activeEvalDetail = computed(() => {
-    const key = this.selectedEval();
-    return key ? this.evalDetails()[key] : null;
-  });
-
   openDetail(row: AppRow): void {
     this.router.navigateByUrl(`/applications/${row.id}`);
   }
@@ -472,26 +554,11 @@ export class Applications {
     this.openSection.update((current) => (current === section ? null : section));
   }
 
+  /** The rich per-application evaluation review screen now lives on the standalone Evaluations page (real documents/stepper/timeline, not this page's old mock EVAL_CARDS/EVAL_DETAILS) — this just links straight to that application's real record there. */
   openEvaluations(): void {
-    this.view.set('evaluations');
-  }
-
-  backFromEvaluations(): void {
-    this.view.set('detail');
-  }
-
-  openEvalDetail(key: EvalKey): void {
-    this.selectedEval.set(key);
-    this.view.set('evaluation-detail');
-  }
-
-  backFromEvalDetail(): void {
-    this.view.set('evaluations');
-  }
-
-  openDocPreview(item: ChecklistItem): void {
-    if (!item.filename) return;
-    this.previewItem.set({ label: item.label, filename: item.filename, status: item.status });
+    const row = this.selectedRow();
+    if (!row) return;
+    this.router.navigateByUrl(`/evaluations?applicationId=${row.id}`);
   }
 
   closeDocPreview(): void {
@@ -507,19 +574,29 @@ export class Applications {
   }
 
   // ---- Row status mutation --------------------------------------------
-  // Routed through the store's validated `transitionStatus` rather than
-  // forcing a coarse status directly — a coarse target that isn't a legal
-  // transition from the row's real lifecycle status is a no-op instead of
-  // an arbitrary jump. Rejection requires a remark (the eval-message
-  // field doubles as that here since this quick menu has no dedicated
-  // remarks prompt of its own).
-  private updateRowStatus(id: string, status: AppStatus): void {
+  // Routed through the store's validated `transitionStatus`, targeting the
+  // real ApplicationLifecycleStatus directly (see STATUS_ACTIONS/
+  // availableStatusActions above) rather than the old coarse-status
+  // indirection that could only ever reach 'Approved'/'Rejected' or a
+  // hardcoded 'Under Evaluation' — the menu now only offers legal next
+  // steps in the first place, so this is normally a straight pass-through;
+  // the boolean return is still checked and surfaced via `quickActionError`
+  // as a defense-in-depth backstop (see its own doc comment).
+  private updateRowStatus(
+    id: string,
+    target: ApplicationLifecycleStatus,
+    remarks?: string,
+  ): void {
+    this.quickActionError.set(null);
     const actor = this.session.name() || 'Staff';
     const role = this.session.role() ?? 'Administrator';
-    const remarks = this.evalMessage().trim() || undefined;
-    const target: ApplicationLifecycleStatus =
-      status === 'Approved' ? 'Approved' : status === 'Rejected' ? 'Rejected' : 'Under Evaluation';
-    this.store.transitionStatus(id, target, actor, role, remarks);
+    const ok = this.store.transitionStatus(id, target, actor, role, remarks);
+    if (!ok) {
+      this.quickActionError.set(
+        `Couldn't move this application to "${target}" — it no longer meets the requirements for that step (re-check its documents/role access and try again).`,
+      );
+      return;
+    }
     const current = this.selectedRow();
     if (current && current.id === id) {
       const refreshed = this.store.getById(id);
@@ -637,33 +714,6 @@ export class Applications {
     downloadCsv(`application-${row.id}`, [this.appCsvRow(row)]);
   }
 
-  protected exportEvalSummary(): void {
-    const row = this.selectedRow();
-    downloadCsv(
-      `evaluations-${row?.id ?? 'summary'}`,
-      this.evalCards().map((c) => ({
-        Evaluation: c.title,
-        Status: c.statusLabel,
-        Documents: c.documents,
-        Comments: c.comments,
-        'Progress %': c.progressPct,
-      })),
-    );
-  }
-
-  protected exportChecklist(): void {
-    const cfg = this.activeEvalDetail();
-    if (!cfg) return;
-    downloadCsv(
-      `checklist-${cfg.title.replace(/\s+/g, '-').toLowerCase()}`,
-      cfg.checklist.map((item) => ({
-        Document: item.label,
-        File: item.filename,
-        Status: item.status,
-      })),
-    );
-  }
-
   // ---- Add application (full walk-in intake wizard) --------------------
   // Gated by `canCreate` (see the "+ Application" button in the template)
   // — an assisted/onsite filing entry point rather than the previously
@@ -689,6 +739,20 @@ export class Applications {
   }
 
   // ---- Detail-header "Action" (status) menu ----------------------------
+  // Rendered via CDK Overlay, not the shared in-flow `.menu-panel` — the
+  // plain absolutely-positioned panel could render clipped by/overlapping
+  // unrelated page content depending on which ancestor happened to
+  // establish the ancestor stacking/positioning context in each of the
+  // views this header appears in (detail/evaluations/evaluation-detail/
+  // info). The overlay renders into its own top-level container instead,
+  // so it always floats above everything. Shared by both the "Action" and
+  // "more" header menus below across all 4 views they appear in — mirrors
+  // `checklistMenuPositions` above.
+
+  protected readonly headerMenuPositions: ConnectedPosition[] = [
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 4 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -4 },
+  ];
 
   protected readonly actionMenuOpen = signal(false);
 
@@ -700,11 +764,48 @@ export class Applications {
     this.actionMenuOpen.set(false);
   }
 
-  protected setStatus(status: AppStatus): void {
-    const row = this.selectedRow();
-    if (row) this.updateRowStatus(row.id, status);
-    this.closeActionMenu();
+  /** cdkConnectedOverlay only emits keydown events while the overlay is open — Escape is the one key it doesn't already close on by itself. */
+  protected onActionMenuKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') this.closeActionMenu();
   }
+
+  /**
+   * 'Rejected' requires a remark — `transitionStatus` refuses it without
+   * one. This used to silently fall back to reusing an unrelated field
+   * belonging to a different feature, which was usually empty or (worse)
+   * could hold a stale note left over from something else entirely — so a
+   * click here would either silently no-op, or silently attach the wrong
+   * remark. Now it opens a dedicated, required-field prompt instead.
+   */
+  protected setStatus(target: ApplicationLifecycleStatus): void {
+    const row = this.selectedRow();
+    this.closeActionMenu();
+    if (!row) return;
+    if (target === 'Rejected') {
+      this.quickRejectRemarks.set('');
+      this.quickRejectTarget.set(row);
+      return;
+    }
+    this.updateRowStatus(row.id, target);
+  }
+
+  protected readonly quickRejectTarget = signal<AppRow | null>(null);
+  protected readonly quickRejectRemarks = signal('');
+
+  protected confirmQuickReject(): void {
+    const row = this.quickRejectTarget();
+    const remarks = this.quickRejectRemarks().trim();
+    if (!row || !remarks) return;
+    this.updateRowStatus(row.id, 'Rejected', remarks);
+    this.quickRejectTarget.set(null);
+  }
+
+  protected cancelQuickReject(): void {
+    this.quickRejectTarget.set(null);
+  }
+
+  /** Surfaces a `transitionStatus` refusal that survived past `availableStatusActions`' own filtering (e.g. a role/permission change or a document status edited in another tab between opening the menu and clicking it) — defense in depth, not the primary guard. */
+  protected readonly quickActionError = signal<string | null>(null);
 
   // ---- Detail/info/evaluations header "more" menu ----------------------
 
@@ -716,6 +817,11 @@ export class Applications {
 
   protected closeMoreMenu(): void {
     this.moreMenuOpen.set(false);
+  }
+
+  /** cdkConnectedOverlay only emits keydown events while the overlay is open — Escape is the one key it doesn't already close on by itself. */
+  protected onMoreMenuKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') this.closeMoreMenu();
   }
 
   protected deleteFromDetail(): void {
@@ -853,6 +959,11 @@ export class Applications {
     this.docActionMenuOpen.set(false);
   }
 
+  /** cdkConnectedOverlay only emits keydown events while the overlay is open — Escape is the one key it doesn't already close on by itself. */
+  protected onDocActionMenuKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') this.closeDocActionMenu();
+  }
+
   protected exportSelectedDocs(): void {
     const ids = this.docSelectedIds();
     const all = this.documentRows();
@@ -987,124 +1098,4 @@ export class Applications {
     ]);
   }
 
-  // ---- Zoning map popup ---------------------------------------------------
-
-  protected viewPropertyDocuments(): void {
-    this.detailTab.set('documents');
-    this.view.set('detail');
-  }
-
-  // ---- Evaluation checklist item quick-actions -----------------------
-
-  protected readonly checklistMenuFor = signal<string | null>(null);
-
-  protected toggleChecklistMenu(item: ChecklistItem): void {
-    this.checklistMenuFor.update((current) => (current === item.label ? null : item.label));
-  }
-
-  protected closeChecklistMenu(): void {
-    this.checklistMenuFor.set(null);
-  }
-
-  protected setChecklistStatus(item: ChecklistItem, status: ChecklistItem['status']): void {
-    const key = this.selectedEval();
-    if (!key) return;
-    this.evalDetails.update((details) => {
-      const cfg = details[key];
-      const checklist = cfg.checklist.map((ci) =>
-        ci.label === item.label ? { ...ci, status, checked: status === 'Approved' } : ci,
-      );
-      return { ...details, [key]: { ...cfg, checklist } };
-    });
-    this.closeChecklistMenu();
-  }
-
-  // ---- Evaluation workflow action row -----------------------------------
-
-  protected readonly evalMessage = signal('');
-
-  protected sendMessageToApplicant(): void {
-    const text = this.evalMessage().trim();
-    if (!text) return;
-    const key = this.selectedEval();
-    const cfg = key ? this.evalDetails()[key] : null;
-    this.comments.update((list) => [
-      ...list,
-      {
-        author: cfg?.title ? `${cfg.title} Reviewer` : 'Evaluator',
-        timeAgo: 'just now',
-        text,
-        depth: 0,
-      },
-    ]);
-    this.evalMessage.set('');
-  }
-
-  protected forwardEval(): void {
-    const key = this.selectedEval();
-    if (!key) return;
-    const row = this.selectedRow();
-    const actor = this.session.name() || 'Staff';
-    if (row) {
-      this.store.recordEvaluation(row.id, EVAL_KEY_TO_STAGE[key], 'Passed', actor);
-    }
-    this.evalCards.update((cards) =>
-      cards.map((c) =>
-        c.key === key
-          ? { ...c, statusLabel: 'Completed', statusTone: 'good', progressPct: 100 }
-          : c,
-      ),
-    );
-    const idx = EVAL_ORDER.indexOf(key);
-    const next = EVAL_ORDER[idx + 1];
-    if (next) {
-      this.selectedEval.set(next);
-      return;
-    }
-    this.selectedEval.set(null);
-    this.backToList();
-  }
-
-  // Revision/rejection require a remark — `evalMessage` (the same field
-  // "Send Message to Applicant" uses) is required non-empty here; if the
-  // reviewer hasn't typed one, the store call fails and nothing changes.
-  protected returnForRevisionEval(): void {
-    const key = this.selectedEval();
-    const row = this.selectedRow();
-    if (!key || !row) return;
-    const actor = this.session.name() || 'Staff';
-    const remarks = this.evalMessage().trim();
-    if (!remarks) return;
-    const ok = this.store.recordEvaluation(
-      row.id,
-      EVAL_KEY_TO_STAGE[key],
-      'Revision Required',
-      actor,
-      remarks,
-    );
-    if (!ok) return;
-    this.evalCards.update((cards) =>
-      cards.map((c) =>
-        c.key === key ? { ...c, statusLabel: 'Revision Needed', statusTone: 'progress' } : c,
-      ),
-    );
-    this.evalMessage.set('');
-    this.selectedEval.set(null);
-    this.view.set('evaluations');
-  }
-
-  protected rejectEval(): void {
-    const key = this.selectedEval();
-    const row = this.selectedRow();
-    if (!row) return;
-    const actor = this.session.name() || 'Staff';
-    const remarks = this.evalMessage().trim();
-    if (!remarks) return;
-    const stage = key ? EVAL_KEY_TO_STAGE[key] : row.evaluationStage;
-    const ok = this.store.recordEvaluation(row.id, stage, 'Rejected', actor, remarks);
-    if (!ok) return;
-    this.evalMessage.set('');
-    this.selectedEval.set(null);
-    this.backToList();
-  }
 }

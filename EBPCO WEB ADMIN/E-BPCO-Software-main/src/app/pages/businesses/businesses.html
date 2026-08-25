@@ -6,7 +6,7 @@
 
 @if (view() === 'list') {
   <section class="kpi-grid">
-    @for (stat of ringStats; track stat.label) {
+    @for (stat of ringStats(); track stat.label) {
       <app-kpi-card
         [label]="stat.label"
         [value]="stat.value"

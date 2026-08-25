@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Topbar } from '../../shared/topbar/topbar';
 import { KpiCard, KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-card';
@@ -6,6 +6,9 @@ import { Icon } from '../../shared/icon/icon';
 import { Pagination } from '../../shared/pagination/pagination';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
+import { ApplicationStore } from '../../core/domain/application-store';
+import { AssessmentStore } from '../../core/domain/assessment-store';
+import { AuditEvent } from '../../core/domain/audit.model';
 
 type LogTabKey = 'activity' | 'access' | 'error' | 'security' | 'events';
 
@@ -92,17 +95,6 @@ function severityFor(i: number): 'Critical' | 'Warning' | 'Info' {
 const ROW_COUNT = 24;
 const BASE_ROWS = buildBaseRows(ROW_COUNT);
 
-const ACTIVITY_EVENTS = [
-  'Login',
-  'Logout',
-  'Create Application',
-  'Update Application',
-  'Approve Application',
-  'Reject Application',
-  'Delete Record',
-  'Export Report',
-];
-
 const ACCESS_EVENTS = ['Login Success', 'Login Failed', 'Password Reset', 'Session Expired'];
 const DEVICES = ['Chrome / Windows', 'Safari / macOS', 'Edge / Windows', 'Chrome / Android'];
 
@@ -138,6 +130,7 @@ const SYSTEM_EVENTS = [
 ];
 
 export interface ActivityRow {
+  id: string;
   timestamp: string;
   eventType: string;
   description: string;
@@ -244,6 +237,103 @@ function buildLogId(prefix: string, timestamp: string, title: string): string {
   return `${prefix}-${Math.abs(hash).toString(36).toUpperCase().padStart(8, '0').slice(0, 8)}`;
 }
 
+// Maps a real AuditEvent's free-text `action` (written across
+// ApplicationStore/AssessmentStore — see appAudit()/audit()) to a short
+// event-type label, a module, and a severity for the Activity Logs tab.
+// Matched by substring against the small, known set of action strings this
+// app actually writes, rather than requiring every writer to also carry a
+// separate structured "type" field.
+const ACTIVITY_EVENT_RULES: {
+  test: (action: string) => boolean;
+  eventType: string;
+  module: string;
+  severity: (action: string) => 'Critical' | 'Warning' | 'Info';
+}[] = [
+  {
+    test: (a) => a.includes('Status changed to Rejected'),
+    eventType: 'Application Rejected',
+    module: 'Applications',
+    severity: () => 'Critical',
+  },
+  {
+    test: (a) => a.includes('Status changed to Revision Required'),
+    eventType: 'Revision Requested',
+    module: 'Applications',
+    severity: () => 'Warning',
+  },
+  {
+    test: (a) => a.includes('cancelled/archived'),
+    eventType: 'Application Cancelled',
+    module: 'Applications',
+    severity: () => 'Warning',
+  },
+  {
+    test: (a) => a.startsWith('Status changed to'),
+    eventType: 'Status Changed',
+    module: 'Applications',
+    severity: () => 'Info',
+  },
+  {
+    test: (a) => a.includes('filed (assisted'),
+    eventType: 'Application Filed',
+    module: 'Applications',
+    severity: () => 'Info',
+  },
+  {
+    test: (a) => a.startsWith('Note added'),
+    eventType: 'Note Added',
+    module: 'Applications',
+    severity: () => 'Info',
+  },
+  {
+    test: (a) => a.startsWith('Document attached'),
+    eventType: 'Document Uploaded',
+    module: 'Applications',
+    severity: () => 'Info',
+  },
+  {
+    test: (a) => a.includes('resubmitted'),
+    eventType: 'Document Resubmitted',
+    module: 'Applications',
+    severity: () => 'Info',
+  },
+  {
+    test: (a) => a.includes('released to'),
+    eventType: 'Permit Released',
+    module: 'Workflow',
+    severity: () => 'Info',
+  },
+  {
+    test: (a) => a.includes('generated'),
+    eventType: 'Permit Generated',
+    module: 'Workflow',
+    severity: () => 'Info',
+  },
+  {
+    test: (a) => a.startsWith('Assessment') || a.startsWith('Transaction'),
+    eventType: 'Billing Update',
+    module: 'Billing',
+    severity: () => 'Info',
+  },
+  {
+    test: (a) => a.includes('marked Verified') || a.includes('marked Failed'),
+    eventType: 'Verification Updated',
+    module: 'User Management',
+    severity: (a) => (a.includes('marked Failed') ? 'Warning' : 'Info'),
+  },
+];
+
+function classifyAuditEvent(action: string): {
+  eventType: string;
+  module: string;
+  severity: 'Critical' | 'Warning' | 'Info';
+} {
+  const rule = ACTIVITY_EVENT_RULES.find((r) => r.test(action));
+  return rule
+    ? { eventType: rule.eventType, module: rule.module, severity: rule.severity(action) }
+    : { eventType: 'System Action', module: 'Applications', severity: 'Info' };
+}
+
 export interface SystemEventRow {
   timestamp: string;
   eventType: string;
@@ -262,6 +352,9 @@ export interface SystemEventRow {
   styleUrl: './system-logs.scss',
 })
 export class SystemLogs {
+  private readonly store = inject(ApplicationStore);
+  private readonly assessmentStore = inject(AssessmentStore);
+
   protected readonly tabs: { key: LogTabKey; label: string; icon: string }[] = [
     { key: 'activity', label: 'Activity logs', icon: 'logs' },
     { key: 'access', label: 'Access logs', icon: 'key' },
@@ -530,19 +623,37 @@ export class SystemLogs {
     };
   });
 
-  private readonly activityRows = signal<ActivityRow[]>(
-    BASE_ROWS.map((r, i) => ({
-      timestamp: timestampFor(i, r),
-      eventType: ACTIVITY_EVENTS[i % ACTIVITY_EVENTS.length],
-      description: `${r.name} triggered ${ACTIVITY_EVENTS[i % ACTIVITY_EVENTS.length].toLowerCase()}`,
-      user: r.name,
-      tenant: r.city,
-      module: MODULES[i % MODULES.length],
-      ip: r.ip,
-      status: r.status,
-      severity: severityFor(i),
-    })),
-  );
+  // The real, append-only audit trail (ApplicationStore + AssessmentStore —
+  // see audit.model.ts) merged and mapped to ActivityRow. Only genuinely
+  // committed actions ever reach either store's auditEvents(), so `status`
+  // is always 'Active' here; `ip` is an honest '—' placeholder since this
+  // frontend-only prototype has no request/session tracking to source a
+  // real IP from. This is the one System Logs tab backed by real data —
+  // Access/Error/Security/Events below stay clearly-labeled sample data,
+  // since nothing in this app tracks logins, exceptions, or security/
+  // deployment events yet.
+  protected readonly activityRows = computed<ActivityRow[]>(() => {
+    const events: AuditEvent[] = [...this.store.auditEvents(), ...this.assessmentStore.auditEvents()];
+    return events
+      .slice()
+      .sort((a, b) => b.timestampValue.getTime() - a.timestampValue.getTime())
+      .map((e) => {
+        const { eventType, module, severity } = classifyAuditEvent(e.action);
+        const context = e.applicationId ? this.store.getApplicationContext(e.applicationId) : undefined;
+        return {
+          id: e.id,
+          timestamp: e.timestamp,
+          eventType,
+          description: e.remarks ? `${e.action} — ${e.remarks}` : e.action,
+          user: e.actor,
+          tenant: context?.businessLabel ?? 'System',
+          module,
+          ip: '—',
+          status: 'Active',
+          severity,
+        };
+      });
+  });
 
   private readonly accessRows = signal<AccessRow[]>(
     BASE_ROWS.map((r, i) => ({
@@ -702,7 +813,7 @@ export class SystemLogs {
 
   openActivityDetail(row: ActivityRow): void {
     this.showDetail({
-      logId: buildLogId('ACT', row.timestamp, row.eventType),
+      logId: row.id,
       category: 'Activity Log',
       title: row.eventType,
       timestamp: row.timestamp,
@@ -904,17 +1015,18 @@ export class SystemLogs {
   }
 
   // ---- Delete -------------------------------------------------------------
-  // Deleting an audit-log entry is unusual in a real system, but this app
-  // has no backend/immutable audit store — treated the same as any other
-  // row here so every table in the app behaves consistently.
+  // Deleting a sample-data row is fine — it's synthetic. Activity Logs is
+  // the exception: it now reads the real, append-only audit trail (see
+  // audit.model.ts — "nothing in the store ever removes or edits one once
+  // written"), so it has no delete action in the template and this never
+  // runs for that tab; the 'activity' case is omitted rather than made a
+  // silent no-op so a future caller can't accidentally wire one back in.
 
-  protected readonly deleteTarget = signal<
-    ActivityRow | AccessRow | ErrorRow | SecurityRow | SystemEventRow | null
-  >(null);
+  protected readonly deleteTarget = signal<AccessRow | ErrorRow | SecurityRow | SystemEventRow | null>(
+    null,
+  );
 
-  protected requestDelete(
-    row: ActivityRow | AccessRow | ErrorRow | SecurityRow | SystemEventRow,
-  ): void {
+  protected requestDelete(row: AccessRow | ErrorRow | SecurityRow | SystemEventRow): void {
     this.deleteTarget.set(row);
   }
 
@@ -926,9 +1038,6 @@ export class SystemLogs {
     const target = this.deleteTarget();
     if (!target) return;
     switch (this.activeTab()) {
-      case 'activity':
-        this.activityRows.update((rows) => rows.filter((r) => r !== target));
-        break;
       case 'access':
         this.accessRows.update((rows) => rows.filter((r) => r !== target));
         break;

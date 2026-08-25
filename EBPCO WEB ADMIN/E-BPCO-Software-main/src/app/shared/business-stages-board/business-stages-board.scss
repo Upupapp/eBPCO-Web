@@ -40,6 +40,35 @@ $note-min-height: 132px;
   animation: section-in 0.4s ease both;
 }
 
+.drop-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: $radius-md;
+  background: $color-warning-bg-soft;
+  color: $color-warning;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+
+  span {
+    flex: 1;
+  }
+}
+
+.drop-error-dismiss {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0.1rem;
+}
+
 h2 {
   margin: 0;
   font-size: 1.15rem;

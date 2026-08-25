@@ -264,6 +264,16 @@
     </div>
   </div>
 
+  @if (actionError(); as message) {
+    <div class="eval-action-error" role="alert">
+      <app-icon name="alert-triangle" [size]="16" />
+      <span>{{ message }}</span>
+      <button type="button" class="eval-action-error-dismiss" aria-label="Dismiss" (click)="actionError.set(null)">
+        &#10005;
+      </button>
+    </div>
+  }
+
   <section class="kpi-grid">
     @for (stat of ringStats(); track stat.label) {
       <app-kpi-card
@@ -387,15 +397,31 @@
                     <button
                       type="button"
                       class="icon-btn more small"
+                      cdkOverlayOrigin
+                      #rowMenuOrigin="cdkOverlayOrigin"
                       [attr.aria-label]="'More actions for application ' + row.id"
-                      [attr.aria-expanded]="openMenuFor() === row.id"
+                      aria-haspopup="menu"
+                      [attr.aria-expanded]="openRowMenuId() === row.id"
                       (click)="toggleRowMenu(row)"
                     >
                       <app-icon name="dots-horizontal" [size]="15" />
                     </button>
-                    @if (openMenuFor() === row.id) {
-                      <div class="menu-backdrop" (click)="closeMenu()"></div>
-                      <div class="menu-panel" role="menu">
+                    <ng-template
+                      cdkConnectedOverlay
+                      [cdkConnectedOverlayOrigin]="rowMenuOrigin"
+                      [cdkConnectedOverlayOpen]="openRowMenuId() === row.id"
+                      [cdkConnectedOverlayPositions]="rowMenuPositions"
+                      cdkConnectedOverlayHasBackdrop
+                      cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+                      (backdropClick)="closeMenu()"
+                      (detach)="closeMenu()"
+                      (overlayKeydown)="onRowMenuKeydown($event)"
+                    >
+                      <div
+                        class="overlay-menu-panel"
+                        role="menu"
+                        [attr.aria-label]="'More actions for application ' + row.id"
+                      >
                         <button
                           type="button"
                           role="menuitem"
@@ -438,7 +464,7 @@
                           </button>
                         }
                       </div>
-                    }
+                    </ng-template>
                   </div>
                 </div>
               </td>
@@ -490,12 +516,22 @@
             <dd>{{ row.type }}</dd>
           </div>
           <div>
-            <dt>Stage :</dt>
-            <dd>{{ stageLabel() }}</dd>
+            <dt>Location :</dt>
+            <dd>{{ recordApplication()?.location || 'Not provided' }}</dd>
           </div>
+          @if (recordApplicant(); as applicant) {
+            <div>
+              <dt>Email :</dt>
+              <dd>{{ applicant.email || 'Not provided' }}</dd>
+            </div>
+            <div>
+              <dt>Mobile :</dt>
+              <dd>{{ applicant.mobileNumber || 'Not provided' }}</dd>
+            </div>
+          }
           <div>
             <dt>Missing Documents :</dt>
-            <dd>{{ row.missingDocuments }}</dd>
+            <dd>{{ recordMissingRequiredCount() }}</dd>
           </div>
           <div>
             <dt>Reviewing Department :</dt>
@@ -525,15 +561,38 @@
         </button>
       </div>
 
+      @if (actionError(); as message) {
+        <div class="eval-action-error" role="alert">
+          <app-icon name="alert-triangle" [size]="16" />
+          <span>{{ message }}</span>
+          <button
+            type="button"
+            class="eval-action-error-dismiss"
+            aria-label="Dismiss"
+            (click)="actionError.set(null)"
+          >
+            &#10005;
+          </button>
+        </div>
+      }
+
       <h3>Evaluation Stage</h3>
-      <div class="stage-tabs static" role="list">
-        @for (tab of stageTabs; track tab.key) {
-          <span class="stage-tab" role="listitem" [class.active]="tab.key === row.stage">
-            <app-icon [name]="tab.icon" [size]="15" />
-            {{ tab.label }}
-          </span>
+      <ul class="status-timeline">
+        @for (step of recordEvaluationSteps(); track step.stage) {
+          <li [class.done]="step.isDone || step.result === 'Passed'" [class.current]="step.isCurrent">
+            <span class="dot"></span>
+            <span class="label">
+              {{ step.stage }}
+              @if (step.result) {
+                — {{ step.result }}
+              }
+              @if (step.evaluatorLabel) {
+                <em>({{ step.evaluatorLabel }})</em>
+              }
+            </span>
+          </li>
         }
-      </div>
+      </ul>
 
       <h3>Assigned Officer</h3>
       <div class="officer-row">
@@ -542,6 +601,140 @@
           <strong>{{ row.officer }}</strong>
           <span>Reviewing this evaluation</span>
         </div>
+      </div>
+
+      <h3>Documents</h3>
+      <div class="table-wrap">
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Required</th>
+              <th>Department</th>
+              <th>Uploaded</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of recordDocumentRows(); track r.requirementId) {
+              <tr>
+                <td>{{ r.label }}</td>
+                <td>{{ r.required ? 'Required' : 'Optional' }}</td>
+                <td>{{ r.departmentName }}</td>
+                <td>{{ r.doc?.uploadedAt ?? '—' }}</td>
+                <td>
+                  <span
+                    class="status-pill"
+                    [class]="(r.doc?.status ?? 'Missing').toLowerCase().replace(' ', '-')"
+                    >{{ r.doc?.status ?? 'Missing' }}</span
+                  >
+                </td>
+                <td>
+                  @if (r.doc) {
+                    <button type="button" class="btn-outline" (click)="openDocPreview(r)">
+                      Preview
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="muted">No document requirements for this permit type.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Timeline</h3>
+      <ul class="timeline-feed">
+        @for (event of recordAuditTrail(); track event.id) {
+          <li class="timeline-feed-item">
+            <span class="timeline-feed-icon">
+              <app-icon name="check-circle" [size]="15" />
+            </span>
+            <div class="timeline-feed-body">
+              <div class="timeline-feed-head">
+                <span class="timeline-feed-title">{{ event.action }}</span>
+                <span class="timeline-feed-time">{{ event.timestamp }}</span>
+              </div>
+              <p class="timeline-feed-detail">
+                {{ event.actor }} ({{ event.role }})
+                @if (event.remarks) {
+                  — {{ event.remarks }}
+                }
+              </p>
+            </div>
+          </li>
+        } @empty {
+          <li class="timeline-feed-item">
+            <div class="timeline-feed-body">
+              <p class="timeline-feed-detail">No activity recorded yet.</p>
+            </div>
+          </li>
+        }
+      </ul>
+
+      <h3>Actions</h3>
+      <div class="record-actions">
+        <button type="button" class="btn-primary" (click)="advanceStage(row)">
+          <app-icon name="check-circle" [size]="14" />
+          Advance Stage
+        </button>
+        <label class="revision-remarks-label" for="record-revision-remarks">
+          Remarks (required to return)
+        </label>
+        <input
+          id="record-revision-remarks"
+          type="text"
+          class="revision-remarks-input inline"
+          placeholder="What needs to be revised?"
+          [ngModel]="revisionRemarks()"
+          (ngModelChange)="revisionRemarks.set($event)"
+        />
+        <button
+          type="button"
+          class="btn-outline danger"
+          [disabled]="!revisionRemarks().trim()"
+          (click)="returnForRevision(row)"
+        >
+          <app-icon name="alert-triangle" [size]="14" />
+          Return for Revision
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (previewItem(); as doc) {
+  <div class="modal-backdrop" (click)="closeDocPreview()">
+    <div class="modal-box doc-preview-box" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" (click)="closeDocPreview()">&#10005;</button>
+      <h2>{{ doc.label }}</h2>
+      <p class="doc-preview-filename">{{ doc.filename }}</p>
+      <div class="doc-preview-sheet">
+        <span class="sheet-watermark" [class]="doc.status.toLowerCase().replace(' ', '-')">{{
+          doc.status
+        }}</span>
+        <div class="sheet-header">
+          <app-icon name="file-check" [size]="28" />
+          <div>
+            <strong>Republic of the Philippines</strong>
+            <span>Office of the Building Official</span>
+          </div>
+        </div>
+        <h3>{{ doc.label }}</h3>
+        <div class="sheet-row">
+          <span>File Name</span><strong>{{ doc.filename }}</strong>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn cancel" (click)="closeDocPreview()">Close</button>
+        <button type="button" class="modal-btn confirm" (click)="downloadPreviewDoc()">
+          <app-icon name="download" [size]="15" />
+          Download
+        </button>
       </div>
     </div>
   </div>

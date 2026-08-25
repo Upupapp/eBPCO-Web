@@ -318,20 +318,22 @@ h3 {
     vertical-align: middle;
   }
 
-  // Method/Amount/Status/Date are short, fixed-shape values — nowrap
-  // keeps them tidy on one line. Transaction ID and Reference are never
-  // truncated with an ellipsis (an OR/reference number must stay fully
-  // readable), so they keep the shared `.detail-table` default of
-  // `white-space: normal` and simply wrap if a value is ever unusually
-  // long, rather than silently hiding part of it.
+  // Method/Amount/Date are short, fixed-shape values — nowrap keeps them
+  // tidy on one line. Transaction ID and Reference are never truncated
+  // with an ellipsis (an OR/reference number must stay fully readable),
+  // so they keep the shared `.detail-table` default of `white-space:
+  // normal` and simply wrap if a value is ever unusually long, rather
+  // than silently hiding part of it. Status is deliberately left out of
+  // this list too — "Pending Verification" is the longest status this
+  // column ever shows, and forcing it onto one line inside a fixed-width
+  // cell let it visually overflow into the Date column next to it instead
+  // of wrapping to a second line the way Reference already does.
   th:nth-child(2),
   td:nth-child(2),
   th:nth-child(3),
   td:nth-child(3),
   th:nth-child(5),
   td:nth-child(5),
-  th:nth-child(6),
-  td:nth-child(6),
   th:nth-child(7),
   td:nth-child(7) {
     white-space: nowrap;
@@ -339,14 +341,18 @@ h3 {
 
   .status-pill {
     vertical-align: middle;
+    // Overrides this file's own general `.status-pill { white-space:
+    // nowrap }` rule above — see the nowrap-column comment above for why.
+    white-space: normal;
   }
 
-  // Right-align the Action column's header title (not just its button/menu
-  // content) so it reads flush with the numeric columns like Amount above
-  // it, instead of the title sitting flush-left while only the data sits
-  // flush-right underneath it.
+  // Left-align the Action column's header title so it sits flush with the
+  // buttons/menu trigger underneath it (see `.txn-actions`'s matching
+  // `justify-content: flex-start` below) — right-aligning just the header
+  // while the action content itself starts from the column's left edge
+  // made the two visibly disagree.
   th:last-child {
-    text-align: right;
+    text-align: left;
   }
 
   // `.txn-actions-cell` (shared with the Assessments/Transactions list
@@ -448,11 +454,10 @@ h3 {
   flex-wrap: wrap;
   align-items: center;
   // Fills the Action cell (a block-level flex container defaults to the
-  // cell's full content width) and pushes its buttons flush right, so the
-  // trigger/chips line up under the right-aligned "Action" header instead
-  // of sitting stranded at the cell's left edge under a mostly-empty
-  // column.
-  justify-content: flex-end;
+  // cell's full content width) and keeps its buttons flush left, so the
+  // trigger/chips line up under the left-aligned "Action" header instead
+  // of drifting away from it toward the column's right edge.
+  justify-content: flex-start;
   gap: 0.5rem;
 }
 
@@ -490,6 +495,10 @@ h3 {
   &.danger {
     background: $color-danger-bg;
     color: $color-danger;
+  }
+  &.info {
+    background: $color-info-bg;
+    color: $color-info;
   }
 }
 
@@ -877,6 +886,11 @@ h3 {
     font-size: 0.78rem;
     font-weight: 700;
     color: $color-ink-500;
+
+    .optional {
+      font-weight: 400;
+      color: $color-ink-200;
+    }
   }
 
   input,
@@ -909,6 +923,14 @@ h3 {
   font-size: 0.82rem;
   color: $color-ink-300;
   line-height: 1.5;
+
+  &.where-to-pay {
+    margin: -0.4rem 0 0.6rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: $radius-sm;
+    background: $color-info-bg-soft;
+    color: $color-ink-600;
+  }
 }
 
 .form-error {

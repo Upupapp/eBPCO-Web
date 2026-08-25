@@ -57,4 +57,69 @@
       }
     }
   }
+
+  .menu-empty-note {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.78rem;
+    color: $color-ink-300;
+  }
+}
+
+// A CDK-overlay-rendered variant for menus that must escape a scrollable
+// ancestor (e.g. a table row inside a `.table-wrap` with overflow-x:
+// auto) — `.menu-panel` above is `position: absolute` relative to
+// `.menu-wrap` and gets clipped by such an ancestor, forcing a scroll to
+// see it. This renders into the CDK overlay container instead (see
+// `cdkConnectedOverlay` usages that pair with this class), so it always
+// floats above everything, including the table's own scroll clipping,
+// and never affects the row's own layout. Visually identical to
+// `.menu-panel` — only the positioning strategy differs. Mirrors the
+// `.txn-menu-panel` pattern already proven in payments.scss.
+.overlay-menu-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.2rem;
+  padding: 0.4rem;
+  min-width: 190px;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card-hover;
+  box-sizing: border-box;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+    border: none;
+    background: transparent;
+    border-radius: $radius-sm;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: $color-ink-700;
+    text-align: left;
+    cursor: pointer;
+    transition: background $ease-fast;
+
+    &:hover {
+      background: $color-bg-subtle;
+    }
+
+    &.danger {
+      color: $color-danger;
+
+      &:hover {
+        background: $color-danger-bg-soft;
+      }
+    }
+  }
+
+  .menu-empty-note {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.78rem;
+    color: $color-ink-300;
+  }
 }

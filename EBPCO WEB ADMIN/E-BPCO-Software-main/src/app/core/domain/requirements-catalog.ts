@@ -175,6 +175,22 @@ const SRC_CASTILLA_BFP_FSIC_FORM: RequirementSource = {
   verificationStatus: 'CASTILLA_OFFICIAL_FORM_VERIFIED',
 };
 
+// The actual Municipality of Castilla Office of the Municipal Engineer
+// "Building Permit Documentary Requirements" checklist, obtained directly
+// from "LGU Castilla BPCO Forms" and bundled at
+// public/assets/permits/Building-Permit-and-Occupancy-Checklist.pdf. Also
+// the source of Box 6 ("Assessed Fees") referenced in fee-rule.model.ts's
+// SRC_CASTILLA_UNIFIED_FORM — the two files describe the same real
+// Castilla OME application package.
+const SRC_CASTILLA_OME_CHECKLIST: RequirementSource = {
+  title:
+    'Municipality of Castilla, Sorsogon — Office of the Municipal Engineer, "Building Permit Documentary Requirements" checklist',
+  url: '/assets/permits/Building-Permit-and-Occupancy-Checklist.pdf',
+  jurisdiction: 'Municipality of Castilla, Sorsogon — Office of the Municipal Engineer',
+  effectiveDate: 'UNDATED on the form itself',
+  verificationStatus: 'CASTILLA_OFFICIAL_FORM_VERIFIED',
+};
+
 const PERMIT_SOURCES: RequirementSource[] = [
   SRC_PD1096,
   SRC_RA9514,
@@ -210,6 +226,8 @@ interface PermitSpec {
   professionalDoc: RequirementDocument | null;
   planDocs: RequirementDocument[];
   extraDocs?: RequirementDocument[];
+  /** When set, completely replaces the constructed document list (COMMON_DOCS + planDocs + professionalDoc + extraDocs) — used when a real official checklist doesn't match the generic template's assumptions closely enough to build from it. */
+  documents?: RequirementDocument[];
   inspectionRequirements: string;
   validityMonths: number | null;
   validityRules: string;
@@ -256,12 +274,13 @@ const DEFAULT_SOURCE_NOTE =
 
 function buildRequirements(spec: PermitSpec): ApplicationTypeRequirements {
   const prefix = spec.permitType.toLowerCase().replace(/[^a-z]+/g, '-');
-  const documents = [
-    ...COMMON_DOCS(prefix, { skipLocational: spec.skipLocationalCommonDoc }),
-    ...spec.planDocs,
-    ...(spec.professionalDoc ? [spec.professionalDoc] : []),
-    ...(spec.extraDocs ?? []),
-  ];
+  const documents =
+    spec.documents ?? [
+      ...COMMON_DOCS(prefix, { skipLocational: spec.skipLocationalCommonDoc }),
+      ...spec.planDocs,
+      ...(spec.professionalDoc ? [spec.professionalDoc] : []),
+      ...(spec.extraDocs ?? []),
+    ];
   return {
     permitType: spec.permitType,
     requiredForm: spec.requiredForm,
@@ -281,23 +300,123 @@ function buildRequirements(spec: PermitSpec): ApplicationTypeRequirements {
   };
 }
 
-const BUILDING_PLAN_SET = (prefix: string): RequirementDocument[] => [
-  doc(`${prefix}-arch-plan`, 'Architectural Plans (signed and sealed)', true, 'obo'),
+// The real Building Permit – New Construction checklist, transcribed
+// directly from Castilla OME's "Building Permit Documentary Requirements"
+// (see SRC_CASTILLA_OME_CHECKLIST above) — replaces COMMON_DOCS/
+// BUILDING_PLAN_SET's generic assumptions for this one type via
+// PermitSpec.documents, since the real checklist's shape (a combined
+// "Design Plans" line, a "Building permit & Ancillary Forms" set of
+// per-discipline application forms distinct from the plans themselves,
+// Survey Plan, Cost Estimate, Technical Specifications, Structural Design
+// & Analysis, Soil Analysis, and DOLE/DPWH clearances) doesn't match the
+// generic template closely enough to build from it. Required/optional
+// follows the checklist's own checkbox groupings: the ownership proof,
+// core plan/analysis documents, and clearances are all required; the
+// per-discipline ancillary permit forms are conditional on the project's
+// actual scope of work (not every Building Permit needs, say, an
+// Electronics Permit form).
+const BUILDING_PERMIT_NEW_CONSTRUCTION_DOCS: RequirementDocument[] = [
   doc(
-    `${prefix}-struct-plan`,
-    'Structural/Civil Plans and Design Analysis (signed and sealed)',
+    'bpnc-oct-tct',
+    'Certified True Copy of OCT/TCT',
+    true,
+    'obo',
+    'Or, if the applicant is not the registered owner: Deed of Sale, Deed of Donation, Lease Contract, Assignment of Rights, or other valid proof of ownership.',
+  ),
+  doc('bpnc-survey-plan', 'Survey Plan', true, 'obo'),
+  doc(
+    'bpnc-design-plans',
+    'Design Plans (duly signed and sealed)',
+    true,
+    'obo',
+    'Covers Architectural, Civil/Structural, Electrical, Sanitary/Plumbing, and Mechanical plans as applicable to the scope of work.',
+  ),
+  doc('bpnc-unified-form', 'Unified Building Permit Form', true, 'obo'),
+  doc(
+    'bpnc-ancillary-electrical',
+    'Electrical Permit (ancillary application form)',
+    false,
+    'obo',
+    'Submit only if the project scope includes electrical work.',
+  ),
+  doc(
+    'bpnc-ancillary-fencing',
+    'Fencing Permit (ancillary application form)',
+    false,
+    'obo',
+    'Submit only if the project scope includes fencing.',
+  ),
+  doc(
+    'bpnc-ancillary-architectural',
+    'Architectural Permit (ancillary application form)',
+    false,
+    'obo',
+  ),
+  doc(
+    'bpnc-ancillary-sanitary-plumbing',
+    'Sanitary/Plumbing Permit (ancillary application form)',
+    false,
+    'obo',
+    'Submit only if the project scope includes sanitary/plumbing work.',
+  ),
+  doc(
+    'bpnc-ancillary-mechanical',
+    'Mechanical Permit (ancillary application form)',
+    false,
+    'obo',
+    'Submit only if the project scope includes mechanical work.',
+  ),
+  doc(
+    'bpnc-ancillary-civil-structural',
+    'Civil/Structural Permit (ancillary application form)',
+    false,
+    'obo',
+  ),
+  doc(
+    'bpnc-ancillary-excavation',
+    'Excavation Permit (ancillary application form)',
+    false,
+    'obo',
+    'Submit only if the project scope includes excavation.',
+  ),
+  doc(
+    'bpnc-ancillary-electronics',
+    'Electronics Permit (ancillary application form)',
+    false,
+    'obo',
+    'Submit only if the project scope includes electronics/communications installation.',
+  ),
+  doc('bpnc-cost-estimate', 'Cost Estimate (duly signed and sealed)', true, 'obo'),
+  doc('bpnc-technical-specs', 'Technical Specifications (duly signed and sealed)', true, 'obo'),
+  doc('bpnc-structural-design-analysis', 'Structural Design and Analysis', true, 'obo'),
+  doc(
+    'bpnc-soil-analysis',
+    'Soil Analysis / Plate Load Test / Seismic Analysis',
     true,
     'obo',
   ),
-  doc(`${prefix}-elec-plan`, 'Electrical Plans (signed and sealed)', true, 'obo'),
-  doc(`${prefix}-mech-plan`, 'Mechanical Plans (signed and sealed, if applicable)', false, 'obo'),
-  doc(`${prefix}-sanitary-plan`, 'Sanitary / Plumbing Plans (signed and sealed)', true, 'obo'),
-  doc(`${prefix}-bom`, 'Bill of Materials and Specifications', true, 'obo'),
   doc(
-    `${prefix}-prc`,
-    'PRC License and current PTR/Professional Tax Receipt of each Engineer/Architect of Record',
+    'bpnc-professional-licenses',
+    'Valid Licenses (PRC) of all involved professionals',
     true,
     'obo',
+  ),
+  doc('bpnc-valid-id', 'Valid ID of Applicant and Owner of Lot', true, 'obo'),
+  doc('bpnc-zoning-locational', 'Zoning / Locational Clearance', true, 'zoning', 'Issued by MPDC.'),
+  doc('bpnc-fire-safety-clearance', 'Fire Safety Evaluation Clearance', true, 'bfp', 'Issued by BFP.'),
+  doc(
+    'bpnc-construction-safety-health',
+    'Approved Construction Safety and Health Program',
+    true,
+    'obo',
+    'Issued by DOLE — this app does not route to DOLE directly, so the approved program is submitted to OBO as part of the documentary requirements.',
+  ),
+  doc(
+    'bpnc-road-clearance',
+    'Road Clearance',
+    true,
+    'obo',
+    'Issued by DPWH/PEO — this app does not route to DPWH/PEO directly, so the clearance is submitted to OBO as part of the documentary requirements.',
   ),
 ];
 
@@ -306,15 +425,20 @@ const BUILDING_PLAN_SET = (prefix: string): RequirementDocument[] => [
 const PERMIT_SPECS: PermitSpec[] = [
   {
     permitType: 'Building Permit – New Construction',
-    requiredForm: 'Application for Building Permit (New Construction)',
+    requiredForm: 'Unified Building Permit Form',
     professionalDoc: null,
-    planDocs: BUILDING_PLAN_SET('building-permit-new-construction'),
+    planDocs: [],
+    documents: BUILDING_PERMIT_NEW_CONSTRUCTION_DOCS,
     inspectionRequirements:
       'Site inspection prior to permit issuance; periodic inspections during construction; final inspection before Certificate of Occupancy.',
     validityMonths: 12,
     validityRules:
       'Valid for twelve (12) months from issuance; work must commence within one year or the permit lapses and must be renewed.',
     finalDocument: 'Building Permit – New Construction',
+    sources: [SRC_CASTILLA_OME_CHECKLIST, SRC_PD1096],
+    sourceNote:
+      "Documentary requirements transcribed directly from the Municipality of Castilla Office of the Municipal Engineer's own \"Building Permit Documentary Requirements\" checklist — see `sources`. Legal basis for the permit itself remains PD 1096 (National Building Code).",
+    verified: true,
   },
   {
     permitType: 'Building Permit – Renovation / Alteration',

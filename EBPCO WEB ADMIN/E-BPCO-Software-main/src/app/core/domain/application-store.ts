@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { ApplicationRecord, withProjectedFields } from './application.model';
 import {
   ApplicationLifecycleStatus,
+  EVALUATION_STAGE_ORDER,
   PaymentStatus,
   canTransition,
   coarseStatus,
@@ -325,7 +326,25 @@ export class ApplicationStore {
     if (to === 'Approved' && !this.canApprove(id)) return false;
 
     this._applications.update((rows) =>
-      rows.map((r) => (r.id === id ? withProjectedFields({ ...r, lifecycleStatus: to }) : r)),
+      rows.map((r) =>
+        r.id === id
+          ? withProjectedFields({
+              ...r,
+              lifecycleStatus: to,
+              // permitReleaseStatus used to be a field only `releasePermit`
+              // and the seed data ever wrote — reaching 'Ready for
+              // Release' via a real generatePermit() call (or any future
+              // caller) never updated it, so the Permit Release Queue
+              // (filtered on `permitReleaseStatus !== 'Not Ready'`) could
+              // never show a genuinely-processed application; only
+              // seed-data rows (which hand-set both fields together)
+              // ever appeared there. Deriving it here, in the one place
+              // lifecycleStatus is validated and set, means it can never
+              // drift out of sync again.
+              ...(to === 'Ready for Release' ? { permitReleaseStatus: 'Ready for Release' as const } : {}),
+            })
+          : r,
+      ),
     );
     this.appAudit(actor, role, id, `Status changed to ${to}`, remarks ?? null);
     return true;
@@ -354,6 +373,35 @@ export class ApplicationStore {
     const row = this.getById(applicationId);
     if (!row) return false;
     if ((result === 'Revision Required' || result === 'Rejected') && !remarks?.trim()) return false;
+    // Check the underlying lifecycle transition would actually be legal
+    // BEFORE appending anything — `transitionStatus` was already called
+    // below for these two results, but its own boolean return was never
+    // checked, so a caller (e.g. an application still 'Submitted', not
+    // yet at Document Verification/Under Evaluation/For Approval) got an
+    // EvaluationRecord written and `recordEvaluation` returning `true`
+    // even though the application's lifecycleStatus never actually
+    // moved — an audit trail entry describing something that didn't
+    // happen. Refusing upfront means no such entry is ever written.
+    if (
+      (result === 'Revision Required' || result === 'Rejected') &&
+      !canTransition(row.lifecycleStatus, result)
+    ) {
+      return false;
+    }
+    // Advancing a stage only makes sense while the application is
+    // genuinely 'Under Evaluation' — refuse it once the application has
+    // already been sent back for revision, rejected, or moved past
+    // evaluation entirely (e.g. already Assessed). Without this, the
+    // Evaluations page's "Advance Stage" menu item could force-pass a
+    // row sitting in the "Returned" tab (a real Revision Required/
+    // Rejected application — every row there is genuinely one of those,
+    // it's not synthetic like the other tabs), silently advancing
+    // evaluationStage/evaluationResult while lifecycleStatus stayed
+    // Revision Required/Rejected — an internally inconsistent record
+    // ("evaluation says Passed, lifecycle says Rejected") with no error
+    // shown anywhere, reachable by one misclick next to "Return for
+    // Revision" in the same menu.
+    if (result === 'Passed' && row.lifecycleStatus !== 'Under Evaluation') return false;
 
     const now = new Date();
     const departmentId =
@@ -382,8 +430,38 @@ export class ApplicationStore {
       this.transitionStatus(applicationId, 'Revision Required', evaluator, 'Evaluator', remarks);
     } else if (result === 'Rejected') {
       this.transitionStatus(applicationId, 'Rejected', evaluator, 'Evaluator', remarks);
-    } else if (result === 'Passed' && stage === 'Final Approval') {
-      this.transitionStatus(applicationId, 'Assessed', evaluator, 'Evaluator');
+    } else if (result === 'Passed') {
+      if (stage === 'Final Approval') {
+        // Reuse assessFee() rather than transitioning straight to
+        // 'Assessed' — it also drafts the real fee assessment (and
+        // auto-issues the Order of Payment when every line is already
+        // resolvable), so passing Final Approval doesn't leave the
+        // application in 'Assessed' with no assessment for Payments to
+        // show. assessFee() itself only transitions when still 'Under
+        // Evaluation', matching the row's real status at this point.
+        this.assessFee(applicationId, evaluator, 'Evaluator');
+      } else {
+        // Passing a non-final stage advances the row's own evaluationStage
+        // to the next stage in the sequence, so the Evaluations page's
+        // per-stage cards and the Applications-detail "Evaluate" cards both
+        // genuinely walk the application forward instead of leaving it
+        // parked under whichever stage it started at. `evaluationResult`
+        // resets to 'Pending' rather than carrying over 'Passed' — 'Passed'
+        // described the stage that was JUST completed (already recorded as
+        // its own EvaluationRecord above), not the new current stage, which
+        // hasn't been evaluated yet. Leaving it as 'Passed' made a freshly
+        // -advanced application look already resolved/approved for a stage
+        // no one had reviewed — it should show as pending review instead.
+        const stageIdx = EVALUATION_STAGE_ORDER.indexOf(stage);
+        const nextStage = EVALUATION_STAGE_ORDER[stageIdx + 1] ?? stage;
+        this._applications.update((rows) =>
+          rows.map((r) =>
+            r.id === applicationId
+              ? withProjectedFields({ ...r, evaluationStage: nextStage, evaluationResult: 'Pending' })
+              : r,
+          ),
+        );
+      }
     }
     return true;
   }
