@@ -36,7 +36,7 @@ describe('Welcome', () => {
     const text = nativeElement.textContent ?? '';
     expect(text).toContain('Municipality of Castilla');
     expect(text).toContain('Province of Sorsogon');
-    expect(text).toContain('Electronic Business Permit and Clearance Office');
+    expect(text).toContain('Electronic Building Permit and Certificate of Occupancy');
     expect(text).not.toContain('Esperanza');
   });
 
