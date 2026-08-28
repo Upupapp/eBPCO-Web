@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Permit Application Stitch defines the complete workflow for submitting a new business permit application within the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+The Permit Application Stitch defines the complete workflow for submitting a new business permit application within the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 This stitch standardizes the user experience from selecting a permit type to submitting the application for evaluation. It ensures a consistent process that is easy to follow while preparing the application for future backend integration.
 

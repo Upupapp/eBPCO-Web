@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Security UX specification defines how security measures should be presented to users within the Electronic Business Permit and Clearance Office (eBPCO) web application.
+The Security UX specification defines how security measures should be presented to users within the Electronic Building Permit and Certificate of Occupancy (eBPCO) web application.
 
 Security should protect users and government data without unnecessarily disrupting legitimate workflows. Well-designed security experiences build user trust, reduce mistakes, and encourage compliance while maintaining usability.
 
@@ -349,7 +349,7 @@ Changes to authentication flows, authorization behavior, privacy messaging, or s
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

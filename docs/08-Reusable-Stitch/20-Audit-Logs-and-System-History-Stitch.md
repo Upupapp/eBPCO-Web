@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Audit Logs and System History Stitch defines the standardized mechanism for recording and monitoring system activities within the Electronic Business Permit and Clearance Office (eBPCO).
+The Audit Logs and System History Stitch defines the standardized mechanism for recording and monitoring system activities within the Electronic Building Permit and Certificate of Occupancy (eBPCO).
 
 This module ensures accountability, transparency, and traceability by recording significant actions performed by applicants and authorized personnel. Audit logs provide administrators with a complete history of system events for monitoring, troubleshooting, compliance, and security investigations.
 

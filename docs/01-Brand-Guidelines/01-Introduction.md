@@ -11,7 +11,7 @@ Applies To:
 
 # Purpose
 
-The Electronic Business Permit and Clearance Office (eBPCO) Design System provides a unified visual language and user experience framework for all eBPCO digital products.
+The Electronic Building Permit and Certificate of Occupancy (eBPCO) Design System provides a unified visual language and user experience framework for all eBPCO digital products.
 
 This document establishes the design foundation that governs the appearance, behavior, and consistency of every interface across the eBPCO ecosystem. It ensures that all users receive a professional, intuitive, accessible, and consistent experience regardless of the platform they are using.
 
@@ -21,7 +21,7 @@ The Brand Guidelines serve as the official reference for designers, frontend dev
 
 # About eBPCO
 
-Electronic Business Permit and Clearance Office (eBPCO) is a digital platform designed to modernize and simplify the process of applying for, reviewing, approving, and managing business permits within Local Government Units (LGUs).
+Electronic Building Permit and Certificate of Occupancy (eBPCO) is a digital platform designed to modernize and simplify the process of applying for, reviewing, approving, and managing business permits within Local Government Units (LGUs).
 
 The system replaces fragmented manual processes with a centralized, transparent, and user-friendly digital experience for both government employees and business owners.
 
@@ -266,7 +266,7 @@ Future revisions should be version-controlled and reviewed prior to adoption.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

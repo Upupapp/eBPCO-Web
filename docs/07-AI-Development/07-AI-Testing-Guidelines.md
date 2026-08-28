@@ -10,7 +10,7 @@ Category: AI Development
 
 # Purpose
 
-The AI Testing Guidelines establish the standards for validating AI-generated software artifacts within the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The AI Testing Guidelines establish the standards for validating AI-generated software artifacts within the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 Testing ensures that AI-generated code, interfaces, documentation, and architectural recommendations satisfy functional requirements, security expectations, accessibility standards, and enterprise quality requirements before deployment.
 
@@ -309,7 +309,7 @@ The Quality Assurance Team is responsible for validating compliance before produ
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

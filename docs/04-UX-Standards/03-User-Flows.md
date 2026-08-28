@@ -10,7 +10,7 @@ Category: UX Standards
 
 # Purpose
 
-User Flows define the optimal sequence of interactions users follow to complete tasks within the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+User Flows define the optimal sequence of interactions users follow to complete tasks within the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 Well-designed user flows reduce cognitive load, minimize errors, improve efficiency, and ensure a consistent experience across the Angular Web Administration Portal and Flutter Mobile Application.
 
@@ -446,7 +446,7 @@ Changes to approved user flows require review and approval from the UI/UX Team b
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

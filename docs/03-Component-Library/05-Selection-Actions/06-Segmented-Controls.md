@@ -420,7 +420,7 @@ Changes to Segmented Control variants, interaction behavior, accessibility requi
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

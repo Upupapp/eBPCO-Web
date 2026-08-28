@@ -10,7 +10,7 @@ Category: Reusable Stitch
 
 # Purpose
 
-This document defines the user roles within the Electronic Business Permit and Clearance Office (eBPCO) platform.
+This document defines the user roles within the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 User roles determine how reusable stitches behave by defining accessible features, navigation, permissions, and business responsibilities.
 
@@ -377,7 +377,7 @@ All changes shall maintain the principle of least privilege.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

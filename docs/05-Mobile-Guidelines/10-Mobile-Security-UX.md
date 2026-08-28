@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-Mobile Security UX defines the user experience standards for security-related interactions within the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+Mobile Security UX defines the user experience standards for security-related interactions within the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 Security should protect users, business information, and government services while remaining understandable, transparent, and minimally disruptive. Every security feature should increase user confidence without creating unnecessary complexity.
 
@@ -357,7 +357,7 @@ Changes affecting authentication, permissions, privacy, or secure workflows requ
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Error Pages specification defines the standards for presenting errors within the Electronic Business Permit and Clearance Office (eBPCO) web application.
+The Error Pages specification defines the standards for presenting errors within the Electronic Building Permit and Certificate of Occupancy (eBPCO) web application.
 
 Errors are unavoidable in any digital system. Well-designed error pages help users understand what happened, recover quickly, and continue their tasks without frustration. Error pages should provide reassurance, guidance, and actionable next steps while protecting sensitive system information.
 
@@ -449,7 +449,7 @@ Changes to error messaging, layouts, or recovery workflows require approval from
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

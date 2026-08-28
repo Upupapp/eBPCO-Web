@@ -10,7 +10,7 @@ Category: UX Standards
 
 # Purpose
 
-Accessibility Standards establish the minimum usability requirements to ensure the Electronic Business Permit and Clearance Office (eBPCO) ecosystem is usable by all individuals, including persons with disabilities (PWDs), older adults, and users with temporary or situational impairments.
+Accessibility Standards establish the minimum usability requirements to ensure the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem is usable by all individuals, including persons with disabilities (PWDs), older adults, and users with temporary or situational impairments.
 
 Accessibility is a fundamental quality requirement and shall be integrated throughout the design and development lifecycle—not treated as an optional enhancement.
 
@@ -346,7 +346,7 @@ Any exceptions require documented approval from the UI/UX Team and Project Manag
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-Device Integration defines the standards for utilizing native mobile device capabilities within the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+Device Integration defines the standards for utilizing native mobile device capabilities within the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 The application should leverage supported hardware and operating system features to improve usability, streamline government transactions, and enhance the overall user experience while maintaining user privacy and security.
 
@@ -341,7 +341,7 @@ New integrations requiring additional device permissions shall undergo review by
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

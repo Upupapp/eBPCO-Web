@@ -361,7 +361,7 @@ Changes to the navigation hierarchy or Sidebar variants require UI/UX approval b
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

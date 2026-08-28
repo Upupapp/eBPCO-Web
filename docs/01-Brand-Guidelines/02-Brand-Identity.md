@@ -8,7 +8,7 @@ Document Owner: UI/UX Team
 
 # Purpose
 
-The eBPCO Brand Identity defines the official visual representation of the Electronic Business Permit and Clearance Office (eBPCO).
+The eBPCO Brand Identity defines the official visual representation of the Electronic Building Permit and Certificate of Occupancy (eBPCO).
 
 It establishes standards for the use of the logo, branding elements, visual consistency, and identity across all digital products. Every implementation must follow these standards to maintain professionalism, trust, and recognition.
 
@@ -337,7 +337,7 @@ These additions must remain backward compatible with Version 1.0.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

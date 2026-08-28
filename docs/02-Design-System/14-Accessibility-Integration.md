@@ -324,7 +324,7 @@ Accessibility shall be reviewed during design, implementation, and quality assur
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

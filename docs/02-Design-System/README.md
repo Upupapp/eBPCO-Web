@@ -118,7 +118,7 @@ All visual decisions must originate from this documentation.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Status
 

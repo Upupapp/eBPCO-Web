@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Authentication Stitch defines the standardized authentication workflow for the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+The Authentication Stitch defines the standardized authentication workflow for the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 Its purpose is to provide a secure, simple, and consistent authentication experience while ensuring the application is ready for future backend integration.
 

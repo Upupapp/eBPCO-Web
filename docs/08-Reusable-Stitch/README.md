@@ -10,7 +10,7 @@ Category: Application Blueprint
 
 # Purpose
 
-The Reusable Stitch documentation defines the complete reusable interface blueprint for the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The Reusable Stitch documentation defines the complete reusable interface blueprint for the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 It connects the project's Brand Guidelines, Design System, Component Library, UX Standards, Mobile Guidelines, Web Guidelines, and AI Development Standards into one implementation-ready structure.
 
@@ -368,7 +368,7 @@ Changes to reusable stitches shall be documented, version-controlled, and synchr
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

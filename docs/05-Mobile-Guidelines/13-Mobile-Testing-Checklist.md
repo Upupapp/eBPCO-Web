@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-The Mobile Testing Checklist establishes the minimum quality assurance requirements for the Electronic Business Permit and Clearance Office (eBPCO) mobile application before every release.
+The Mobile Testing Checklist establishes the minimum quality assurance requirements for the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application before every release.
 
 This checklist ensures that all mobile features meet the organization's standards for functionality, usability, accessibility, security, performance, and reliability across supported Android devices.
 
@@ -473,7 +473,7 @@ Updates to this checklist require approval from the QA Team, UI/UX Team, Develop
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

@@ -10,7 +10,7 @@ Category: Reusable Stitch
 
 # Purpose
 
-This document establishes the principles that govern the design, creation, implementation, and maintenance of reusable stitches within the Electronic Business Permit and Clearance Office (eBPCO).
+This document establishes the principles that govern the design, creation, implementation, and maintenance of reusable stitches within the Electronic Building Permit and Certificate of Occupancy (eBPCO).
 
 A Reusable Stitch is a standardized application building block that combines reusable UI components, navigation, business logic, user interactions, permissions, and workflow definitions into a modular unit that can be assembled to build complete applications.
 
@@ -320,7 +320,7 @@ Changes to existing stitches shall be version-controlled and documented to maint
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

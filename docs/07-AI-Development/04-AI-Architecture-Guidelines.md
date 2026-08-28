@@ -10,7 +10,7 @@ Category: AI Development
 
 # Purpose
 
-The AI Architecture Guidelines establish the architectural requirements that Artificial Intelligence (AI) must follow when generating software solutions for the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The AI Architecture Guidelines establish the architectural requirements that Artificial Intelligence (AI) must follow when generating software solutions for the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 AI-generated architectures shall be scalable, maintainable, secure, testable, and aligned with enterprise software engineering principles. These guidelines ensure that AI-generated designs integrate seamlessly with the existing project architecture and support long-term sustainability.
 
@@ -332,7 +332,7 @@ Architectural changes shall be reviewed and approved by the System Architect bef
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

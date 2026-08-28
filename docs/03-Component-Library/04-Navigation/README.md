@@ -8,7 +8,7 @@ Document Owner: UI/UX Team
 
 # Purpose
 
-The Navigation category defines reusable components that enable users to move efficiently throughout the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+The Navigation category defines reusable components that enable users to move efficiently throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 Navigation should help users understand:
 
@@ -221,7 +221,7 @@ New navigation components or variants require UI/UX approval before implementati
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

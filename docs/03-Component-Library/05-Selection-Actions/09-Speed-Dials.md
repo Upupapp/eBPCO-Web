@@ -445,7 +445,7 @@ Changes to Speed Dial behavior, animation, accessibility requirements, placement
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

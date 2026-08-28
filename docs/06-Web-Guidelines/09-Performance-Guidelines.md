@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Performance Guidelines establish the standards for building fast, responsive, and scalable web applications within the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The Performance Guidelines establish the standards for building fast, responsive, and scalable web applications within the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 Performance is a critical aspect of user experience. Citizens, business owners, inspectors, and government personnel should be able to complete tasks efficiently regardless of device, browser, or network conditions.
 
@@ -383,7 +383,7 @@ Performance shall be evaluated during development, quality assurance, and produc
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

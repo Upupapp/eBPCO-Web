@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-Navigation Patterns define the standards for how users move throughout the Electronic Business Permit and Clearance Office (eBPCO) web application.
+Navigation Patterns define the standards for how users move throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) web application.
 
 A well-designed navigation system enables users to locate information efficiently, complete tasks with confidence, and maintain awareness of their current location within the system. Consistent navigation is essential for enterprise government applications where users regularly perform complex workflows.
 
@@ -382,7 +382,7 @@ Changes to navigation structure, hierarchy, or interaction behavior require appr
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

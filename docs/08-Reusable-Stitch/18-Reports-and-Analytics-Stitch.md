@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Reports and Analytics Stitch defines the standardized reporting module for the Electronic Business Permit and Clearance Office (eBPCO). It provides authorized personnel with statistical insights, operational reports, and performance metrics to support decision-making and monitor the efficiency of permit processing.
+The Reports and Analytics Stitch defines the standardized reporting module for the Electronic Building Permit and Certificate of Occupancy (eBPCO). It provides authorized personnel with statistical insights, operational reports, and performance metrics to support decision-making and monitor the efficiency of permit processing.
 
 This module consolidates application, payment, approval, and release data into meaningful reports that can be filtered, exported, and analyzed.
 

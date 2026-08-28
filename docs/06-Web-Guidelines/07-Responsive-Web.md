@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Responsive Web specification defines how the Electronic Business Permit and Clearance Office (eBPCO) web application adapts to different screen sizes, resolutions, devices, and orientations.
+The Responsive Web specification defines how the Electronic Building Permit and Certificate of Occupancy (eBPCO) web application adapts to different screen sizes, resolutions, devices, and orientations.
 
 Responsive design ensures that users experience a consistent, efficient, and accessible interface whether accessing the system from desktop computers, laptops, tablets, or mobile browsers.
 
@@ -441,7 +441,7 @@ Changes to responsive behavior, breakpoints, or adaptive layouts require approva
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

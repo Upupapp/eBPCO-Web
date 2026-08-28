@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-Mobile Forms define the standards for designing, validating, and interacting with forms in the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+Mobile Forms define the standards for designing, validating, and interacting with forms in the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 As the primary method for applying for permits, renewing licenses, submitting documents, and updating user information, forms must be optimized for touch interaction, readability, and efficiency while minimizing user errors.
 
@@ -387,7 +387,7 @@ Changes to form structure, validation behavior, or interaction patterns require 
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

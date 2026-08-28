@@ -243,7 +243,7 @@ Changes to radius values shall be made centrally and automatically propagate acr
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

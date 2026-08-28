@@ -2,7 +2,7 @@
 
 Version: 1.0.0  
 Status: Approved  
-Project: Electronic Business Permit and Clearance Office (eBPCO)  
+Project: Electronic Building Permit and Certificate of Occupancy (eBPCO)  
 Platforms: Angular Web Admin • Flutter Mobile Application
 
 ---

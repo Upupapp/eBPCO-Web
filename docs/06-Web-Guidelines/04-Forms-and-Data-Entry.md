@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Forms and Data Entry specification establishes the standards for designing and implementing forms within the Electronic Business Permit and Clearance Office (eBPCO) web application.
+The Forms and Data Entry specification establishes the standards for designing and implementing forms within the Electronic Building Permit and Certificate of Occupancy (eBPCO) web application.
 
 Forms are the primary mechanism through which citizens, business owners, and government personnel interact with the system. Well-designed forms improve efficiency, reduce errors, and increase successful transaction completion.
 
@@ -417,7 +417,7 @@ Changes to form structure, validation behavior, or interaction patterns require 
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

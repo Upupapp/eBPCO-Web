@@ -10,7 +10,7 @@ Category: Reusable Stitch
 
 # Purpose
 
-The Navigation Stitch defines the standardized navigation structure for the Electronic Business Permit and Clearance Office (eBPCO).
+The Navigation Stitch defines the standardized navigation structure for the Electronic Building Permit and Certificate of Occupancy (eBPCO).
 
 It provides a reusable navigation blueprint that can be implemented consistently across the Responsive Web Application and Flutter Mobile Application.
 
@@ -405,7 +405,7 @@ Changes to navigation shall be reviewed by the UI/UX Team and System Architect t
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

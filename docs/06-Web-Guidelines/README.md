@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Overview
 
-The Web Guidelines establish the standards for designing, developing, and maintaining the Electronic Business Permit and Clearance Office (eBPCO) web application.
+The Web Guidelines establish the standards for designing, developing, and maintaining the Electronic Building Permit and Certificate of Occupancy (eBPCO) web application.
 
 These guidelines ensure that all web interfaces provide a consistent, accessible, secure, and user-centered experience for citizens, business owners, government personnel, and system administrators.
 
@@ -125,7 +125,7 @@ Major revisions should include version updates and change documentation.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

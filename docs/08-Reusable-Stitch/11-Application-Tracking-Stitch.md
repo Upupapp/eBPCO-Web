@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Application Tracking Stitch defines the standardized workflow for monitoring the progress of permit applications submitted through the Electronic Business Permit and Clearance Office (eBPCO).
+The Application Tracking Stitch defines the standardized workflow for monitoring the progress of permit applications submitted through the Electronic Building Permit and Certificate of Occupancy (eBPCO).
 
 This module provides applicants with real-time visibility into their application status, processing stages, remarks, and history, reducing uncertainty and minimizing unnecessary office visits.
 

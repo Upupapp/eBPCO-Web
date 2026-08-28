@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-Mobile Performance defines the standards for delivering a fast, responsive, and reliable user experience throughout the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+Mobile Performance defines the standards for delivering a fast, responsive, and reliable user experience throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 Performance directly impacts user satisfaction, task completion, and trust in government digital services. Every screen, interaction, and workflow should be optimized to minimize waiting time and maximize responsiveness.
 
@@ -333,7 +333,7 @@ Any deviations from the recommended performance targets require review and appro
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

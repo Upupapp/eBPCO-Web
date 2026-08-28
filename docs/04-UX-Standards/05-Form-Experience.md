@@ -10,7 +10,7 @@ Category: UX Standards
 
 # Purpose
 
-Form Experience defines the standards for designing, organizing, and interacting with forms throughout the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+Form Experience defines the standards for designing, organizing, and interacting with forms throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 Since permit applications, renewals, inspections, payments, and administrative functions rely heavily on forms, every form should provide a consistent, efficient, and accessible user experience across the Angular Web Administration Portal and Flutter Mobile Application.
 
@@ -344,7 +344,7 @@ Changes to form structure, validation patterns, or interaction behavior require 
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

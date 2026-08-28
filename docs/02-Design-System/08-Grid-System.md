@@ -323,7 +323,7 @@ Layout changes shall be reviewed by the UI/UX Team before implementation.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

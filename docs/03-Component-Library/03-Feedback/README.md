@@ -8,7 +8,7 @@ Document Owner: UI/UX Team
 
 # Purpose
 
-The Feedback category defines reusable components that communicate system responses, application states, user confirmations, and operational progress throughout the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+The Feedback category defines reusable components that communicate system responses, application states, user confirmations, and operational progress throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 Effective feedback helps users understand what is happening, what actions are required, and whether operations have completed successfully.
 
@@ -176,7 +176,7 @@ New Feedback components or variants require UI/UX approval before implementation
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

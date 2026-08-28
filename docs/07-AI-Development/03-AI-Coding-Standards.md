@@ -10,7 +10,7 @@ Category: AI Development
 
 # Purpose
 
-The AI Coding Standards define the requirements for AI-generated source code within the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The AI Coding Standards define the requirements for AI-generated source code within the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 These standards ensure that all AI-generated code is maintainable, secure, readable, testable, and consistent with the project's software architecture and development practices.
 
@@ -375,7 +375,7 @@ The Development Team and System Architect are responsible for reviewing, maintai
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

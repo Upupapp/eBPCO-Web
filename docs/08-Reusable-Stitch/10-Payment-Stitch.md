@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Payment Stitch defines the standardized payment workflow for the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+The Payment Stitch defines the standardized payment workflow for the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 This module allows applicants to pay permit-related fees through supported payment methods while providing transparent payment tracking and verification. It also accommodates users who prefer traditional over-the-counter transactions.
 

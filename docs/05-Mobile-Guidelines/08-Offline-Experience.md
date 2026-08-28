@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-Offline Experience defines the standards for how the Electronic Business Permit and Clearance Office (eBPCO) mobile application behaves when internet connectivity is unavailable, unstable, or interrupted.
+Offline Experience defines the standards for how the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application behaves when internet connectivity is unavailable, unstable, or interrupted.
 
 Because users may access government services in areas with limited or unreliable network coverage, the application should provide a predictable, resilient, and trustworthy experience while protecting user data and preserving work in progress.
 
@@ -280,7 +280,7 @@ Changes to synchronization behavior, offline storage, or recovery mechanisms req
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

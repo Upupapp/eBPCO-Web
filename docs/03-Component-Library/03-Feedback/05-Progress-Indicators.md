@@ -383,7 +383,7 @@ New Progress Indicator variants require UI/UX approval before implementation.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

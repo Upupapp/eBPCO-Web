@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-Navigation Patterns define the standards for how users move throughout the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+Navigation Patterns define the standards for how users move throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 Effective navigation enables users to efficiently discover features, complete government services, and maintain awareness of their location within the application while minimizing cognitive effort.
 
@@ -321,7 +321,7 @@ Changes to navigation structure or behavior require approval from the UI/UX Team
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

@@ -268,7 +268,7 @@ Changes to typography shall be made centrally and reflected across all applicati
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

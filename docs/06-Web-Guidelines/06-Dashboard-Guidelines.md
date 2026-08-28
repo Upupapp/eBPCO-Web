@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Dashboard Guidelines establish the standards for designing dashboards within the Electronic Business Permit and Clearance Office (eBPCO) web application.
+The Dashboard Guidelines establish the standards for designing dashboards within the Electronic Building Permit and Certificate of Occupancy (eBPCO) web application.
 
 Dashboards provide users with an overview of important information, system activity, and actionable insights. Whether used by citizens, business owners, inspectors, or administrators, dashboards should present relevant information clearly and enable users to quickly perform their most important tasks.
 
@@ -438,7 +438,7 @@ New dashboard layouts, analytics, or visualization patterns require approval fro
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

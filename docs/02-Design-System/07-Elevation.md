@@ -345,7 +345,7 @@ Changes to the elevation hierarchy require approval from the UI/UX Team.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

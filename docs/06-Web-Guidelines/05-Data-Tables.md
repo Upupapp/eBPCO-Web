@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Data Tables specification defines the standards for presenting structured information within the Electronic Business Permit and Clearance Office (eBPCO) web application.
+The Data Tables specification defines the standards for presenting structured information within the Electronic Building Permit and Certificate of Occupancy (eBPCO) web application.
 
 Data tables are one of the primary interfaces used by government personnel to manage permits, businesses, users, transactions, inspections, and reports. Well-designed tables improve productivity, support informed decision-making, and enable efficient management of large datasets.
 
@@ -462,7 +462,7 @@ Changes to table structures, interaction patterns, or supported features require
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

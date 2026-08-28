@@ -381,7 +381,7 @@ Any new interaction state must be reviewed and approved before adoption.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

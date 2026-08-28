@@ -457,7 +457,7 @@ Changes to Contextual Action behavior, accessibility requirements, placement, or
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

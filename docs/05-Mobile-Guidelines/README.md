@@ -8,7 +8,7 @@ Document Owner: UI/UX Team
 
 # Overview
 
-The Mobile Guidelines define the standards for designing, developing, and maintaining the mobile experience for the Electronic Business Permit and Clearance Office (eBPCO).
+The Mobile Guidelines define the standards for designing, developing, and maintaining the mobile experience for the Electronic Building Permit and Certificate of Occupancy (eBPCO).
 
 These guidelines ensure that the Flutter mobile application delivers a consistent, accessible, secure, and user-friendly experience across Android and future supported mobile platforms.
 
@@ -103,7 +103,7 @@ Any deviations require review and approval from the UI/UX Team before implementa
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

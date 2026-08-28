@@ -246,7 +246,7 @@ If a proposal violates these principles, it must be revised before approval.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 
