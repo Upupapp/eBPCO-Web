@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Web Accessibility specification establishes the standards for creating inclusive and accessible web interfaces within the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The Web Accessibility specification establishes the standards for creating inclusive and accessible web interfaces within the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 Accessibility ensures that all users—including persons with disabilities (PWDs), senior citizens, users with temporary impairments, and users with varying levels of digital literacy—can effectively access and use government digital services.
 
@@ -406,7 +406,7 @@ Exceptions require documented approval from the UI/UX Team and Project Managemen
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

@@ -10,7 +10,7 @@ Category: Reusable Stitch
 
 # Purpose
 
-This document defines the complete inventory of screens within the Electronic Business Permit and Clearance Office (eBPCO).
+This document defines the complete inventory of screens within the Electronic Building Permit and Certificate of Occupancy (eBPCO).
 
 Unlike the Application Map, which illustrates how reusable stitches connect, the Screen Inventory identifies every user-facing screen, its purpose, ownership, and the stitch to which it belongs.
 
@@ -301,7 +301,7 @@ No new screen should be implemented without first being registered in this inven
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

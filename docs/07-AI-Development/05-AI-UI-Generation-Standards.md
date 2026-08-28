@@ -10,7 +10,7 @@ Category: AI Development
 
 # Purpose
 
-The AI UI Generation Standards define how Artificial Intelligence (AI) shall generate user interfaces for the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The AI UI Generation Standards define how Artificial Intelligence (AI) shall generate user interfaces for the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 These standards ensure that AI-generated interfaces are visually consistent, accessible, responsive, maintainable, and fully aligned with the project's Design System, Brand Guidelines, UX Standards, Mobile Guidelines, and Web Guidelines.
 
@@ -357,7 +357,7 @@ The UI/UX Team and Development Team shall review generated interfaces before imp
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

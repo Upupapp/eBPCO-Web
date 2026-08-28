@@ -505,7 +505,7 @@ Changes to Checkbox variants, interaction behavior, validation rules, or accessi
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Notification Stitch defines the standardized notification system for the Electronic Business Permit and Clearance Office (eBPCO).
+The Notification Stitch defines the standardized notification system for the Electronic Building Permit and Certificate of Occupancy (eBPCO).
 
 Its purpose is to keep applicants informed of important updates regarding their permit applications, payments, announcements, and system activities. Notifications reduce uncertainty by providing timely and relevant information directly within the application.
 

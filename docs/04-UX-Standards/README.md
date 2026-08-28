@@ -8,7 +8,7 @@ Document Owner: UI/UX Team
 
 # Overview
 
-The UX Standards define the principles, interaction patterns, and usability requirements that guide the design of the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+The UX Standards define the principles, interaction patterns, and usability requirements that guide the design of the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 These standards ensure that every user experience is intuitive, accessible, efficient, and consistent across the Angular Web Administration Portal and Flutter Mobile Application.
 
@@ -81,7 +81,7 @@ Changes require review and approval from the UI/UX Team before implementation.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Status
 

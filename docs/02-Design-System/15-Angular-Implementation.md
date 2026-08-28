@@ -374,7 +374,7 @@ Exceptions require approval from the Frontend Lead and UI/UX Team.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

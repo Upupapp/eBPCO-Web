@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Web Design Principles establish the foundational guidelines for designing the Electronic Business Permit and Clearance Office (eBPCO) web application.
+The Web Design Principles establish the foundational guidelines for designing the Electronic Building Permit and Certificate of Occupancy (eBPCO) web application.
 
 These principles ensure that every web interface delivers a professional, consistent, accessible, and user-centered experience while supporting the operational requirements of government services.
 
@@ -331,7 +331,7 @@ Exceptions require documented review and approval by the UI/UX Team before imple
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

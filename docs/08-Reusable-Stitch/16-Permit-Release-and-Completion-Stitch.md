@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Permit Release and Completion Stitch defines the standardized workflow for releasing approved business permits to applicants through the Electronic Business Permit and Clearance Office (eBPCO).
+The Permit Release and Completion Stitch defines the standardized workflow for releasing approved business permits to applicants through the Electronic Building Permit and Certificate of Occupancy (eBPCO).
 
 This module begins after an application has been fully approved and all required payments have been verified. It ensures applicants are informed that their permits are ready for release while providing a complete record of the release process.
 

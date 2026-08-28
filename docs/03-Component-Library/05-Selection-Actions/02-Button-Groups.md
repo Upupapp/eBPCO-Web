@@ -403,7 +403,7 @@ Changes to layout, hierarchy, spacing, or interaction behavior require UI/UX app
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

@@ -341,7 +341,7 @@ Changes to the theme require review and approval by the UI/UX Team before implem
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Admin Review and Approval Stitch defines the standardized workflow for evaluating business permit applications submitted through the Electronic Business Permit and Clearance Office (eBPCO).
+The Admin Review and Approval Stitch defines the standardized workflow for evaluating business permit applications submitted through the Electronic Building Permit and Certificate of Occupancy (eBPCO).
 
 This stitch documents how authorized personnel review applications, verify submitted information, communicate with applicants, and approve or reject permit requests. It establishes a consistent review process that promotes transparency, accountability, and efficiency.
 

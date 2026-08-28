@@ -10,7 +10,7 @@ Category: UX Standards
 
 # Purpose
 
-Responsive UX defines how the Electronic Business Permit and Clearance Office (eBPCO) ecosystem adapts user experiences across different devices, screen sizes, and input methods while maintaining consistency, usability, and accessibility.
+Responsive UX defines how the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem adapts user experiences across different devices, screen sizes, and input methods while maintaining consistency, usability, and accessibility.
 
 Responsive design is more than resizing layouts—it ensures users can accomplish the same tasks efficiently whether using a desktop computer, tablet, or smartphone.
 
@@ -371,7 +371,7 @@ Changes to responsive layouts, breakpoint strategies, or adaptive interaction pa
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

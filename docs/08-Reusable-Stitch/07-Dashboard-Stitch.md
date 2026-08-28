@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Dashboard Stitch defines the main landing page of the Electronic Business Permit and Clearance Office (eBPCO) mobile application after a user successfully signs in.
+The Dashboard Stitch defines the main landing page of the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application after a user successfully signs in.
 
 The dashboard serves as the user's command center, providing quick access to business permit services, application status, notifications, recent activities, and account information.
 

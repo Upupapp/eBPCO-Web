@@ -10,7 +10,7 @@ Category: AI Development
 
 # Purpose
 
-The AI Documentation Standards define how Artificial Intelligence (AI) shall generate, maintain, and update technical documentation for the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The AI Documentation Standards define how Artificial Intelligence (AI) shall generate, maintain, and update technical documentation for the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 Documentation is a critical project asset that preserves knowledge, supports collaboration, accelerates onboarding, and ensures long-term maintainability. AI-generated documentation shall be accurate, consistent, complete, and aligned with enterprise documentation standards.
 
@@ -294,7 +294,7 @@ The Development Team and Technical Documentation Owner are responsible for maint
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

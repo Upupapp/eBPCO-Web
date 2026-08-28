@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Settings Stitch defines the centralized configuration area of the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+The Settings Stitch defines the centralized configuration area of the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 This module allows users to customize their application experience, manage account preferences, review application information, and access essential support services. It serves as the primary location for account management, privacy controls, and application preferences.
 

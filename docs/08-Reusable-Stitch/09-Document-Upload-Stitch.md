@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Document Upload Stitch defines the standardized process for uploading, managing, validating, and reviewing supporting documents required for permit applications in the Electronic Business Permit and Clearance Office (eBPCO).
+The Document Upload Stitch defines the standardized process for uploading, managing, validating, and reviewing supporting documents required for permit applications in the Electronic Building Permit and Certificate of Occupancy (eBPCO).
 
 This stitch ensures all document-related interactions are consistent throughout the application while preparing the system for secure backend storage and document verification.
 

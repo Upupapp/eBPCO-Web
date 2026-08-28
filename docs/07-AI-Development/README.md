@@ -8,7 +8,7 @@ Document Owner: Development Team
 
 # Overview
 
-The AI Development Standards define how Artificial Intelligence (AI) tools shall be used during the design, development, testing, documentation, and maintenance of the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The AI Development Standards define how Artificial Intelligence (AI) tools shall be used during the design, development, testing, documentation, and maintenance of the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 These standards establish a consistent framework for using AI-assisted development while ensuring that all generated artifacts comply with the project's architecture, security, accessibility, quality, and governance requirements.
 
@@ -130,7 +130,7 @@ All modifications shall be reviewed and approved by:
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

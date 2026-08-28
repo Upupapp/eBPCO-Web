@@ -430,7 +430,7 @@ New button variants require approval from the UI/UX Team and documentation befor
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

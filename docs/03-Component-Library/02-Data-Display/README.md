@@ -8,7 +8,7 @@ Document Owner: UI/UX Team
 
 # Purpose
 
-The Data Display category defines the reusable components used to present information throughout the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+The Data Display category defines the reusable components used to present information throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 These components enable users to efficiently view, interpret, and interact with business records, permit applications, payment transactions, inspections, reports, notifications, and administrative data.
 
@@ -198,7 +198,7 @@ New components or variants require review and approval by the UI/UX Team before 
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

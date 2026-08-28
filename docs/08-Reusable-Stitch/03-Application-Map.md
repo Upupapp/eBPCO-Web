@@ -10,7 +10,7 @@ Category: Reusable Stitch
 
 # Purpose
 
-This document defines how the Electronic Business Permit and Clearance Office (eBPCO) application is assembled using reusable stitches.
+This document defines how the Electronic Building Permit and Certificate of Occupancy (eBPCO) application is assembled using reusable stitches.
 
 Rather than viewing the platform as a collection of individual pages, the application is organized into modular stitches, where each stitch represents a complete business capability.
 
@@ -291,7 +291,7 @@ Maintaining an accurate Application Map ensures all project stakeholders share a
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

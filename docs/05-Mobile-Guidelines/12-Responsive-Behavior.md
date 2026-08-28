@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-Responsive Behavior defines how the Electronic Business Permit and Clearance Office (eBPCO) mobile application adapts to different device sizes, screen orientations, resolutions, and display configurations while maintaining a consistent and accessible user experience.
+Responsive Behavior defines how the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application adapts to different device sizes, screen orientations, resolutions, and display configurations while maintaining a consistent and accessible user experience.
 
 The application shall provide an optimized interface across supported Android smartphones and tablets without compromising usability, performance, or accessibility.
 
@@ -391,7 +391,7 @@ Changes affecting responsive behavior or supported device categories require app
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

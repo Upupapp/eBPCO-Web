@@ -10,7 +10,7 @@ Category: UX Standards
 
 # Purpose
 
-The UX Principles establish the foundation for every user experience decision within the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+The UX Principles establish the foundation for every user experience decision within the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 These principles ensure that every interface, workflow, interaction, and feature delivers a consistent, intuitive, accessible, and citizen-centered experience across the Angular Web Administration Portal and Flutter Mobile Application.
 
@@ -305,7 +305,7 @@ Changes to these principles require approval from the UI/UX Team before implemen
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

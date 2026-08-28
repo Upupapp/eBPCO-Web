@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-Touch Interactions define the standards for how users physically interact with the Electronic Business Permit and Clearance Office (eBPCO) mobile application using touch-based devices.
+Touch Interactions define the standards for how users physically interact with the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application using touch-based devices.
 
 These guidelines ensure that all interactions are intuitive, responsive, accessible, and optimized for modern smartphones and tablets while providing a consistent experience throughout the application.
 
@@ -332,7 +332,7 @@ Changes to gesture behavior or touch interaction patterns require approval from 
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

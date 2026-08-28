@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Admin Dashboard Stitch defines the centralized workspace for authorized personnel of the Electronic Business Permit and Clearance Office (eBPCO). It provides administrators and reviewing officers with a real-time overview of permit processing activities, application statistics, operational metrics, and quick access to administrative functions.
+The Admin Dashboard Stitch defines the centralized workspace for authorized personnel of the Electronic Building Permit and Certificate of Occupancy (eBPCO). It provides administrators and reviewing officers with a real-time overview of permit processing activities, application statistics, operational metrics, and quick access to administrative functions.
 
 The dashboard serves as the primary landing page after an administrator logs into the system.
 

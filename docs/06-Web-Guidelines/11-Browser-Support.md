@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Browser Support specification defines the officially supported web browsers, compatibility requirements, and progressive enhancement strategies for the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The Browser Support specification defines the officially supported web browsers, compatibility requirements, and progressive enhancement strategies for the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 Since the system serves citizens, business owners, inspectors, and government employees using various devices and browsers, the application must provide a reliable, secure, and consistent experience across supported environments.
 
@@ -362,7 +362,7 @@ Any decision to support or discontinue browser compatibility shall require appro
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

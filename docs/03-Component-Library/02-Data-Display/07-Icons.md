@@ -12,7 +12,7 @@ Category: Data Display
 
 Icons are visual symbols that communicate actions, objects, navigation, or statuses with minimal text.
 
-Icons should improve usability, recognition, and navigation while remaining consistent throughout the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+Icons should improve usability, recognition, and navigation while remaining consistent throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 This specification applies to both the Angular Web Administration Portal and Flutter Mobile Application.
 
@@ -480,7 +480,7 @@ New icon sets or custom icons require UI/UX approval before implementation.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

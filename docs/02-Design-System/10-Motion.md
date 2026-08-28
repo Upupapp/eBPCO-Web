@@ -320,7 +320,7 @@ New animation patterns require UI/UX Team review before implementation.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

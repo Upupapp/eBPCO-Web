@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Profile and Account Stitch defines the standardized management of user profile information within the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+The Profile and Account Stitch defines the standardized management of user profile information within the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 This module allows users to manage their personal information, business details, account preferences, and security settings while ensuring consistency throughout the application.
 

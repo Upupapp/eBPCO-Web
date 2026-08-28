@@ -10,7 +10,7 @@ Category: UX Standards
 
 # Purpose
 
-Navigation Experience defines how users move throughout the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+Navigation Experience defines how users move throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 Effective navigation enables users to understand where they are, where they can go, and how to efficiently complete their tasks with minimal cognitive effort.
 
@@ -376,7 +376,7 @@ Changes to navigation structure, hierarchy, or interaction patterns require appr
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

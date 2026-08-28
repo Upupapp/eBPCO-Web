@@ -2,7 +2,7 @@
 
 ## Overview
 
-The User Management Stitch defines the standardized administration of user accounts within the Electronic Business Permit and Clearance Office (eBPCO). It enables authorized administrators to manage applicant and staff accounts, assign roles, monitor account status, and maintain account security.
+The User Management Stitch defines the standardized administration of user accounts within the Electronic Building Permit and Certificate of Occupancy (eBPCO). It enables authorized administrators to manage applicant and staff accounts, assign roles, monitor account status, and maintain account security.
 
 This module ensures that only authorized users have access to administrative functions while providing a centralized location for user administration.
 

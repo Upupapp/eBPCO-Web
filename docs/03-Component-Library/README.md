@@ -8,7 +8,7 @@ Document Owner: UI/UX Team
 
 # Overview
 
-The Component Library is the official reference for all reusable user interface (UI) components used throughout the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+The Component Library is the official reference for all reusable user interface (UI) components used throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 It provides detailed specifications for every component used within the Angular Web Administration Portal and Flutter Mobile Application, ensuring a consistent user experience, reducing duplication, and simplifying frontend development.
 
@@ -250,7 +250,7 @@ Changes to reusable components should be documented before implementation.
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

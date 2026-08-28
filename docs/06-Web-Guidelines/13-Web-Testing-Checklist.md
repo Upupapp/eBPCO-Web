@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Web Testing Checklist establishes the minimum testing requirements for all web interfaces within the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The Web Testing Checklist establishes the minimum testing requirements for all web interfaces within the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 The objective is to ensure that every feature released to production is functional, accessible, secure, responsive, performant, and consistent with the established Design System and UX standards.
 
@@ -451,7 +451,7 @@ The Quality Assurance Team is responsible for maintaining this document and upda
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-Mobile Accessibility defines the standards for ensuring that the Electronic Business Permit and Clearance Office (eBPCO) mobile application is usable by everyone, including persons with disabilities (PWDs), senior citizens, users with temporary impairments, and users with varying levels of digital literacy.
+Mobile Accessibility defines the standards for ensuring that the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application is usable by everyone, including persons with disabilities (PWDs), senior citizens, users with temporary impairments, and users with varying levels of digital literacy.
 
 Accessibility shall be considered a fundamental design and development requirement throughout the Flutter Mobile Application.
 
@@ -356,7 +356,7 @@ Exceptions require documented approval from the UI/UX Team and Project Managemen
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

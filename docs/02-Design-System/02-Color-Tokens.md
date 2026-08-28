@@ -275,7 +275,7 @@ Changes to token values shall be made centrally and propagated through the appli
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

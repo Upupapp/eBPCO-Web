@@ -10,7 +10,7 @@ Category: AI Development
 
 # Purpose
 
-The AI Governance document establishes the policies, responsibilities, decision-making processes, and oversight mechanisms governing the use of Artificial Intelligence (AI) throughout the Electronic Business Permit and Clearance Office (eBPCO) project.
+The AI Governance document establishes the policies, responsibilities, decision-making processes, and oversight mechanisms governing the use of Artificial Intelligence (AI) throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) project.
 
 The objective is to ensure that AI is used responsibly, ethically, securely, and consistently while maintaining full human accountability for all project deliverables.
 
@@ -298,7 +298,7 @@ All project contributors shall comply with this governance framework when using 
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

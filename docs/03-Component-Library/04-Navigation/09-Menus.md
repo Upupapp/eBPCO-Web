@@ -418,7 +418,7 @@ Changes to Menu variants, grouping, or behaviors require UI/UX approval before i
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

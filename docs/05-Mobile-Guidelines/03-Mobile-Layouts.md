@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-Mobile Layouts define the structural standards for arranging content within the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+Mobile Layouts define the structural standards for arranging content within the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 Consistent layouts improve usability, readability, and navigation while ensuring that users can efficiently complete government services across a wide range of mobile devices.
 
@@ -366,7 +366,7 @@ Changes to layout structures, spacing standards, or content hierarchy require ap
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

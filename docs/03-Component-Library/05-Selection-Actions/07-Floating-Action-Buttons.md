@@ -408,7 +408,7 @@ Changes to Floating Action Button variants, placement, accessibility requirement
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

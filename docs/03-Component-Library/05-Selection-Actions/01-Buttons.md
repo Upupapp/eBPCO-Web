@@ -642,7 +642,7 @@ Changes to button hierarchy, variants, states, sizing, or interaction behavior r
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

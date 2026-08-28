@@ -10,7 +10,7 @@ Category: AI Development
 
 # Purpose
 
-The AI Security Guidelines establish the security requirements for all Artificial Intelligence (AI)-assisted development within the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The AI Security Guidelines establish the security requirements for all Artificial Intelligence (AI)-assisted development within the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 These guidelines ensure that AI-generated code, documentation, architecture, and recommendations comply with the organization's security standards while protecting government systems, citizen information, business records, and confidential data.
 
@@ -330,7 +330,7 @@ The Security Team is responsible for reviewing AI-generated deliverables that af
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

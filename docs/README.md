@@ -1,4 +1,4 @@
-# Electronic Business Permit and Clearance Office (eBPCO)
+# Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Version: 1.0.0  
 Status: Approved
@@ -7,7 +7,7 @@ Status: Approved
 
 # Overview
 
-Welcome to the official documentation repository for the **Electronic Business Permit and Clearance Office (eBPCO)** project.
+Welcome to the official documentation repository for the **Electronic Building Permit and Certificate of Occupancy (eBPCO)** project.
 
 This repository serves as the central knowledge base for the entire system, providing standards, guidelines, references, and development documentation used throughout the Software Development Life Cycle (SDLC).
 
@@ -238,7 +238,7 @@ All contributors are responsible for maintaining the quality, accuracy, and cons
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Status
 

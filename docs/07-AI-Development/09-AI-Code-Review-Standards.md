@@ -10,7 +10,7 @@ Category: AI Development
 
 # Purpose
 
-The AI Code Review Standards establish the requirements for reviewing AI-generated code within the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The AI Code Review Standards establish the requirements for reviewing AI-generated code within the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 These standards ensure that all AI-assisted code is accurate, secure, maintainable, readable, and compliant with project architecture, coding standards, and business requirements before it is merged into the codebase.
 
@@ -297,7 +297,7 @@ The Development Team is responsible for ensuring that every AI-assisted code con
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

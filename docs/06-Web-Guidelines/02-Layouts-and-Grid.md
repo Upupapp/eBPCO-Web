@@ -10,7 +10,7 @@ Category: Web Guidelines
 
 # Purpose
 
-The Layouts and Grid specification defines the structural foundation for all web interfaces within the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The Layouts and Grid specification defines the structural foundation for all web interfaces within the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 A standardized layout system ensures visual consistency, improves usability, supports responsive behavior, and simplifies development across all portals and administrative modules.
 
@@ -394,7 +394,7 @@ Any deviation from the approved grid system or layout structure requires review 
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

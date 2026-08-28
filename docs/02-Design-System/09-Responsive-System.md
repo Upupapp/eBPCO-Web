@@ -352,7 +352,7 @@ Responsive behavior shall be validated during UI review before implementation ap
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

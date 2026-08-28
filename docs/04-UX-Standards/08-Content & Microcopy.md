@@ -10,7 +10,7 @@ Category: UX Standards
 
 # Purpose
 
-Content & Microcopy establishes the writing standards for all user-facing text throughout the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+Content & Microcopy establishes the writing standards for all user-facing text throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 Well-written content helps users understand information quickly, complete tasks confidently, reduce errors, and build trust in the system. Every piece of text should be intentional, consistent, and easy to understand.
 
@@ -391,7 +391,7 @@ Changes to terminology, tone, or writing standards require approval from the UI/
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

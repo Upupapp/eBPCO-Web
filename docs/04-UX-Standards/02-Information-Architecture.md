@@ -10,7 +10,7 @@ Category: UX Standards
 
 # Purpose
 
-Information Architecture (IA) defines how information is organized, structured, labeled, and navigated throughout the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+Information Architecture (IA) defines how information is organized, structured, labeled, and navigated throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 A well-designed Information Architecture enables users to locate information efficiently, understand system organization, and complete tasks with minimal effort.
 
@@ -395,7 +395,7 @@ Structural changes to the Information Architecture require UI/UX approval before
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

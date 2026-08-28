@@ -355,7 +355,7 @@ Changes to Pagination variants, page sizes, or behavior require UI/UX approval b
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

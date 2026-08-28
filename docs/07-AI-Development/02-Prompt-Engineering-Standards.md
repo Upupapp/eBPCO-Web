@@ -10,7 +10,7 @@ Category: AI Development
 
 # Purpose
 
-The Prompt Engineering Standards establish a consistent methodology for creating prompts used with Artificial Intelligence (AI) systems during the development of the Electronic Business Permit and Clearance Office (eBPCO) platform.
+The Prompt Engineering Standards establish a consistent methodology for creating prompts used with Artificial Intelligence (AI) systems during the development of the Electronic Building Permit and Certificate of Occupancy (eBPCO) platform.
 
 Well-structured prompts improve output quality, reduce ambiguity, minimize hallucinations, and ensure AI-generated artifacts align with project standards.
 
@@ -165,7 +165,7 @@ Examples
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Frontend
 
@@ -359,7 +359,7 @@ Approved prompt templates shall be maintained by the Development Team and review
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

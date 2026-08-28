@@ -10,7 +10,7 @@ Category: UX Standards
 
 # Purpose
 
-Error Handling & Recovery defines the standards for communicating errors, preventing user frustration, and helping users recover from problems throughout the Electronic Business Permit and Clearance Office (eBPCO) ecosystem.
+Error Handling & Recovery defines the standards for communicating errors, preventing user frustration, and helping users recover from problems throughout the Electronic Building Permit and Certificate of Occupancy (eBPCO) ecosystem.
 
 Errors should never leave users confused, uncertain, or unable to continue their tasks. Every error must provide sufficient context, guidance, and recovery options while maintaining a professional and trustworthy user experience.
 
@@ -319,7 +319,7 @@ Changes to validation behavior, recovery workflows, or error messaging standards
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 

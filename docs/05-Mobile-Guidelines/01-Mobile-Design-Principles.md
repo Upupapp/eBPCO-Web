@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-The Mobile Design Principles establish the foundational philosophy for designing the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+The Mobile Design Principles establish the foundational philosophy for designing the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 These principles ensure that every mobile interface is intuitive, efficient, accessible, and consistent while taking advantage of modern mobile capabilities and adhering to government service standards.
 
@@ -265,7 +265,7 @@ Changes to these principles require review and approval from the UI/UX Team befo
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

@@ -10,7 +10,7 @@ Category: Mobile Guidelines
 
 # Purpose
 
-Notifications define the standards for delivering timely, relevant, and actionable information to users of the Electronic Business Permit and Clearance Office (eBPCO) mobile application.
+Notifications define the standards for delivering timely, relevant, and actionable information to users of the Electronic Building Permit and Certificate of Occupancy (eBPCO) mobile application.
 
 Notifications should improve communication between the government and users without becoming intrusive or overwhelming. Every notification should provide clear value and encourage users to take appropriate action when necessary.
 
@@ -357,7 +357,7 @@ Changes to notification content, timing, or delivery mechanisms require approval
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platform
 

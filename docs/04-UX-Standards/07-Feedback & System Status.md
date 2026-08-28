@@ -10,7 +10,7 @@ Category: UX Standards
 
 # Purpose
 
-Feedback & System Status defines how the Electronic Business Permit and Clearance Office (eBPCO) communicates system responses, task progress, and application status to users.
+Feedback & System Status defines how the Electronic Building Permit and Certificate of Occupancy (eBPCO) communicates system responses, task progress, and application status to users.
 
 The system should continuously keep users informed about what is happening through timely, clear, and meaningful feedback. Proper feedback builds user confidence, reduces uncertainty, and improves overall usability.
 
@@ -346,7 +346,7 @@ Changes to notification behavior, status communication, or feedback patterns req
 
 Project
 
-Electronic Business Permit and Clearance Office (eBPCO)
+Electronic Building Permit and Certificate of Occupancy (eBPCO)
 
 Platforms
 
