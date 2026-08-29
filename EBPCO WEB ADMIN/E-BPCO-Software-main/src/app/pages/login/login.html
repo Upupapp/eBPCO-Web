@@ -94,7 +94,20 @@
         </p>
       }
 
-      <button type="submit" class="btn-primary">Login Account</button>
+      <!--
+        Disabled while the request is in flight. `signingIn` was set on both
+        sides of the call and read by nothing, so the button stayed live and a
+        slow sign-in could be submitted repeatedly, firing concurrent
+        /auth/token posts.
+      -->
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="signingIn()"
+        [attr.aria-busy]="signingIn() ? true : null"
+      >
+        {{ signingIn() ? 'Signing in…' : 'Login Account' }}
+      </button>
     </form>
 
     <p class="switch-auth">
