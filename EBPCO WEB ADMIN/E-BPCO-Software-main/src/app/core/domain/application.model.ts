@@ -22,6 +22,17 @@ export type { CoarseStatus as AppStatus };
 // business's registered name is never assumed to equal its owner's name.
 export interface ApplicationRecord {
   id: string;
+  /**
+   * The permit reference an applicant and an officer actually quote — the
+   * number that ends up printed on the permit, e.g. `BP-2026-0001`.
+   *
+   * Optional because the seed does not carry one and twenty-odd files build
+   * records; required would break every one of them. The queue endpoint DOES
+   * send it, and the mapper always did — but this interface never declared it,
+   * so no template could bind it and the value was mapped and then discarded.
+   * `id` stays the identity used by routes, selection and aria labels.
+   */
+  referenceNumber?: string;
   businessId: string;
   businessName: string;
   applicantId: string;

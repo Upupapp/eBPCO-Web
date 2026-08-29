@@ -78,6 +78,13 @@ describe('StaffApplicationsApi', () => {
     expect((await fetchOne({ lifecycleStatus: 'Submitted' })).permitReleaseStatus).toBe('Not Ready');
   });
 
+  it('keeps the permit reference the server sends', async () => {
+    // Mapped all along, but ApplicationRecord did not declare it, so no
+    // template could bind it and the value was discarded on arrival.
+    const record = await fetchOne({ referenceNumber: 'BP-2026-0042' });
+    expect(record.referenceNumber).toBe('BP-2026-0042');
+  });
+
   it('mirrors type from permitType', async () => {
     expect((await fetchOne({ permitType: 'Electrical Permit' })).type).toBe('Electrical Permit');
   });

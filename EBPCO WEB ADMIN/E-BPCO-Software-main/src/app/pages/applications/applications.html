@@ -143,7 +143,19 @@
                   (change)="toggleRowSelected(row)"
                 />
               </td>
-              <td class="id-cell">{{ row.id }}</td>
+              <!--
+                `id` stays primary — routes, selection and every aria label use
+                it. The permit reference sits under it because that is the
+                number an applicant quotes; the server sends it and this cell
+                showed the internal id instead, because ApplicationRecord did
+                not declare the field.
+              -->
+              <td class="id-cell">
+                {{ row.id }}
+                @if (row.referenceNumber; as reference) {
+                  <span class="id-reference">{{ reference }}</span>
+                }
+              </td>
               <td>
                 <div class="identity-cell">
                   <app-avatar [name]="row.applicant" [size]="30" />
