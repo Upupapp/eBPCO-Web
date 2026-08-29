@@ -43,7 +43,9 @@ export class Login {
     this.loginError.set('');
   }
 
-  onSubmit(form: NgForm): void {
+  readonly signingIn = signal(false);
+
+  async onSubmit(form: NgForm): Promise<void> {
     this.submitted.set(true);
     this.loginError.set('');
 
@@ -55,10 +57,23 @@ export class Login {
     if (form.invalid) return;
 
     // Every successful staff login enters the same canonical dashboard —
-    // URLs identify resources, not roles. The session (mock — see
-    // SessionService) is what scopes content from here on, not which URL
-    // tree got navigated into.
-    this.session.signIn(normalized);
-    this.router.navigateByUrl('/dashboard');
+    // URLs identify resources, not roles. The session is what scopes content
+    // from here on, not which URL tree got navigated into.
+    this.signingIn.set(true);
+    try {
+      await this.session.signIn(normalized, this.password);
+      this.router.navigateByUrl('/dashboard');
+    } catch (error) {
+      // The API's own words where it wrote them for a reader. It answers the
+      // same refusal for a wrong password and an unknown address, on purpose —
+      // so this must not try to be more specific than the server was.
+      this.loginError.set(
+        error instanceof Error && error.message !== ''
+          ? error.message
+          : 'Sign-in failed. Check the address and password and try again.',
+      );
+    } finally {
+      this.signingIn.set(false);
+    }
   }
 }

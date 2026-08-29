@@ -3,6 +3,9 @@ import { provideRouter } from '@angular/router';
 import { Sidebar } from './sidebar';
 import { SessionService } from '../../core/session/session.service';
 import { NAV_MODULES } from '../../core/session/permissions';
+import { IdentityApi } from '../../core/api/identity.api';
+import { FakeIdentityApi } from '../../core/api/identity.api.fake';
+import { TokenStore } from '../../core/api/token-store';
 
 describe('Sidebar', () => {
   let session: SessionService;
@@ -10,7 +13,12 @@ describe('Sidebar', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Sidebar],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        // Stubbed for the same reason as the guard spec: these assert what the
+        // sidebar shows a signed-in officer, not how they signed in.
+        { provide: IdentityApi, useFactory: () => new FakeIdentityApi(TestBed.inject(TokenStore)) },
+      ],
     }).compileComponents();
     session = TestBed.inject(SessionService);
   });
@@ -22,8 +30,8 @@ describe('Sidebar', () => {
     return anchors.map((a) => ({ label: a.textContent?.trim(), href: a.getAttribute('href') }));
   }
 
-  it('shows every module to a Super Admin, exactly once, with no /tenant hrefs', () => {
-    session.signIn('super@ebpco.gov.ph');
+  it('shows every module to a Super Admin, exactly once, with no /tenant hrefs', async () => {
+    await session.signIn('super@ebpco.gov.ph', 'correct-horse');
     const links = renderLinks();
     expect(links.length).toBe(NAV_MODULES.length);
     const hrefs = links.map((l) => l.href);
@@ -31,8 +39,8 @@ describe('Sidebar', () => {
     expect(hrefs.some((h) => h?.includes('/tenant'))).toBe(false);
   });
 
-  it('scopes the sidebar to only the modules a narrower role is authorized for', () => {
-    session.signIn('cashier@ebpco.gov.ph');
+  it('scopes the sidebar to only the modules a narrower role is authorized for', async () => {
+    await session.signIn('cashier@ebpco.gov.ph', 'correct-horse');
     session.setRole('Payment Officer');
     const links = renderLinks();
     const labels = links.map((l) => l.label);
@@ -42,7 +50,7 @@ describe('Sidebar', () => {
     expect(labels).not.toContain('System Logs');
   });
 
-  it('renders no items before a session exists (nothing to leak pre-auth)', () => {
+  it('renders no items before a session exists (nothing to leak pre-auth)', async () => {
     // No signIn() called — session is null. Every module currently
     // defaults to visible when role is null (see Sidebar.sections), which
     // is fine because the AdminLayout this sidebar lives in is itself

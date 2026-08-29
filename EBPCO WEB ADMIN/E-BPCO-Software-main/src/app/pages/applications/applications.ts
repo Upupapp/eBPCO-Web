@@ -45,6 +45,7 @@ import {
   TIMELINE,
   TimelineItem,
 } from './applications-data';
+import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
 
 /** One row of the real per-application Documents tab — a required-but-not-yet-uploaded requirement has `doc: null` and renders as "Missing". */
 interface DocumentRow {
@@ -135,6 +136,33 @@ export class Applications {
   private readonly titleService = inject(Title);
   private readonly session = inject(SessionService);
   private readonly toast = inject(ToastService);
+  private readonly queue = inject(StaffApplicationsApi);
+
+  /** Null until the first fetch resolves; a message when it fails. */
+  protected readonly loadError = signal<string | null>(null);
+  protected readonly loading = signal(true);
+
+  /**
+   * The first screen in this portal that renders server bytes.
+   *
+   * The store is populated rather than the component holding its own copy,
+   * because every derived count, filter and detail lookup on this page already
+   * reads the store — pointing the component at a second list would leave the
+   * table showing the server's rows and the counters showing the seed's.
+   */
+  private readonly loaded = (async (): Promise<void> => {
+    try {
+      const page = await this.queue.page({ limit: 100 });
+      this.store.replaceApplications(page.rows);
+    } catch (error) {
+      // The seeded rows stay on screen behind the message. Blanking the table
+      // would tell an officer the LGU has no applications, which is a different
+      // and much worse claim than "this did not load".
+      this.loadError.set(error instanceof Error ? error.message : 'The queue could not be loaded.');
+    } finally {
+      this.loading.set(false);
+    }
+  })();
   protected readonly canCreate = computed(() => {
     const role = this.session.role();
     return role ? ACTION_PERMISSIONS.createApplication(role) : false;

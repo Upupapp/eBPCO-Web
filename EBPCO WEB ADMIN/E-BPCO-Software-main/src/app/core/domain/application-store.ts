@@ -90,6 +90,23 @@ export class ApplicationStore {
 
   // ---- Single-record lookups ------------------------------------------------
 
+  /**
+   * Replaces the in-memory applications with what the server holds.
+   *
+   * The seed stays as the starting value rather than being deleted, and that is
+   * deliberate: the other stores here (assessments, payments) are driven FROM
+   * the seeded applications at construction, so emptying this one at boot would
+   * leave them describing applications that no longer exist. The server's rows
+   * replace the list once they arrive.
+   *
+   * It does not merge. A merge would leave an application on screen that the
+   * server has archived — the queue's whole job is to show what is live, and a
+   * row that survives because it was once seeded is the opposite of that.
+   */
+  replaceApplications(rows: readonly ApplicationRecord[]): void {
+    this._applications.set([...rows]);
+  }
+
   getById(id: string): ApplicationRecord | undefined {
     return this._applications().find((row) => row.id === id);
   }

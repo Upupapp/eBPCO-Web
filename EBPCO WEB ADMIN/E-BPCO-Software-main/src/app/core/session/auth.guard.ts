@@ -17,8 +17,13 @@ export const authGuard: CanActivateFn = (_route, state) => {
   const session = inject(SessionService);
   const router = inject(Router);
 
+  // Signed out means signed out. This used to CREATE a session here —
+  // `signIn('staff@ebpco.gov.ph')` — which made every guarded route reachable
+  // by anyone who typed its URL, because the guard's first act was to satisfy
+  // itself. Harmless while the portal had no server and no real data behind it;
+  // not harmless now that it does.
   if (!session.isAuthenticated()) {
-    session.signIn('staff@ebpco.gov.ph');
+    return router.parseUrl('/login');
   }
   const role = session.role();
   if (role && !canAccessPath(role, state.url)) {
