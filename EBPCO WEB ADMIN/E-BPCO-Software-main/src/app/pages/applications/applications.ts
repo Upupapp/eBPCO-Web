@@ -150,19 +150,34 @@ export class Applications {
    * reads the store — pointing the component at a second list would leave the
    * table showing the server's rows and the counters showing the seed's.
    */
-  private readonly loaded = (async (): Promise<void> => {
+  /**
+   * Owner ruling, 29 Aug 2026: a failed load CLEARS the rows.
+   *
+   * This used to leave the seeded rows on screen, on the reasoning that
+   * blanking the table claims "the LGU has no applications". But the error it
+   * was supposed to sit behind was never rendered — `loadError` was set and no
+   * template read it — so the real behaviour was a queue of applications that
+   * do not exist, shown with no warning at all.
+   *
+   * "We could not ask" and "there is nothing there" are different claims, and
+   * the officer now sees the first one explicitly rather than the second one
+   * silently. This is ADR 0001's rule, restated.
+   */
+  protected async load(): Promise<void> {
+    this.loading.set(true);
+    this.loadError.set(null);
     try {
       const page = await this.queue.page({ limit: 100 });
       this.store.replaceApplications(page.rows);
     } catch (error) {
-      // The seeded rows stay on screen behind the message. Blanking the table
-      // would tell an officer the LGU has no applications, which is a different
-      // and much worse claim than "this did not load".
+      this.store.replaceApplications([]);
       this.loadError.set(error instanceof Error ? error.message : 'The queue could not be loaded.');
     } finally {
       this.loading.set(false);
     }
-  })();
+  }
+
+  private readonly loaded = this.load();
   protected readonly canCreate = computed(() => {
     const role = this.session.role();
     return role ? ACTION_PERMISSIONS.createApplication(role) : false;

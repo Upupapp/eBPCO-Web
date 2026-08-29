@@ -109,6 +109,22 @@ export class AssessmentStore {
     this.seq = Math.max(this.seq, maxSeq);
   }
 
+  /**
+   * Drops everything, including the seed.
+   *
+   * Called when the server's applications replace the local ones. The payments
+   * page lists `allTransactions()` globally rather than per application, so
+   * seeded money records stay on screen beside real applications unless they
+   * are cleared here — and a fabricated peso figure beside a real permit is the
+   * most consequential thing this portal can show.
+   */
+  clear(): void {
+    this._assessments.set([]);
+    this._transactions.set([]);
+    this._adjustments.set([]);
+    this._auditEvents.set([]);
+  }
+
   // ---- Lookups --------------------------------------------------------
 
   getAssessments(applicationId: string): Assessment[] {
