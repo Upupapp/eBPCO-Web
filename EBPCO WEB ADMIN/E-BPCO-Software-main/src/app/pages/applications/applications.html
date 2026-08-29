@@ -79,6 +79,29 @@
       </div>
     }
 
+    <!--
+      These live in the LIST branch, beside the table they describe. They were
+      first written next to `quickActionError`, which is in the DETAIL branch —
+      so the queue error rendered only on a screen you cannot reach when the
+      queue failed to load. The store specs passed throughout: they never render
+      the template. Found by running the portal and looking at it.
+    -->
+    @if (loading()) {
+      <div class="queue-status" role="status">
+        <span>Loading the queue…</span>
+      </div>
+    }
+
+    @if (loadError(); as message) {
+      <div class="quick-action-error" role="alert">
+        <app-icon name="alert-triangle" [size]="16" />
+        <span>The queue could not be loaded, so no applications are shown. {{ message }}</span>
+        <button type="button" class="queue-retry" (click)="load()" [disabled]="loading()">
+          Try again
+        </button>
+      </div>
+    }
+
     <div class="table-wrap">
       <table>
         <thead>
@@ -260,27 +283,6 @@
       </div>
     </div>
   </div>
-
-  @if (loading()) {
-    <div class="queue-status" role="status">
-      <span>Loading the queue…</span>
-    </div>
-  }
-
-  <!--
-    The queue could not be read. The table below is empty because the rows were
-    cleared, not because the LGU has no applications — those are different
-    claims and this one has to be the visible one.
-  -->
-  @if (loadError(); as message) {
-    <div class="quick-action-error" role="alert">
-      <app-icon name="alert-triangle" [size]="16" />
-      <span>The queue could not be loaded, so no applications are shown. {{ message }}</span>
-      <button type="button" class="queue-retry" (click)="load()" [disabled]="loading()">
-        Try again
-      </button>
-    </div>
-  }
 
   @if (quickActionError(); as message) {
     <div class="quick-action-error" role="alert">
