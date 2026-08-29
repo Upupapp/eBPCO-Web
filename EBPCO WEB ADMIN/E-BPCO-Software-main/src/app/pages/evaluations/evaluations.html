@@ -373,7 +373,8 @@
                   </div>
                 </div>
               </td>
-              <td>{{ row.missingDocuments }}</td>
+              <!-- null means no document data is held, which is not the same as none outstanding. -->
+              <td>{{ row.missingDocuments ?? '—' }}</td>
               <td>{{ row.type }}</td>
               <td>{{ row.department }}</td>
               <td>{{ row.dateSubmitted }}</td>

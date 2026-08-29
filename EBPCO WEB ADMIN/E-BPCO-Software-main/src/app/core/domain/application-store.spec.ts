@@ -1275,3 +1275,49 @@ describe('ApplicationStore — the server answer replaces the seed', () => {
     expect(store.businesses()).toEqual([]);
   });
 });
+
+/**
+ * The Missing Documents column was fiction.
+ *
+ * `evaluations-data.ts` filled it with `Math.abs(hash(applicationId)) % 4` — a
+ * number 0-3 derived from the ID string, unrelated to any document, rendered to
+ * officers in the Evaluations table and written into the CSV export under the
+ * heading "Missing Documents". Actionable fiction: chase an applicant for papers
+ * that are not missing, or fail to chase for ones that are. The correct logic
+ * already existed in `canApprove`.
+ */
+describe('ApplicationStore — missingRequiredDocuments', () => {
+  let store: ApplicationStore;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [ApplicationStore] });
+    store = TestBed.inject(ApplicationStore);
+  });
+
+  it('counts required documents that are absent or unresolved', () => {
+    const app = store.applications().find((a) => store.getDocuments(a.id).length > 0)!;
+    const count = store.missingRequiredDocuments(app.id);
+
+    expect(count).not.toBeNull();
+    // A real count, bounded by how many documents the permit type requires —
+    // the hash could return 0-3 regardless of what the permit actually needs.
+    const required = requirementsFor(app.permitType).documents.filter((d) => d.required).length;
+    expect(count!).toBeGreaterThanOrEqual(0);
+    expect(count!).toBeLessThanOrEqual(required);
+  });
+
+  it('says unknown rather than zero when no documents are held', () => {
+    // A server load clears child collections, so every server row is this case
+    // until a detail endpoint exists. "None outstanding" would be a claim the
+    // portal cannot support.
+    const app = store.applications()[0];
+    store.replaceApplications([app]);
+
+    expect(store.getDocuments(app.id)).toEqual([]);
+    expect(store.missingRequiredDocuments(app.id)).toBeNull();
+  });
+
+  it('says unknown for an application it does not hold', () => {
+    expect(store.missingRequiredDocuments('NOPE-1')).toBeNull();
+  });
+});
