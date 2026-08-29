@@ -19,7 +19,6 @@ export class Login {
   rememberMe = false;
 
   readonly showPassword = signal(false);
-  readonly submitted = signal(false);
   readonly loginError = signal('');
   readonly showForgotPassword = signal(false);
 
@@ -46,7 +45,8 @@ export class Login {
   readonly signingIn = signal(false);
 
   async onSubmit(form: NgForm): Promise<void> {
-    this.submitted.set(true);
+    // `submitted` used to be set here and read by nothing — dead state rather
+    // than a validation gate. Validation is `loginError` plus `form.invalid`.
     this.loginError.set('');
 
     const normalized = this.email.trim().toLowerCase();
