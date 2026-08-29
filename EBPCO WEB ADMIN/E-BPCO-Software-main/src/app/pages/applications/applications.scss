@@ -96,6 +96,15 @@ h3 {
   font-weight: 700;
 }
 
+// The permit reference, under the id. Quieter than the id because the id is
+// what the URL and every aria label use; this is what an applicant quotes.
+.id-reference {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: $color-ink-300;
+}
+
 // Applicant (a person) and Business/Project (the permit's real owner —
 // see ApplicationStore.getApplicationContext) sit stacked in one cell so
 // they're always both visible, on wide and narrow layouts alike, rather

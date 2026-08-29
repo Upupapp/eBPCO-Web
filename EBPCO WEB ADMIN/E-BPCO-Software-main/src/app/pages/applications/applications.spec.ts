@@ -66,6 +66,29 @@ describe('Applications — a failed queue load is visible on the list', () => {
     expect(TestBed.inject(ApplicationStore).applications()).toEqual([]);
   });
 
+  it('renders the permit reference beside the id', async () => {
+    const row = {
+      id: 'SRV-1', referenceNumber: 'BP-2026-0042',
+      businessId: '', businessName: '—', applicantId: '', applicant: 'Raul Villanueva',
+      location: 'Barangay Poblacion', permitType: 'Building Permit – New Construction',
+      applicationAction: 'New', officer: '—', dateSubmitted: '2026-08-01',
+      dateValue: new Date('2026-08-01T00:00:00.000Z'), lifecycleStatus: 'Submitted',
+      evaluationStage: 'Initial', evaluationResult: 'Pending',
+      paymentStatus: 'Not Yet Available', permitReleaseStatus: 'Not Ready',
+      assessedAmountCentavos: null, type: 'Building Permit – New Construction',
+      status: 'Under Review',
+    };
+    const fixture = mount(() => Promise.resolve({ rows: [row], nextCursor: null }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    // Both: the id is the identity routes and aria labels use, the reference is
+    // what an applicant quotes.
+    expect(text).toContain('SRV-1');
+    expect(text).toContain('BP-2026-0042');
+  });
+
   it('shows no error when the queue loads', async () => {
     const fixture = mount(() => Promise.resolve({ rows: [], nextCursor: null }));
     await fixture.whenStable();
