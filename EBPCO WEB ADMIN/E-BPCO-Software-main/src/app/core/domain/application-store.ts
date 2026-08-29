@@ -103,8 +103,34 @@ export class ApplicationStore {
    * server has archived — the queue's whole job is to show what is live, and a
    * row that survives because it was once seeded is the opposite of that.
    */
+  /**
+   * The server's answer replaces local state — the seed included.
+   *
+   * Owner ruling, 29 Aug 2026. Swapping only `_applications` left every child
+   * collection seeded, so real applications rendered beside fabricated
+   * documents, evaluations, businesses and payments with nothing on screen
+   * telling an officer which was which. The queue row carries no `businessId`
+   * or `applicantId` either, so those joins could not have resolved anyway.
+   *
+   * Empty sections are the honest answer until the detail endpoints exist:
+   * "nothing recorded" is a smaller claim than a fabricated document list, and
+   * it is the same rule ADR 0001 set for the applications themselves.
+   *
+   * Passing an empty array is how a FAILED load clears the screen.
+   */
   replaceApplications(rows: readonly ApplicationRecord[]): void {
     this._applications.set([...rows]);
+    this._businesses.set([]);
+    this._applicants.set([]);
+    this._documents.set([]);
+    this._evaluations.set([]);
+    this._permits.set([]);
+    this._releases.set([]);
+    this._auditEvents.set([]);
+    this._notifications.set([]);
+    // Assessments and payments live in their own store, and the payments page
+    // lists them globally rather than per application.
+    this.assessmentStore.clear();
   }
 
   getById(id: string): ApplicationRecord | undefined {

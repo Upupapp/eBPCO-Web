@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ApplicationStore } from './application-store';
+import { ApplicationRecord, withProjectedFields } from './application.model';
 import { AssessmentStore } from './assessment-store';
 import { PaymentConfigStore } from './payment-config-store';
 import { ALL_PERMIT_TYPES } from './permit.model';
@@ -1195,5 +1196,82 @@ describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
     // Integration: the same record is visible everywhere via the shared store.
     expect(store.applications().find((a) => a.id === record.id)!.lifecycleStatus).toBe('Completed');
     expect(store.getById(record.id)!.status).toBe('Approved'); // coarse projection stays in sync
+  });
+});
+
+/**
+ * Owner ruling, 29 Aug 2026: the server's answer replaces local state, seed
+ * included — and a failed load clears the rows.
+ *
+ * Before this, `replaceApplications` swapped the applications and left every
+ * child collection seeded, so a real application rendered beside fabricated
+ * documents, evaluations, businesses and payments. Nothing on screen said
+ * which was which, and the queue row carries no businessId or applicantId, so
+ * those joins could never have resolved anyway.
+ */
+describe('ApplicationStore — the server answer replaces the seed', () => {
+  let store: ApplicationStore;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [ApplicationStore] });
+    store = TestBed.inject(ApplicationStore);
+  });
+
+  const serverRow = (): ApplicationRecord =>
+    withProjectedFields({
+      id: 'SRV-1',
+      businessId: '',
+      businessName: '—',
+      applicantId: '',
+      applicant: 'Server Applicant',
+      location: '—',
+      permitType: 'Building Permit – New Construction',
+      applicationAction: 'New',
+      officer: '—',
+      dateSubmitted: '2026-08-01',
+      dateValue: new Date('2026-08-01T00:00:00.000Z'),
+      lifecycleStatus: 'Submitted',
+      evaluationStage: 'Initial',
+      evaluationResult: 'Pending',
+      paymentStatus: 'Not Yet Available',
+      permitReleaseStatus: 'Not Ready',
+      assessedAmountCentavos: null,
+    });
+
+  /** A seeded application that actually has documents, so the clearing is provable. */
+  const seededWithDocuments = (): ApplicationRecord =>
+    store.applications().find((a) => store.getDocuments(a.id).length > 0)!;
+
+  it('seeds children to begin with, so the clearing below is a real change', () => {
+    expect(store.applications().length).toBeGreaterThan(0);
+    expect(store.businesses().length).toBeGreaterThan(0);
+    expect(seededWithDocuments()).toBeDefined();
+  });
+
+  it('drops every seeded child when server rows arrive', () => {
+    const seeded = seededWithDocuments();
+    expect(store.getDocuments(seeded.id).length).toBeGreaterThan(0);
+
+    store.replaceApplications([serverRow()]);
+
+    expect(store.applications().map((a) => a.id)).toEqual(['SRV-1']);
+    // No fabricated detail may survive beside a real application.
+    expect(store.getDocuments(seeded.id)).toEqual([]);
+    expect(store.getPermit(seeded.id)).toBeUndefined();
+    expect(store.evaluations()).toEqual([]);
+    expect(store.businesses()).toEqual([]);
+    expect(store.applicants()).toEqual([]);
+    expect(store.notifications()).toEqual([]);
+  });
+
+  it('clears the rows when a failed load passes an empty list', () => {
+    expect(store.applications().length).toBeGreaterThan(0);
+
+    store.replaceApplications([]);
+
+    // "We could not ask" is what the page renders. The store's job is to hold
+    // nothing, rather than a queue of applications that do not exist.
+    expect(store.applications()).toEqual([]);
+    expect(store.businesses()).toEqual([]);
   });
 });

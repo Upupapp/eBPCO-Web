@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 
 import { ApiClient } from './api.client';
-import { ApplicationRecord } from '../domain/application.model';
-import { ApplicationLifecycleStatus } from '../domain/status.model';
+import { ApplicationRecord, withProjectedFields } from '../domain/application.model';
+import { ApplicationLifecycleStatus, PermitReleaseStatus } from '../domain/status.model';
 import { PermitType, ApplicationAction } from '../domain/permit.model';
 
 /**
@@ -22,15 +22,30 @@ import { PermitType, ApplicationAction } from '../domain/permit.model';
  *                        application to a named officer.
  *   evaluationStage      the detail endpoint carries evaluations; the queue
  *   evaluationResult     row does not.
- *   permitReleaseStatus  no counterpart in the row.
  *
- * They are filled with an explicit "unknown" rather than a plausible guess, and
- * listed here so the gap is a recorded fact rather than something a reader
- * discovers from a blank column. Serving them is backend work: either the queue
- * row grows, or these columns come off the screen.
+ * Where the type allows it these are filled with an explicit "unknown" (NOT_SENT)
+ * rather than a plausible guess, and listed here so the gap is a recorded fact
+ * rather than something a reader discovers from a blank column. `evaluationStage`
+ * and `evaluationResult` are closed unions with no "unknown" member, so they
+ * still take their first-step defaults — that IS a guess, and the honest fix is
+ * a widened type or a queue row that carries them. Serving them is backend work:
+ * either the queue row grows, or these columns come off the screen.
  *
- * `paymentStatus` IS derivable — the row carries `paymentVerified` and an
- * assessed amount — and is the one field mapped rather than defaulted.
+ * Three fields ARE derivable and are derived rather than defaulted:
+ *
+ *   paymentStatus        the row carries `paymentVerified` and an assessed amount.
+ *   permitReleaseStatus  follows from `lifecycleStatus`. Hardcoding 'Not Ready'
+ *                        made every server row invisible to the Permit Release
+ *                        Queue, which filters on `permitReleaseStatus !== 'Not
+ *                        Ready'` — the same defect ApplicationStore had already
+ *                        found and fixed on its own write path.
+ *   type / status        via `withProjectedFields`, the one place those two
+ *                        migration-bridge fields are built. Writing them by hand
+ *                        here set `status` to the raw lifecycleStatus instead of
+ *                        the 3-value CoarseStatus, so server rows matched none of
+ *                        the 'Approved'/'Under Review'/'Rejected' buckets and the
+ *                        dashboard counters silently under-counted them. An
+ *                        `as unknown as` cast was hiding the mismatch.
  */
 
 interface QueueRow {
@@ -72,9 +87,21 @@ export class StaffApplicationsApi {
   }
 }
 
+/**
+ * The queue row has no release field, but `lifecycleStatus` already implies it —
+ * and leaving every row at 'Not Ready' hid all server data from the release
+ * queue. Mirrors ApplicationStore's own rule so the two paths cannot disagree.
+ */
+function releaseStatusFor(status: ApplicationLifecycleStatus): PermitReleaseStatus {
+  if (status === 'Released' || status === 'Completed') return 'Released';
+  if (status === 'Ready for Release') return 'Ready for Release';
+  return 'Not Ready';
+}
+
 function toRecord(row: QueueRow): ApplicationRecord {
   const submitted = row.submittedAt === null ? null : new Date(row.submittedAt);
-  return {
+  const lifecycleStatus = row.lifecycleStatus as ApplicationLifecycleStatus;
+  return withProjectedFields({
     id: row.id,
     referenceNumber: row.referenceNumber,
     businessId: '',
@@ -87,18 +114,17 @@ function toRecord(row: QueueRow): ApplicationRecord {
     officer: NOT_SENT,
     dateSubmitted: submitted === null ? NOT_SENT : submitted.toISOString().slice(0, 10),
     dateValue: submitted ?? new Date(0),
-    lifecycleStatus: row.lifecycleStatus as ApplicationLifecycleStatus,
-    evaluationStage: 'Initial',
-    evaluationResult: 'Pending',
-    // The one derived field: verified means paid, an assessed amount with no
-    // verification means it is owed, and no assessment means there is nothing
-    // to pay yet.
-    paymentStatus: row.paymentVerified
+    lifecycleStatus,
+    evaluationStage: 'Initial' as const,
+    evaluationResult: 'Pending' as const,
+    // Verified means paid, an assessed amount with no verification means it is
+    // owed, and no assessment means there is nothing to pay yet.
+    paymentStatus: (row.paymentVerified
       ? 'Paid'
-      : row.assessedAmountCentavos === null ? 'Not Yet Available' : 'Pending Verification',
-    permitReleaseStatus: 'Not Ready',
+      : row.assessedAmountCentavos === null
+        ? 'Not Yet Available'
+        : 'Pending Verification') as ApplicationRecord['paymentStatus'],
+    permitReleaseStatus: releaseStatusFor(lifecycleStatus),
     assessedAmountCentavos: row.assessedAmountCentavos,
-    type: row.permitType,
-    status: row.lifecycleStatus,
-  } as unknown as ApplicationRecord;
+  });
 }

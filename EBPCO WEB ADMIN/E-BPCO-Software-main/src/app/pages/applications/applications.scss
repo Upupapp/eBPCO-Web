@@ -463,6 +463,36 @@ h3 {
   }
 }
 
+// "Loading" and "we could not ask" are the two states the queue had no way of
+// showing — the error signal was set but never rendered.
+.queue-status {
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: $radius-md;
+  background: $color-bg-muted;
+  color: $color-ink-600;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.queue-retry {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid currentcolor;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+}
+
 .quick-action-error-dismiss {
   flex-shrink: 0;
   border: none;
