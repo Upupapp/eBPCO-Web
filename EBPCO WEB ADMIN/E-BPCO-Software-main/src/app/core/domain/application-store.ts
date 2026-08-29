@@ -927,6 +927,38 @@ export class ApplicationStore {
     });
   }
 
+  /**
+   * How many REQUIRED documents are missing or unresolved — or `null` when we
+   * have no document data for this application at all.
+   *
+   * The Evaluations table used to fill this column with
+   * `Math.abs(hash(id)) % 4` — a number between 0 and 3 derived from the
+   * application's ID string, with no relationship to any document. It was
+   * rendered to officers and written into the CSV export as "Missing
+   * Documents", so it was actionable fiction: chase an applicant for papers
+   * that are not missing, or fail to chase for ones that are.
+   *
+   * `null` rather than `0` when nothing is recorded, because "no required
+   * document is outstanding" and "we hold no documents for this application"
+   * are different claims and only one of them is safe to make. Since a server
+   * load clears child collections (see `replaceApplications`), server rows are
+   * exactly that second case until a detail endpoint exists.
+   *
+   * Same rule as `canApprove`: a required document that is absent, or present
+   * but in an unresolved state, counts against the application.
+   */
+  missingRequiredDocuments(applicationId: string): number | null {
+    const row = this.getById(applicationId);
+    if (!row) return null;
+    const docs = this.getDocuments(applicationId);
+    if (docs.length === 0) return null;
+    const required = requirementsFor(row.permitType).documents.filter((d) => d.required);
+    return required.filter((req) => {
+      const match = docs.find((d) => d.requirementId === req.id);
+      return !match || UNRESOLVED_DOCUMENT_STATUSES.has(match.status);
+    }).length;
+  }
+
   /** Attaches a new document for a requirement that has none yet, or resubmits over an existing one (preserving its history) — the one entry point the intake form and the Documents tab's upload control both go through. */
   attachDocument(
     applicationId: string,

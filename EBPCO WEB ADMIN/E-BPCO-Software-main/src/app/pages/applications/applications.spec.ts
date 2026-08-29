@@ -38,6 +38,12 @@ describe('Applications — a failed queue load is visible on the list', () => {
     return fixture;
   }
 
+  // Mounting this component compiles a ~1300-line template with a dozen child
+  // components. It fits inside vitest's 5s default on an idle machine and does
+  // not when other sessions are running, so these carry their own budget — a
+  // guard that fails on load is not a guard.
+  const MOUNT_BUDGET = 20_000;
+
   it('renders the error and a retry on the LIST screen, not only in the detail branch', async () => {
     const fixture = mount(() => Promise.reject(new Error('The queue is down for maintenance.')));
     await fixture.whenStable();
@@ -54,7 +60,7 @@ describe('Applications — a failed queue load is visible on the list', () => {
       (fixture.nativeElement as HTMLElement).querySelectorAll('button'),
     ).filter((b) => b.textContent?.includes('Try again'));
     expect(retry.length).toBe(1);
-  });
+  }, MOUNT_BUDGET);
 
   it('clears the seeded rows rather than showing applications that do not exist', async () => {
     // `inject` before `configureTestingModule` instantiates the module and the
@@ -64,7 +70,7 @@ describe('Applications — a failed queue load is visible on the list', () => {
     fixture.detectChanges();
 
     expect(TestBed.inject(ApplicationStore).applications()).toEqual([]);
-  });
+  }, MOUNT_BUDGET);
 
   it('renders the permit reference beside the id', async () => {
     const row = {
@@ -87,7 +93,7 @@ describe('Applications — a failed queue load is visible on the list', () => {
     // what an applicant quotes.
     expect(text).toContain('SRV-1');
     expect(text).toContain('BP-2026-0042');
-  });
+  }, MOUNT_BUDGET);
 
   it('shows no error when the queue loads', async () => {
     const fixture = mount(() => Promise.resolve({ rows: [], nextCursor: null }));
@@ -96,5 +102,5 @@ describe('Applications — a failed queue load is visible on the list', () => {
 
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).not.toContain('The queue could not be loaded');
-  });
+  }, MOUNT_BUDGET);
 });

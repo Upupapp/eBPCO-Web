@@ -38,7 +38,12 @@ export interface EvalRow {
   /** Canonical relationship — see ApplicationStore.getApplicationContext. Never derived from `applicant`; one applicant can own multiple businesses. */
   businessId: string;
   businessName: string;
-  missingDocuments: number;
+  /**
+   * Required documents outstanding, or `null` when no document data is held for
+   * the application. This was a hash of the application's ID rendered as fact;
+   * `null` is the honest answer where a number cannot be supported.
+   */
+  missingDocuments: number | null;
   type: string;
   dateSubmitted: string;
   officer: string;
@@ -125,12 +130,6 @@ export function buildEvalTypeCards(apps: ApplicationRecord[]): EvalTypeCard[] {
   }));
 }
 
-function missingDocCount(id: string): number {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0;
-  return Math.abs(hash) % 4;
-}
-
 /** True once a real EvaluationRecord shows this application actually passed this specific stage — a permanent fact, unaffected by whatever happens at a LATER stage afterward (see stageBucket below). */
 function hasPassedStage(
   applicationId: string,
@@ -195,6 +194,8 @@ export function buildEvalRows(
   apps: ApplicationRecord[],
   stageKey: EvalTypeKey,
   allEvaluations: EvaluationRecord[] = [],
+  /** ApplicationStore.missingRequiredDocuments. Defaults to "unknown" so a caller that cannot supply it says so rather than showing a number. */
+  missingRequiredDocuments: (applicationId: string) => number | null = () => null,
 ): EvalRow[] {
   const appStage = EVAL_KEY_TO_APP_STAGE[stageKey];
   return scopedApps(apps, stageKey, allEvaluations).map((a) => {
@@ -207,7 +208,7 @@ export function buildEvalRows(
       applicant: a.applicant,
       businessId: a.businessId,
       businessName: a.businessName,
-      missingDocuments: missingDocCount(a.id),
+      missingDocuments: missingRequiredDocuments(a.id),
       type: a.permitType,
       dateSubmitted: a.dateSubmitted,
       officer: a.officer,

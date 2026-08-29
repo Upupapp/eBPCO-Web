@@ -137,7 +137,7 @@ export class Evaluations {
 
   protected readonly cardRows = computed(() => {
     const card = this.selectedCard();
-    return card ? buildEvalRows(this.applications(), card.key, this.allEvaluations()) : [];
+    return card ? buildEvalRows(this.applications(), card.key, this.allEvaluations(), (id) => this.store.missingRequiredDocuments(id)) : [];
   });
 
   protected readonly stageRows = computed(() => {
@@ -300,7 +300,7 @@ export class Evaluations {
     )?.[0];
     const card = cardKey && this.cards().find((c) => c.key === cardKey);
     if (!card) return;
-    const row = buildEvalRows(this.applications(), card.key, this.allEvaluations()).find(
+    const row = buildEvalRows(this.applications(), card.key, this.allEvaluations(), (id) => this.store.missingRequiredDocuments(id)).find(
       (r) => r.id === id,
     );
     if (!row) return;
@@ -452,7 +452,8 @@ export class Evaluations {
       Applicant: row.applicant,
       'Business ID': row.businessId,
       'Business / Project': row.businessName,
-      'Missing Documents': row.missingDocuments,
+      // '—' not '' — a blank cell in a spreadsheet reads as zero.
+      'Missing Documents': row.missingDocuments ?? '—',
       Type: row.type,
       'Reviewing Department': row.department,
       'Date Submitted': row.dateSubmitted,
