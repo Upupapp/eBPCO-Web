@@ -232,8 +232,11 @@ export class UserRoles {
     }[]
   >(() => {
     const all = this.users();
-    const active = all.filter((u) => u.status === 'Active').length;
-    const pending = all.filter((u) => u.status === 'Pending').length;
+    // Counting a status nobody knows gives 0, and 0 is a claim — "no user is
+    // active" — not an absence. Total Users is real: the roster length.
+    const anyStatusKnown = all.some((u) => u.status !== null);
+    const active = anyStatusKnown ? String(all.filter((u) => u.status === 'Active').length) : '—';
+    const pending = anyStatusKnown ? String(all.filter((u) => u.status === 'Pending').length) : '—';
     return [
       {
         icon: 'users',
@@ -248,15 +251,17 @@ export class UserRoles {
         tone: 'success',
         illustration: 'active',
         label: 'Active Users',
-        value: String(active),
-        footnote: `${Math.round((active / (all.length || 1)) * 100)}% of total`,
+        value: active,
+        footnote: anyStatusKnown
+          ? `${Math.round((Number(active) / (all.length || 1)) * 100)}% of total`
+          : 'Status not recorded',
       },
       {
         icon: 'alert-triangle',
         tone: 'warning',
         illustration: 'pending',
         label: 'Pending Invites',
-        value: String(pending),
+        value: pending,
         footnote: 'Awaiting acceptance',
       },
       {

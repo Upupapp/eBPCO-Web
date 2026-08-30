@@ -43,7 +43,8 @@ interface BusinessRow {
   contactPhone: string;
   subdomain: string;
   dateCreated: string;
-  userCount: number;
+  /** `null` when unknown. It was `8 + (hash(id) % 16)`, which sat beside a real "Active Users" count and contradicted it. */
+  userCount: number | null;
   status: 'Active' | 'Inactive';
 }
 
@@ -68,12 +69,6 @@ function slugify(value: string): string {
     .replace(/[^a-z0-9\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-');
-}
-
-function hashOf(id: string): number {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0;
-  return Math.abs(hash);
 }
 
 interface GrowthPoint {
@@ -173,13 +168,14 @@ export class Businesses {
   // A real Business's registration/contact fields — never a fabricated
   // dataset — with the owner's contact info joined through the real
   // `Applicant` (never guessed from the business name). Fields with no
-  // real backing data in the domain model (subdomain, userCount) stay as
-  // deterministic-per-id sample placeholders, matching the "SAMPLE DATA"
-  // precedent used elsewhere in this app, and are cosmetic only — they
-  // carry no permit-ownership meaning.
+  // `userCount` used to be `8 + (hash(id) % 16)`. Once the detail panel stopped
+  // inventing staff, that hash sat beside a real "Active Users 1" and openly
+  // contradicted it — 21 users claimed, one known. It is `null` now and renders
+  // as a dash. `subdomain` remains derived from the business name; it is not a
+  // count and it feeds this page's search filter, so it is recorded rather than
+  // changed here.
   private toBusinessRow(b: Business): BusinessRow {
     const owner = this.store.getApplicant(b.ownerApplicantId);
-    const seed = hashOf(b.id);
     return {
       id: b.id,
       code: b.name,
@@ -189,7 +185,7 @@ export class Businesses {
       contactPhone: owner?.mobileNumber ?? 'Not provided',
       subdomain: `${slugify(b.name)}.castillasorsogon.gov.ph`,
       dateCreated: b.dateRegistered,
-      userCount: 8 + (seed % 16),
+      userCount: null,
       status: b.status,
     };
   }
@@ -385,7 +381,8 @@ export class Businesses {
       Phone: row.contactPhone,
       Subdomain: row.subdomain,
       'Date Registered': row.dateCreated,
-      Users: row.userCount,
+      // '—' not '' — a blank spreadsheet cell reads as zero.
+      Users: row.userCount ?? '—',
       Status: row.status,
     };
   }
