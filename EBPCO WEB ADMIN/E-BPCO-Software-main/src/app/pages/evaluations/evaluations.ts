@@ -59,12 +59,15 @@ type View = 'list' | 'detail' | 'record';
 // all — this filter had silently never worked.
 const TYPE_OPTIONS = ALL_PERMIT_TYPES;
 
-const EVAL_KEY_TO_APP_STAGE: Record<EvalTypeCard['key'], EvaluationStage> = {
+const EVAL_KEY_TO_APP_STAGE: Record<EvalTypeCard['key'], EvaluationStage | null> = {
   initial: 'Initial',
   zoning: 'Zoning',
   fire: 'Fire Safety',
   obo: 'OBO',
   final: 'Final Approval',
+  // No stage. An evaluation cannot be recorded against one that is unknown, so
+  // the two actions below refuse rather than picking a stage on the row's behalf.
+  unrecorded: null,
 };
 
 // Matches the shared KpiCard's own TONE_ACCENT exactly — the step
@@ -211,7 +214,10 @@ export class Evaluations {
     const app = this.recordApplication();
     if (!app) return [];
     const records = this.store.getEvaluations(app.id);
-    const currentIdx = EVALUATION_STAGE_ORDER.indexOf(app.evaluationStage);
+    // -1 when the stage is unknown, so no step is marked current rather than
+    // 'Initial' being marked current on no evidence.
+    const currentIdx =
+      app.evaluationStage === null ? -1 : EVALUATION_STAGE_ORDER.indexOf(app.evaluationStage);
     return EVALUATION_STAGE_ORDER.map((stage, idx) => {
       const stageRecords = records.filter((r) => r.stage === stage);
       const latest =
@@ -295,9 +301,9 @@ export class Evaluations {
     if (!id || this.appliedApplicationIdParam) return;
     const app = this.store.getById(id);
     if (!app) return;
-    const cardKey = (Object.entries(EVAL_KEY_TO_APP_STAGE) as [EvalTypeKey, EvaluationStage][]).find(
-      ([, stage]) => stage === app.evaluationStage,
-    )?.[0];
+    const cardKey = (
+      Object.entries(EVAL_KEY_TO_APP_STAGE) as [EvalTypeKey, EvaluationStage | null][]
+    ).find(([, stage]) => stage === app.evaluationStage)?.[0];
     const card = cardKey && this.cards().find((c) => c.key === cardKey);
     if (!card) return;
     const row = buildEvalRows(this.applications(), card.key, this.allEvaluations(), (id) => this.store.missingRequiredDocuments(id)).find(
@@ -405,9 +411,13 @@ export class Evaluations {
     // would call recordEvaluation for THIS stage while the application is
     // actually being evaluated at a later one.
     if (!row.isCurrentStage) return;
+    // No stage means nothing to advance PAST. Recording against a guessed stage
+    // is what put every server row in the wrong queue to begin with.
+    const stage = EVAL_KEY_TO_APP_STAGE[card.key];
+    if (stage === null) return;
     this.actionError.set(null);
     const actor = this.session.name() || 'Staff';
-    const ok = this.store.recordEvaluation(row.id, EVAL_KEY_TO_APP_STAGE[card.key], 'Passed', actor);
+    const ok = this.store.recordEvaluation(row.id, stage, 'Passed', actor);
     if (!ok) {
       const message = `Can't advance ${row.applicant}'s application — it's currently Rejected or Revision Required, not actively Under Evaluation. Open it in Applications to see its real status.`;
       this.actionError.set(message);
@@ -422,17 +432,13 @@ export class Evaluations {
     const card = this.selectedCard();
     if (!card) return;
     if (!row.isCurrentStage) return;
+    const stage = EVAL_KEY_TO_APP_STAGE[card.key];
+    if (stage === null) return;
     const remarks = this.revisionRemarks().trim();
     if (!remarks) return;
     this.actionError.set(null);
     const actor = this.session.name() || 'Staff';
-    const ok = this.store.recordEvaluation(
-      row.id,
-      EVAL_KEY_TO_APP_STAGE[card.key],
-      'Revision Required',
-      actor,
-      remarks,
-    );
+    const ok = this.store.recordEvaluation(row.id, stage, 'Revision Required', actor, remarks);
     if (ok) {
       this.revisionRemarks.set('');
       this.toast.success(`${row.applicant}'s application returned for revision.`);

@@ -1,5 +1,5 @@
 import { ApplicationRecord, withProjectedFields } from '../../core/domain/application.model';
-import { buildEvalRows } from './evaluations-data';
+import { buildEvalRows, buildEvalTypeCards } from './evaluations-data';
 
 function makeApp(overrides: Partial<ApplicationRecord> = {}): ApplicationRecord {
   const base = {
@@ -69,5 +69,45 @@ describe('buildEvalRows — business/project context is preserved unchanged', ()
     const zoningApp = makeApp({ id: 'E-BPCO-2026-000021', evaluationStage: 'Zoning' });
     const rows = buildEvalRows([initialApp, zoningApp], 'initial');
     expect(rows.map((r) => r.id)).toEqual(['E-BPCO-2026-000020']);
+  });
+});
+
+
+/**
+ * Rows whose evaluation stage the server never sent.
+ *
+ * The staff queue carries no stage, and the mapper used to stamp every server
+ * row `'Initial'`. `buildEvalTypeCards` therefore counted them all under Initial
+ * Evaluation and `scopedApps` never placed one in a later stage's queue — an
+ * officer opening Final Approval saw it empty with applications sitting in it.
+ * Owner ruling, 29 Aug: give them their own bucket rather than a claim.
+ */
+describe('evaluations-data — applications with no recorded stage', () => {
+  const unknown = makeApp({ id: 'SRV-1', evaluationStage: null, evaluationResult: null });
+  const initial = makeApp({ id: 'SEED-1', evaluationStage: 'Initial' });
+
+  it('counts them under "Stage not recorded", never under Initial', () => {
+    const cards = buildEvalTypeCards([unknown, initial]);
+    const by = (key: string) => cards.find((c) => c.key === key)!;
+
+    expect(by('unrecorded').count).toBe(1);
+    // The whole defect: this used to be 2.
+    expect(by('initial').count).toBe(1);
+    expect(by('unrecorded').title).toBe('Stage not recorded');
+  });
+
+  it('keeps them out of every real stage queue', () => {
+    for (const key of ['initial', 'zoning', 'fire', 'obo', 'final'] as const) {
+      const ids = buildEvalRows([unknown], key).map((r) => r.id);
+      expect(ids).not.toContain('SRV-1');
+    }
+    expect(buildEvalRows([unknown], 'unrecorded').map((r) => r.id)).toEqual(['SRV-1']);
+  });
+
+  it('never marks an unknown stage as the current one', () => {
+    // `null === null` would be true and would offer Passed / Return for Revision
+    // on a row whose stage nobody knows.
+    const [row] = buildEvalRows([unknown], 'unrecorded');
+    expect(row.isCurrentStage).toBe(false);
   });
 });

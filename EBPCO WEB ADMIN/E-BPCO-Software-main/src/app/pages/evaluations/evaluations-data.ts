@@ -5,7 +5,12 @@ import { KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-card';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 
-export type EvalTypeKey = 'initial' | 'zoning' | 'fire' | 'obo' | 'final';
+// 'unrecorded' is not a stage an application can be AT — it is the absence of
+// the fact. The staff queue does not send a stage, and every server row used to
+// be stamped 'Initial', which counted them all under Initial Evaluation and kept
+// them out of every later queue. They get their own bucket instead of a claim
+// (owner ruling, 29 Aug).
+export type EvalTypeKey = 'initial' | 'zoning' | 'fire' | 'obo' | 'final' | 'unrecorded';
 // Previously 4 buckets ('pending-review' and 'under-review' both meaning
 // "nobody has ruled on this yet") — collapsed to 3, since the distinction
 // never meant anything an admin could act on differently. 'passed' is a
@@ -63,12 +68,14 @@ export interface EvalRow {
   department: string;
 }
 
-const EVAL_KEY_TO_APP_STAGE: Record<EvalTypeKey, EvaluationStage> = {
+/** `null` for the bucket that exists precisely because no stage is known. */
+const EVAL_KEY_TO_APP_STAGE: Record<EvalTypeKey, EvaluationStage | null> = {
   initial: 'Initial',
   zoning: 'Zoning',
   fire: 'Fire Safety',
   obo: 'OBO',
   final: 'Final Approval',
+  unrecorded: null,
 };
 
 const CARD_META: Omit<EvalTypeCard, 'count'>[] = [
@@ -112,6 +119,16 @@ const CARD_META: Omit<EvalTypeCard, 'count'>[] = [
     tone: 'success',
     illustration: 'evaluations',
   },
+  // Last, and described as what it is. These rows are not "at" this stage —
+  // the portal simply has not been told where they are.
+  {
+    key: 'unrecorded',
+    title: 'Stage not recorded',
+    description: 'Applications the server has not told this portal the evaluation stage for.',
+    icon: 'help-circle',
+    tone: 'info',
+    illustration: 'evaluations',
+  },
 ];
 
 // Status is derived from stage (not stored independently) so a row's badge
@@ -126,6 +143,8 @@ export const STAGE_STATUS: Record<Stage, RowStatus> = {
 export function buildEvalTypeCards(apps: ApplicationRecord[]): EvalTypeCard[] {
   return CARD_META.map((meta) => ({
     ...meta,
+    // Both sides are null for the 'unrecorded' card, which is exactly the rows
+    // whose stage the portal does not know.
     count: apps.filter((a) => a.evaluationStage === EVAL_KEY_TO_APP_STAGE[meta.key]).length,
   }));
 }
@@ -156,10 +175,12 @@ function hasPassedStage(
  */
 function stageBucket(
   app: ApplicationRecord,
-  appStage: EvaluationStage,
+  appStage: EvaluationStage | null,
   allEvaluations: EvaluationRecord[],
 ): Stage {
-  if (hasPassedStage(app.id, appStage, allEvaluations)) return 'passed';
+  // With no stage there is nothing to have passed; the row still shows its
+  // lifecycle-derived state so it is workable rather than inert.
+  if (appStage !== null && hasPassedStage(app.id, appStage, allEvaluations)) return 'passed';
   if (app.lifecycleStatus === 'Revision Required' || app.lifecycleStatus === 'Rejected') {
     return 'returned';
   }
@@ -179,8 +200,13 @@ function scopedApps(
   allEvaluations: EvaluationRecord[],
 ): ApplicationRecord[] {
   const appStage = EVAL_KEY_TO_APP_STAGE[stageKey];
+  // The unknown-stage bucket holds exactly the rows with no stage, and no real
+  // stage's queue may claim them — "past this stage" is meaningless without one.
+  if (appStage === null) return apps.filter((a) => a.evaluationStage === null);
+
   const stageIdx = EVALUATION_STAGE_ORDER.indexOf(appStage);
   return apps.filter((a) => {
+    if (a.evaluationStage === null) return false;
     if (a.evaluationStage === appStage) return true;
     return (
       EVALUATION_STAGE_ORDER.indexOf(a.evaluationStage) > stageIdx &&
@@ -200,9 +226,11 @@ export function buildEvalRows(
   const appStage = EVAL_KEY_TO_APP_STAGE[stageKey];
   return scopedApps(apps, stageKey, allEvaluations).map((a) => {
     const stage = stageBucket(a, appStage, allEvaluations);
-    const departmentId = requirementsFor(a.permitType).evaluationSequence.find(
-      (s) => s.stage === appStage,
-    )?.departmentId;
+    const departmentId =
+      appStage === null
+        ? undefined
+        : requirementsFor(a.permitType).evaluationSequence.find((s) => s.stage === appStage)
+            ?.departmentId;
     return {
       id: a.id,
       applicant: a.applicant,
@@ -214,7 +242,9 @@ export function buildEvalRows(
       officer: a.officer,
       status: STAGE_STATUS[stage],
       stage,
-      isCurrentStage: a.evaluationStage === appStage,
+      // `null === null` would be true, which would offer Passed/Return on a row
+      // whose stage nobody knows. An unknown stage is never "the current one".
+      isCurrentStage: appStage !== null && a.evaluationStage === appStage,
       department: departmentId ? departmentName(departmentId) : '—',
     };
   });
