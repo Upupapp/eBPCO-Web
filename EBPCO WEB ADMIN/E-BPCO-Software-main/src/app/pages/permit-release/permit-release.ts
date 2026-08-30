@@ -42,7 +42,8 @@ interface ReleaseRow {
   businessId: string;
   businessName: string;
   city: string;
-  type: string;
+  /** `null` when the portal could not name the permit. */
+  type: string | null;
   approvalStatus: string;
   paymentStatus: string;
   permitStatus: PermitStatus;
@@ -348,7 +349,7 @@ export class PermitRelease {
         r.applicant.toLowerCase().includes(term) ||
         r.businessName.toLowerCase().includes(term) ||
         r.city.toLowerCase().includes(term) ||
-        r.type.toLowerCase().includes(term)
+        (r.type?.toLowerCase().includes(term) ?? false)
       );
     });
   });

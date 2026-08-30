@@ -166,7 +166,7 @@ export class ApplicationStore {
         businessId: string;
         business: Business | undefined;
         businessLabel: string;
-        permitType: PermitType;
+        permitType: PermitType | null;
       }
     | undefined {
     const app = this.getById(applicationId);
@@ -577,6 +577,8 @@ export class ApplicationStore {
 
   private seedAssessmentFor(app: ApplicationRecord): void {
     if (!ApplicationStore.PAYMENT_ELIGIBLE_STATUSES.has(app.lifecycleStatus)) return;
+    // No permit type, no fee schedule to assess against.
+    if (app.permitType === null) return;
     const draft = this.assessmentStore.draftAssessment(
       app.id,
       app.permitType,
@@ -1096,6 +1098,8 @@ export class ApplicationStore {
     if (!row) return false;
     const existing = this.assessmentStore.getActiveAssessment(applicationId);
     if (existing) return true; // already drafted/issued — nothing more for this one-click action to do
+    // No permit type means no fee schedule to draft against.
+    if (row.permitType === null) return false;
     const draft = this.assessmentStore.draftAssessment(applicationId, row.permitType, actor, role);
     if (!draft) return false;
     if (!draft.hasUnresolvedLines) {

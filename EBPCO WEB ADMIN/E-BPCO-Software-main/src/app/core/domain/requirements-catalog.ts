@@ -889,6 +889,49 @@ export function assertCatalogComplete(): void {
   }
 }
 
-export function requirementsFor(permitType: PermitType): ApplicationTypeRequirements {
-  return REQUIREMENTS_CATALOG[permitType];
+/**
+ * The answer for a permit type this catalogue does not hold — including `null`,
+ * meaning the portal could not name the permit at all.
+ *
+ * Everything is empty rather than plausible: no required documents, no
+ * evaluation sequence. A consumer reads "nothing to check", which is true, and
+ * the prose says why rather than leaving a reader to guess at blank fields.
+ */
+const UNKNOWN_PERMIT_REQUIREMENTS: ApplicationTypeRequirements = {
+  permitType: 'Certificate of Occupancy',
+  requiredForm: '—',
+  documents: [],
+  responsibleDepartmentId: '',
+  evaluationSequence: [],
+  paymentRequirements: 'Not known — this portal has no requirements for this permit type.',
+  inspectionRequirements: 'Not known — this portal has no requirements for this permit type.',
+  validityRules: 'Not known — this portal has no requirements for this permit type.',
+  validityMonths: null,
+  finalDocument: '—',
+  releaseRequirements: 'Not known — this portal has no requirements for this permit type.',
+  sourceNote: 'No catalogue entry for this permit type.',
+  effectiveDate: '',
+  verified: false,
+  sources: [],
+};
+
+/**
+ * Requirements for a permit type — never `undefined`, even for a type this
+ * catalogue does not hold.
+ *
+ * It used to be a bare `REQUIREMENTS_CATALOG[permitType]`. Six call sites
+ * dereference the result immediately (`.documents`, `.evaluationSequence`), so
+ * an unknown key was a **TypeError**, not a missing lookup. The wire made that
+ * reachable: it sends internal keys ('New Construction') while this catalogue
+ * is keyed by published names ('Building Permit – New Construction'), and a
+ * cast used to let one through as the other.
+ *
+ * `null` — the portal cannot name this permit — yields the same empty answer:
+ * no documents required, no evaluation sequence, and prose saying so. Empty is
+ * a safe claim here because every consumer treats it as "nothing to check",
+ * whereas a throw takes the whole page down.
+ */
+export function requirementsFor(permitType: PermitType | null): ApplicationTypeRequirements {
+  if (permitType === null) return UNKNOWN_PERMIT_REQUIREMENTS;
+  return REQUIREMENTS_CATALOG[permitType] ?? UNKNOWN_PERMIT_REQUIREMENTS;
 }

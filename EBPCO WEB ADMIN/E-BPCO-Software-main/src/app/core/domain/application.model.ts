@@ -38,8 +38,21 @@ export interface ApplicationRecord {
   applicantId: string;
   applicant: string;
   location: string;
-  permitType: PermitType;
-  applicationAction: ApplicationAction;
+  /**
+   * The PUBLISHED permit name, or `null` when the portal cannot name it.
+   *
+   * The wire speaks a different vocabulary: the service keys records on short
+   * internal names ('New Construction'), while this union holds the published
+   * names a citizen reads ('Building Permit – New Construction'). The mapper
+   * used to cast one into the other, which put a value the union does not
+   * contain into this field — and `REQUIREMENTS_CATALOG[permitType]` then
+   * returns `undefined` for it, which its callers dereference. A TypeError on
+   * real data, not a silent miss.
+   *
+   * Nullable so an unnameable row is visibly unnamed rather than mislabelled.
+   */
+  permitType: PermitType | null;
+  applicationAction: ApplicationAction | null;
   officer: string;
   dateSubmitted: string;
   /** Same moment as dateSubmitted, kept as a real Date for sorting/range filtering. */
@@ -72,14 +85,15 @@ export interface ApplicationRecord {
    * — and are set by the SAME store mutation that sets the field they
    * project from, so they can never independently drift.
    */
-  type: string;
+  /** Mirrors `permitType`, so it is `null` for the same reason: the portal could not name the permit. */
+  type: string | null;
   status: CoarseStatus;
 }
 
 /** Builds the two migration-bridge fields from the rest of a record — used by the store on every create/update so `type`/`status` never drift. */
 export function withProjectedFields<T extends Omit<ApplicationRecord, 'type' | 'status'>>(
   record: T,
-): T & { type: string; status: CoarseStatus } {
+): T & { type: string | null; status: CoarseStatus } {
   return { ...record, type: record.permitType, status: coarseStatus(record.lifecycleStatus) };
 }
 

@@ -49,7 +49,8 @@ export interface EvalRow {
    * `null` is the honest answer where a number cannot be supported.
    */
   missingDocuments: number | null;
-  type: string;
+  /** `null` when the portal could not name the permit. */
+  type: string | null;
   dateSubmitted: string;
   officer: string;
   status: RowStatus;

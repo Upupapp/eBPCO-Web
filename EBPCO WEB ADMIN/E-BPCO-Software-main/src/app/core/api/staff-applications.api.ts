@@ -3,7 +3,12 @@ import { Injectable, inject } from '@angular/core';
 import { ApiClient } from './api.client';
 import { ApplicationRecord, withProjectedFields } from '../domain/application.model';
 import { ApplicationLifecycleStatus, PermitReleaseStatus } from '../domain/status.model';
-import { PermitType, ApplicationAction } from '../domain/permit.model';
+import {
+  ApplicationAction,
+  PermitType,
+  isValidApplicationAction,
+  isValidPermitType,
+} from '../domain/permit.model';
 
 /**
  * The staff queue, from the server.
@@ -52,6 +57,12 @@ interface QueueRow {
   readonly id: string;
   readonly referenceNumber: string;
   readonly permitType: string;
+  /**
+   * The PUBLISHED name, which the service is adding alongside `permitType`.
+   * Optional until it lands; preferred the moment it does, with no further
+   * change here.
+   */
+  readonly permitTypeName?: string | null;
   readonly applicationAction: string;
   readonly lifecycleStatus: string;
   readonly businessName: string | null;
@@ -98,6 +109,35 @@ function releaseStatusFor(status: ApplicationLifecycleStatus): PermitReleaseStat
   return 'Not Ready';
 }
 
+/**
+ * The permit type as a name this portal's vocabulary contains — or `null`.
+ *
+ * **The wire and this union speak different vocabularies.** The service keys its
+ * records on 17 short internal names (`'New Construction'`, `'Civil/Structural'`,
+ * `'Fencing'`); `PermitType` holds the 19 published names a citizen reads
+ * (`'Building Permit – New Construction'`, `'Civil / Structural Permit'`,
+ * `'Fencing Permit'`). They are two vocabularies on purpose, not a mismatch to
+ * repair here.
+ *
+ * This used to be `row.permitType as PermitType`. The cast silenced the
+ * compiler and put an internal key into a typed field, where
+ * `REQUIREMENTS_CATALOG[permitType]` returns `undefined` and its callers
+ * dereference it — **a TypeError on real data**, not merely a silent miss.
+ *
+ * No mapping is done here on purpose. Translating internal keys to published
+ * names would put a third copy of a vocabulary that already exists in the
+ * service, and it cannot be done honestly anyway: two internal keys have no
+ * agreed published name. The service is adding `permitTypeName`; this prefers
+ * it the moment it arrives.
+ */
+function publishedPermitType(row: QueueRow): PermitType | null {
+  const published = row.permitTypeName;
+  if (typeof published === 'string' && isValidPermitType(published)) return published;
+  // A row that already speaks the published vocabulary (seeded or legacy).
+  if (isValidPermitType(row.permitType)) return row.permitType;
+  return null;
+}
+
 function toRecord(row: QueueRow): ApplicationRecord {
   const submitted = row.submittedAt === null ? null : new Date(row.submittedAt);
   const lifecycleStatus = row.lifecycleStatus as ApplicationLifecycleStatus;
@@ -109,8 +149,10 @@ function toRecord(row: QueueRow): ApplicationRecord {
     applicantId: '',
     applicant: row.applicantName,
     location: row.location ?? NOT_SENT,
-    permitType: row.permitType as PermitType,
-    applicationAction: row.applicationAction as ApplicationAction,
+    permitType: publishedPermitType(row),
+    applicationAction: isValidApplicationAction(row.applicationAction)
+      ? row.applicationAction
+      : null,
     officer: NOT_SENT,
     dateSubmitted: submitted === null ? NOT_SENT : submitted.toISOString().slice(0, 10),
     dateValue: submitted ?? new Date(0),

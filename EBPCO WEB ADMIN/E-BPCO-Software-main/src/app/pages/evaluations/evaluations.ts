@@ -144,7 +144,7 @@ export class Evaluations {
         r.id.toLowerCase().includes(term) ||
         r.applicant.toLowerCase().includes(term) ||
         r.businessName.toLowerCase().includes(term) ||
-        r.type.toLowerCase().includes(term)
+        (r.type?.toLowerCase().includes(term) ?? false)
       );
     });
   });

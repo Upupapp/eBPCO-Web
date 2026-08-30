@@ -33,7 +33,10 @@ describe('StaffApplicationsApi', () => {
   const row = (over: Record<string, unknown> = {}) => ({
     id: 'APP-1',
     referenceNumber: 'BP-2026-0001',
-    permitType: 'Building Permit',
+    // What the wire actually sends: the service's INTERNAL key, not a
+    // published name. The old fixture used 'Building Permit', which is a
+    // service_domain value and not a permit type at all.
+    permitType: 'New Construction',
     applicationAction: 'New',
     lifecycleStatus: 'Submitted',
     businessName: 'Villanueva Hardware',
@@ -93,8 +96,39 @@ describe('StaffApplicationsApi', () => {
     expect(record.evaluationResult).toBeNull();
   });
 
-  it('mirrors type from permitType', async () => {
+  it('refuses an internal permit key rather than casting it into the union', async () => {
+    // The service keys records on 'New Construction'; PermitType holds the
+    // published 'Building Permit – New Construction'. A cast used to let the
+    // key through, and REQUIREMENTS_CATALOG[key] is undefined — whose callers
+    // dereference it. A TypeError on real data, not a silent miss.
+    const record = await fetchOne({ permitType: 'Civil/Structural' });
+    expect(record.permitType).toBeNull();
+    expect(record.type).toBeNull();
+  });
+
+  it('uses permitTypeName the moment the service sends it', async () => {
+    const record = await fetchOne({
+      permitType: 'Civil/Structural',
+      permitTypeName: 'Civil / Structural Permit',
+    });
+    expect(record.permitType).toBe('Civil / Structural Permit');
+    expect(record.type).toBe('Civil / Structural Permit');
+  });
+
+  it('ignores a permitTypeName that is not in the published vocabulary', async () => {
+    // Two internal keys have no agreed published name. A client that trusted
+    // whatever arrived would put an unpublished string in a published field.
+    const record = await fetchOne({ permitType: 'X', permitTypeName: 'Sanitary/Plumbing' });
+    expect(record.permitType).toBeNull();
+  });
+
+  it('still accepts a row that already speaks the published vocabulary', async () => {
     expect((await fetchOne({ permitType: 'Electrical Permit' })).type).toBe('Electrical Permit');
+  });
+
+  it('refuses an application action the union does not contain', async () => {
+    expect((await fetchOne({ applicationAction: 'Reissuance' })).applicationAction).toBeNull();
+    expect((await fetchOne({ applicationAction: 'Renewal' })).applicationAction).toBe('Renewal');
   });
 
   it('derives paymentStatus from the two fields the row does carry', async () => {

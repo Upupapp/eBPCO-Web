@@ -419,6 +419,8 @@ export class Payments {
       this.toast.error("Can't revise this assessment from its current status.");
       return;
     }
+    // Without a permit type there is no fee schedule to revise against.
+    if (app.permitType === null) return;
     const revised = this.assessmentStore.reviseIssuedAssessment(
       a.id,
       app.permitType,
