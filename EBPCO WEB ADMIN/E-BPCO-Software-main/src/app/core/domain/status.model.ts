@@ -37,6 +37,33 @@ export type ApplicationLifecycleStatus =
   | 'Cancelled'
   | 'Expired';
 
+// Every member of the union, terminal ones included. NOT `LIFECYCLE_SEQUENCE`
+// — that is the fifteen-step happy path and omits 'Revision Required',
+// 'Rejected', 'Cancelled' and 'Expired', so validating against it would refuse
+// four perfectly valid statuses. Guarded by a spec that counts both.
+const ALL_LIFECYCLE_STATUSES: ReadonlySet<ApplicationLifecycleStatus> = new Set([
+  'Draft', 'Submitted', 'Received', 'Document Verification', 'Under Evaluation',
+  'Revision Required', 'Assessed', 'Payment Submitted', 'Payment Under Verification',
+  'Payment Verified', 'For Approval', 'Approved', 'Permit Generated',
+  'Ready for Release', 'Released', 'Completed', 'Rejected', 'Cancelled', 'Expired',
+]);
+
+/**
+ * The companion to `isValidPermitType`, for the same reason: the wire is an
+ * untyped source and `as ApplicationLifecycleStatus` puts whatever arrived into
+ * a typed field.
+ *
+ * Unlike the permit vocabulary the two ends agree here — the service's own
+ * `LIFECYCLE_STATUSES` is these same 19 names in this same order — so this
+ * guards against DRIFT rather than a standing mismatch. An unknown status used
+ * to coerce silently: `coarseStatus` falls through to 'Under Review', so a
+ * status this portal had never heard of was displayed as a claim about where
+ * the application stands.
+ */
+export function isValidLifecycleStatus(value: string): value is ApplicationLifecycleStatus {
+  return ALL_LIFECYCLE_STATUSES.has(value as ApplicationLifecycleStatus);
+}
+
 // The ordered "happy path" through the non-terminal states — used to
 // render a status timeline. Revision Required is reachable from Document
 // Verification/Under Evaluation/For Approval and loops back rather than

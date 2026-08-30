@@ -2,7 +2,11 @@ import { Injectable, inject } from '@angular/core';
 
 import { ApiClient } from './api.client';
 import { ApplicationRecord, withProjectedFields } from '../domain/application.model';
-import { ApplicationLifecycleStatus, PermitReleaseStatus } from '../domain/status.model';
+import {
+  ApplicationLifecycleStatus,
+  PermitReleaseStatus,
+  isValidLifecycleStatus,
+} from '../domain/status.model';
 import {
   ApplicationAction,
   PermitType,
@@ -140,7 +144,28 @@ function publishedPermitType(row: QueueRow): PermitType | null {
 
 function toRecord(row: QueueRow): ApplicationRecord {
   const submitted = row.submittedAt === null ? null : new Date(row.submittedAt);
-  const lifecycleStatus = row.lifecycleStatus as ApplicationLifecycleStatus;
+  // The last cast at this boundary, replaced by a check rather than a nullable
+  // field — and the difference from `permitType` is deliberate.
+  //
+  // There the two ends genuinely disagree (internal keys vs published names), so
+  // an unnameable permit is a NORMAL state a row can be in, and the record
+  // carries `null` for it. Here the vocabularies MATCH: the service's own
+  // `LIFECYCLE_STATUSES` is these same 19 names in this order. An unrecognised
+  // status is therefore not a normal state — it means this portal is older than
+  // the service, and every row of that status is affected, not one.
+  //
+  // So it fails the load with a precise message instead of threading `null`
+  // through sixteen call sites and a template that lowercases the projection.
+  // Coercing was the third option and the worst: `coarseStatus` falls through
+  // to 'Under Review', so a status this portal had never heard of would be
+  // displayed as a confident claim about where the application stands.
+  if (!isValidLifecycleStatus(row.lifecycleStatus)) {
+    throw new Error(
+      `The server sent an application status this portal does not recognise: `
+        + `"${row.lifecycleStatus}". The portal is likely older than the service.`,
+    );
+  }
+  const lifecycleStatus = row.lifecycleStatus;
   return withProjectedFields({
     id: row.id,
     referenceNumber: row.referenceNumber,
