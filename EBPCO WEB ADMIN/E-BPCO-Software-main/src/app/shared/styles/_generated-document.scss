@@ -1,0 +1,129 @@
+// Formal, restrained, printable A4 document styling — deliberately
+// SEPARATE from _tokens.scss/_motion.scss. This partial intentionally does
+// NOT `@use` the app's brand-red/decorative token system: a generated
+// government permit must look like a real official document, not a
+// dashboard card. No gradients, no shadows, no rounded corners, no brand
+// color beyond black/gray ink and a single muted watermark tone.
+
+$doc-ink: #1a1a1a;
+$doc-line: #333333;
+$doc-muted: #5a5a5a;
+$doc-faint: #8a8a8a;
+$doc-border: #000000;
+$doc-watermark: rgba(150, 20, 20, 0.14);
+$doc-font: Georgia, 'Times New Roman', 'Cambria', serif;
+$doc-font-sans: Arial, Helvetica, sans-serif;
+
+// A4 at 96dpi: 210mm x 297mm ≈ 794px x 1123px. Screen preview scales the
+// page visually; print CSS below pins it to true A4.
+$doc-page-width: 210mm;
+$doc-page-min-height: 297mm;
+
+@mixin doc-page {
+  width: $doc-page-width;
+  min-height: $doc-page-min-height;
+  margin: 0 auto;
+  padding: 16mm 18mm;
+  background: #ffffff;
+  color: $doc-ink;
+  font-family: $doc-font;
+  font-size: 10.5pt;
+  line-height: 1.45;
+  position: relative;
+  box-sizing: border-box;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
+
+.doc-generated-page {
+  @include doc-page;
+  border: 1px solid #d0d0d0;
+
+  @media print {
+    border: none;
+    box-shadow: none;
+  }
+}
+
+.doc-generated-section {
+  margin: 0 0 0.9rem;
+
+  h2 {
+    font-family: $doc-font-sans;
+    font-size: 9.5pt;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $doc-ink;
+    border-bottom: 1px solid $doc-border;
+    padding-bottom: 0.2rem;
+    margin: 0 0 0.5rem;
+  }
+}
+
+.doc-generated-fields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.3rem 1.5rem;
+  margin: 0;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-bottom: 1px dotted #b0b0b0;
+    padding: 0.15rem 0;
+  }
+
+  dt {
+    font-family: $doc-font-sans;
+    font-size: 8.5pt;
+    color: $doc-muted;
+    white-space: nowrap;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+    text-align: right;
+  }
+}
+
+.doc-generated-placeholder {
+  font-style: italic;
+  color: $doc-faint;
+  font-weight: 400;
+}
+
+.doc-generated-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9pt;
+  margin: 0.4rem 0;
+
+  th,
+  td {
+    border: 1px solid $doc-line;
+    padding: 0.3rem 0.5rem;
+    text-align: left;
+  }
+
+  th {
+    font-family: $doc-font-sans;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: #f2f2f2;
+  }
+}
+
+.doc-generated-note {
+  font-size: 8.5pt;
+  color: $doc-muted;
+  margin: 0.3rem 0 0;
+}

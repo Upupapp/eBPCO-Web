@@ -14,6 +14,7 @@ import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS } from '../../core/session/permissions';
 import { ALL_PERMIT_TYPES, PermitType, ReleaseMethod } from '../../core/domain/permit.model';
 import { DocumentPreview } from '../../shared/document-preview/document-preview';
+import { GeneratedPermitDocumentModal } from '../../shared/generated-document/generated-permit-document-modal';
 import { requirementsFor, RequirementDocument } from '../../core/domain/requirements-catalog';
 import { RequirementsConfigStore } from '../../core/domain/requirements-config-store';
 import { PaymentConfigStore } from '../../core/domain/payment-config-store';
@@ -62,7 +63,17 @@ interface RingStat {
 
 @Component({
   selector: 'app-permit-release',
-  imports: [Topbar, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, DocumentPreview],
+  imports: [
+    Topbar,
+    Icon,
+    Avatar,
+    KpiCard,
+    Pagination,
+    FormsModule,
+    FilterPanel,
+    DocumentPreview,
+    GeneratedPermitDocumentModal,
+  ],
   templateUrl: './permit-release.html',
   styleUrl: './permit-release.scss',
 })

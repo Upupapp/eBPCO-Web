@@ -379,9 +379,8 @@
   </div>
 
   @if (previewTarget(); as target) {
-    <app-document-preview
+    <app-generated-permit-document-modal
       [applicationId]="target.id"
-      kind="permit"
       (closed)="closePermitPreview()"
     />
   }

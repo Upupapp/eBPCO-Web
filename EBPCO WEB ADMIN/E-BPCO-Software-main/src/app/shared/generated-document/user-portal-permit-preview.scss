@@ -1,0 +1,85 @@
+// Ported verbatim from ebpco-user-portal's src/styles.scss (.doc-generated-*
+// rules). The base classes (.doc-generated-page, .doc-generated-section,
+// .doc-generated-fields, .doc-generated-placeholder, .doc-generated-table,
+// .doc-generated-note) come from ../styles/_generated-document.scss, the
+// same partial GeneratedPermitDocument itself @uses — Angular's emulated
+// encapsulation scopes styles per-component, so it must be @used here too
+// rather than assumed global. This file then adds the classes that partial
+// doesn't define — header/title/number-block/signature/qr/footer/watermark
+// — so this component matches the User Portal's rendering pixel-for-pixel.
+
+@use '../styles/_generated-document' as *;
+
+:host {
+  display: block;
+}
+
+.doc-generated-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  text-align: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+.doc-generated-header img { width: 52px; height: 52px; object-fit: contain; flex-shrink: 0; }
+.doc-generated-header .lines { display: flex; flex-direction: column; font-family: Arial, Helvetica, sans-serif; font-size: 9pt; color: #1a1a1a; line-height: 1.3; }
+.doc-generated-header .lines strong { font-size: 11pt; }
+.doc-generated-header .office-line { font-size: 8.5pt; color: #5a5a5a; }
+
+.doc-generated-title { text-align: center; margin: 6px 0 14px; }
+.doc-generated-title h1 { margin: 0; font-size: 15pt; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: #1a1a1a; }
+.doc-generated-title .subtitle { margin: 2px 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; font-weight: 700; letter-spacing: 0.06em; color: #5a5a5a; }
+
+.doc-generated-numberblock {
+  border: 1px solid #000;
+  padding: 8px 12px;
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.doc-generated-numberblock .num-main { display: flex; align-items: baseline; gap: 8px; }
+.doc-generated-numberblock .num-label { font-size: 8.5pt; color: #5a5a5a; text-transform: uppercase; letter-spacing: 0.03em; }
+.doc-generated-numberblock .num-value { font-size: 12pt; font-weight: 700; letter-spacing: 0.02em; }
+.doc-generated-numberblock .num-dates { display: flex; gap: 20px; font-size: 8.5pt; color: #5a5a5a; }
+
+.doc-generated-signature { width: 260px; margin: 24px auto 0; text-align: center; }
+.doc-generated-signature .sig-pending { height: 48px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 3px; font-style: italic; font-size: 8.5pt; color: #8a8a8a; }
+.doc-generated-signature .sig-line { border-top: 1px solid #000; margin-top: 3px; }
+.doc-generated-signature .sig-name { font-weight: 700; font-size: 9.5pt; margin-top: 5px; }
+.doc-generated-signature .sig-position { font-family: Arial, Helvetica, sans-serif; font-size: 8pt; color: #5a5a5a; }
+
+.doc-generated-qr { display: flex; flex-direction: column; align-items: center; gap: 5px; margin: 16px 0 8px; }
+.doc-generated-qr svg { width: 78px; height: 78px; border: 1px solid #333; }
+.doc-generated-qr .qr-caption { font-family: Arial, Helvetica, sans-serif; font-size: 7pt; color: #5a5a5a; text-align: center; margin: 0; max-width: 220px; word-break: break-all; }
+.doc-generated-qr .qr-unavailable { font-style: italic; color: #8a8a8a; max-width: 200px; }
+
+.doc-generated-footer { margin-top: 24px; padding-top: 8px; border-top: 1px solid #333; font-family: Arial, Helvetica, sans-serif; font-size: 7.5pt; color: #8a8a8a; text-align: center; }
+.doc-generated-footer p { margin: 2px 0; }
+
+.doc-generated-watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(2.2rem, 9vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: rgba(150, 20, 20, 0.14);
+  text-transform: uppercase;
+  text-align: center;
+  transform: rotate(-30deg);
+  line-height: 1.1;
+  padding: 0 10%;
+}
