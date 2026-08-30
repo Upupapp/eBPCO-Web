@@ -28,6 +28,7 @@ import {
   EvalTypeKey,
   EvalRow,
   Stage,
+  EVAL_KEY_TO_APP_STAGE,
 } from './evaluations-data';
 
 /** One row of the record view's real Documents Checklist — read-only here (Accept/Reject stays an Applications-Documents-tab-only action). A required requirement with no uploaded row yet shows up as a synthetic "Missing" row rather than silently not appearing. */
@@ -58,17 +59,6 @@ type View = 'list' | 'detail' | 'record';
 // 'Renovation' here previously never matched any real permit type at
 // all — this filter had silently never worked.
 const TYPE_OPTIONS = ALL_PERMIT_TYPES;
-
-const EVAL_KEY_TO_APP_STAGE: Record<EvalTypeCard['key'], EvaluationStage | null> = {
-  initial: 'Initial',
-  zoning: 'Zoning',
-  fire: 'Fire Safety',
-  obo: 'OBO',
-  final: 'Final Approval',
-  // No stage. An evaluation cannot be recorded against one that is unknown, so
-  // the two actions below refuse rather than picking a stage on the row's behalf.
-  unrecorded: null,
-};
 
 // Matches the shared KpiCard's own TONE_ACCENT exactly — the step
 // illustration's SVG needs a literal hex value (not a CSS custom

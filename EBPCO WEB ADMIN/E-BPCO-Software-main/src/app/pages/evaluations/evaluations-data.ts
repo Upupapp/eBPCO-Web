@@ -68,8 +68,15 @@ export interface EvalRow {
   department: string;
 }
 
-/** `null` for the bucket that exists precisely because no stage is known. */
-const EVAL_KEY_TO_APP_STAGE: Record<EvalTypeKey, EvaluationStage | null> = {
+/**
+ * The one definition. `null` for the bucket that exists precisely because no
+ * stage is known — an evaluation cannot be recorded against an unknown stage,
+ * so callers must refuse rather than pick one on the row's behalf.
+ *
+ * This was maintained in two files, and only one of them was updated when the
+ * 'unrecorded' bucket was added; the compiler caught the other.
+ */
+export const EVAL_KEY_TO_APP_STAGE: Record<EvalTypeKey, EvaluationStage | null> = {
   initial: 'Initial',
   zoning: 'Zoning',
   fire: 'Fire Safety',
