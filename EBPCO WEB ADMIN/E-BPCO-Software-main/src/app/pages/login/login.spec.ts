@@ -48,6 +48,10 @@ describe('Login — the sign-in button while a request is in flight', () => {
     button = fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement;
   });
 
+  // Mounting this component compiles the shared auth layout and its children;
+  // vitest's 5s default is not enough headroom on a machine running other work.
+  const MOUNT_BUDGET = 20_000;
+
   /** A valid form, so onSubmit reaches the network call rather than bailing on validation. */
   const submitValid = (): Promise<void> => {
     component.email = 'officer@lgu.gov.ph';
@@ -71,6 +75,40 @@ describe('Login — the sign-in button while a request is in flight', () => {
     settle.resolve();
     await pending;
   });
+
+  it('reports a sign-in failure as the FORM\'s, never as the email field\'s', async () => {
+    const pending = submitValid();
+    fixture.detectChanges();
+    settle.reject(new Error('The request failed'));
+    await pending;
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    // role="alert" so it is announced as the form-level failure it is.
+    const alert = el.querySelector('[role="alert"]');
+    expect(alert?.textContent).toContain('The request failed');
+
+    // The email input must NOT be blamed: an officer with a correct address
+    // was being told the address was wrong, screen readers included.
+    const email = el.querySelector('input[type="email"]')!;
+    expect(email.getAttribute('aria-invalid')).toBeNull();
+    expect(email.getAttribute('aria-describedby')).toBeNull();
+    expect(el.querySelector('#email-error')).toBeNull();
+  }, MOUNT_BUDGET);
+
+  it('DOES blame the email field when the address is genuinely malformed', async () => {
+    component.email = 'not-an-email';
+    component.password = 'x';
+    await component.onSubmit({ invalid: false } as NgForm);
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('#email-error')?.textContent)
+      .toContain('Please enter a valid email address.');
+    expect(el.querySelector('input[type="email"]')!.getAttribute('aria-invalid')).toBe('true');
+    // and no form-level alert, because the form did not fail — the field did.
+    expect(el.querySelector('[role="alert"]')).toBeNull();
+  }, MOUNT_BUDGET);
 
   it('comes back enabled when sign-in fails, so the officer can retry', async () => {
     const pending = submitValid();

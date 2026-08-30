@@ -9,7 +9,7 @@
 
     <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm" novalidate>
       <label class="field-label" for="email">Enter Email Address</label>
-      <div class="input-wrap" [class.invalid]="loginError()">
+      <div class="input-wrap" [class.invalid]="emailError()">
         <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path
             d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-11Z"
@@ -27,12 +27,12 @@
           (ngModelChange)="onEmailChange()"
           required
           autocomplete="username"
-          [attr.aria-invalid]="loginError() ? true : null"
-          [attr.aria-describedby]="loginError() ? 'email-error' : null"
+          [attr.aria-invalid]="emailError() ? true : null"
+          [attr.aria-describedby]="emailError() ? 'email-error' : null"
         />
       </div>
-      @if (loginError()) {
-        <p class="field-error" id="email-error">{{ loginError() }}</p>
+      @if (emailError()) {
+        <p class="field-error" id="email-error">{{ emailError() }}</p>
       }
 
       <label class="field-label" for="password">Enter Password</label>
@@ -92,6 +92,16 @@
           Contact your administrator to reset your password.
           <button type="button" (click)="closeForgotPassword()">Dismiss</button>
         </p>
+      }
+
+      <!--
+        Sign-in was refused or could not be reached. This is NOT a fact about
+        the email field, and rendering it as one told an officer with a correct
+        address that their address was wrong. role="alert" so a screen reader
+        announces it as the form-level failure it is.
+      -->
+      @if (signInError(); as message) {
+        <p class="form-error" role="alert">{{ message }}</p>
       }
 
       <!--
