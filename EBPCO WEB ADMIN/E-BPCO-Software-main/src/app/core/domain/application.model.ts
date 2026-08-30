@@ -45,8 +45,22 @@ export interface ApplicationRecord {
   /** Same moment as dateSubmitted, kept as a real Date for sorting/range filtering. */
   dateValue: Date;
   lifecycleStatus: ApplicationLifecycleStatus;
-  evaluationStage: EvaluationStage;
-  evaluationResult: EvaluationResult;
+  /**
+   * Where this application sits in its evaluation sequence, or `null` when the
+   * portal does not know.
+   *
+   * The staff queue does not send it, and the mapper used to stamp every server
+   * row `'Initial'` — so `buildEvalTypeCards` counted them all under Initial
+   * Evaluation and `scopedApps` never placed one in a later stage's queue. An
+   * officer opening Final Approval saw it empty with applications sitting in it.
+   *
+   * Nullable rather than widened with an 'Unknown' member, because "unknown" is
+   * not a stage an application can be AT — it is the absence of the fact. Rows
+   * with null are surfaced in their own "Stage not recorded" bucket (owner
+   * ruling, 29 Aug) rather than hidden or claimed.
+   */
+  evaluationStage: EvaluationStage | null;
+  evaluationResult: EvaluationResult | null;
   paymentStatus: PaymentStatus;
   permitReleaseStatus: PermitReleaseStatus;
   assessedAmountCentavos: number | null;

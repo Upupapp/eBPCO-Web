@@ -85,6 +85,14 @@ describe('StaffApplicationsApi', () => {
     expect(record.referenceNumber).toBe('BP-2026-0042');
   });
 
+  it('says the evaluation stage is unknown rather than guessing Initial', async () => {
+    // The queue sends neither. Stamping 'Initial' counted every server row under
+    // Initial Evaluation and kept it out of every later queue.
+    const record = await fetchOne();
+    expect(record.evaluationStage).toBeNull();
+    expect(record.evaluationResult).toBeNull();
+  });
+
   it('mirrors type from permitType', async () => {
     expect((await fetchOne({ permitType: 'Electrical Permit' })).type).toBe('Electrical Permit');
   });

@@ -115,8 +115,10 @@ function toRecord(row: QueueRow): ApplicationRecord {
     dateSubmitted: submitted === null ? NOT_SENT : submitted.toISOString().slice(0, 10),
     dateValue: submitted ?? new Date(0),
     lifecycleStatus,
-    evaluationStage: 'Initial' as const,
-    evaluationResult: 'Pending' as const,
+    // The queue row carries neither. `null` says so; 'Initial' claimed a stage
+    // this portal has no basis for, and put every server row in the wrong queue.
+    evaluationStage: null,
+    evaluationResult: null,
     // Verified means paid, an assessed amount with no verification means it is
     // owed, and no assessment means there is nothing to pay yet.
     paymentStatus: (row.paymentVerified

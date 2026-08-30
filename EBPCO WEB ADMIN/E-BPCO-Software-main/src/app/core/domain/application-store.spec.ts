@@ -263,13 +263,13 @@ describe('ApplicationStore — status transitions', () => {
     // evaluationStage/evaluationResult actually describe).
     const app = store.applications().find((a) => a.lifecycleStatus === 'Under Evaluation');
     if (!app) return;
-    expect(store.recordEvaluation(app.id, app.evaluationStage, 'Revision Required', 'Tester')).toBe(
+    expect(store.recordEvaluation(app.id, app.evaluationStage!, 'Revision Required', 'Tester')).toBe(
       false,
     );
     expect(
       store.recordEvaluation(
         app.id,
-        app.evaluationStage,
+        app.evaluationStage!,
         'Revision Required',
         'Tester',
         'Missing document',
@@ -282,7 +282,7 @@ describe('ApplicationStore — status transitions', () => {
     if (!app) return;
     const sentBack = store.recordEvaluation(
       app.id,
-      app.evaluationStage,
+      app.evaluationStage!,
       'Revision Required',
       'Tester',
       'Needs fixing',
@@ -294,7 +294,7 @@ describe('ApplicationStore — status transitions', () => {
     // menu item used to allow: a row genuinely sitting in the "Returned"
     // tab (Revision Required) getting force-passed anyway.
     const before = store.getById(app.id)!;
-    const forcedPass = store.recordEvaluation(app.id, before.evaluationStage, 'Passed', 'Tester');
+    const forcedPass = store.recordEvaluation(app.id, before.evaluationStage!, 'Passed', 'Tester');
     expect(forcedPass).toBe(false);
     const after = store.getById(app.id)!;
     expect(after.lifecycleStatus).toBe('Revision Required');
