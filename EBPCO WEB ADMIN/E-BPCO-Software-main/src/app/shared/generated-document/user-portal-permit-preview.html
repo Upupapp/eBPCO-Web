@@ -150,7 +150,7 @@
           </svg>
           <p class="qr-caption">Scan to verify this document at<br />{{ verificationUrl() }}</p>
         } @else {
-          <p class="qr-caption qr-unavailable">QR verification not yet available — this permit has not been issued.</p>
+          <p class="qr-caption qr-unavailable">{{ qrUnavailableReason() }}</p>
         }
       </div>
 
