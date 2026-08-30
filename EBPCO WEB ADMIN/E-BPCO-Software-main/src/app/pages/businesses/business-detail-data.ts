@@ -47,28 +47,9 @@ export interface BusinessDetail {
   metrics: {
     totalApplications: number;
     approvedPermits: number;
-    pendingPayments: string;
+    /** `null` when the portal holds no payment data for the business — it used to be `1500 + rand()*8500` centavos, formatted as pesos. */
+    pendingPayments: string | null;
     activeUsers: number;
-  };
-}
-
-const STAFF_NAMES = [
-  'Liza Fernandez',
-  'Marco Dizon',
-  'Angelo Reyes',
-  'Cristina Ong',
-  'Paolo Santos',
-  'Bea Corpuz',
-];
-
-// Small deterministic PRNG seeded from the business's own ID, so every reload
-// shows the same linked records for the same business instead of reshuffling.
-function seedFrom(id: string): () => number {
-  let seed = 0;
-  for (let i = 0; i < id.length; i++) seed = (seed * 31 + id.charCodeAt(i)) | 0;
-  return () => {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    return (seed / 0x7fffffff) % 1;
   };
 }
 
@@ -82,7 +63,6 @@ export function buildBusinessDetail(
   },
   linkedApplications: { application: ApplicationRecord; permitNumber: string | null }[],
 ): BusinessDetail {
-  const rand = seedFrom(row.id);
 
   // The real join — every application whose businessId matches this
   // business's own id, via ApplicationRecord.businessId (never matched by
@@ -101,32 +81,19 @@ export function buildBusinessDetail(
 
   const approvedPermits = permits.filter((p) => p.status === 'Approved').length;
 
-  // Mirrors E-BPCO Mobile's generic Business Permit minimum requirements
-  // (Valid Government ID, Barangay Clearance, Proof of Business Address).
-  const documents: BusinessDocument[] = [
-    { name: 'Valid Government ID', status: 'Verified', uploadedDate: row.dateCreated },
-    {
-      name: 'Barangay Clearance',
-      status: rand() > 0.25 ? 'Verified' : 'Pending Review',
-      uploadedDate: row.dateCreated,
-    },
-    {
-      name: 'Proof of Business Address',
-      status: rand() > 0.15 ? 'Verified' : 'Missing',
-      uploadedDate: row.dateCreated,
-    },
-  ];
+  // Owner ruling, 29 Aug: no document data is held for a business, so none is
+  // claimed. This used to be three named documents whose "Verified" /
+  // "Pending Review" / "Missing" statuses came from a PRNG seeded on the
+  // business id — a "Missing" clearance is something an officer acts on.
+  const documents: BusinessDocument[] = [];
 
-  const staffCount = Math.min(row.userCount - 1, 5);
-  const users: BusinessUser[] = [
-    { name: row.contactName, role: 'Owner', status: 'Active' },
-    ...Array.from({ length: Math.max(staffCount, 0) }, (_, i) => ({
-      name: STAFF_NAMES[i % STAFF_NAMES.length],
-      role: 'Staff' as const,
-      status: rand() > 0.15 ? ('Active' as const) : ('Inactive' as const),
-    })),
-  ];
+  // The owner is real — it is the linked applicant's own name. The staff rows
+  // were names from a fixed list with PRNG Active/Inactive statuses.
+  const users: BusinessUser[] = [{ name: row.contactName, role: 'Owner', status: 'Active' }];
 
+  // Only the registration entry is a fact the portal holds. The rest was an
+  // invented timeline — "Payment verified", "Documents submitted", each with a
+  // made-up "2 weeks ago" — presented beside real application ids.
   const activity: BusinessActivityItem[] = [
     {
       actor: row.contactName,
@@ -134,40 +101,10 @@ export function buildBusinessDetail(
       detail: `${row.code} was registered on the platform.`,
       timeAgo: row.dateCreated,
     },
-    {
-      actor: row.contactName,
-      title: 'Documents submitted',
-      detail: 'Valid Government ID and Barangay Clearance uploaded for verification.',
-      timeAgo: '2 weeks ago',
-    },
-    {
-      actor: 'Engr. Ricardo Buenaflor',
-      title: `${permits[0]?.type ?? 'Building Permit – New Construction'} application received`,
-      detail: `${permits[0]?.applicationId ?? 'No applications yet'} moved to Under Review.`,
-      timeAgo: '9 days ago',
-    },
-    {
-      actor: 'System',
-      title: 'Payment verified',
-      detail: 'Filing fee payment confirmed via Bank Transfer.',
-      timeAgo: '5 days ago',
-    },
-    {
-      actor: 'Engr. Ricardo Buenaflor',
-      title: approvedPermits > 0 ? 'Permit approved' : 'Evaluation in progress',
-      detail:
-        approvedPermits > 0
-          ? `${permits.find((p) => p.status === 'Approved')?.applicationId} approved and ready for release.`
-          : 'Application is still under technical review.',
-      timeAgo: '1 day ago',
-    },
   ];
 
-  const pendingCentavos = 1500 + Math.floor(rand() * 8500);
-  const pendingPayments = new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-  }).format(permits.some((p) => p.status !== 'Approved') ? pendingCentavos : 0);
+  // No payment endpoint exists for a business, so there is no figure to show.
+  const pendingPayments: string | null = null;
 
   return {
     permits,

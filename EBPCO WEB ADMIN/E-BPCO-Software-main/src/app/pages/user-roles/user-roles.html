@@ -125,11 +125,11 @@
                 <td>{{ row.role }}</td>
                 <td>{{ row.department }}</td>
                 <td>
-                  <span class="status-pill" [class]="row.status.toLowerCase()">{{
-                    row.status
+                  <span class="status-pill" [class]="(row.status ?? 'unknown').toLowerCase()">{{
+                    row.status ?? '—'
                   }}</span>
                 </td>
-                <td>{{ row.lastActive }}</td>
+                <td>{{ row.lastActive ?? '—' }}</td>
                 <td class="actions-cell" (click)="$event.stopPropagation()">
                   <button
                     type="button"
@@ -215,7 +215,7 @@
   <div class="detail-head">
     <h1>{{ row.name }}</h1>
     <div class="header-actions">
-      <span class="status-pill" [class]="row.status.toLowerCase()">{{ row.status }}</span>
+      <span class="status-pill" [class]="(row.status ?? 'unknown').toLowerCase()">{{ row.status ?? '—' }}</span>
       <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
     </div>
   </div>
@@ -262,7 +262,7 @@
 
       <div class="record-info">
         <h2>{{ row.name }}</h2>
-        <span class="status-pill" [class]="row.status.toLowerCase()">{{ row.status }}</span>
+        <span class="status-pill" [class]="(row.status ?? 'unknown').toLowerCase()">{{ row.status ?? '—' }}</span>
 
         <dl class="info-list">
           <div>
@@ -282,11 +282,11 @@
 
       <div class="record-footer">
         <div>
-          <strong>{{ row.lastActive }}</strong>
+          <strong>{{ row.lastActive ?? '—' }}</strong>
           <span>Last Active</span>
         </div>
         <div>
-          <strong>{{ row.status }}</strong>
+          <strong>{{ row.status ?? '—' }}</strong>
           <span>Account Status</span>
         </div>
       </div>

@@ -94,3 +94,41 @@ describe('buildBusinessDetail — linked permits come only from the passed-in re
     expect(first.permits).toEqual(second.permits);
   });
 });
+
+/**
+ * The panel used to mix real metrics with invented ones.
+ *
+ * `totalApplications` and `approvedPermits` come from a documented, real join
+ * on `ApplicationRecord.businessId`. Beside them sat a "Pending Payments" peso
+ * figure that was `1500 + rand() * 8500` centavos, document rows whose
+ * "Verified" / "Pending Review" / "Missing" statuses came from a PRNG seeded on
+ * the business id, and staff users with names from a fixed list. A "Missing"
+ * clearance and a pending balance are things an officer acts on.
+ *
+ * Owner ruling, 29 Aug: keep what is real, dash what is not.
+ */
+describe('buildBusinessDetail — nothing invented beside the real join', () => {
+  it('reports no pending payment figure rather than an invented one', () => {
+    const detail = buildBusinessDetail(makeRow(), []);
+    expect(detail.metrics.pendingPayments).toBeNull();
+  });
+
+  it('records no documents, rather than three with PRNG statuses', () => {
+    const detail = buildBusinessDetail(makeRow(), []);
+    expect(detail.documents).toEqual([]);
+  });
+
+  it('keeps only the real owner, not a fabricated staff list', () => {
+    const detail = buildBusinessDetail(makeRow({ contactName: 'Raul Villanueva', userCount: 9 }), []);
+    expect(detail.users.map((u) => u.name)).toEqual(['Raul Villanueva']);
+    expect(detail.users[0].role).toBe('Owner');
+    // userCount used to inflate this into up to five invented staff rows.
+    expect(detail.metrics.activeUsers).toBe(1);
+  });
+
+  it('is deterministic in the only way that matters — no randomness left', () => {
+    const a = buildBusinessDetail(makeRow(), []);
+    const b = buildBusinessDetail(makeRow(), []);
+    expect(a).toEqual(b);
+  });
+});
