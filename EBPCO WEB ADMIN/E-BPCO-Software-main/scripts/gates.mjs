@@ -3,7 +3,7 @@
  * Front-end gates that `build` and `test` cannot see.
  *
  * Every defect found in the 29 Aug sweep passed both of the portal's only two
- * scripts. These three checks are the shapes those defects had. Each one is a
+ * scripts. These four checks are the shapes those defects had. Each one is a
  * pattern, not a style preference — a finding here is a thing that is wrong,
  * not a thing that is untidy.
  *
@@ -16,6 +16,10 @@
  *   casts        `as unknown as` — the double cast that switches the type
  *                system off. One of these hid a `status` field set to entirely
  *                the wrong union for every server row.
+ *   config       index.html must actually LOAD public/config.js. The runtime
+ *                tokens read `globalThis.EBPCO_*`, and an edit adding that
+ *                script tag failed silently once: the build passed, config.js
+ *                shipped, and nothing referenced it.
  *
  * Zero dependencies, on purpose: this runs anywhere `node` does, including a
  * tree that has not been `npm install`ed.
@@ -117,6 +121,29 @@ for (const file of ts) {
       ]);
     }
   });
+}
+
+// ── 4. Runtime config must actually be wired ──────────────────────────────
+// The tokens read `globalThis.EBPCO_*`, and nothing defines those unless
+// index.html loads config.js BEFORE the app bundle. This is checked because it
+// failed silently once: an edit to index.html did not match, the build
+// succeeded, config.js shipped, and nothing referenced it — a config mechanism
+// that is present, emitted, and inert.
+{
+  const indexPath = 'src/index.html';
+  const configPath = 'public/config.js';
+  if (existsSync(indexPath) && existsSync(configPath)) {
+    const html = readFileSync(indexPath, 'utf8');
+    if (!/<script[^>]+src=["']config\.js["']/.test(html)) {
+      findings.push([
+        'config',
+        indexPath,
+        'public/config.js exists but index.html does not load it — the EBPCO_* globals would never be defined',
+      ]);
+    }
+  } else if (existsSync(indexPath) && readFileSync(indexPath, 'utf8').includes('config.js')) {
+    findings.push(['config', configPath, 'index.html loads config.js but the file is missing']);
+  }
 }
 
 // ── Report ────────────────────────────────────────────────────────────────
