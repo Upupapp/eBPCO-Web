@@ -1,5 +1,6 @@
 import { Component, computed, inject, input } from '@angular/core';
 import qrcodegen from 'qrcode-generator';
+import { USER_PORTAL_BASE_URL } from '../../core/config/user-portal.config';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
@@ -32,6 +33,7 @@ interface QrCell {
 export class UserPortalPermitPreview {
   private readonly store = inject(ApplicationStore);
   private readonly assessmentStore = inject(AssessmentStore);
+  private readonly userPortalBaseUrl = inject(USER_PORTAL_BASE_URL);
 
   readonly applicationId = input.required<string>();
 
@@ -104,7 +106,28 @@ export class UserPortalPermitPreview {
   protected readonly verificationUrl = computed(() => {
     const p = this.permit();
     if (!p || !this.gate().cleared) return null;
-    return `${window.location.origin}/verify/${p.permitNumber}`;
+    // NOT `window.location.origin`. Staff preview this on the admin portal,
+    // which has no /verify route and whose router ends in a wildcard redirect
+    // to login — so that origin sent a scanning citizen to a staff sign-in page.
+    // Unconfigured means no QR at all rather than one pointing at a guess.
+    const base = this.userPortalBaseUrl;
+    if (base === '') return null;
+    return `${base}/verify/${p.permitNumber}`;
+  });
+
+  /**
+   * Why there is no QR, in the reader's terms.
+   *
+   * The two reasons are different and were both reported as "not yet issued",
+   * which is false when the permit IS issued and the portal simply has not been
+   * told where the User Portal lives.
+   */
+  protected readonly qrUnavailableReason = computed(() => {
+    const p = this.permit();
+    if (!p || !this.gate().cleared) {
+      return 'QR verification not yet available — this permit has not been issued.';
+    }
+    return 'QR verification unavailable — this portal has not been told the User Portal address.';
   });
 
   protected readonly qr = computed<{ count: number; cells: QrCell[] } | null>(() => {
