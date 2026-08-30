@@ -133,7 +133,7 @@
               </td>
               <td>{{ row.subdomain }}</td>
               <td>{{ row.dateCreated }}</td>
-              <td>{{ row.userCount }}</td>
+              <td>{{ row.userCount ?? '—' }}</td>
               <td>
                 <span class="status-pill" [class]="row.status.toLowerCase()">{{ row.status }}</span>
               </td>
@@ -455,7 +455,7 @@
           <span>Date Created</span>
         </div>
         <div>
-          <strong>{{ row.userCount }}</strong>
+          <strong>{{ row.userCount ?? '—' }}</strong>
           <span>User Count</span>
         </div>
       </div>

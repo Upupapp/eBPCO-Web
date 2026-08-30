@@ -59,7 +59,8 @@ export function buildBusinessDetail(
     code: string;
     contactName: string;
     dateCreated: string;
-    userCount: number;
+    /** Unused since the staff list stopped being invented from it; kept so the row shape matches. */
+    userCount: number | null;
   },
   linkedApplications: { application: ApplicationRecord; permitNumber: string | null }[],
 ): BusinessDetail {
