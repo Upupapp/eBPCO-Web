@@ -25,7 +25,7 @@
       <section class="kpi-grid kpi-grid--compact">
         <app-kpi-card
           label="Draft"
-          [value]="assessmentSummary().draft.toString()"
+          [value]="assessmentCount(assessmentSummary().draft)"
           icon="file-text"
           tone="neutral"
           illustration="pending"
@@ -33,7 +33,7 @@
         />
         <app-kpi-card
           label="For Approval"
-          [value]="assessmentSummary().forApproval.toString()"
+          [value]="assessmentCount(assessmentSummary().forApproval)"
           icon="clock"
           tone="warning"
           illustration="pending"
@@ -41,7 +41,7 @@
         />
         <app-kpi-card
           label="Issued"
-          [value]="assessmentSummary().issued.toString()"
+          [value]="assessmentCount(assessmentSummary().issued)"
           icon="send"
           tone="info"
           illustration="pending"
@@ -49,7 +49,7 @@
         />
         <app-kpi-card
           label="Partially Paid"
-          [value]="assessmentSummary().partiallyPaid.toString()"
+          [value]="assessmentCount(assessmentSummary().partiallyPaid)"
           icon="wallet"
           tone="warning"
           illustration="pending"
@@ -57,7 +57,7 @@
         />
         <app-kpi-card
           label="Paid"
-          [value]="assessmentSummary().paid.toString()"
+          [value]="assessmentCount(assessmentSummary().paid)"
           icon="check-circle"
           tone="success"
           illustration="success"
@@ -65,7 +65,7 @@
         />
         <app-kpi-card
           label="Overdue"
-          [value]="assessmentSummary().overdue.toString()"
+          [value]="assessmentCount(assessmentSummary().overdue)"
           icon="alert-triangle"
           tone="danger"
           illustration="critical"

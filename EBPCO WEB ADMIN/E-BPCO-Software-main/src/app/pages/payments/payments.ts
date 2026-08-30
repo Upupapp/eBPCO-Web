@@ -229,6 +229,24 @@ export class Payments {
     return this.filteredAssessmentRows().slice(start, start + this.pageSize);
   });
 
+  /**
+   * True when the portal holds no assessment data at all, as distinct from
+   * holding data in which nothing is Draft, Issued, Overdue and so on.
+   *
+   * Assessments have no endpoint, so a successful queue load clears them (see
+   * ApplicationStore.replaceApplications). Every tile then counts zero — and
+   * six zeros read as "no assessment is in any of these states", which is a
+   * claim. The absence of data is not the same claim.
+   */
+  protected readonly hasNoAssessmentData = computed(
+    () => this.assessmentStore.allAssessments().length === 0,
+  );
+
+  /** A count, or '—' when there is nothing to count over. */
+  protected assessmentCount(value: number): string {
+    return this.hasNoAssessmentData() ? '—' : value.toString();
+  }
+
   protected readonly assessmentSummary = computed(() => {
     const rows = this.assessmentStore.allAssessments();
     return {

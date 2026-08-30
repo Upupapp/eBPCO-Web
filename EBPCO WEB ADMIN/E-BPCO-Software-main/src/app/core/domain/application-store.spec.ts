@@ -1016,6 +1016,11 @@ describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
     assessmentStore = TestBed.inject(AssessmentStore);
   });
 
+  // Walks every lifecycle stage through the real public methods, so it is the
+  // heaviest test here. It fits vitest's 5s default on an idle machine and not
+  // on a busy one — a guard that fails on load is not a guard.
+  const WORKFLOW_BUDGET = 30_000;
+
   it('walks a brand-new Renovation application through every real stage to a released permit, entirely through public store methods', () => {
     const actor = 'Engr. Integration Tester';
     const adminRole = 'Administrator';
@@ -1196,7 +1201,7 @@ describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
     // Integration: the same record is visible everywhere via the shared store.
     expect(store.applications().find((a) => a.id === record.id)!.lifecycleStatus).toBe('Completed');
     expect(store.getById(record.id)!.status).toBe('Approved'); // coarse projection stays in sync
-  });
+  }, WORKFLOW_BUDGET);
 });
 
 /**
