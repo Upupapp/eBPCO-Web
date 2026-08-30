@@ -1,0 +1,14 @@
+<div class="modal-backdrop" (click)="close()">
+  <div class="doc-modal-shell" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Generated permit document">
+    <div class="doc-toolbar no-print">
+      <span>Permit Preview</span>
+      <div class="doc-toolbar-actions">
+        <button type="button" class="modal-btn confirm" (click)="print()">Print / Download</button>
+        <button type="button" class="modal-btn neutral" (click)="close()">Close</button>
+      </div>
+    </div>
+    <div class="doc-modal-scroll">
+      <app-user-portal-permit-preview [applicationId]="applicationId()" />
+    </div>
+  </div>
+</div>

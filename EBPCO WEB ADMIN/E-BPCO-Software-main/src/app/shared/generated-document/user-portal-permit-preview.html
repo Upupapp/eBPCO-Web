@@ -1,0 +1,165 @@
+@if (row(); as a) {
+  @if (config(); as cfg) {
+    <article class="doc-generated-page">
+      @if (watermarkText()) {
+        <div class="doc-generated-watermark" aria-hidden="true">{{ watermarkText() }}</div>
+      }
+
+      <div class="doc-generated-header">
+        <img src="/assets/logos/logo.png" alt="" aria-hidden="true" />
+        <div class="lines">
+          <span>{{ cfg.header.line1 }}</span>
+          <span>{{ cfg.header.line2 }}</span>
+          @if (cfg.header.line3) {
+            <strong>{{ cfg.header.line3 }}</strong>
+          }
+          <span class="office-line">{{ cfg.header.officeLine }}</span>
+        </div>
+      </div>
+
+      <div class="doc-generated-title">
+        <h1>{{ cfg.title.title }}</h1>
+        @if (cfg.title.subtitle) {
+          <p class="subtitle">{{ cfg.title.subtitle }}</p>
+        }
+      </div>
+
+      <div class="doc-generated-numberblock">
+        <div class="num-main">
+          <span class="num-label">Permit No.</span>
+          <span class="num-value" [class.doc-generated-placeholder]="!permit()">
+            {{ permit()?.permitNumber ?? 'Not yet assigned' }}
+          </span>
+        </div>
+        <div class="num-dates">
+          <span>Application No.: <strong>{{ a.id }}</strong></span>
+          <span>Date Issued: <strong>{{ permit()?.issuedDate ?? 'Not yet assigned' }}</strong></span>
+          <span>Valid Until: <strong>{{ permit() ? (permit()!.expiryDate ?? 'No fixed expiry') : 'Not yet assigned' }}</strong></span>
+        </div>
+      </div>
+
+      <section class="doc-generated-section">
+        <h2>Owner / Applicant</h2>
+        <dl class="doc-generated-fields">
+          <div>
+            <dt>Owner / Permittee Name</dt>
+            <dd>{{ a.applicant || 'Not on file' }}</dd>
+          </div>
+          <div>
+            <dt>Business / Project</dt>
+            <dd>{{ a.businessName || 'Not provided' }}</dd>
+          </div>
+          <div>
+            <dt>Contact Number</dt>
+            <dd>{{ applicant()?.mobileNumber ?? 'Not on file' }}</dd>
+          </div>
+          <div>
+            <dt>Address</dt>
+            <dd>{{ applicant()?.addressLine ?? 'Not on file' }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="doc-generated-section">
+        <h2>Property</h2>
+        <dl class="doc-generated-fields">
+          <div>
+            <dt>Barangay</dt>
+            <dd>{{ business()?.barangay ?? 'Not on file' }}</dd>
+          </div>
+          <div>
+            <dt>City / Municipality</dt>
+            <dd>{{ business()?.city ?? 'Not on file' }}</dd>
+          </div>
+          <div>
+            <dt>Street / Location</dt>
+            <dd>{{ business()?.street ?? 'Not on file' }}</dd>
+          </div>
+          <div>
+            <dt>Province</dt>
+            <dd>{{ business()?.province ?? 'Not on file' }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="doc-generated-section">
+        <h2>Project</h2>
+        <dl class="doc-generated-fields">
+          <div>
+            <dt>Transaction</dt>
+            <dd>{{ a.applicationAction }}</dd>
+          </div>
+          <div>
+            <dt>Date Applied</dt>
+            <dd>{{ a.dateSubmitted || 'Pending' }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="doc-generated-section">
+        <h2>Assessment / Payment</h2>
+        @if (assessment(); as asmt) {
+          <table class="doc-generated-table">
+            <thead>
+              <tr><th>Fee</th><th>Authority</th><th>Amount</th></tr>
+            </thead>
+            <tbody>
+              @for (line of asmt.lineItems; track line.code) {
+                <tr>
+                  <td>{{ line.name }}</td>
+                  <td>{{ line.legalBasisTitle || line.authority }}</td>
+                  <td>{{ formatPHP(line.amountCentavos) }}</td>
+                </tr>
+              }
+              <tr>
+                <td colspan="2"><strong>Total Amount Due</strong></td>
+                <td><strong>{{ formatPHP(asmt.totalCentavos) }}</strong></td>
+              </tr>
+              <tr>
+                <td colspan="2">Outstanding Balance</td>
+                <td>{{ formatPHP(asmt.balanceCentavos) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="doc-generated-note">Order of Payment No.: {{ asmt.opsNumber ?? ('Not yet issued (' + asmt.status + ')') }}</p>
+        } @else {
+          <p class="doc-generated-note doc-generated-placeholder">No assessment has been issued yet for this application.</p>
+        }
+      </section>
+
+      <section class="doc-generated-section">
+        <h2>Conditions / Remarks</h2>
+        <p>{{ requirements()?.validityRules ?? 'Not yet available.' }}</p>
+      </section>
+
+      <section class="doc-generated-section doc-generated-signature">
+        <h2 style="text-align:left; border:none;">Approval</h2>
+        <div class="sig-pending">Pending Authorized Signature</div>
+        <div class="sig-line"></div>
+        <div class="sig-name">{{ permit()?.approvingOfficial ?? 'Pending' }}</div>
+        <div class="sig-position">{{ permit()?.approvingOffice ?? reviewingOffice() ?? 'Pending' }}</div>
+      </section>
+
+      <div class="doc-generated-qr">
+        @if (qr(); as q) {
+          <svg [attr.viewBox]="'0 0 ' + q.count + ' ' + q.count" shape-rendering="crispEdges">
+            <rect width="100%" height="100%" fill="#ffffff" />
+            @for (cell of q.cells; track cell.x + '-' + cell.y) {
+              <rect [attr.x]="cell.x" [attr.y]="cell.y" width="1" height="1" fill="#000000" />
+            }
+          </svg>
+          <p class="qr-caption">Scan to verify this document at<br />{{ verificationUrl() }}</p>
+        } @else {
+          <p class="qr-caption qr-unavailable">QR verification not yet available — this permit has not been issued.</p>
+        }
+      </div>
+
+      <footer class="doc-generated-footer">
+        <p>This is a system-generated document issued by the Municipality of Castilla, Sorsogon.</p>
+        <p>Document Ref. {{ a.id }} &middot; Generated {{ generatedOn }} &middot; Page 1 of 1</p>
+      </footer>
+    </article>
+  }
+} @else {
+  <p class="doc-generated-note">We couldn't find that application.</p>
+}
