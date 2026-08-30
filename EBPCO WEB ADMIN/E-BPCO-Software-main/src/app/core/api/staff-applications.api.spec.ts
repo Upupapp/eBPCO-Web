@@ -126,6 +126,27 @@ describe('StaffApplicationsApi', () => {
     expect((await fetchOne({ permitType: 'Electrical Permit' })).type).toBe('Electrical Permit');
   });
 
+  it('refuses a lifecycle status it does not recognise, loudly', async () => {
+    // The vocabularies match today, so this is a drift tripwire: an
+    // unrecognised status means the portal is older than the service. Coercing
+    // would have shown the row as 'Under Review' — a confident claim about
+    // where the application stands, made on no evidence.
+    const pending = api.page({ limit: 10 });
+    const req = http.expectOne((r) => r.url === '/staff/applications');
+    req.flush({ items: [row({ lifecycleStatus: 'Awaiting Barangay Endorsement' })], nextCursor: null });
+    await expect(pending).rejects.toThrow(/does not recognise: "Awaiting Barangay Endorsement"/);
+  });
+
+  it('accepts every terminal status, which the happy-path sequence omits', async () => {
+    // LIFECYCLE_SEQUENCE holds only the 15-step happy path. Validating against
+    // it would refuse 'Rejected', 'Cancelled', 'Expired' and 'Revision
+    // Required' — all perfectly valid.
+    for (const status of ['Rejected', 'Cancelled', 'Expired', 'Revision Required']) {
+      const record = await fetchOne({ lifecycleStatus: status });
+      expect(record.lifecycleStatus).toBe(status);
+    }
+  });
+
   it('refuses an application action the union does not contain', async () => {
     expect((await fetchOne({ applicationAction: 'Reissuance' })).applicationAction).toBeNull();
     expect((await fetchOne({ applicationAction: 'Renewal' })).applicationAction).toBe('Renewal');
