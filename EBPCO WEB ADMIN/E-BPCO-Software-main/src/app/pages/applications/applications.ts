@@ -439,7 +439,7 @@ export class Applications {
         r.applicant.toLowerCase().includes(term) ||
         r.businessName.toLowerCase().includes(term) ||
         r.location.toLowerCase().includes(term) ||
-        r.type.toLowerCase().includes(term)
+        (r.type?.toLowerCase().includes(term) ?? false)
       );
     });
   });

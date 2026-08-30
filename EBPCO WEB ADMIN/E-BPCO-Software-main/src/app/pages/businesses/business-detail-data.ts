@@ -15,7 +15,8 @@ export interface LinkedPermit {
   applicationId: string;
   /** The real generated permit number (see ApplicationStore.generatePermit) — null until one has actually been issued. Never the application id presented as if it were the permit number. */
   permitNumber: string | null;
-  type: PermitType;
+  /** `null` when the portal could not name the permit — see ApplicationRecord.permitType. */
+  type: PermitType | null;
   status: PermitStatus;
   dateSubmitted: string;
 }

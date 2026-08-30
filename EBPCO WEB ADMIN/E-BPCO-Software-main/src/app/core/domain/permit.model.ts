@@ -62,6 +62,17 @@ export function isValidPermitType(value: string): value is PermitType {
 // Mirrors ApplicationType in application_model.dart.
 export type ApplicationAction = 'New' | 'Renewal' | 'Amendment';
 
+const ALL_APPLICATION_ACTIONS: ReadonlySet<string> = new Set<ApplicationAction>([
+  'New',
+  'Renewal',
+  'Amendment',
+]);
+
+/** The companion to `isValidPermitType`, for the same reason: the wire is an untyped source, and `as ApplicationAction` would put a value the union does not contain into a typed field. */
+export function isValidApplicationAction(value: string): value is ApplicationAction {
+  return ALL_APPLICATION_ACTIONS.has(value);
+}
+
 export interface GeneratedPermit {
   applicationId: string;
   permitNumber: string;

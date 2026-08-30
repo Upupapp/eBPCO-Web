@@ -190,13 +190,15 @@ export interface AppDetail {
     lotArea: string;
     floorArea: string;
     floors: string;
-    projectType: string;
+    /** `null` when the portal could not name the permit type. */
+    projectType: string | null;
   };
   applicationType: {
     type: string;
     ifCompany: string;
     authorizedRep: string;
-    businessPermit: string;
+    /** `null` when the portal could not name the permit type. */
+    businessPermit: string | null;
   };
   govId: { idType: string; contactNumber: string; tin: string };
   professional: { architect: string; civilEngineer: string; electricalEngineer: string };

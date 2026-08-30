@@ -73,7 +73,12 @@ export class UserPortalPermitPreview {
     if (!row) return null;
     return {
       header: agencyHeaderFor(this.reviewingOffice() ?? 'Office of the Building Official (OBO)'),
-      title: documentTitleFor(row.permitType),
+      // A document cannot be titled for a permit the portal cannot name. The
+      // subtitle says so rather than the header implying a specific permit.
+      title:
+        row.permitType === null
+          ? { title: 'Permit', subtitle: 'Permit type not recorded' }
+          : documentTitleFor(row.permitType),
     };
   });
 

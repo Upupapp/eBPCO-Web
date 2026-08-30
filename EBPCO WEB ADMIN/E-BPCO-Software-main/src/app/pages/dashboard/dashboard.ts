@@ -428,7 +428,7 @@ export class Dashboard {
         row.applicant.toLowerCase().includes(term) ||
         row.businessName.toLowerCase().includes(term) ||
         row.location.toLowerCase().includes(term) ||
-        row.type.toLowerCase().includes(term)
+        (row.type?.toLowerCase().includes(term) ?? false)
       );
     });
   });

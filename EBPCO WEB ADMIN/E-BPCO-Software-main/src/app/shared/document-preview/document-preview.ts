@@ -128,7 +128,9 @@ export class DocumentPreview {
   /** The official permit form PDF for this application's permit type, bundled under public/assets/permits/. Null when no matching file was provided for that permit type. */
   protected readonly permitFormUrl = computed(() => {
     const row = this.row();
-    return row ? permitFormUrl(row.permitType) : null;
+    // No permit type means no form to point at — a link built from a guess
+    // would download the wrong LGU form.
+    return row?.permitType ? permitFormUrl(row.permitType) : null;
   });
   protected readonly permitFormSafeUrl = computed<SafeResourceUrl | null>(() => {
     const url = this.permitFormUrl();
@@ -137,7 +139,7 @@ export class DocumentPreview {
   /** The real Castilla OBO documentary-requirements checklist for this application's permit type, when it applies (Building Permit family + Certificate of Occupancy). Plain URL, not sanitized as a resource — opened as a normal link, not embedded in an iframe. */
   protected readonly permitChecklistUrl = computed(() => {
     const row = this.row();
-    return row ? permitChecklistUrl(row.permitType) : null;
+    return row?.permitType ? permitChecklistUrl(row.permitType) : null;
   });
   protected readonly release = computed(() => this.store.getRelease(this.applicationId()));
 
