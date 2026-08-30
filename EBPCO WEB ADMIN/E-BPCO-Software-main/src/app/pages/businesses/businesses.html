@@ -407,7 +407,7 @@
       />
       <app-kpi-card
         label="Pending Payments"
-        [value]="detail.metrics.pendingPayments"
+        [value]="detail.metrics.pendingPayments ?? '—'"
         icon="wallet"
         tone="warning"
         density="compact"
@@ -612,6 +612,11 @@
                   </tr>
                 </thead>
                 <tbody>
+                  @if (detail.documents.length === 0) {
+                    <tr class="table-empty-row">
+                      <td colspan="3">No documents recorded for this business.</td>
+                    </tr>
+                  }
                   @for (d of detail.documents; track d.name) {
                     <tr>
                       <td>{{ d.name }}</td>
@@ -644,6 +649,11 @@
                   </tr>
                 </thead>
                 <tbody>
+                  @if (detail.users.length === 0) {
+                    <tr class="table-empty-row">
+                      <td colspan="5">No users recorded for this business.</td>
+                    </tr>
+                  }
                   @for (u of detail.users; track u.name) {
                     <tr>
                       <td><app-avatar [name]="u.name" [size]="26" /></td>

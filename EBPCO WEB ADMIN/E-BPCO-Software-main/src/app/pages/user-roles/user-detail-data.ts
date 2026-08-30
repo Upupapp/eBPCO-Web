@@ -81,7 +81,7 @@ export function buildSessions(user: UserRow): SessionEntry[] {
   return Array.from({ length: count }, (_, i) => ({
     device: DEVICES[Math.floor(rand() * DEVICES.length)],
     ip: `192.168.${1 + Math.floor(rand() * 9)}.${10 + Math.floor(rand() * 240)}`,
-    lastSeen: i === 0 ? user.lastActive : `${3 + Math.floor(rand() * 20)} days ago`,
+    lastSeen: i === 0 ? (user.lastActive ?? '—') : `${3 + Math.floor(rand() * 20)} days ago`,
   }));
 }
 
@@ -102,12 +102,12 @@ export function buildUserActivity(user: UserRow): UserActivityItem[] {
     return items;
   }
   items.push(
-    { title: 'Signed in', detail: `Logged in from a recognized device.`, timeAgo: user.lastActive },
+    { title: 'Signed in', detail: `Logged in from a recognized device.`, timeAgo: user.lastActive ?? '—' },
     { title: 'Reviewed an application', detail: 'Advanced an application to its next evaluation stage.', timeAgo: '2 days ago' },
     { title: 'Exported a report', detail: 'Downloaded a CSV export from their assigned module.', timeAgo: '6 days ago' },
   );
   if (user.status === 'Inactive') {
-    items.unshift({ title: 'Account marked inactive', detail: 'No activity recorded in the last 30 days.', timeAgo: user.lastActive });
+    items.unshift({ title: 'Account marked inactive', detail: 'No activity recorded in the last 30 days.', timeAgo: user.lastActive ?? '—' });
   }
   return items;
 }

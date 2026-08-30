@@ -18,7 +18,13 @@ import {
 
 type Tab = 'users' | 'roles';
 type UserDetailTab = 'profile' | 'permissions' | 'workload' | 'security' | 'activity';
-type UserStatus = 'Active' | 'Inactive' | 'Pending';
+/**
+ * `null` where the portal does not know. There is no user endpoint, and status
+ * used to be derived from the row's INDEX — `i % 9 === 8 ? 'Pending' : ...` —
+ * so an administrator could read "Inactive" off a number with no account
+ * behind it. Owner ruling, 29 Aug: show what is known, dash what is not.
+ */
+type UserStatus = 'Active' | 'Inactive' | 'Pending' | null;
 
 export interface UserRow {
   name: string;
@@ -26,7 +32,8 @@ export interface UserRow {
   role: string;
   department: string;
   status: UserStatus;
-  lastActive: string;
+  /** `null` when unknown — it used to be index arithmetic ("Online now", "3h ago"). */
+  lastActive: string | null;
 }
 
 export interface RoleRow {
@@ -97,15 +104,9 @@ function emailFor(name: string): string {
 
 function buildUsers(): UserRow[] {
   return NAMES.map((name, i) => {
-    const status: UserStatus = i % 9 === 8 ? 'Pending' : i % 7 === 6 ? 'Inactive' : 'Active';
-    const lastActive =
-      status === 'Pending'
-        ? 'Invited — not yet accepted'
-        : status === 'Inactive'
-          ? `${7 + (i % 20)} days ago`
-          : i % 5 === 0
-            ? 'Online now'
-            : `${(i % 11) + 1}h ago`;
+    // Both were index arithmetic dressed as account facts.
+    const status: UserStatus = null;
+    const lastActive: string | null = null;
     return {
       name,
       email: emailFor(name),
