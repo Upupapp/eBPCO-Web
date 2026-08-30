@@ -6,6 +6,12 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!--
+      Runtime configuration, loaded BEFORE the application bundle so the
+      injection-token factories see it when they first resolve. Plain JS with no
+      build step, so a deploy can write it per environment. See public/config.js.
+    -->
+    <script src="config.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
