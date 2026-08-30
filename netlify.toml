@@ -1,0 +1,39 @@
+# Netlify build settings for the eBPCO admin portal.
+#
+# Without this file the site's settings lived only in Netlify's UI, and they
+# pointed at the repository root. The root has no index.html, so the site
+# answered 404 at every page while still serving `/assets/...` — because this
+# repo happens to have its own `assets/` folder at the root. The Angular build
+# never ran at all: `/3rdpartylicenses.txt`, which only exists in build output,
+# was a 404 too.
+#
+# Keeping it here rather than in the UI means the deploy is reviewable, and a
+# change to it arrives with the code change that needs it.
+
+[build]
+  # The portal is not at the repository root — this is a monorepo that also
+  # holds castilla-lgu-portal, the mobile app and the design-system docs.
+  # The space in the directory name is real; it is why this is quoted.
+  base = "EBPCO WEB ADMIN/E-BPCO-Software-main"
+
+  # `publish` is resolved relative to `base`. Angular's application builder
+  # emits the browser bundle one level below the project output directory, so
+  # `dist/e-bpco` is NOT it — `dist/e-bpco/browser` holds index.html.
+  publish = "dist/e-bpco/browser"
+
+  command = "npm ci && npm run build"
+
+[build.environment]
+  # Angular 22. Netlify's default image can be older than Angular requires, and
+  # a version resolved by chance is a build that breaks on their schedule
+  # rather than ours.
+  NODE_VERSION = "22"
+
+# Angular routes on the client. Without this every deep link — /login,
+# /applications, /evaluations — is a 404 on refresh or when opened directly,
+# because no file exists at that path. 200 rather than 301: the URL the officer
+# sees must not change.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
