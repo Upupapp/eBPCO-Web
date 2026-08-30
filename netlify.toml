@@ -12,7 +12,7 @@
 
 [build]
   # The portal is not at the repository root — this is a monorepo that also
-  # holds castilla-lgu-portal, the mobile app and the design-system docs.
+  # holds the mobile app and the design-system docs.
   # The space in the directory name is real; it is why this is quoted.
   base = "EBPCO WEB ADMIN/E-BPCO-Software-main"
 
