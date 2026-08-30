@@ -29,6 +29,37 @@
   # rather than ours.
   NODE_VERSION = "22"
 
+# ── API paths, BEFORE the catch-all. Order matters: Netlify takes the first
+# rule that matches, so these must precede `/*` or the catch-all swallows them.
+#
+# `API_BASE_URL` defaults to the empty string — same origin — and that is the
+# INTENDED shape: "a portal served behind the same gateway as the API". This
+# Netlify site is not that gateway and holds no API, so without these rules
+# `GET /me` returns the SPA shell with **200 text/html** to a caller expecting
+# JSON. Measured on the live site before adding them.
+#
+# A 404 is the honest answer: ApiClient turns a failing status into an ApiError
+# the pages already handle, whereas a 200 of HTML gets parsed as JSON and fails
+# as malformed data — which reads like a broken server, not an absent one.
+#
+# If this site is ever put in front of a real API, replace these with proxy
+# rules (`to = "https://<api-host>/:splat"`, `status = 200`) rather than
+# deleting them — leaving no rule at all returns to the silent-200 behaviour.
+[[redirects]]
+  from = "/auth/*"
+  to = "/index.html"
+  status = 404
+
+[[redirects]]
+  from = "/me"
+  to = "/index.html"
+  status = 404
+
+[[redirects]]
+  from = "/staff/*"
+  to = "/index.html"
+  status = 404
+
 # Angular routes on the client. Without this every deep link — /login,
 # /applications, /evaluations — is a 404 on refresh or when opened directly,
 # because no file exists at that path. 200 rather than 301: the URL the officer
