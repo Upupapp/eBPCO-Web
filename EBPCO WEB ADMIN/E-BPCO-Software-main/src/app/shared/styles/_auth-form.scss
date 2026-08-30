@@ -134,6 +134,25 @@
   color: #dc2626;
 }
 
+// The FORM's failure, not a field's — sign-in refused, or the server could not
+// be reached. It used to be rendered as `.field-error` under the email input,
+// with the input marked invalid and `aria-describedby` pointing at it, so an
+// officer with a correct address was told the address was wrong. It sits with
+// the submit button because that is the action that failed.
+.form-error {
+  margin: -0.4rem 0 1rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  // Literals, like `.field-error` above — this stylesheet does not import the
+  // token file, and a variable it cannot see fails the build rather than
+  // falling back.
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 .row-between {
   display: flex;
   align-items: center;

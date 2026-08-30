@@ -19,7 +19,19 @@ export class Login {
   rememberMe = false;
 
   readonly showPassword = signal(false);
-  readonly loginError = signal('');
+  /**
+   * A malformed email address — a fact about THIS field, so the field is
+   * marked invalid and describes itself with the message.
+   */
+  readonly emailError = signal('');
+  /**
+   * Sign-in refused or unreachable. Not a fact about the email field, and it
+   * used to be rendered as one: the input turned red, `aria-invalid` went true
+   * and `aria-describedby` pointed at it, so an officer with a perfectly good
+   * address was told their address was wrong — and a screen-reader user was
+   * told it in those words — when the server was simply down.
+   */
+  readonly signInError = signal('');
   readonly showForgotPassword = signal(false);
 
   private readonly session = inject(SessionService);
@@ -39,19 +51,21 @@ export class Login {
   }
 
   onEmailChange(): void {
-    this.loginError.set('');
+    this.emailError.set('');
+    this.signInError.set('');
   }
 
   readonly signingIn = signal(false);
 
   async onSubmit(form: NgForm): Promise<void> {
     // `submitted` used to be set here and read by nothing — dead state rather
-    // than a validation gate. Validation is `loginError` plus `form.invalid`.
-    this.loginError.set('');
+    // than a validation gate. Validation is `emailError` plus `form.invalid`.
+    this.emailError.set('');
+    this.signInError.set('');
 
     const normalized = this.email.trim().toLowerCase();
     if (!EMAIL_PATTERN.test(normalized)) {
-      this.loginError.set('Please enter a valid email address.');
+      this.emailError.set('Please enter a valid email address.');
       return;
     }
     if (form.invalid) return;
@@ -67,7 +81,7 @@ export class Login {
       // The API's own words where it wrote them for a reader. It answers the
       // same refusal for a wrong password and an unknown address, on purpose —
       // so this must not try to be more specific than the server was.
-      this.loginError.set(
+      this.signInError.set(
         error instanceof Error && error.message !== ''
           ? error.message
           : 'Sign-in failed. Check the address and password and try again.',
