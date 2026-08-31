@@ -23,6 +23,32 @@ describe('Businesses — business rows and linked permits are genuinely store-so
     fixture.detectChanges();
   });
 
+  it('shows no invented hostname for a business', () => {
+
+    const el: HTMLElement = fixture.nativeElement;
+
+    const text = el.textContent ?? '';
+
+
+    // `subdomain` was `slugify(name) + '.castillasorsogon.gov.ph'` — a hostname
+
+    // invented on the LGU's REAL government domain, in a table column, the
+
+    // detail panel, the CSV export and the search filter. None resolve; the
+
+    // parent domain does, which is what made it plausible. The API refused to
+
+    // serve it as "leftovers from a multi-tenant template" (P-F3).
+
+    expect(text).not.toContain('.castillasorsogon.gov.ph');
+
+    expect(text).not.toContain('Sub Domain');
+
+    expect(text).not.toContain('yourapp.gov.ph');
+
+  });
+
+
   it('businessRows() ids are exactly the real ApplicationStore business ids (no fabricated dataset)', () => {
     const rowIds: string[] = component.businessRows().map((r: { id: string }) => r.id);
     const realIds = new Set(store.businesses().map((b) => b.id));
@@ -69,7 +95,6 @@ describe('Businesses — business rows and linked permits are genuinely store-so
       city: 'Barangay Poblacion',
       contactName: 'Not provided',
       contactPhone: 'Not provided',
-      subdomain: 'ghost.castillasorsogon.gov.ph',
       dateCreated: 'Just now',
       userCount: 1,
       status: 'Active',
