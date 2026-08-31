@@ -38,6 +38,16 @@ describe('Welcome', () => {
     expect(text).toContain('Province of Sorsogon');
     expect(text).toContain('Electronic Building Permit and Certificate of Occupancy');
     expect(text).not.toContain('Esperanza');
+
+    // `toContain` above proves the correct name appears SOMEWHERE on the page.
+    // It does not prove the wrong one is absent, and for months it was not:
+    // the body copy offered "managing the complete business permit and
+    // clearance process" while this assertion passed on the footer. The owner's
+    // ruling is that this system is not a business-permit system at all, so on
+    // THIS page that vocabulary is always wrong. (Repo-wide it is not: the
+    // ServiceDomain union has a legitimate 'Business Permit' member.)
+    expect(text.toLowerCase()).not.toContain('business permit');
+    expect(text.toLowerCase()).not.toContain('business clearance');
   });
 
   it('shows no citizen-facing portal choice or public account creation', () => {
