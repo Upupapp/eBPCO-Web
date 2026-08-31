@@ -734,7 +734,18 @@ export class Applications {
     return '';
   });
 
-  protected confirmDelete(): void {
+  /**
+   * Archiving, with the remarks stored against the record.
+   *
+   * The store has taken `remarks` all along and writes them into the audit
+   * entry; this page simply never passed any, so every archive in the trail
+   * read "Application cancelled/archived" with no reason attached. An audit
+   * entry that records the act but not the why answers the easy question.
+   *
+   * The server requires at least three characters for the same reason, so the
+   * dialog enforces it here rather than discovering it in a round trip.
+   */
+  protected confirmDelete(remarks: string): void {
     const target = this.deleteTarget();
     if (!target) return;
     const idsToRemove = target === 'bulk' ? this.selectedIds() : new Set([target.id]);
@@ -745,6 +756,7 @@ export class Applications {
       idsToRemove,
       this.session.name() || 'Staff',
       this.session.role() ?? 'Administrator',
+      remarks,
     );
     this.toast.success(
       idsToRemove.size === 1

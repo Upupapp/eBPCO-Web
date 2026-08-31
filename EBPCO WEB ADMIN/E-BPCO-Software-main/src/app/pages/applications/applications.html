@@ -1344,7 +1344,9 @@
     [message]="deleteDialogMessage()"
     confirmLabel="Archive"
     tone="danger"
-    (confirmed)="confirmDelete()"
+    reasonLabel="Why is this being archived?"
+    reasonPlaceholder="Stored with the record. Anyone reading this later will have only this."
+    (confirmed)="confirmDelete($event)"
     (cancelled)="cancelDelete()"
   />
 }

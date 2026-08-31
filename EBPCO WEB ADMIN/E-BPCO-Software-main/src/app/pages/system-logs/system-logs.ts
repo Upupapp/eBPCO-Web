@@ -9,6 +9,7 @@ import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
 import { AuditEvent } from '../../core/domain/audit.model';
+import { AuditApi, AuditEntry } from '../../core/api/audit.api';
 import { ToastService } from '../../shared/toast/toast.service';
 
 type LogTabKey = 'activity' | 'access' | 'error' | 'security' | 'events';
@@ -357,6 +358,44 @@ export interface SystemEventRow {
   styleUrl: './system-logs.scss',
 })
 export class SystemLogs {
+  // ---- A-20 · Access decisions, from the server's own audit stream --------
+
+  /**
+   * The `security` stream, read for real.
+   *
+   * This is where access decisions land: a request approved or rejected, a
+   * level changed, forms changed, an account disabled or enabled — alongside
+   * refused sign-ins and MFA failures. An access-control system nobody can
+   * review is one nobody can trust, and until now this tab was invented.
+   *
+   * The fabricated rows remain ONLY when the server cannot be reached, and the
+   * page says which it is showing. Silently mixing real and invented rows under
+   * one honest-looking heading would be worse than either alone.
+   */
+  private readonly audit = inject(AuditApi);
+  protected readonly securityEntries = signal<readonly AuditEntry[]>([]);
+  protected readonly securityLive = signal(false);
+  protected readonly securityLoading = signal(false);
+  protected readonly securityError = signal<string | null>(null);
+
+  protected async loadSecurityStream(): Promise<void> {
+    this.securityLoading.set(true);
+    this.securityError.set(null);
+    try {
+      const result = await this.audit.stream('security');
+      if (result.kind === 'ok') {
+        this.securityEntries.set(result.entries);
+        this.securityLive.set(true);
+        return;
+      }
+      this.securityEntries.set([]);
+      this.securityLive.set(false);
+      if (result.kind === 'failed') this.securityError.set(result.message);
+    } finally {
+      this.securityLoading.set(false);
+    }
+  }
+
   private readonly store = inject(ApplicationStore);
   private readonly assessmentStore = inject(AssessmentStore);
   private readonly toast = inject(ToastService);
@@ -808,6 +847,8 @@ export class SystemLogs {
   selectTab(tab: LogTabKey): void {
     this.activeTab.set(tab);
     this.page.set(1);
+    // The security tab is the one with a real server stream behind it.
+    if (tab === 'security') void this.loadSecurityStream();
   }
 
   toggleLiveStream(): void {
