@@ -170,8 +170,12 @@ export class Applications {
       const page = await this.queue.page({ limit: 100 });
       this.store.replaceApplications(page.rows);
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'The queue could not be loaded.';
       this.store.replaceApplications([]);
-      this.loadError.set(error instanceof Error ? error.message : 'The queue could not be loaded.');
+      // Every page that reads the store needs this, not just this one.
+      this.store.recordLoadFailure(message);
+      this.loadError.set(message);
     } finally {
       this.loading.set(false);
     }

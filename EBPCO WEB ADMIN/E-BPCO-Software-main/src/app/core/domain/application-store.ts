@@ -119,6 +119,7 @@ export class ApplicationStore {
    * Passing an empty array is how a FAILED load clears the screen.
    */
   replaceApplications(rows: readonly ApplicationRecord[]): void {
+    this._loadFailure.set(null);
     this._applications.set([...rows]);
     this._businesses.set([]);
     this._applicants.set([]);
@@ -131,6 +132,28 @@ export class ApplicationStore {
     // Assessments and payments live in their own store, and the payments page
     // lists them globally rather than per application.
     this.assessmentStore.clear();
+  }
+
+  private readonly _loadFailure = signal<string | null>(null);
+
+  /**
+   * Why the queue could not be read, or `null`.
+   *
+   * It lives here rather than on the page that fetches, because **five pages
+   * read `applications()` and only one of them fetches**. A failed load empties
+   * this store, and Dashboard, Evaluations, Permit Release and Businesses then
+   * showed confident zeros — "nothing is ready for release", "no applications
+   * under review" — with nothing on screen saying the portal had simply failed
+   * to ask. The Applications page knew; the rest could not.
+   *
+   * Cleared by any successful `replaceApplications`, including an empty one:
+   * a load that genuinely returns no rows is not a failure.
+   */
+  readonly loadFailure = this._loadFailure.asReadonly();
+
+  /** Records that the queue could not be read. The rows are cleared separately, by `replaceApplications([])`. */
+  recordLoadFailure(message: string): void {
+    this._loadFailure.set(message);
   }
 
   getById(id: string): ApplicationRecord | undefined {

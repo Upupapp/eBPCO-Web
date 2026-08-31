@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Topbar } from '../../shared/topbar/topbar';
+import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 import { Icon } from '../../shared/icon/icon';
 import { Avatar } from '../../shared/avatar/avatar';
 import { KpiCard, KpiTone } from '../../shared/kpi-card/kpi-card';
@@ -75,7 +76,8 @@ const STEP_TONE_ACCENT: Record<KpiTone, string> = {
 
 @Component({
   selector: 'app-evaluations',
-  imports: [Topbar, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, OverlayModule],
+  imports: [Topbar,
+    QueueLoadNotice, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, OverlayModule],
   templateUrl: './evaluations.html',
   styleUrl: './evaluations.scss',
 })

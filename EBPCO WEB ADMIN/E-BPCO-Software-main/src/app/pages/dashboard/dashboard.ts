@@ -2,6 +2,7 @@ import { Component, computed, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Topbar } from '../../shared/topbar/topbar';
+import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 import { KpiCard, KpiIllustration, KpiTone, KpiTrend } from '../../shared/kpi-card/kpi-card';
 import { Icon } from '../../shared/icon/icon';
 import { DonutChart, DonutSegment } from '../../shared/donut-chart/donut-chart';
@@ -109,6 +110,7 @@ const STAGE_TO_EVAL_KEY: Record<EvaluationStage, string> = {
   selector: 'app-dashboard',
   imports: [
     Topbar,
+    QueueLoadNotice,
     KpiCard,
     Icon,
     DonutChart,

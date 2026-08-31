@@ -4,6 +4,8 @@
   (searchChange)="searchTerm.set($event); onSearchChange()"
 />
 
+
+<app-queue-load-notice />
 <nav class="tab-nav">
   @for (t of tabs; track t.key) {
     <button
