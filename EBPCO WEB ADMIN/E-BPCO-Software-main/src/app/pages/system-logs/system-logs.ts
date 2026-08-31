@@ -4,7 +4,6 @@ import { Topbar } from '../../shared/topbar/topbar';
 import { KpiCard, KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-card';
 import { Icon } from '../../shared/icon/icon';
 import { Pagination } from '../../shared/pagination/pagination';
-import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
@@ -353,7 +352,7 @@ export interface SystemEventRow {
 
 @Component({
   selector: 'app-system-logs',
-  imports: [Topbar, KpiCard, Icon, Pagination, ConfirmDialog, FormsModule],
+  imports: [Topbar, KpiCard, Icon, Pagination, FormsModule],
   templateUrl: './system-logs.html',
   styleUrl: './system-logs.scss',
 })
