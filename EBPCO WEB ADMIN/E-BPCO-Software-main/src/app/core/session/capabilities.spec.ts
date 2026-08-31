@@ -30,6 +30,7 @@ const session = (over: Partial<Session> = {}): Session => ({
   email: 'ana@castillasorsogon.gov.ph',
   role: 'Evaluator',
   scopes: null,
+  assignedForms: null,
   ...over,
 });
 

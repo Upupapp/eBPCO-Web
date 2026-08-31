@@ -1,0 +1,19 @@
+.assigned-forms-notice {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 11px 14px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  background: var(--surface-muted, #f4f6fa);
+  color: var(--text-secondary, #4a5568);
+  font-size: 13.5px;
+  line-height: 1.5;
+
+  // An account assigned nothing is not an ordinary state — it can see nothing
+  // at all, and it reads as an idle morning unless it looks different.
+  &.warn {
+    background: #fff8e6;
+    color: #7a5b00;
+  }
+}

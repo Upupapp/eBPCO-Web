@@ -24,6 +24,14 @@ export interface Me {
   readonly kind: 'applicant' | 'staff';
   readonly roles?: readonly string[];
   readonly scopes?: readonly string[];
+  /**
+   * The permit types this account may work on, when the server reports them.
+   *
+   * Absent is not empty. Absent means the server did not say; empty means it
+   * said "none", and an account assigned no forms can see nothing — a fact the
+   * portal must be able to state rather than render as an ordinary empty list.
+   */
+  readonly permitTypes?: readonly string[];
   readonly firstName?: string;
   readonly lastName?: string;
 }

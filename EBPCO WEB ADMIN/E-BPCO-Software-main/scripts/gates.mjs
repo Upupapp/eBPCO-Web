@@ -19,6 +19,11 @@
  *   notice       every page that reads the application store but does not
  *                fetch it must show the queue-load notice, or a failed load
  *                renders as confident zeros with nothing saying why.
+ *   delete       a control or dialog offering to DELETE a record. Records are
+ *                archived; the exemptions are listed and justified in the check.
+ *   icon         an <app-icon> whose name is not defined. Renders an EMPTY
+ *                svg with no error — an icon-only button becomes an invisible
+ *                click target.
  *   dead-control a <select> bound to nothing. Not merely inert: its options
  *                NAME a period ("This Month"), so the chart beneath is read as
  *                filtered when it is not.
@@ -199,6 +204,93 @@ for (const file of ts) {
         'dead-control',
         `${short(file)}:${line}`,
         'a <select> bound to nothing — it names a choice the page does not make',
+      ]);
+    }
+  }
+}
+
+// ── 7. An icon name that renders nothing ──────────────────────────────────
+// `Icon` resolves `ICONS[name] ?? []`, so an unknown name produces an EMPTY
+// SVG: no error, no fallback, no console warning. An icon-only button becomes
+// an invisible click target, and a labelled one silently loses its glyph.
+//
+// Found by writing four of them — `refresh`, `check`, `slash`, `archive` —
+// while building the access-control screens, and noticing only when adding a
+// fifth. The build was green every time.
+{
+  const iconFile = 'src/app/shared/icon/icon.ts';
+  if (existsSync(iconFile)) {
+    const src = readFileSync(iconFile, 'utf8');
+    const known = new Set(
+      [...src.matchAll(/^\s{2}'?([a-z][a-z0-9-]*)'?:\s*\[/gm)].map((m) => m[1]),
+    );
+    if (known.size > 0) {
+      for (const file of files.filter((f) => f.endsWith('.html'))) {
+        const html = read.get(file);
+        for (const m of html.matchAll(/<app-icon[^>]*\bname="([a-z0-9-]+)"/g)) {
+          if (!known.has(m[1])) {
+            const line = html.slice(0, m.index).split('\n').length;
+            findings.push([
+              'icon',
+              `${short(file)}:${line}`,
+              `no icon named "${m[1]}" — it renders an empty SVG, silently`,
+            ]);
+          }
+        }
+      }
+    }
+  }
+}
+
+// ── 8. No delete on a record ──────────────────────────────────────────────
+// Owner ruling, 2026-08-31: no delete access anywhere — archive only, and what
+// is set aside is preserved. This gate is deny-by-default: any NEW control
+// whose visible label says delete/remove/destroy fails the build, and the
+// exemptions below are the ones that were measured and found legitimate.
+//
+// It is a labelling gate on purpose. Every case found on 2026-08-31 was a
+// control that already behaved correctly — applications called `store.archive()`
+// and businesses only hid rows — while the button said "Delete Application".
+// The behaviour was safe and the officer's belief was not, which is the whole
+// defect: they clicked it expecting the record to be gone.
+//
+// To add an exemption, prove the target is not a record of something that
+// happened, and say so here.
+{
+  const EXEMPT = [
+    // Un-attaching a file from a form that has not been submitted. Nothing has
+    // happened yet, so there is no record to preserve.
+    'shared/application-intake/application-intake.html',
+    // Removing a document from a requirements CHECKLIST — configuration, which
+    // is editable by design (the checklist is a seed, not an authority).
+    'pages/permit-release/permit-release.html',
+  ];
+  const WORDS = /\b(delete|destroy|purge)\b/i;
+
+  for (const file of files.filter((f) => f.endsWith('.html'))) {
+    const rel = short(file);
+    if (EXEMPT.includes(rel)) continue;
+    const html = read.get(file);
+
+    for (const m of html.matchAll(/<button[\s\S]*?<\/button>/g)) {
+      const label = m[0].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const aria = m[0].match(/aria-label="([^"]*)"/)?.[1] ?? '';
+      if (!WORDS.test(label) && !WORDS.test(aria)) continue;
+      const line = html.slice(0, m.index).split('\n').length;
+      findings.push([
+        'delete',
+        `${rel}:${line}`,
+        `a control offering to delete: "${(label || aria).slice(0, 48)}" — records are archived, never deleted`,
+      ]);
+    }
+
+    for (const m of html.matchAll(/(?:confirmLabel|title)="([^"]*)"/g)) {
+      if (!WORDS.test(m[1])) continue;
+      const line = html.slice(0, m.index).split('\n').length;
+      findings.push([
+        'delete',
+        `${rel}:${line}`,
+        `a dialog offering to delete: "${m[1].slice(0, 48)}" — records are archived, never deleted`,
       ]);
     }
   }

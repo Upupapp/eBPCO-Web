@@ -70,9 +70,10 @@
           <app-icon name="download" [size]="14" />
           Export
         </button>
+        <!-- Hides from this view; nothing is destroyed. See confirmDelete(). -->
         <button type="button" class="btn-outline danger" (click)="requestDeleteSelected()">
-          <app-icon name="trash" [size]="14" />
-          Delete
+          <app-icon name="eye-off" [size]="14" />
+          Hide
         </button>
       </div>
     }
@@ -160,10 +161,10 @@
                   <button
                     type="button"
                     class="icon-btn del"
-                    aria-label="Delete business"
+                    aria-label="Hide business from this view"
                     (click)="requestDelete(row)"
                   >
-                    <app-icon name="trash" [size]="14" />
+                    <app-icon name="eye-off" [size]="14" />
                   </button>
                 </div>
               </td>
@@ -926,9 +927,9 @@
 
 @if (deleteTarget()) {
   <app-confirm-dialog
-    title="Delete business?"
+    title="Hide this business?"
     [message]="deleteDialogMessage()"
-    confirmLabel="Delete"
+    confirmLabel="Hide"
     tone="danger"
     (confirmed)="confirmDelete()"
     (cancelled)="cancelDelete()"
