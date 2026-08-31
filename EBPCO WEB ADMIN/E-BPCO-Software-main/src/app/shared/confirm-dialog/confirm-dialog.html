@@ -5,6 +5,26 @@
     @if (message()) {
       <p>{{ message() }}</p>
     }
+
+    @if (reasonLabel(); as label) {
+      <label class="modal-reason-label" for="confirm-reason">{{ label }}</label>
+      <textarea
+        id="confirm-reason"
+        class="modal-reason"
+        rows="3"
+        name="confirmReason"
+        [placeholder]="reasonPlaceholder()"
+        [(ngModel)]="reason"
+        (ngModelChange)="touched.set(false)"
+      ></textarea>
+      @if (touched() && reasonTooShort()) {
+        <p class="modal-reason-error" role="alert">
+          Please give a reason. It is stored with the record and is what anyone
+          reading this later will have.
+        </p>
+      }
+    }
+
     <div class="modal-actions">
       <button type="button" class="modal-btn neutral" (click)="cancelled.emit()">{{ cancelLabel() }}</button>
       <button
@@ -12,7 +32,7 @@
         class="modal-btn"
         [class.danger]="tone() === 'danger'"
         [class.confirm]="tone() !== 'danger'"
-        (click)="confirmed.emit()"
+        (click)="onConfirm()"
       >
         {{ confirmLabel() }}
       </button>

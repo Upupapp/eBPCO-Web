@@ -1,0 +1,68 @@
+<app-topbar title="Archive" />
+
+<section class="archive-page">
+  <app-queue-load-notice />
+
+  <div class="page-head">
+    <div>
+      <h2>Archived applications</h2>
+      <p class="page-sub">
+        Nothing in eBPCO is deleted. Applications that were cancelled, rejected
+        or allowed to expire are kept here with who set them aside and why.
+        This list is read-only.
+      </p>
+    </div>
+  </div>
+
+  @if (emptyAndKnown()) {
+    <p class="state-note">Nothing has been archived.</p>
+  } @else if (count() > 0) {
+    <p class="count-line">
+      {{ count() }} archived application{{ count() === 1 ? '' : 's' }}.
+    </p>
+
+    <div class="table-wrap">
+      <table class="archive-table">
+        <thead>
+          <tr>
+            <th scope="col">Application</th>
+            <th scope="col">Citizen</th>
+            <th scope="col">Permit type</th>
+            <th scope="col">Status</th>
+            <th scope="col">Set aside by</th>
+            <th scope="col">Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.record.id) {
+            <tr class="row-clickable" tabindex="0" role="button" (click)="open(row)">
+              <td>{{ row.record.id }}</td>
+              <td>{{ row.record.applicant }}</td>
+              <td>{{ row.record.permitType || 'Not recorded' }}</td>
+              <td><span class="status">{{ row.record.lifecycleStatus }}</span></td>
+              <td>
+                @if (row.archivedBy) {
+                  {{ row.archivedBy }}
+                  <span class="when">{{ row.archivedAt }}</span>
+                } @else {
+                  <span class="muted">Not recorded</span>
+                }
+              </td>
+              <td>
+                @if (row.remarks) {
+                  {{ row.remarks }}
+                } @else {
+                  <!--
+                    Archives made before remarks were required. Saying so is
+                    better than a blank cell, which reads as "no reason needed".
+                  -->
+                  <span class="muted">No reason was recorded</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

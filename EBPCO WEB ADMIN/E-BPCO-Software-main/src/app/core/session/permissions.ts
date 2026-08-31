@@ -120,6 +120,17 @@ export const NAV_MODULES: NavModule[] = [
     roles: ['Super Admin', 'Administrator'],
   },
   {
+    key: 'archive',
+    label: 'Archive',
+    icon: 'archive',
+    path: '/archive',
+    group: 'administration',
+    // Everyone who can see applications can see what was set aside. A
+    // preservation guarantee only counts if the people relying on it can look.
+    roles: ALL_STAFF_ROLES,
+  },
+
+  {
     key: 'system-logs',
     label: 'System Logs',
     icon: 'logs',

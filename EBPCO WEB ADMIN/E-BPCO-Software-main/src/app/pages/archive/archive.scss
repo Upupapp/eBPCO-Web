@@ -1,0 +1,51 @@
+:host { display: block; }
+
+.archive-page { padding: 20px 24px 32px; }
+
+.page-head { margin-bottom: 16px; h2 { margin: 0 0 4px; font-size: 18px; } }
+
+.page-sub {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--text-secondary, #4a5568);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.state-note,
+.count-line {
+  font-size: 13.5px;
+  color: var(--text-secondary, #4a5568);
+  margin: 0 0 12px;
+}
+
+.table-wrap { overflow-x: auto; }
+
+.archive-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border, #eef1f6);
+    vertical-align: top;
+  }
+
+  th { color: var(--text-secondary, #4a5568); font-weight: 600; }
+}
+
+.row-clickable { cursor: pointer; &:hover { background: var(--surface-muted, #f7f9fc); } }
+
+.status {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--surface-muted, #eef1f6);
+  font-size: 12.5px;
+}
+
+.when { display: block; color: var(--text-secondary, #6b7280); font-size: 12px; }
+
+.muted { color: var(--text-secondary, #6b7280); font-style: italic; }

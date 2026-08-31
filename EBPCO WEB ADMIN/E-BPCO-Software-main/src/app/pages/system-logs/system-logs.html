@@ -41,6 +41,34 @@
           Applications or Payments.</span
         >
       </div>
+    } @else if (activeTab() === 'security' && securityLoading()) {
+      <div class="prototype-disclaimer" role="status">
+        <app-icon name="info" [size]="16" />
+        <span>Reading the security audit trail…</span>
+      </div>
+    } @else if (activeTab() === 'security' && securityLive()) {
+      <!--
+        Real, and said so. The security stream is the one tab with a server
+        source wired in; the fabricated rows below remain only when it cannot
+        be reached. Mixing real and invented rows under one heading would be
+        worse than either alone.
+      -->
+      <div class="prototype-disclaimer" role="note">
+        <app-icon name="info" [size]="16" />
+        <span>
+          Live security events from the server's audit trail — access decisions,
+          refused sign-ins and MFA failures. Showing
+          {{ securityEntries().length }} entr{{ securityEntries().length === 1 ? 'y' : 'ies' }}.
+        </span>
+      </div>
+    } @else if (activeTab() === 'security' && securityError()) {
+      <div class="prototype-disclaimer" role="alert">
+        <app-icon name="alert-triangle" [size]="16" />
+        <span>
+          The security audit could not be read, so what follows is sample data
+          and not a record of anything. {{ securityError() }}
+        </span>
+      </div>
     } @else {
       <div class="prototype-disclaimer" role="note">
         <app-icon name="info" [size]="16" />
