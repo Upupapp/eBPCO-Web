@@ -109,6 +109,13 @@ export class Capabilities {
   readonly assignedForms = computed<readonly string[] | null>(
     () => this.session.session()?.assignedForms ?? null,
   );
+  // MEASURED 2026-08-31 (F-32): `/me` does not return `permitTypes` for staff,
+  // so this is currently ALWAYS null and every surface reading it renders
+  // nothing. That is the designed behaviour for "the server did not say" — it
+  // is why none of them shows a wrong answer — but it means the forms-scoped
+  // explanations never appear. `GET /staff/users/:id/access` has the data and
+  // requires `staff:administer`, so an officer cannot read their own. Filed
+  // for the backend; nothing on this side can close it.
 
   /** True when the server said this account is assigned no forms at all. */
   readonly hasNoForms = computed(() => this.assignedForms()?.length === 0);
