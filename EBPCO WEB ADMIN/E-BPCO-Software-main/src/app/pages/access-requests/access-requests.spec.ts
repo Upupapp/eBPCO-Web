@@ -258,6 +258,59 @@ describe('Access Requests', () => {
     expect(fixture.nativeElement.textContent).toContain('already been decided');
   });
 
+  it('warns when View and edit would grant nothing', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      startApprove(r: unknown): void; toggleGrantRole(k: string): void;
+      setLevel(l: string): void; levelAddsNothing(): boolean; requests(): unknown[];
+    };
+    c.startApprove(c.requests()[0]);
+    c.toggleGrantRole('auditor');
+    c.setLevel('view-edit');
+    fixture.detectChanges();
+
+    // The level SUBTRACTS and never adds: the server withholds authority at
+    // `view` and issues the role's scopes unchanged at `view-edit`. An auditor
+    // holds none, so this combination grants exactly what it would without it,
+    // and an approver ticking it believes otherwise.
+    expect(c.levelAddsNothing()).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('adds nothing');
+  });
+
+  it('does not warn when a role that can act is also selected', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      startApprove(r: unknown): void; toggleGrantRole(k: string): void;
+      setLevel(l: string): void; levelAddsNothing(): boolean; requests(): unknown[];
+    };
+    c.startApprove(c.requests()[0]);
+    c.toggleGrantRole('auditor');
+    c.toggleGrantRole('evaluator');
+    c.setLevel('view-edit');
+
+    // Mixed with anything that can act, the level is doing real work.
+    expect(c.levelAddsNothing()).toBe(false);
+  });
+
+  it('does not warn at view level, where the point does not arise', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      startApprove(r: unknown): void; toggleGrantRole(k: string): void;
+      setLevel(l: string): void; levelAddsNothing(): boolean; requests(): unknown[];
+    };
+    c.startApprove(c.requests()[0]);
+    c.toggleGrantRole('auditor');
+    c.setLevel('view');
+
+    expect(c.levelAddsNothing()).toBe(false);
+  });
+
   it('does not borrow the RA 11032 pledge language for staff onboarding', async () => {
     const fixture = await mount((http) =>
       http

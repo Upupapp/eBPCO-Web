@@ -107,8 +107,20 @@ export interface AccessGrant {
   readonly roles: readonly string[];
 }
 
-/** Assignable on approval. `super-admin` is deliberately absent — see the UI. */
-export const ASSIGNABLE_ROLES: readonly { key: string; label: string; note: string }[] = [
+/**
+ * Assignable on approval. `super-admin` is deliberately absent: creating
+ * another one should be a deliberate act, not a checkbox on a routine approval.
+ *
+ * `readOnly` mirrors the server's `isReadOnlyRole` — a role whose scope set
+ * grants no authority at all. It is duplicated here ONLY to warn an approver
+ * that `view-edit` would add nothing to it; the server remains the authority
+ * and nothing here grants or withholds anything. If a second read-only role is
+ * ever added there, it must be marked here too, or the warning quietly stops
+ * covering it.
+ */
+export const ASSIGNABLE_ROLES: readonly {
+  key: string; label: string; note: string; readOnly?: true;
+}[] = [
   { key: 'receiving-officer', label: 'Receiving Officer', note: 'Takes applications in at the counter.' },
   { key: 'records-officer', label: 'Records Officer', note: 'Maintains the record; withdrawals and expiries.' },
   { key: 'evaluator', label: 'Evaluator', note: 'Reviews submissions stage by stage.' },
@@ -116,7 +128,7 @@ export const ASSIGNABLE_ROLES: readonly { key: string; label: string; note: stri
   { key: 'cashier', label: 'Cashier', note: 'Verifies that payment was received.' },
   { key: 'building-official', label: 'Building Official', note: 'Approves or refuses the permit.' },
   { key: 'releasing-officer', label: 'Releasing Officer', note: 'Prepares and releases the permit.' },
-  { key: 'auditor', label: 'Auditor', note: 'Reads everything, changes nothing.' },
+  { key: 'auditor', label: 'Auditor', note: 'Reads everything, changes nothing.', readOnly: true },
   { key: 'administrator', label: 'Administrator', note: 'Manages staff accounts and access.' },
 ];
 

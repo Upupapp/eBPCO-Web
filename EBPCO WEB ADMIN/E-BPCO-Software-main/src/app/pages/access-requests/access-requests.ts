@@ -95,6 +95,26 @@ export class AccessRequests implements OnInit {
     return this.grantRoles().has(key);
   }
 
+  /**
+   * True when View and edit would grant nothing.
+   *
+   * The level is SUBTRACTIVE — the server withholds authority scopes at `view`
+   * and issues the role's scopes unchanged at `view-edit`. It can never add
+   * what a role does not have. So a role that grants no authority at all is
+   * read-only whichever level is chosen, and an approver ticking Auditor and
+   * View-and-edit has granted exactly what they would have without it.
+   *
+   * Only when EVERY selected role is read-only: mixed with anything else, the
+   * level is doing real work.
+   */
+  protected readonly levelAddsNothing = computed(() => {
+    const chosen = this.grantRoles();
+    if (chosen.size === 0 || this.grantLevel() !== 'view-edit') return false;
+    return [...chosen].every(
+      (key) => ASSIGNABLE_ROLES.find((r) => r.key === key)?.readOnly === true,
+    );
+  });
+
   protected toggleGrantRole(key: string): void {
     const next = new Set(this.grantRoles());
     if (!next.delete(key)) next.add(key);
