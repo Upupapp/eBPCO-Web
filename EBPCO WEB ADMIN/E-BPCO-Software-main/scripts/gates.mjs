@@ -16,6 +16,9 @@
  *   casts        `as unknown as` — the double cast that switches the type
  *                system off. One of these hid a `status` field set to entirely
  *                the wrong union for every server row.
+ *   notice       every page that reads the application store but does not
+ *                fetch it must show the queue-load notice, or a failed load
+ *                renders as confident zeros with nothing saying why.
  *   config       index.html must actually LOAD public/config.js. The runtime
  *                tokens read `globalThis.EBPCO_*`, and an edit adding that
  *                script tag failed silently once: the build passed, config.js
@@ -143,6 +146,29 @@ for (const file of ts) {
     }
   } else if (existsSync(indexPath) && readFileSync(indexPath, 'utf8').includes('config.js')) {
     findings.push(['config', configPath, 'index.html loads config.js but the file is missing']);
+  }
+}
+
+// ── 5. The queue-load notice must be placed, not merely written ───────────
+// Five pages read ApplicationStore.applications() and one fetches. When the
+// fetch fails the store empties and the others show confident zeros. The notice
+// exists to say so — and a component written but never used would reproduce the
+// defect exactly, which is a shape this codebase has shipped before.
+{
+  const readers = ['permit-release', 'dashboard', 'evaluations', 'businesses'];
+  const noticeExists = existsSync('src/app/shared/queue-load-notice/queue-load-notice.ts');
+  if (noticeExists) {
+    for (const page of readers) {
+      const tpl = `src/app/pages/${page}/${page}.html`;
+      if (!existsSync(tpl)) continue;
+      if (!readFileSync(tpl, 'utf8').includes('<app-queue-load-notice')) {
+        findings.push([
+          'notice',
+          tpl,
+          'reads the application store but does not show the queue-load notice — a failed load would render confident zeros in silence',
+        ]);
+      }
+    }
   }
 }
 

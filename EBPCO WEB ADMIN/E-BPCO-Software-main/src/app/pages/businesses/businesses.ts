@@ -2,6 +2,7 @@ import { Component, ElementRef, computed, inject, signal, viewChild } from '@ang
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Topbar } from '../../shared/topbar/topbar';
+import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 import { Icon } from '../../shared/icon/icon';
 import { Avatar } from '../../shared/avatar/avatar';
 import { KpiCard, KpiIllustration, KpiTone, KpiTrend } from '../../shared/kpi-card/kpi-card';
@@ -93,7 +94,8 @@ const GROWTH_POINTS: GrowthPoint[] = [
 
 @Component({
   selector: 'app-businesses',
-  imports: [Topbar, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, ConfirmDialog],
+  imports: [Topbar,
+    QueueLoadNotice, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, ConfirmDialog],
   templateUrl: './businesses.html',
   styleUrl: './businesses.scss',
 })
