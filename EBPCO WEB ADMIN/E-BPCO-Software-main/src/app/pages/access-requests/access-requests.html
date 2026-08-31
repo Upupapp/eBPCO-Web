@@ -205,6 +205,19 @@
                 ></textarea>
               }
 
+              @if (levelAddsNothing()) {
+                <!--
+                  The level subtracts; it never adds. A role with no authority
+                  scopes is read-only at either level, so an approver ticking
+                  this combination believes they granted editing and did not.
+                -->
+                <p class="decision-warn" role="note">
+                  The role selected grants no editing, so <strong>View and edit</strong>
+                  adds nothing — this account will be read-only. Choose another role
+                  if it should be able to act.
+                </p>
+              }
+
               @if (decisionError(); as message) {
                 <p class="decision-error" role="alert">{{ message }}</p>
               }
