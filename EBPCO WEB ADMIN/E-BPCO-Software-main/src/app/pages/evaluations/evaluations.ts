@@ -20,6 +20,8 @@ import { Applicant } from '../../core/domain/applicant.model';
 import { ApplicationDocument } from '../../core/domain/document.model';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
+import { Capabilities } from '../../core/session/capabilities';
+import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
 import {
   buildEvalTypeCards,
   buildEvalRows,
@@ -76,12 +78,21 @@ const STEP_TONE_ACCENT: Record<KpiTone, string> = {
 
 @Component({
   selector: 'app-evaluations',
-  imports: [Topbar,
+  imports: [ViewOnlyNotice, Topbar,
     QueueLoadNotice, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, OverlayModule],
   templateUrl: './evaluations.html',
   styleUrl: './evaluations.scss',
 })
 export class Evaluations {
+  /**
+   * Whether this officer may decide anything here.
+   *
+   * From `Capabilities`, never a local boolean: a permission answered per
+   * screen is one that is wrong on at least one screen, and the wrong one is
+   * always the one nobody opened.
+   */
+  protected readonly capabilities = inject(Capabilities);
+
   private readonly store = inject(ApplicationStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);

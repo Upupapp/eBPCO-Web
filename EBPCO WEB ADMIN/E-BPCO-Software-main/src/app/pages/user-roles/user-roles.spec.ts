@@ -292,6 +292,72 @@ describe('User directory', () => {
     expect(text).not.toContain('is not signed in anywhere.');
   });
 
+  it('refuses to disable the last enabled super admin, before sending anything', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({
+        items: [
+          member({ id: 'USR-1', role: 'super-admin', fullName: 'Only Super Admin' }),
+          member({ id: 'USR-2', role: 'evaluator', email: 'other@castillasorsogon.gov.ph' }),
+        ],
+      }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      requestDisable(r: unknown): void; disableRefused(): string;
+      disableTarget(): unknown; filteredUsers(): { serverRole: string }[];
+    };
+    const superAdmin = c.filteredUsers().find((u) => u.serverRole === 'super-admin');
+    c.requestDisable(superAdmin);
+
+    // The single failure this product cannot repair from inside itself: an LGU
+    // with no super admin has nobody who can grant anybody access, including
+    // to undo this.
+    TestBed.inject(HttpTestingController).verify();
+    expect(c.disableTarget()).toBeNull();
+    expect(c.disableRefused()).toContain('last enabled super admin');
+  });
+
+  it('allows disabling a super admin while another remains enabled', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({
+        items: [
+          member({ id: 'USR-1', role: 'super-admin' }),
+          member({ id: 'USR-2', role: 'super-admin', email: 'two@castillasorsogon.gov.ph' }),
+        ],
+      }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      requestDisable(r: unknown): void; disableRefused(): string;
+      disableTarget(): unknown; filteredUsers(): unknown[];
+    };
+    c.requestDisable(c.filteredUsers()[0]);
+
+    // The guard must not be a blanket refusal on the role — it counts.
+    expect(c.disableRefused()).toBe('');
+    expect(c.disableTarget()).not.toBeNull();
+  });
+
+  it('counts only ENABLED super admins toward the last-one guard', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({
+        items: [
+          member({ id: 'USR-1', role: 'super-admin' }),
+          member({
+            id: 'USR-2', role: 'super-admin', status: 'disabled',
+            email: 'two@castillasorsogon.gov.ph',
+          }),
+        ],
+      }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      requestDisable(r: unknown): void; disableRefused(): string; filteredUsers(): unknown[];
+    };
+    c.requestDisable(c.filteredUsers()[0]);
+
+    // A disabled super admin cannot grant anybody anything, so it is not a
+    // second one. Counting it would let the last usable account be switched off.
+    expect(c.disableRefused()).toContain('last enabled super admin');
+  });
+
   it('does not present an absent directory as an empty one', async () => {
     const fixture = await mount((http) =>
       http.expectOne('/staff/users').flush(

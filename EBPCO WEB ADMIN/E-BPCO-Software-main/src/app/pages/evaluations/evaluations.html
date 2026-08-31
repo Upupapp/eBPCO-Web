@@ -439,7 +439,15 @@
                           </span>
                         }
                         @if (row.isCurrentStage && row.stage !== 'passed') {
-                          <button type="button" role="menuitem" (click)="advanceStage(row)">
+                          <button
+                            type="button"
+                            role="menuitem"
+                            [disabled]="!capabilities.canEdit()"
+                            [attr.title]="
+                              capabilities.canEdit() ? null : capabilities.viewOnlyReason()
+                            "
+                            (click)="advanceStage(row)"
+                          >
                             <app-icon name="check-circle" [size]="14" />
                             Advance Stage
                           </button>
@@ -685,8 +693,19 @@
       </ul>
 
       <h3>Actions</h3>
+      <!--
+        The explanation sits with the controls it explains. A greyed-out button
+        on its own has three candidate readings and only one is true; the
+        officer tries the other two first, every time.
+      -->
+      <app-view-only-notice />
       <div class="record-actions">
-        <button type="button" class="btn-primary" (click)="advanceStage(row)">
+        <button
+          type="button"
+          class="btn-primary"
+          [disabled]="!capabilities.canEdit()"
+          (click)="advanceStage(row)"
+        >
           <app-icon name="check-circle" [size]="14" />
           Advance Stage
         </button>

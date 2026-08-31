@@ -415,6 +415,7 @@
         @case ('permissions') {
           @if (selectedUser(); as user) {
             <section class="access-panel">
+              <app-view-only-notice />
               <div class="access-head">
                 <div>
                   <h3>Access</h3>
@@ -424,7 +425,7 @@
                     is not what grants anything.
                   </p>
                 </div>
-                @if (!editingAccess()) {
+                @if (!editingAccess() && capabilities.canEdit()) {
                   <button type="button" class="modal-btn confirm" (click)="startEditAccess()">
                     Change access
                   </button>
@@ -757,6 +758,22 @@
       </form>
     </div>
   </div>
+}
+
+@if (disableRefused(); as refusal) {
+  <!--
+    Refused before anything was sent. The server refuses this too; saying so
+    immediately, in the portal's own words, is a better answer than a wait
+    followed by an error body.
+  -->
+  <app-confirm-dialog
+    title="This account cannot be disabled"
+    [message]="refusal"
+    confirmLabel="Understood"
+    tone="default"
+    (confirmed)="dismissDisableRefusal()"
+    (cancelled)="dismissDisableRefusal()"
+  />
 }
 
 @if (disableTarget(); as target) {

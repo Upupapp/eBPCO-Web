@@ -8,6 +8,16 @@ export interface Session {
   name: string;
   email: string;
   role: StaffRole;
+  /**
+   * The scopes `/me` reported, or null when it reported none.
+   *
+   * Null is not "no scopes" — it is "the server did not say", and the two must
+   * not collapse. Treating silence as an empty set would disable every write
+   * control against a server that simply does not send the field yet; treating
+   * it as full access would do the opposite. `Capabilities` decides, in one
+   * place, and says which source it used.
+   */
+  scopes: readonly string[] | null;
 }
 
 /**
@@ -72,7 +82,12 @@ export class SessionService {
       );
     }
     const name = [me.firstName, me.lastName].filter(Boolean).join(' ');
-    this._session.set({ name: name === '' ? me.email : name, email: me.email, role });
+    this._session.set({
+      name: name === '' ? me.email : name,
+      email: me.email,
+      role,
+      scopes: me.scopes ?? null,
+    });
   }
 
   async signOut(): Promise<void> {
@@ -97,7 +112,12 @@ export class SessionService {
         return;
       }
       const name = [me.firstName, me.lastName].filter(Boolean).join(' ');
-      this._session.set({ name: name === '' ? me.email : name, email: me.email, role });
+      this._session.set({
+        name: name === '' ? me.email : name,
+        email: me.email,
+        role,
+        scopes: me.scopes ?? null,
+      });
     } catch {
       // An expired or revoked token is not an error worth showing on load; the
       // guard will send them to sign in.
