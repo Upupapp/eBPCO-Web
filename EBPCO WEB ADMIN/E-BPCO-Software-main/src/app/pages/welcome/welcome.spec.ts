@@ -50,6 +50,18 @@ describe('Welcome', () => {
     expect(text.toLowerCase()).not.toContain('business clearance');
   });
 
+  /**
+   * "Citizen", "applicant" and "business owner" are ONE population under three
+   * names (owner, 2026-08-31) — not three roles. So this test and the
+   * `/register` page guard the same boundary from two directions: that
+   * population is never offered an account on the ADMIN portal.
+   *
+   * The words are not banned vocabulary, and must not be treated as such.
+   * "Citizen's Charter" is a proper noun — the LGU's official service-standards
+   * document, required of every Philippine LGU — and this repo cites it as a
+   * genuine source in `fee-rule.model.ts` and `requirements-catalog.ts`.
+   * A careless sweep for "citizen" would corrupt that sourcing.
+   */
   it('shows no citizen-facing portal choice or public account creation', () => {
     const text = nativeElement.textContent ?? '';
     expect(text).not.toContain('Citizen Portal');
