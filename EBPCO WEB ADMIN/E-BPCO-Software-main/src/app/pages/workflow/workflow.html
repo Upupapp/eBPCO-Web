@@ -15,9 +15,16 @@
         <div class="filter-panel">
           <span class="filter-panel-title">Filter</span>
           @for (f of filters; track f.key) {
+            <!--
+              Radio, not checkbox. `selectFilter` replaces the active flow, so
+              exactly one is ever chosen — a checkbox announces "you may pick
+              several" to a screen reader and to anyone reading the shape, and
+              then silently behaves as a radio.
+            -->
             <label class="filter-option">
               <input
-                type="checkbox"
+                type="radio"
+                name="workflow-filter"
                 [checked]="activeFilter() === f.key"
                 (change)="selectFilter(f.key)"
               />
