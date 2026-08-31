@@ -15,6 +15,14 @@
     </button>
   </div>
 
+  @if (notice(); as message) {
+    <div class="state-note warn" role="status">
+      <app-icon name="alert-triangle" [size]="16" />
+      <span>{{ message }}</span>
+      <button type="button" class="notice-dismiss" (click)="dismissNotice()">Dismiss</button>
+    </div>
+  }
+
   @if (loading()) {
     <p class="state-note">Loading access requests…</p>
   } @else if (unavailable()) {
@@ -83,6 +91,130 @@
             <dt>Reason given</dt>
             <dd class="justification">{{ request.justification }}</dd>
           </dl>
+
+          @if (deciding()?.id === request.id) {
+            <div class="decision-panel">
+              @if (decisionMode() === 'approve') {
+                <h4>Grant access</h4>
+                <p class="decision-note">
+                  Seeded from what was asked for. Change it before approving —
+                  this is what the account will be able to do.
+                </p>
+
+                <fieldset class="forms-field">
+                  <legend>
+                    Forms this account may work on
+                    <span class="count">{{ grantCount() }} selected</span>
+                  </legend>
+                  <div class="forms-grid">
+                    @for (type of permitTypes; track type) {
+                      <label class="form-option">
+                        <input
+                          type="checkbox"
+                          [checked]="isGranted(type)"
+                          (change)="toggleGrant(type)"
+                        />
+                        <span>{{ type }}</span>
+                      </label>
+                    }
+                  </div>
+                </fieldset>
+
+                @if (unknownRequested(request); as unknown) {
+                  @if (unknown.length > 0) {
+                    <!--
+                      Asked for something this portal does not publish. Shown
+                      rather than dropped silently: a grant that quietly omits
+                      what somebody requested is one they will assume they have.
+                    -->
+                    <p class="decision-warn" role="note">
+                      Not granted, because this portal does not publish
+                      {{ unknown.length === 1 ? 'this form' : 'these forms' }}:
+                      {{ unknown.join(', ') }}
+                    </p>
+                  }
+                }
+
+                <fieldset class="level-field">
+                  <legend>Level of access</legend>
+                  <label class="level-option">
+                    <input
+                      type="radio"
+                      [name]="'grant-level-' + request.id"
+                      [checked]="grantLevel() === 'view'"
+                      (change)="setLevel('view')"
+                    />
+                    <span>
+                      <strong>View only</strong>
+                      <small>See applications and documents. Cannot change anything.</small>
+                    </span>
+                  </label>
+                  <label class="level-option">
+                    <input
+                      type="radio"
+                      [name]="'grant-level-' + request.id"
+                      [checked]="grantLevel() === 'view-edit'"
+                      (change)="setLevel('view-edit')"
+                    />
+                    <span>
+                      <strong>View and edit</strong>
+                      <small>Respond to citizens and decide on applications.</small>
+                    </span>
+                  </label>
+                </fieldset>
+              } @else {
+                <h4>Reject this request</h4>
+                <label class="decision-label" [attr.for]="'reason-' + request.id">
+                  Reason
+                </label>
+                <textarea
+                  [id]="'reason-' + request.id"
+                  rows="3"
+                  placeholder="The requester is a colleague and will ask why."
+                  [(ngModel)]="rejectReason"
+                  name="rejectReason"
+                ></textarea>
+              }
+
+              @if (decisionError(); as message) {
+                <p class="decision-error" role="alert">{{ message }}</p>
+              }
+
+              <div class="decision-actions">
+                <button type="button" class="btn-secondary" (click)="cancelDecision()">
+                  Cancel
+                </button>
+                @if (decisionMode() === 'approve') {
+                  <button
+                    type="button"
+                    class="btn-primary"
+                    [disabled]="working()"
+                    (click)="confirmApprove()"
+                  >
+                    {{ working() ? 'Approving…' : 'Approve and create account' }}
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="btn-danger"
+                    [disabled]="working()"
+                    (click)="confirmReject()"
+                  >
+                    {{ working() ? 'Rejecting…' : 'Reject request' }}
+                  </button>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="card-actions">
+              <button type="button" class="btn-secondary" (click)="startReject(request)">
+                Reject
+              </button>
+              <button type="button" class="btn-primary" (click)="startApprove(request)">
+                Review and approve
+              </button>
+            </div>
+          }
         </li>
       }
     </ul>

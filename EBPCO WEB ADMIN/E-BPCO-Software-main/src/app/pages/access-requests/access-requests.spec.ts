@@ -123,6 +123,137 @@ describe('Access Requests', () => {
     expect(text).not.toContain('No requests are waiting');
   });
 
+  it('seeds the grant from what was asked, so the approver edits rather than rebuilds', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/access-requests').flush({
+        items: [request({
+          requestedPermitTypes: ['Fencing Permit', 'Sign Permit'],
+          requestedLevel: 'view-edit',
+        })],
+      }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      startApprove(r: unknown): void; isGranted(t: string): boolean;
+      grantLevel(): string; grantCount(): number;
+    };
+    c.startApprove((fixture.componentInstance as unknown as { requests(): unknown[] }).requests()[0]);
+
+    // Seeded, not silently accepted and not empty: an approver made to rebuild
+    // the list from scratch will pick something easier than the right answer.
+    expect(c.isGranted('Fencing Permit')).toBe(true);
+    expect(c.isGranted('Sign Permit')).toBe(true);
+    expect(c.isGranted('Demolition Permit')).toBe(false);
+    expect(c.grantLevel()).toBe('view-edit');
+  });
+
+  it('never grants a permit type this portal does not publish', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/access-requests').flush({
+        items: [request({ requestedPermitTypes: ['Fencing Permit', 'Sorcery Permit'] })],
+      }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      startApprove(r: unknown): void; grantCount(): number;
+      unknownRequested(r: unknown): readonly string[]; requests(): unknown[];
+    };
+    const row = c.requests()[0];
+    c.startApprove(row);
+    fixture.detectChanges();
+
+    // Filtered out of the grant, but SHOWN — a grant that quietly omits what
+    // somebody asked for is one they will assume they have.
+    expect(c.grantCount()).toBe(1);
+    expect(c.unknownRequested(row)).toEqual(['Sorcery Permit']);
+    expect(fixture.nativeElement.textContent).toContain('Sorcery Permit');
+  });
+
+  it('refuses to approve with no forms — an account that can see nothing', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      startApprove(r: unknown): void; toggleGrant(t: string): void;
+      confirmApprove(): Promise<void>; requests(): unknown[];
+    };
+    c.startApprove(c.requests()[0]);
+    c.toggleGrant('Building Permit – New Construction');
+    await c.confirmApprove();
+
+    TestBed.inject(HttpTestingController).verify();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('at least one form');
+  });
+
+  it('sends the grant WITH the approval, in one request', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      startApprove(r: unknown): void; setLevel(l: string): void;
+      confirmApprove(): Promise<void>; requests(): unknown[];
+    };
+    c.startApprove(c.requests()[0]);
+    c.setLevel('view-edit');
+    const pending = c.confirmApprove();
+
+    const http = TestBed.inject(HttpTestingController);
+    const req = http.expectOne('/staff/access-requests/REQ-1/approve');
+    // One call, not two: a second request would leave a window in which an
+    // approved account exists with undefined access, and if it failed the
+    // window would never close.
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body.level).toBe('view-edit');
+    expect(req.request.body.permitTypes).toEqual(['Building Permit – New Construction']);
+    req.flush(null, { status: 204, statusText: 'No Content' });
+
+    // The reload is queued behind the decision's promise, so it does not exist
+    // until the task queue drains.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    http.expectOne('/staff/access-requests').flush({ items: [] });
+    await pending;
+  });
+
+  it('refuses to reject without a reason', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      startReject(r: unknown): void; confirmReject(): Promise<void>; requests(): unknown[];
+    };
+    c.startReject(c.requests()[0]);
+    await c.confirmReject();
+
+    TestBed.inject(HttpTestingController).verify();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Give a reason');
+  });
+
+  it('tells the approver when someone else already decided, rather than failing', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      startReject(r: unknown): void; confirmReject(): Promise<void>;
+      rejectReason: string; requests(): unknown[];
+    };
+    c.startReject(c.requests()[0]);
+    c.rejectReason = 'Not required for this role.';
+    const pending = c.confirmReject();
+
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/staff/access-requests/REQ-1/reject').flush(
+      { type: 'about:blank', title: 'Conflict', status: 409 },
+      { status: 409, statusText: 'Conflict' },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    http.expectOne('/staff/access-requests').flush({ items: [] });
+    await pending;
+    fixture.detectChanges();
+
+    // A 409 is not a failure to retry — a decision already exists.
+    expect(fixture.nativeElement.textContent).toContain('already been decided');
+  });
+
   it('does not borrow the RA 11032 pledge language for staff onboarding', async () => {
     const fixture = await mount((http) =>
       http
