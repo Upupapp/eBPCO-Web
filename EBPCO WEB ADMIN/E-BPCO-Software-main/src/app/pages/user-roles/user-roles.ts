@@ -540,7 +540,6 @@ export class UserRoles implements OnInit {
   protected readonly editingAccess = signal(false);
   protected readonly accessLevel = signal<AccessLevel>('view');
   private readonly accessForms = signal<ReadonlySet<string>>(new Set());
-  protected accessReason = '';
   protected readonly accessError = signal('');
   protected readonly accessWorking = signal(false);
 
@@ -569,7 +568,6 @@ export class UserRoles implements OnInit {
     // and changes it, rather than composing a replacement from memory.
     this.accessLevel.set(row.level);
     this.accessForms.set(new Set(row.permitTypes));
-    this.accessReason = '';
     this.accessError.set('');
     this.editingAccess.set(true);
   }
@@ -577,7 +575,6 @@ export class UserRoles implements OnInit {
   protected cancelEditAccess(): void {
     this.editingAccess.set(false);
     this.accessError.set('');
-    this.accessReason = '';
   }
 
   async saveAccess(): Promise<void> {
@@ -597,26 +594,16 @@ export class UserRoles implements OnInit {
       this.accessError.set('Choose at least one form. An account with no forms can see nothing.');
       return;
     }
-    if (this.accessReason.trim().length < 3) {
-      this.accessError.set('Give a reason. It is recorded against this change.');
-      return;
-    }
-
     this.accessWorking.set(true);
     try {
-      const result = await this.directory.changeAccess(
-        row.id,
-        {
-          level: this.accessLevel(),
-          permitTypes: [...this.accessForms()] as PermitType[],
-        },
-        this.accessReason,
-      );
+      const result = await this.directory.changeAccess(row.id, {
+        level: this.accessLevel(),
+        permitTypes: [...this.accessForms()] as PermitType[],
+      });
 
       if (result.kind === 'done') {
         this.editingAccess.set(false);
-        this.accessReason = '';
-        this.toast.success(`Access updated for ${row.name}.`);
+            this.toast.success(`Access updated for ${row.name}.`);
         await this.loadDirectory();
         // Re-select from the reloaded list so the panel shows what the SERVER
         // now holds, not what this page hoped it sent.

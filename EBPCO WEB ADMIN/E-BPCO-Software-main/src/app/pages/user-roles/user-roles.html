@@ -501,16 +501,14 @@
                   </label>
                 </fieldset>
 
-                <label class="access-reason-label" for="accessReason">
-                  Reason for this change
-                </label>
-                <textarea
-                  id="accessReason"
-                  rows="2"
-                  name="accessReason"
-                  placeholder="Recorded against this change in the audit trail."
-                  [(ngModel)]="accessReason"
-                ></textarea>
+                <!--
+                  The reason field was removed, not hidden. Neither
+                  `PUT :id/access/level` nor `PUT :id/access/forms` accepts one
+                  — both are `.strict()` — so it was collecting text and
+                  discarding it, which is the F-24 defect exactly. Asking an
+                  administrator to justify a change and then dropping the
+                  justification is worse than not asking. Filed for the backend.
+                -->
 
                 @if (accessError(); as message) {
                   <p class="access-error" role="alert">{{ message }}</p>

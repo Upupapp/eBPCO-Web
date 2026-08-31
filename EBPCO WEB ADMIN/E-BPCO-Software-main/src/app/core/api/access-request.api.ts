@@ -53,17 +53,25 @@ export interface AccessRequest {
  * cannot work.
  */
 /** A request awaiting a super admin's decision. */
+/**
+ * A request awaiting decision, in the SERVER's field names.
+ *
+ * Named as the API names them rather than as this portal would have. Four of
+ * these were wrong until 2026-08-31 — `mobileNumber`, `position`,
+ * `requestedPermitTypes` and `requestedAt` — and every one failed silently:
+ * `undefined` renders as an empty cell, not as an error (F-31).
+ */
 export interface PendingAccessRequest {
   readonly id: string;
   readonly fullName: string;
   readonly email: string;
-  readonly mobileNumber: string;
-  readonly position: string;
-  readonly requestedPermitTypes: readonly string[];
+  readonly mobile: string;
+  readonly officePosition: string;
+  readonly permitTypes: readonly string[];
   readonly requestedLevel: AccessLevel;
   readonly justification: string;
   /** RFC 3339, as the API sends it. */
-  readonly requestedAt: string;
+  readonly raisedAt: string;
 }
 
 /**
@@ -177,10 +185,12 @@ export class AccessRequestApi {
    */
   async listPending(): Promise<PendingListResult> {
     try {
-      const page = await this.api.get<{ items?: readonly PendingAccessRequest[] }>(
+      // `data`, not `items`. The server's envelope — and `?? []` on the wrong
+      // key does not fail, it answers "none waiting" with total confidence.
+      const page = await this.api.get<{ data?: readonly PendingAccessRequest[] }>(
         '/staff/access-requests',
       );
-      return { kind: 'ok', requests: page.items ?? [] };
+      return { kind: 'ok', requests: page.data ?? [] };
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
