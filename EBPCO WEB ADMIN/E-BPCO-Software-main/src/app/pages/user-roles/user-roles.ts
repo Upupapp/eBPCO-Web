@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Topbar } from '../../shared/topbar/topbar';
 import { KpiCard, KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-card';
@@ -8,6 +8,7 @@ import { Pagination } from '../../shared/pagination/pagination';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { SessionService } from '../../core/session/session.service';
+import { StaffDirectoryApi, StaffMember } from '../../core/api/staff-directory.api';
 import { ToastService } from '../../shared/toast/toast.service';
 import {
   buildPermissionMatrix,
@@ -27,6 +28,8 @@ type UserDetailTab = 'profile' | 'permissions' | 'workload' | 'security' | 'acti
 type UserStatus = 'Active' | 'Inactive' | 'Pending' | null;
 
 export interface UserRow {
+  /** The server's account id. Empty only for a row this page has not saved. */
+  id: string;
   name: string;
   email: string;
   role: string;
@@ -102,20 +105,25 @@ function emailFor(name: string): string {
   return `${handle}@ebpco.gov.ph`;
 }
 
-function buildUsers(): UserRow[] {
-  return NAMES.map((name, i) => {
-    // Both were index arithmetic dressed as account facts.
-    const status: UserStatus = null;
-    const lastActive: string | null = null;
-    return {
-      name,
-      email: emailFor(name),
-      role: ROLE_ORDER[i % ROLE_ORDER.length],
-      department: DEPARTMENTS[i % DEPARTMENTS.length],
-      status,
-      lastActive,
-    };
-  });
+/**
+ * A server staff record as this page's row.
+ *
+ * `role` shows the LEVEL rather than a job title, because that is what the
+ * owner's model actually grants: an ADMIN sub-type is defined by accessibility
+ * — which forms, and view or view-and-edit — not by what the post is called.
+ */
+function toUserRow(member: StaffMember): UserRow {
+  return {
+    id: member.id,
+    name: member.fullName,
+    email: member.email,
+    role: member.level === 'view-edit' ? 'View and edit' : 'View only',
+    department: member.permitTypes.length === 0
+      ? 'No forms assigned'
+      : `${member.permitTypes.length} form${member.permitTypes.length === 1 ? '' : 's'}`,
+    status: member.status === 'disabled' ? 'Inactive' : 'Active',
+    lastActive: member.lastSignInAt,
+  };
 }
 
 const ROLES: RoleRow[] = [
@@ -191,7 +199,7 @@ const ROLES: RoleRow[] = [
   templateUrl: './user-roles.html',
   styleUrl: './user-roles.scss',
 })
-export class UserRoles {
+export class UserRoles implements OnInit {
   private readonly session = inject(SessionService);
   private readonly toast = inject(ToastService);
 
@@ -212,7 +220,24 @@ export class UserRoles {
   protected readonly roleFilter = signal('All Roles');
   protected readonly statusFilter = signal('All Statuses');
 
-  private readonly users = signal<UserRow[]>(buildUsers());
+  private readonly directory = inject(StaffDirectoryApi);
+
+  /**
+   * The staff list, read from the server.
+   *
+   * It used to be `buildUsers()` — names and departments invented from
+   * hardcoded arrays. A fabricated LIST is worse than a fabricated chart: an
+   * administrator reading it believes these people hold accounts, and the
+   * absence of somebody who does hold one is invisible.
+   *
+   * Three states, because an empty table is not an answer: loaded, capability
+   * absent, read failed. `directoryLoaded` is false until the server has
+   * actually answered, so the page never presents an empty list as "no staff".
+   */
+  private readonly users = signal<UserRow[]>([]);
+  protected readonly directoryLoading = signal(true);
+  protected readonly directoryUnavailable = signal(false);
+  protected readonly directoryError = signal<string | null>(null);
   protected readonly roles = signal<RoleRow[]>(ROLES);
   protected readonly roleOptions = ROLE_ORDER;
   protected readonly statusOptions: UserStatus[] = ['Active', 'Inactive', 'Pending'];
@@ -274,6 +299,28 @@ export class UserRoles {
       },
     ];
   });
+
+  async ngOnInit(): Promise<void> {
+    await this.loadDirectory();
+  }
+
+  protected async loadDirectory(): Promise<void> {
+    this.directoryLoading.set(true);
+    this.directoryUnavailable.set(false);
+    this.directoryError.set(null);
+    try {
+      const result = await this.directory.list();
+      if (result.kind === 'ok') {
+        this.users.set(result.members.map(toUserRow));
+        return;
+      }
+      this.users.set([]);
+      if (result.kind === 'unavailable') this.directoryUnavailable.set(true);
+      else this.directoryError.set(result.message);
+    } finally {
+      this.directoryLoading.set(false);
+    }
+  }
 
   protected readonly filteredUsers = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -389,22 +436,48 @@ export class UserRoles {
 
   // ---- Delete -------------------------------------------------------------
 
-  protected readonly deleteTarget = signal<UserRow | null>(null);
+  /**
+   * Disabling an account. There is no delete, and the absence is the feature.
+   *
+   * Owner ruling, 2026-08-31: no delete access anywhere — archive or disable,
+   * and what is set aside is preserved. This control used to remove the row
+   * from the list outright:
+   *
+   *     this.users.update((rows) => rows.filter((r) => r.email !== target.email));
+   *
+   * An officer's name is on every application they touched. Deleting the
+   * account leaves that audit trail pointing at nobody, and a permit decided by
+   * a person the system can no longer identify is a permit nobody can defend.
+   * The API agrees: it offers `disable` and `enable` and no destructive route
+   * for a staff user.
+   */
+  protected readonly disableTarget = signal<UserRow | null>(null);
 
-  protected requestDelete(row: UserRow): void {
-    this.deleteTarget.set(row);
+  protected requestDisable(row: UserRow): void {
+    this.disableTarget.set(row);
   }
 
-  protected cancelDelete(): void {
-    this.deleteTarget.set(null);
+  protected cancelDisable(): void {
+    this.disableTarget.set(null);
   }
 
-  protected confirmDelete(): void {
-    const target = this.deleteTarget();
+  protected confirmDisable(): void {
+    const target = this.disableTarget();
     if (!target) return;
-    this.users.update((rows) => rows.filter((row) => row.email !== target.email));
-    this.deleteTarget.set(null);
-    this.toast.success(`"${target.name}" removed.`);
+    // Preserved, not removed. The row stays and its status changes, so the
+    // account remains attributable everywhere it has already acted.
+    this.users.update((rows) =>
+      rows.map((row) => (row.email === target.email ? { ...row, status: 'Inactive' } : row)),
+    );
+    this.disableTarget.set(null);
+    this.toast.success(`"${target.name}" disabled. The account is kept, not deleted.`);
+  }
+
+  protected enableUser(row: UserRow): void {
+    this.users.update((rows) =>
+      rows.map((r) => (r.email === row.email ? { ...r, status: 'Active' } : r)),
+    );
+    this.toast.success(`"${row.name}" enabled.`);
   }
 
   // ---- Add user -----------------------------------------------------------
@@ -435,6 +508,10 @@ export class UserRoles {
     this.users.update((rows) => [
       {
         name,
+        // No server id: this row has not been saved anywhere. The empty
+        // string says so rather than a fabricated identifier that would look
+        // like a real account to every later read.
+        id: '',
         email,
         role: this.newUser.role,
         department: this.newUser.department,
