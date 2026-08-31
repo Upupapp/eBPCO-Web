@@ -5,14 +5,186 @@
       <span class="brand-name">E-BPCO</span>
     </div>
 
-    <h1 class="title">Requesting an account</h1>
-
-    <div class="provisioning">
-      <p>
-        Accounts for the Electronic Building Permit and Certificate of Occupancy
-        admin portal are issued by the Municipality of Castilla, and cannot be
-        created here. Please ask your LGU administrator to provision one for you.
+    @if (outcome(); as done) {
+      <!--
+        Never "your account has been created". The endpoint answers 202
+        identically whether or not the address is already known, so the only
+        true statement here is that the request was accepted for review.
+      -->
+      <h1 class="title">Request received</h1>
+      <div class="provisioning" role="status">
+        @if (done === 'received') {
+          <p>
+            Your request has been sent to the LGU administrator for approval.
+            <strong>No account exists yet.</strong> If it is approved, you will
+            be told which forms you may work on and at what level.
+          </p>
+          <p class="applicant-note">
+            You may not hear back by email if this address is not eligible for
+            an account, so follow up with your administrator if you hear nothing.
+          </p>
+        } @else {
+          <p>
+            <strong>This deployment cannot take access requests yet.</strong>
+            Nothing was submitted and no account was created.
+          </p>
+          <p class="applicant-note">
+            Ask your LGU administrator to add your account directly.
+          </p>
+        }
+      </div>
+      <p class="switch-auth">
+        <a routerLink="/login">Back to sign in</a>
       </p>
+    } @else {
+      <h1 class="title">Request an account</h1>
+
+      <p class="provisioning intro">
+        Accounts on this portal are issued by the Municipality of Castilla. Fill
+        this in and an administrator will decide whether to approve it, and what
+        access to give you. <strong>This does not create an account</strong>, and
+        no password is set here.
+      </p>
+
+      <form (ngSubmit)="onSubmit(requestForm)" #requestForm="ngForm" novalidate>
+        <label class="field-label" for="fullName">Full name</label>
+        <div class="input-wrap">
+          <input
+            id="fullName"
+            name="fullName"
+            type="text"
+            placeholder="Your full name"
+            [(ngModel)]="fullName"
+            (ngModelChange)="onFieldChange()"
+            required
+            autocomplete="name"
+          />
+        </div>
+
+        <label class="field-label" for="email">Work email address</label>
+        <div class="input-wrap" [class.invalid]="emailInvalid()">
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="you@example.gov.ph"
+            [(ngModel)]="email"
+            (ngModelChange)="onFieldChange()"
+            required
+            [attr.aria-invalid]="emailInvalid() ? 'true' : null"
+            autocomplete="email"
+          />
+        </div>
+
+        <label class="field-label" for="mobileNumber">Mobile number</label>
+        <div class="input-wrap" [class.invalid]="mobileInvalid()">
+          <input
+            id="mobileNumber"
+            name="mobileNumber"
+            type="tel"
+            placeholder="09XXXXXXXXX"
+            [(ngModel)]="mobileNumber"
+            (ngModelChange)="onFieldChange()"
+            required
+            [attr.aria-invalid]="mobileInvalid() ? 'true' : null"
+            autocomplete="tel"
+          />
+        </div>
+
+        <label class="field-label" for="position">Office and position</label>
+        <div class="input-wrap">
+          <input
+            id="position"
+            name="position"
+            type="text"
+            placeholder="e.g. Municipal Engineering Office — Evaluator"
+            [(ngModel)]="position"
+            (ngModelChange)="onFieldChange()"
+            required
+          />
+        </div>
+
+        <fieldset class="forms-field">
+          <legend class="field-label">
+            Forms you need access to
+            <span class="count">{{ selectedCount() }} selected</span>
+          </legend>
+          <!--
+            Nothing pre-ticked, deliberately. A request that arrives asking for
+            every form is one an approver waves through, and the assignment
+            that results is nobody's decision.
+          -->
+          <div class="forms-grid">
+            @for (type of permitTypes; track type) {
+              <label class="form-option">
+                <input
+                  type="checkbox"
+                  [name]="'form-' + type"
+                  [checked]="isSelected(type)"
+                  (change)="toggle(type)"
+                />
+                <span>{{ type }}</span>
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        <fieldset class="level-field">
+          <legend class="field-label">Level of access</legend>
+          <label class="level-option">
+            <input
+              type="radio"
+              name="requestedLevel"
+              value="view"
+              [(ngModel)]="requestedLevel"
+              (ngModelChange)="onFieldChange()"
+            />
+            <span>
+              <strong>View only</strong>
+              <small>See applications and documents. Cannot change anything.</small>
+            </span>
+          </label>
+          <label class="level-option">
+            <input
+              type="radio"
+              name="requestedLevel"
+              value="view-edit"
+              [(ngModel)]="requestedLevel"
+              (ngModelChange)="onFieldChange()"
+            />
+            <span>
+              <strong>View and edit</strong>
+              <small>Respond to applicants and decide on applications.</small>
+            </span>
+          </label>
+        </fieldset>
+
+        <label class="field-label" for="justification">Why you need access</label>
+        <div class="input-wrap">
+          <textarea
+            id="justification"
+            name="justification"
+            rows="3"
+            placeholder="Briefly, so the administrator can decide"
+            [(ngModel)]="justification"
+            (ngModelChange)="onFieldChange()"
+            required
+          ></textarea>
+        </div>
+
+        @if (formError(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="submitting()"
+          [attr.aria-busy]="submitting() ? 'true' : null"
+        >
+          {{ submitting() ? 'Sending request…' : 'Send request' }}
+        </button>
+      </form>
 
       <p class="applicant-note">
         Applying for a building permit or a certificate of occupancy? This portal
@@ -21,10 +193,10 @@
           Apply at <a [href]="portal" rel="noopener">the business owners portal</a>.
         }
       </p>
-    </div>
 
-    <p class="switch-auth">
-      Already have an account? <a routerLink="/login">Sign in</a>
-    </p>
+      <p class="switch-auth">
+        Already have an account? <a routerLink="/login">Sign in</a>
+      </p>
+    }
   </div>
 </app-auth-layout>

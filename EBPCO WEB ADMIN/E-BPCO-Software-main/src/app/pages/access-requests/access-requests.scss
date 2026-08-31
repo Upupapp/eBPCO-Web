@@ -1,0 +1,155 @@
+:host {
+  display: block;
+}
+
+.requests-page {
+  padding: 20px 24px 32px;
+}
+
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+
+  h2 {
+    margin: 0 0 4px;
+    font-size: 18px;
+  }
+}
+
+.page-sub {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--text-secondary, #4a5568);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.state-note {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--surface-muted, #f4f6fa);
+  color: var(--text-secondary, #4a5568);
+  font-size: 13.5px;
+  line-height: 1.5;
+
+  &.warn {
+    background: #fff8e6;
+    color: #7a5b00;
+  }
+
+  &.error {
+    background: #fdecec;
+    color: #8a2020;
+  }
+}
+
+.count-line {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  color: var(--text-secondary, #4a5568);
+}
+
+.request-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.request-card {
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+  padding: 16px;
+  background: #fff;
+}
+
+.request-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+
+  h3 {
+    margin: 0 0 3px;
+    font-size: 15.5px;
+  }
+}
+
+.request-meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary, #4a5568);
+}
+
+.waiting {
+  flex: none;
+  font-size: 12.5px;
+  color: var(--text-secondary, #4a5568);
+  white-space: nowrap;
+}
+
+.request-body {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 18px;
+  margin: 14px 0 0;
+  font-size: 13.5px;
+
+  dt {
+    color: var(--text-secondary, #4a5568);
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.level {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--surface-muted, #eef1f6);
+  font-size: 12.5px;
+
+  // View-and-edit is the one that can decide applications. It reads
+  // differently on purpose: an approver skimming a list should not have to
+  // read the words to see which requests carry authority.
+  &.elevated {
+    background: #fdf0d5;
+    color: #7a5b00;
+    font-weight: 600;
+  }
+}
+
+.form-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+
+  li {
+    padding: 2px 8px;
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 999px;
+    font-size: 12.5px;
+  }
+}
+
+.justification {
+  max-width: 70ch;
+  line-height: 1.5;
+}
+
+.none {
+  color: var(--text-secondary, #4a5568);
+  font-style: italic;
+}

@@ -70,6 +70,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/businesses/businesses').then((m) => m.Businesses),
       },
       {
+        path: 'access-requests',
+        loadComponent: () =>
+          import('./pages/access-requests/access-requests').then((m) => m.AccessRequests),
+      },
+      {
         path: 'user-roles',
         loadComponent: () => import('./pages/user-roles/user-roles').then((m) => m.UserRoles),
       },
