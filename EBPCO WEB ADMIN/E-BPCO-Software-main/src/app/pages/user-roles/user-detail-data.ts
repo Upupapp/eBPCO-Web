@@ -75,15 +75,7 @@ export function buildWorkload(user: UserRow): WorkloadSummary {
 
 const DEVICES = ['Chrome / Windows', 'Safari / macOS', 'Edge / Windows', 'Chrome / Android'];
 
-export function buildSessions(user: UserRow): SessionEntry[] {
-  const rand = seedFrom(user.email + 'session');
-  const count = user.status === 'Active' ? 2 : 1;
-  return Array.from({ length: count }, (_, i) => ({
-    device: DEVICES[Math.floor(rand() * DEVICES.length)],
-    ip: `192.168.${1 + Math.floor(rand() * 9)}.${10 + Math.floor(rand() * 240)}`,
-    lastSeen: i === 0 ? (user.lastActive ?? '—') : `${3 + Math.floor(rand() * 20)} days ago`,
-  }));
-}
+
 
 export function buildUserActivity(user: UserRow): UserActivityItem[] {
   const items: UserActivityItem[] = [

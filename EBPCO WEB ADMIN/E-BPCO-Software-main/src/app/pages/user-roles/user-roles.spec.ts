@@ -128,6 +128,170 @@ describe('User directory', () => {
     expect(fixture.nativeElement.textContent).toContain('No forms assigned');
   });
 
+  it('seeds an access edit from what the account holds, not from its labels', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({
+        items: [member({ level: 'view-edit', permitTypes: ['Fencing Permit', 'Sign Permit'] })],
+      }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      openDetail(r: unknown): void; startEditAccess(): void;
+      accessLevel(): string; isAccessForm(t: string): boolean; accessFormCount(): number;
+      filteredUsers(): unknown[];
+    };
+    c.openDetail(c.filteredUsers()[0]);
+    c.startEditAccess();
+
+    // From the raw values, never by parsing "2 forms" back out of a label — a
+    // round trip through display text is how an edit quietly grants something
+    // nobody chose.
+    expect(c.accessLevel()).toBe('view-edit');
+    expect(c.accessFormCount()).toBe(2);
+    expect(c.isAccessForm('Fencing Permit')).toBe(true);
+    expect(c.isAccessForm('Demolition Permit')).toBe(false);
+  });
+
+  it('will not save an access change without a reason', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({ items: [member()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      openDetail(r: unknown): void; startEditAccess(): void;
+      saveAccess(): Promise<void>; accessError(): string; filteredUsers(): unknown[];
+    };
+    c.openDetail(c.filteredUsers()[0]);
+    c.startEditAccess();
+    await c.saveAccess();
+
+    // Every access change lands in the audit stream. An entry saying "level
+    // changed" without saying why answers the easy question, not the one
+    // anybody actually asks.
+    TestBed.inject(HttpTestingController).verify();
+    expect(c.accessError()).toContain('Give a reason');
+  });
+
+  it('will not save an access change that grants no forms', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({ items: [member()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      openDetail(r: unknown): void; startEditAccess(): void;
+      toggleAccessForm(t: string): void; saveAccess(): Promise<void>;
+      accessError(): string; accessReason: string; filteredUsers(): unknown[];
+    };
+    c.openDetail(c.filteredUsers()[0]);
+    c.startEditAccess();
+    c.toggleAccessForm('Fencing Permit');
+    c.accessReason = 'Moving to a different office.';
+    await c.saveAccess();
+
+    TestBed.inject(HttpTestingController).verify();
+    expect(c.accessError()).toContain('at least one form');
+  });
+
+  it('sends the level and the forms together, with the reason', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({ items: [member()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      openDetail(r: unknown): void; startEditAccess(): void;
+      setAccessLevel(l: string): void; saveAccess(): Promise<void>;
+      accessReason: string; filteredUsers(): unknown[];
+    };
+    c.openDetail(c.filteredUsers()[0]);
+    c.startEditAccess();
+    c.setAccessLevel('view-edit');
+    c.accessReason = 'Promoted to evaluator.';
+    const pending = c.saveAccess();
+
+    const http = TestBed.inject(HttpTestingController);
+    const req = http.expectOne('/staff/users/USR-1/roles');
+    // One call. A level applied without its forms leaves the account in a
+    // state nobody chose for however long the second call takes to fail.
+    expect(req.request.body.level).toBe('view-edit');
+    expect(req.request.body.permitTypes).toEqual(['Fencing Permit']);
+    expect(req.request.body.reason).toBe('Promoted to evaluator.');
+    req.flush(null, { status: 204, statusText: 'No Content' });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    http.expectOne('/staff/users').flush({ items: [member({ level: 'view-edit' })] });
+    await pending;
+  });
+
+  it('shows a refusal as the server worded it', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({ items: [member()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      openDetail(r: unknown): void; startEditAccess(): void;
+      saveAccess(): Promise<void>; accessError(): string;
+      accessReason: string; filteredUsers(): unknown[];
+    };
+    c.openDetail(c.filteredUsers()[0]);
+    c.startEditAccess();
+    c.accessReason = 'Reducing access.';
+    const pending = c.saveAccess();
+
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/staff/users/USR-1/roles').flush(
+      { type: 'about:blank', title: 'Conflict', status: 409,
+        detail: 'This is the last super admin and cannot be demoted.' },
+      { status: 409, statusText: 'Conflict' },
+    );
+    await pending;
+
+    // The last-super-admin refusal is a correct answer, not a fault. Flattening
+    // it into "something went wrong" hides the one thing the approver needs.
+    expect(c.accessError()).toContain('last super admin');
+  });
+
+  it('never invents a session list', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({ items: [member()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      openDetail(r: unknown): void; selectUserDetailTab(t: string): void;
+      sessions(): unknown[]; filteredUsers(): unknown[];
+    };
+    c.openDetail(c.filteredUsers()[0]);
+    c.selectUserDetailTab('security');
+
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/staff/users/USR-1/sessions').flush({ items: [] });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+
+    // This is the screen an administrator opens when they suspect an account is
+    // compromised. Generated devices and IPs would answer with invented
+    // reassurance.
+    expect(c.sessions().length).toBe(0);
+    expect(fixture.nativeElement.textContent).toContain('not signed in anywhere');
+  });
+
+  it('does not say an account is signed in nowhere when it could not look', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({ items: [member()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      openDetail(r: unknown): void; selectUserDetailTab(t: string): void;
+      filteredUsers(): unknown[];
+    };
+    c.openDetail(c.filteredUsers()[0]);
+    c.selectUserDetailTab('security');
+
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/staff/users/USR-1/sessions').flush(
+      { type: 'about:blank', title: 'Server Error', status: 500 },
+      { status: 500, statusText: 'Server Error' },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('not known whether this account is signed in');
+    expect(text).not.toContain('is not signed in anywhere.');
+  });
+
   it('does not present an absent directory as an empty one', async () => {
     const fixture = await mount((http) =>
       http.expectOne('/staff/users').flush(

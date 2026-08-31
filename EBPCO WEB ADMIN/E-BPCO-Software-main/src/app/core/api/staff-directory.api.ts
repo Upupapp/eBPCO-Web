@@ -47,6 +47,20 @@ export type StaffListResult =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
 
+/** A live sign-in. `current` marks the session making this request, if known. */
+export interface StaffSession {
+  readonly id: string;
+  readonly device: string | null;
+  readonly ipAddress: string | null;
+  readonly lastSeenAt: string | null;
+  readonly current?: boolean;
+}
+
+export type SessionListResult =
+  | { readonly kind: 'ok'; readonly sessions: readonly StaffSession[] }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 export type StaffWriteResult =
   | { readonly kind: 'done' }
   | { readonly kind: 'refused'; readonly message: string }
@@ -100,6 +114,47 @@ export class StaffDirectoryApi {
     return this.write(`/staff/users/${encodeURIComponent(id)}/enable`, {
       reason: reason.trim(),
     });
+  }
+
+  /** The live sessions for an account. */
+  async sessions(id: string): Promise<SessionListResult> {
+    try {
+      const page = await this.api.get<{ items?: readonly StaffSession[] }>(
+        `/staff/users/${encodeURIComponent(id)}/sessions`,
+      );
+      return { kind: 'ok', sessions: page.items ?? [] };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * End one session.
+   *
+   * The only DELETE this portal issues. A session is not a record of anything
+   * that happened — ending it removes an ability, not history, and the audit
+   * trail keeps its own entry either way.
+   */
+  async revokeSession(userId: string, sessionId: string): Promise<StaffWriteResult> {
+    try {
+      await this.api.delete<void>(
+        `/staff/users/${encodeURIComponent(userId)}/sessions/${encodeURIComponent(sessionId)}`,
+      );
+      return { kind: 'done' };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        if (error.status === 403 || error.status === 409) {
+          return { kind: 'refused', message: error.message };
+        }
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
   }
 
   private async write(path: string, body: unknown): Promise<StaffWriteResult> {
