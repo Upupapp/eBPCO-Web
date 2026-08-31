@@ -1,63 +1,132 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { AccessLevel, AccessRequestApi } from '../../core/api/access-request.api';
 import { USER_PORTAL_BASE_URL } from '../../core/config/user-portal.config';
+import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
 import { AuthLayout } from '../../shared/auth-layout/auth-layout';
 import { DilgSeal } from '../../shared/dilg-seal/dilg-seal';
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// The API's own rule, copied deliberately rather than loosened: a number this
+// form accepts and the server rejects is a request the officer cannot make and
+// cannot see why.
+const MOBILE_PATTERN = /^(09\d{9}|\+639\d{9})$/;
+
 /**
- * Says how an account for this portal is obtained. It does not create one.
+ * Requesting an account. It does not create one.
+ *
+ * Owner ruling, 2026-08-31: sign-up on the admin portal is not allowed, least
+ * of all as super admin. Every request is subject to a super admin's approval,
+ * who assigns which forms may be worked on and at what level.
  *
  * ── What this page used to do ───────────────────────────────────────────
  *
- * It collected a full name, an email address and a password, validated them,
- * and on success ran exactly one statement:
+ * It collected a password, validated it, and ran `navigateByUrl('/login')`.
+ * Nothing was sent, no account was made, the password was discarded, and the
+ * redirect read as success (F-24). This page still creates nothing — but now
+ * it says so while actually forwarding the request to someone who can.
  *
- *     this.router.navigateByUrl('/login');
+ * ── No password here, on purpose ────────────────────────────────────────
  *
- * No request was made. No account was created. The password was typed into a
- * form that discarded it, and the redirect to the sign-in screen reads as
- * success — so a new officer would believe they had an account, try to sign in,
- * and be told their details were wrong. The portal never said the difference.
+ * A credential chosen before an account exists is a credential stored
+ * somewhere, for an account that may never be approved. The password is set
+ * when the account is created, by the person it belongs to.
  *
- * ── Why wiring it up was the wrong fix ──────────────────────────────────
+ * ── Least access is the default ─────────────────────────────────────────
  *
- * The service does expose `POST /auth/register`, so the obvious repair is to
- * call it. Measured against the API, that would have been worse than the bug:
- *
- *   - `identity.service.ts` saves the new account as `kind: 'applicant'` with
- *     `roles: []`. That is a BUSINESS OWNER, not LGU staff.
- *   - This portal's role gate fails closed. An applicant account therefore
- *     cannot use this portal at all — so the form would have "worked",
- *     issued the wrong kind of account, and still ended at a refused sign-in.
- *   - Applicant sign-up (the LGU calls the same people business owners)
- *     belongs to the business owners portal, which is a separate repository
- *     and a separate origin.
- *   - The request would have been rejected anyway: the endpoint requires
- *     `firstName`, `lastName` and a Philippine `mobileNumber`, and this form
- *     collected a single `fullName` and no number.
- *
- * Staff accounts are not self-service. An LGU permitting portal that let anyone
- * on the internet mint a staff login would be a hole, not a feature.
- *
- * ── What this page must not do ──────────────────────────────────────────
- *
- * It must not name an office, an email address or a telephone number. Nobody
- * has told this repository what the LGU's provisioning channel actually is, and
- * this project has already shipped an invented contact route once. "Ask your
- * administrator" is true and useless-if-vague; a fabricated address is false
- * and actively harmful. The gap is filed as an LGU input, not papered over.
- *
- * The business owners link renders only when `USER_PORTAL_BASE_URL` is
- * configured, on the same rule the permit QR uses: an unset origin means say
- * nothing, never guess.
+ * `requestedLevel` starts at 'view' and no form is pre-ticked. A request
+ * defaulting to full access across every permit type is one an approver waves
+ * through, and the assignment that results is nobody's decision.
  */
 @Component({
   selector: 'app-register',
-  imports: [RouterLink, AuthLayout, DilgSeal],
+  imports: [FormsModule, RouterLink, AuthLayout, DilgSeal],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
 export class Register {
+  private readonly requests = inject(AccessRequestApi);
   protected readonly userPortal = inject(USER_PORTAL_BASE_URL);
+  protected readonly permitTypes = ALL_PERMIT_TYPES;
+
+  protected fullName = '';
+  protected email = '';
+  protected mobileNumber = '';
+  protected position = '';
+  protected justification = '';
+  protected requestedLevel: AccessLevel = 'view';
+
+  private readonly selected = signal<ReadonlySet<PermitType>>(new Set());
+  protected readonly selectedCount = computed(() => this.selected().size);
+
+  protected readonly submitting = signal(false);
+  /** null until submitted; then the honest outcome, which is never "approved". */
+  protected readonly outcome = signal<'received' | 'unavailable' | null>(null);
+  protected readonly formError = signal('');
+  protected readonly emailInvalid = signal(false);
+  protected readonly mobileInvalid = signal(false);
+
+  protected isSelected(type: PermitType): boolean {
+    return this.selected().has(type);
+  }
+
+  protected toggle(type: PermitType): void {
+    const next = new Set(this.selected());
+    if (!next.delete(type)) next.add(type);
+    this.selected.set(next);
+    this.formError.set('');
+  }
+
+  protected onFieldChange(): void {
+    this.formError.set('');
+    this.emailInvalid.set(false);
+    this.mobileInvalid.set(false);
+  }
+
+  async onSubmit(form: NgForm): Promise<void> {
+    if (this.submitting()) return;
+    this.onFieldChange();
+
+    if (form.invalid) {
+      this.formError.set('Please fill in every field.');
+      return;
+    }
+    if (!EMAIL_PATTERN.test(this.email.trim().toLowerCase())) {
+      this.emailInvalid.set(true);
+      this.formError.set('Please enter a valid email address.');
+      return;
+    }
+    if (!MOBILE_PATTERN.test(this.mobileNumber.trim())) {
+      this.mobileInvalid.set(true);
+      this.formError.set('Enter a mobile number as 09XXXXXXXXX or +639XXXXXXXXX.');
+      return;
+    }
+    if (this.selected().size === 0) {
+      this.formError.set('Choose at least one form you need access to.');
+      return;
+    }
+
+    this.submitting.set(true);
+    try {
+      const result = await this.requests.submit({
+        fullName: this.fullName,
+        email: this.email,
+        mobileNumber: this.mobileNumber,
+        position: this.position,
+        requestedPermitTypes: [...this.selected()],
+        requestedLevel: this.requestedLevel,
+        justification: this.justification,
+      });
+
+      if (result.kind === 'rejected') {
+        this.formError.set(result.message);
+        return;
+      }
+      this.outcome.set(result.kind);
+    } finally {
+      this.submitting.set(false);
+    }
+  }
 }

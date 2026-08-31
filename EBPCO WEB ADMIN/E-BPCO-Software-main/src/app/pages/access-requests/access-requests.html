@@ -1,0 +1,90 @@
+<app-topbar title="Access Requests" />
+
+<section class="requests-page">
+  <div class="page-head">
+    <div>
+      <h2>Awaiting your approval</h2>
+      <p class="page-sub">
+        Nobody can sign themselves up. Approving a request creates the account
+        and assigns the forms and level you choose.
+      </p>
+    </div>
+    <button type="button" class="btn-secondary" (click)="reload()" [disabled]="loading()">
+      <app-icon name="refresh" [size]="14" />
+      {{ loading() ? 'Loading…' : 'Refresh' }}
+    </button>
+  </div>
+
+  @if (loading()) {
+    <p class="state-note">Loading access requests…</p>
+  } @else if (unavailable()) {
+    <!--
+      A deployment without the endpoint is a different fact from an empty
+      queue, and must not be rendered as one.
+    -->
+    <div class="state-note warn" role="status">
+      <app-icon name="alert-triangle" [size]="16" />
+      <span>
+        This deployment cannot receive access requests yet, so none can be
+        listed here. Accounts must be created directly in Users &amp; Roles
+        until it is available.
+      </span>
+    </div>
+  } @else if (failure(); as message) {
+    <div class="state-note error" role="alert">
+      <app-icon name="alert-triangle" [size]="16" />
+      <span>
+        Access requests could not be loaded, so this page is not a picture of
+        who is waiting. {{ message }}
+      </span>
+    </div>
+  } @else if (pendingCount() === 0) {
+    <p class="state-note">
+      No requests are waiting. The server was asked and answered.
+    </p>
+  } @else {
+    <p class="count-line">
+      {{ pendingCount() }} request{{ pendingCount() === 1 ? '' : 's' }} waiting.
+    </p>
+
+    <ul class="request-list">
+      @for (request of requests(); track request.id) {
+        <li class="request-card">
+          <div class="request-head">
+            <div>
+              <h3>{{ request.fullName }}</h3>
+              <p class="request-meta">{{ request.position }}</p>
+              <p class="request-meta">{{ request.email }} · {{ request.mobileNumber }}</p>
+            </div>
+            <span class="waiting">{{ waitingLabel(request) }}</span>
+          </div>
+
+          <dl class="request-body">
+            <dt>Requested level</dt>
+            <dd>
+              <span class="level" [class.elevated]="request.requestedLevel === 'view-edit'">
+                {{ levelLabel(request) }}
+              </span>
+            </dd>
+
+            <dt>Forms requested</dt>
+            <dd>
+              @if (request.requestedPermitTypes.length === 0) {
+                <span class="none">None specified</span>
+              } @else {
+                <ul class="form-chips">
+                  @for (type of request.requestedPermitTypes; track type) {
+                    <li>{{ type }}</li>
+                  }
+                </ul>
+              }
+            </dd>
+
+            <dt>Reason given</dt>
+            <dd class="justification">{{ request.justification }}</dd>
+          </dl>
+        </li>
+      }
+    </ul>
+  }
+</section>

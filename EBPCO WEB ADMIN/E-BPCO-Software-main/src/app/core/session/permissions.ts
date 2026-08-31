@@ -92,6 +92,18 @@ export const NAV_MODULES: NavModule[] = [
     roles: ['Super Admin', 'Administrator'],
   },
   {
+    key: 'access-requests',
+    label: 'Access Requests',
+    icon: 'user',
+    path: '/access-requests',
+    group: 'administration',
+    // Super Admin ALONE. The owner's ruling is that approval is the super
+    // admin's, and an Administrator who could approve access requests could
+    // grant themselves anything by approving their own second account.
+    roles: ['Super Admin'],
+  },
+
+  {
     key: 'user-roles',
     label: 'Users & Roles',
     icon: 'user-check',
