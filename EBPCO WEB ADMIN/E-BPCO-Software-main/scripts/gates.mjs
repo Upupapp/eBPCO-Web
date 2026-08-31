@@ -19,6 +19,9 @@
  *   notice       every page that reads the application store but does not
  *                fetch it must show the queue-load notice, or a failed load
  *                renders as confident zeros with nothing saying why.
+ *   dead-control a <select> bound to nothing. Not merely inert: its options
+ *                NAME a period ("This Month"), so the chart beneath is read as
+ *                filtered when it is not.
  *   config       index.html must actually LOAD public/config.js. The runtime
  *                tokens read `globalThis.EBPCO_*`, and an edit adding that
  *                script tag failed silently once: the build passed, config.js
@@ -168,6 +171,35 @@ for (const file of ts) {
           'reads the application store but does not show the queue-load notice — a failed load would render confident zeros in silence',
         ]);
       }
+    }
+  }
+}
+
+// ── 6. A control that controls nothing ────────────────────────────────────
+// A `<select>` with no binding is inert, and inertness is not the damage: the
+// options NAME something. Four of these sat above dashboard and analytics
+// charts offering "This Month" / "Last Month" / "This Year" while the chart
+// beneath showed every record it had. An officer who picked "This Month" then
+// read an all-time figure as a monthly one — a wrong number attached to a
+// period, produced by the reader rather than the code.
+//
+// `disabled` selects are exempt and deliberately so: the application detail
+// panels render read-only values that way, one interpolated option each. Those
+// display real data and cannot be operated, so they claim nothing.
+{
+  const BINDINGS = ['ngModel', '(change)', '[value]', 'formControl', '[('];
+  for (const file of files.filter((f) => f.endsWith('.html'))) {
+    const html = read.get(file);
+    for (const m of html.matchAll(/<select[^>]*>/g)) {
+      const tag = m[0];
+      if (/\bdisabled\b/.test(tag)) continue;
+      if (BINDINGS.some((b) => tag.includes(b))) continue;
+      const line = html.slice(0, m.index).split('\n').length;
+      findings.push([
+        'dead-control',
+        `${short(file)}:${line}`,
+        'a <select> bound to nothing — it names a choice the page does not make',
+      ]);
     }
   }
 }

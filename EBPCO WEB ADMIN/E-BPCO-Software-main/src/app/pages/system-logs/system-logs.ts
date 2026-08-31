@@ -114,6 +114,10 @@ const ERROR_MESSAGES = [
   'Request blocked due to insufficient permissions.',
 ];
 
+// Travels in every exported sample row, as its first column. The screen says
+// this data is not real; a file has to say so too, on its own.
+const SAMPLE_MARKER = 'SAMPLE - not real activity';
+
 const SECURITY_EVENTS = [
   'Failed Login Attempt',
   'Password Changed',
@@ -1011,7 +1015,14 @@ export class SystemLogs {
       Severity: log.severity ?? 'N/A',
     };
     for (const f of log.fields) row[f.label] = f.value;
-    downloadCsv(`${log.logId}`, [row]);
+
+    // Same reasoning as the bulk export: a single fabricated security entry
+    // saved as `SEC-0003.csv` reads as a real incident record on its own.
+    if (this.isSampleTab(this.activeTab())) {
+      downloadCsv(`SAMPLE-${log.logId}`, [{ dataSource: SAMPLE_MARKER, ...row }]);
+    } else {
+      downloadCsv(`${log.logId}`, [row]);
+    }
     this.toast.success(`Exported ${log.logId}.`);
   }
 
@@ -1067,30 +1078,69 @@ export class SystemLogs {
 
   // ---- Export -----------------------------------------------------------
 
+  /**
+   * Whether the tab currently shown is sample data rather than a record of
+   * anything. Same rule the template's disclaimer uses — `activity` is the one
+   * tab backed by the real audit trail — expressed once so the two cannot
+   * drift apart and leave an export unmarked.
+   */
+  private isSampleTab(tab: LogTabKey): boolean {
+    return tab !== 'activity';
+  }
+
+  /**
+   * Exports rows, carrying their provenance with them.
+   *
+   * The on-screen disclaimer is honest and unconditional, but it is bound to
+   * the screen. Export walks the data out of the room: a file called
+   * `system-logs-security.csv`, holding invented "Failed Login Attempt" and
+   * "Suspicious IP Blocked" rows with IP addresses and timestamps, is
+   * indistinguishable from a real security log once it is sitting in a folder,
+   * attached to an email, or handed to an auditor. Nothing about the file said
+   * what the page said.
+   *
+   * So the marking travels in the file itself, two ways. The filename is the
+   * first thing anyone sees, and `dataSource` is spread first so it is the
+   * leading column of every row — a header line can be cropped or scrolled
+   * past, and a per-row column survives sorting and filtering in a spreadsheet.
+   */
+  private exportRows<T extends object>(tab: LogTabKey, rows: readonly T[]): number {
+    if (rows.length === 0) return 0;
+
+    if (!this.isSampleTab(tab)) {
+      downloadCsv(`system-logs-${tab}`, [...rows]);
+      return rows.length;
+    }
+    const marked = rows.map((row) => ({ dataSource: SAMPLE_MARKER, ...row }));
+    downloadCsv(`SAMPLE-system-logs-${tab}`, marked);
+    return rows.length;
+  }
+
   protected exportCurrentTab(): void {
     const tab = this.activeTab();
     let count = 0;
     switch (tab) {
       case 'activity':
-        count = this.filteredActivityRows().length;
-        downloadCsv(`system-logs-${tab}`, this.filteredActivityRows());
+        count = this.exportRows(tab, this.filteredActivityRows());
         break;
       case 'access':
-        count = this.filteredAccessRows().length;
-        downloadCsv(`system-logs-${tab}`, this.filteredAccessRows());
+        count = this.exportRows(tab, this.filteredAccessRows());
         break;
       case 'error':
-        count = this.filteredErrorRows().length;
-        downloadCsv(`system-logs-${tab}`, this.filteredErrorRows());
+        count = this.exportRows(tab, this.filteredErrorRows());
         break;
       case 'security':
-        count = this.filteredSecurityRows().length;
-        downloadCsv(`system-logs-${tab}`, this.filteredSecurityRows());
+        count = this.exportRows(tab, this.filteredSecurityRows());
         break;
       case 'events':
-        count = this.filteredEventRows().length;
-        downloadCsv(`system-logs-${tab}`, this.filteredEventRows());
+        count = this.exportRows(tab, this.filteredEventRows());
         break;
+    }
+    // `downloadCsv` writes nothing for an empty set, so "Exported 0 rows."
+    // announced a file that was never created.
+    if (count === 0) {
+      this.toast.info('Nothing to export — no rows match the current filters.');
+      return;
     }
     this.toast.success(`Exported ${count} row${count === 1 ? '' : 's'}.`);
   }

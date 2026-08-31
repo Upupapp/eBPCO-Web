@@ -4,3 +4,20 @@
   display: block;
   width: 100%;
 }
+
+// Prose, not fields. The shared auth-form partial styles inputs and labels,
+// and this page no longer has either.
+.provisioning {
+  margin: 0 0 4px;
+  color: var(--text-secondary, #4a5568);
+  font-size: 14px;
+  line-height: 1.55;
+
+  p {
+    margin: 0 0 12px;
+  }
+
+  .applicant-note {
+    margin-bottom: 0;
+  }
+}
