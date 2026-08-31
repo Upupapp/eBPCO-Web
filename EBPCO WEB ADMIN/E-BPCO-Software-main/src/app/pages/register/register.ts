@@ -30,8 +30,9 @@ import { DilgSeal } from '../../shared/dilg-seal/dilg-seal';
  *   - This portal's role gate fails closed. An applicant account therefore
  *     cannot use this portal at all — so the form would have "worked",
  *     issued the wrong kind of account, and still ended at a refused sign-in.
- *   - Applicant sign-up belongs to the business-owner portal, which is a
- *     separate repository and a separate origin.
+ *   - Applicant sign-up (the LGU calls the same people business owners)
+ *     belongs to the business owners portal, which is a separate repository
+ *     and a separate origin.
  *   - The request would have been rejected anyway: the endpoint requires
  *     `firstName`, `lastName` and a Philippine `mobileNumber`, and this form
  *     collected a single `fullName` and no number.
@@ -47,7 +48,7 @@ import { DilgSeal } from '../../shared/dilg-seal/dilg-seal';
  * administrator" is true and useless-if-vague; a fabricated address is false
  * and actively harmful. The gap is filed as an LGU input, not papered over.
  *
- * The business-owner link renders only when `USER_PORTAL_BASE_URL` is
+ * The business owners link renders only when `USER_PORTAL_BASE_URL` is
  * configured, on the same rule the permit QR uses: an unset origin means say
  * nothing, never guess.
  */

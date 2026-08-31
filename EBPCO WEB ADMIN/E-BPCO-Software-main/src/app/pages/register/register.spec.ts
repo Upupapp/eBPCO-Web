@@ -73,7 +73,11 @@ describe('Register', () => {
     // renders an href of its own, so a bare a[href] check passes for the wrong
     // reason.
     expect(el.querySelector('.applicant-note a')).toBeNull();
-    expect(el.textContent).toContain('it is for LGU staff');
+    // Both words, deliberately: the LGU calls this one population by two
+    // names, and a business owner who does not think of themselves as an
+    // "applicant" would not realise the sentence is about them. This is the
+    // one page whose whole job is redirecting the wrong audience.
+    expect(el.textContent).toContain('business owners and applicants');
   });
 
   it('links applicants to the portal once its origin is configured', () => {
