@@ -1,7 +1,12 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { AccessLevel, AccessRequestApi, PendingAccessRequest } from '../../core/api/access-request.api';
+import {
+  ASSIGNABLE_ROLES,
+  AccessLevel,
+  AccessRequestApi,
+  PendingAccessRequest,
+} from '../../core/api/access-request.api';
 import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
 import { Icon } from '../../shared/icon/icon';
 import { Topbar } from '../../shared/topbar/topbar';
@@ -73,6 +78,29 @@ export class AccessRequests implements OnInit {
    */
   private readonly grantForms = signal<ReadonlySet<PermitType>>(new Set());
   protected readonly grantLevel = signal<AccessLevel>('view');
+
+  /**
+   * The staff roles this account will hold. The server requires at least one.
+   *
+   * A third axis alongside forms and level, and a real one: forms say WHICH
+   * permits, level says whether they may act, and the role says at WHICH STEP.
+   * `super-admin` is not offered — creating another one is a decision that
+   * should be deliberate rather than a checkbox on a routine approval.
+   */
+  protected readonly assignableRoles = ASSIGNABLE_ROLES;
+  private readonly grantRoles = signal<ReadonlySet<string>>(new Set());
+  protected readonly grantRoleCount = computed(() => this.grantRoles().size);
+
+  protected isGrantRole(key: string): boolean {
+    return this.grantRoles().has(key);
+  }
+
+  protected toggleGrantRole(key: string): void {
+    const next = new Set(this.grantRoles());
+    if (!next.delete(key)) next.add(key);
+    this.grantRoles.set(next);
+    this.decisionError.set('');
+  }
   protected readonly grantCount = computed(() => this.grantForms().size);
 
   protected isGranted(type: PermitType): boolean {
@@ -104,6 +132,9 @@ export class AccessRequests implements OnInit {
     );
     this.grantForms.set(new Set(asked));
     this.grantLevel.set(request.requestedLevel);
+    // Nothing pre-selected: the requester never asked for a role, so any
+    // default here would be the portal deciding what an officer does.
+    this.grantRoles.set(new Set());
   }
 
   protected startReject(request: PendingAccessRequest): void {
@@ -137,12 +168,19 @@ export class AccessRequests implements OnInit {
       );
       return;
     }
+    if (this.grantRoles().size === 0) {
+      this.decisionError.set(
+        'Choose at least one role. It decides which step of the process this officer works.',
+      );
+      return;
+    }
 
     this.working.set(true);
     try {
       const result = await this.api.approve(request.id, {
         permitTypes: [...this.grantForms()],
         level: this.grantLevel(),
+        roles: [...this.grantRoles()],
       });
       await this.afterDecision(result);
     } finally {

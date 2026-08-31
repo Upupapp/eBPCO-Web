@@ -96,7 +96,29 @@ export type AccessRequestOutcome =
 export interface AccessGrant {
   readonly permitTypes: readonly PermitType[];
   readonly level: AccessLevel;
+  /**
+   * The staff roles this account will hold. Required by the server, non-empty.
+   *
+   * A third axis, and a real one: forms say WHICH permits, level says whether
+   * they may act, and the role says at WHICH STEP — evaluator, assessor,
+   * cashier, building official, releasing officer. Deriving it from the level
+   * would have been an invention, so the approver is asked.
+   */
+  readonly roles: readonly string[];
 }
+
+/** Assignable on approval. `super-admin` is deliberately absent — see the UI. */
+export const ASSIGNABLE_ROLES: readonly { key: string; label: string; note: string }[] = [
+  { key: 'receiving-officer', label: 'Receiving Officer', note: 'Takes applications in at the counter.' },
+  { key: 'records-officer', label: 'Records Officer', note: 'Maintains the record; withdrawals and expiries.' },
+  { key: 'evaluator', label: 'Evaluator', note: 'Reviews submissions stage by stage.' },
+  { key: 'assessor', label: 'Assessor', note: 'Computes the order of payment.' },
+  { key: 'cashier', label: 'Cashier', note: 'Verifies that payment was received.' },
+  { key: 'building-official', label: 'Building Official', note: 'Approves or refuses the permit.' },
+  { key: 'releasing-officer', label: 'Releasing Officer', note: 'Prepares and releases the permit.' },
+  { key: 'auditor', label: 'Auditor', note: 'Reads everything, changes nothing.' },
+  { key: 'administrator', label: 'Administrator', note: 'Manages staff accounts and access.' },
+];
 
 /** How a decision ended. `stale` means somebody else already decided it. */
 export type DecisionOutcome =
@@ -111,12 +133,16 @@ export class AccessRequestApi {
 
   async submit(request: AccessRequest): Promise<AccessRequestOutcome> {
     try {
+      // Field names are the SERVER's, not this portal's. Its schema is
+      // `.strict()`, so a name it does not know is a 400 rather than an
+      // ignored key — measured 2026-08-31, when `mobileNumber`, `position`
+      // and `requestedPermitTypes` were all rejected at once (F-30).
       await this.api.post<void>('/auth/access-request', {
         fullName: request.fullName.trim(),
         email: request.email.trim().toLowerCase(),
-        mobileNumber: request.mobileNumber.trim(),
-        position: request.position.trim(),
-        requestedPermitTypes: [...request.requestedPermitTypes],
+        mobile: request.mobileNumber.trim(),
+        officePosition: request.position.trim(),
+        permitTypes: [...request.requestedPermitTypes],
         requestedLevel: request.requestedLevel,
         justification: request.justification.trim(),
       });
@@ -161,8 +187,9 @@ export class AccessRequestApi {
    */
   async approve(id: string, grant: AccessGrant): Promise<DecisionOutcome> {
     return this.decide(`/staff/access-requests/${encodeURIComponent(id)}/approve`, {
-      permitTypes: [...grant.permitTypes],
+      roles: [...grant.roles],
       level: grant.level,
+      permitTypes: [...grant.permitTypes],
     });
   }
 
