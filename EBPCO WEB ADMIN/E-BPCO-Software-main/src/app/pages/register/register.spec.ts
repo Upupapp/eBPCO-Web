@@ -192,11 +192,11 @@ describe('Register — requesting an account', () => {
     expect(text).not.toMatch(/\b(?:09\d{9}|\+639\d{9})\b/);
   });
 
-  it('links business owners onward only when that portal is configured', () => {
-    expect(mount('').nativeElement.querySelector('.applicant-note a')).toBeNull();
+  it('links citizens onward only when that portal is configured', () => {
+    expect(mount('').nativeElement.querySelector('.citizen-note a')).toBeNull();
     expect(
       mount('https://apply.castilla.gov.ph')
-        .nativeElement.querySelector('.applicant-note a')
+        .nativeElement.querySelector('.citizen-note a')
         ?.getAttribute('href'),
     ).toBe('https://apply.castilla.gov.ph');
   });

@@ -19,7 +19,7 @@
             <strong>No account exists yet.</strong> If it is approved, you will
             be told which forms you may work on and at what level.
           </p>
-          <p class="applicant-note">
+          <p class="citizen-note">
             You may not hear back by email if this address is not eligible for
             an account, so follow up with your administrator if you hear nothing.
           </p>
@@ -28,7 +28,7 @@
             <strong>This deployment cannot take access requests yet.</strong>
             Nothing was submitted and no account was created.
           </p>
-          <p class="applicant-note">
+          <p class="citizen-note">
             Ask your LGU administrator to add your account directly.
           </p>
         }
@@ -154,7 +154,7 @@
             />
             <span>
               <strong>View and edit</strong>
-              <small>Respond to applicants and decide on applications.</small>
+              <small>Respond to citizens and decide on applications.</small>
             </span>
           </label>
         </fieldset>
@@ -186,11 +186,11 @@
         </button>
       </form>
 
-      <p class="applicant-note">
+      <p class="citizen-note">
         Applying for a building permit or a certificate of occupancy? This portal
-        is for LGU staff — business owners and applicants use a different one.
+        is for LGU staff — citizens use a different one.
         @if (userPortal; as portal) {
-          Apply at <a [href]="portal" rel="noopener">the business owners portal</a>.
+          Apply at <a [href]="portal" rel="noopener">the citizen portal</a>.
         }
       </p>
 

@@ -85,6 +85,26 @@ export type AccessRequestOutcome =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'rejected'; readonly message: string };
 
+/**
+ * What approving a request grants.
+ *
+ * Both halves are required and neither has a default here. An approval that
+ * could be sent without naming the forms or the level would let the server
+ * choose, and whatever it chose would be nobody's decision — which is the whole
+ * failure this feature exists to prevent.
+ */
+export interface AccessGrant {
+  readonly permitTypes: readonly PermitType[];
+  readonly level: AccessLevel;
+}
+
+/** How a decision ended. `stale` means somebody else already decided it. */
+export type DecisionOutcome =
+  | { readonly kind: 'done' }
+  | { readonly kind: 'stale' }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 @Injectable({ providedIn: 'root' })
 export class AccessRequestApi {
   private readonly api = inject(ApiClient);
@@ -126,6 +146,44 @@ export class AccessRequestApi {
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Approve a request, creating the account with exactly this access.
+   *
+   * The grant travels WITH the approval rather than as a follow-up call. Two
+   * requests would leave a window in which an approved account exists with
+   * undefined access, and if the second failed the window would never close.
+   */
+  async approve(id: string, grant: AccessGrant): Promise<DecisionOutcome> {
+    return this.decide(`/staff/access-requests/${encodeURIComponent(id)}/approve`, {
+      permitTypes: [...grant.permitTypes],
+      level: grant.level,
+    });
+  }
+
+  /** Reject a request. The reason is required by the server and by this portal. */
+  async reject(id: string, reason: string): Promise<DecisionOutcome> {
+    return this.decide(`/staff/access-requests/${encodeURIComponent(id)}/reject`, {
+      reason: reason.trim(),
+    });
+  }
+
+  private async decide(path: string, body: unknown): Promise<DecisionOutcome> {
+    try {
+      await this.api.post<void>(path, body);
+      return { kind: 'done' };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        // 409 means the request is no longer pending — another super admin got
+        // there first. Reporting that as a failure would invite a retry that
+        // cannot succeed, and hide the fact that a decision already exists.
+        if (error.status === 409) return { kind: 'stale' };
         return { kind: 'failed', message: error.message };
       }
       throw error;
