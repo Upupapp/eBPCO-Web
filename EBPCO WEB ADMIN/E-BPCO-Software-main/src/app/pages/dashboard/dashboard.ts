@@ -357,9 +357,34 @@ export class Dashboard {
     this.router.navigate(['/evaluations'], { queryParams: { stage: STAGE_TO_EVAL_KEY[stage] } });
   }
 
+  /**
+   * Whether "overdue" is a question this data can answer at all.
+   *
+   * `overdueItems` requires `evaluationResult === 'Pending'`, and the queue
+   * endpoint sends no review state: `staff-applications.api.ts` sets both
+   * `evaluationStage` and `evaluationResult` to null for every server row. So
+   * against live data the list is ALWAYS empty, and the panel rendered
+   * "Nothing overdue right now." — an all-clear on the LGU's backlog, issued
+   * by a page that had not been told one thing about it.
+   *
+   * Empty is honest in one case: no applications at all, where nothing can be
+   * overdue. Otherwise, rows with no review state mean unknown, not none.
+   */
+  protected readonly overdueKnown = computed(() => {
+    const rows = this.store.applications();
+    return rows.length === 0 || rows.some((a) => a.evaluationResult !== null);
+  });
+
   // "Overdue" = still actively awaiting review, submitted more than 5 days
   // ago — a real, derived condition rather than a hardcoded list of 3
   // names, so it can never reference an application that doesn't exist.
+  //
+  // The 5- and 10-day thresholds are this component's own invention: no
+  // service standard is recorded anywhere in the portal or sent by the API,
+  // and these are CALENDAR days, so a weekend alone can age an application
+  // into "Overdue". Kept because a visible ageing signal is better than none
+  // and the arithmetic is at least real, but it is a local heuristic being
+  // displayed as a finding, and it is filed as an LGU input.
   protected readonly overdueItems = computed<OverdueItem[]>(() => {
     const now = Date.now();
     const fiveDaysMs = 5 * 24 * 60 * 60 * 1000;

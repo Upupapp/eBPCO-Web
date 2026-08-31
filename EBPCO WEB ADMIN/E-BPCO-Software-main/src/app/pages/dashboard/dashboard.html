@@ -147,7 +147,14 @@
             </div>
           </div>
         } @empty {
-          <p class="overdue-empty">Nothing overdue right now.</p>
+          @if (overdueKnown()) {
+            <p class="overdue-empty">Nothing overdue right now.</p>
+          } @else {
+            <p class="overdue-empty">
+              These applications carry no review progress, so overdue work
+              cannot be identified from them.
+            </p>
+          }
         }
       </div>
     </div>
@@ -157,11 +164,6 @@
     <div class="card status-card">
       <div class="card-head">
         <h2 id="status-card-heading">Applications By Status</h2>
-        <label class="sr-only" for="status-range">Applications by status time range</label>
-        <select id="status-range" class="filter-select">
-          <option>Yearly</option>
-          <option>Monthly</option>
-        </select>
       </div>
 
       <div class="status-body">
@@ -192,11 +194,6 @@
     <div class="card tenants-card">
       <div class="card-head">
         <h2>Applications By Business</h2>
-        <label class="sr-only" for="tenants-range">Applications by business time range</label>
-        <select id="tenants-range" class="filter-select">
-          <option>This Month</option>
-          <option>Last Month</option>
-        </select>
       </div>
 
       <app-bar-list [rows]="pagedBusinessRows()" />
@@ -212,11 +209,6 @@
   <section class="card overview-card">
     <div class="card-head">
       <h2>Application Overview</h2>
-      <label class="sr-only" for="overview-range">Application overview time range</label>
-      <select id="overview-range" class="filter-select">
-        <option>This Month</option>
-        <option>This Year</option>
-      </select>
     </div>
 
     <div class="overview-legend">
