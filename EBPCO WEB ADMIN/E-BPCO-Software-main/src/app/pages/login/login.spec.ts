@@ -4,6 +4,7 @@ import { NgForm } from '@angular/forms';
 
 import { Login } from './login';
 import { SessionService } from '../../core/session/session.service';
+import { ApiError } from '../../core/api/problem';
 
 /**
  * The sign-in button's pending state.
@@ -22,13 +23,18 @@ describe('Login — the sign-in button while a request is in flight', () => {
   let button: HTMLButtonElement;
   /** Resolves/rejects the pending signIn so the in-flight window is observable. */
   let settle: { resolve: () => void; reject: (e: Error) => void };
+  /** What the last signIn call received, so the second factor can be asserted. */
+  let lastSignIn: { email: string; password: string; totp?: string } | undefined;
 
   beforeEach(async () => {
+    lastSignIn = undefined;
     const session = {
-      signIn: () =>
-        new Promise<void>((resolve, reject) => {
+      signIn: (email: string, password: string, totp?: string) => {
+        lastSignIn = { email, password, totp };
+        return new Promise<void>((resolve, reject) => {
           settle = { resolve: () => resolve(), reject };
-        }),
+        });
+      },
     };
 
     await TestBed.configureTestingModule({
@@ -96,7 +102,80 @@ describe('Login — the sign-in button while a request is in flight', () => {
     expect(el.querySelector('#email-error')).toBeNull();
   }, MOUNT_BUDGET);
 
-  it('DOES blame the email field when the address is genuinely malformed', async () => {
+  it('asks for a code instead of calling a correct password a failure', async () => {
+    const pending = submitValid();
+    settle.reject(
+      new ApiError({
+        type: '/problems/mfa-required',
+        title: 'A second factor is required',
+        status: 401,
+        detail: 'Enter the code from your authenticator app.',
+      }),
+    );
+    await pending;
+    fixture.detectChanges();
+
+    // Staff accounts require MFA. Before F-33 the portal had no field for the
+    // code and rendered the server's sentence as a sign-in failure, so NO staff
+    // member could sign in and the screen blamed their credentials.
+    expect(component.mfaRequired()).toBe(true);
+    expect(component.signInError()).toBe('');
+    expect(fixture.nativeElement.querySelector('#totp')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Your password was accepted');
+  }, MOUNT_BUDGET);
+
+  it('sends the code on the second attempt', async () => {
+    const first = submitValid();
+    settle.reject(
+      new ApiError({ type: '/problems/mfa-required', title: 'A second factor is required', status: 401 }),
+    );
+    await first;
+
+    component.totp = '123456';
+    const second = component.onSubmit({ invalid: false } as NgForm);
+    // `IdentityApi.signIn` has taken a totp argument all along; nothing ever
+    // passed one, which is why nothing failed (F-33).
+    expect(lastSignIn?.totp).toBe('123456');
+    settle.resolve();
+    await second;
+  }, MOUNT_BUDGET);
+
+  it('refuses a code that is not six digits, without calling the server', async () => {
+    const first = submitValid();
+    settle.reject(
+      new ApiError({ type: '/problems/mfa-required', title: 'A second factor is required', status: 401 }),
+    );
+    await first;
+
+    lastSignIn = undefined;
+    component.totp = '12ab';
+    await component.onSubmit({ invalid: false } as NgForm);
+
+    // The server's own rule, matched exactly so it is caught in the field.
+    expect(lastSignIn).toBeUndefined();
+    expect(component.signInError()).toContain('six-digit code');
+  }, MOUNT_BUDGET);
+
+  it('stays on the code step when the code is wrong', async () => {
+    const first = submitValid();
+    settle.reject(
+      new ApiError({ type: '/problems/mfa-required', title: 'A second factor is required', status: 401 }),
+    );
+    await first;
+
+    component.totp = '000000';
+    const second = component.onSubmit({ invalid: false } as NgForm);
+    settle.reject(new Error('Those credentials were not accepted'));
+    await second;
+    fixture.detectChanges();
+
+    // A wrong code is not a wrong password: sending the officer back to retype
+    // their whole credential would be the portal misreading the server.
+    expect(component.mfaRequired()).toBe(true);
+    expect(fixture.nativeElement.querySelector('#totp')).not.toBeNull();
+  }, MOUNT_BUDGET);
+
+    it('DOES blame the email field when the address is genuinely malformed', async () => {
     component.email = 'not-an-email';
     component.password = 'x';
     await component.onSubmit({ invalid: false } as NgForm);

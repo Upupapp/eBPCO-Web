@@ -100,6 +100,32 @@
         address that their address was wrong. role="alert" so a screen reader
         announces it as the form-level failure it is.
       -->
+      @if (mfaRequired()) {
+        <!--
+          A step, not a failure. The password was accepted and the server is
+          asking for the second factor; the portal had no field for it, so
+          every staff sign-in ended as "A second factor is required" rendered
+          as though the credentials were wrong (F-33).
+        -->
+        <p class="mfa-note" role="status">
+          Your password was accepted. Enter the six-digit code from your
+          authenticator app.
+        </p>
+        <label class="field-label" for="totp">Authentication code</label>
+        <div class="input-wrap">
+          <input
+            id="totp"
+            name="totp"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            placeholder="000000"
+            [(ngModel)]="totp"
+          />
+        </div>
+      }
+
       @if (signInError(); as message) {
         <p class="form-error" role="alert">{{ message }}</p>
       }
@@ -116,7 +142,13 @@
         [disabled]="signingIn()"
         [attr.aria-busy]="signingIn() ? true : null"
       >
-        {{ signingIn() ? 'Signing in…' : 'Login Account' }}
+        {{
+          signingIn()
+            ? 'Signing in…'
+            : mfaRequired()
+              ? 'Verify and sign in'
+              : 'Login Account'
+        }}
       </button>
     </form>
 

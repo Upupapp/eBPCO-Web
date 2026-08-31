@@ -32,3 +32,18 @@
     }
   }
 }
+
+.mfa-note {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface-muted, #f4f6fa);
+  color: var(--text-secondary, #4a5568);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#totp {
+  letter-spacing: 0.28em;
+  font-variant-numeric: tabular-nums;
+}
