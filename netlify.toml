@@ -23,6 +23,33 @@
 
   command = "npm ci && npm run build"
 
+  # ── Always build. Do not remove without reading this. ────────────────────
+  #
+  # Every deploy from 30 Aug 23:26 to 31 Aug 12:29 was CANCELLED — fourteen
+  # commits, none published. The deploy log shows "Building: Complete" after
+  # 3.775s and Deploying/Cleanup/Post-processing all "Skipped", which is far too
+  # fast to have run `npm ci`. The build never started: Netlify decided nothing
+  # had changed.
+  #
+  # The cause is the SPACE in `base`. Netlify's default change detection for a
+  # site with a base directory compares the two commits limited to that path,
+  # and an unquoted path splits into three pathspecs that match nothing:
+  #
+  #   git diff --quiet A B -- EBPCO WEB ADMIN/E-BPCO-Software-main
+  #                            ^^^^^ ^^^ ^^^^^^^^^^^^^^^^^^^^^^^^
+  #
+  # Verified against this repository: quoted reports changes between a69dcba and
+  # b87a7b5; unquoted reports none, and each of the three fragments matches zero
+  # files. `a69dcba` was the last success because it had no cached commit to
+  # compare against and so built unconditionally — then cached itself, and every
+  # build since compared against it and skipped.
+  #
+  # `exit 1` means "never ignore, always build". The alternative is renaming the
+  # directory, which is a bigger change to a repository another agent also
+  # works in. A build here takes about a minute; a silently skipped deploy cost
+  # two days.
+  ignore = "exit 1"
+
 [build.environment]
   # Angular 22. Netlify's default image can be older than Angular requires, and
   # a version resolved by chance is a build that breaks on their schedule
