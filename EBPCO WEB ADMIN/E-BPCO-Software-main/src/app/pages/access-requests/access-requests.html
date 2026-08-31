@@ -135,6 +135,35 @@
                   }
                 }
 
+                <fieldset class="forms-field">
+                  <legend>
+                    Role
+                    <span class="count">{{ grantRoleCount() }} selected</span>
+                  </legend>
+                  <!--
+                    The third axis, and the server requires it. Forms say which
+                    permits, level says whether they may act, and the role says
+                    at which step. Nothing is pre-selected: the requester never
+                    asked for a role, so a default would be the portal deciding
+                    what an officer does.
+                  -->
+                  <div class="forms-grid">
+                    @for (role of assignableRoles; track role.key) {
+                      <label class="form-option">
+                        <input
+                          type="checkbox"
+                          [checked]="isGrantRole(role.key)"
+                          (change)="toggleGrantRole(role.key)"
+                        />
+                        <span>
+                          <strong>{{ role.label }}</strong>
+                          <small class="role-note">{{ role.note }}</small>
+                        </span>
+                      </label>
+                    }
+                  </div>
+                </fieldset>
+
                 <fieldset class="level-field">
                   <legend>Level of access</legend>
                   <label class="level-option">

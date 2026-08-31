@@ -48,7 +48,7 @@ function fillValid(fixture: ComponentFixture<Register>): void {
   c.email = 'ana.reyes@castillasorsogon.gov.ph';
   c.mobileNumber = '09171234567';
   c.position = 'Municipal Engineering Office — Evaluator';
-  c.justification = 'Assigned to evaluate structural submissions.';
+  c.justification = 'Assigned to evaluate structural submissions for the office.';
   c.toggle('Building Permit – New Construction');
   fixture.detectChanges();
 }
@@ -107,7 +107,7 @@ describe('Register — requesting an account', () => {
     c.email = 'ana@castillasorsogon.gov.ph';
     c.mobileNumber = '09171234567';
     c.position = 'MEO';
-    c.justification = 'Evaluations.';
+    c.justification = 'Assigned to evaluate structural submissions.';
 
     await c.onSubmit({ invalid: false });
 
@@ -128,7 +128,17 @@ describe('Register — requesting an account', () => {
     const http = TestBed.inject(HttpTestingController);
     const req = http.expectOne('/auth/access-request');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body.requestedPermitTypes).toEqual(['Building Permit – New Construction']);
+
+    // The SERVER's field names, verified against the running API on
+    // 2026-08-31 (F-30). Its schema is `.strict()`, so `mobileNumber`,
+    // `position` and `requestedPermitTypes` — which this portal used to send —
+    // are a 400, not ignored keys. Asserting the exact shape is what stops
+    // this drifting back to names that only this portal's mock accepted.
+    expect(Object.keys(req.request.body).sort()).toEqual([
+      'email', 'fullName', 'justification', 'mobile', 'officePosition',
+      'permitTypes', 'requestedLevel',
+    ]);
+    expect(req.request.body.permitTypes).toEqual(['Building Permit – New Construction']);
     expect(req.request.body.requestedLevel).toBe('view');
     // The password is not merely absent from the form — it is absent from the wire.
     expect(Object.keys(req.request.body)).not.toContain('password');

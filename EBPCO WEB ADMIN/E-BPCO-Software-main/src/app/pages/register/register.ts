@@ -13,6 +13,8 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // form accepts and the server rejects is a request the officer cannot make and
 // cannot see why.
 const MOBILE_PATTERN = /^(09\d{9}|\+639\d{9})$/;
+/** The server requires 20 characters. Matched exactly, so neither side surprises. */
+const MIN_JUSTIFICATION = 20;
 
 /**
  * Requesting an account. It does not create one.
@@ -105,6 +107,16 @@ export class Register {
     }
     if (this.selected().size === 0) {
       this.formError.set('Choose at least one form you need access to.');
+      return;
+    }
+    // The server's own floor, with the server's own reason: an approver given
+    // "pls" has been given nothing to weigh. Enforced here so it is caught in
+    // the field rather than as a 400 after submitting.
+    if (this.justification.trim().length < MIN_JUSTIFICATION) {
+      this.formError.set(
+        `Say a little more about why you need access — at least ${MIN_JUSTIFICATION} characters. `
+          + 'An administrator has to decide from this.',
+      );
       return;
     }
 
