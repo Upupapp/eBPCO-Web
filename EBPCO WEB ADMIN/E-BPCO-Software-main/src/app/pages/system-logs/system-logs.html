@@ -254,14 +254,6 @@
                       >
                         <app-icon name="edit" [size]="14" />
                       </button>
-                      <button
-                        type="button"
-                        class="icon-btn del"
-                        aria-label="Delete"
-                        (click)="requestDelete(row)"
-                      >
-                        <app-icon name="trash" [size]="14" />
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -337,14 +329,6 @@
                         (click)="openErrorDetail(row)"
                       >
                         <app-icon name="edit" [size]="14" />
-                      </button>
-                      <button
-                        type="button"
-                        class="icon-btn del"
-                        aria-label="Delete"
-                        (click)="requestDelete(row)"
-                      >
-                        <app-icon name="trash" [size]="14" />
                       </button>
                     </div>
                   </td>
@@ -422,14 +406,6 @@
                       >
                         <app-icon name="edit" [size]="14" />
                       </button>
-                      <button
-                        type="button"
-                        class="icon-btn del"
-                        aria-label="Delete"
-                        (click)="requestDelete(row)"
-                      >
-                        <app-icon name="trash" [size]="14" />
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -501,14 +477,6 @@
                         (click)="openEventDetail(row)"
                       >
                         <app-icon name="edit" [size]="14" />
-                      </button>
-                      <button
-                        type="button"
-                        class="icon-btn del"
-                        aria-label="Delete"
-                        (click)="requestDelete(row)"
-                      >
-                        <app-icon name="trash" [size]="14" />
                       </button>
                     </div>
                   </td>
@@ -640,13 +608,3 @@
   </div>
 }
 
-@if (deleteTarget()) {
-  <app-confirm-dialog
-    title="Delete log entry?"
-    message="This entry will be permanently removed from the log."
-    confirmLabel="Delete"
-    tone="danger"
-    (confirmed)="confirmDelete()"
-    (cancelled)="cancelDelete()"
-  />
-}

@@ -18,6 +18,14 @@ export interface Session {
    * place, and says which source it used.
    */
   scopes: readonly string[] | null;
+  /**
+   * The forms this account may work on, or null when `/me` did not report them.
+   *
+   * Same distinction as `scopes`: null is silence, `[]` is "none assigned".
+   * The queue is scoped by the SERVER — this is carried so the portal can
+   * explain an empty result, never so it can filter one.
+   */
+  assignedForms: readonly string[] | null;
 }
 
 /**
@@ -87,6 +95,7 @@ export class SessionService {
       email: me.email,
       role,
       scopes: me.scopes ?? null,
+      assignedForms: me.permitTypes ?? null,
     });
   }
 
@@ -117,6 +126,7 @@ export class SessionService {
         email: me.email,
         role,
         scopes: me.scopes ?? null,
+        assignedForms: me.permitTypes ?? null,
       });
     } catch {
       // An expired or revoked token is not an error worth showing on load; the

@@ -5,6 +5,14 @@
 />
 
 @if (view() === 'list') {
+  <!--
+    What this officer is looking at. "No applications" is three facts under one
+    label — none exist, none in your forms, or you hold no forms at all — and
+    the middle one costs a day: the queue looks quiet while work sits in a
+    permit type nobody assigned you.
+  -->
+  <app-assigned-forms-notice />
+
   <section class="kpi-grid">
     @for (stat of ringStats(); track stat.label) {
       <app-kpi-card
@@ -72,9 +80,15 @@
           <app-icon name="download" [size]="14" />
           Export
         </button>
+        <!--
+          "Archive", because that is what happens. confirmDelete() calls
+          store.archive() and moves the application to Cancelled, where it
+          stays visible, filterable and auditable. The button said Delete, so
+          an officer clicking it believed the record had been destroyed.
+        -->
         <button type="button" class="btn-outline danger" (click)="requestDeleteSelected()">
-          <app-icon name="trash" [size]="14" />
-          Delete
+          <app-icon name="archive" [size]="14" />
+          Archive
         </button>
       </div>
     }
@@ -287,8 +301,8 @@
               Export Application
             </button>
             <button type="button" role="menuitem" class="danger" (click)="deleteFromDetail()">
-              <app-icon name="trash" [size]="14" />
-              Delete Application
+              <app-icon name="archive" [size]="14" />
+              Archive Application
             </button>
           </div>
         </ng-template>
@@ -993,8 +1007,8 @@
               Export Application
             </button>
             <button type="button" role="menuitem" class="danger" (click)="deleteFromDetail()">
-              <app-icon name="trash" [size]="14" />
-              Delete Application
+              <app-icon name="archive" [size]="14" />
+              Archive Application
             </button>
           </div>
         </ng-template>
@@ -1326,9 +1340,9 @@
 
 @if (deleteTarget()) {
   <app-confirm-dialog
-    title="Delete application?"
+    title="Archive this application?"
     [message]="deleteDialogMessage()"
-    confirmLabel="Delete"
+    confirmLabel="Archive"
     tone="danger"
     (confirmed)="confirmDelete()"
     (cancelled)="cancelDelete()"

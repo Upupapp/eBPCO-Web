@@ -46,6 +46,7 @@ import {
   TimelineItem,
 } from './applications-data';
 import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { AssignedFormsNotice } from '../../shared/assigned-forms-notice/assigned-forms-notice';
 
 /** One row of the real per-application Documents tab — a required-but-not-yet-uploaded requirement has `doc: null` and renders as "Missing". */
 interface DocumentRow {
@@ -113,7 +114,7 @@ const STATUS_ACTIONS: { label: string; target: ApplicationLifecycleStatus }[] = 
 
 @Component({
   selector: 'app-applications',
-  imports: [
+  imports: [AssignedFormsNotice, 
     Topbar,
     Icon,
     Avatar,
@@ -723,9 +724,13 @@ export class Applications {
     const target = this.deleteTarget();
     if (target === 'bulk') {
       const n = this.selectedIds().size;
-      return `This will remove ${n} selected application${n === 1 ? '' : 's'}.`;
+      return `${n} selected application${n === 1 ? '' : 's'} will be moved to Cancelled, `
+        + 'where they stay visible and auditable. Nothing is deleted.';
     }
-    if (target) return `This will remove ${target.applicant}'s application (${target.id}).`;
+    if (target) {
+      return `${target.applicant}'s application (${target.id}) will be moved to Cancelled, `
+        + 'where it stays visible and auditable. Nothing is deleted.';
+    }
     return '';
   });
 

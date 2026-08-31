@@ -4,6 +4,7 @@ import { Icon } from '../icon/icon';
 import { Avatar } from '../avatar/avatar';
 import { SessionService } from '../../core/session/session.service';
 import { ApplicationStore } from '../../core/domain/application-store';
+import { Capabilities } from '../../core/session/capabilities';
 
 @Component({
   selector: 'app-topbar',
@@ -12,6 +13,14 @@ import { ApplicationStore } from '../../core/domain/application-store';
   styleUrl: './topbar.scss',
 })
 export class Topbar {
+  /**
+   * What this account may do, read from the one capability rather than
+   * recomputed here. A second opinion in the topbar is how a portal ends up
+   * telling an officer they may edit on the chrome and refusing them on the page.
+   */
+  protected readonly capabilities = inject(Capabilities);
+  protected readonly assignedForms = this.capabilities.assignedForms;
+
   private readonly session = inject(SessionService);
   private readonly store = inject(ApplicationStore);
 

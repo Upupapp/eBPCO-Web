@@ -97,6 +97,22 @@ export class Capabilities {
     return EDITING_ROLES.includes(current.role);
   });
 
+  /**
+   * The forms this officer may work on, as the server reported them.
+   *
+   * `null` means the server did not say. The queue is scoped SERVER-side and
+   * this is never used to filter — filtering a full list here would leak the
+   * existence and count of applications the officer may not see, which is the
+   * thing the scoping exists to prevent. It is carried so an empty queue can be
+   * explained, and so an officer can see what they hold without asking.
+   */
+  readonly assignedForms = computed<readonly string[] | null>(
+    () => this.session.session()?.assignedForms ?? null,
+  );
+
+  /** True when the server said this account is assigned no forms at all. */
+  readonly hasNoForms = computed(() => this.assignedForms()?.length === 0);
+
   /** True when signed in and unable to edit — the state that needs explaining. */
   readonly isViewOnly = computed(() => this.session.session() !== null && !this.canEdit());
 

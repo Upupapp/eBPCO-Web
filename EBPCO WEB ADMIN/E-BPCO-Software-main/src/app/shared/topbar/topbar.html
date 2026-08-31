@@ -108,6 +108,26 @@
               <span class="user-role">{{ userRole() }}</span>
             </div>
           </div>
+          <!--
+            A-17. What this account may actually do, where the officer already
+            looks to see who they are signed in as. Without it, the only way to
+            find out is to notice something missing from a queue and ask.
+          -->
+          <dl class="user-access">
+            <dt>Access</dt>
+            <dd>{{ capabilities.canEdit() ? 'View and edit' : 'View only' }}</dd>
+            @if (assignedForms(); as forms) {
+              <dt>Forms</dt>
+              <dd>
+                @if (forms.length === 0) {
+                  <span class="no-forms">None assigned — you can see nothing.</span>
+                } @else {
+                  {{ forms.join(', ') }}
+                }
+              </dd>
+            }
+          </dl>
+
           <button type="button" class="logout-btn" (click)="logout()">
             <app-icon name="logout" [size]="15" />
             Log Out

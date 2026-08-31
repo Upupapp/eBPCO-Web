@@ -105,6 +105,26 @@ const ICONS: Record<string, Shape[]> = {
       d: 'M14.7 4.3a1.6 1.6 0 0 1 2.3 0l2.7 2.7a1.6 1.6 0 0 1 0 2.3L9.5 19.6 4.5 20l.4-5Z',
     },
   ],
+  // A box with its lid on: set aside and kept, which is what archiving is.
+  // Deliberately not a variant of `trash` — the two must never read alike.
+  archive: [
+    { tag: 'rect', x: 3.2, y: 4.2, width: 17.6, height: 4, rx: 1 },
+    { tag: 'path', d: 'M5 8.2v10.6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.2' },
+    { tag: 'path', d: 'M10 12h4' },
+  ],
+  refresh: [
+    { tag: 'path', d: 'M20 11.5A8 8 0 0 0 6.3 6.3L4 8.5' },
+    { tag: 'path', d: 'M4 4.5v4h4' },
+    { tag: 'path', d: 'M4 12.5A8 8 0 0 0 17.7 17.7L20 15.5' },
+    { tag: 'path', d: 'M20 19.5v-4h-4' },
+  ],
+  slash: [
+    { tag: 'circle', cx: 12, cy: 12, r: 8.2 },
+    { tag: 'path', d: 'M6.2 6.2l11.6 11.6' },
+  ],
+  check: [
+    { tag: 'path', d: 'M5 12.5l4.5 4.5L19 7.5' },
+  ],
   trash: [
     { tag: 'path', d: 'M5 7h14' },
     { tag: 'path', d: 'M9.5 7V5.2a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V7' },

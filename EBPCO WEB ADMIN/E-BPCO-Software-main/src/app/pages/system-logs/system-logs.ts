@@ -1043,38 +1043,24 @@ export class SystemLogs {
   // runs for that tab; the 'activity' case is omitted rather than made a
   // silent no-op so a future caller can't accidentally wire one back in.
 
-  protected readonly deleteTarget = signal<AccessRow | ErrorRow | SecurityRow | SystemEventRow | null>(
+  private readonly _removedDeleteTarget = signal<AccessRow | ErrorRow | SecurityRow | SystemEventRow | null>(
     null,
   );
 
-  protected requestDelete(row: AccessRow | ErrorRow | SecurityRow | SystemEventRow): void {
-    this.deleteTarget.set(row);
-  }
+  /**
+   * Deleting a log entry used to be offered here, on all four sample tabs, with
+   * "This entry will be permanently removed from the log."
+   *
+   * An audit trail that can be deleted from the screen that displays it is not
+   * an audit trail. The entries most worth removing are the ones somebody most
+   * wants removed, and the control offered exactly that. Owner ruling,
+   * 2026-08-31: no delete access anywhere — archive only, and what is set aside
+   * is preserved.
+   *
+   * Nothing replaces it. There is no honest "archive" for an audit entry: the
+   * record is the point, and hiding one is the same act wearing a better word.
+   */
 
-  protected cancelDelete(): void {
-    this.deleteTarget.set(null);
-  }
-
-  protected confirmDelete(): void {
-    const target = this.deleteTarget();
-    if (!target) return;
-    switch (this.activeTab()) {
-      case 'access':
-        this.accessRows.update((rows) => rows.filter((r) => r !== target));
-        break;
-      case 'error':
-        this.errorRows.update((rows) => rows.filter((r) => r !== target));
-        break;
-      case 'security':
-        this.securityRows.update((rows) => rows.filter((r) => r !== target));
-        break;
-      case 'events':
-        this.eventRows.update((rows) => rows.filter((r) => r !== target));
-        break;
-    }
-    this.deleteTarget.set(null);
-    this.toast.success('Log entry deleted.');
-  }
 
   // ---- Export -----------------------------------------------------------
 
