@@ -42,16 +42,21 @@ async function mount(
   return fixture;
 }
 
+/**
+ * A pending row in the SERVER's field names — `mobile`, `officePosition`,
+ * `permitTypes`, `raisedAt`. Four of these were wrong until F-31, and the
+ * fixture agreed with the portal so nothing failed.
+ */
 const request = (over: Record<string, unknown> = {}) => ({
   id: 'REQ-1',
   fullName: 'Engr. Ana Reyes',
   email: 'ana.reyes@castillasorsogon.gov.ph',
-  mobileNumber: '09171234567',
-  position: 'Municipal Engineering Office — Evaluator',
-  requestedPermitTypes: ['Building Permit – New Construction'],
+  mobile: '09171234567',
+  officePosition: 'Municipal Engineering Office — Evaluator',
+  permitTypes: ['Building Permit – New Construction'],
   requestedLevel: 'view',
   justification: 'Assigned to evaluate structural submissions.',
-  requestedAt: new Date(Date.now() - 3 * 86_400_000).toISOString(),
+  raisedAt: new Date(Date.now() - 3 * 86_400_000).toISOString(),
   ...over,
 });
 
@@ -68,7 +73,7 @@ describe('Access Requests', () => {
 
   it('lists a pending request with its level, forms and age', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+      http.expectOne('/staff/access-requests').flush({ data: [request()] }),
     );
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
 
@@ -82,7 +87,7 @@ describe('Access Requests', () => {
     const fixture = await mount((http) =>
       http
         .expectOne('/staff/access-requests')
-        .flush({ items: [request({ requestedLevel: 'view-edit' })] }),
+        .flush({ data: [request({ requestedLevel: 'view-edit' })] }),
     );
 
     expect(fixture.nativeElement.querySelector('.level.elevated')).not.toBeNull();
@@ -91,7 +96,7 @@ describe('Access Requests', () => {
 
   it('says nobody is waiting only when the server said so', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/access-requests').flush({ items: [] }),
+      http.expectOne('/staff/access-requests').flush({ data: [] }),
     );
 
     expect(fixture.nativeElement.textContent).toContain('The server was asked and answered');
@@ -125,9 +130,8 @@ describe('Access Requests', () => {
 
   it('seeds the grant from what was asked, so the approver edits rather than rebuilds', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/access-requests').flush({
-        items: [request({
-          requestedPermitTypes: ['Fencing Permit', 'Sign Permit'],
+      http.expectOne('/staff/access-requests').flush({ data: [request({
+          permitTypes: ['Fencing Permit', 'Sign Permit'],
           requestedLevel: 'view-edit',
         })],
       }),
@@ -148,8 +152,7 @@ describe('Access Requests', () => {
 
   it('never grants a permit type this portal does not publish', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/access-requests').flush({
-        items: [request({ requestedPermitTypes: ['Fencing Permit', 'Sorcery Permit'] })],
+      http.expectOne('/staff/access-requests').flush({ data: [request({ permitTypes: ['Fencing Permit', 'Sorcery Permit'] })],
       }),
     );
     const c = fixture.componentInstance as unknown as {
@@ -169,7 +172,7 @@ describe('Access Requests', () => {
 
   it('refuses to approve with no forms — an account that can see nothing', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+      http.expectOne('/staff/access-requests').flush({ data: [request()] }),
     );
     const c = fixture.componentInstance as unknown as {
       startApprove(r: unknown): void; toggleGrant(t: string): void;
@@ -186,7 +189,7 @@ describe('Access Requests', () => {
 
   it('sends the grant WITH the approval, in one request', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+      http.expectOne('/staff/access-requests').flush({ data: [request()] }),
     );
     const c = fixture.componentInstance as unknown as {
       startApprove(r: unknown): void; setLevel(l: string): void;
@@ -213,13 +216,13 @@ describe('Access Requests', () => {
     // The reload is queued behind the decision's promise, so it does not exist
     // until the task queue drains.
     await new Promise((resolve) => setTimeout(resolve, 0));
-    http.expectOne('/staff/access-requests').flush({ items: [] });
+    http.expectOne('/staff/access-requests').flush({ data: [] });
     await pending;
   });
 
   it('refuses to reject without a reason', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+      http.expectOne('/staff/access-requests').flush({ data: [request()] }),
     );
     const c = fixture.componentInstance as unknown as {
       startReject(r: unknown): void; confirmReject(): Promise<void>; requests(): unknown[];
@@ -234,7 +237,7 @@ describe('Access Requests', () => {
 
   it('tells the approver when someone else already decided, rather than failing', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+      http.expectOne('/staff/access-requests').flush({ data: [request()] }),
     );
     const c = fixture.componentInstance as unknown as {
       startReject(r: unknown): void; confirmReject(): Promise<void>;
@@ -250,7 +253,7 @@ describe('Access Requests', () => {
       { status: 409, statusText: 'Conflict' },
     );
     await new Promise((resolve) => setTimeout(resolve, 0));
-    http.expectOne('/staff/access-requests').flush({ items: [] });
+    http.expectOne('/staff/access-requests').flush({ data: [] });
     await pending;
     fixture.detectChanges();
 
@@ -260,7 +263,7 @@ describe('Access Requests', () => {
 
   it('warns when View and edit would grant nothing', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+      http.expectOne('/staff/access-requests').flush({ data: [request()] }),
     );
     const c = fixture.componentInstance as unknown as {
       startApprove(r: unknown): void; toggleGrantRole(k: string): void;
@@ -281,7 +284,7 @@ describe('Access Requests', () => {
 
   it('does not warn when a role that can act is also selected', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+      http.expectOne('/staff/access-requests').flush({ data: [request()] }),
     );
     const c = fixture.componentInstance as unknown as {
       startApprove(r: unknown): void; toggleGrantRole(k: string): void;
@@ -298,7 +301,7 @@ describe('Access Requests', () => {
 
   it('does not warn at view level, where the point does not arise', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/access-requests').flush({ items: [request()] }),
+      http.expectOne('/staff/access-requests').flush({ data: [request()] }),
     );
     const c = fixture.componentInstance as unknown as {
       startApprove(r: unknown): void; toggleGrantRole(k: string): void;
@@ -315,7 +318,7 @@ describe('Access Requests', () => {
     const fixture = await mount((http) =>
       http
         .expectOne('/staff/access-requests')
-        .flush({ items: [request({ requestedAt: new Date(Date.now() - 40 * 86_400_000).toISOString() })] }),
+        .flush({ data: [request({ raisedAt: new Date(Date.now() - 40 * 86_400_000).toISOString() })] }),
     );
     const text = ((fixture.nativeElement as HTMLElement).textContent ?? '').toLowerCase();
 

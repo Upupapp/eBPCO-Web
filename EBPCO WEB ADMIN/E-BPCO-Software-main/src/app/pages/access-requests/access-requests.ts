@@ -147,7 +147,7 @@ export class AccessRequests implements OnInit {
     // Seed from the request, filtered to permit types this portal publishes —
     // a retired or unknown type must not become a grant just because it was
     // asked for.
-    const asked = request.requestedPermitTypes.filter((t): t is PermitType =>
+    const asked = request.permitTypes.filter((t): t is PermitType =>
       (ALL_PERMIT_TYPES as readonly string[]).includes(t),
     );
     this.grantForms.set(new Set(asked));
@@ -173,7 +173,7 @@ export class AccessRequests implements OnInit {
 
   /** Any permit type the requester asked for that this portal does not publish. */
   protected unknownRequested(request: PendingAccessRequest): readonly string[] {
-    return request.requestedPermitTypes.filter(
+    return request.permitTypes.filter(
       (t) => !(ALL_PERMIT_TYPES as readonly string[]).includes(t),
     );
   }
@@ -282,7 +282,7 @@ export class AccessRequests implements OnInit {
    * which the dashboard's 5-day "Overdue" rule already did once (F-26).
    */
   protected waitingDays(request: PendingAccessRequest): number | null {
-    const raised = new Date(request.requestedAt).getTime();
+    const raised = new Date(request.raisedAt).getTime();
     if (Number.isNaN(raised)) return null;
     return Math.max(0, Math.floor((Date.now() - raised) / 86_400_000));
   }
