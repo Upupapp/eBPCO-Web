@@ -10,6 +10,8 @@ import { downloadCsv } from '../../shared/utils/export-csv';
 import { SessionService } from '../../core/session/session.service';
 import { StaffDirectoryApi, StaffMember, StaffSession } from '../../core/api/staff-directory.api';
 import { AccessLevel } from '../../core/api/access-request.api';
+import { Capabilities } from '../../core/session/capabilities';
+import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
 import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
 import { ToastService } from '../../shared/toast/toast.service';
 import {
@@ -41,6 +43,14 @@ export interface UserRow {
    */
   level: AccessLevel;
   permitTypes: readonly string[];
+  /**
+   * The role the SERVER holds for this account, kept raw.
+   *
+   * `role` below is a display label derived from the level. This is the thing
+   * the last-super-admin guard has to count, and counting a display string
+   * would break the moment the label is reworded.
+   */
+  serverRole: string;
   name: string;
   email: string;
   role: string;
@@ -128,6 +138,7 @@ function toUserRow(member: StaffMember): UserRow {
     id: member.id,
     level: member.level,
     permitTypes: member.permitTypes,
+    serverRole: member.role,
     name: member.fullName,
     email: member.email,
     role: member.level === 'view-edit' ? 'View and edit' : 'View only',
@@ -208,11 +219,13 @@ const ROLES: RoleRow[] = [
 
 @Component({
   selector: 'app-user-roles',
-  imports: [Topbar, KpiCard, Icon, Avatar, Pagination, FormsModule, ConfirmDialog],
+  imports: [ViewOnlyNotice, Topbar, KpiCard, Icon, Avatar, Pagination, FormsModule, ConfirmDialog],
   templateUrl: './user-roles.html',
   styleUrl: './user-roles.scss',
 })
 export class UserRoles implements OnInit {
+  protected readonly capabilities = inject(Capabilities);
+
   private readonly session = inject(SessionService);
   private readonly toast = inject(ToastService);
 
@@ -462,6 +475,54 @@ export class UserRoles implements OnInit {
     this.view.set('detail');
   }
 
+  // ---- A-10 · Guards that must hold before anything is sent --------------
+
+  /**
+   * Refusing an action here as well as on the server.
+   *
+   * The server is the authority and refuses these too. Checking first is not
+   * duplication for its own sake: an officer who clicks Disable, waits, and is
+   * then told the server said no has been given a worse answer than one who was
+   * told immediately and shown why. It also means the reason is worded by the
+   * portal in the portal's own voice, rather than depending on an error body.
+   *
+   * The one that genuinely matters is the last super admin. Every other refusal
+   * here is a convenience; that one guards the single failure this product
+   * cannot repair from inside itself — an LGU with no super admin has nobody
+   * who can grant anybody access, including to fix it.
+   */
+  private isSelf(row: UserRow): boolean {
+    const email = this.session.session()?.email;
+    return email !== undefined && email.toLowerCase() === row.email.toLowerCase();
+  }
+
+  private isSuperAdmin(row: UserRow): boolean {
+    return row.serverRole === 'super-admin';
+  }
+
+  private enabledSuperAdmins(): UserRow[] {
+    return this.users().filter((u) => this.isSuperAdmin(u) && u.status !== 'Inactive');
+  }
+
+  /** Why this account may not be disabled, or null when it may be. */
+  protected disableRefusal(row: UserRow): string | null {
+    if (this.isSelf(row)) {
+      return 'You cannot disable your own account — you would be signed out with no way back in.';
+    }
+    if (this.isSuperAdmin(row) && this.enabledSuperAdmins().length <= 1) {
+      return 'This is the last enabled super admin. Disabling it would leave nobody able to grant access, including to undo this.';
+    }
+    return null;
+  }
+
+  /** Why this account's access may not be changed, or null when it may be. */
+  protected accessRefusal(row: UserRow, nextLevel: AccessLevel): string | null {
+    if (this.isSelf(row) && nextLevel === 'view') {
+      return 'You cannot reduce your own access — an administrator has to do it.';
+    }
+    return null;
+  }
+
   // ---- A-07 · Changing what an account may do ----------------------------
 
   /**
@@ -525,6 +586,11 @@ export class UserRoles implements OnInit {
 
     if (!row.id) {
       this.accessError.set('This account has not been created on the server yet.');
+      return;
+    }
+    const refusal = this.accessRefusal(row, this.accessLevel());
+    if (refusal !== null) {
+      this.accessError.set(refusal);
       return;
     }
     if (this.accessForms().size === 0) {
@@ -638,8 +704,20 @@ export class UserRoles implements OnInit {
    */
   protected readonly disableTarget = signal<UserRow | null>(null);
 
+  protected readonly disableRefused = signal('');
+
   protected requestDisable(row: UserRow): void {
+    const refusal = this.disableRefusal(row);
+    if (refusal !== null) {
+      this.disableRefused.set(refusal);
+      return;
+    }
+    this.disableRefused.set('');
     this.disableTarget.set(row);
+  }
+
+  protected dismissDisableRefusal(): void {
+    this.disableRefused.set('');
   }
 
   protected cancelDisable(): void {
@@ -699,6 +777,7 @@ export class UserRoles implements OnInit {
         id: '',
         level: 'view' as AccessLevel,
         permitTypes: [],
+        serverRole: '',
         email,
         role: this.newUser.role,
         department: this.newUser.department,
