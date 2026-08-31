@@ -94,7 +94,6 @@
             <th>BUSINESS NAME</th>
             <th>CATEGORY</th>
             <th>CONTACT PERSON</th>
-            <th>Sub Domain</th>
             <th>DATE CREATED</th>
             <th>User Count</th>
             <th>STATUS</th>
@@ -134,7 +133,6 @@
                   <span class="contact-phone">{{ row.contactPhone }}</span>
                 </div>
               </td>
-              <td>{{ row.subdomain }}</td>
               <td>{{ row.dateCreated }}</td>
               <td>{{ row.userCount ?? '—' }}</td>
               <td>
@@ -541,8 +539,6 @@
               <dd>Sorsogon, Region V</dd>
             </div>
             <div>
-              <dt>Sub Domain</dt>
-              <dd>{{ row.subdomain }}</dd>
             </div>
             <div>
               <dt>Account Status</dt>
@@ -878,19 +874,6 @@
         </div>
       </div>
 
-      <div class="card">
-        <h2>Subdomain Configuration</h2>
-        <label class="field-label">Slug/Subdomain Field</label>
-        <div class="slug-wrap">
-          <input
-            class="text-input"
-            type="text"
-            placeholder="Enter Slug Name"
-            [(ngModel)]="newBusiness.slug"
-          />
-          <span class="slug-suffix">yourapp.gov.ph</span>
-        </div>
-      </div>
     </div>
   </div>
 }

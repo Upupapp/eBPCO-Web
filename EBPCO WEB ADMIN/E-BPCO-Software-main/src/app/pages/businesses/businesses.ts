@@ -42,7 +42,6 @@ interface BusinessRow {
   city: string;
   contactName: string;
   contactPhone: string;
-  subdomain: string;
   dateCreated: string;
   /** `null` when unknown. It was `8 + (hash(id) % 16)`, which sat beside a real "Active Users" count and contradicted it. */
   userCount: number | null;
@@ -173,9 +172,20 @@ export class Businesses {
   // `userCount` used to be `8 + (hash(id) % 16)`. Once the detail panel stopped
   // inventing staff, that hash sat beside a real "Active Users 1" and openly
   // contradicted it — 21 users claimed, one known. It is `null` now and renders
-  // as a dash. `subdomain` remains derived from the business name; it is not a
-  // count and it feeds this page's search filter, so it is recorded rather than
-  // changed here.
+  // as a dash.
+  //
+  // `subdomain` is GONE (P-F3). It was `slugify(name) + '.castillasorsogon.gov.ph'`
+  // — a hostname invented on the LGU's REAL government domain, shown as a table
+  // column, repeated in the detail panel, written into the CSV export, and
+  // searchable. None of them resolve; the parent domain does, which is exactly
+  // what made it plausible to anyone who read one.
+  //
+  // The API had already refused to serve it, in as many words: "leftovers from a
+  // multi-tenant template" that "describe nothing in this domain", and inventing
+  // one "would create a vocabulary the LGU never asked for and would then have to
+  // keep". The add-business form even carried a "Subdomain Configuration" card
+  // whose suffix still read `yourapp.gov.ph` — the template's own placeholder,
+  // never edited.
   private toBusinessRow(b: Business): BusinessRow {
     const owner = this.store.getApplicant(b.ownerApplicantId);
     return {
@@ -185,7 +195,6 @@ export class Businesses {
       city: `Barangay ${b.barangay}`,
       contactName: owner ? applicantFullName(owner) : 'Not provided',
       contactPhone: owner?.mobileNumber ?? 'Not provided',
-      subdomain: `${slugify(b.name)}.castillasorsogon.gov.ph`,
       dateCreated: b.dateRegistered,
       userCount: null,
       status: b.status,
@@ -243,7 +252,7 @@ export class Businesses {
         r.category.toLowerCase().includes(term) ||
         r.city.toLowerCase().includes(term) ||
         r.contactName.toLowerCase().includes(term) ||
-        r.subdomain.toLowerCase().includes(term)
+        r.contactName.toLowerCase().includes(term)
       );
     });
   });
@@ -381,7 +390,6 @@ export class Businesses {
       Location: row.city,
       Contact: row.contactName,
       Phone: row.contactPhone,
-      Subdomain: row.subdomain,
       'Date Registered': row.dateCreated,
       // '—' not '' — a blank spreadsheet cell reads as zero.
       Users: row.userCount ?? '—',
@@ -602,7 +610,6 @@ export class Businesses {
     userName: '',
     password: '',
     confirmPassword: '',
-    slug: '',
     modules: {
       initialEvaluation: false,
       zoningEvaluation: false,
@@ -705,7 +712,6 @@ export class Businesses {
         city: barangayLabel === 'N/A' ? 'N/A' : `Barangay ${barangayLabel}`,
         contactName: this.newBusiness.contactName.trim() || 'N/A',
         contactPhone: this.newBusiness.contactPhone.trim() || 'N/A',
-        subdomain: `${this.newBusiness.slug.trim() || code.toLowerCase()}.castillasorsogon.gov.ph`,
         dateCreated: 'Just now',
         userCount: 1,
         status: 'Active',
