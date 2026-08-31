@@ -147,19 +147,49 @@
                   >
                     <app-icon name="edit" [size]="14" />
                   </button>
-                  <button
-                    type="button"
-                    class="icon-btn del"
-                    [attr.aria-label]="'Remove ' + row.name"
-                    (click)="requestDelete(row)"
-                  >
-                    <app-icon name="trash" [size]="14" />
-                  </button>
+                  @if (row.status === 'Inactive') {
+                    <button
+                      type="button"
+                      class="icon-btn"
+                      [attr.aria-label]="'Enable ' + row.name"
+                      (click)="enableUser(row)"
+                    >
+                      <app-icon name="check" [size]="14" />
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="icon-btn del"
+                      [attr.aria-label]="'Disable ' + row.name"
+                      (click)="requestDisable(row)"
+                    >
+                      <app-icon name="slash" [size]="14" />
+                    </button>
+                  }
                 </td>
               </tr>
             } @empty {
+              <!--
+                Four different facts, four sentences. "No users match your
+                search" is only true once the server has answered and the list
+                is genuinely filtered to nothing; saying it while loading, or
+                while the read failed, tells an administrator the directory is
+                empty when nobody has looked.
+              -->
               <tr class="table-empty-row">
-                <td colspan="6">No users match your search.</td>
+                <td colspan="6">
+                  @if (directoryLoading()) {
+                    Loading the staff directory…
+                  } @else if (directoryUnavailable()) {
+                    This deployment has no staff directory yet, so no accounts
+                    can be listed here.
+                  } @else if (directoryError(); as message) {
+                    The staff directory could not be read, so this is not a
+                    picture of who holds an account. {{ message }}
+                  } @else {
+                    No users match your search.
+                  }
+                </td>
               </tr>
             }
           </tbody>
@@ -577,13 +607,21 @@
   </div>
 }
 
-@if (deleteTarget(); as target) {
+@if (disableTarget(); as target) {
+  <!--
+    "Disable", not "Remove". The account is kept so that every application it
+    has already touched stays attributable — a permit decided by a person the
+    system can no longer identify is a permit nobody can defend.
+  -->
   <app-confirm-dialog
-    title="Remove user?"
-    [message]="target.name + ' will lose access immediately.'"
-    confirmLabel="Remove"
+    title="Disable this account?"
+    [message]="
+      target.name +
+      ' will lose access immediately. The account is kept, not deleted, so their past decisions stay attributable — and it can be enabled again.'
+    "
+    confirmLabel="Disable"
     tone="danger"
-    (confirmed)="confirmDelete()"
-    (cancelled)="cancelDelete()"
+    (confirmed)="confirmDisable()"
+    (cancelled)="cancelDisable()"
   />
 }
