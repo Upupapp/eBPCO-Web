@@ -413,6 +413,125 @@
         }
 
         @case ('permissions') {
+          @if (selectedUser(); as user) {
+            <section class="access-panel">
+              <div class="access-head">
+                <div>
+                  <h3>Access</h3>
+                  <p class="access-sub">
+                    What this account may do. This is the access that is
+                    enforced — the matrix below describes the role's shape and
+                    is not what grants anything.
+                  </p>
+                </div>
+                @if (!editingAccess()) {
+                  <button type="button" class="modal-btn confirm" (click)="startEditAccess()">
+                    Change access
+                  </button>
+                }
+              </div>
+
+              @if (!editingAccess()) {
+                <dl class="access-summary">
+                  <dt>Level</dt>
+                  <dd>
+                    <span class="level" [class.elevated]="user.level === 'view-edit'">
+                      {{ user.level === 'view-edit' ? 'View and edit' : 'View only' }}
+                    </span>
+                  </dd>
+                  <dt>Forms</dt>
+                  <dd>
+                    @if (user.permitTypes.length === 0) {
+                      <span class="none">No forms assigned — this account can see nothing.</span>
+                    } @else {
+                      <ul class="form-chips">
+                        @for (type of user.permitTypes; track type) {
+                          <li>{{ type }}</li>
+                        }
+                      </ul>
+                    }
+                  </dd>
+                </dl>
+              } @else {
+                <fieldset class="forms-field">
+                  <legend>
+                    Forms this account may work on
+                    <span class="count">{{ accessFormCount() }} selected</span>
+                  </legend>
+                  <div class="forms-grid">
+                    @for (type of permitTypes; track type) {
+                      <label class="form-option">
+                        <input
+                          type="checkbox"
+                          [checked]="isAccessForm(type)"
+                          (change)="toggleAccessForm(type)"
+                        />
+                        <span>{{ type }}</span>
+                      </label>
+                    }
+                  </div>
+                </fieldset>
+
+                <fieldset class="level-field">
+                  <legend>Level of access</legend>
+                  <label class="level-option">
+                    <input
+                      type="radio"
+                      name="accessLevel"
+                      [checked]="accessLevel() === 'view'"
+                      (change)="setAccessLevel('view')"
+                    />
+                    <span>
+                      <strong>View only</strong>
+                      <small>See applications and documents. Cannot change anything.</small>
+                    </span>
+                  </label>
+                  <label class="level-option">
+                    <input
+                      type="radio"
+                      name="accessLevel"
+                      [checked]="accessLevel() === 'view-edit'"
+                      (change)="setAccessLevel('view-edit')"
+                    />
+                    <span>
+                      <strong>View and edit</strong>
+                      <small>Respond to citizens and decide on applications.</small>
+                    </span>
+                  </label>
+                </fieldset>
+
+                <label class="access-reason-label" for="accessReason">
+                  Reason for this change
+                </label>
+                <textarea
+                  id="accessReason"
+                  rows="2"
+                  name="accessReason"
+                  placeholder="Recorded against this change in the audit trail."
+                  [(ngModel)]="accessReason"
+                ></textarea>
+
+                @if (accessError(); as message) {
+                  <p class="access-error" role="alert">{{ message }}</p>
+                }
+
+                <div class="modal-actions">
+                  <button type="button" class="modal-btn neutral" (click)="cancelEditAccess()">
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    class="modal-btn confirm"
+                    [disabled]="accessWorking()"
+                    (click)="saveAccess()"
+                  >
+                    {{ accessWorking() ? 'Saving…' : 'Save access' }}
+                  </button>
+                </div>
+              }
+            </section>
+          }
+
           @if (selectedUserRole(); as role) {
             <h3>{{ role.name }}</h3>
             <p class="role-desc">{{ role.description }}</p>
@@ -491,7 +610,8 @@
         @case ('security') {
           <h3>Recent Sessions</h3>
           <p class="role-desc">
-            Prototype data — this app has no authentication backend, so sessions are simulated.
+            Live sessions for this account, read from the server. Ending one
+            signs that device out immediately.
           </p>
           <div class="table-wrap">
             <table class="detail-table">
@@ -500,14 +620,46 @@
                   <th>Device / Browser</th>
                   <th>IP Address</th>
                   <th>Last Seen</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                @for (s of sessions(); track s.ip) {
+                @for (s of sessions(); track s.id) {
                   <tr>
-                    <td>{{ s.device }}</td>
-                    <td class="muted">{{ s.ip }}</td>
-                    <td class="muted">{{ s.lastSeen }}</td>
+                    <td>
+                      {{ s.device || 'Device not recorded' }}
+                      @if (s.current) {
+                        <span class="session-current">this session</span>
+                      }
+                    </td>
+                    <td class="muted">{{ s.ipAddress || '—' }}</td>
+                    <td class="muted">{{ s.lastSeenAt || 'Not recorded' }}</td>
+                    <td>
+                      <button
+                        type="button"
+                        class="modal-btn neutral"
+                        [disabled]="revoking() === s.id"
+                        (click)="revokeSession(s)"
+                      >
+                        {{ revoking() === s.id ? 'Ending…' : 'End session' }}
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr class="table-empty-row">
+                    <td colspan="4">
+                      @if (sessionsLoading()) {
+                        Loading sessions…
+                      } @else if (sessionsUnavailable()) {
+                        This deployment cannot list sessions, so it is not known
+                        whether this account is signed in anywhere.
+                      } @else if (sessionsError(); as message) {
+                        Sessions could not be read, so it is not known whether
+                        this account is signed in anywhere. {{ message }}
+                      } @else {
+                        No live sessions. This account is not signed in anywhere.
+                      }
+                    </td>
                   </tr>
                 }
               </tbody>

@@ -8,11 +8,12 @@ import { Pagination } from '../../shared/pagination/pagination';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { SessionService } from '../../core/session/session.service';
-import { StaffDirectoryApi, StaffMember } from '../../core/api/staff-directory.api';
+import { StaffDirectoryApi, StaffMember, StaffSession } from '../../core/api/staff-directory.api';
+import { AccessLevel } from '../../core/api/access-request.api';
+import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
 import { ToastService } from '../../shared/toast/toast.service';
 import {
   buildPermissionMatrix,
-  buildSessions,
   buildUserActivity,
   buildWorkload,
 } from './user-detail-data';
@@ -30,6 +31,16 @@ type UserStatus = 'Active' | 'Inactive' | 'Pending' | null;
 export interface UserRow {
   /** The server's account id. Empty only for a row this page has not saved. */
   id: string;
+  /**
+   * The access this account actually holds, carried raw as well as rendered.
+   *
+   * `role` and `department` are display strings derived from these two. Editing
+   * access has to start from the real values, not from parsing "2 forms" back
+   * out of a label — a round trip through display text is how an edit quietly
+   * grants something nobody chose.
+   */
+  level: AccessLevel;
+  permitTypes: readonly string[];
   name: string;
   email: string;
   role: string;
@@ -115,6 +126,8 @@ function emailFor(name: string): string {
 function toUserRow(member: StaffMember): UserRow {
   return {
     id: member.id,
+    level: member.level,
+    permitTypes: member.permitTypes,
     name: member.fullName,
     email: member.email,
     role: member.level === 'view-edit' ? 'View and edit' : 'View only',
@@ -374,10 +387,69 @@ export class UserRoles implements OnInit {
     return row ? buildWorkload(row) : null;
   });
 
-  protected readonly sessions = computed(() => {
+  // ---- A-09 · Live sessions ----------------------------------------------
+
+  /**
+   * The account's live sign-ins, read from the server.
+   *
+   * These used to be `buildSessions(row)` — devices, IP addresses and
+   * last-seen times generated from the row. A fabricated session list is a
+   * particular kind of harmful: it is the screen an administrator opens when
+   * they suspect an account is compromised, and it would have answered with
+   * invented reassurance.
+   */
+  protected readonly sessions = signal<readonly StaffSession[]>([]);
+  protected readonly sessionsLoading = signal(false);
+  protected readonly sessionsUnavailable = signal(false);
+  protected readonly sessionsError = signal<string | null>(null);
+  protected readonly revoking = signal<string | null>(null);
+
+  protected async loadSessions(): Promise<void> {
     const row = this.selectedUser();
-    return row ? buildSessions(row) : [];
-  });
+    this.sessions.set([]);
+    this.sessionsUnavailable.set(false);
+    this.sessionsError.set(null);
+    if (!row?.id) {
+      // No server id means this row was never saved, so it has no sessions to
+      // show. Saying "unavailable" is truer than an empty table.
+      this.sessionsUnavailable.set(true);
+      return;
+    }
+    this.sessionsLoading.set(true);
+    try {
+      const result = await this.directory.sessions(row.id);
+      if (result.kind === 'ok') {
+        this.sessions.set(result.sessions);
+        return;
+      }
+      if (result.kind === 'unavailable') this.sessionsUnavailable.set(true);
+      else this.sessionsError.set(result.message);
+    } finally {
+      this.sessionsLoading.set(false);
+    }
+  }
+
+  async revokeSession(session: StaffSession): Promise<void> {
+    const row = this.selectedUser();
+    if (!row?.id || this.revoking()) return;
+
+    this.revoking.set(session.id);
+    try {
+      const result = await this.directory.revokeSession(row.id, session.id);
+      if (result.kind === 'done') {
+        this.toast.success('Session ended.');
+        await this.loadSessions();
+        return;
+      }
+      this.sessionsError.set(
+        result.kind === 'unavailable'
+          ? 'This deployment cannot end sessions yet.'
+          : result.message,
+      );
+    } finally {
+      this.revoking.set(null);
+    }
+  }
 
   protected readonly userActivity = computed(() => {
     const row = this.selectedUser();
@@ -390,7 +462,120 @@ export class UserRoles implements OnInit {
     this.view.set('detail');
   }
 
+  // ---- A-07 · Changing what an account may do ----------------------------
+
+  /**
+   * Editing access is one operation, not two.
+   *
+   * The level and the forms are sent together for the same reason the approval
+   * grant is: applying one without the other leaves the account in a state
+   * nobody chose, for however long the second call takes to fail.
+   *
+   * The reason is mandatory and is not decoration. Every access change lands in
+   * the audit stream, and an entry saying "level changed" without saying why is
+   * a record that answers the easy question and not the one anybody asks.
+   */
+  protected readonly permitTypes = ALL_PERMIT_TYPES;
+  protected readonly editingAccess = signal(false);
+  protected readonly accessLevel = signal<AccessLevel>('view');
+  private readonly accessForms = signal<ReadonlySet<string>>(new Set());
+  protected accessReason = '';
+  protected readonly accessError = signal('');
+  protected readonly accessWorking = signal(false);
+
+  protected readonly accessFormCount = computed(() => this.accessForms().size);
+
+  protected isAccessForm(type: PermitType): boolean {
+    return this.accessForms().has(type);
+  }
+
+  protected toggleAccessForm(type: PermitType): void {
+    const next = new Set(this.accessForms());
+    if (!next.delete(type)) next.add(type);
+    this.accessForms.set(next);
+    this.accessError.set('');
+  }
+
+  protected setAccessLevel(level: AccessLevel): void {
+    this.accessLevel.set(level);
+    this.accessError.set('');
+  }
+
+  protected startEditAccess(): void {
+    const row = this.selectedUser();
+    if (!row) return;
+    // Seeded from what the account HOLDS, so the editor sees the current state
+    // and changes it, rather than composing a replacement from memory.
+    this.accessLevel.set(row.level);
+    this.accessForms.set(new Set(row.permitTypes));
+    this.accessReason = '';
+    this.accessError.set('');
+    this.editingAccess.set(true);
+  }
+
+  protected cancelEditAccess(): void {
+    this.editingAccess.set(false);
+    this.accessError.set('');
+    this.accessReason = '';
+  }
+
+  async saveAccess(): Promise<void> {
+    const row = this.selectedUser();
+    if (!row || this.accessWorking()) return;
+
+    if (!row.id) {
+      this.accessError.set('This account has not been created on the server yet.');
+      return;
+    }
+    if (this.accessForms().size === 0) {
+      this.accessError.set('Choose at least one form. An account with no forms can see nothing.');
+      return;
+    }
+    if (this.accessReason.trim().length < 3) {
+      this.accessError.set('Give a reason. It is recorded against this change.');
+      return;
+    }
+
+    this.accessWorking.set(true);
+    try {
+      const result = await this.directory.changeAccess(
+        row.id,
+        {
+          level: this.accessLevel(),
+          permitTypes: [...this.accessForms()] as PermitType[],
+        },
+        this.accessReason,
+      );
+
+      if (result.kind === 'done') {
+        this.editingAccess.set(false);
+        this.accessReason = '';
+        this.toast.success(`Access updated for ${row.name}.`);
+        await this.loadDirectory();
+        // Re-select from the reloaded list so the panel shows what the SERVER
+        // now holds, not what this page hoped it sent.
+        this.selectedUser.set(this.filteredUsers().find((u) => u.id === row.id) ?? null);
+        return;
+      }
+      if (result.kind === 'refused') {
+        // The server refusing on purpose — most importantly when this would
+        // strip the last super admin. That is a correct answer, and it is shown
+        // as the server worded it rather than flattened into a generic failure.
+        this.accessError.set(result.message);
+        return;
+      }
+      this.accessError.set(
+        result.kind === 'unavailable'
+          ? 'This deployment cannot change access yet.'
+          : result.message,
+      );
+    } finally {
+      this.accessWorking.set(false);
+    }
+  }
+
   protected selectUserDetailTab(tab: UserDetailTab): void {
+    if (tab === 'security') void this.loadSessions();
     this.userDetailTab.set(tab);
   }
 
@@ -512,6 +697,8 @@ export class UserRoles implements OnInit {
         // string says so rather than a fabricated identifier that would look
         // like a real account to every later read.
         id: '',
+        level: 'view' as AccessLevel,
+        permitTypes: [],
         email,
         role: this.newUser.role,
         department: this.newUser.department,

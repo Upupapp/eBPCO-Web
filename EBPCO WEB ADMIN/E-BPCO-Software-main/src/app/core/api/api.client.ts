@@ -40,6 +40,18 @@ export class ApiClient {
     ));
   }
 
+  /**
+   * The one destructive verb this portal uses.
+   *
+   * Deliberately narrow. There is no delete on records anywhere in eBPCO —
+   * applications, documents and payments are archived, and staff accounts are
+   * disabled. DELETE exists for exactly one class of thing: a live session or a
+   * registered device, neither of which is a record of anything that happened.
+   */
+  async delete<T>(path: string): Promise<T> {
+    return this.send(() => firstValueFrom(this.http.delete<T>(`${this.baseUrl}${path}`)));
+  }
+
   private async send<T>(call: () => Promise<T>): Promise<T> {
     try {
       return await call();
