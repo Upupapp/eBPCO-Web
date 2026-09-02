@@ -32,7 +32,7 @@
     <div class="table-toolbar">
       <div class="search-input">
         <app-icon name="search" [size]="16" />
-        <input
+        <input aria-label="Search Here By Application ID, Applicant Name, Business/Project, or Lo"
           type="text"
           placeholder="Search Here By Application ID, Applicant Name, Business/Project, or Location"
           [(ngModel)]="searchTerm"
@@ -670,7 +670,7 @@
 
             <label class="doc-remarks-field">
               Remarks <span class="optional">(required when rejecting or requesting revision)</span>
-              <input
+              <input aria-label="Reason shown to the applicant…"
                 type="text"
                 [value]="docRemarksDraft()"
                 (input)="docRemarksDraft.set($any($event.target).value)"
@@ -905,7 +905,7 @@
               </div>
             }
             <div class="post-row">
-              <input
+              <input aria-label="Post a new message"
                 type="text"
                 placeholder="Post a new message"
                 [value]="newMessage()"
@@ -931,7 +931,7 @@
                     >
                     @if (editingComment() === c) {
                       <div class="comment-edit-row">
-                        <input
+                        <input aria-label="Field"
                           type="text"
                           [value]="editingText()"
                           (input)="editingText.set($any($event.target).value)"
@@ -1069,12 +1069,12 @@
         </button>
         @if (openSection() === 'meta') {
           <div class="accordion-body">
-            <label>Date Submitted</label>
-            <input type="text" disabled [value]="detail.meta.dateSubmitted" />
-            <label>Application Number</label>
-            <input type="text" disabled [value]="detail.meta.applicationNumber" />
-            <label>Current Status</label>
-            <input type="text" disabled [value]="detail.meta.currentStatus" />
+            <label for="date-submitted">Date Submitted</label>
+            <input id="date-submitted" type="text" disabled [value]="detail.meta.dateSubmitted" />
+            <label for="application-number">Application Number</label>
+            <input id="application-number" type="text" disabled [value]="detail.meta.applicationNumber" />
+            <label for="current-status">Current Status</label>
+            <input id="current-status" type="text" disabled [value]="detail.meta.currentStatus" />
           </div>
         }
       </div>
@@ -1089,16 +1089,16 @@
         </button>
         @if (openSection() === 'project') {
           <div class="accordion-body">
-            <label>Project Location</label>
-            <textarea disabled rows="2">{{ detail.project.location }}</textarea>
-            <label>Lot Area</label>
-            <input type="text" disabled [value]="detail.project.lotArea" />
-            <label>Floor Area</label>
-            <input type="text" disabled [value]="detail.project.floorArea" />
-            <label>Number Of Floors</label>
-            <input type="text" disabled [value]="detail.project.floors" />
-            <label>Project Type</label>
-            <select disabled>
+            <label for="project-location">Project Location</label>
+            <textarea id="project-location" disabled rows="2">{{ detail.project.location }}</textarea>
+            <label for="lot-area">Lot Area</label>
+            <input id="lot-area" type="text" disabled [value]="detail.project.lotArea" />
+            <label for="floor-area">Floor Area</label>
+            <input id="floor-area" type="text" disabled [value]="detail.project.floorArea" />
+            <label for="number-of-floors">Number Of Floors</label>
+            <input id="number-of-floors" type="text" disabled [value]="detail.project.floors" />
+            <label for="project-type">Project Type</label>
+            <select id="project-type" disabled>
               <option>{{ detail.project.projectType }}</option>
             </select>
           </div>
@@ -1112,21 +1112,21 @@
         </button>
         @if (openSection() === 'type') {
           <div class="accordion-body">
-            <label>Type</label>
-            <select disabled>
+            <label for="type">Type</label>
+            <select id="type" disabled>
               <option>{{ detail.applicationType.type }}</option>
             </select>
-            <label>If Company:</label>
-            <input
+            <label for="if-company">If Company:</label>
+            <input id="if-company"
               type="text"
               disabled
               [value]="detail.applicationType.ifCompany"
               placeholder="Not provided"
             />
-            <label>Authorized Representative</label>
-            <input type="text" disabled placeholder="Select" />
-            <label>Business Permit</label>
-            <input type="text" disabled placeholder="Select" />
+            <label for="authorized-representative">Authorized Representative</label>
+            <input id="authorized-representative" type="text" disabled placeholder="Select" />
+            <label for="business-permit">Business Permit</label>
+            <input id="business-permit" type="text" disabled placeholder="Select" />
           </div>
         }
       </div>
@@ -1143,12 +1143,12 @@
         </button>
         @if (openSection() === 'govid') {
           <div class="accordion-body">
-            <label>ID Type</label>
-            <input type="text" disabled [value]="detail.govId.idType" />
-            <label>Contact Number</label>
-            <input type="text" disabled [value]="detail.govId.contactNumber" />
-            <label>TIN</label>
-            <input type="text" disabled [value]="detail.govId.tin" />
+            <label for="id-type">ID Type</label>
+            <input id="id-type" type="text" disabled [value]="detail.govId.idType" />
+            <label for="contact-number">Contact Number</label>
+            <input id="contact-number" type="text" disabled [value]="detail.govId.contactNumber" />
+            <label for="tin">TIN</label>
+            <input id="tin" type="text" disabled [value]="detail.govId.tin" />
           </div>
         }
       </div>
@@ -1163,12 +1163,12 @@
         </button>
         @if (openSection() === 'professional') {
           <div class="accordion-body">
-            <label>Architect</label>
-            <input type="text" disabled placeholder="Name" />
-            <label>Civil Engineer</label>
-            <input type="text" disabled placeholder="Name" />
-            <label>Electrical Engineer</label>
-            <input type="text" disabled placeholder="Name" />
+            <label for="architect">Architect</label>
+            <input id="architect" type="text" disabled placeholder="Name" />
+            <label for="civil-engineer">Civil Engineer</label>
+            <input id="civil-engineer" type="text" disabled placeholder="Name" />
+            <label for="electrical-engineer">Electrical Engineer</label>
+            <input id="electrical-engineer" type="text" disabled placeholder="Name" />
           </div>
         }
       </div>
@@ -1183,12 +1183,12 @@
         </button>
         @if (openSection() === 'ownership') {
           <div class="accordion-body">
-            <label>Lot Owner Name</label>
-            <input type="text" disabled [value]="detail.ownership.lotOwnerName" />
-            <label>Relationship to Applicant</label>
-            <input type="text" disabled [value]="detail.ownership.relationship" />
-            <label>Ownership Type</label>
-            <select disabled>
+            <label for="lot-owner-name">Lot Owner Name</label>
+            <input id="lot-owner-name" type="text" disabled [value]="detail.ownership.lotOwnerName" />
+            <label for="relationship-to-applicant">Relationship to Applicant</label>
+            <input id="relationship-to-applicant" type="text" disabled [value]="detail.ownership.relationship" />
+            <label for="ownership-type">Ownership Type</label>
+            <select id="ownership-type" disabled>
               <option>{{ detail.ownership.ownershipType }}</option>
             </select>
           </div>
@@ -1284,7 +1284,7 @@
       <form class="create-form" (ngSubmit)="sendNotify()">
         <label>
           Message
-          <textarea
+          <textarea aria-label="Message to the applicant…"
             rows="4"
             [value]="notifyMessage()"
             (input)="notifyMessage.set($any($event.target).value)"
@@ -1313,7 +1313,7 @@
       <form class="create-form" (ngSubmit)="confirmQuickReject()">
         <label>
           Reason <span class="optional">(required)</span>
-          <textarea
+          <textarea aria-label="Explain why this application is being rejected…"
             rows="3"
             required
             [value]="quickRejectRemarks()"

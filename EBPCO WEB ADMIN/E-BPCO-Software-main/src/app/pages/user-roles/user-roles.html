@@ -56,13 +56,13 @@
           />
         </div>
 
-        <select class="filter-select" [(ngModel)]="roleFilter" (ngModelChange)="onFilterChange()">
+        <select aria-label="Role filter" class="filter-select" [(ngModel)]="roleFilter" (ngModelChange)="onFilterChange()">
           <option>All Roles</option>
           @for (role of roleOptions; track role) {
             <option>{{ role }}</option>
           }
         </select>
-        <select class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
+        <select aria-label="Status filter" class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
           <option>All Statuses</option>
           @for (status of statusOptions; track status) {
             <option>{{ status }}</option>
@@ -701,7 +701,7 @@
         </label>
         <label>
           Email
-          <input
+          <input aria-label="Auto-generated if left blank"
             type="email"
             [(ngModel)]="newUser.email"
             name="userEmail"
