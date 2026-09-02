@@ -1,0 +1,19 @@
+{
+  "source": "recorded",
+  "recordedAt": "2026-08-31T11:33:00.000Z",
+  "note": "Captured from the running API on 31 Aug via the runbook register flow.",
+  "request": {
+    "method": "GET",
+    "path": "/me"
+  },
+  "status": 200,
+  "body": {
+    "id": "45679d19-2741-45b8-a0b7-eef8a867e983",
+    "kind": "applicant",
+    "email": "wire-check@example.ph",
+    "emailVerifiedAt": null,
+    "firstName": "Wire",
+    "lastName": "Check",
+    "mobileNumber": "09171234567"
+  }
+}

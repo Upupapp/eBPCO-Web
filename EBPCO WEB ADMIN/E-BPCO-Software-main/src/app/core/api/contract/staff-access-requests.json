@@ -1,0 +1,27 @@
+{
+  "source": "derived",
+  "derivedFrom": "apps/ebpco-api/src/modules/identity/transport/access-request.controller.ts:133-141 and application/access-request.service.ts:174-180",
+  "note": "Envelope is `data`, NOT `items` \u2014 reading the wrong key rendered 'No requests are waiting' with total confidence (F-31).",
+  "request": {
+    "method": "GET",
+    "path": "/staff/access-requests"
+  },
+  "status": 200,
+  "body": {
+    "data": [
+      {
+        "id": "uuid",
+        "fullName": "Engr. Ana Reyes",
+        "email": "ana@castillasorsogon.gov.ph",
+        "mobile": "09171234567",
+        "officePosition": "MEO \u2014 Evaluator",
+        "requestedLevel": "view",
+        "justification": "Assigned to evaluate structural submissions.",
+        "raisedAt": "2026-08-31T09:00:00.000Z",
+        "permitTypes": [
+          "Fencing Permit"
+        ]
+      }
+    ]
+  }
+}
