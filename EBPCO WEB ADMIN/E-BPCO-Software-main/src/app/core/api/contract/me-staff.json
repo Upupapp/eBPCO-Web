@@ -1,0 +1,24 @@
+{
+  "source": "derived",
+  "derivedFrom": "apps/ebpco-api/src/modules/identity/transport/auth.controller.ts:291-300",
+  "note": "The staff branch of GET /me. Returns roles and scopes; returns NO firstName/lastName (applicants get those) and NO permitTypes (F-32).",
+  "request": {
+    "method": "GET",
+    "path": "/me"
+  },
+  "status": 200,
+  "body": {
+    "id": "uuid",
+    "kind": "staff",
+    "email": "officer@castillasorsogon.gov.ph",
+    "emailVerifiedAt": null,
+    "roles": [
+      "evaluator"
+    ],
+    "scopes": [
+      "applications:read",
+      "documents:read",
+      "staff:evaluate"
+    ]
+  }
+}

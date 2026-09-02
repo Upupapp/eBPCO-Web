@@ -1,0 +1,13 @@
+{
+  "source": "derived",
+  "derivedFrom": "apps/ebpco-api/src/modules/identity/transport/staff-directory.controller.ts:83-99",
+  "note": "Envelope is `data`, NOT `items` (F-31).",
+  "request": {
+    "method": "GET",
+    "path": "/staff/users"
+  },
+  "status": 200,
+  "body": {
+    "data": []
+  }
+}
