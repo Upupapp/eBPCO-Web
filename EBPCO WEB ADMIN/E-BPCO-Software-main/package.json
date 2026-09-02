@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "gates": "node scripts/gates.mjs",
-    "verify": "npm run gates && npm run build:strict && npm test -- --watch=false",
+    "verify": "npm run gates && npm run check:labels && npm run build:strict && npm test -- --watch=false",
     "build:strict": "node scripts/build-strict.mjs",
     "check:a11y": "node scripts/check-a11y.mjs",
     "check:labels": "node scripts/check-form-labels.mjs"

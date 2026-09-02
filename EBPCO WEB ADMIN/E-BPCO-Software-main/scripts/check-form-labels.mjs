@@ -59,7 +59,11 @@ for (const file of walk('src/app')) {
   for (const m of html.matchAll(CONTROL)) {
     const tag = m[0];
     if (/type="(hidden|submit|button|reset)"/.test(tag)) continue;
-    if (/aria-label(?:ledby)?=/.test(tag)) continue;
+    // Both the static attribute and Angular's binding form. Without the
+    // second, a control written `[attr.aria-label]="'Select ' + row.id"` is
+    // reported as unlabelled while being correctly labelled — and the first
+    // thing anyone does with a false positive is start "fixing" working code.
+    if (/(?:\[attr\.)?aria-label(?:ledby)?\]?=/.test(tag)) continue;
 
     const id = tag.match(/(?<!\[)\bid="([^"]+)"/)?.[1];
     const boundId = tag.match(/\[id\]="([^"]+)"/)?.[1]?.trim();

@@ -41,7 +41,7 @@
       <div class="table-toolbar">
         <div class="search-input">
           <app-icon name="search" [size]="16" />
-          <input
+          <input aria-label="Search Here By Application ID, Applicant Name, Business/Project, or Lo"
             type="text"
             placeholder="Search Here By Application ID, Applicant Name, Business/Project, or Location"
             [(ngModel)]="searchTerm"
@@ -489,21 +489,21 @@
                 @if (editingDocumentId() === doc.id) {
                   <tr>
                     <td>
-                      <input
+                      <input aria-label="Label"
                         type="text"
                         [(ngModel)]="editDraft.label"
                         name="editLabel-{{ doc.id }}"
                       />
                     </td>
                     <td>
-                      <input
+                      <input aria-label="Required"
                         type="checkbox"
                         [(ngModel)]="editDraft.required"
                         name="editRequired-{{ doc.id }}"
                       />
                     </td>
                     <td>
-                      <select
+                      <select aria-label="Reviewing department id"
                         [(ngModel)]="editDraft.reviewingDepartmentId"
                         name="editDept-{{ doc.id }}"
                       >

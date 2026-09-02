@@ -78,7 +78,7 @@
       <div class="table-toolbar">
         <div class="search-input">
           <app-icon name="search" [size]="16" />
-          <input
+          <input aria-label="Search by Application ID, Applicant, Business/Project, Permit Type, or"
             type="text"
             placeholder="Search by Application ID, Applicant, Business/Project, Permit Type, or OPS No."
             [(ngModel)]="searchTerm"
@@ -86,7 +86,7 @@
           />
         </div>
         <div class="toolbar-actions">
-          <select
+          <select aria-label="Assessment status filter"
             class="filter-select"
             [(ngModel)]="assessmentStatusFilter"
             (ngModelChange)="page.set(1)"
@@ -291,7 +291,7 @@
                     </td>
                     <td>
                       @if (a.status === 'Draft' && line.requiresAssessorInput) {
-                        <input
+                        <input aria-label="Requires assessor input"
                           type="number"
                           min="0"
                           step="0.01"
@@ -604,7 +604,7 @@
       <div class="table-toolbar">
         <div class="search-input">
           <app-icon name="search" [size]="16" />
-          <input
+          <input aria-label="Search by Transaction ID, Reference, Applicant, or Business/Project"
             type="text"
             placeholder="Search by Transaction ID, Reference, Applicant, or Business/Project"
             [(ngModel)]="searchTerm"
@@ -1333,7 +1333,7 @@
         </label>
         <label>
           Reference Number
-          <input
+          <input aria-label="Bank/deposit reference or internal counter ref."
             type="text"
             [(ngModel)]="paymentForm.reference"
             name="payRef"
@@ -1531,7 +1531,7 @@
           @for (type of permitTypeOptions; track type) {
             <div class="applicability-row">
               <span>{{ type }}</span>
-              <select
+              <select aria-label="Applicability"
                 [ngModel]="editForm.applicability[type]"
                 [name]="'app-' + type"
                 (ngModelChange)="setApplicability(type, $any($event))"

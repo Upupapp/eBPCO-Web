@@ -95,18 +95,18 @@
         <span>May {{ dateRange }}</span>
       </div>
 
-      <select class="filter-select" [(ngModel)]="tenantFilter" (ngModelChange)="page.set(1)">
+      <select aria-label="Filter by tenant" class="filter-select" [(ngModel)]="tenantFilter" (ngModelChange)="page.set(1)">
         <option>All Tenants</option>
         @for (t of tenantOptions; track t) {
           <option [value]="t">{{ t }}</option>
         }
       </select>
-      <select class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="page.set(1)">
+      <select aria-label="Status filter" class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="page.set(1)">
         <option>All Statuses</option>
         <option value="Active">Active</option>
         <option value="Inactive">Inactive</option>
       </select>
-      <select class="filter-select" [(ngModel)]="severityFilter" (ngModelChange)="page.set(1)">
+      <select aria-label="Severity filter" class="filter-select" [(ngModel)]="severityFilter" (ngModelChange)="page.set(1)">
         <option>All Severity</option>
         <option value="Critical">Critical</option>
         <option value="Warning">Warning</option>

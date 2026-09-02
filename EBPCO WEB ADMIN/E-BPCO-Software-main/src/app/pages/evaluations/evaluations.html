@@ -309,7 +309,7 @@
     <div class="table-toolbar">
       <div class="search-input">
         <app-icon name="search" [size]="16" />
-        <input
+        <input aria-label="Search Here By Application ID, Applicant Name, Business/Project, or Ty"
           type="text"
           placeholder="Search Here By Application ID, Applicant Name, Business/Project, or Type"
           [(ngModel)]="searchTerm"
@@ -339,7 +339,7 @@
       <table>
         <thead>
           <tr>
-            <th><input type="checkbox" /></th>
+            <th><input type="checkbox" aria-label="Select all applications in this stage" /></th>
             <th>APPLICATION ID</th>
             <th>APPLICANT NAME</th>
             <th>MISSING DOCUMENTS</th>
@@ -362,7 +362,9 @@
               (keydown.enter)="openRecord(row)"
               (keydown.space)="$event.preventDefault(); openRecord(row)"
             >
-              <td (click)="$event.stopPropagation()"><input type="checkbox" /></td>
+              <td (click)="$event.stopPropagation()">
+                  <input type="checkbox" [attr.aria-label]="'Select ' + row.id" />
+                </td>
               <td class="id-cell">{{ row.id }}</td>
               <td>
                 <div class="identity-cell">
@@ -459,7 +461,7 @@
                           >
                             Remarks (required to return)
                           </label>
-                          <input
+                          <input aria-label="What needs to be revised?"
                             [id]="'revision-remarks-' + row.id"
                             type="text"
                             class="revision-remarks-input"

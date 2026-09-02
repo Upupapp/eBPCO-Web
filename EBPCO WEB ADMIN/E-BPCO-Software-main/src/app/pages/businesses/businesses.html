@@ -25,7 +25,7 @@
     <div class="table-toolbar">
       <div class="search-input">
         <app-icon name="search" [size]="16" />
-        <input
+        <input aria-label="Search Here By Application ID, Applicant Name, or Location"
           type="text"
           placeholder="Search Here By Application ID, Applicant Name, or Location"
           [(ngModel)]="searchTerm"
@@ -353,7 +353,7 @@
           <div class="comm-center-card">
             <h2>Communication Center</h2>
             <p class="comm-subtitle">Broadcast system-wide notices to businesses.</p>
-            <textarea
+            <textarea aria-label="Compose an announcement..."
               placeholder="Compose an announcement..."
               rows="7"
               [(ngModel)]="announcementText"
@@ -365,7 +365,7 @@
             @if (announcementSent()) {
               <p class="field-success">Announcement broadcast to {{ announcementAudience() }}.</p>
             }
-            <select class="filter-select full-width" [(ngModel)]="announcementAudience">
+            <select aria-label="Announcement audience" class="filter-select full-width" [(ngModel)]="announcementAudience">
               <option>All Businesses (150)</option>
               <option>Active Businesses Only</option>
             </select>
@@ -709,16 +709,16 @@
     <div class="create-col">
       <div class="card">
         <h2>Basic Information</h2>
-        <label class="field-label">Business Name</label>
-        <input
+        <label for="business-name" class="field-label">Business Name</label>
+        <input id="business-name"
           class="text-input"
           type="text"
           placeholder="Enter Business Name"
           [(ngModel)]="newBusiness.businessName"
         />
 
-        <label class="field-label">Business Category</label>
-        <select class="select-input" [(ngModel)]="newBusiness.type">
+        <label for="business-category" class="field-label">Business Category</label>
+        <select id="business-category" class="select-input" [(ngModel)]="newBusiness.type">
           <option value="">Select Business Category</option>
           <option value="Retail">Retail</option>
           <option value="Food Service">Food Service</option>
@@ -731,16 +731,16 @@
 
       <div class="card">
         <h2>Contact Person</h2>
-        <label class="field-label">Full Name</label>
-        <input
+        <label for="full-name" class="field-label">Full Name</label>
+        <input id="full-name"
           class="text-input"
           type="text"
           placeholder="Enter Full Name"
           [(ngModel)]="newBusiness.contactName"
         />
 
-        <label class="field-label">Contact Number</label>
-        <input
+        <label for="contact-number" class="field-label">Contact Number</label>
+        <input id="contact-number"
           class="text-input"
           type="text"
           placeholder="Enter Contact Number"
@@ -774,23 +774,23 @@
     <div class="create-col">
       <div class="card">
         <h2>Address Information</h2>
-        <label class="field-label">Region</label>
-        <select class="select-input" [(ngModel)]="newBusiness.region">
+        <label for="region" class="field-label">Region</label>
+        <select id="region" class="select-input" [(ngModel)]="newBusiness.region">
           <option value="region-5">Region V (Bicol Region)</option>
         </select>
 
-        <label class="field-label">Province</label>
-        <select class="select-input" [(ngModel)]="newBusiness.province">
+        <label for="province" class="field-label">Province</label>
+        <select id="province" class="select-input" [(ngModel)]="newBusiness.province">
           <option value="sorsogon">Sorsogon</option>
         </select>
 
-        <label class="field-label">City/Municipality</label>
-        <select class="select-input" [(ngModel)]="newBusiness.cityMunicipality">
+        <label for="city-municipality" class="field-label">City/Municipality</label>
+        <select id="city-municipality" class="select-input" [(ngModel)]="newBusiness.cityMunicipality">
           <option value="castilla">Castilla</option>
         </select>
 
-        <label class="field-label">Barangay</label>
-        <select class="select-input" [(ngModel)]="newBusiness.barangay">
+        <label for="barangay" class="field-label">Barangay</label>
+        <select id="barangay" class="select-input" [(ngModel)]="newBusiness.barangay">
           <option value="">Select Barangay</option>
           <option value="amomonting">Amomonting</option>
           <option value="bagalayag">Bagalayag</option>
@@ -831,8 +831,8 @@
 
       <div class="card">
         <h2>Login Credentials</h2>
-        <label class="field-label">User Name</label>
-        <input
+        <label for="user-name" class="field-label">User Name</label>
+        <input id="user-name"
           class="text-input"
           type="text"
           placeholder="Enter User Name"
@@ -842,7 +842,7 @@
         <label class="field-label">Password</label>
         <div class="input-wrap">
           <app-icon name="lock" [size]="16" class="input-icon" />
-          <input
+          <input aria-label="Password"
             [type]="showPassword() ? 'text' : 'password'"
             placeholder="••••••••"
             [(ngModel)]="newBusiness.password"
@@ -859,7 +859,7 @@
         <label class="field-label">Confirm Password</label>
         <div class="input-wrap">
           <app-icon name="lock" [size]="16" class="input-icon" />
-          <input
+          <input aria-label="Confirm password"
             [type]="showConfirmPassword() ? 'text' : 'password'"
             placeholder="••••••••"
             [(ngModel)]="newBusiness.confirmPassword"

@@ -42,7 +42,7 @@
                 >*</span
               ></span
             >
-            <input
+            <input aria-label="Juan Dela Cruz"
               type="text"
               required
               aria-required="true"
@@ -67,7 +67,7 @@
                 >*</span
               ></span
             >
-            <input
+            <input aria-label="juan.delacruz@gmail.com"
               type="email"
               required
               aria-required="true"
@@ -134,7 +134,7 @@
                 >*</span
               ></span
             >
-            <input
+            <input aria-label="Purok 1, Street/Sitio"
               type="text"
               required
               aria-required="true"
@@ -191,7 +191,7 @@
                 >*</span
               ></span
             >
-            <input
+            <input aria-label="Street address"
               type="text"
               required
               aria-required="true"
@@ -238,7 +238,7 @@
                 >(where applicable)</span
               ></span
             >
-            <input
+            <input aria-label="DTI/SEC/CDA number"
               type="text"
               [(ngModel)]="business.registrationNumber"
               name="bizRegNumber"
@@ -306,7 +306,7 @@
                 >*</span
               ></span
             >
-            <textarea
+            <textarea aria-label="Briefly describe the business activity or the scope of construction wo"
               rows="3"
               required
               aria-required="true"
@@ -399,7 +399,7 @@
                   </label>
                   <label class="field">
                     <span class="field-label">Issuing Office</span>
-                    <input
+                    <input aria-label="Optional"
                       type="text"
                       [ngModel]="doc.issuingOffice"
                       (ngModelChange)="onDocFieldChange(doc, 'issuingOffice', $event)"

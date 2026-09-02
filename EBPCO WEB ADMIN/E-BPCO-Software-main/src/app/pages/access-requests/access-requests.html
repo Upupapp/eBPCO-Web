@@ -193,10 +193,10 @@
                 </fieldset>
               } @else {
                 <h4>Reject this request</h4>
-                <label class="decision-label" [attr.for]="'reason-' + request.id">
+                <label for="reason" class="decision-label" [attr.for]="'reason-' + request.id">
                   Reason
                 </label>
-                <textarea
+                <textarea id="reason"
                   [id]="'reason-' + request.id"
                   rows="3"
                   placeholder="The requester is a colleague and will ask why."
