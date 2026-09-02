@@ -1344,6 +1344,10 @@
         @if (paymentForm.method === 'Bank Transfer') {
           <label>
             Proof of Payment
+            <small class="not-stored">
+              The file name is recorded against the payment. The document itself
+              is not stored, so keep the original.
+            </small>
             <input type="file" (change)="onProofFileChosen($event)" name="payProof" required />
           </label>
         }

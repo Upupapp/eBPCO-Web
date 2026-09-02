@@ -1129,7 +1129,7 @@ export class Applications {
       file.name,
       this.session.name() || 'Staff',
     );
-    this.toast.success(`"${r.label}" attached.`);
+    this.toast.success(`"${r.label}" recorded as ${file.name}. The file is not stored yet.`);
     input.value = '';
   }
 

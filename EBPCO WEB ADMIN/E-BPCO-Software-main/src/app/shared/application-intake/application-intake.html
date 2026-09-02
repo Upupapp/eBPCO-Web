@@ -371,7 +371,13 @@
                 </div>
                 <div class="doc-row-fields">
                   <label class="file-field">
-                    <span class="field-label">File Upload</span>
+                    <span class="field-label">
+                      File name
+                      <small class="not-stored">
+                        Recorded for the checklist. The file itself is not sent
+                        anywhere yet.
+                      </small>
+                    </span>
                     <input type="file" (change)="onFileChosen(doc, $event)" />
                     @if (doc.fileName) {
                       <span class="file-chip"
