@@ -19,6 +19,8 @@
  *   notice       every page that reads the application store but does not
  *                fetch it must show the queue-load notice, or a failed load
  *                renders as confident zeros with nothing saying why.
+ *   legend       the workflow legend's swatches must match the colours
+ *                flow-chart.ts actually draws with. Two places, one fact.
  *   delete       a control or dialog offering to DELETE a record. Records are
  *                archived; the exemptions are listed and justified in the check.
  *   icon         an <app-icon> whose name is not defined. Renders an EMPTY
@@ -305,6 +307,35 @@ for (const file of ts) {
         `${rel}:${line}`,
         `a dialog offering to delete: "${m[1].slice(0, 48)}" — records are archived, never deleted`,
       ]);
+    }
+  }
+}
+
+// ── 9. A legend must use the colours the chart actually draws ─────────────
+// The workflow legend explains that red leaves the process and gray returns to
+// it. Those swatches are CSS; the lines are drawn from `EDGE_COLORS` in
+// flow-chart.ts. Two places holding one fact, and the failure mode is silent:
+// change the edge colour and the legend keeps confidently describing the old
+// one, which is worse than having no legend at all.
+{
+  const chart = 'src/app/shared/flow-chart/flow-chart.ts';
+  const legend = 'src/app/pages/workflow/workflow.scss';
+  if (existsSync(chart) && existsSync(legend)) {
+    const colours = Object.fromEntries(
+      [...readFileSync(chart, 'utf8').matchAll(/^\s*(\w+):\s*'(#[0-9a-fA-F]{6})',/gm)]
+        .map((m) => [m[1], m[2].toLowerCase()]),
+    );
+    const css = readFileSync(legend, 'utf8');
+    for (const [swatch, key] of [['out', 'red'], ['loop', 'gray']]) {
+      const used = css.match(new RegExp(`&\\.${swatch}\\s*\\{[^}]*background:\\s*(#[0-9a-fA-F]{6})`))?.[1];
+      const expected = colours[key];
+      if (expected !== undefined && used !== undefined && used.toLowerCase() !== expected) {
+        findings.push([
+          'legend',
+          legend,
+          `.${swatch} swatch is ${used}, but the chart draws ${key} edges in ${expected} — the legend describes a colour the chart no longer uses`,
+        ]);
+      }
     }
   }
 }

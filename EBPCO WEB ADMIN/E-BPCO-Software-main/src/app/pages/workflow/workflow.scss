@@ -159,3 +159,51 @@
 .canvas-card {
   overflow: hidden;
 }
+
+// Only shown for the generated lifecycle flow, which is the one that uses
+// colour to mean something. The swatches take their colours from the same
+// values `flow-chart.ts` draws with — if those change, this must change too,
+// which is a duplication worth naming rather than hiding.
+.legend-card {
+  padding: 16px 18px;
+  margin-bottom: 14px;
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 15px;
+  }
+}
+
+.legend-note {
+  margin: 0 0 12px;
+  max-width: 70ch;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary, #4a5568);
+}
+
+.legend-keys {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 13.5px;
+
+  li {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+}
+
+.legend-swatch {
+  flex: none;
+  width: 22px;
+  height: 3px;
+  border-radius: 2px;
+  transform: translateY(-3px);
+
+  &.out { background: #e0402c; }
+  &.loop { background: #6b7280; }
+}

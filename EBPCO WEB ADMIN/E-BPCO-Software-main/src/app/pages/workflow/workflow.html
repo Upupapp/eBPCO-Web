@@ -37,6 +37,35 @@
   </div>
 </div>
 
+@if (activeFilter() === 'lifecycle') {
+  <!--
+    The lifecycle flow is the only one that encodes meaning in COLOUR: red for
+    a way out of the process, gray for a loop back into it. It said so nowhere,
+    which made the distinction visible only to whoever wrote it (T-19).
+    Deliberately shown for this flow alone — the eight hand-drawn departmental
+    flows do not use the convention, and a legend describing colours a chart
+    does not use is worse than none.
+  -->
+  <section class="card legend-card" aria-label="What the colours mean">
+    <h3>Reading this chart</h3>
+    <p class="legend-note">
+      Generated from the transition rules the system enforces, so it cannot
+      drift from them. The other flows are departmental procedures, drawn by
+      hand.
+    </p>
+    <ul class="legend-keys">
+      <li>
+        <span class="legend-swatch out" aria-hidden="true"></span>
+        <span><strong>Leaves the process</strong> — rejected, cancelled or expired. Nothing follows.</span>
+      </li>
+      <li>
+        <span class="legend-swatch loop" aria-hidden="true"></span>
+        <span><strong>Returns to the process</strong> — sent back for revision, then re-evaluated.</span>
+      </li>
+    </ul>
+  </section>
+}
+
 <section class="card canvas-card">
   <app-flow-chart
     [title]="activeFlow().title"
