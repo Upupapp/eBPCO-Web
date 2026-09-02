@@ -47,6 +47,10 @@ describe('Applications — a failed queue load is visible on the list', () => {
   it('renders the error and a retry on the LIST screen, not only in the detail branch', async () => {
     const fixture = mount(() => Promise.reject(new Error('The queue is down for maintenance.')));
     await fixture.whenStable();
+    // The fetch moved into QueueLoader (T-02), so the page awaits the loader
+    // which awaits the API — one more promise hop than when the request was
+    // made here. `whenStable` resolves before the store has been told.
+    await new Promise((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
