@@ -1,5 +1,6 @@
 import { FlowEdge, FlowNode } from '../../shared/flow-chart/flow-chart';
 import { FlowBuilder, ROW_GAP } from './flow-builder';
+import { buildLifecycleFlow } from './lifecycle-flow';
 
 export interface FlowDef {
   key: string;
@@ -414,6 +415,31 @@ export function buildAllFlows(): Record<string, FlowDef> {
     const payment = buildPaymentSection(b, false, obo.last);
     buildReleasingSection(b, false, payment.last);
     flows['overall'] = makeFlow('overall', 'Overall', 'OVERALL Flowchart', b, 80);
+  }
+
+  // ── Lifecycle: the only flow on this page that is DERIVED ──────────────
+  //
+  // The eight above are departmental procedures, hand-drawn: who does what, in
+  // which office, in what order. None of them reads `VALID_TRANSITIONS`, so a
+  // transition could be added or re-pointed and every picture would keep
+  // showing the old process with nothing to notice (P-F2).
+  //
+  // This one is generated from the table the lifecycle engine enforces, so it
+  // cannot drift. Deliberately last: an officer looking for their own office's
+  // steps wants one of the flows above, and this answers a different question —
+  // what the system will actually permit next.
+  {
+    const built = buildLifecycleFlow(CX);
+    const b = new FlowBuilder(CX);
+    b.nodes.push(...built.nodes);
+    b.edges.push(...built.edges);
+    flows['lifecycle'] = makeFlow(
+      'lifecycle',
+      'Lifecycle',
+      'Application Lifecycle (generated from the transition rules)',
+      b,
+      80,
+    );
   }
 
   return flows;
