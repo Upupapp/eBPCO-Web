@@ -175,6 +175,11 @@ function toRecord(row: QueueRow): ApplicationRecord {
     applicant: row.applicantName,
     location: row.location ?? NOT_SENT,
     permitType: publishedPermitType(row),
+    // What the server called it, verbatim — including `Business Permit`, a
+    // twentieth value the office does not publish and the legacy flow still
+    // files against. `permitType` is null for it; this is not, so the portal
+    // can say what was filed instead of "Not recorded" (2 Sep).
+    filedAs: row.permitTypeName ?? row.permitType,
     applicationAction: isValidApplicationAction(row.applicationAction)
       ? row.applicationAction
       : null,
