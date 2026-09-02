@@ -46,6 +46,7 @@ import {
   TimelineItem,
 } from './applications-data';
 import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { QueueLoader } from '../../core/domain/queue-loader';
 import { AssignedFormsNotice } from '../../shared/assigned-forms-notice/assigned-forms-notice';
 
 /** One row of the real per-application Documents tab — a required-but-not-yet-uploaded requirement has `doc: null` and renders as "Missing". */
@@ -137,7 +138,7 @@ export class Applications {
   private readonly titleService = inject(Title);
   private readonly session = inject(SessionService);
   private readonly toast = inject(ToastService);
-  private readonly queue = inject(StaffApplicationsApi);
+  private readonly loader = inject(QueueLoader);
 
   /** Null until the first fetch resolves; a message when it fails. */
   protected readonly loadError = signal<string | null>(null);
@@ -164,19 +165,22 @@ export class Applications {
    * the officer now sees the first one explicitly rather than the second one
    * silently. This is ADR 0001's rule, restated.
    */
+  /**
+   * Reloads through the shared loader.
+   *
+   * The fetch used to live here, and this was the ONLY page that called the
+   * server — which is why every other surface showed seed data (S-1). It now
+   * belongs to `QueueLoader`, called once by `AdminLayout` for the whole
+   * session; this page keeps a reload for its own refresh control.
+   *
+   * `loadError` is read from the store rather than tracked separately, so this
+   * page and the shared notice can no longer disagree about the same failure.
+   */
   protected async load(): Promise<void> {
     this.loading.set(true);
-    this.loadError.set(null);
     try {
-      const page = await this.queue.page({ limit: 100 });
-      this.store.replaceApplications(page.rows);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'The queue could not be loaded.';
-      this.store.replaceApplications([]);
-      // Every page that reads the store needs this, not just this one.
-      this.store.recordLoadFailure(message);
-      this.loadError.set(message);
+      await this.loader.reload();
+      this.loadError.set(this.store.loadFailure());
     } finally {
       this.loading.set(false);
     }
