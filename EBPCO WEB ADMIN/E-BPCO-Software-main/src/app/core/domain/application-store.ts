@@ -694,6 +694,25 @@ export class ApplicationStore {
     const row = this.getById(applicationId);
     if (!row) return;
     const assessment = this.assessmentStore.getActiveAssessment(applicationId);
+
+    // ── Two screens must not give two answers for one fact ────────────────
+    //
+    // `paymentStatus` has two sources. The wire sets it from `paymentVerified`
+    // on the queue row; this method recomputes it from the local assessment
+    // store. They are only ever consistent when the assessment store is the
+    // authority, and after a server load it is EMPTY — `replaceApplications`
+    // calls `assessmentStore.clear()`.
+    //
+    // So without this guard: a server row that says the payment was verified
+    // shows "Paid" in Applications, and the first Payments action touching it
+    // recomputes from no assessment, gets 'Not Yet Available', and silently
+    // overwrites it. A verified payment becomes an unpaid one because a local
+    // store that was never told anything disagreed with the server.
+    //
+    // Raised by the citizen web portal lane on 2 Sep, who found the same
+    // divergence on their side. This is the lane where a wrong answer about
+    // payment has consequences: it gates permit release.
+    if (assessment === undefined && this.dataSource() === 'server') return;
     const { paymentStatus, assessedAmountCentavos } = this.derivePaymentProjection(assessment);
 
     const paymentSubSequence: ApplicationLifecycleStatus[] = [
