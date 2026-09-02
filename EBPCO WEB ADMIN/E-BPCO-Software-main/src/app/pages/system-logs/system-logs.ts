@@ -10,6 +10,7 @@ import { AssessmentStore } from '../../core/domain/assessment-store';
 import { AuditEvent } from '../../core/domain/audit.model';
 import { AuditApi, AuditEntry } from '../../core/api/audit.api';
 import { ToastService } from '../../shared/toast/toast.service';
+import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 
 type LogTabKey = 'activity' | 'access' | 'error' | 'security' | 'events';
 
@@ -352,7 +353,7 @@ export interface SystemEventRow {
 
 @Component({
   selector: 'app-system-logs',
-  imports: [Topbar, KpiCard, Icon, Pagination, FormsModule],
+  imports: [QueueLoadNotice, Topbar, KpiCard, Icon, Pagination, FormsModule],
   templateUrl: './system-logs.html',
   styleUrl: './system-logs.scss',
 })

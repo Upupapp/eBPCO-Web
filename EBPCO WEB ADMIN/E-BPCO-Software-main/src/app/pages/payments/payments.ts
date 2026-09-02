@@ -33,6 +33,7 @@ import {
 } from '../../core/domain/payment.model';
 import { FeeApplicability, FeeRule } from '../../core/domain/fee-rule.model';
 import { DocumentPreview } from '../../shared/document-preview/document-preview';
+import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 
 type PaymentsTab = 'assessments' | 'transactions' | 'matrix' | 'configuration';
 type ConfigSubTab = 'fee-rules' | 'payment-methods' | 'bank-information' | 'payroll';
@@ -67,7 +68,7 @@ interface TransactionRow {
 
 @Component({
   selector: 'app-payments',
-  imports: [
+  imports: [QueueLoadNotice, 
     Topbar,
     Icon,
     Avatar,
