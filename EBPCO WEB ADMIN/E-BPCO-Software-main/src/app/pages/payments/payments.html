@@ -4,6 +4,8 @@
   (searchChange)="searchTerm.set($event); onSearchChange()"
 />
 
+<app-queue-load-notice />
+
 <section class="card table-card">
   <nav class="tab-nav">
     @for (t of visibleTabs(); track t.key) {

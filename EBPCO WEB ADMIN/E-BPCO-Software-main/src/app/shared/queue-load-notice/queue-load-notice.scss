@@ -14,3 +14,11 @@
   font-weight: 600;
   line-height: 1.4;
 }
+
+// Distinct from a failure: nothing is broken, the page simply has not asked.
+// Amber rather than red, because the officer's action is to open Applications,
+// not to report a fault.
+.queue-load-notice.seed {
+  background: #fff8e6;
+  color: #7a5b00;
+}

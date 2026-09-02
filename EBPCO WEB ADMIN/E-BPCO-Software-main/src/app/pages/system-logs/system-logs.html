@@ -4,6 +4,8 @@
   (searchChange)="searchTerm.set($event); onSearchChange()"
 />
 
+<app-queue-load-notice />
+
 @if (view() === 'list') {
   <section class="kpi-grid">
     @for (s of currentStats(); track s.label) {

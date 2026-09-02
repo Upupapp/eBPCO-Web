@@ -119,6 +119,9 @@ export class ApplicationStore {
    * Passing an empty array is how a FAILED load clears the screen.
    */
   replaceApplications(rows: readonly ApplicationRecord[]): void {
+    // The server has answered. Even an empty answer is an answer, and is not
+    // the seed.
+    this._dataSource.set('server');
     this._loadFailure.set(null);
     this._applications.set([...rows]);
     this._businesses.set([]);
@@ -133,6 +136,27 @@ export class ApplicationStore {
     // lists them globally rather than per application.
     this.assessmentStore.clear();
   }
+
+  /**
+   * Whether these rows came from the server, or are the seed.
+   *
+   * ── Why this has to exist ───────────────────────────────────────────────
+   *
+   * The store starts holding 50 generated applications — reasonable as a
+   * fallback, and a genuine hazard without a way to ask. Only Applications
+   * called the server, and login lands on Dashboard, so on every sign-in an
+   * officer met a backlog, stage counts, an overdue panel and a business
+   * breakdown that were all invented, with nothing saying so (S-1).
+   *
+   * The queue-load notice could not help: it reports a load that FAILED, and
+   * here no load had been attempted. "Not asked" and "asked and refused" are
+   * different states and the portal could only express one of them.
+   */
+  private readonly _dataSource = signal<'seed' | 'server'>('seed');
+  /** 'seed' until the server has answered, successfully or not. */
+  readonly dataSource = this._dataSource.asReadonly();
+  /** True while any page would be showing generated applications as real. */
+  readonly isSeedData = computed(() => this._dataSource() === 'seed');
 
   private readonly _loadFailure = signal<string | null>(null);
 

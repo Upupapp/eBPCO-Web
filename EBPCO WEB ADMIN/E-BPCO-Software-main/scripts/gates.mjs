@@ -163,7 +163,20 @@ for (const file of ts) {
 // exists to say so — and a component written but never used would reproduce the
 // defect exactly, which is a shape this codebase has shipped before.
 {
-  const readers = ['permit-release', 'dashboard', 'evaluations', 'businesses'];
+  // DERIVED, not listed. This check used to name four pages, and `payments`
+  // was not among them — it reads the store nine times and the gate was blind
+  // to it for as long as the gate existed. A list that has to be remembered is
+  // the same defect class the gate was written to catch (S-2).
+  //
+  // `applications` is exempt because it is the page that FETCHES, and shows its
+  // own `loadError` in place of the shared notice.
+  const EXEMPT = new Set(['applications']);
+  const readers = ts
+    .filter((f) => /pages\/([^/]+)\/\1\.ts$/.test(f.replace(/\\/g, '/')))
+    .filter((f) => /\bApplicationStore\b/.test(read.get(f)))
+    .map((f) => f.replace(/\\/g, '/').match(/pages\/([^/]+)\//)[1])
+    .filter((page) => !EXEMPT.has(page));
+
   const noticeExists = existsSync('src/app/shared/queue-load-notice/queue-load-notice.ts');
   if (noticeExists) {
     for (const page of readers) {
@@ -173,7 +186,7 @@ for (const file of ts) {
         findings.push([
           'notice',
           tpl,
-          'reads the application store but does not show the queue-load notice — a failed load would render confident zeros in silence',
+          'injects ApplicationStore but shows no queue-load notice — a failed or unattempted load renders confident figures in silence',
         ]);
       }
     }
