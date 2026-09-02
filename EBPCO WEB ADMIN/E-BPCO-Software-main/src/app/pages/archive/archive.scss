@@ -49,3 +49,12 @@
 .when { display: block; color: var(--text-secondary, #6b7280); font-size: 12px; }
 
 .muted { color: var(--text-secondary, #6b7280); font-style: italic; }
+
+// Filed as a permit this office does not issue. Marked rather than hidden:
+// the application is real and so is the type, it is simply not one of the
+// nineteen the office publishes.
+.not-published {
+  display: block;
+  font-size: 11.5px;
+  color: #7a5b00;
+}

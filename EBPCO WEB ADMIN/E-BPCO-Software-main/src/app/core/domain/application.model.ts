@@ -87,14 +87,40 @@ export interface ApplicationRecord {
    */
   /** Mirrors `permitType`, so it is `null` for the same reason: the portal could not name the permit. */
   type: string | null;
+  /**
+   * What the server said was filed, verbatim — including a value this office
+   * does not publish.
+   *
+   * NOT a duplicate of `permitType`. They answer different questions:
+   * `permitType` is *"is this one of the office's nineteen?"* and is null when
+   * it is not; `filedAs` is *"what did the server call it?"* and is null only
+   * when the server said nothing.
+   *
+   * `Business Permit` is the case that forced this. It is a twentieth value on
+   * the wire, the legacy flow still files against it, and the owner's ruling is
+   * that the office's nineteen published names stand — so it cannot join
+   * `PermitType` without contradicting the ruling, and the nineteen are
+   * asserted in `permit.model.spec.ts` and used by the cross-repo parity gate.
+   *
+   * Until 2 Sep such rows rendered **"Not recorded"**, which was false: the type
+   * was recorded, the portal simply did not publish that name.
+   */
+  filedAs: string | null;
   status: CoarseStatus;
 }
 
 /** Builds the two migration-bridge fields from the rest of a record — used by the store on every create/update so `type`/`status` never drift. */
-export function withProjectedFields<T extends Omit<ApplicationRecord, 'type' | 'status'>>(
-  record: T,
-): T & { type: string | null; status: CoarseStatus } {
-  return { ...record, type: record.permitType, status: coarseStatus(record.lifecycleStatus) };
+export function withProjectedFields<
+  T extends Omit<ApplicationRecord, 'type' | 'status' | 'filedAs'> & { filedAs?: string | null },
+>(record: T): T & { type: string | null; status: CoarseStatus; filedAs: string | null } {
+  return {
+    ...record,
+    type: record.permitType,
+    // Defaults to the published name when the caller did not say otherwise, so
+    // seeded records and older callers are unaffected.
+    filedAs: record.filedAs ?? record.permitType,
+    status: coarseStatus(record.lifecycleStatus),
+  };
 }
 
 /** Bare barangay name (e.g. "Poblacion") from a record's `location` display string (e.g. "Barangay Poblacion") — the one place that mapping happens, so the Business Stages board's Barangay filter and the intake form's location field never diverge on how they derive it. */

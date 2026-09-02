@@ -881,7 +881,8 @@ export class ApplicationStore {
    * that permission before showing the entry point to this method.
    */
   create(
-    record: Omit<ApplicationRecord, 'id' | 'dateValue' | 'type' | 'status'> & { dateValue?: Date },
+    record: Omit<ApplicationRecord, 'id' | 'dateValue' | 'type' | 'status' | 'filedAs'> &
+      { dateValue?: Date; filedAs?: string | null },
     actor: string,
     role: string,
   ): ApplicationRecord {

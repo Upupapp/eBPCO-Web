@@ -38,7 +38,21 @@
             <tr class="row-clickable" tabindex="0" role="button" (click)="open(row)">
               <td>{{ row.record.id }}</td>
               <td>{{ row.record.applicant }}</td>
-              <td>{{ row.record.permitType || 'Not recorded' }}</td>
+              <td>
+                @if (row.record.permitType) {
+                  {{ row.record.permitType }}
+                } @else if (row.record.filedAs) {
+                  <!--
+                    Filed as something this office does not publish — the legacy
+                    `Business Permit`. Saying "Not recorded" was false: the type
+                    was recorded, the portal just does not publish that name.
+                  -->
+                  {{ row.record.filedAs }}
+                  <span class="not-published">not an office permit</span>
+                } @else {
+                  <span class="muted">Not recorded</span>
+                }
+              </td>
               <td><span class="status">{{ row.record.lifecycleStatus }}</span></td>
               <td>
                 @if (row.archivedBy) {
