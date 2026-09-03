@@ -25,13 +25,25 @@ export interface Me {
   readonly roles?: readonly string[];
   readonly scopes?: readonly string[];
   /**
-   * The permit types this account may work on, when the server reports them.
+   * The permit types this account may work on.
    *
    * Absent is not empty. Absent means the server did not say; empty means it
    * said "none", and an account assigned no forms can see nothing — a fact the
    * portal must be able to state rather than render as an ordinary empty list.
+   *
+   * Sent since the backend closed F-32 (3 Sep). It is `liveAccessFor`, so a
+   * RETIRED permit type is not listed even though the officer still holds the
+   * grant — the grant is what keeps their historical work attributable, and
+   * this is what they may file against today. The portal does not yet
+   * distinguish the two, and does not need to while it only offers filing.
    */
   readonly permitTypes?: readonly string[];
+
+  /** The officer's name. Null means genuinely not on record, not blank. */
+  readonly fullName?: string | null;
+
+  /** `view` or `view-edit`. Scopes already encode it; this states it plainly. */
+  readonly level?: string;
   readonly firstName?: string;
   readonly lastName?: string;
 }

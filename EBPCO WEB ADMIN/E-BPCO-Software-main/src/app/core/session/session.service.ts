@@ -89,9 +89,14 @@ export class SessionService {
           : 'This is an applicant account. Staff sign in here; applicants use the mobile app.',
       );
     }
-    const name = [me.firstName, me.lastName].filter(Boolean).join(' ');
+    // `fullName` for staff, first/last for applicants, email as the last
+    // resort. Until the backend closed F-32 there was no name for staff at
+    // all, so every officer saw their own email address in the topbar — the
+    // fallback was working exactly as written, on a field that never arrived.
+    const composed = [me.firstName, me.lastName].filter(Boolean).join(' ');
+    const name = me.fullName ?? (composed === '' ? null : composed);
     this._session.set({
-      name: name === '' ? me.email : name,
+      name: name ?? me.email,
       email: me.email,
       role,
       scopes: me.scopes ?? null,
@@ -120,9 +125,10 @@ export class SessionService {
         this.tokens.clear();
         return;
       }
-      const name = [me.firstName, me.lastName].filter(Boolean).join(' ');
+      const composed = [me.firstName, me.lastName].filter(Boolean).join(' ');
+      const name = me.fullName ?? (composed === '' ? null : composed);
       this._session.set({
-        name: name === '' ? me.email : name,
+        name: name ?? me.email,
         email: me.email,
         role,
         scopes: me.scopes ?? null,

@@ -88,6 +88,23 @@ describe('Capabilities', () => {
     expect(c.isViewOnly()).toBe(true);
   });
 
+  it('carries the forms the server assigned, so the scoped screens can speak', () => {
+    const c = withSession(session({ assignedForms: ['Fencing Permit', 'Sign Permit'] }));
+
+    // Null until 3 Sep, because /me sent no permitTypes — which left A-15 to
+    // A-17 rendering nothing at all. They were correct to render nothing: the
+    // server had not said. Now it does.
+    expect(c.assignedForms()).toEqual(['Fencing Permit', 'Sign Permit']);
+    expect(c.hasNoForms()).toBe(false);
+  });
+
+  it('distinguishes an officer assigned nothing from one the server did not describe', () => {
+    // The distinction the whole three-state design rests on.
+    expect(withSession(session({ assignedForms: [] })).hasNoForms()).toBe(true);
+    expect(withSession(session({ assignedForms: null })).hasNoForms()).toBe(false);
+    expect(withSession(session({ assignedForms: null })).assignedForms()).toBeNull();
+  });
+
   it('explains view-only in one wording, and says nothing otherwise', () => {
     expect(withSession(session({ role: 'Auditor' })).viewOnlyReason()).toContain('View only');
     expect(withSession(session({ role: 'Evaluator' })).viewOnlyReason()).toBe('');
