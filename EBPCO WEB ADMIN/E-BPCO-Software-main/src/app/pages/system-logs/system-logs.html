@@ -116,13 +116,18 @@
       <div class="spacer"></div>
 
       <div class="live-toggle">
-        <span>Live Stream</span>
+        <!-- The visible text was a SIBLING of the switch with nothing joining
+             them, so a screen reader announced "switch, on" and never said what
+             was on. aria-labelledby is used rather than a duplicated
+             aria-label so the accessible name stays the text on screen. -->
+        <span id="live-stream-label">Live Stream</span>
         <button
           type="button"
           class="switch"
           [class.on]="liveStream()"
           (click)="toggleLiveStream()"
           role="switch"
+          aria-labelledby="live-stream-label"
           [attr.aria-checked]="liveStream()"
         >
           <span class="knob"></span>
@@ -169,12 +174,7 @@
               @for (row of pagedActivityRows(); track row.id) {
                 <tr
                   class="row-clickable"
-                  tabindex="0"
-                  role="button"
-                  [attr.aria-label]="'View log entry for ' + row.eventType + ' by ' + row.user"
                   (click)="openActivityDetail(row)"
-                  (keydown.enter)="openActivityDetail(row)"
-                  (keydown.space)="$event.preventDefault(); openActivityDetail(row)"
                 >
                   <td>{{ row.timestamp }}</td>
                   <td>{{ row.eventType }}</td>
@@ -244,12 +244,7 @@
               @for (row of pagedAccessRows(); track row.timestamp + row.user) {
                 <tr
                   class="row-clickable"
-                  tabindex="0"
-                  role="button"
-                  [attr.aria-label]="'View log entry for ' + row.event + ' by ' + row.user"
                   (click)="openAccessDetail(row)"
-                  (keydown.enter)="openAccessDetail(row)"
-                  (keydown.space)="$event.preventDefault(); openAccessDetail(row)"
                 >
                   <td>{{ row.timestamp }}</td>
                   <td>{{ row.user }}</td>
@@ -316,12 +311,7 @@
               @for (row of pagedErrorRows(); track row.timestamp + row.requestId) {
                 <tr
                   class="row-clickable"
-                  tabindex="0"
-                  role="button"
-                  [attr.aria-label]="'View log entry for ' + row.errorType + ', ' + row.requestId"
                   (click)="openErrorDetail(row)"
-                  (keydown.enter)="openErrorDetail(row)"
-                  (keydown.space)="$event.preventDefault(); openErrorDetail(row)"
                 >
                   <td>{{ row.timestamp }}</td>
                   <td>{{ row.errorType }}</td>
@@ -392,12 +382,7 @@
               @for (row of pagedSecurityRows(); track row.timestamp + row.user) {
                 <tr
                   class="row-clickable"
-                  tabindex="0"
-                  role="button"
-                  [attr.aria-label]="'View log entry for ' + row.eventType + ' by ' + row.user"
                   (click)="openSecurityDetail(row)"
-                  (keydown.enter)="openSecurityDetail(row)"
-                  (keydown.space)="$event.preventDefault(); openSecurityDetail(row)"
                 >
                   <td>{{ row.timestamp }}</td>
                   <td>{{ row.eventType }}</td>
@@ -467,12 +452,7 @@
               @for (row of pagedEventRows(); track row.timestamp + row.event) {
                 <tr
                   class="row-clickable"
-                  tabindex="0"
-                  role="button"
-                  [attr.aria-label]="'View log entry for ' + row.eventType + ' on ' + row.module"
                   (click)="openEventDetail(row)"
-                  (keydown.enter)="openEventDetail(row)"
-                  (keydown.space)="$event.preventDefault(); openEventDetail(row)"
                 >
                   <td>{{ row.timestamp }}</td>
                   <td>{{ row.eventType }}</td>

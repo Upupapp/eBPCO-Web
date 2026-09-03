@@ -142,12 +142,7 @@
           @for (row of pagedRows(); track row.id) {
             <tr
               class="row-clickable"
-              tabindex="0"
-              role="button"
-              [attr.aria-label]="'View application ' + row.id + ' for ' + row.applicant"
               (click)="openDetail(row)"
-              (keydown.enter)="openDetail(row)"
-              (keydown.space)="$event.preventDefault(); openDetail(row)"
             >
               <td (click)="$event.stopPropagation()">
                 <input

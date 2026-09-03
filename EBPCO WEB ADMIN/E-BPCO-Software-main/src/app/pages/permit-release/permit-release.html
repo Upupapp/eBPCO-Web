@@ -107,12 +107,7 @@
             @for (row of pagedRows(); track row.id) {
               <tr
                 class="row-clickable"
-                tabindex="0"
-                role="button"
-                [attr.aria-label]="'View permit release for ' + row.id + ', ' + row.applicant"
                 (click)="openDetail(row)"
-                (keydown.enter)="openDetail(row)"
-                (keydown.space)="$event.preventDefault(); openDetail(row)"
               >
                 <td (click)="$event.stopPropagation()">
                   <input
@@ -122,7 +117,24 @@
                     (change)="toggleRowSelected(row)"
                   />
                 </td>
-                <td class="id-cell">{{ row.id }}</td>
+                <td class="id-cell">
+                <!-- The row itself is no longer role="button": a row that
+                     announces itself as a button while containing buttons is a
+                     nested-interactive violation, and its nested controls become
+                     ambiguous to a screen reader. Unlike the other queues, this
+                     row had no nested control that opened the detail -- its "view"
+                     button previews the permit document, which is a different
+                     action -- so removing the row role without this would have
+                     taken the detail view away from keyboard users entirely. -->
+                <button
+                  type="button"
+                  class="id-open"
+                  [attr.aria-label]="'View permit release for ' + row.id + ', ' + row.applicant"
+                  (click)="openDetail(row)"
+                >
+                  {{ row.id }}
+                </button>
+              </td>
                 <td>
                   <div class="identity-cell">
                     <app-avatar [name]="row.applicant" [size]="30" />
