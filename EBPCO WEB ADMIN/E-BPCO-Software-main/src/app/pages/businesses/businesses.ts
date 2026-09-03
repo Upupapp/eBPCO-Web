@@ -721,6 +721,6 @@ export class Businesses {
 
     this.view.set('list');
     this.page.set(1);
-    this.toast.success(`"${name}" registered.`);
+    this.toast.success(`"${name}" added to this list only — it has not been registered yet.`);
   }
 }

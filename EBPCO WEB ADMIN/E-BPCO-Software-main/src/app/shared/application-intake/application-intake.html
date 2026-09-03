@@ -529,6 +529,17 @@
           </section>
           <section>
             <h3>Documents</h3>
+            <!--
+              Names, not files. This is the last screen an officer reads before
+              filing, and a green tick beside a filename said the document was
+              held. The portal has no upload path — a chosen file contributes
+              only its name (S-6) — so the tick is a statement about the
+              checklist, and the note below says which.
+            -->
+            <p class="not-stored">
+              These are the file names recorded against the checklist. The
+              documents themselves are not sent anywhere yet.
+            </p>
             @if (documents().length === 0) {
               <p class="empty-note">No document checklist loaded.</p>
             } @else {
@@ -540,7 +551,7 @@
                       [size]="14"
                     />
                     {{ doc.label }} <em>({{ doc.required ? 'Required' : 'Optional' }})</em> —
-                    {{ doc.fileName || 'Not attached' }}
+                    {{ doc.fileName || 'No file named' }}
                   </li>
                 }
               </ul>
