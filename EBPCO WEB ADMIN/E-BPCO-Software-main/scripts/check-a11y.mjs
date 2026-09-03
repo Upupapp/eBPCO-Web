@@ -42,6 +42,9 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
+import { createRequire } from 'node:module';
+
+const require_ = createRequire(import.meta.url);
 
 const ROOT = 'dist/e-bpco/browser';
 const PORT = 4398;
@@ -62,14 +65,25 @@ if (!existsSync(ROOT)) {
   process.exit(2);
 }
 
-// axe-core is INJECTED rather than used through @axe-core/playwright. The
-// wrapper lives only in a sibling repo's node_modules, and a gate that depends
-// on another lane not running `npm ci` is a gate that breaks for reasons
-// nobody here can see. axe.min.js is a single file evaluated in the page.
-const AXE = '/Users/user/ServanaWorkerWeb/node_modules/axe-core/axe.min.js';
+// playwright and axe-core are devDependencies OF THIS REPO. They were once
+// imported by absolute path from a sibling product's node_modules, which meant
+// this gate could only ever run on one machine, and would break here whenever
+// that unrelated repo was cleaned. A gate nobody else can run is a gate that
+// silently stops being run. Resolving them locally is what lets this run inside
+// `npm run verify` at all.
+//
+// axe-core is still INJECTED as a file rather than used through
+// @axe-core/playwright: axe.min.js is a single self-contained script evaluated
+// in the page, so it needs no second wrapper package kept in step.
+// Resolved INSIDE the try. At module top level a missing package throws a raw
+// loader stack trace and exits 1 -- the code this gate uses for "violations
+// found" -- so an uninstalled dependency would read as an accessibility
+// failure. Exit 2 means "could not run"; the two must stay distinguishable.
+let AXE;
 let engines;
 try {
-  const pw = await import('/Users/user/ServanaWorkerWeb/node_modules/playwright/index.mjs');
+  AXE = require_.resolve('axe-core/axe.min.js');
+  const pw = await import('playwright');
   engines = { chromium: pw.chromium, webkit: pw.webkit };
   for (const [name, engine] of Object.entries(engines)) {
     if (!engine) throw new Error(`playwright exposes no ${name} engine`);
@@ -77,6 +91,7 @@ try {
   if (!existsSync(AXE)) throw new Error(`axe-core not found at ${AXE}`);
 } catch (error) {
   console.error('✘ a11y: could not load Playwright or axe-core.');
+  console.error('   Both are devDependencies of this repo — run `npm ci`.');
   console.error(`   ${String(error).split('\n')[0]}`);
   console.error('   This gate FAILS rather than skips: a silent skip reads as a pass.');
   process.exit(2);
