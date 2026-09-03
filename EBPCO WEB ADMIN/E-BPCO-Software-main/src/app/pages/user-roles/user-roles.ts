@@ -774,7 +774,7 @@ export class UserRoles implements OnInit {
       ...rows,
     ]);
     this.showAddUser.set(false);
-    this.toast.success(`"${name}" invited.`);
+    this.toast.success(`"${name}" added to this list only — no invitation has been sent and no account exists yet.`);
   }
 
   // ---- Role card actions ---------------------------------------------
