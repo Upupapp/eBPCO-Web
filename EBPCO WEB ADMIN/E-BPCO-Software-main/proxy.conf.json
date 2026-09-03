@@ -1,0 +1,21 @@
+{
+  "//": [
+    "Development only. `ng serve` forwards the API paths to a local instance so",
+    "the portal is SAME-ORIGIN against it, which is the shape production will",
+    "have too: EBPCO_API_BASE_URL stays '' and Netlify proxies /auth, /me and",
+    "/staff to the API host.",
+    "",
+    "Deliberately NOT done by setting EBPCO_API_BASE_URL to localhost in",
+    "public/config.js. That file ships: a localhost value committed there would",
+    "point the deployed portal at the officer's own machine, where nothing",
+    "answers, and the failure would look exactly like the API being down.",
+    "",
+    "Same-origin also means no CORS. The API does not call enableCors, so a",
+    "cross-origin browser request is blocked before it reaches the server, and",
+    "the portal reports 'The request failed' -- indistinguishable from the state",
+    "it is in with no API at all."
+  ],
+  "/auth": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true },
+  "/me": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true },
+  "/staff": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true }
+}
