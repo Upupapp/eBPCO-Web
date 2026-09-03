@@ -40,7 +40,7 @@
  */
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
 import { createRequire } from 'node:module';
 
@@ -48,7 +48,39 @@ const require_ = createRequire(import.meta.url);
 
 const ROOT = 'dist/e-bpco/browser';
 const PORT = 4398;
-const ROUTES = ['/welcome', '/login', '/register'];
+// ── The denominator, stated ─────────────────────────────────────────────
+//
+// The citizen lane's warning, 3 Sep: their sweep visited 17 screens, reported
+// the portal clean, and never went to /permits/apply -- where 22 unnamed file
+// pickers sat. Screens behind a journey are the easiest to omit and the most
+// consequential, because that is where the real work happens.
+//
+// The same hole was here. This gate scanned three URL-reachable pages out of a
+// sixteen-route table and said "clean", which is true only of the three.
+//
+// So the two lists below are exhaustive and CHECKED against app.routes.ts on
+// every run. A route that appears in neither fails the gate rather than
+// quietly not being scanned.
+const ROUTES = ['/', '/welcome', '/login', '/register'];
+
+// Reachable only with a server-validated session. authGuard no longer mints one
+// (it used to, which made every guarded route reachable by typing its URL), and
+// the seeded account requires a second factor, so this gate cannot sign itself
+// in. These are UNMEASURED -- not clean -- and are printed on every run.
+const SESSION_REQUIRED = {
+  '/dashboard': 'authGuard',
+  '/applications': 'authGuard',
+  '/applications/:id': 'authGuard + needs a record to exist',
+  '/evaluations': 'authGuard',
+  '/payments': 'authGuard',
+  '/permit-release': 'authGuard',
+  '/businesses': 'authGuard',
+  '/archive': 'authGuard',
+  '/access-requests': 'authGuard',
+  '/user-roles': 'authGuard',
+  '/workflow': 'authGuard',
+  '/system-logs': 'authGuard',
+};
 const CONFIGS = [
   { name: 'desktop', engine: 'chromium', width: 1280, height: 900 },
   { name: 'laptop', engine: 'chromium', width: 900, height: 800 },
@@ -59,6 +91,44 @@ const CONFIGS = [
   // a finding can be compared across the two portals without re-measuring.
   { name: 'phone-webkit', engine: 'webkit', width: 390, height: 844 },
 ];
+
+// ── The denominator is DERIVED, not trusted ─────────────────────────────
+//
+// Reading app.routes.ts rather than a number typed here. A route that is in
+// neither ROUTES nor SESSION_REQUIRED fails this gate, because the alternative
+// is a screen that is never scanned and never mentioned -- which is how a sweep
+// goes on reporting clean while coverage shrinks underneath it.
+function declaredRoutes() {
+  const src = readFileSync('src/app/app.routes.ts', 'utf8');
+  const found = new Set();
+  for (const m of src.matchAll(/path:\s*'([^']*)'/g)) {
+    const path = m[1];
+    if (path === '**') continue;
+    // The object this path belongs to, up to the next path: or its closing brace.
+    const rest = src.slice(m.index, m.index + 220);
+    const tail = rest.slice(0, Math.min(...[rest.indexOf('path:', 5), rest.indexOf('},')]
+      .filter((i) => i > 0).concat([rest.length])));
+    if (/redirectTo/.test(tail)) continue;      // an alias, not a screen
+    found.add(path === '' ? '/' : `/${path}`);
+  }
+  return found;
+}
+
+const declared = declaredRoutes();
+const covered = new Set([...ROUTES, ...Object.keys(SESSION_REQUIRED)]);
+const unaccounted = [...declared].filter((r) => !covered.has(r));
+const stale = [...covered].filter((r) => !declared.has(r));
+if (unaccounted.length || stale.length) {
+  console.error('✘ a11y: the route table and this gate disagree.');
+  for (const r of unaccounted) {
+    console.error(`   ${r} is a route but is in neither ROUTES nor SESSION_REQUIRED.`);
+  }
+  for (const r of stale) {
+    console.error(`   ${r} is listed here but no longer exists in app.routes.ts.`);
+  }
+  console.error('   A screen this gate does not know about is a screen it silently skips.');
+  process.exit(2);
+}
 
 if (!existsSync(ROOT)) {
   console.error(`✘ a11y: ${ROOT} does not exist — run \`npm run build\` first.`);
@@ -145,6 +215,21 @@ for (const vp of CONFIGS) {
   const page = await context.newPage();
   for (const route of ROUTES) {
     await page.goto(`http://localhost:${PORT}${route}`, { waitUntil: 'networkidle' });
+
+    // A navigation that did not land where it was sent is the failure the
+    // citizen lane pressed on: a redirected or errored screen prints nothing
+    // and reads exactly like a clean one, so a guard added tomorrow would
+    // silently shrink this sweep while it went on saying clean for ever.
+    // '/' legitimately resolves to the splash component without changing URL.
+    const landed = new URL(page.url()).pathname;
+    const want = route === '/' ? '/' : route;
+    if (landed !== want) {
+      console.error(`✘ a11y: ${route} redirected to ${landed} and was NOT scanned.`);
+      console.error('   An unreachable screen is UNMEASURED, not clean.');
+      console.error('   Either it gained a guard (move it to SESSION_REQUIRED and say so),');
+      console.error('   or the sweep is broken. It is not a pass either way.');
+      process.exit(1);
+    }
     await page.addStyleTag({ content: SETTLE });
     await page.waitForTimeout(120);
     await page.addScriptTag({ path: AXE });
@@ -167,7 +252,20 @@ for (const browser of browsers.values()) await browser.close();
 server.close();
 
 const engineCount = new Set(CONFIGS.map((c) => c.engine)).size;
-const scanned = `${ROUTES.length} routes × ${CONFIGS.length} configs, ${engineCount} engines`;
+const unmeasured = Object.keys(SESSION_REQUIRED);
+const scanned =
+  `${ROUTES.length} of ${declared.size} routes × ${CONFIGS.length} configs, ${engineCount} engines`;
+
+// Printed whether the run passes or fails. A gap nobody is reminded of is a gap
+// that becomes permanent.
+function reportCoverage() {
+  console.log(`a11y coverage: ${ROUTES.length} of ${declared.size} routes scanned.`);
+  console.log(`  ${unmeasured.length} UNMEASURED -- not clean -- because they need a session:`);
+  for (const r of unmeasured) console.log(`    ${r}  (${SESSION_REQUIRED[r]})`);
+  console.log('  These are where officers review, decide and release permits, so this');
+  console.log('  is the consequential half. Supply a signed-in session to close it.');
+}
+reportCoverage();
 if (findings.length === 0) {
   console.log(`a11y: clean (${scanned})`);
   process.exit(0);
