@@ -104,12 +104,7 @@
           @for (row of pagedBusinessRows(); track row.id) {
             <tr
               class="row-clickable"
-              tabindex="0"
-              role="button"
-              [attr.aria-label]="'View business ' + row.code"
               (click)="openDetail(row)"
-              (keydown.enter)="openDetail(row)"
-              (keydown.space)="$event.preventDefault(); openDetail(row)"
             >
               <td (click)="$event.stopPropagation()">
                 <input

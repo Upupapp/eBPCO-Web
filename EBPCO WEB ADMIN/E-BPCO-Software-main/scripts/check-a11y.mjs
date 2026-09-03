@@ -260,10 +260,14 @@ const scanned =
 // that becomes permanent.
 function reportCoverage() {
   console.log(`a11y coverage: ${ROUTES.length} of ${declared.size} routes scanned.`);
-  console.log(`  ${unmeasured.length} UNMEASURED -- not clean -- because they need a session:`);
+  console.log(`  ${unmeasured.length} not reached BY THIS SWEEP -- they need a session:`);
   for (const r of unmeasured) console.log(`    ${r}  (${SESSION_REQUIRED[r]})`);
-  console.log('  These are where officers review, decide and release permits, so this');
-  console.log('  is the consequential half. Supply a signed-in session to close it.');
+  console.log('  They are not unmeasured: a11y-guarded-screens.spec.ts mounts all twelve');
+  console.log('  as components and runs axe on them, which found nested-interactive on');
+  console.log('  five screens and an unnamed switch on system-logs.');
+  console.log('  What that CANNOT see is anything needing layout -- contrast, focus');
+  console.log('  order, target size, reflow -- because jsdom does not lay out. Those');
+  console.log('  remain genuinely unmeasured here until a signed-in session exists.');
 }
 reportCoverage();
 if (findings.length === 0) {
