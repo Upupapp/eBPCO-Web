@@ -99,13 +99,21 @@ describe('Wire contract — what the portal makes of a real response', () => {
     expect(result.members.length).toBe(1);
   });
 
-  it('records that /me sends staff no permitTypes, which three screens depend on', () => {
-    // Not parsed here — asserted as a standing fact about the contract, because
-    // `Capabilities.assignedForms` is null BECAUSE of it and A-15 to A-17
-    // render nothing as a result (F-32). If this ever gains the field, those
-    // screens start working and this test should be deleted.
-    expect(Object.keys((meStaff as Fixture).body)).not.toContain('permitTypes');
+  it('/me now carries the three fields three screens were waiting on', () => {
+    // This test used to assert the OPPOSITE — that `permitTypes` was absent,
+    // which is why `Capabilities.assignedForms` was null and A-15 to A-17
+    // rendered nothing. The backend closed F-32 on 3 Sep and the fixture went
+    // stale within a day of being written.
+    //
+    // Worth keeping as the record of that: a derived fixture is a snapshot of
+    // somebody else's source, and it goes out of date without anything here
+    // changing. It is the argument for recording over deriving.
+    const body = (meStaff as Fixture).body;
+    for (const field of ['fullName', 'level', 'permitTypes', 'roles', 'scopes']) {
+      expect(Object.keys(body)).toContain(field);
+    }
+    // Applicants keep their own profile shape; the two branches differ.
     expect(Object.keys((meApplicant as Fixture).body)).toContain('firstName');
-    expect(Object.keys((meStaff as Fixture).body)).not.toContain('firstName');
+    expect(Object.keys(body)).not.toContain('firstName');
   });
 });

@@ -1,24 +1,29 @@
 {
   "source": "derived",
-  "derivedFrom": "apps/ebpco-api/src/modules/identity/transport/auth.controller.ts:291-300",
-  "note": "The staff branch of GET /me. Returns roles and scopes; returns NO firstName/lastName (applicants get those) and NO permitTypes (F-32).",
+  "derivedFrom": "apps/ebpco-api/src/modules/identity/transport/auth.controller.ts, staff branch (migration 034)",
+  "note": "Updated 3 Sep. The backend closed F-32: /me for staff now returns fullName, level and permitTypes. `liveAccessFor` is used, so a RETIRED permit type is not offered even though the officer still holds the grant \u2014 historical work stays attributable. fullName null means genuinely not on record, not blank.",
   "request": {
     "method": "GET",
     "path": "/me"
   },
   "status": 200,
   "body": {
-    "id": "uuid",
+    "id": "e9af61b4-1c04-446f-af4c-d9b0b153b79c",
     "kind": "staff",
-    "email": "officer@castillasorsogon.gov.ph",
+    "email": "paul@lguids.com.ph",
     "emailVerifiedAt": null,
+    "fullName": "Paul Espinas",
     "roles": [
-      "evaluator"
+      "super-admin"
     ],
     "scopes": [
       "applications:read",
-      "documents:read",
-      "staff:evaluate"
+      "applications:write",
+      "staff:administer"
+    ],
+    "level": "view-edit",
+    "permitTypes": [
+      "Fencing Permit"
     ]
   }
 }
