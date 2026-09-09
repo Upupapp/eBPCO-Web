@@ -423,7 +423,7 @@
               {{ requirementsConfigDocCount(type) }} document{{
                 requirementsConfigDocCount(type) === 1 ? '' : 's'
               }}
-              · Office of {{ departmentLabel(referenceFor(type).responsibleDepartmentId) }}
+              · {{ departmentLabel(referenceFor(type).responsibleDepartmentId) }}
             </span>
             <app-icon name="chevron-right" [size]="16" />
           </button>
