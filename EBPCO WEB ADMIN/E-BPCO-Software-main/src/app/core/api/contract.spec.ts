@@ -85,10 +85,15 @@ describe('Wire contract — what the portal makes of a real response', () => {
   it('reads the staff directory out of the server envelope', async () => {
     const http = setup();
     const pending = TestBed.inject(StaffDirectoryApi).list();
+    // The real shape: `roles` (an array, not `role`), capitalized `status`,
+    // no `fullName` — this endpoint carries no name column for a staff
+    // account at all, and no `level`/`permitTypes` — those live on the
+    // separate GET /staff/users/:id/access call instead.
     http.expectOne('/staff/users').flush({
       ...(staffUsers as Fixture).body,
-      data: [{ id: 'USR-1', fullName: 'Engr. Ana Reyes', email: 'a@b.ph', role: 'evaluator',
-               status: 'active', level: 'view', permitTypes: [], lastSignInAt: null }],
+      data: [{ id: 'USR-1', email: 'a@b.ph', roles: ['evaluator'],
+               status: 'Active', mfaRequired: true, mfaEnrolled: true,
+               createdAt: '2026-01-01T00:00:00.000Z', lastSignInAt: null }],
     });
     const result = await pending;
 
@@ -97,6 +102,7 @@ describe('Wire contract — what the portal makes of a real response', () => {
     // Reading `items` here emptied the directory and said so as though it had
     // looked.
     expect(result.members.length).toBe(1);
+    expect(result.members[0].roles).toEqual(['evaluator']);
   });
 
   it('/me now carries the three fields three screens were waiting on', () => {

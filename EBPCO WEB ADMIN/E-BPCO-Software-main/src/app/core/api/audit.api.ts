@@ -18,14 +18,26 @@ import { ApiError } from './problem';
 
 export type AuditStream = 'activity' | 'access' | 'security';
 
+/**
+ * One row, exactly as `GET /staff/audit` sends it.
+ *
+ * There is no `id` — the server orders and identifies rows by `sequence`, a
+ * number. There is no combined `actor` string either, and no `detail` field
+ * at all: the server instead names WHO acted (`actorAccountId`,
+ * `actorRole`), WHETHER the action was allowed (`outcome`), and WHERE it
+ * came from (`sourceAddress`) — a security stream's own vocabulary, not the
+ * generic shape this used to assume.
+ */
 export interface AuditEntry {
-  readonly id: string;
+  readonly sequence: number;
   readonly action: string;
-  readonly actor: string | null;
+  readonly outcome: 'allowed' | 'denied';
+  readonly actorAccountId: string | null;
+  readonly actorRole: string | null;
   readonly subjectType: string | null;
   readonly subjectId: string | null;
+  readonly sourceAddress: string | null;
   readonly occurredAt: string;
-  readonly detail?: string | null;
 }
 
 /**
