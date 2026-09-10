@@ -21,19 +21,39 @@ import { PermitType } from '../domain/permit.model';
  * offers `disable` and `enable` and no destructive route for a staff user.
  */
 
-export type StaffStatus = 'active' | 'disabled';
+export type StaffStatus = 'Active' | 'Disabled' | 'Pending';
 
+/**
+ * A roster row, exactly as `GET /staff/users` sends it.
+ *
+ * There is no `fullName` here — staff accounts carry no name column on the
+ * backend, only `email` and `roles`. There is no `level`/`permitTypes`
+ * either: those live on the separate `GET /staff/users/:id/access` call
+ * (see `access()` below) because the roster and an account's specific grant
+ * are two different questions the server answers separately.
+ */
 export interface StaffMember {
   readonly id: string;
-  readonly fullName: string;
   readonly email: string;
-  readonly role: string;
+  readonly roles: readonly string[];
   readonly status: StaffStatus;
-  readonly level: AccessLevel;
-  readonly permitTypes: readonly string[];
+  readonly mfaRequired: boolean;
+  readonly mfaEnrolled: boolean;
+  readonly createdAt: string;
   /** RFC 3339, or null when this account has never signed in. */
   readonly lastSignInAt: string | null;
 }
+
+/** What `GET /staff/users/:id/access` reports for one account. */
+export interface StaffAccess {
+  readonly level: AccessLevel;
+  readonly permitTypes: readonly string[];
+}
+
+export type StaffAccessResult =
+  | { readonly kind: 'ok'; readonly access: StaffAccess }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
 
 /**
  * Three outcomes, because an empty table is not an answer.
@@ -47,13 +67,18 @@ export type StaffListResult =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
 
-/** A live sign-in. `current` marks the session making this request, if known. */
+/**
+ * A live sign-in, exactly as `GET /staff/users/:id/sessions` sends it.
+ *
+ * No `device`, `ipAddress`, or `current` — the backend tracks none of
+ * those for a session, only when it was issued, when it expires, and when
+ * it was last used.
+ */
 export interface StaffSession {
-  readonly id: string;
-  readonly device: string | null;
-  readonly ipAddress: string | null;
-  readonly lastSeenAt: string | null;
-  readonly current?: boolean;
+  readonly sessionId: string;
+  readonly issuedAt: string;
+  readonly expiresAt: string;
+  readonly lastUsedAt: string | null;
 }
 
 export type SessionListResult =
@@ -77,6 +102,27 @@ export class StaffDirectoryApi {
       // the directory permanently empty and said so as though it had looked.
       const page = await this.api.get<{ data?: readonly StaffMember[] }>('/staff/users');
       return { kind: 'ok', members: page.data ?? [] };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * One account's grant — the level and forms `GET /staff/users` itself
+   * does not carry. Called per-row rather than assumed, because the roster
+   * and an account's specific access are two different questions on this
+   * server.
+   */
+  async access(id: string): Promise<StaffAccessResult> {
+    try {
+      const access = await this.api.get<StaffAccess>(
+        `/staff/users/${encodeURIComponent(id)}/access`,
+      );
+      return { kind: 'ok', access };
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };

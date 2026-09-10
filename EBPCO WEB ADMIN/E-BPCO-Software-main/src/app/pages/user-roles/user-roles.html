@@ -442,7 +442,9 @@
                   </dd>
                   <dt>Forms</dt>
                   <dd>
-                    @if (user.permitTypes.length === 0) {
+                    @if (user.permitTypes === null) {
+                      <span class="none">Loading…</span>
+                    } @else if (user.permitTypes.length === 0) {
                       <span class="none">No forms assigned — this account can see nothing.</span>
                     } @else {
                       <ul class="form-chips">
@@ -616,31 +618,26 @@
             <table class="detail-table">
               <thead>
                 <tr>
-                  <th>Device / Browser</th>
-                  <th>IP Address</th>
-                  <th>Last Seen</th>
+                  <th>Issued</th>
+                  <th>Last Used</th>
+                  <th>Expires</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                @for (s of sessions(); track s.id) {
+                @for (s of sessions(); track s.sessionId) {
                   <tr>
-                    <td>
-                      {{ s.device || 'Device not recorded' }}
-                      @if (s.current) {
-                        <span class="session-current">this session</span>
-                      }
-                    </td>
-                    <td class="muted">{{ s.ipAddress || '—' }}</td>
-                    <td class="muted">{{ s.lastSeenAt || 'Not recorded' }}</td>
+                    <td>{{ s.issuedAt }}</td>
+                    <td class="muted">{{ s.lastUsedAt || 'Not used yet' }}</td>
+                    <td class="muted">{{ s.expiresAt }}</td>
                     <td>
                       <button
                         type="button"
                         class="modal-btn neutral"
-                        [disabled]="revoking() === s.id"
+                        [disabled]="revoking() === s.sessionId"
                         (click)="revokeSession(s)"
                       >
-                        {{ revoking() === s.id ? 'Ending…' : 'End session' }}
+                        {{ revoking() === s.sessionId ? 'Ending…' : 'End session' }}
                       </button>
                     </td>
                   </tr>

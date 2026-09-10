@@ -8,7 +8,7 @@ import { Pagination } from '../../shared/pagination/pagination';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { SessionService } from '../../core/session/session.service';
-import { StaffDirectoryApi, StaffMember, StaffSession } from '../../core/api/staff-directory.api';
+import { StaffAccess, StaffDirectoryApi, StaffMember, StaffSession } from '../../core/api/staff-directory.api';
 import { AccessLevel } from '../../core/api/access-request.api';
 import { Capabilities } from '../../core/session/capabilities';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
@@ -40,17 +40,23 @@ export interface UserRow {
    * access has to start from the real values, not from parsing "2 forms" back
    * out of a label — a round trip through display text is how an edit quietly
    * grants something nobody chose.
-   */
-  level: AccessLevel;
-  permitTypes: readonly string[];
-  /**
-   * The role the SERVER holds for this account, kept raw.
    *
-   * `role` below is a display label derived from the level. This is the thing
-   * the last-super-admin guard has to count, and counting a display string
-   * would break the moment the label is reworded.
+   * `null` until this row's `GET /staff/users/:id/access` call has answered —
+   * the roster listing itself doesn't carry it (see `StaffMember` on
+   * `staff-directory.api.ts`), so every row starts not-yet-known rather than
+   * a guessed default.
    */
-  serverRole: string;
+  level: AccessLevel | null;
+  permitTypes: readonly string[] | null;
+  /**
+   * The roles the SERVER holds for this account, kept raw.
+   *
+   * `role` below is a display label derived from the level. This is what the
+   * last-super-admin guard has to check, and checking a display string would
+   * break the moment the label is reworded.
+   */
+  serverRoles: readonly string[];
+  /** The server has no name column for staff accounts — the email stands in. */
   name: string;
   email: string;
   role: string;
@@ -132,21 +138,41 @@ function emailFor(name: string): string {
  * `role` shows the LEVEL rather than a job title, because that is what the
  * owner's model actually grants: an ADMIN sub-type is defined by accessibility
  * — which forms, and view or view-and-edit — not by what the post is called.
+ *
+ * `level`/`permitTypes` are `null` here — the roster call (`GET /staff/users`)
+ * doesn't carry them, only `GET /staff/users/:id/access` does. `mergeAccess`
+ * below fills them in once that per-row call answers.
  */
 function toUserRow(member: StaffMember): UserRow {
   return {
     id: member.id,
-    level: member.level,
-    permitTypes: member.permitTypes,
-    serverRole: member.role,
-    name: member.fullName,
+    level: null,
+    permitTypes: null,
+    serverRoles: member.roles,
+    // No name column exists for a staff account server-side — the email is
+    // the honest display name, not a guess at one.
+    name: member.email,
     email: member.email,
-    role: member.level === 'view-edit' ? 'View and edit' : 'View only',
-    department: member.permitTypes.length === 0
-      ? 'No forms assigned'
-      : `${member.permitTypes.length} form${member.permitTypes.length === 1 ? '' : 's'}`,
-    status: member.status === 'disabled' ? 'Inactive' : 'Active',
+    role: 'Access not yet loaded',
+    department: 'Access not yet loaded',
+    status: member.status === 'Disabled' ? 'Inactive' : member.status === 'Pending' ? 'Pending' : 'Active',
     lastActive: member.lastSignInAt,
+  };
+}
+
+/** Folds a `GET /staff/users/:id/access` answer into a row already on screen. */
+function withAccess(row: UserRow, access: StaffAccess | null): UserRow {
+  if (access === null) {
+    return { ...row, role: 'Access could not be read', department: 'Access could not be read' };
+  }
+  return {
+    ...row,
+    level: access.level,
+    permitTypes: access.permitTypes,
+    role: access.level === 'view-edit' ? 'View and edit' : 'View only',
+    department: access.permitTypes.length === 0
+      ? 'No forms assigned'
+      : `${access.permitTypes.length} form${access.permitTypes.length === 1 ? '' : 's'}`,
   };
 }
 
@@ -337,7 +363,14 @@ export class UserRoles implements OnInit {
     try {
       const result = await this.directory.list();
       if (result.kind === 'ok') {
-        this.users.set(result.members.map(toUserRow));
+        const rows = result.members.map(toUserRow);
+        // The roster alone doesn't say what each account may do — that's a
+        // separate call per account (`GET /staff/users/:id/access`). Fired
+        // once, in parallel, right after the roster answers, rather than
+        // deferred to each row's own detail view: the list screen's own
+        // Role/Department columns need this too.
+        this.users.set(rows);
+        await this.loadAccessFor(rows);
         return;
       }
       this.users.set([]);
@@ -346,6 +379,19 @@ export class UserRoles implements OnInit {
     } finally {
       this.directoryLoading.set(false);
     }
+  }
+
+  private async loadAccessFor(rows: readonly UserRow[]): Promise<void> {
+    const answers = await Promise.all(
+      rows.map(async (row) => {
+        const result = await this.directory.access(row.id);
+        return { id: row.id, access: result.kind === 'ok' ? result.access : null };
+      }),
+    );
+    const byId = new Map(answers.map((a) => [a.id, a.access] as const));
+    this.users.update((current) =>
+      current.map((row) => (byId.has(row.id) ? withAccess(row, byId.get(row.id)!) : row)),
+    );
   }
 
   protected readonly filteredUsers = computed(() => {
@@ -446,9 +492,9 @@ export class UserRoles implements OnInit {
     const row = this.selectedUser();
     if (!row?.id || this.revoking()) return;
 
-    this.revoking.set(session.id);
+    this.revoking.set(session.sessionId);
     try {
-      const result = await this.directory.revokeSession(row.id, session.id);
+      const result = await this.directory.revokeSession(row.id, session.sessionId);
       if (result.kind === 'done') {
         this.toast.success('Session ended.');
         await this.loadSessions();
@@ -497,7 +543,7 @@ export class UserRoles implements OnInit {
   }
 
   private isSuperAdmin(row: UserRow): boolean {
-    return row.serverRole === 'super-admin';
+    return row.serverRoles.includes('super-admin');
   }
 
   private enabledSuperAdmins(): UserRow[] {
@@ -564,6 +610,10 @@ export class UserRoles implements OnInit {
   protected startEditAccess(): void {
     const row = this.selectedUser();
     if (!row) return;
+    if (row.level === null || row.permitTypes === null) {
+      this.toast.error("This account's current access hasn't finished loading yet.");
+      return;
+    }
     // Seeded from what the account HOLDS, so the editor sees the current state
     // and changes it, rather than composing a replacement from memory.
     this.accessLevel.set(row.level);
@@ -764,7 +814,7 @@ export class UserRoles implements OnInit {
         id: '',
         level: 'view' as AccessLevel,
         permitTypes: [],
-        serverRole: '',
+        serverRoles: [],
         email,
         role: this.newUser.role,
         department: this.newUser.department,
