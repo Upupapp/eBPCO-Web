@@ -288,7 +288,14 @@ export class ApplicationIntake {
 
   protected next(): void {
     const step = this.currentStep();
+    // Marking the step attempted BEFORE the validity check is what actually
+    // reveals each field's inline error — previously this ran unconditionally
+    // followed by an unconditional advance, so `canGoNext()` existed and was
+    // computed correctly but nothing ever consulted it: clicking Next with
+    // every required field blank (name, email, mobile, address) silently
+    // advanced to the next step with no error shown anywhere.
     this.attempted.update((set) => new Set(set).add(step));
+    if (!this.canGoNext()) return;
     if (this.stepIndex() < this.steps.length - 1) this.stepIndex.update((i) => i + 1);
   }
 
@@ -328,10 +335,10 @@ export class ApplicationIntake {
   protected submit(): void {
     if (this.submitting()) return;
     this.submitError.set('');
-    // `next()` marks a step attempted but always advances regardless of
-    // errors, so a staffer can click through to Review with earlier
-    // sections still invalid — this is the actual gate before anything
-    // gets written to the store.
+    // `next()` now refuses to advance past an invalid step, but this is
+    // still the real gate before anything is written to the store — a step
+    // can go from valid to invalid after being passed (e.g. a field cleared
+    // after going back), and this is what catches that before submission.
     const invalidStep = this.steps.find(
       (s) => s.key !== 'review' && this.stepErrors(s.key).length > 0,
     );

@@ -146,4 +146,34 @@ export class SessionService {
     const current = this._session();
     if (current) this._session.set({ ...current, role });
   }
+
+  /**
+   * TEMPORARY DEV BYPASS — establishes a local Super Admin session without
+   * calling the API. Added so the portal can be exercised on a machine with
+   * no local backend running (see proxy.conf.json). Remove this and its call
+   * site in auth.guard.ts once a backend is available again.
+   */
+  devBypass(): void {
+    // QA-PASS ONLY: a real session survives a hard navigation (typing a URL,
+    // hitting refresh); this mock one normally resets to Super Admin every
+    // time because there is no persisted role behind it. Reading a role
+    // stashed in sessionStorage (set via `qaSetRoleAcrossReload`) lets the
+    // manual role/permission-matrix pass simulate "already signed in as
+    // Evaluator" surviving a direct URL entry. Remove alongside the rest of
+    // devBypass once a backend exists.
+    const qaRole = sessionStorage.getItem('qa-dev-bypass-role') as StaffRole | null;
+    this._session.set({
+      name: 'Dev Bypass (Super Admin)',
+      email: 'dev-bypass@ebpco.local',
+      role: qaRole ?? 'Super Admin',
+      scopes: null,
+      assignedForms: null,
+    });
+  }
+
+  /** QA-PASS ONLY: see `devBypass`. Call before a hard navigation to make the next devBypass() come up as this role. */
+  qaSetRoleAcrossReload(role: StaffRole | null): void {
+    if (role) sessionStorage.setItem('qa-dev-bypass-role', role);
+    else sessionStorage.removeItem('qa-dev-bypass-role');
+  }
 }

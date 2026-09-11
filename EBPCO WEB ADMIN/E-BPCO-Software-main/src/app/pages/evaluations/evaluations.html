@@ -489,7 +489,19 @@
             </tr>
           } @empty {
             <tr class="table-empty-row">
-              <td colspan="10">No applications match your search.</td>
+              <td colspan="10">
+                @if (queueLoading()) {
+                  Loading the evaluation queue…
+                } @else if (queueUnavailable()) {
+                  This deployment has no evaluation queue yet, so no applications can
+                  be listed here.
+                } @else if (queueError(); as message) {
+                  The evaluation queue could not be read, so this is not a picture of
+                  current work. {{ message }}
+                } @else {
+                  No applications match your search.
+                }
+              </td>
             </tr>
           }
         </tbody>

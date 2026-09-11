@@ -50,6 +50,9 @@
               name="applicantFullName"
               placeholder="Juan Dela Cruz"
             />
+            @if (showStepErrors() && !applicant.fullName.trim()) {
+              <span class="field-error">Applicant/user name is required.</span>
+            }
           </label>
           <label class="field">
             <span class="field-label"
@@ -142,6 +145,9 @@
               name="applicantAddress"
               placeholder="Purok 1, Street/Sitio"
             />
+            @if (showStepErrors() && !applicant.addressLine.trim()) {
+              <span class="field-error">Address is required.</span>
+            }
           </label>
         </div>
       }
@@ -161,6 +167,9 @@
               [(ngModel)]="business.registeredName"
               name="bizName"
             />
+            @if (showStepErrors() && !business.registeredName.trim()) {
+              <span class="field-error">Registered business name is required.</span>
+            }
           </label>
           <label class="field">
             <span class="field-label"
@@ -199,6 +208,9 @@
               name="bizAddress"
               placeholder="Street address"
             />
+            @if (showStepErrors() && !business.addressLine.trim()) {
+              <span class="field-error">Business address is required.</span>
+            }
           </label>
           <label class="field">
             <span class="field-label"
@@ -231,6 +243,9 @@
               name="bizOwner"
               [placeholder]="applicant.fullName"
             />
+            @if (showStepErrors() && !business.ownerOrRepresentative.trim()) {
+              <span class="field-error">Owner or authorized representative is required.</span>
+            }
           </label>
           <label class="field span-2">
             <span class="field-label"
@@ -266,6 +281,9 @@
                 <option [value]="p">{{ p }}</option>
               }
             </select>
+            @if (showStepErrors() && !applicationInfo.permitType) {
+              <span class="field-error">Permit type is required.</span>
+            }
           </label>
           <label class="field">
             <span class="field-label"
@@ -297,6 +315,9 @@
               [(ngModel)]="applicationInfo.dateReceived"
               name="dateReceived"
             />
+            @if (showStepErrors() && !applicationInfo.dateReceived) {
+              <span class="field-error">Date received is required.</span>
+            }
           </label>
           <label class="field span-2">
             <span class="field-label"
@@ -314,6 +335,9 @@
               name="scopeDescription"
               placeholder="Briefly describe the business activity or the scope of construction work…"
             ></textarea>
+            @if (showStepErrors() && !applicationInfo.scopeDescription.trim()) {
+              <span class="field-error">Description or scope of work is required.</span>
+            }
           </label>
           <label class="field">
             <span class="field-label">Assigned Evaluator</span>
