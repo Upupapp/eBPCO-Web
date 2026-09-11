@@ -1,0 +1,3 @@
+[     686ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943
+[    2937ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:4200/staff/applications?limit=100:0
+[    2978ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:4200/staff/evaluations?limit=100:0

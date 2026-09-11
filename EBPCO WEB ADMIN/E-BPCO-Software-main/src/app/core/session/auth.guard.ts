@@ -3,6 +3,11 @@ import { CanActivateFn, Router } from '@angular/router';
 import { SessionService } from './session.service';
 import { canAccessPath } from './permissions';
 
+// QA-PASS TOGGLE: false while testing the real /login and /register screens
+// (so the guard actually redirects there instead of skipping past them).
+// Set back to true afterward to restore the dev bypass.
+const DEV_BYPASS_ENABLED = false;
+
 /**
  * There's no real backend or credential check behind login (see
  * SessionService) — every successful sign-in produces the same mock Super
@@ -17,12 +22,16 @@ export const authGuard: CanActivateFn = (_route, state) => {
   const session = inject(SessionService);
   const router = inject(Router);
 
-  // Signed out means signed out. This used to CREATE a session here —
-  // `signIn('staff@ebpco.gov.ph')` — which made every guarded route reachable
-  // by anyone who typed its URL, because the guard's first act was to satisfy
-  // itself. Harmless while the portal had no server and no real data behind it;
-  // not harmless now that it does.
+  // TEMPORARY DEV BYPASS: no backend is running locally right now, so real
+  // sign-in can't succeed. Auto-establish a mock Super Admin session instead
+  // of redirecting to /login (this used to be the guard's normal behavior —
+  // see git blame on this file — before a real backend existed). Remove this
+  // block and SessionService.devBypass once a backend is available again.
   if (!session.isAuthenticated()) {
+    if (DEV_BYPASS_ENABLED) {
+      session.devBypass();
+      return true;
+    }
     return router.parseUrl('/login');
   }
   const role = session.role();

@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
@@ -12,7 +12,6 @@ import { FilterPanel } from '../../shared/filter-panel/filter-panel';
 import { ToastService } from '../../shared/toast/toast.service';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
-import { SessionService } from '../../core/session/session.service';
 import { EVALUATION_STAGE_ORDER, EvaluationStage } from '../../core/domain/status.model';
 import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
 import { ApplicationRecord } from '../../core/domain/application.model';
@@ -22,6 +21,7 @@ import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 import { Capabilities } from '../../core/session/capabilities';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
+import { StaffEvaluationsApi, EvaluationQueueRow } from '../../core/api/staff-evaluations.api';
 import {
   buildEvalTypeCards,
   buildEvalRows,
@@ -83,7 +83,7 @@ const STEP_TONE_ACCENT: Record<KpiTone, string> = {
   templateUrl: './evaluations.html',
   styleUrl: './evaluations.scss',
 })
-export class Evaluations {
+export class Evaluations implements OnInit {
   /**
    * Whether this officer may decide anything here.
    *
@@ -94,7 +94,7 @@ export class Evaluations {
   protected readonly capabilities = inject(Capabilities);
 
   private readonly store = inject(ApplicationStore);
-  private readonly session = inject(SessionService);
+  private readonly evaluationsApi = inject(StaffEvaluationsApi);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
@@ -109,13 +109,39 @@ export class Evaluations {
   // itself (see applyApplicationIdParam below).
   readonly applicationId = input<string>();
 
-  // Card counts, rows, and ring totals all read from the same
-  // store-backed application pool every other page uses — a card's count
-  // always equals the number of rows you actually see under it.
-  private readonly applications = computed(() => this.store.applications());
-  /** Real per-application-per-stage evaluation history — what makes the "Passed" tab a permanent record instead of a guess (see evaluations-data.ts's stageBucket/hasPassedStage). */
-  private readonly allEvaluations = computed(() => this.store.evaluations());
-  protected readonly cards = computed(() => buildEvalTypeCards(this.applications()));
+  // Card counts, rows, and ring totals all read from the same real queue —
+  // GET /staff/evaluations — so a card's count always equals the number of
+  // rows you actually see under it. See StaffEvaluationsApi's own doc
+  // comment: the stage order and every legality check on a decision are the
+  // SERVER's, not re-derived here.
+  protected readonly queueRows = signal<EvaluationQueueRow[]>([]);
+  protected readonly queueLoading = signal(false);
+  protected readonly queueUnavailable = signal(false);
+  protected readonly queueError = signal<string | null>(null);
+
+  async ngOnInit(): Promise<void> {
+    await this.loadQueue();
+  }
+
+  protected async loadQueue(): Promise<void> {
+    this.queueLoading.set(true);
+    this.queueUnavailable.set(false);
+    this.queueError.set(null);
+    try {
+      const result = await this.evaluationsApi.queue();
+      if (result.kind === 'ok') {
+        this.queueRows.set([...result.rows]);
+        return;
+      }
+      this.queueRows.set([]);
+      if (result.kind === 'unavailable') this.queueUnavailable.set(true);
+      else this.queueError.set(result.message);
+    } finally {
+      this.queueLoading.set(false);
+    }
+  }
+
+  protected readonly cards = computed(() => buildEvalTypeCards(this.queueRows()));
   protected readonly stageTabs = STAGE_TABS;
   protected readonly typeOptions = TYPE_OPTIONS;
 
@@ -127,7 +153,7 @@ export class Evaluations {
   // of the whole application pool.
   protected readonly ringStats = computed(() => {
     const card = this.selectedCard();
-    return card ? buildEvalRingStats(this.applications(), card.key, this.allEvaluations()) : [];
+    return card ? buildEvalRingStats(this.queueRows(), card.key) : [];
   });
   protected readonly activeStage = signal<Stage>('under-review');
   protected readonly page = signal(1);
@@ -143,7 +169,7 @@ export class Evaluations {
 
   protected readonly cardRows = computed(() => {
     const card = this.selectedCard();
-    return card ? buildEvalRows(this.applications(), card.key, this.allEvaluations(), (id) => this.store.missingRequiredDocuments(id)) : [];
+    return card ? buildEvalRows(this.queueRows(), card.key) : [];
   });
 
   protected readonly stageRows = computed(() => {
@@ -302,16 +328,23 @@ export class Evaluations {
   private readonly applyApplicationIdParam = effect(() => {
     const id = this.applicationId();
     if (!id || this.appliedApplicationIdParam) return;
-    const app = this.store.getById(id);
-    if (!app) return;
-    const cardKey = (
-      Object.entries(EVAL_KEY_TO_APP_STAGE) as [EvalTypeKey, EvaluationStage | null][]
-    ).find(([, stage]) => stage === app.evaluationStage)?.[0];
+    const queueRow = this.queueRows().find((r) => r.applicationId === id);
+    if (!queueRow) return;
+    // Mirrors evaluations-data.ts's own bucketing: no next stage and no
+    // decisions yet means unrecorded; no next stage but a history of
+    // decisions means every stage has been passed, which the 'final' card's
+    // own Passed tab is where that application permanently lives.
+    const cardKey =
+      queueRow.nextStage === null
+        ? queueRow.evaluations.length === 0
+          ? 'unrecorded'
+          : 'final'
+        : (Object.entries(EVAL_KEY_TO_APP_STAGE) as [EvalTypeKey, string | null][]).find(
+            ([, stage]) => stage === queueRow.nextStage,
+          )?.[0];
     const card = cardKey && this.cards().find((c) => c.key === cardKey);
     if (!card) return;
-    const row = buildEvalRows(this.applications(), card.key, this.allEvaluations(), (id) => this.store.missingRequiredDocuments(id)).find(
-      (r) => r.id === id,
-    );
+    const row = buildEvalRows(this.queueRows(), card.key).find((r) => r.id === id);
     if (!row) return;
     this.appliedApplicationIdParam = true;
     this.selectedCard.set(card);
@@ -397,21 +430,22 @@ export class Evaluations {
     if (event.key === 'Escape') this.closeMenu();
   }
 
-  // Real mutations now go through the store's validated
-  // `recordEvaluation`, which advances the application's actual
-  // lifecycle status — the row disappears from this stage/tab because the
-  // underlying application really moved, not because a local-only field
-  // changed.
-  /** Surfaces a `recordEvaluation` refusal — e.g. Advance Stage on a row that's genuinely Rejected/Revision Required (every row in the "Returned" tab is), which the store now refuses rather than silently force-passing. */
+  // Real mutations now go through StaffEvaluationsApi's validated `record`
+  // call — `POST /staff/applications/:id/evaluations` — which enforces stage
+  // order, self-review, and remarks-required-for-refusal server-side. The
+  // queue is reloaded after a successful decision rather than patched
+  // locally, so the row's stage/tab always reflects what the server actually
+  // recorded, not what this page assumed would happen.
+  /** Surfaces a `record` refusal — e.g. Advance Stage on a row that's genuinely Rejected/Revision Required (every row in the "Returned" tab is), which the server refuses rather than silently force-passing. */
   protected readonly actionError = signal<string | null>(null);
 
-  protected advanceStage(row: EvalRow): void {
+  protected async advanceStage(row: EvalRow): Promise<void> {
     const card = this.selectedCard();
     if (!card) return;
     // Defense in depth — the row menu already hides this action once
     // `!row.isCurrentStage` (the application has genuinely moved past
     // this stage), but never trust the UI filter alone: acting anyway
-    // would call recordEvaluation for THIS stage while the application is
+    // would record a decision for THIS stage while the application is
     // actually being evaluated at a later one.
     if (!row.isCurrentStage) return;
     // No stage means nothing to advance PAST. Recording against a guessed stage
@@ -419,19 +453,18 @@ export class Evaluations {
     const stage = EVAL_KEY_TO_APP_STAGE[card.key];
     if (stage === null) return;
     this.actionError.set(null);
-    const actor = this.session.name() || 'Staff';
-    const ok = this.store.recordEvaluation(row.id, stage, 'Passed', actor);
-    if (!ok) {
-      const message = `Can't advance ${row.applicant}'s application — it's currently Rejected or Revision Required, not actively Under Evaluation. Open it in Applications to see its real status.`;
-      this.actionError.set(message);
-      this.toast.error(message);
-    } else {
+    const result = await this.evaluationsApi.record(row.id, { stage, result: 'Passed' });
+    if (result.kind === 'done') {
       this.toast.success(`${row.applicant}'s application advanced past ${card.title}.`);
+      await this.loadQueue();
+    } else {
+      this.actionError.set(result.message);
+      this.toast.error(result.message);
     }
     this.closeMenu();
   }
 
-  protected returnForRevision(row: EvalRow): void {
+  protected async returnForRevision(row: EvalRow): Promise<void> {
     const card = this.selectedCard();
     if (!card) return;
     if (!row.isCurrentStage) return;
@@ -440,15 +473,18 @@ export class Evaluations {
     const remarks = this.revisionRemarks().trim();
     if (!remarks) return;
     this.actionError.set(null);
-    const actor = this.session.name() || 'Staff';
-    const ok = this.store.recordEvaluation(row.id, stage, 'Revision Required', actor, remarks);
-    if (ok) {
+    const result = await this.evaluationsApi.record(row.id, {
+      stage,
+      result: 'Revision Required',
+      remarks,
+    });
+    if (result.kind === 'done') {
       this.revisionRemarks.set('');
       this.toast.success(`${row.applicant}'s application returned for revision.`);
+      await this.loadQueue();
     } else {
-      const message = `Can't return ${row.applicant}'s application for revision from its current status.`;
-      this.actionError.set(message);
-      this.toast.error(message);
+      this.actionError.set(result.message);
+      this.toast.error(result.message);
     }
     this.closeMenu();
   }

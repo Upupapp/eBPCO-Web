@@ -36,7 +36,7 @@
       }
 
       <label class="field-label" for="password">Enter Password</label>
-      <div class="input-wrap">
+      <div class="input-wrap" [class.invalid]="passwordError()">
         <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <rect x="5" y="10.5" width="14" height="9.5" rx="1.8" stroke="currentColor" stroke-width="1.6" />
           <path d="M8 10.5V8a4 4 0 1 1 8 0v2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
@@ -47,8 +47,11 @@
           [type]="showPassword() ? 'text' : 'password'"
           placeholder="Enter your password"
           [(ngModel)]="password"
+          (ngModelChange)="onPasswordChange()"
           required
           autocomplete="current-password"
+          [attr.aria-invalid]="passwordError() ? true : null"
+          [attr.aria-describedby]="passwordError() ? 'password-error' : null"
         />
         <button
           type="button"
@@ -78,6 +81,9 @@
           }
         </button>
       </div>
+      @if (passwordError()) {
+        <p class="field-error" id="password-error">{{ passwordError() }}</p>
+      }
 
       <div class="row-between">
         <label class="remember">

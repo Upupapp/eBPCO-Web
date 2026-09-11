@@ -34,6 +34,13 @@ export class Login {
    */
   readonly signInError = signal('');
   readonly showForgotPassword = signal(false);
+  /**
+   * A missing password — a fact about THIS field, same treatment as
+   * `emailError`. Previously `form.invalid` silently blocked submission with
+   * no feedback at all: clicking "Login Account" with an empty password did
+   * nothing visible, and an officer had no way to tell why.
+   */
+  readonly passwordError = signal('');
 
   private readonly session = inject(SessionService);
 
@@ -53,6 +60,11 @@ export class Login {
 
   onEmailChange(): void {
     this.emailError.set('');
+    this.signInError.set('');
+  }
+
+  onPasswordChange(): void {
+    this.passwordError.set('');
     this.signInError.set('');
   }
 
@@ -81,9 +93,18 @@ export class Login {
   totp = '';
 
   async onSubmit(form: NgForm): Promise<void> {
+    // The `[disabled]` binding on the submit button is not enough on its own —
+    // it only takes effect once Angular's change detection repaints the DOM,
+    // and two click events dispatched in quick succession (a fast double-click,
+    // an impatient double-tap) can both invoke onSubmit before that repaint
+    // happens, firing two concurrent /auth/token POSTs. This early return is
+    // the real guard; `[disabled]` is only the visual signal for it.
+    if (this.signingIn()) return;
+
     // `submitted` used to be set here and read by nothing — dead state rather
-    // than a validation gate. Validation is `emailError` plus `form.invalid`.
+    // than a validation gate. Validation is `emailError` plus `passwordError`.
     this.emailError.set('');
+    this.passwordError.set('');
     this.signInError.set('');
 
     if (this.mfaRequired() && !/^\d{6}$/.test(this.totp.trim())) {
@@ -95,6 +116,10 @@ export class Login {
     const normalized = this.email.trim().toLowerCase();
     if (!EMAIL_PATTERN.test(normalized)) {
       this.emailError.set('Please enter a valid email address.');
+      return;
+    }
+    if (!this.password) {
+      this.passwordError.set('Enter your password.');
       return;
     }
     if (form.invalid) return;

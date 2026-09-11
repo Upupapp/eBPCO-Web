@@ -1,0 +1,117 @@
+- generic [ref=e5]:
+  - generic [ref=e7]:
+    - img "Municipality of Castilla, Sorsogon seal" [ref=e11]
+    - paragraph [ref=e12]: Electronic Building Permit and Certificate of Occupancy
+    - paragraph [ref=e13]: Municipality of Castilla, Sorsogon
+  - generic [ref=e14]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=e18]
+        - generic [ref=e19]: E-BPCO
+      - heading "Request an account" [level=1] [ref=e20]
+      - paragraph [ref=e21]:
+        - text: Accounts on this portal are issued by the Municipality of Castilla. Fill this in and an administrator will decide whether to approve it, and what access to give you.
+        - strong [ref=e22]: This does not create an account
+        - text: ", and no password is set here."
+      - generic [ref=e23]:
+        - generic [ref=e24]: Full name
+        - textbox "Full name" [ref=e26]:
+          - /placeholder: Your full name
+          - text: Juan Dela Cruz
+        - generic [ref=e27]: Work email address
+        - textbox "Work email address" [ref=e29]:
+          - /placeholder: you@example.gov.ph
+          - text: juan.delacruz@castilla.gov.ph
+        - generic [ref=e30]: Mobile number
+        - textbox "Mobile number" [ref=e32]:
+          - /placeholder: 09XXXXXXXXX
+          - text: "09171234567"
+        - generic [ref=e33]: Office and position
+        - textbox "Office and position" [ref=e35]:
+          - /placeholder: e.g. Municipal Engineering Office — Evaluator
+          - text: Zoning Office - Evaluator
+        - group "Forms you need access to 1 selected" [ref=e119]:
+          - generic [ref=e37]:
+            - text: Forms you need access to
+            - generic [ref=e38]: 1 selected
+          - generic [ref=e39]:
+            - generic [ref=e40] [cursor=pointer]:
+              - checkbox "Building Permit – New Construction" [checked] [ref=e41]
+              - generic [ref=e42]: Building Permit – New Construction
+            - generic [ref=e43] [cursor=pointer]:
+              - checkbox "Building Permit – Renovation / Alteration" [ref=e44]
+              - generic [ref=e45]: Building Permit – Renovation / Alteration
+            - generic [ref=e46] [cursor=pointer]:
+              - checkbox "Building Permit – Addition / Extension" [ref=e47]
+              - generic [ref=e48]: Building Permit – Addition / Extension
+            - generic [ref=e49] [cursor=pointer]:
+              - checkbox "Demolition Permit" [ref=e50]
+              - generic [ref=e51]: Demolition Permit
+            - generic [ref=e52] [cursor=pointer]:
+              - checkbox "Zoning / Locational Clearance" [ref=e53]
+              - generic [ref=e54]: Zoning / Locational Clearance
+            - generic [ref=e55] [cursor=pointer]:
+              - checkbox "Architectural Permit" [ref=e56]
+              - generic [ref=e57]: Architectural Permit
+            - generic [ref=e58] [cursor=pointer]:
+              - checkbox "Civil / Structural Permit" [ref=e59]
+              - generic [ref=e60]: Civil / Structural Permit
+            - generic [ref=e61] [cursor=pointer]:
+              - checkbox "Electrical Permit" [ref=e62]
+              - generic [ref=e63]: Electrical Permit
+            - generic [ref=e64] [cursor=pointer]:
+              - checkbox "Mechanical Permit" [ref=e65]
+              - generic [ref=e66]: Mechanical Permit
+            - generic [ref=e67] [cursor=pointer]:
+              - checkbox "Sanitary Permit" [ref=e68]
+              - generic [ref=e69]: Sanitary Permit
+            - generic [ref=e70] [cursor=pointer]:
+              - checkbox "Plumbing Permit" [ref=e71]
+              - generic [ref=e72]: Plumbing Permit
+            - generic [ref=e73] [cursor=pointer]:
+              - checkbox "Electronics Permit" [ref=e74]
+              - generic [ref=e75]: Electronics Permit
+            - generic [ref=e76] [cursor=pointer]:
+              - checkbox "Interior Design Permit" [ref=e77]
+              - generic [ref=e78]: Interior Design Permit
+            - generic [ref=e79] [cursor=pointer]:
+              - checkbox "Fencing Permit" [ref=e80]
+              - generic [ref=e81]: Fencing Permit
+            - generic [ref=e82] [cursor=pointer]:
+              - checkbox "Sign Permit" [ref=e83]
+              - generic [ref=e84]: Sign Permit
+            - generic [ref=e85] [cursor=pointer]:
+              - checkbox "Excavation Permit" [ref=e86]
+              - generic [ref=e87]: Excavation Permit
+            - generic [ref=e88] [cursor=pointer]:
+              - checkbox "FSEC for Building Permit (BFP)" [ref=e89]
+              - generic [ref=e90]: FSEC for Building Permit (BFP)
+            - generic [ref=e91] [cursor=pointer]:
+              - checkbox "Certificate of Occupancy" [ref=e92]
+              - generic [ref=e93]: Certificate of Occupancy
+            - generic [ref=e94] [cursor=pointer]:
+              - checkbox "FSIC for Occupancy Permit (BFP)" [ref=e95]
+              - generic [ref=e96]: FSIC for Occupancy Permit (BFP)
+        - group "Level of access" [ref=e97]:
+          - generic [ref=e99] [cursor=pointer]:
+            - radio "View only See applications and documents. Cannot change anything." [checked] [ref=e100]
+            - generic [ref=e101]:
+              - strong [ref=e102]: View only
+              - generic [ref=e103]: See applications and documents. Cannot change anything.
+          - generic [ref=e104] [cursor=pointer]:
+            - radio "View and edit Respond to citizens and decide on applications." [ref=e105]
+            - generic [ref=e106]:
+              - strong [ref=e107]: View and edit
+              - generic [ref=e108]: Respond to citizens and decide on applications.
+        - generic [ref=e109]: Why you need access
+        - textbox "Why you need access" [ref=e111]:
+          - /placeholder: Briefly, so the administrator can decide
+          - text: I need access to review and process building permit applications for the Zoning Office as part of my daily duties.
+        - alert [ref=e121]: The request failed
+        - button "Send request" [ref=e112] [cursor=pointer]
+      - paragraph [ref=e113]: Applying for a building permit or a certificate of occupancy? This portal is for LGU staff — citizens use a different one.
+      - paragraph [ref=e114]:
+        - text: Already have an account?
+        - link "Sign in" [ref=e115] [cursor=pointer]:
+          - /url: /login
+    - paragraph [ref=e116]: © 2026 Municipality of Castilla, Sorsogon. All rights reserved.

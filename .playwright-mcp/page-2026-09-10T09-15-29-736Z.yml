@@ -1,0 +1,134 @@
+- generic [ref=e54]:
+  - complementary [ref=e56]:
+    - generic [ref=e57]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=e59]
+      - generic [ref=e60]: E-BPCO
+    - navigation [ref=e61]:
+      - link "Dashboard" [ref=e64] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=e70]:
+        - generic [ref=e71]: Operations
+        - generic [ref=e72]:
+          - link "Applications" [ref=e73] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=e79] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=e84] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=e91] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=e98]:
+        - generic [ref=e99]: Administration
+        - generic [ref=e100]:
+          - link "Businesses" [ref=e101] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=e107] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=e113] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=e120] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=e129] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [active] [ref=e135] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=e141] [cursor=pointer]
+  - main [ref=e147]:
+    - generic [ref=e676]:
+      - generic "System Logs" [ref=e677]:
+        - generic [ref=e678]:
+          - heading "System Logs" [level=1] [ref=e679]
+          - generic [ref=e680]:
+            - button "Notifications" [ref=e682] [cursor=pointer]
+            - button "P paul@lguids.com.ph Super Admin" [ref=e688] [cursor=pointer]:
+              - generic [ref=e689]: P
+              - generic [ref=e693]:
+                - generic [ref=e694]: paul@lguids.com.ph
+                - generic [ref=e695]: Super Admin
+      - generic [ref=e699]:
+        - generic [ref=e701]:
+          - generic [ref=e703]:
+            - paragraph [ref=e704]: Total Logs (Today)
+            - paragraph [ref=e705]: "0"
+          - generic [ref=e706]: All activity logged today
+        - generic [ref=e710]:
+          - generic [ref=e712]:
+            - paragraph [ref=e713]: Errors (Critical)
+            - paragraph [ref=e714]: "0"
+          - generic [ref=e715]: 0% of today's logs
+        - generic [ref=e719]:
+          - generic [ref=e721]:
+            - paragraph [ref=e722]: Warnings (Today)
+            - paragraph [ref=e723]: "0"
+          - generic [ref=e724]: 0% of today's logs
+        - generic [ref=e728]:
+          - generic [ref=e730]:
+            - paragraph [ref=e731]: Successful Actions
+            - paragraph [ref=e732]: "0"
+          - generic [ref=e733]: 0% of today's logs
+        - generic [ref=e737]:
+          - generic [ref=e739]:
+            - paragraph [ref=e740]: Active Sessions
+            - paragraph [ref=e741]: "20"
+          - generic [ref=e742]: Across All Tenants
+      - generic [ref=e745]:
+        - navigation [ref=e746]:
+          - button [ref=e747] [cursor=pointer]
+          - button [ref=e752] [cursor=pointer]
+          - button [ref=e759] [cursor=pointer]
+          - button [ref=e764] [cursor=pointer]
+          - button [ref=e768] [cursor=pointer]
+        - note [ref=e773]:
+          - generic [ref=e778]: Backed by this app's real audit trail — every row here is a genuine action taken in Applications or Payments.
+        - generic [ref=e779]:
+          - generic [ref=e780]: May 5, 2026 - May 6, 2026
+          - combobox "Filter by tenant" [ref=e785] [cursor=pointer]:
+            - option "All Tenants" [selected]
+            - option "Villanueva Hardware & Construction Supply"
+            - option "Simbulan Sari-Sari Store"
+            - option "Rodrigo Bakeshop"
+            - option "Zaballero Auto Repair Shop"
+            - option "Martirez Rice Mill"
+            - option "Nuñez Feeds & Agri Supply"
+            - option "Villareal Eatery"
+            - option "Barrera Internet Café"
+            - option "Morales General Merchandise"
+            - option "Bermudez Furniture Shop"
+            - option "Salazar Water Refilling Station"
+            - option "Fajota Trading Corp."
+          - combobox "Status filter" [ref=e786] [cursor=pointer]:
+            - option "All Statuses" [selected]
+            - option "Active"
+            - option "Inactive"
+          - combobox "Severity filter" [ref=e787] [cursor=pointer]:
+            - option "All Severity" [selected]
+            - option "Critical"
+            - option "Warning"
+            - option "Info"
+          - generic [ref=e788]:
+            - generic [ref=e789]: Live Stream
+            - switch "Live Stream" [checked] [ref=e790] [cursor=pointer]
+          - button [disabled] [ref=e792]
+          - button [ref=e796] [cursor=pointer]
+        - table [ref=e802]:
+          - rowgroup [ref=e803]:
+            - row [ref=e804]:
+              - columnheader "Time Stamp" [ref=e805]
+              - columnheader "Event type" [ref=e806]
+              - columnheader "Description" [ref=e807]
+              - columnheader "User/Action" [ref=e808]
+              - columnheader "Tenant" [ref=e809]
+              - columnheader "Module" [ref=e810]
+              - columnheader "IP Address" [ref=e811]
+              - columnheader "Status" [ref=e812]
+              - columnheader "Severity" [ref=e813]
+              - columnheader "ACTION" [ref=e814]
+          - rowgroup [ref=e815]:
+            - row [ref=e816]:
+              - cell "No activity logs match your search." [ref=e817]
+        - navigation "Pagination" [ref=e819]:
+          - generic [ref=e820]: Showing 0 of 0
+          - generic [ref=e821]:
+            - button "First page" [disabled] [ref=e822]
+            - button "Page 1" [ref=e827] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=e828]

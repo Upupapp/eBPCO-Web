@@ -1,0 +1,280 @@
+- generic [ref=f20e4]:
+  - complementary [ref=f20e6]:
+    - generic [ref=f20e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f20e9]
+      - generic [ref=f20e10]: E-BPCO
+    - navigation [ref=f20e11]:
+      - link "Dashboard" [ref=f20e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f20e20]:
+        - generic [ref=f20e21]: Operations
+        - generic [ref=f20e22]:
+          - link "Applications" [ref=f20e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f20e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f20e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f20e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f20e48]:
+        - generic [ref=f20e49]: Administration
+        - generic [ref=f20e50]:
+          - link "Businesses" [ref=f20e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f20e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f20e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f20e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f20e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f20e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f20e91] [cursor=pointer]
+  - main [ref=f20e97]:
+    - generic [ref=f20e98]:
+      - generic "Applications" [ref=f20e99]:
+        - generic [ref=f20e100]:
+          - heading "Applications" [level=1] [ref=f20e101]
+          - generic [ref=f20e102]:
+            - button "Notifications" [ref=f20e104] [cursor=pointer]
+            - button "DB Dev Bypass (Super Admin) Super Admin" [ref=f20e110] [cursor=pointer]:
+              - generic [ref=f20e111]: DB
+              - generic [ref=f20e115]:
+                - generic [ref=f20e116]: Dev Bypass (Super Admin)
+                - generic [ref=f20e117]: Super Admin
+      - generic [ref=f20e121]:
+        - generic [ref=f20e123]:
+          - generic [ref=f20e125]:
+            - paragraph [ref=f20e126]: Under Review
+            - paragraph [ref=f20e127]: "0"
+          - generic [ref=f20e128]:
+            - generic [ref=f20e129]: 0% of all applications
+            - 'img "Under Review progress: 0 percent" [ref=f20e131]'
+        - generic [ref=f20e134]:
+          - generic [ref=f20e136]:
+            - paragraph [ref=f20e137]: Approved
+            - paragraph [ref=f20e138]: "0"
+          - generic [ref=f20e139]:
+            - generic [ref=f20e140]: 0% of all applications
+            - 'img "Approved progress: 0 percent" [ref=f20e142]'
+        - generic [ref=f20e145]:
+          - generic [ref=f20e147]:
+            - paragraph [ref=f20e148]: Rejected
+            - paragraph [ref=f20e149]: "0"
+          - generic [ref=f20e150]:
+            - generic [ref=f20e151]: 0% of all applications
+            - 'img "Rejected progress: 0 percent" [ref=f20e153]'
+        - generic [ref=f20e156]:
+          - generic [ref=f20e158]:
+            - paragraph [ref=f20e159]: Total Applications
+            - paragraph [ref=f20e160]: "0"
+          - generic [ref=f20e161]:
+            - generic [ref=f20e162]: Under Review · Approved · Rejected
+            - 'img "3 categories: 0, 0, 0" [ref=f20e164]'
+      - generic [ref=f20e168]:
+        - generic [ref=f20e169]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Lo" [ref=f20e175]:
+            - /placeholder: Search Here By Application ID, Applicant Name, Business/Project, or Location
+          - generic [ref=f20e176]:
+            - button [ref=f20e179] [cursor=pointer]
+            - button [ref=f20e183] [cursor=pointer]
+            - button [ref=f20e188] [cursor=pointer]
+        - alert [ref=f20e191]:
+          - generic [ref=f20e196]: The queue could not be loaded, so no applications are shown. The request failed
+          - button "Try again" [ref=f20e197] [cursor=pointer]
+        - table [ref=f20e199]:
+          - rowgroup [ref=f20e200]:
+            - row [ref=f20e201]:
+              - columnheader [ref=f20e202]:
+                - checkbox "Select all applications" [ref=f20e203]
+              - columnheader "APPLICATION ID" [ref=f20e204]
+              - columnheader "APPLICANT NAME" [ref=f20e205]
+              - columnheader "LOCATION" [ref=f20e206]
+              - columnheader "TYPE" [ref=f20e207]
+              - columnheader "DATE SUBMITTED" [ref=f20e208]
+              - columnheader "ASSIGNED OFFICER" [ref=f20e209]
+              - columnheader "STATUS" [ref=f20e210]
+              - columnheader "ACTION" [ref=f20e211]
+          - rowgroup [ref=f20e212]:
+            - row [ref=f20e213]:
+              - cell "No applications match your search." [ref=f20e214]
+        - navigation "Pagination" [ref=f20e216]:
+          - generic [ref=f20e217]: Showing 0 of 0
+          - generic [ref=f20e218]:
+            - button "First page" [disabled] [ref=f20e219]
+            - button "Page 1" [ref=f20e224] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f20e225]
+      - dialog "New Application" [ref=f20e831]:
+        - button "Close" [ref=f20e832] [cursor=pointer]: ✕
+        - heading "New Application" [level=2] [ref=f20e833]
+        - paragraph [ref=f20e834]: Encode a walk-in or manually submitted application.
+        - tablist "Application form sections" [ref=f20e835]:
+          - tab "1 Applicant Information" [ref=f20e836] [cursor=pointer]:
+            - generic [ref=f20e837]: "1"
+            - text: Applicant Information
+          - tab "2 Business Information" [ref=f20e838] [cursor=pointer]:
+            - generic [ref=f20e839]: "2"
+            - text: Business Information
+          - tab "3 Application Information" [ref=f20e840] [cursor=pointer]:
+            - generic [ref=f20e841]: "3"
+            - text: Application Information
+          - tab "4 Document Attachments" [ref=f20e842] [cursor=pointer]:
+            - generic [ref=f20e843]: "4"
+            - text: Document Attachments
+          - tab "5 Review & Confirm" [selected] [ref=f20e844] [cursor=pointer]:
+            - generic [ref=f20e845]: "5"
+            - text: Review & Confirm
+        - paragraph [ref=f20e846]: "* Required field"
+        - generic [ref=f20e1448]:
+          - generic [ref=f20e1449]:
+            - heading "Applicant Information" [level=3] [ref=f20e1450]
+            - generic [ref=f20e1451]:
+              - generic [ref=f20e1452]:
+                - term [ref=f20e1453]: Name
+                - definition [ref=f20e1454]: Maria Santos
+              - generic [ref=f20e1455]:
+                - term [ref=f20e1456]: Type
+                - definition [ref=f20e1457]: Individual
+              - generic [ref=f20e1458]:
+                - term [ref=f20e1459]: Email
+                - definition [ref=f20e1460]: maria.santos@gmail.com
+              - generic [ref=f20e1461]:
+                - term [ref=f20e1462]: Mobile
+                - definition [ref=f20e1463]: +63 917 123 4567
+              - generic [ref=f20e1464]:
+                - term [ref=f20e1465]: Address
+                - definition [ref=f20e1466]: Purok 3, Poblacion, Barangay Poblacion
+          - generic [ref=f20e1467]:
+            - heading "Business Information" [level=3] [ref=f20e1468]
+            - generic [ref=f20e1469]:
+              - generic [ref=f20e1470]:
+                - term [ref=f20e1471]: Registered Name
+                - definition [ref=f20e1472]: Santos Sari-Sari Store
+              - generic [ref=f20e1473]:
+                - term [ref=f20e1474]: Category
+                - definition [ref=f20e1475]: Retail
+              - generic [ref=f20e1476]:
+                - term [ref=f20e1477]: Address
+                - definition [ref=f20e1478]: Purok 3, Poblacion, Barangay Poblacion
+              - generic [ref=f20e1479]:
+                - term [ref=f20e1480]: Owner/Representative
+                - definition [ref=f20e1481]: Maria Santos
+          - generic [ref=f20e1482]:
+            - heading "Application Information" [level=3] [ref=f20e1483]
+            - generic [ref=f20e1484]:
+              - generic [ref=f20e1485]:
+                - term [ref=f20e1486]: Permit Type
+                - definition [ref=f20e1487]: Building Permit – New Construction
+              - generic [ref=f20e1488]:
+                - term [ref=f20e1489]: Transaction
+                - definition [ref=f20e1490]: New
+              - generic [ref=f20e1491]:
+                - term [ref=f20e1492]: Date Received
+                - definition [ref=f20e1493]: 2026-09-11
+              - generic [ref=f20e1494]:
+                - term [ref=f20e1495]: Assigned Evaluator
+                - definition [ref=f20e1496]: Engr. Ricardo Buenaflor
+              - generic [ref=f20e1497]:
+                - term [ref=f20e1498]: Assigned Office
+                - definition [ref=f20e1499]: Office of the Municipal Engineer / Building Official
+              - generic [ref=f20e1500]:
+                - term [ref=f20e1501]: Scope of Work
+                - definition [ref=f20e1502]: Construction of a new 2-story residential building.
+          - generic [ref=f20e1503]:
+            - heading "Documents" [level=3] [ref=f20e1504]
+            - paragraph [ref=f20e1505]: These are the file names recorded against the checklist. The documents themselves are not sent anywhere yet.
+            - list [ref=f20e1506]:
+              - listitem [ref=f20e1507]:
+                - text: Certified True Copy of OCT/TCT
+                - emphasis [ref=f20e1512]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1513]:
+                - text: Survey Plan
+                - emphasis [ref=f20e1518]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1519]:
+                - text: Design Plans (duly signed and sealed)
+                - emphasis [ref=f20e1524]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1525]:
+                - text: Unified Building Permit Form
+                - emphasis [ref=f20e1530]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1531]:
+                - text: Electrical Permit (ancillary application form)
+                - emphasis [ref=f20e1536]: (Optional)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1537]:
+                - text: Fencing Permit (ancillary application form)
+                - emphasis [ref=f20e1542]: (Optional)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1543]:
+                - text: Architectural Permit (ancillary application form)
+                - emphasis [ref=f20e1548]: (Optional)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1549]:
+                - text: Sanitary/Plumbing Permit (ancillary application form)
+                - emphasis [ref=f20e1554]: (Optional)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1555]:
+                - text: Mechanical Permit (ancillary application form)
+                - emphasis [ref=f20e1560]: (Optional)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1561]:
+                - text: Civil/Structural Permit (ancillary application form)
+                - emphasis [ref=f20e1566]: (Optional)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1567]:
+                - text: Excavation Permit (ancillary application form)
+                - emphasis [ref=f20e1572]: (Optional)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1573]:
+                - text: Electronics Permit (ancillary application form)
+                - emphasis [ref=f20e1578]: (Optional)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1579]:
+                - text: Cost Estimate (duly signed and sealed)
+                - emphasis [ref=f20e1584]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1585]:
+                - text: Technical Specifications (duly signed and sealed)
+                - emphasis [ref=f20e1590]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1591]:
+                - text: Structural Design and Analysis
+                - emphasis [ref=f20e1596]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1597]:
+                - text: Soil Analysis / Plate Load Test / Seismic Analysis
+                - emphasis [ref=f20e1602]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1603]:
+                - text: Valid Licenses (PRC) of all involved professionals
+                - emphasis [ref=f20e1608]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1609]:
+                - text: Valid ID of Applicant and Owner of Lot
+                - emphasis [ref=f20e1614]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1615]:
+                - text: Zoning / Locational Clearance
+                - emphasis [ref=f20e1620]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1621]:
+                - text: Fire Safety Evaluation Clearance
+                - emphasis [ref=f20e1626]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1627]:
+                - text: Approved Construction Safety and Health Program
+                - emphasis [ref=f20e1632]: (Required)
+                - text: — test-file.pdf
+              - listitem [ref=f20e1633]:
+                - text: Road Clearance
+                - emphasis [ref=f20e1638]: (Required)
+                - text: — test-file.pdf
+        - generic [ref=f20e871]:
+          - button "Back" [ref=f20e896] [cursor=pointer]
+          - button "Create Application" [ref=f20e1639] [cursor=pointer]

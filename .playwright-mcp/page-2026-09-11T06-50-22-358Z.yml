@@ -1,0 +1,167 @@
+- generic [ref=f24e2]:
+  - generic [ref=f24e4]:
+    - complementary [ref=f24e6]:
+      - generic [ref=f24e7]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f24e9]
+        - generic [ref=f24e10]: E-BPCO
+      - navigation [ref=f24e11]:
+        - link "Dashboard" [ref=f24e14] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f24e20]:
+          - generic [ref=f24e21]: Operations
+          - generic [ref=f24e22]:
+            - link "Applications" [ref=f24e23] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f24e29] [cursor=pointer]:
+              - /url: /evaluations
+            - link "Payments" [ref=f24e34] [cursor=pointer]:
+              - /url: /payments
+            - link "Permit Release" [ref=f24e41] [cursor=pointer]:
+              - /url: /permit-release
+        - generic [ref=f24e48]:
+          - generic [ref=f24e49]: Administration
+          - generic [ref=f24e50]:
+            - link "Businesses" [ref=f24e51] [cursor=pointer]:
+              - /url: /businesses
+            - link "Access Requests" [ref=f24e57] [cursor=pointer]:
+              - /url: /access-requests
+            - link "Users & Roles" [ref=f24e63] [cursor=pointer]:
+              - /url: /user-roles
+            - link "Workflow" [ref=f24e70] [cursor=pointer]:
+              - /url: /workflow
+            - link "Archive" [ref=f24e79] [cursor=pointer]:
+              - /url: /archive
+            - link "System Logs" [ref=f24e85] [cursor=pointer]:
+              - /url: /system-logs
+      - button "Log Out" [ref=f24e91] [cursor=pointer]
+    - main [ref=f24e97]:
+      - generic [ref=f24e98]:
+        - generic "Businesses" [ref=f24e99]:
+          - generic [ref=f24e100]:
+            - heading "Businesses" [level=1] [ref=f24e101]
+            - generic [ref=f24e102]:
+              - button "Notifications" [ref=f24e104] [cursor=pointer]
+              - button "DB Dev Bypass (Super Admin) Super Admin" [ref=f24e110] [cursor=pointer]:
+                - generic [ref=f24e111]: DB
+                - generic [ref=f24e115]:
+                  - generic [ref=f24e116]: Dev Bypass (Super Admin)
+                  - generic [ref=f24e117]: Super Admin
+        - alert [ref=f24e122]:
+          - generic [ref=f24e127]: The application queue could not be loaded, so the figures on this page are not a picture of current work. The request failed
+        - generic [ref=f24e319]:
+          - generic [ref=f24e320]:
+            - heading "Create Business" [level=1] [ref=f24e321]
+            - paragraph [ref=f24e322]: Register a new Business (citizen) in the System
+          - generic [ref=f24e323]:
+            - button "Back to List" [ref=f24e324] [cursor=pointer]
+            - button [active] [ref=f24e325] [cursor=pointer]
+        - generic [ref=f24e328]:
+          - generic [ref=f24e329]:
+            - generic [ref=f24e330]:
+              - heading "Basic Information" [level=2] [ref=f24e331]
+              - generic [ref=f24e332]: Business Name
+              - textbox "Business Name" [ref=f24e333]:
+                - /placeholder: Enter Business Name
+                - text: Test Business Co
+              - generic [ref=f24e334]: Business Category
+              - combobox "Business Category" [ref=f24e335] [cursor=pointer]:
+                - option "Select Business Category" [selected]
+                - option "Retail"
+                - option "Food Service"
+                - option "Services"
+                - option "Manufacturing"
+                - option "Wholesale"
+                - option "Other"
+            - generic [ref=f24e336]:
+              - heading "Contact Person" [level=2] [ref=f24e337]
+              - generic [ref=f24e338]: Full Name
+              - textbox "Full Name" [ref=f24e339]:
+                - /placeholder: Enter Full Name
+              - generic [ref=f24e340]: Contact Number
+              - textbox "Contact Number" [ref=f24e341]:
+                - /placeholder: Enter Contact Number
+            - generic [ref=f24e342]:
+              - heading "Initial Information" [level=2] [ref=f24e343]
+              - generic [ref=f24e344]: Enable Modules
+              - generic [ref=f24e345] [cursor=pointer]:
+                - checkbox "Initial Evaluation" [ref=f24e346]
+                - text: Initial Evaluation
+              - generic [ref=f24e347] [cursor=pointer]:
+                - checkbox "Zoning Evaluation" [ref=f24e348]
+                - text: Zoning Evaluation
+              - generic [ref=f24e349] [cursor=pointer]:
+                - checkbox "Fire Safety Evaluation" [ref=f24e350]
+                - text: Fire Safety Evaluation
+              - generic [ref=f24e351] [cursor=pointer]:
+                - checkbox "Locational Clearance" [ref=f24e352]
+                - text: Locational Clearance
+          - generic [ref=f24e353]:
+            - generic [ref=f24e354]:
+              - heading "Address Information" [level=2] [ref=f24e355]
+              - generic [ref=f24e356]: Region
+              - combobox "Region" [ref=f24e357] [cursor=pointer]:
+                - option "Region V (Bicol Region)" [selected]
+              - generic [ref=f24e358]: Province
+              - combobox "Province" [ref=f24e359] [cursor=pointer]:
+                - option "Sorsogon" [selected]
+              - generic [ref=f24e360]: City/Municipality
+              - combobox "City/Municipality" [ref=f24e361] [cursor=pointer]:
+                - option "Castilla" [selected]
+              - generic [ref=f24e362]: Barangay
+              - combobox "Barangay" [ref=f24e363] [cursor=pointer]:
+                - option "Select Barangay" [selected]
+                - option "Amomonting"
+                - option "Bagalayag"
+                - option "Bagong Sirang"
+                - option "Bonga"
+                - option "Buenavista"
+                - option "Burabod"
+                - option "Caburacan"
+                - option "Canjela"
+                - option "Cogon"
+                - option "Cumadcad"
+                - option "Dangcalan"
+                - option "Dinapa"
+                - option "La Union"
+                - option "Libtong"
+                - option "Loreto"
+                - option "Macalaya"
+                - option "Maracabac"
+                - option "Mayon"
+                - option "Maypangi"
+                - option "Milagrosa"
+                - option "Miluya"
+                - option "Monte Carmelo"
+                - option "Oras"
+                - option "Pandan"
+                - option "Poblacion"
+                - option "Quirapi"
+                - option "Saclayan"
+                - option "Salvacion"
+                - option "San Isidro"
+                - option "San Rafael"
+                - option "San Roque"
+                - option "San Vicente"
+                - option "Sogoy"
+                - option "Tomalaytay"
+            - generic [ref=f24e364]:
+              - heading "Login Credentials" [level=2] [ref=f24e365]
+              - generic [ref=f24e366]: User Name
+              - textbox "User Name" [ref=f24e367]:
+                - /placeholder: Enter User Name
+                - text: testbusiness1
+              - generic [ref=f24e368]: Password
+              - generic [ref=f24e369]:
+                - textbox "Password" [ref=f24e374]:
+                  - /placeholder: ••••••••
+                  - text: Password123
+                - button [ref=f24e375] [cursor=pointer]
+              - generic [ref=f24e380]: Confirm Password
+              - generic [ref=f24e381]:
+                - textbox "Confirm password" [ref=f24e386]:
+                  - /placeholder: ••••••••
+                  - text: DifferentPass456
+                - button [ref=f24e387] [cursor=pointer]
+  - status [ref=f24e393]:
+    - generic [ref=f24e398]: Password and confirm password do not match.
+    - button "Dismiss" [ref=f24e399] [cursor=pointer]: ✕

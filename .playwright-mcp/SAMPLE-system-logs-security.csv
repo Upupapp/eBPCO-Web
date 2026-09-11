@@ -1,0 +1,25 @@
+dataSource,timestamp,eventType,user,tenant,message,ip,environment,severity,status
+SAMPLE - not real activity,1 Jan 2026 8:00 AM,Failed Login Attempt,Daniel Bermas,Villanueva Hardware & Construction Supply,Failed Login Attempt from 192.168.1.10,192.168.1.10,Production,Critical,Active
+SAMPLE - not real activity,2 Feb 2026 9:07 AM,Password Changed,Maria Santos,Simbulan Sari-Sari Store,Password Changed from 192.168.2.11,192.168.2.11,Staging,Warning,Active
+SAMPLE - not real activity,3 Mar 2026 10:14 AM,Suspicious IP Blocked,Jose Bragais,Rodrigo Bakeshop,Suspicious IP Blocked from 192.168.3.12,192.168.3.12,Production,Info,Active
+SAMPLE - not real activity,4 Apr 2026 11:21 AM,2FA Enabled,Ana Rosales,Zaballero Auto Repair Shop,2FA Enabled from 192.168.4.13,192.168.4.13,Staging,Critical,Active
+SAMPLE - not real activity,5 May 2026 12:28 PM,Account Locked,Mark Olivar,Martirez Rice Mill,Account Locked from 192.168.5.14,192.168.5.14,Production,Warning,Inactive
+SAMPLE - not real activity,6 Jun 2026 1:35 PM,Failed Login Attempt,Grace Fajota,Nuñez Feeds & Agri Supply,Failed Login Attempt from 192.168.6.15,192.168.6.15,Staging,Info,Active
+SAMPLE - not real activity,7 Jul 2026 2:42 PM,Password Changed,Paolo Escueta,Villareal Eatery,Password Changed from 192.168.7.16,192.168.7.16,Production,Critical,Active
+SAMPLE - not real activity,8 Aug 2026 3:49 PM,Suspicious IP Blocked,Liza Buenaflor,Barrera Internet Café,Suspicious IP Blocked from 192.168.8.17,192.168.8.17,Staging,Warning,Active
+SAMPLE - not real activity,9 Sep 2026 4:56 PM,2FA Enabled,Ramon Estioco,Morales General Merchandise,2FA Enabled from 192.168.9.18,192.168.9.18,Production,Info,Active
+SAMPLE - not real activity,10 Oct 2026 5:03 PM,Account Locked,Carmen Salvador,Bermudez Furniture Shop,Account Locked from 192.168.1.19,192.168.1.19,Staging,Critical,Inactive
+SAMPLE - not real activity,11 Nov 2026 8:10 AM,Failed Login Attempt,Victor Ariola,Salazar Water Refilling Station,Failed Login Attempt from 192.168.2.20,192.168.2.20,Production,Warning,Active
+SAMPLE - not real activity,12 Dec 2026 9:17 AM,Password Changed,Rosa Mendoza,Fajota Trading Corp.,Password Changed from 192.168.3.21,192.168.3.21,Staging,Info,Active
+SAMPLE - not real activity,13 Jan 2026 10:24 AM,Suspicious IP Blocked,Daniel Bermas,Villanueva Hardware & Construction Supply,Suspicious IP Blocked from 192.168.4.22,192.168.4.22,Production,Critical,Active
+SAMPLE - not real activity,14 Feb 2026 11:31 AM,2FA Enabled,Maria Santos,Simbulan Sari-Sari Store,2FA Enabled from 192.168.5.23,192.168.5.23,Staging,Warning,Active
+SAMPLE - not real activity,15 Mar 2026 12:38 PM,Account Locked,Jose Bragais,Rodrigo Bakeshop,Account Locked from 192.168.6.24,192.168.6.24,Production,Info,Inactive
+SAMPLE - not real activity,16 Apr 2026 1:45 PM,Failed Login Attempt,Ana Rosales,Zaballero Auto Repair Shop,Failed Login Attempt from 192.168.7.25,192.168.7.25,Staging,Critical,Active
+SAMPLE - not real activity,17 May 2026 2:52 PM,Password Changed,Mark Olivar,Martirez Rice Mill,Password Changed from 192.168.8.26,192.168.8.26,Production,Warning,Active
+SAMPLE - not real activity,18 Jun 2026 3:59 PM,Suspicious IP Blocked,Grace Fajota,Nuñez Feeds & Agri Supply,Suspicious IP Blocked from 192.168.9.27,192.168.9.27,Staging,Info,Active
+SAMPLE - not real activity,19 Jul 2026 4:06 PM,2FA Enabled,Paolo Escueta,Villareal Eatery,2FA Enabled from 192.168.1.28,192.168.1.28,Production,Critical,Active
+SAMPLE - not real activity,20 Aug 2026 5:13 PM,Account Locked,Liza Buenaflor,Barrera Internet Café,Account Locked from 192.168.2.29,192.168.2.29,Staging,Warning,Inactive
+SAMPLE - not real activity,21 Sep 2026 8:20 AM,Failed Login Attempt,Ramon Estioco,Morales General Merchandise,Failed Login Attempt from 192.168.3.30,192.168.3.30,Production,Info,Active
+SAMPLE - not real activity,22 Oct 2026 9:27 AM,Password Changed,Carmen Salvador,Bermudez Furniture Shop,Password Changed from 192.168.4.31,192.168.4.31,Staging,Critical,Active
+SAMPLE - not real activity,23 Nov 2026 10:34 AM,Suspicious IP Blocked,Victor Ariola,Salazar Water Refilling Station,Suspicious IP Blocked from 192.168.5.32,192.168.5.32,Production,Warning,Active
+SAMPLE - not real activity,24 Dec 2026 11:41 AM,2FA Enabled,Rosa Mendoza,Fajota Trading Corp.,2FA Enabled from 192.168.6.33,192.168.6.33,Staging,Info,Active

@@ -1,0 +1,304 @@
+- generic [ref=f23e4]:
+  - complementary [ref=f23e6]:
+    - generic [ref=f23e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f23e9]
+      - generic [ref=f23e10]: E-BPCO
+    - navigation [ref=f23e11]:
+      - link "Dashboard" [ref=f23e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f23e20]:
+        - generic [ref=f23e21]: Operations
+        - generic [ref=f23e22]:
+          - link "Applications" [ref=f23e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f23e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f23e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f23e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f23e48]:
+        - generic [ref=f23e49]: Administration
+        - generic [ref=f23e50]:
+          - link "Businesses" [ref=f23e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f23e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f23e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f23e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f23e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f23e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f23e91] [cursor=pointer]
+  - main [ref=f23e97]:
+    - generic [ref=f23e98]:
+      - generic "Permit Release" [ref=f23e99]:
+        - generic [ref=f23e100]:
+          - heading "Permit Release" [level=1] [ref=f23e101]
+          - generic [ref=f23e102]:
+            - button "Notifications" [ref=f23e104] [cursor=pointer]
+            - button "DB Dev Bypass (Super Admin) Super Admin" [ref=f23e110] [cursor=pointer]:
+              - generic [ref=f23e111]: DB
+              - generic [ref=f23e115]:
+                - generic [ref=f23e116]: Dev Bypass (Super Admin)
+                - generic [ref=f23e117]: Super Admin
+      - alert [ref=f23e122]:
+        - generic [ref=f23e127]: The application queue could not be loaded, so the figures on this page are not a picture of current work. The request failed
+      - navigation [ref=f23e128]:
+        - button [ref=f23e129] [cursor=pointer]
+        - button [ref=f23e135] [cursor=pointer]
+      - generic [ref=f23e349]:
+        - heading "Building Permit – New Construction" [level=1] [ref=f23e350]
+        - button "Back to List" [ref=f23e352] [cursor=pointer]
+      - generic [ref=f23e353]:
+        - generic [ref=f23e354]:
+          - generic [ref=f23e355]:
+            - heading "Required Documents" [level=2] [ref=f23e356]
+            - generic [ref=f23e357]:
+              - button "Reset to Default" [ref=f23e358] [cursor=pointer]
+              - button [ref=f23e359] [cursor=pointer]
+          - table [ref=f23e363]:
+            - rowgroup [ref=f23e364]:
+              - row [ref=f23e365]:
+                - columnheader "Document" [ref=f23e366]
+                - columnheader "Required" [ref=f23e367]
+                - columnheader "Reviewing Department" [ref=f23e368]
+                - columnheader "Actions" [ref=f23e369]
+            - rowgroup [ref=f23e370]:
+              - row [ref=f23e658]:
+                - cell "Certified True Copy of OCT/TCT" [ref=f23e659]
+                - cell "Required" [ref=f23e660]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e662]
+                - cell [ref=f23e663]:
+                  - button "Edit" [ref=f23e664] [cursor=pointer]
+                  - button "Remove" [ref=f23e665] [cursor=pointer]
+              - row [ref=f23e379]:
+                - cell "Survey Plan" [ref=f23e380]
+                - cell "Required" [ref=f23e381]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e383]
+                - cell [ref=f23e384]:
+                  - button "Edit" [ref=f23e385] [cursor=pointer]
+                  - button "Remove" [ref=f23e386] [cursor=pointer]
+              - row [ref=f23e387]:
+                - cell "Design Plans (duly signed and sealed)" [ref=f23e388]
+                - cell "Required" [ref=f23e389]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e391]
+                - cell [ref=f23e392]:
+                  - button "Edit" [ref=f23e393] [cursor=pointer]
+                  - button "Remove" [ref=f23e394] [cursor=pointer]
+              - row [ref=f23e395]:
+                - cell "Unified Building Permit Form" [ref=f23e396]
+                - cell "Required" [ref=f23e397]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e399]
+                - cell [ref=f23e400]:
+                  - button "Edit" [ref=f23e401] [cursor=pointer]
+                  - button "Remove" [ref=f23e402] [cursor=pointer]
+              - row [ref=f23e403]:
+                - cell "Electrical Permit (ancillary application form)" [ref=f23e404]
+                - cell "Optional" [ref=f23e405]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e407]
+                - cell [ref=f23e408]:
+                  - button "Edit" [ref=f23e409] [cursor=pointer]
+                  - button "Remove" [ref=f23e410] [cursor=pointer]
+              - row [ref=f23e411]:
+                - cell "Fencing Permit (ancillary application form)" [ref=f23e412]
+                - cell "Optional" [ref=f23e413]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e415]
+                - cell [ref=f23e416]:
+                  - button "Edit" [ref=f23e417] [cursor=pointer]
+                  - button "Remove" [ref=f23e418] [cursor=pointer]
+              - row [ref=f23e419]:
+                - cell "Architectural Permit (ancillary application form)" [ref=f23e420]
+                - cell "Optional" [ref=f23e421]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e423]
+                - cell [ref=f23e424]:
+                  - button "Edit" [ref=f23e425] [cursor=pointer]
+                  - button "Remove" [ref=f23e426] [cursor=pointer]
+              - row [ref=f23e427]:
+                - cell "Sanitary/Plumbing Permit (ancillary application form)" [ref=f23e428]
+                - cell "Optional" [ref=f23e429]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e431]
+                - cell [ref=f23e432]:
+                  - button "Edit" [ref=f23e433] [cursor=pointer]
+                  - button "Remove" [ref=f23e434] [cursor=pointer]
+              - row [ref=f23e435]:
+                - cell "Mechanical Permit (ancillary application form)" [ref=f23e436]
+                - cell "Optional" [ref=f23e437]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e439]
+                - cell [ref=f23e440]:
+                  - button "Edit" [ref=f23e441] [cursor=pointer]
+                  - button "Remove" [ref=f23e442] [cursor=pointer]
+              - row [ref=f23e443]:
+                - cell "Civil/Structural Permit (ancillary application form)" [ref=f23e444]
+                - cell "Optional" [ref=f23e445]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e447]
+                - cell [ref=f23e448]:
+                  - button "Edit" [ref=f23e449] [cursor=pointer]
+                  - button "Remove" [ref=f23e450] [cursor=pointer]
+              - row [ref=f23e451]:
+                - cell "Excavation Permit (ancillary application form)" [ref=f23e452]
+                - cell "Optional" [ref=f23e453]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e455]
+                - cell [ref=f23e456]:
+                  - button "Edit" [ref=f23e457] [cursor=pointer]
+                  - button "Remove" [ref=f23e458] [cursor=pointer]
+              - row [ref=f23e459]:
+                - cell "Electronics Permit (ancillary application form)" [ref=f23e460]
+                - cell "Optional" [ref=f23e461]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e463]
+                - cell [ref=f23e464]:
+                  - button "Edit" [ref=f23e465] [cursor=pointer]
+                  - button "Remove" [ref=f23e466] [cursor=pointer]
+              - row [ref=f23e467]:
+                - cell "Cost Estimate (duly signed and sealed)" [ref=f23e468]
+                - cell "Required" [ref=f23e469]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e471]
+                - cell [ref=f23e472]:
+                  - button "Edit" [ref=f23e473] [cursor=pointer]
+                  - button "Remove" [ref=f23e474] [cursor=pointer]
+              - row [ref=f23e475]:
+                - cell "Technical Specifications (duly signed and sealed)" [ref=f23e476]
+                - cell "Required" [ref=f23e477]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e479]
+                - cell [ref=f23e480]:
+                  - button "Edit" [ref=f23e481] [cursor=pointer]
+                  - button "Remove" [ref=f23e482] [cursor=pointer]
+              - row [ref=f23e483]:
+                - cell "Structural Design and Analysis" [ref=f23e484]
+                - cell "Required" [ref=f23e485]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e487]
+                - cell [ref=f23e488]:
+                  - button "Edit" [ref=f23e489] [cursor=pointer]
+                  - button "Remove" [ref=f23e490] [cursor=pointer]
+              - row [ref=f23e491]:
+                - cell "Soil Analysis / Plate Load Test / Seismic Analysis" [ref=f23e492]
+                - cell "Required" [ref=f23e493]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e495]
+                - cell [ref=f23e496]:
+                  - button "Edit" [ref=f23e497] [cursor=pointer]
+                  - button "Remove" [ref=f23e498] [cursor=pointer]
+              - row [ref=f23e499]:
+                - cell "Valid Licenses (PRC) of all involved professionals" [ref=f23e500]
+                - cell "Required" [ref=f23e501]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e503]
+                - cell [ref=f23e504]:
+                  - button "Edit" [ref=f23e505] [cursor=pointer]
+                  - button "Remove" [ref=f23e506] [cursor=pointer]
+              - row [ref=f23e507]:
+                - cell "Valid ID of Applicant and Owner of Lot" [ref=f23e508]
+                - cell "Required" [ref=f23e509]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e511]
+                - cell [ref=f23e512]:
+                  - button "Edit" [ref=f23e513] [cursor=pointer]
+                  - button "Remove" [ref=f23e514] [cursor=pointer]
+              - row [ref=f23e515]:
+                - cell "Zoning / Locational Clearance" [ref=f23e516]
+                - cell "Required" [ref=f23e517]
+                - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f23e519]
+                - cell [ref=f23e520]:
+                  - button "Edit" [ref=f23e521] [cursor=pointer]
+                  - button "Remove" [ref=f23e522] [cursor=pointer]
+              - row [ref=f23e523]:
+                - cell "Fire Safety Evaluation Clearance" [ref=f23e524]
+                - cell "Required" [ref=f23e525]
+                - cell "Bureau of Fire Protection – Castilla Fire Station" [ref=f23e527]
+                - cell [ref=f23e528]:
+                  - button "Edit" [ref=f23e529] [cursor=pointer]
+                  - button "Remove" [ref=f23e530] [cursor=pointer]
+              - row [ref=f23e531]:
+                - cell "Approved Construction Safety and Health Program" [ref=f23e532]
+                - cell "Required" [ref=f23e533]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e535]
+                - cell [ref=f23e536]:
+                  - button "Edit" [ref=f23e537] [cursor=pointer]
+                  - button "Remove" [ref=f23e538] [cursor=pointer]
+              - row [ref=f23e539]:
+                - cell "Road Clearance" [ref=f23e540]
+                - cell "Required" [ref=f23e541]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f23e543]
+                - cell [ref=f23e544]:
+                  - button "Edit" [ref=f23e545] [cursor=pointer]
+                  - button "Remove" [ref=f23e546] [cursor=pointer]
+        - generic [ref=f23e547]:
+          - generic [ref=f23e548]:
+            - heading "Fee Rules" [level=2] [ref=f23e549]
+            - button [ref=f23e550] [cursor=pointer]
+          - table [ref=f23e555]:
+            - rowgroup [ref=f23e556]:
+              - row [ref=f23e557]:
+                - columnheader "Fee" [ref=f23e558]
+                - columnheader "Applicability" [ref=f23e559]
+                - columnheader "Amount" [ref=f23e560]
+            - rowgroup [ref=f23e561]:
+              - row [ref=f23e562]:
+                - cell "Filing / Application Fee (LGU-FIL-01)" [ref=f23e563]
+                - cell "Required" [ref=f23e564]
+                - cell "₱250.00" [ref=f23e566]
+              - row [ref=f23e567]:
+                - cell "Building Permit Fee (DPWH-BLD-01)" [ref=f23e568]
+                - cell "Required" [ref=f23e569]
+                - cell "Requires assessor input" [ref=f23e571]
+              - row [ref=f23e572]:
+                - cell "Line and Grade (Geodetic) Fee (CASTILLA-LNG-01)" [ref=f23e573]
+                - cell "Required" [ref=f23e574]
+                - cell "Requires assessor input" [ref=f23e576]
+              - row [ref=f23e577]:
+                - cell "Locational / Zoning of Land Fee (CASTILLA-ZON-01)" [ref=f23e578]
+                - cell "Required" [ref=f23e579]
+                - cell "Requires assessor input" [ref=f23e581]
+              - row [ref=f23e582]:
+                - cell "Electrical Permit Fee (DPWH-ELC-01)" [ref=f23e583]
+                - cell "Conditional" [ref=f23e584]
+                - cell "Requires assessor input" [ref=f23e586]
+              - row [ref=f23e587]:
+                - cell "Mechanical Permit Fee (DPWH-MEC-01)" [ref=f23e588]
+                - cell "Conditional" [ref=f23e589]
+                - cell "Requires assessor input" [ref=f23e591]
+              - row [ref=f23e592]:
+                - cell "Plumbing Permit Fee (DPWH-PLB-01)" [ref=f23e593]
+                - cell "Conditional" [ref=f23e594]
+                - cell "Requires assessor input" [ref=f23e596]
+              - row [ref=f23e597]:
+                - cell "Sanitary Permit Fee (DPWH-SAN-01)" [ref=f23e598]
+                - cell "Conditional" [ref=f23e599]
+                - cell "Requires assessor input" [ref=f23e601]
+              - row [ref=f23e602]:
+                - cell "Electronics Permit Fee (DPWH-ELN-01)" [ref=f23e603]
+                - cell "Conditional" [ref=f23e604]
+                - cell "Requires assessor input" [ref=f23e606]
+              - row [ref=f23e607]:
+                - cell "Fencing Permit Fee (DPWH-ACC-FEN)" [ref=f23e608]
+                - cell "Conditional" [ref=f23e609]
+                - cell "Requires assessor input" [ref=f23e611]
+              - row [ref=f23e612]:
+                - cell "Fire Code Assessment (FSEC/FSIC) (BFP-FSIC-01)" [ref=f23e613]
+                - cell "Conditional" [ref=f23e614]
+                - cell "Requires assessor input" [ref=f23e616]
+              - row [ref=f23e617]:
+                - cell "Architectural Fee (CASTILLA-ARC-01)" [ref=f23e618]
+                - cell "Conditional" [ref=f23e619]
+                - cell "Requires assessor input" [ref=f23e621]
+              - row [ref=f23e622]:
+                - cell "Civil / Structural Fee (CASTILLA-CVL-01)" [ref=f23e623]
+                - cell "Conditional" [ref=f23e624]
+                - cell "Requires assessor input" [ref=f23e626]
+              - row [ref=f23e627]:
+                - cell "Interior Fee (CASTILLA-INT-01)" [ref=f23e628]
+                - cell "Conditional" [ref=f23e629]
+                - cell "Requires assessor input" [ref=f23e631]
+              - row [ref=f23e632]:
+                - cell "Hotworks Fee (CASTILLA-HOT-01)" [ref=f23e633]
+                - cell "Conditional" [ref=f23e634]
+                - cell "Requires assessor input" [ref=f23e636]
+              - row [ref=f23e637]:
+                - cell "Surcharges (CASTILLA-SUR-01)" [ref=f23e638]
+                - cell "Conditional" [ref=f23e639]
+                - cell "Requires assessor input" [ref=f23e641]
+              - row [ref=f23e642]:
+                - cell "Penalties (CASTILLA-PEN-01)" [ref=f23e643]
+                - cell "Conditional" [ref=f23e644]
+                - cell "Requires assessor input" [ref=f23e646]
+          - paragraph [ref=f23e647]: Building/permit fee, line-item fees per discipline (architectural/structural/electrical/mechanical/sanitary as applicable), and other regulatory fees assessed by the Municipal Treasurer’s Office based on project cost/floor area.

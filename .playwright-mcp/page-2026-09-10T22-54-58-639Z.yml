@@ -1,0 +1,117 @@
+- generic [ref=f1e4]:
+  - complementary [ref=f1e6]:
+    - generic [ref=f1e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e9]
+      - generic [ref=f1e10]: E-BPCO
+    - navigation [ref=f1e11]:
+      - link "Dashboard" [ref=f1e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e20]:
+        - generic [ref=f1e21]: Operations
+        - generic [ref=f1e22]:
+          - link "Applications" [ref=f1e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f1e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e48]:
+        - generic [ref=f1e49]: Administration
+        - generic [ref=f1e50]:
+          - link "Businesses" [ref=f1e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f1e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f1e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e91] [cursor=pointer]
+  - main [ref=f1e97]:
+    - generic [ref=f1e98]:
+      - generic "Evaluations" [ref=f1e99]:
+        - generic [ref=f1e100]:
+          - heading "Evaluations" [level=1] [ref=f1e101]
+          - generic [ref=f1e102]:
+            - button "Notifications" [ref=f1e104] [cursor=pointer]
+            - button "DB Dev Bypass (Super Admin) Super Admin" [ref=f1e110] [cursor=pointer]:
+              - generic [ref=f1e111]: DB
+              - generic [ref=f1e115]:
+                - generic [ref=f1e116]: Dev Bypass (Super Admin)
+                - generic [ref=f1e117]: Super Admin
+      - alert [ref=f1e122]:
+        - generic [ref=f1e127]: The application queue could not be loaded, so the figures on this page are not a picture of current work. The request failed
+      - generic [ref=f1e303]:
+        - heading "Initial Evaluation" [level=1] [ref=f1e304]
+        - generic [ref=f1e305]:
+          - button "Back" [ref=f1e306] [cursor=pointer]
+          - button "More actions" [ref=f1e308] [cursor=pointer]
+      - generic [ref=f1e314]:
+        - generic [ref=f1e316]:
+          - generic [ref=f1e318]:
+            - paragraph [ref=f1e319]: Total Applications
+            - paragraph [ref=f1e320]: "0"
+          - generic [ref=f1e321]:
+            - generic [ref=f1e322]: Revision Required · Under Review · Accepted
+            - 'img "3 categories: 0, 0, 0" [ref=f1e324]'
+        - generic [ref=f1e329]:
+          - generic [ref=f1e331]:
+            - paragraph [ref=f1e332]: Revision Required
+            - paragraph [ref=f1e333]: "0"
+          - generic [ref=f1e334]:
+            - generic [ref=f1e335]: 0% of all applications
+            - 'img "Revision Required progress: 0 percent" [ref=f1e337]'
+        - generic [ref=f1e340]:
+          - generic [ref=f1e342]:
+            - paragraph [ref=f1e343]: Under Review
+            - paragraph [ref=f1e344]: "0"
+          - generic [ref=f1e345]:
+            - generic [ref=f1e346]: 0% of all applications
+            - 'img "Under Review progress: 0 percent" [ref=f1e348]'
+        - generic [ref=f1e351]:
+          - generic [ref=f1e353]:
+            - paragraph [ref=f1e354]: Accepted
+            - paragraph [ref=f1e355]: "0"
+          - generic [ref=f1e356]:
+            - generic [ref=f1e357]: 0% of all applications
+            - 'img "Accepted progress: 0 percent" [ref=f1e359]'
+      - generic [ref=f1e361]:
+        - button [ref=f1e362] [cursor=pointer]
+        - button [ref=f1e367] [cursor=pointer]
+        - button [ref=f1e372] [cursor=pointer]
+      - generic [ref=f1e377]:
+        - generic [ref=f1e378]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Ty" [ref=f1e384]:
+            - /placeholder: Search Here By Application ID, Applicant Name, Business/Project, or Type
+          - generic [ref=f1e385]:
+            - button [ref=f1e388] [cursor=pointer]
+            - button [ref=f1e392] [cursor=pointer]
+        - table [ref=f1e398]:
+          - rowgroup [ref=f1e399]:
+            - row [ref=f1e400]:
+              - columnheader [ref=f1e401]:
+                - checkbox "Select all applications in this stage" [ref=f1e402]
+              - columnheader "APPLICATION ID" [ref=f1e403]
+              - columnheader "APPLICANT NAME" [ref=f1e404]
+              - columnheader "MISSING DOCUMENTS" [ref=f1e405]
+              - columnheader "TYPE" [ref=f1e406]
+              - columnheader "REVIEWING DEPARTMENT" [ref=f1e407]
+              - columnheader "DATE SUBMITTED" [ref=f1e408]
+              - columnheader "ASSIGNED OFFICER" [ref=f1e409]
+              - columnheader "STATUS" [ref=f1e410]
+              - columnheader "ACTION" [ref=f1e411]
+          - rowgroup [ref=f1e412]:
+            - row [ref=f1e413]:
+              - cell "The evaluation queue could not be read, so this is not a picture of current work. The request failed" [ref=f1e414]
+        - navigation "Pagination" [ref=f1e416]:
+          - generic [ref=f1e417]: Showing 0 of 0
+          - generic [ref=f1e418]:
+            - button "First page" [disabled] [ref=f1e419]
+            - button "Page 1" [ref=f1e424] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f1e425]

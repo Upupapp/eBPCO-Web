@@ -1,0 +1,150 @@
+- generic [ref=f20e2]:
+  - generic [ref=f20e4]:
+    - complementary [ref=f20e6]:
+      - generic [ref=f20e7]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f20e9]
+        - generic [ref=f20e10]: E-BPCO
+      - navigation [ref=f20e11]:
+        - link "Dashboard" [ref=f20e14] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f20e20]:
+          - generic [ref=f20e21]: Operations
+          - generic [ref=f20e22]:
+            - link "Applications" [ref=f20e23] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f20e29] [cursor=pointer]:
+              - /url: /evaluations
+            - link "Payments" [ref=f20e34] [cursor=pointer]:
+              - /url: /payments
+            - link "Permit Release" [ref=f20e41] [cursor=pointer]:
+              - /url: /permit-release
+        - generic [ref=f20e48]:
+          - generic [ref=f20e49]: Administration
+          - generic [ref=f20e50]:
+            - link "Businesses" [ref=f20e51] [cursor=pointer]:
+              - /url: /businesses
+            - link "Access Requests" [ref=f20e57] [cursor=pointer]:
+              - /url: /access-requests
+            - link "Users & Roles" [ref=f20e63] [cursor=pointer]:
+              - /url: /user-roles
+            - link "Workflow" [ref=f20e70] [cursor=pointer]:
+              - /url: /workflow
+            - link "Archive" [ref=f20e79] [cursor=pointer]:
+              - /url: /archive
+            - link "System Logs" [ref=f20e85] [cursor=pointer]:
+              - /url: /system-logs
+      - button "Log Out" [ref=f20e91] [cursor=pointer]
+    - main [ref=f20e97]:
+      - generic [ref=f20e1640]:
+        - generic "Applications" [ref=f20e1641]:
+          - generic [ref=f20e1642]:
+            - heading "Applications" [level=1] [ref=f20e1643]
+            - generic [ref=f20e1644]:
+              - button "Notifications" [ref=f20e1646] [cursor=pointer]
+              - button "DB Dev Bypass (Super Admin) Super Admin" [ref=f20e1652] [cursor=pointer]:
+                - generic [ref=f20e1653]: DB
+                - generic [ref=f20e1657]:
+                  - generic [ref=f20e1658]: Dev Bypass (Super Admin)
+                  - generic [ref=f20e1659]: Super Admin
+        - generic [ref=f20e1663]:
+          - heading "Application Details" [level=1] [ref=f20e1664]
+          - generic [ref=f20e1665]:
+            - button "Action" [ref=f20e1667] [cursor=pointer]
+            - button "Evaluate" [ref=f20e1668] [cursor=pointer]
+            - button "Back to List" [ref=f20e1669] [cursor=pointer]
+            - button "More actions" [ref=f20e1671] [cursor=pointer]
+        - generic [ref=f20e1677]:
+          - generic [ref=f20e1678]:
+            - generic [ref=f20e1679]: MS
+            - generic [ref=f20e1687]:
+              - heading "E-BPCO-2026-000001 - Maria Santos" [level=2] [ref=f20e1688]
+              - generic [ref=f20e1689]: Under Review
+              - generic [ref=f20e1690]:
+                - generic [ref=f20e1691]:
+                  - term [ref=f20e1692]: "Business / Project :"
+                  - definition [ref=f20e1693]: Santos Sari-Sari Store
+                - generic [ref=f20e1694]:
+                  - term [ref=f20e1695]: "City :"
+                  - definition [ref=f20e1696]: Barangay Poblacion
+                - generic [ref=f20e1697]:
+                  - term [ref=f20e1698]: "Region :"
+                  - definition [ref=f20e1699]: Region V (Bicol Region)
+                - generic [ref=f20e1700]:
+                  - term [ref=f20e1701]: "Type :"
+                  - definition [ref=f20e1702]: Building Permit – New Construction
+                - generic [ref=f20e1703]:
+                  - term [ref=f20e1704]: "Email :"
+                  - definition [ref=f20e1705]:
+                    - text: mariasantos@gmail.com
+                    - generic [ref=f20e1706]: Unverified
+                    - button "Confirm" [ref=f20e1707] [cursor=pointer]
+                    - button "Mark Failed" [ref=f20e1708] [cursor=pointer]
+                - generic [ref=f20e1709]:
+                  - term [ref=f20e1710]: "Phone :"
+                  - definition [ref=f20e1711]:
+                    - text: +63 912 345 6789
+                    - generic [ref=f20e1712]: Unverified
+                    - button "Confirm" [ref=f20e1713] [cursor=pointer]
+                    - button "Mark Failed" [ref=f20e1714] [cursor=pointer]
+                - generic [ref=f20e1715]:
+                  - term [ref=f20e1716]: "Barangay :"
+                  - definition [ref=f20e1717]: Poblacion
+            - generic [ref=f20e1718]:
+              - generic [ref=f20e1719]:
+                - strong [ref=f20e1720]: 11 Sept 2026
+                - generic [ref=f20e1721]: Date Submitted
+              - generic [ref=f20e1722]:
+                - strong [ref=f20e1723]: Engr. Ricardo Buenaflor
+                - generic [ref=f20e1724]: Assigned Officer
+            - button [ref=f20e1725] [cursor=pointer]
+          - generic [ref=f20e1729]:
+            - generic [ref=f20e1730]:
+              - button "Timeline" [ref=f20e1731] [cursor=pointer]
+              - button "Documents" [ref=f20e1732] [cursor=pointer]
+              - button "Permit Result" [ref=f20e1733] [cursor=pointer]
+              - button "Comments" [ref=f20e1734] [cursor=pointer]
+            - generic [ref=f20e1735]:
+              - heading "Activity Summary" [level=2] [ref=f20e1736]
+              - paragraph [ref=f20e1737]:
+                - text: This Application Is Currently At
+                - strong [ref=f20e1738]: Submitted
+              - heading "Lifecycle Progress" [level=3] [ref=f20e1739]
+              - list [ref=f20e1740]:
+                - listitem [ref=f20e1741]: Draft
+                - listitem [ref=f20e1742]: Submitted
+                - listitem [ref=f20e1743]: Received
+                - listitem [ref=f20e1744]: Document Verification
+                - listitem [ref=f20e1745]: Under Evaluation
+                - listitem [ref=f20e1746]: Assessed
+                - listitem [ref=f20e1747]: Payment Submitted
+                - listitem [ref=f20e1748]: Payment Under Verification
+                - listitem [ref=f20e1749]: Payment Verified
+                - listitem [ref=f20e1750]: For Approval
+                - listitem [ref=f20e1751]: Approved
+                - listitem [ref=f20e1752]: Permit Generated
+                - listitem [ref=f20e1753]: Ready for Release
+                - listitem [ref=f20e1754]: Released
+                - listitem [ref=f20e1755]: Completed
+              - heading "Quick Information :" [level=3] [ref=f20e1756]
+              - generic [ref=f20e1757]:
+                - list [ref=f20e1758]:
+                  - listitem [ref=f20e1759]: "Assigned To: Engr. Ricardo Buenaflor"
+                  - listitem [ref=f20e1760]: "Current Step: Submitted"
+                  - listitem [ref=f20e1761]: "Days In Current Step: 0 Days"
+                - generic [ref=f20e1762]: "Total Elapsed Time: 0 Days"
+              - heading "Audit Trail" [level=3] [ref=f20e1763]
+              - table [ref=f20e1765]:
+                - rowgroup [ref=f20e1766]:
+                  - row [ref=f20e1767]:
+                    - columnheader "#" [ref=f20e1768]
+                    - columnheader "Timeline Event" [ref=f20e1769]
+                    - columnheader "Date" [ref=f20e1770]
+                    - columnheader "Time" [ref=f20e1771]
+                    - columnheader "Details" [ref=f20e1772]
+                    - columnheader "Action" [ref=f20e1773]
+                - rowgroup [ref=f20e1774]:
+                  - row [ref=f20e1775]:
+                    - cell "No audit events recorded yet." [ref=f20e1776]
+  - status [ref=f20e1778]:
+    - generic [ref=f20e1783]: Application E-BPCO-2026-000001 created for Santos Sari-Sari Store.
+    - button "Dismiss" [ref=f20e1784] [cursor=pointer]: ✕

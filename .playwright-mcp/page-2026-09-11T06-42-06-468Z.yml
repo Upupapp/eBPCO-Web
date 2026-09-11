@@ -1,0 +1,170 @@
+- generic [ref=f20e4]:
+  - complementary [ref=f20e6]:
+    - generic [ref=f20e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f20e9]
+      - generic [ref=f20e10]: E-BPCO
+    - navigation [ref=f20e11]:
+      - link "Dashboard" [ref=f20e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f20e20]:
+        - generic [ref=f20e21]: Operations
+        - generic [ref=f20e22]:
+          - link "Applications" [ref=f20e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f20e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f20e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f20e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f20e48]:
+        - generic [ref=f20e49]: Administration
+        - generic [ref=f20e50]:
+          - link "Businesses" [ref=f20e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f20e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f20e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f20e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f20e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f20e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f20e91] [cursor=pointer]
+  - main [ref=f20e97]:
+    - generic [ref=f20e98]:
+      - generic "Applications" [ref=f20e99]:
+        - generic [ref=f20e100]:
+          - heading "Applications" [level=1] [ref=f20e101]
+          - generic [ref=f20e102]:
+            - button "Notifications" [ref=f20e104] [cursor=pointer]
+            - button "DB Dev Bypass (Super Admin) Super Admin" [ref=f20e110] [cursor=pointer]:
+              - generic [ref=f20e111]: DB
+              - generic [ref=f20e115]:
+                - generic [ref=f20e116]: Dev Bypass (Super Admin)
+                - generic [ref=f20e117]: Super Admin
+      - generic [ref=f20e121]:
+        - generic [ref=f20e123]:
+          - generic [ref=f20e125]:
+            - paragraph [ref=f20e126]: Under Review
+            - paragraph [ref=f20e127]: "0"
+          - generic [ref=f20e128]:
+            - generic [ref=f20e129]: 0% of all applications
+            - 'img "Under Review progress: 0 percent" [ref=f20e131]'
+        - generic [ref=f20e134]:
+          - generic [ref=f20e136]:
+            - paragraph [ref=f20e137]: Approved
+            - paragraph [ref=f20e138]: "0"
+          - generic [ref=f20e139]:
+            - generic [ref=f20e140]: 0% of all applications
+            - 'img "Approved progress: 0 percent" [ref=f20e142]'
+        - generic [ref=f20e145]:
+          - generic [ref=f20e147]:
+            - paragraph [ref=f20e148]: Rejected
+            - paragraph [ref=f20e149]: "0"
+          - generic [ref=f20e150]:
+            - generic [ref=f20e151]: 0% of all applications
+            - 'img "Rejected progress: 0 percent" [ref=f20e153]'
+        - generic [ref=f20e156]:
+          - generic [ref=f20e158]:
+            - paragraph [ref=f20e159]: Total Applications
+            - paragraph [ref=f20e160]: "0"
+          - generic [ref=f20e161]:
+            - generic [ref=f20e162]: Under Review · Approved · Rejected
+            - 'img "3 categories: 0, 0, 0" [ref=f20e164]'
+      - generic [ref=f20e168]:
+        - generic [ref=f20e169]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Lo" [ref=f20e175]:
+            - /placeholder: Search Here By Application ID, Applicant Name, Business/Project, or Location
+          - generic [ref=f20e176]:
+            - button [ref=f20e179] [cursor=pointer]
+            - button [ref=f20e183] [cursor=pointer]
+            - button [ref=f20e188] [cursor=pointer]
+        - alert [ref=f20e191]:
+          - generic [ref=f20e196]: The queue could not be loaded, so no applications are shown. The request failed
+          - button "Try again" [ref=f20e197] [cursor=pointer]
+        - table [ref=f20e199]:
+          - rowgroup [ref=f20e200]:
+            - row [ref=f20e201]:
+              - columnheader [ref=f20e202]:
+                - checkbox "Select all applications" [ref=f20e203]
+              - columnheader "APPLICATION ID" [ref=f20e204]
+              - columnheader "APPLICANT NAME" [ref=f20e205]
+              - columnheader "LOCATION" [ref=f20e206]
+              - columnheader "TYPE" [ref=f20e207]
+              - columnheader "DATE SUBMITTED" [ref=f20e208]
+              - columnheader "ASSIGNED OFFICER" [ref=f20e209]
+              - columnheader "STATUS" [ref=f20e210]
+              - columnheader "ACTION" [ref=f20e211]
+          - rowgroup [ref=f20e212]:
+            - row [ref=f20e213]:
+              - cell "No applications match your search." [ref=f20e214]
+        - navigation "Pagination" [ref=f20e216]:
+          - generic [ref=f20e217]: Showing 0 of 0
+          - generic [ref=f20e218]:
+            - button "First page" [disabled] [ref=f20e219]
+            - button "Page 1" [ref=f20e224] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f20e225]
+      - dialog "New Application" [ref=f20e831]:
+        - button "Close" [ref=f20e832] [cursor=pointer]: ✕
+        - heading "New Application" [level=2] [ref=f20e833]
+        - paragraph [ref=f20e834]: Encode a walk-in or manually submitted application.
+        - tablist "Application form sections" [ref=f20e835]:
+          - tab "1 Applicant Information" [ref=f20e836] [cursor=pointer]:
+            - generic [ref=f20e837]: "1"
+            - text: Applicant Information
+          - tab "2 Business Information" [selected] [ref=f20e838] [cursor=pointer]:
+            - generic [ref=f20e839]: "2"
+            - text: Business Information
+          - tab "3 Application Information" [ref=f20e840] [cursor=pointer]:
+            - generic [ref=f20e841]: "3"
+            - text: Application Information
+          - tab "4 Document Attachments" [ref=f20e842] [cursor=pointer]:
+            - generic [ref=f20e843]: "4"
+            - text: Document Attachments
+          - tab "5 Review & Confirm" [ref=f20e844] [cursor=pointer]:
+            - generic [ref=f20e845]: "5"
+            - text: Review & Confirm
+        - paragraph [ref=f20e846]: "* Required field"
+        - generic [ref=f20e874]:
+          - generic [ref=f20e875]:
+            - generic [ref=f20e876]: Registered Business Name *
+            - textbox "Registered Business Name" [ref=f20e877]: Santos Sari-Sari Store
+          - generic [ref=f20e878]:
+            - generic [ref=f20e879]: Trade Name (if applicable)
+            - textbox "Trade Name (if applicable)" [ref=f20e880]
+          - generic [ref=f20e881]:
+            - generic [ref=f20e882]: Business Category *
+            - combobox "Business Category" [ref=f20e883]:
+              - option "Retail" [selected]
+              - option "Food Service"
+              - option "Services"
+              - option "Manufacturing"
+              - option "Wholesale"
+              - option "Other"
+          - generic [ref=f20e884]:
+            - generic [ref=f20e885]: Business Address *
+            - textbox "Street address" [ref=f20e886]: Purok 3, Poblacion
+          - generic [ref=f20e887]:
+            - generic [ref=f20e888]: Barangay *
+            - combobox "Barangay" [ref=f20e889]:
+              - option "Poblacion" [selected]
+              - option "Buenavista"
+              - option "Cogon"
+              - option "Bonga"
+              - option "Burabod"
+              - option "Salvacion"
+              - option "San Isidro"
+          - generic [ref=f20e890]:
+            - generic [ref=f20e891]: Owner / Authorized Representative *
+            - textbox "Owner / Authorized Representative" [ref=f20e892]:
+              - /placeholder: Maria Santos
+              - text: Maria Santos
+          - generic [ref=f20e893]:
+            - generic [ref=f20e894]: Registration / Reference Number (where applicable)
+            - textbox "DTI/SEC/CDA number" [ref=f20e895]
+        - generic [ref=f20e871]:
+          - button "Back" [ref=f20e896] [cursor=pointer]
+          - button "Next" [active] [ref=f20e873] [cursor=pointer]
