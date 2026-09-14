@@ -15,6 +15,7 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { Business } from '../../core/domain/business.model';
 import { applicantFullName } from '../../core/domain/applicant.model';
 import { ToastService } from '../../shared/toast/toast.service';
+import { validateMobileNumber } from '../../shared/utils/validators';
 
 type SubTab = 'analytics' | 'modules' | 'recent-activity';
 type ViewMode = 'list' | 'create' | 'detail';
@@ -100,6 +101,9 @@ const GROWTH_POINTS: GrowthPoint[] = [
 })
 export class Businesses {
   private readonly store = inject(ApplicationStore);
+
+  /** No backend route lists businesses as their own directory (see `ringStats`/`businessRows`' own doc comments) — real applicant/business rows are always empty regardless of what the queue holds. */
+  protected readonly noBusinessDirectory = computed(() => !this.store.isSeedData());
   private readonly toast = inject(ToastService);
 
   constructor(private readonly router: Router) {}
@@ -107,16 +111,70 @@ export class Businesses {
   protected readonly view = signal<ViewMode>('list');
   protected readonly activeSubTab = signal<SubTab>('analytics');
 
-  // These four cards used to be hardcoded ("Total Users: 1,524", "Active
-  // Businesses: 849", …) sitting directly above a table that shows the
-  // real ~17-row seed dataset — a staffer had no way to tell the ring
-  // numbers were placeholders wildly mismatched with the real data right
-  // below them. Now genuinely derived from the store, same discipline
-  // Dashboard/Evaluations/User Roles already document for their own KPI
-  // cards. "Total Users" reads `applicants()` (each real Applicant is a
-  // registered owner/user) as the closest real analogue — Active/
-  // Inactive/Total Businesses read `Business.status` directly.
+  /**
+   * `ApplicationStore._businesses`/`_applicants` are seed-only: real queue
+   * rows never populate them (the queue API sends `businessName`/`applicant`
+   * as plain strings, not a joinable id — see `staff-applications.api.ts`'s
+   * own doc comment on `businessId`/`applicantId`), and `replaceApplications`
+   * wipes both to `[]` on every real load. Once real data was wired in
+   * (Stage 2), this page's four KPI cards silently went to a flat, confident
+   * "0" — indistinguishable from a genuine "no businesses" fact — while a
+   * real business sat one page away on Applications. `store.businesses()`/
+   * `applicants()` are still the source on seed data (nothing wrong with
+   * them there); on real data this counts DISTINCT business/applicant names
+   * across the real queue instead — an honest, coarser number ("6 business
+   * names appear in the queue"), not the same claim ("6 registered
+   * businesses, this many active/inactive") the seed-backed version makes,
+   * which is why Active/Inactive read '—' rather than a fabricated split.
+   */
   protected readonly ringStats = computed<RingStat[]>(() => {
+    if (!this.store.isSeedData()) {
+      const apps = this.store.applications();
+      const totalUsers = new Set(apps.map((a) => a.applicant)).size;
+      const totalBusinesses = new Set(apps.map((a) => a.businessName)).size;
+      return [
+        {
+          label: 'Total Users',
+          value: totalUsers.toLocaleString(),
+          icon: 'users',
+          tone: 'info',
+          illustration: 'users',
+          pct: 100,
+          isTotal: true,
+          support: 'Distinct applicants across the real applications queue',
+        },
+        {
+          label: 'Active Businesses',
+          value: '—',
+          icon: 'check-circle',
+          tone: 'success',
+          illustration: 'success',
+          pct: 0,
+          isTotal: false,
+          support: 'Not tracked by this deployment',
+        },
+        {
+          label: 'Inactive Businesses',
+          value: '—',
+          icon: 'building',
+          tone: 'danger',
+          illustration: 'critical',
+          pct: 0,
+          isTotal: false,
+          support: 'Not tracked by this deployment',
+        },
+        {
+          label: 'Total Businesses',
+          value: totalBusinesses.toLocaleString(),
+          icon: 'building',
+          tone: 'violet',
+          illustration: 'businesses',
+          pct: totalUsers ? Math.round((totalBusinesses / totalUsers) * 100) : 0,
+          isTotal: false,
+          support: 'Distinct business names across the real applications queue',
+        },
+      ];
+    }
     const totalUsers = this.store.applicants().length || 1;
     const businesses = this.store.businesses();
     const active = businesses.filter((b) => b.status === 'Active').length;
@@ -201,7 +259,15 @@ export class Businesses {
     };
   }
 
-  /** Businesses created through this page's own "+ Business" wizard — kept separate from the real ApplicationStore-backed rows below since they aren't real linkable Business records (see createBusiness's documented limitation). */
+  /**
+   * `store.businesses()` is always `[]` on real data (see `ringStats`'s own
+   * doc comment) — this page has no backend business-directory route to
+   * fall back to, only businesses created through its own "+ Business"
+   * wizard this session (`locallyCreatedRows`, kept separate since they
+   * aren't real linkable Business records either — see createBusiness's
+   * documented limitation). `noBusinessDirectory` tells the template to say
+   * so rather than let an empty table read as "this LGU has no businesses".
+   */
   private readonly locallyCreatedRows = signal<BusinessRow[]>([]);
   /** Ids removed via confirmDelete — hides a store-backed row from this view rather than mutating shared store data no method exists to delete. */
   private readonly hiddenIds = signal<ReadonlySet<string>>(new Set());
@@ -399,6 +465,12 @@ export class Businesses {
 
   protected exportVisible(): void {
     const rows = this.filteredBusinessRows();
+    // `downloadCsv` writes nothing for an empty set, so "Exported 0 rows."
+    // announced a file that was never created (same fix as System Logs').
+    if (rows.length === 0) {
+      this.toast.info('Nothing to export — no businesses match the current view.');
+      return;
+    }
     downloadCsv(
       'businesses',
       rows.map((row) => this.businessCsvRow(row)),
@@ -697,9 +769,27 @@ export class Businesses {
       this.toast.error('Password and confirm password do not match.');
       return;
     }
+    // Optional (no `required` on the field, and an empty value already
+    // falls back to 'N/A' below) — but a NON-empty value should be a real
+    // Philippine mobile number, same rule and message the Applications
+    // intake wizard's conceptually identical field already enforces.
+    const phoneValidation = validateMobileNumber(this.newBusiness.contactPhone, false);
+    if (!phoneValidation.valid) {
+      this.toast.error(phoneValidation.error ?? 'Enter a valid contact number.');
+      return;
+    }
     const code = name.toUpperCase().replace(/\s+/g, '');
-    const nextIdNum =
-      Math.max(...this.businessRows().map((r) => parseInt(r.id.replace('REG-2026-', ''), 10))) + 1;
+    // `Math.max(...[])` on an empty (or all-non-numeric) list is `-Infinity`,
+    // which does not throw — it silently becomes part of the generated id
+    // string instead ("REG-2026--Infinity"). Businesses created in a fresh
+    // session always start from an empty `businessRows()` (no real
+    // business-directory endpoint exists yet — see this page's own banner),
+    // so this was not a rare edge case, it was the FIRST business created in
+    // every session.
+    const existingIds = this.businessRows()
+      .map((r) => parseInt(r.id.replace('REG-2026-', ''), 10))
+      .filter((n) => Number.isFinite(n));
+    const nextIdNum = (existingIds.length === 0 ? 0 : Math.max(...existingIds)) + 1;
     const barangayLabel = this.newBusiness.barangay
       ? this.newBusiness.barangay.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
       : 'N/A';
@@ -711,7 +801,7 @@ export class Businesses {
         category: (this.newBusiness.type as BusinessCategory) || 'Other',
         city: barangayLabel === 'N/A' ? 'N/A' : `Barangay ${barangayLabel}`,
         contactName: this.newBusiness.contactName.trim() || 'N/A',
-        contactPhone: this.newBusiness.contactPhone.trim() || 'N/A',
+        contactPhone: phoneValidation.normalized || 'N/A',
         dateCreated: 'Just now',
         userCount: 1,
         status: 'Active',

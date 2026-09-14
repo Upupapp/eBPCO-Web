@@ -110,6 +110,21 @@ export class SessionService {
   }
 
   /**
+   * Drops the local session without calling the API.
+   *
+   * For when the server has already told us the token is no good (a 401 on
+   * an authenticated request — see `auth.interceptor.ts`) rather than the
+   * officer choosing to sign out. `signOut()` would try to revoke a token
+   * that is, by definition, already refused; this just matches the client's
+   * belief about the session to reality so the guard and every `@if
+   * (isAuthenticated())` check agree with it immediately, instead of only
+   * after a reload happens to call `restore()`.
+   */
+  forceSignOut(): void {
+    this._session.set(null);
+  }
+
+  /**
    * Re-establishes a session from a token that survived a reload.
    *
    * Without this, refreshing the page signs the officer out even though the

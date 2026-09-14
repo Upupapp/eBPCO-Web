@@ -12,8 +12,9 @@ import {
   EVALUATION_STAGE_ORDER,
   canTransition,
 } from '../../core/domain/status.model';
-import { SessionService } from '../../core/session/session.service';
 import { ToastService } from '../toast/toast.service';
+import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { QueueLoader } from '../../core/domain/queue-loader';
 
 type StageFilterKey = 'All' | EvaluationStage;
 
@@ -95,8 +96,9 @@ const PREVIEW_COUNT = 6;
 export class BusinessStagesBoard {
   private readonly store = inject(ApplicationStore);
   private readonly router = inject(Router);
-  private readonly session = inject(SessionService);
   private readonly toast = inject(ToastService);
+  private readonly applicationsApi = inject(StaffApplicationsApi);
+  private readonly loader = inject(QueueLoader);
 
   readonly selectApplication = output<ApplicationRecord>();
 
@@ -488,10 +490,11 @@ export class BusinessStagesBoard {
     this.dropError.set(null);
   }
 
-  // Moves the dragged app to the front of the shared store (not just a
-  // status swap in place) so a legal move visibly does something, even
-  // for a same-column drop.
-  private moveApp(app: ApplicationRecord, targetStatus: AppStatus): void {
+  // Moves the dragged app via the real transition endpoint. `canTransition`
+  // stays as a same-tick hint — refusing an obviously-illegal drop before a
+  // round trip — but the actual result, and its exact reason when refused,
+  // always comes from the server.
+  private async moveApp(app: ApplicationRecord, targetStatus: AppStatus): Promise<void> {
     this.dropError.set(null);
     const target = BusinessStagesBoard.COLUMN_TARGET[targetStatus];
     if (!canTransition(app.lifecycleStatus, target)) {
@@ -500,19 +503,22 @@ export class BusinessStagesBoard {
       );
       return;
     }
-    const actor = this.session.name() || 'Staff';
-    const role = this.session.role() ?? 'Administrator';
     const remarks =
       target === 'Rejected' ? this.rejectRemarks().trim() || 'Rejected via Business Stages board' : undefined;
-    const ok = this.store.transitionStatus(app.id, target, actor, role, remarks);
-    if (ok) {
-      this.store.bringToFront(app.id);
+    const result = await this.applicationsApi.transition(app.id, target, {
+      expectedVersion: app.version,
+      remarks,
+    });
+    if (result.kind === 'done') {
       this.toast.success(`${app.applicant}'s application moved to "${targetStatus}".`);
-    } else {
-      this.dropError.set(
-        `Can't move ${app.applicant}'s application to "${targetStatus}" — it doesn't meet the requirements for that stage yet (e.g. required documents not all Accepted).`,
-      );
+      await this.loader.reload();
+      return;
     }
+    this.dropError.set(
+      result.kind === 'unavailable'
+        ? "This deployment cannot change an application's status yet."
+        : `Can't move ${app.applicant}'s application to "${targetStatus}" — ${result.message}`,
+    );
   }
 
   // A deterministic per-card tilt (based on the app's own id, not

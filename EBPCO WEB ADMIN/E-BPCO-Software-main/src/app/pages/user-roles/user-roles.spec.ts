@@ -22,8 +22,37 @@ import { API_BASE_URL } from '../../core/api/api.config';
  * worse than a fabricated chart: an administrator believes these people hold
  * accounts, and the absence of somebody who does is invisible.
  */
+const member = (over: Record<string, unknown> = {}) => ({
+  id: 'USR-1',
+  email: 'ana.reyes@castillasorsogon.gov.ph',
+  roles: ['evaluator'],
+  status: 'Active',
+  mfaRequired: false,
+  mfaEnrolled: false,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  lastSignInAt: null,
+  ...over,
+});
+
+/** What `GET /staff/users/:id/access` answers — a separate call from the roster. */
+const access = (over: Record<string, unknown> = {}) => ({
+  level: 'view',
+  permitTypes: ['Fencing Permit'],
+  ...over,
+});
+
+/**
+ * Mounts the page, flushes `/staff/users` via `respond`, then auto-flushes
+ * whatever per-row `GET /staff/users/:id/access` calls that roster answer
+ * triggers (the roster and an account's specific grant are two different
+ * questions on the real server) — every row gets `access()`'s default unless
+ * overridden by id in `accessById`. A `respond` that answers with an error
+ * instead of a roster never triggers those calls, and the loop below is then
+ * simply a no-op.
+ */
 async function mount(
   respond: (http: HttpTestingController) => void,
+  accessById: Record<string, Record<string, unknown>> = {},
 ): Promise<ComponentFixture<UserRoles>> {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -37,24 +66,18 @@ async function mount(
   });
   const fixture = TestBed.createComponent(UserRoles);
   fixture.detectChanges();
-  respond(TestBed.inject(HttpTestingController));
+  const http = TestBed.inject(HttpTestingController);
+  respond(http);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  for (const req of http.match((r) => /^\/staff\/users\/[^/]+\/access$/.test(r.url))) {
+    const id = req.request.url.split('/')[3];
+    req.flush(access(accessById[id] ?? {}));
+  }
   await fixture.whenStable();
   await new Promise((resolve) => setTimeout(resolve, 0));
   fixture.detectChanges();
   return fixture;
 }
-
-const member = (over: Record<string, unknown> = {}) => ({
-  id: 'USR-1',
-  fullName: 'Engr. Ana Reyes',
-  email: 'ana.reyes@castillasorsogon.gov.ph',
-  role: 'evaluator',
-  status: 'active',
-  level: 'view',
-  permitTypes: ['Fencing Permit'],
-  lastSignInAt: null,
-  ...over,
-});
 
 describe('User directory', () => {
   it('collects no reason it cannot send', async () => {
@@ -106,7 +129,9 @@ describe('User directory', () => {
     level.flush({ level: 'view-edit' });
 
     await new Promise((resolve) => setTimeout(resolve, 0));
-    http.expectOne('/staff/users').flush({ data: [member({ level: 'view-edit' })] });
+    http.expectOne('/staff/users').flush({ data: [member()] });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    http.expectOne('/staff/users/USR-1/access').flush(access({ level: 'view-edit' }));
     await pending;
   });
 
@@ -158,50 +183,76 @@ describe('User directory', () => {
       http.expectOne('/staff/users').flush({ data: [member()] }),
     );
     const c = fixture.componentInstance as unknown as {
-      requestDisable(r: unknown): void; confirmDisable(): void;
-      filteredUsers(): { name: string; status: string }[];
+      requestDisable(r: unknown): void; confirmDisable(reason: string): Promise<void>;
+      filteredUsers(): { email: string; status: string }[];
     };
     c.requestDisable(c.filteredUsers()[0]);
-    c.confirmDisable();
+    const pending = c.confirmDisable('No longer with the LGU.');
+
+    const http = TestBed.inject(HttpTestingController);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    http.expectOne('/staff/users/USR-1/disable').flush({});
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    http.expectOne('/staff/users').flush({ data: [member({ status: 'Disabled' })] });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    http.expectOne('/staff/users/USR-1/access').flush(access());
+    await pending;
     fixture.detectChanges();
 
     const rows = c.filteredUsers();
     // Still there. Its past decisions stay attributable.
     expect(rows.length).toBe(1);
-    expect(rows[0].name).toBe('Engr. Ana Reyes');
+    expect(rows[0].email).toBe('ana.reyes@castillasorsogon.gov.ph');
     expect(rows[0].status).toBe('Inactive');
   });
 
   it('a disabled account can be enabled again', async () => {
     const fixture = await mount((http) =>
-      http.expectOne('/staff/users').flush({ data: [member({ status: 'disabled' })] }),
+      http.expectOne('/staff/users').flush({ data: [member({ status: 'Disabled' })] }),
     );
     const c = fixture.componentInstance as unknown as {
-      enableUser(r: unknown): void; filteredUsers(): { status: string }[];
+      requestEnable(r: unknown): void; confirmEnable(reason: string): Promise<void>;
+      filteredUsers(): { status: string }[];
     };
     expect(c.filteredUsers()[0].status).toBe('Inactive');
 
-    c.enableUser(c.filteredUsers()[0]);
+    c.requestEnable(c.filteredUsers()[0]);
+    const pending = c.confirmEnable('Rehired.');
+
+    const http = TestBed.inject(HttpTestingController);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    http.expectOne('/staff/users/USR-1/enable').flush({});
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    http.expectOne('/staff/users').flush({ data: [member({ status: 'Active' })] });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    http.expectOne('/staff/users/USR-1/access').flush(access());
+    await pending;
     fixture.detectChanges();
+
     expect(c.filteredUsers()[0].status).toBe('Active');
   });
 
-  it('describes an account by its access, not a job title', async () => {
-    const fixture = await mount((http) =>
-      http.expectOne('/staff/users').flush({ data: [member({ level: 'view-edit', permitTypes: ['Fencing Permit', 'Sign Permit'] })],
-      }),
+  it('names the account by its real server role, and its forms separately by access', async () => {
+    const fixture = await mount(
+      (http) => http.expectOne('/staff/users').flush({ data: [member({ roles: ['evaluator'] })] }),
+      { 'USR-1': { level: 'view-edit', permitTypes: ['Fencing Permit', 'Sign Permit'] } },
     );
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
 
-    // An ADMIN sub-type is defined by accessibility — which forms, and view or
-    // view-and-edit — not by what the post is called.
-    expect(text).toContain('View and edit');
+    // The real role — mapped from the server's own `roles` via the same
+    // wire-role → portal-role table the account's own session uses
+    // (`portalRoleFor`) — not the access level dressed up under a "Role"
+    // heading. "Evaluator" is a job; "View and edit" is what the job can
+    // do, and the two used to be conflated into one field/column that could
+    // only ever say the second.
+    expect(text).toContain('Evaluator');
     expect(text).toContain('2 forms');
   });
 
   it('says an account has no forms rather than leaving it blank', async () => {
-    const fixture = await mount((http) =>
-      http.expectOne('/staff/users').flush({ data: [member({ permitTypes: [] })] }),
+    const fixture = await mount(
+      (http) => http.expectOne('/staff/users').flush({ data: [member()] }),
+      { 'USR-1': { permitTypes: [] } },
     );
 
     // An account with no forms can see nothing. A blank cell reads as
@@ -210,9 +261,9 @@ describe('User directory', () => {
   });
 
   it('seeds an access edit from what the account holds, not from its labels', async () => {
-    const fixture = await mount((http) =>
-      http.expectOne('/staff/users').flush({ data: [member({ level: 'view-edit', permitTypes: ['Fencing Permit', 'Sign Permit'] })],
-      }),
+    const fixture = await mount(
+      (http) => http.expectOne('/staff/users').flush({ data: [member()] }),
+      { 'USR-1': { level: 'view-edit', permitTypes: ['Fencing Permit', 'Sign Permit'] } },
     );
     const c = fixture.componentInstance as unknown as {
       openDetail(r: unknown): void; startEditAccess(): void;
@@ -231,7 +282,6 @@ describe('User directory', () => {
     expect(c.isAccessForm('Demolition Permit')).toBe(false);
   });
 
-  
   it('will not save an access change that grants no forms', async () => {
     const fixture = await mount((http) =>
       http.expectOne('/staff/users').flush({ data: [member()] }),
@@ -250,8 +300,6 @@ describe('User directory', () => {
     expect(c.accessError()).toContain('at least one form');
   });
 
-  
-  
   it('never invents a session list', async () => {
     const fixture = await mount((http) =>
       http.expectOne('/staff/users').flush({ data: [member()] }),
@@ -302,16 +350,16 @@ describe('User directory', () => {
   it('refuses to disable the last enabled super admin, before sending anything', async () => {
     const fixture = await mount((http) =>
       http.expectOne('/staff/users').flush({ data: [
-          member({ id: 'USR-1', role: 'super-admin', fullName: 'Only Super Admin' }),
-          member({ id: 'USR-2', role: 'evaluator', email: 'other@castillasorsogon.gov.ph' }),
+          member({ id: 'USR-1', roles: ['super-admin'], email: 'only@castillasorsogon.gov.ph' }),
+          member({ id: 'USR-2', roles: ['evaluator'], email: 'other@castillasorsogon.gov.ph' }),
         ],
       }),
     );
     const c = fixture.componentInstance as unknown as {
       requestDisable(r: unknown): void; disableRefused(): string;
-      disableTarget(): unknown; filteredUsers(): { serverRole: string }[];
+      disableTarget(): unknown; filteredUsers(): { id: string }[];
     };
-    const superAdmin = c.filteredUsers().find((u) => u.serverRole === 'super-admin');
+    const superAdmin = c.filteredUsers().find((u) => u.id === 'USR-1');
     c.requestDisable(superAdmin);
 
     // The single failure this product cannot repair from inside itself: an LGU
@@ -325,8 +373,8 @@ describe('User directory', () => {
   it('allows disabling a super admin while another remains enabled', async () => {
     const fixture = await mount((http) =>
       http.expectOne('/staff/users').flush({ data: [
-          member({ id: 'USR-1', role: 'super-admin' }),
-          member({ id: 'USR-2', role: 'super-admin', email: 'two@castillasorsogon.gov.ph' }),
+          member({ id: 'USR-1', roles: ['super-admin'] }),
+          member({ id: 'USR-2', roles: ['super-admin'], email: 'two@castillasorsogon.gov.ph' }),
         ],
       }),
     );
@@ -344,9 +392,9 @@ describe('User directory', () => {
   it('counts only ENABLED super admins toward the last-one guard', async () => {
     const fixture = await mount((http) =>
       http.expectOne('/staff/users').flush({ data: [
-          member({ id: 'USR-1', role: 'super-admin' }),
+          member({ id: 'USR-1', roles: ['super-admin'] }),
           member({
-            id: 'USR-2', role: 'super-admin', status: 'disabled',
+            id: 'USR-2', roles: ['super-admin'], status: 'Disabled',
             email: 'two@castillasorsogon.gov.ph',
           }),
         ],

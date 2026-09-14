@@ -61,7 +61,7 @@ const PORT = 4398;
 // So the two lists below are exhaustive and CHECKED against app.routes.ts on
 // every run. A route that appears in neither fails the gate rather than
 // quietly not being scanned.
-const ROUTES = ['/', '/welcome', '/login', '/register'];
+const ROUTES = ['/', '/welcome', '/login', '/register', '/reset-password'];
 
 // Reachable only with a server-validated session. authGuard no longer mints one
 // (it used to, which made every guarded route reachable by typing its URL), and

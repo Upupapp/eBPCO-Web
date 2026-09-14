@@ -340,6 +340,66 @@ function classifyAuditEvent(action: string): {
     : { eventType: 'System Action', module: 'Applications', severity: 'Info' };
 }
 
+/**
+ * The real server's own audit vocabulary — `<namespace>.<verb[-verb]>`
+ * dot-paths (`application.transitioned`, `permit.generated`,
+ * `staff.account.roles-changed`), nothing like the English sentences
+ * `classifyAuditEvent` above was written to pattern-match (those belonged to
+ * the local mock's own invented `AuditEvent.action` strings). Rather than
+ * hand-list every real action name — a list Applications/Payments/Permits/
+ * Identity have all since grown past — this classifies by namespace prefix,
+ * so an action nobody has enumerated yet still lands in a sensible module
+ * instead of silently falling through unclassified.
+ */
+const REAL_ACTION_MODULE_BY_PREFIX: Record<string, string> = {
+  application: 'Applications',
+  requirements: 'Applications',
+  workflow: 'Applications',
+  evaluation: 'Applications',
+  instruction: 'Applications',
+  document: 'Applications',
+  assessment: 'Billing',
+  payment: 'Billing',
+  'fee-schedule': 'Billing',
+  'payment-method': 'Billing',
+  permit: 'Workflow',
+  staff: 'User Management',
+  access: 'User Management',
+  mfa: 'User Management',
+  contact: 'User Management',
+  profile: 'User Management',
+  account: 'User Management',
+};
+
+/** The server's raw ISO timestamp, in the same `en-PH` display shape the rest of this portal already uses for a real timestamp (see user-roles.ts's `formatLastActive`). */
+function formatLogTimestamp(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString('en-PH', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+function classifyRealAuditAction(
+  action: string,
+  outcome: 'allowed' | 'denied',
+): { eventType: string; module: string; severity: 'Critical' | 'Warning' | 'Info' } {
+  const prefix = action.split('.')[0] ?? '';
+  const module = REAL_ACTION_MODULE_BY_PREFIX[prefix] ?? 'Applications';
+  const eventType = action
+    .split(/[.-]/)
+    .filter((word) => word.length > 0)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+  const severity: 'Critical' | 'Warning' | 'Info' =
+    outcome === 'denied' || /rejected|failed|erased/.test(action) ? 'Warning' : 'Info';
+  return { eventType, module, severity };
+}
+
 export interface SystemEventRow {
   timestamp: string;
   eventType: string;
@@ -378,6 +438,52 @@ export class SystemLogs {
   protected readonly securityLoading = signal(false);
   protected readonly securityError = signal<string | null>(null);
 
+  /**
+   * The `activity` stream, read for real — the same `GET /staff/audit`
+   * endpoint the security tab already uses, just the other named stream it
+   * exposes. Until now this tab read `ApplicationStore.auditEvents()`/
+   * `AssessmentStore.auditEvents()` instead, which was accurate before Stage
+   * 2-4 wired Applications/Payments to the real API, but silently went stale
+   * the moment those pages stopped calling the OLD local mutators that used
+   * to push into it — the tab kept its "genuine action" banner while quietly
+   * showing less and less of what was actually happening.
+   *
+   * Real entries carry only `actorRole` ('staff'/'applicant'), not a name —
+   * coarser than the old fabricated rows' specific names, but real. Falls
+   * back to the local store's own audit trail (whatever it still captures)
+   * only when the real stream is unavailable or fails, same as security's
+   * fabricated-rows fallback.
+   */
+  protected readonly activityEntries = signal<readonly AuditEntry[]>([]);
+  protected readonly activityLive = signal(false);
+  protected readonly activityLoading = signal(false);
+  protected readonly activityError = signal<string | null>(null);
+
+  protected async loadActivityStream(): Promise<void> {
+    this.activityLoading.set(true);
+    this.activityError.set(null);
+    try {
+      const result = await this.audit.stream('activity');
+      if (result.kind === 'ok') {
+        this.activityEntries.set(result.entries);
+        this.activityLive.set(true);
+        return;
+      }
+      this.activityEntries.set([]);
+      this.activityLive.set(false);
+      if (result.kind === 'failed') this.activityError.set(result.message);
+    } finally {
+      this.activityLoading.set(false);
+    }
+  }
+
+  constructor() {
+    // 'activity' is the tab a staffer lands on by default — selectTab() below
+    // only fires this on an explicit click, so the default view needs its own
+    // real load kicked off here instead of waiting for one.
+    void this.loadActivityStream();
+  }
+
   protected async loadSecurityStream(): Promise<void> {
     this.securityLoading.set(true);
     this.securityError.set(null);
@@ -412,7 +518,25 @@ export class SystemLogs {
   protected readonly page = signal(1);
   protected readonly pageSize = 10;
 
-  protected readonly dateRange = '5, 2026 - May 6, 2026';
+  /**
+   * Purely a header label — nothing in this page actually filters by date
+   * range. On the real activity tab this now reflects the genuine span of
+   * the rows being shown, rather than the fixed "May 5, 2026 - May 6, 2026"
+   * every tab used to display regardless of the actual date — which, next
+   * to real data, read as an active filter silently excluding today.
+   */
+  protected readonly dateRangeLabel = computed<string>(() => {
+    if (this.activeTab() !== 'activity' || !this.activityLive()) return 'May 5, 2026 - May 6, 2026';
+    const rows = this.activityEntries();
+    if (rows.length === 0) return 'No entries yet';
+    const times = rows.map((r) => new Date(r.occurredAt).getTime()).filter((t) => !Number.isNaN(t));
+    if (times.length === 0) return 'No entries yet';
+    const fmt = (t: number) =>
+      new Date(t).toLocaleDateString('en-PH', { day: 'numeric', month: 'short', year: 'numeric' });
+    const earliest = fmt(Math.min(...times));
+    const latest = fmt(Math.max(...times));
+    return earliest === latest ? earliest : `${earliest} - ${latest}`;
+  });
 
   // Every tile here is derived from the same row arrays the tables below
   // render — "Total Logs (Today)" always equals the real row count for
@@ -668,16 +792,43 @@ export class SystemLogs {
     };
   });
 
-  // The real, append-only audit trail (ApplicationStore + AssessmentStore —
-  // see audit.model.ts) merged and mapped to ActivityRow. Only genuinely
-  // committed actions ever reach either store's auditEvents(), so `status`
-  // is always 'Active' here; `ip` is an honest '—' placeholder since this
-  // frontend-only prototype has no request/session tracking to source a
-  // real IP from. This is the one System Logs tab backed by real data —
-  // Access/Error/Security/Events below stay clearly-labeled sample data,
-  // since nothing in this app tracks logins, exceptions, or security/
-  // deployment events yet.
+  /**
+   * Prefers the real `GET /staff/audit?stream=activity` entries
+   * (`activityEntries()`, populated by `loadActivityStream()` above) — real
+   * `actorRole` is only the coarse 'staff'/'applicant' the server actually
+   * carries, not a name, and `ip` reads `sourceAddress` honestly rather than
+   * inventing one. Falls back to the local `ApplicationStore`/
+   * `AssessmentStore` audit trail only when the real stream is unavailable
+   * or fails — whatever that local trail still captures (some actions may no
+   * longer reach it now that Applications/Payments call the real API
+   * directly) is still better than nothing, but it is the fallback, not the
+   * primary source, and the template says which one is showing.
+   */
   protected readonly activityRows = computed<ActivityRow[]>(() => {
+    if (this.activityLive()) {
+      return this.activityEntries()
+        .slice()
+        .sort((a, b) => b.sequence - a.sequence)
+        .map((e): ActivityRow => {
+          const { eventType, module, severity } = classifyRealAuditAction(e.action, e.outcome);
+          const context =
+            e.subjectType === 'application' && e.subjectId
+              ? this.store.getApplicationContext(e.subjectId)
+              : undefined;
+          return {
+            id: String(e.sequence),
+            timestamp: formatLogTimestamp(e.occurredAt),
+            eventType,
+            description: e.outcome === 'denied' ? `${e.action} — denied` : e.action,
+            user: e.actorRole ?? 'system',
+            tenant: context?.businessLabel ?? 'System',
+            module,
+            ip: e.sourceAddress ?? '—',
+            status: e.outcome === 'denied' ? 'Inactive' : 'Active',
+            severity,
+          };
+        });
+    }
     const events: AuditEvent[] = [...this.store.auditEvents(), ...this.assessmentStore.auditEvents()];
     return events
       .slice()
@@ -728,8 +879,42 @@ export class SystemLogs {
     })),
   );
 
-  private readonly securityRows = signal<SecurityRow[]>(
-    BASE_ROWS.map((r, i) => ({
+  /**
+   * Prefers the real `GET /staff/audit?stream=security` entries
+   * (`securityEntries()`, populated by `loadSecurityStream()` above) — same
+   * live/fallback pattern as `activityRows` above. This tab's own note has
+   * always correctly described `securityEntries()`/`securityLive()`
+   * ("Live security events from the server's audit trail... Showing N
+   * entries."), but the table and every KPI tile on this tab read from a
+   * completely different, fixed-size, hardcoded-mock signal instead — the
+   * note's honest claim and what the tab actually rendered had quietly
+   * stopped being the same thing.
+   */
+  protected readonly securityRows = computed<SecurityRow[]>(() => {
+    if (this.securityLive()) {
+      return this.securityEntries()
+        .slice()
+        .sort((a, b) => b.sequence - a.sequence)
+        .map((e): SecurityRow => {
+          const { eventType, severity } = classifyRealAuditAction(e.action, e.outcome);
+          const context =
+            e.subjectType === 'application' && e.subjectId
+              ? this.store.getApplicationContext(e.subjectId)
+              : undefined;
+          return {
+            timestamp: formatLogTimestamp(e.occurredAt),
+            eventType,
+            user: e.actorRole ?? 'system',
+            tenant: context?.businessLabel ?? 'System',
+            message: e.outcome === 'denied' ? `${e.action} — denied` : e.action,
+            ip: e.sourceAddress ?? '—',
+            environment: '—',
+            severity,
+            status: e.outcome === 'denied' ? 'Inactive' : 'Active',
+          };
+        });
+    }
+    return BASE_ROWS.map((r, i) => ({
       timestamp: timestampFor(i, r),
       eventType: SECURITY_EVENTS[i % SECURITY_EVENTS.length],
       user: r.name,
@@ -739,8 +924,8 @@ export class SystemLogs {
       environment: i % 2 === 0 ? 'Production' : 'Staging',
       severity: severityFor(i),
       status: r.status,
-    })),
-  );
+    }));
+  });
 
   private readonly eventRows = signal<SystemEventRow[]>(
     BASE_ROWS.map((r, i) => ({
@@ -757,7 +942,18 @@ export class SystemLogs {
 
   // ---- Filters ----------------------------------------------------------
 
-  protected readonly tenantOptions = TENANTS;
+  /**
+   * The tenant filter's own options — `TENANTS`' fake names for the tabs
+   * still on sample data, but the *real* distinct tenant values seen in
+   * `activityRows()` while on the activity tab, since none of `TENANTS`'
+   * invented names can ever match a real row's `tenant` (`row.tenant !==
+   * this.tenantFilter()` below) — every option would silently return zero
+   * results otherwise.
+   */
+  protected readonly tenantOptions = computed<readonly string[]>(() => {
+    if (this.activeTab() !== 'activity' || !this.activityLive()) return TENANTS;
+    return [...new Set(this.activityRows().map((r) => r.tenant))].sort();
+  });
   protected readonly tenantFilter = signal<string>('All Tenants');
   protected readonly statusFilter = signal<'All Statuses' | 'Active' | 'Inactive'>('All Statuses');
   protected readonly severityFilter = signal<'All Severity' | 'Critical' | 'Warning' | 'Info'>(
@@ -847,7 +1043,10 @@ export class SystemLogs {
   selectTab(tab: LogTabKey): void {
     this.activeTab.set(tab);
     this.page.set(1);
-    // The security tab is the one with a real server stream behind it.
+    // Activity and security are the two tabs with a real server stream
+    // behind them — re-fetch on every visit rather than only once at
+    // construction, the same as re-opening any other real queue.
+    if (tab === 'activity') void this.loadActivityStream();
     if (tab === 'security') void this.loadSecurityStream();
   }
 

@@ -50,7 +50,13 @@ const PROBLEM_KEYS = ['type', 'title', 'status'] as const;
 export function toProblem(status: number, body: unknown): Problem {
   if (typeof body === 'object' && body !== null
     && PROBLEM_KEYS.every((key) => key in (body as Record<string, unknown>))) {
-    return body as Problem;
+    // The server's own field is `errors` (see `problem-details.filter.ts`),
+    // not `fieldErrors` — this portal has always called it the latter, and
+    // until now nothing had actually read the field back off a real response
+    // to notice the two names never matched. `fieldErrors` stays the name on
+    // this side of the boundary; only the read here changes.
+    const raw = body as Problem & { readonly errors?: readonly FieldError[] };
+    return { ...raw, fieldErrors: raw.fieldErrors ?? raw.errors };
   }
   return {
     type: 'about:blank',

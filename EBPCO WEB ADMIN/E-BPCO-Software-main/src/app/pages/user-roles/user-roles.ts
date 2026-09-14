@@ -9,6 +9,8 @@ import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { SessionService } from '../../core/session/session.service';
 import { StaffAccess, StaffDirectoryApi, StaffMember, StaffSession } from '../../core/api/staff-directory.api';
+import { portalRoleFor } from '../../core/api/role-map';
+import { ALL_STAFF_ROLES } from '../../core/session/permissions';
 import { AccessLevel } from '../../core/api/access-request.api';
 import { Capabilities } from '../../core/session/capabilities';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
@@ -110,17 +112,11 @@ const DEPARTMENTS = [
   'City Administrator Office',
 ];
 
-const ROLE_ORDER = [
-  'Super Admin',
-  'Tenant Admin',
-  'Initial Evaluator',
-  'Zoning Evaluator',
-  'Fire Safety Evaluator',
-  'OBO Evaluator',
-  'Cashier',
-  'Releasing Officer',
-  'Viewer / Auditor',
-];
+// The real 7-role portal vocabulary (see role-map.ts's BY_WIRE_NAME / BREADTH)
+// — not a separate, invented list. `row.role` (from `portalRoleFor`) only ever
+// takes one of these seven names, so a filter option outside this set can
+// never match a real row.
+const ROLE_ORDER = ALL_STAFF_ROLES;
 
 function emailFor(name: string): string {
   const handle = name
@@ -130,6 +126,25 @@ function emailFor(name: string): string {
     .trim()
     .replace(/\s+/g, '.');
   return `${handle}@ebpco.gov.ph`;
+}
+
+/**
+ * The server's raw ISO timestamp (`"2026-09-12T11:20:26.612Z"`), in a form
+ * an officer reads without decoding it themselves. Anything that isn't a
+ * real timestamp — the "Invited — not yet accepted" placeholder a
+ * locally-added row starts with — is left exactly as it was.
+ */
+function formatLastActive(value: string | null): string | null {
+  if (!value) return value;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString('en-PH', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 }
 
 /**
@@ -153,91 +168,88 @@ function toUserRow(member: StaffMember): UserRow {
     // the honest display name, not a guess at one.
     name: member.email,
     email: member.email,
-    role: 'Access not yet loaded',
+    // The real role, from the roster call itself (`member.roles`) — reusing
+    // the same wire-role → portal-role mapping the account's own session
+    // uses (`portalRoleFor`), not a guess at one. This used to show the
+    // account's ACCESS LEVEL ("View and edit"/"View only") under a field
+    // and column both titled "Role" — a real role name (Assessor, Cashier,
+    // Approving Officer...) was never shown anywhere on this page, even
+    // though the roster response already carries it and no second call is
+    // needed for it (unlike `department` below, which genuinely does wait
+    // on `GET /staff/users/:id/access`).
+    role: portalRoleFor(member.roles) ?? 'Role not recognised',
     department: 'Access not yet loaded',
     status: member.status === 'Disabled' ? 'Inactive' : member.status === 'Pending' ? 'Pending' : 'Active',
-    lastActive: member.lastSignInAt,
+    lastActive: formatLastActive(member.lastSignInAt),
   };
 }
 
-/** Folds a `GET /staff/users/:id/access` answer into a row already on screen. */
+/** Folds a `GET /staff/users/:id/access` answer into a row already on screen. `role` is untouched — it comes from the roster call in `toUserRow`, not from this one. */
 function withAccess(row: UserRow, access: StaffAccess | null): UserRow {
   if (access === null) {
-    return { ...row, role: 'Access could not be read', department: 'Access could not be read' };
+    return { ...row, department: 'Access could not be read' };
   }
   return {
     ...row,
     level: access.level,
     permitTypes: access.permitTypes,
-    role: access.level === 'view-edit' ? 'View and edit' : 'View only',
     department: access.permitTypes.length === 0
       ? 'No forms assigned'
       : `${access.permitTypes.length} form${access.permitTypes.length === 1 ? '' : 's'}`,
   };
 }
 
-const ROLES: RoleRow[] = [
+/**
+ * The real 7-role vocabulary (see `ALL_STAFF_ROLES` above), with static
+ * descriptive copy — not a separate, larger, partly-invented catalog.
+ *
+ * `userCount` is deliberately NOT here: it used to be nine hand-typed
+ * numbers that never matched the real roster (a "Super Admin" card claiming
+ * 3 users when the real roster held 2, and a "Tenant Admin" role — 12 users
+ * claimed — that does not exist server-side at all). It is computed in
+ * `roles` below, from the same roster this page's Users tab renders.
+ */
+const ROLE_CATALOG: Omit<RoleRow, 'userCount'>[] = [
   {
     name: 'Super Admin',
-    description: 'Full platform access across LGU Castilla and all its modules.',
-    userCount: 3,
+    description:
+      'Full platform access across every module, including every action scope any other staff role holds.',
     permissions: ['All Modules', 'User Management', 'System Settings'],
     iconBg: '#c81e2c',
   },
   {
-    name: 'Tenant Admin',
-    description:
-      'Manages tenant (business owner / applicant) accounts, verification, and profile settings.',
-    userCount: 12,
-    permissions: ['Tenant Settings', 'User Management', 'Reports'],
+    name: 'Administrator',
+    description: 'Manages staff accounts and access, and takes applications in at the counter.',
+    permissions: ['User Management', 'Access Requests', 'Application Intake'],
     iconBg: '#2563eb',
   },
   {
-    name: 'Initial Evaluator',
-    description: 'Performs first-level document verification and checklist review.',
-    userCount: 18,
-    permissions: ['View Applications', 'Initial Evaluation'],
+    name: 'Evaluator',
+    description: 'Reviews submissions stage by stage — Initial, Zoning, Fire Safety, OBO, Final Approval.',
+    permissions: ['View Applications', 'Record Evaluations'],
     iconBg: '#7c3aed',
   },
   {
-    name: 'Zoning Evaluator',
-    description: 'Reviews land-use classification and zoning compliance.',
-    userCount: 14,
-    permissions: ['View Applications', 'Zoning Evaluation'],
-    iconBg: '#f59e0b',
-  },
-  {
-    name: 'Fire Safety Evaluator',
-    description: 'Validates Bureau of Fire Protection compliance and inspection reports.',
-    userCount: 9,
-    permissions: ['View Applications', 'Fire Safety Evaluation'],
-    iconBg: '#dc2626',
-  },
-  {
-    name: 'OBO Evaluator',
-    description: 'Office of the Building Official engineering review and sign-off.',
-    userCount: 11,
-    permissions: ['View Applications', 'OBO Evaluation', 'Final Approval'],
-    iconBg: '#16a34a',
-  },
-  {
-    name: 'Cashier',
-    description: 'Processes application fee payments and issues official receipts.',
-    userCount: 7,
+    name: 'Payment Officer',
+    description: 'Computes the order of payment and verifies that payment was received.',
     permissions: ['View Applications', 'Payment Processing'],
     iconBg: '#0891b2',
   },
   {
+    name: 'Approving Officer',
+    description: 'Approves or refuses the permit, and generates it once approved.',
+    permissions: ['View Applications', 'Approve Permits', 'Generate Permits'],
+    iconBg: '#16a34a',
+  },
+  {
     name: 'Releasing Officer',
-    description: 'Generates and releases approved permit documents to applicants.',
-    userCount: 5,
+    description: 'Prepares and releases the approved permit document to applicants.',
     permissions: ['View Applications', 'Document Release'],
     iconBg: '#65a30d',
   },
   {
-    name: 'Viewer / Auditor',
-    description: 'Read-only access across applications and reports for oversight.',
-    userCount: 6,
+    name: 'Auditor',
+    description: 'Reads everything, changes nothing.',
     permissions: ['View Applications', 'View Reports'],
     iconBg: '#565c6b',
   },
@@ -290,7 +302,26 @@ export class UserRoles implements OnInit {
   protected readonly directoryLoading = signal(true);
   protected readonly directoryUnavailable = signal(false);
   protected readonly directoryError = signal<string | null>(null);
-  protected readonly roles = signal<RoleRow[]>(ROLES);
+  // Session-only local edits from the "Edit Role" card action — kept
+  // separate from ROLE_CATALOG so an edited description/permissions list
+  // survives, while userCount below always stays live rather than being
+  // frozen at whatever it read when the card was last edited.
+  private readonly roleOverrides = signal<ReadonlyMap<string, Pick<RoleRow, 'description' | 'permissions'>>>(
+    new Map(),
+  );
+
+  // Recomputed from the real roster on every load, not seeded once — a
+  // signal(ROLES) never reflects who actually holds a role after the
+  // directory answers.
+  protected readonly roles = computed<RoleRow[]>(() => {
+    const all = this.users();
+    const overrides = this.roleOverrides();
+    return ROLE_CATALOG.map((entry) => ({
+      ...entry,
+      ...(overrides.get(entry.name) ?? {}),
+      userCount: all.filter((u) => u.role === entry.name).length,
+    }));
+  });
   protected readonly roleOptions = ROLE_ORDER;
   protected readonly statusOptions: UserStatus[] = ['Active', 'Inactive', 'Pending'];
   protected readonly departments = DEPARTMENTS;
@@ -346,7 +377,7 @@ export class UserRoles implements OnInit {
         tone: 'neutral',
         illustration: 'roles',
         label: 'Roles Defined',
-        value: `${ROLES.length}`,
+        value: `${ROLE_CATALOG.length}`,
         footnote: 'Across the platform',
       },
     ];
@@ -715,6 +746,12 @@ export class UserRoles implements OnInit {
 
   protected exportUsers(): void {
     const rows = this.filteredUsers();
+    // `downloadCsv` writes nothing for an empty set, so "Exported 0 rows."
+    // announced a file that was never created.
+    if (rows.length === 0) {
+      this.toast.info('Nothing to export — no users match the current view.');
+      return;
+    }
     downloadCsv(
       'users',
       rows.map((row) => this.userCsvRow(row)),
@@ -740,6 +777,7 @@ export class UserRoles implements OnInit {
    * for a staff user.
    */
   protected readonly disableTarget = signal<UserRow | null>(null);
+  protected readonly disableWorking = signal(false);
 
   protected readonly disableRefused = signal('');
 
@@ -761,23 +799,74 @@ export class UserRoles implements OnInit {
     this.disableTarget.set(null);
   }
 
-  protected confirmDisable(): void {
+  /**
+   * Mirrors `saveAccess()`'s shape: guard the not-yet-created case, call the
+   * real endpoint, reload from the server rather than trust a local mutation.
+   *
+   * `ConfirmDialog` has no slot for an inline error, unlike the persistent
+   * Edit Access panel — so a refusal here (a rare race, e.g. someone else
+   * disabled the second-to-last super admin a moment ago; the common cases
+   * are already caught by `disableRefusal()` before this dialog even opens)
+   * closes the dialog and surfaces through the toast, same as a plain action
+   * button's refusal elsewhere in this app.
+   */
+  protected async confirmDisable(reason: string): Promise<void> {
     const target = this.disableTarget();
-    if (!target) return;
-    // Preserved, not removed. The row stays and its status changes, so the
-    // account remains attributable everywhere it has already acted.
-    this.users.update((rows) =>
-      rows.map((row) => (row.email === target.email ? { ...row, status: 'Inactive' } : row)),
-    );
+    if (!target || this.disableWorking()) return;
     this.disableTarget.set(null);
-    this.toast.success(`"${target.name}" disabled. The account is kept, not deleted.`);
+    if (!target.id) {
+      this.toast.error('This account has not been created on the server yet.');
+      return;
+    }
+    this.disableWorking.set(true);
+    try {
+      const result = await this.directory.disable(target.id, reason);
+      if (result.kind === 'done') {
+        this.toast.success(`"${target.name}" disabled. The account is kept, not deleted.`);
+        await this.loadDirectory();
+        return;
+      }
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot disable accounts yet.' : result.message,
+      );
+    } finally {
+      this.disableWorking.set(false);
+    }
   }
 
-  protected enableUser(row: UserRow): void {
-    this.users.update((rows) =>
-      rows.map((r) => (r.email === row.email ? { ...r, status: 'Active' } : r)),
-    );
-    this.toast.success(`"${row.name}" enabled.`);
+  protected readonly enableTarget = signal<UserRow | null>(null);
+  protected readonly enableWorking = signal(false);
+
+  protected requestEnable(row: UserRow): void {
+    this.enableTarget.set(row);
+  }
+
+  protected cancelEnable(): void {
+    this.enableTarget.set(null);
+  }
+
+  protected async confirmEnable(reason: string): Promise<void> {
+    const target = this.enableTarget();
+    if (!target || this.enableWorking()) return;
+    this.enableTarget.set(null);
+    if (!target.id) {
+      this.toast.error('This account has not been created on the server yet.');
+      return;
+    }
+    this.enableWorking.set(true);
+    try {
+      const result = await this.directory.enable(target.id, reason);
+      if (result.kind === 'done') {
+        this.toast.success(`"${target.name}" enabled.`);
+        await this.loadDirectory();
+        return;
+      }
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot enable accounts yet.' : result.message,
+      );
+    } finally {
+      this.enableWorking.set(false);
+    }
   }
 
   // ---- Add user -----------------------------------------------------------
@@ -842,7 +931,11 @@ export class UserRoles implements OnInit {
   protected saveEditRole(): void {
     const edited = this.editingRole();
     if (!edited) return;
-    this.roles.update((rows) => rows.map((r) => (r.name === edited.name ? edited : r)));
+    this.roleOverrides.update((current) => {
+      const next = new Map(current);
+      next.set(edited.name, { description: edited.description, permissions: edited.permissions });
+      return next;
+    });
     this.editingRole.set(null);
     this.toast.success(`"${edited.name}" role updated.`);
   }

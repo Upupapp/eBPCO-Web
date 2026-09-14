@@ -167,15 +167,36 @@ export const ACTION_PERMISSIONS = {
   /** Editing a Draft assessment's line items/due date, and submitting it for approval. */
   editAssessment: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Payment Officer',
-  /** Approving a submitted assessment and issuing its Order of Payment — kept distinct from drafting/editing so an Evaluator can start an assessment without being able to authorize collection. */
+  /**
+   * Approving a submitted assessment and issuing its Order of Payment.
+   *
+   * Payment Officer holds this via the real `staff:assess` scope (assessor/
+   * cashier accounts). Super Admin was ALSO granted `staff:assess` on the
+   * backend directly (2026-09-13, owner's explicit request — a deliberate
+   * reversal of the separation-of-duty design `account.ts`'s `ROLE_SCOPES`
+   * used to enforce for this role), so it is not merely shown the button for
+   * visibility here: it genuinely holds the scope now. Administrator still
+   * does not, and would still be refused server-side. The server still
+   * separately refuses an assessor approving their OWN draft (self-approval,
+   * checked by account, not role) — that check applies to Super Admin too.
+   */
   approveAssessment: (role: StaffRole): boolean =>
-    role === 'Super Admin' || role === 'Administrator',
+    role === 'Super Admin' || role === 'Administrator' || role === 'Payment Officer',
   recordPayment: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Payment Officer',
   verifyPayment: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Payment Officer',
-  /** Void/reversal/refund of an already-Verified transaction — more sensitive than recording or verifying a fresh one, so narrowed to admin-level roles. */
-  adjustPayment: (role: StaffRole): boolean => role === 'Super Admin' || role === 'Administrator',
+  /**
+   * Void/reversal/refund of an already-Verified transaction.
+   *
+   * Includes Payment Officer for the same reason as `approveAssessment`
+   * above: `staff:verify-payment` is a cashier-only scope in the real
+   * backend. Super Admin holds it too, for the same reason it holds
+   * `staff:assess` now — see `approveAssessment`'s comment. Administrator
+   * still does not, and would still be refused server-side.
+   */
+  adjustPayment: (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator' || role === 'Payment Officer',
   generatePermit: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Approving Officer',
   releasePermit: (role: StaffRole): boolean =>

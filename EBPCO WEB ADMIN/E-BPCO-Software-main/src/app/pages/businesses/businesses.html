@@ -63,6 +63,17 @@
       </div>
     </div>
 
+    @if (noBusinessDirectory()) {
+      <div class="prototype-disclaimer" role="note">
+        <app-icon name="info" [size]="16" />
+        <span
+          >This deployment has no business-directory endpoint yet — the applications queue has real
+          businesses on it, but nothing here can list them independently. Only businesses added
+          through "Create New Business" this session appear below.</span
+        >
+      </div>
+    }
+
     @if (selectedIds().size > 0) {
       <div class="bulk-bar">
         <span>{{ selectedIds().size }} selected</span>
@@ -145,14 +156,6 @@
                   </button>
                   <button
                     type="button"
-                    class="icon-btn edit"
-                    aria-label="Edit business"
-                    (click)="openDetail(row)"
-                  >
-                    <app-icon name="edit" [size]="14" />
-                  </button>
-                  <button
-                    type="button"
                     class="icon-btn del"
                     aria-label="Hide business from this view"
                     (click)="requestDelete(row)"
@@ -215,6 +218,15 @@
           <div class="growth-card">
             <div class="card-head">
               <h2>Businesses Growth</h2>
+            </div>
+
+            <div class="prototype-disclaimer" role="note">
+              <app-icon name="info" [size]="16" />
+              <span
+                >Sample data for preview only — this deployment has no growth-analytics endpoint,
+                so these figures (2,032 applications, 1,524 active users) do not reflect the real
+                data shown elsewhere on this page.</span
+              >
             </div>
 
             <div

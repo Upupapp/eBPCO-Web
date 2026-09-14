@@ -18,6 +18,8 @@ import {
   validateMobileNumber,
 } from '../utils/validators';
 import { ToastService } from '../toast/toast.service';
+import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { QueueLoader } from '../../core/domain/queue-loader';
 
 // Same barangay list the seed data and the Business Stages board's
 // filter draw from (application-seed.ts's LOCATIONS) — kept as its own
@@ -90,6 +92,8 @@ export class ApplicationIntake {
   private readonly session = inject(SessionService);
   private readonly requirementsConfig = inject(RequirementsConfigStore);
   private readonly toast = inject(ToastService);
+  private readonly applicationsApi = inject(StaffApplicationsApi);
+  private readonly loader = inject(QueueLoader);
 
   readonly cancelled = output<void>();
   readonly created = output<ApplicationRecord>();
@@ -133,6 +137,7 @@ export class ApplicationIntake {
     barangay: this.barangays[0],
     ownerOrRepresentative: '',
     registrationNumber: '',
+    dateRegistered: this.todayInput(),
   };
 
   protected applicationInfo = {
@@ -141,7 +146,6 @@ export class ApplicationIntake {
     scopeDescription: '',
     dateReceived: this.todayInput(),
     assignedEvaluator: 'Engr. Ricardo Buenaflor',
-    initialRemarks: '',
   };
 
   // `applicant`/`business`/`applicationInfo` above are plain mutable
@@ -164,16 +168,35 @@ export class ApplicationIntake {
     return departmentById(req.responsibleDepartmentId) ?? null;
   }
 
-  protected onPermitTypeChange(): void {
+  protected async onPermitTypeChange(): Promise<void> {
     const type = this.applicationInfo.permitType;
     if (!type) {
       this.documents.set([]);
       return;
     }
-    // Reads the LIVE checklist (Permit Release > Permit Types can add,
-    // relabel, or remove entries) rather than the static catalog directly
-    // — see RequirementsConfigStore's own doc comment.
-    const docs = this.requirementsConfig.documentsFor(type);
+    // Renders immediately from whatever the store already holds (the static
+    // catalog seed, or an earlier session's live fetch), then refreshes once
+    // the live checklist for this type has actually loaded — Permit Release
+    // > Permit Types is the one place it can be edited server-side.
+    this.applyDocumentsFor(type);
+    await this.requirementsConfig.ensureLoaded(type);
+    if (this.applicationInfo.permitType === type) this.applyDocumentsFor(type);
+  }
+
+  private applyDocumentsFor(type: PermitType): void {
+    const live = this.requirementsConfig.documentsFor(type);
+    // A successful live fetch that came back empty means nobody has
+    // published a checklist for this type yet (see RequirementsConfigStore's
+    // own doc comment) — correct and honest on the editor that manages that
+    // checklist, but a brand-new application's intake step has no such
+    // context to offer; showing a step that is silently, unexplainedly blank
+    // between the tab strip and the Back/Next buttons reads as broken, not
+    // as "nothing required". Falling back to the office's static reference
+    // catalog here — the same one the per-application Documents tab already
+    // reads directly — keeps the step usable and honestly labelled instead.
+    const usingFallback = live.length === 0;
+    const docs = usingFallback ? requirementsFor(type).documents : live;
+    this.documentsFallbackActive.set(usingFallback);
     this.documents.set(
       docs.map((d): DocumentDraft => ({
         requirementId: d.id,
@@ -190,6 +213,8 @@ export class ApplicationIntake {
   }
 
   protected readonly documents = signal<DocumentDraft[]>([]);
+  /** True while Step 4 is showing the static reference catalog because no live checklist has been published for the selected type yet — drives the honest notice in the template. */
+  protected readonly documentsFallbackActive = signal(false);
 
   protected departmentLabel(id: string): string {
     return departmentName(id);
@@ -249,6 +274,7 @@ export class ApplicationIntake {
       if (!this.business.addressLine.trim()) errors.push('Business address is required.');
       if (!this.business.ownerOrRepresentative.trim())
         errors.push('Owner or authorized representative is required.');
+      if (!this.business.dateRegistered) errors.push('Date registered is required.');
     } else if (step === 'application') {
       if (!this.applicationInfo.permitType) errors.push('Permit type is required.');
       if (!this.applicationInfo.scopeDescription.trim())
@@ -325,20 +351,18 @@ export class ApplicationIntake {
   // ---- Submission -----------------------------------------------------
 
   // Guards against a double-click / double-Enter firing `submit()` twice
-  // before the first call finishes (there is no network round-trip here,
-  // but the store mutation itself is synchronous and a second call would
-  // otherwise create a second Applicant/Business/ApplicationRecord for
-  // the same encoded submission) — set true for the remainder of this
-  // call, and the template disables the submit button while it's true.
+  // before the first call's own request lands — a fresh idempotency key is
+  // generated per attempt (see `StaffApplicationsApi.fileOnBehalf`), so a
+  // second concurrent call would otherwise file the same application twice.
   protected readonly submitting = signal(false);
 
-  protected submit(): void {
+  protected async submit(): Promise<void> {
     if (this.submitting()) return;
     this.submitError.set('');
     // `next()` now refuses to advance past an invalid step, but this is
-    // still the real gate before anything is written to the store — a step
-    // can go from valid to invalid after being passed (e.g. a field cleared
-    // after going back), and this is what catches that before submission.
+    // still the real gate before anything is sent — a step can go from
+    // valid to invalid after being passed (e.g. a field cleared after
+    // going back), and this is what catches that before submission.
     const invalidStep = this.steps.find(
       (s) => s.key !== 'review' && this.stepErrors(s.key).length > 0,
     );
@@ -352,107 +376,84 @@ export class ApplicationIntake {
       return;
     }
 
-    this.submitting.set(true);
     const permitType = this.applicationInfo.permitType;
-    if (!permitType) {
-      this.submitting.set(false);
-      return;
-    }
+    if (!permitType) return;
 
-    const actor = this.session.name() || 'Staff';
-    const role = this.session.role() ?? 'Administrator';
+    this.submitting.set(true);
+    try {
+      const [firstName, ...rest] = this.applicant.fullName.trim().split(/\s+/);
+      const lastName = rest.length ? rest.join(' ') : '';
 
-    const [firstName, ...rest] = this.applicant.fullName.trim().split(/\s+/);
-    const lastName = rest.length ? rest.join(' ') : firstName;
-
-    const applicant = this.store.addApplicant({
-      firstName,
-      lastName: rest.length ? lastName : '',
-      email: this.emailValidation().normalized,
-      mobileNumber: this.mobileValidation().normalized,
-      landlineNumber: this.landlineValidation().normalized || null,
-      applicantType: this.applicant.applicantType,
-      addressLine: this.applicant.addressLine.trim(),
-      barangay: this.applicant.barangay,
-      emailVerification: {
-        status: 'Unverified',
-        method: null,
-        verifiedBy: null,
-        verifiedAtValue: null,
-        verifiedAt: null,
-      },
-      mobileVerification: {
-        status: 'Unverified',
-        method: null,
-        verifiedBy: null,
-        verifiedAtValue: null,
-        verifiedAt: null,
-      },
-    });
-
-    const business = this.store.addBusiness({
-      name: this.business.registeredName.trim(),
-      category: this.business.category,
-      ownerApplicantId: applicant.id,
-      street: this.business.addressLine.trim(),
-      barangay: this.business.barangay,
-      city: 'Castilla',
-      province: 'Sorsogon',
-      registrationNumber: this.business.registrationNumber.trim() || 'PENDING',
-      status: 'Active',
-    });
-
-    const dateReceived = new Date(`${this.applicationInfo.dateReceived}T09:00:00`);
-    const dateSubmitted = dateReceived.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-
-    const record = this.store.create(
-      {
-        businessId: business.id,
-        businessName: business.name,
-        applicantId: applicant.id,
-        applicant: `${applicant.firstName} ${applicant.lastName}`.trim(),
-        location: `Barangay ${this.business.barangay}`,
+      const result = await this.applicationsApi.fileOnBehalf({
+        applicant: {
+          firstName,
+          lastName,
+          email: this.emailValidation().normalized,
+          mobileNumber: this.mobileValidation().normalized || undefined,
+        },
+        business: {
+          name: this.business.registeredName.trim(),
+          category: this.business.category,
+          street: this.business.addressLine.trim(),
+          barangay: this.business.barangay,
+          city: 'Castilla',
+          province: 'Sorsogon',
+          registrationNumber: this.business.registrationNumber.trim() || 'PENDING',
+          dateRegistered: this.business.dateRegistered,
+        },
         permitType,
         applicationAction: this.applicationInfo.applicationAction,
-        officer: this.applicationInfo.assignedEvaluator,
-        dateSubmitted,
-        dateValue: dateReceived,
-        lifecycleStatus: 'Submitted',
-        evaluationStage: 'Initial',
-        evaluationResult: 'Pending',
-        paymentStatus: 'Not Yet Available',
-        permitReleaseStatus: 'Not Ready',
-        assessedAmountCentavos: null,
-      },
-      actor,
-      role,
-    );
+        location: `Barangay ${this.business.barangay}`,
+      });
 
-    for (const doc of this.documents()) {
-      if (!doc.fileName.trim()) continue;
-      this.store.attachDocument(
-        record.id,
-        doc.requirementId,
-        doc.documentType || doc.label,
-        doc.fileName.trim(),
-        actor,
-        {
-          issuingOffice: doc.issuingOffice.trim() || null,
-          issueDate: doc.issueDate || null,
-          expiryDate: doc.expiryDate || null,
-        },
-      );
+      if (result.kind !== 'done') {
+        const message =
+          result.kind === 'unavailable'
+            ? 'This deployment cannot file applications on behalf of an applicant yet.'
+            : result.message;
+        this.submitError.set(message);
+        this.toast.error(message);
+        return;
+      }
+
+      // The server's own record, not a locally-assembled guess — filing
+      // creates the applicant's account and the business row too, and this
+      // is the one place that gets to see exactly what it decided (e.g. a
+      // returning email reused instead of duplicated).
+      await this.loader.reload();
+      const record = this.store.getById(result.applicationId);
+      if (!record) {
+        const message =
+          'The application was filed, but this screen could not find it in the reloaded queue. Refresh and look for it directly.';
+        this.submitError.set(message);
+        this.toast.error(`Application ${result.referenceNumber} filed, but could not be reopened here.`);
+        return;
+      }
+
+      // Document attachment has no server-side counterpart yet (see the
+      // "not stored" note on the Document Attachments step) — this stays a
+      // local-only annotation layered on the real, now server-backed record.
+      const actor = this.session.name() || 'Staff';
+      for (const doc of this.documents()) {
+        if (!doc.fileName.trim()) continue;
+        this.store.attachDocument(
+          record.id,
+          doc.requirementId,
+          doc.documentType || doc.label,
+          doc.fileName.trim(),
+          actor,
+          {
+            issuingOffice: doc.issuingOffice.trim() || null,
+            issueDate: doc.issueDate || null,
+            expiryDate: doc.expiryDate || null,
+          },
+        );
+      }
+
+      this.toast.success(`Application ${result.referenceNumber} filed for ${this.business.registeredName.trim()}.`);
+      this.created.emit(this.store.getById(record.id) ?? record);
+    } finally {
+      this.submitting.set(false);
     }
-
-    if (this.applicationInfo.initialRemarks.trim()) {
-      this.store.addNote(record.id, actor, role, this.applicationInfo.initialRemarks.trim());
-    }
-
-    this.toast.success(`Application ${record.id} created for ${business.name}.`);
-    this.created.emit(record);
   }
 }

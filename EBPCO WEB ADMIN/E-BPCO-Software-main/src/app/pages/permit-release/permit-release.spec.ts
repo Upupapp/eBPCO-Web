@@ -62,7 +62,7 @@ describe('Permit release', () => {
   it('refuses a release with no claimant named', () => {
     const fixture = mount();
     const c = fixture.componentInstance as unknown as Testable;
-    const ready = c.rows().find((r) => (r as { permitStatus?: string }).permitStatus === 'Ready for Release');
+    const ready = c.rows().find((r) => (r as { permitStage?: string }).permitStage === 'Ready for Release');
     expect(ready).toBeDefined();
     if (!ready) return;
 
@@ -81,7 +81,7 @@ describe('Permit release', () => {
     const c = fixture.componentInstance as unknown as Testable;
     const notReady = c
       .rows()
-      .find((r) => (r as { permitStatus?: string }).permitStatus !== 'Ready for Release');
+      .find((r) => (r as { permitStage?: string }).permitStage !== 'Ready for Release');
     expect(notReady).toBeDefined();
     if (!notReady) return;
 

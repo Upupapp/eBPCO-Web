@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
 import { ApiClient } from './api.client';
+import { ApiError } from './problem';
 import { ApplicationRecord, withProjectedFields } from '../domain/application.model';
 import {
   ApplicationLifecycleStatus,
@@ -75,6 +76,8 @@ interface QueueRow {
   readonly submittedAt: string | null;
   readonly assessedAmountCentavos: number | null;
   readonly paymentVerified: boolean;
+  /** Optimistic-concurrency token — threaded back as `expectedVersion` on a transition so a stale edit is refused rather than silently overwriting a decision made elsewhere in the meantime. */
+  readonly version?: number;
 }
 
 interface QueuePage {
@@ -82,8 +85,120 @@ interface QueuePage {
   readonly nextCursor: string | null;
 }
 
+/** One row of the `payments` array on `GET /staff/applications/:id` — every payment ever submitted against this application, any status, in submission order. Distinct from `StaffPaymentsApi.PaymentQueueRow`, which is the cashier's global Pending-Verification-first worklist, not scoped to one application. */
+export interface ApplicationPaymentRow {
+  readonly id: string;
+  readonly referenceNumber: string;
+  readonly amountCentavos: number;
+  readonly method: string;
+  readonly status: string;
+  readonly submittedAt: string;
+  readonly verifiedAt: string | null;
+  readonly officialReceiptNumber: string | null;
+}
+
+/** The most recent non-superseded Order of Payment, or `null` before one is issued. Never an in-progress Draft/Submitted/Approved assessment — see `StaffPaymentsApi.getAssessment`'s own doc comment for why that has no per-application lookup at all. */
+export interface ApplicationOrderOfPayment {
+  readonly id: string;
+  readonly number: string;
+  readonly totalCentavos: number;
+  readonly filingCentavos: number;
+  readonly processingCentavos: number;
+  readonly architecturalCentavos: number;
+  readonly structuralCentavos: number;
+  readonly electricalCentavos: number;
+  readonly othersCentavos: number;
+  readonly feeScheduleVersion: string;
+  readonly assessedAt: string;
+  readonly dueDate: string | null;
+}
+
+/** One row of the `timeline` array on `GET /staff/applications/:id` — the record's own transition history, written by the database trigger on every committed transition (never the security/audit log, which also records refused attempts). */
+export interface ApplicationTimelineEvent {
+  readonly fromStatus: string | null;
+  readonly toStatus: string;
+  readonly occurredAt: string;
+  readonly office: string | null;
+  readonly remarks: string | null;
+}
+
+export interface ApplicationDetail {
+  readonly payments: readonly ApplicationPaymentRow[];
+  readonly orderOfPayment: ApplicationOrderOfPayment | null;
+  /** The applicant's real email, from their account — never fabricated from the display name. */
+  readonly applicantEmail: string;
+  /** The applicant's real mobile number, from their account, or `null` when the account has none on file. */
+  readonly applicantMobile: string | null;
+  readonly timeline: readonly ApplicationTimelineEvent[];
+}
+
+export type ApplicationDetailResult =
+  | { readonly kind: 'ok'; readonly detail: ApplicationDetail }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 /** Absent, not empty. A blank cell reads as "none"; this reads as "not sent". */
 export const NOT_SENT = '—';
+
+/** `POST /staff/applications` — the assisted/onsite filing an officer submits on an applicant's behalf. */
+export interface FileOnBehalfInput {
+  applicant: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    mobileNumber?: string;
+  };
+  /** Give exactly one of `business`/`businessId` — a new business, or an existing one this same applicant already owns. */
+  business?: {
+    name: string;
+    category: string;
+    street: string;
+    barangay: string;
+    city: string;
+    province: string;
+    registrationNumber: string;
+    /** `YYYY-MM-DD` */
+    dateRegistered: string;
+  };
+  businessId?: string;
+  permitType: string;
+  applicationAction: ApplicationAction;
+  renewsPermitNumber?: string | null;
+  location?: string;
+}
+
+export type FileOnBehalfResult =
+  | { readonly kind: 'done'; readonly applicationId: string; readonly referenceNumber: string; readonly applicantId: string }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
+/**
+ * Every distinct reason `POST /staff/applications/:id/transitions` refuses,
+ * kept apart rather than flattened into one message — `stale-version` means
+ * "reload and look again", `precondition-unmet` means "something is still
+ * missing", and the two call for different next actions from whoever reads
+ * them.
+ */
+export type TransitionRefusalReason =
+  | 'not-permitted'
+  | 'illegal-transition'
+  | 'precondition-unmet'
+  | 'stale-version'
+  | 'not-found'
+  | 'other';
+
+export type TransitionResult =
+  | { readonly kind: 'done'; readonly status: string; readonly version: number }
+  | { readonly kind: 'refused'; readonly reason: TransitionRefusalReason; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
+export type ArchiveResult =
+  | { readonly kind: 'done' }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
 
 @Injectable({ providedIn: 'root' })
 export class StaffApplicationsApi {
@@ -99,6 +214,126 @@ export class StaffApplicationsApi {
       status: options.status,
     });
     return { rows: page.items.map(toRecord), nextCursor: page.nextCursor };
+  }
+
+  /**
+   * `GET /staff/applications/:id` — the one place an issued Order of Payment
+   * and every payment ever submitted against this application can be read.
+   * The queue row (`page()` above) carries neither: `orderOfPayment` is
+   * `null` until an Order has actually been issued, and holds only the
+   * issued snapshot — not an in-progress Draft/Submitted/Approved assessment,
+   * which has no per-application lookup at all (see `StaffPaymentsApi`'s own
+   * doc comment on `getAssessment`).
+   */
+  async detail(applicationId: string): Promise<ApplicationDetailResult> {
+    try {
+      const detail = await this.api.get<ApplicationDetail>(
+        `/staff/applications/${encodeURIComponent(applicationId)}`,
+      );
+      return { kind: 'ok', detail };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * `POST /staff/applications` — files a new application for someone who
+   * came in at the counter/by phone rather than through their own account.
+   * The server creates the applicant's account too (with an unusable
+   * password — they set one later through account recovery).
+   */
+  async fileOnBehalf(input: FileOnBehalfInput): Promise<FileOnBehalfResult> {
+    try {
+      const result = await this.api.post<{
+        applicationId: string;
+        referenceNumber: string;
+        applicantId: string;
+      }>('/staff/applications', input, crypto.randomUUID());
+      return { kind: 'done', ...result };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        // 409 = the Idempotency-Key collided with a different request; 422 =
+        // the server's own SubmissionService refused the filing itself
+        // (e.g. staff filing under their own address, a business that isn't
+        // this applicant's). Both are answers this screen can act on.
+        if (error.status === 409 || error.status === 422) {
+          return { kind: 'refused', message: error.message };
+        }
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * `POST /staff/applications/:id/transitions` — the one real place an
+   * application's lifecycle status moves. `expectedVersion` is the row's own
+   * `version` (see `QueueRow`/`ApplicationRecord`) — omit it and the server
+   * accepts any current state; send it and a `stale-version` refusal comes
+   * back if somebody else changed the row first.
+   */
+  async transition(
+    applicationId: string,
+    to: ApplicationLifecycleStatus,
+    options: { expectedVersion?: number; remarks?: string } = {},
+  ): Promise<TransitionResult> {
+    try {
+      const result = await this.api.post<{ status: string; version: number }>(
+        `/staff/applications/${encodeURIComponent(applicationId)}/transitions`,
+        {
+          to,
+          ...(options.expectedVersion === undefined ? {} : { expectedVersion: options.expectedVersion }),
+          ...(options.remarks === undefined ? {} : { remarks: options.remarks }),
+        },
+        crypto.randomUUID(),
+      );
+      return { kind: 'done', ...result };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 501) return { kind: 'unavailable' };
+        // The visibility check answers a not-found/not-yours application
+        // with the same 404 a genuinely missing one gets — either way,
+        // there is nothing this screen can act on but tell the caller so.
+        if (error.status === 404) return { kind: 'refused', reason: 'not-found', message: error.message };
+        if (error.status === 403) return { kind: 'refused', reason: 'not-permitted', message: error.message };
+        if (error.status === 409) return { kind: 'refused', reason: 'illegal-transition', message: error.message };
+        if (error.status === 422) return { kind: 'refused', reason: 'precondition-unmet', message: error.message };
+        if (error.status === 412) return { kind: 'refused', reason: 'stale-version', message: error.message };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * `POST /staff/applications/archive` — moves one or more applications to
+   * Cancelled. There is no delete on a filed application anywhere in this
+   * system (see `ApplicationStore`'s own note); this is the only way one
+   * leaves the active queue.
+   */
+  async archive(applicationIds: readonly string[], remarks: string): Promise<ArchiveResult> {
+    try {
+      await this.api.post<{ archived: unknown }>(
+        '/staff/applications/archive',
+        { applicationIds: [...applicationIds], remarks },
+        crypto.randomUUID(),
+      );
+      return { kind: 'done' };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 501) return { kind: 'unavailable' };
+        if (error.status === 404 || error.status === 422) {
+          return { kind: 'refused', message: error.message };
+        }
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
   }
 }
 
@@ -200,5 +435,6 @@ function toRecord(row: QueueRow): ApplicationRecord {
         : 'Pending Verification') as ApplicationRecord['paymentStatus'],
     permitReleaseStatus: releaseStatusFor(lifecycleStatus),
     assessedAmountCentavos: row.assessedAmountCentavos,
+    version: row.version,
   });
 }

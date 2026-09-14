@@ -1,8 +1,4 @@
-<app-topbar
-  title="User &amp; Roles"
-  [searchTerm]="searchTerm()"
-  (searchChange)="searchTerm.set($event); onFilterChange()"
-/>
+<app-topbar title="User &amp; Roles" />
 
 @if (view() === 'list') {
   <div class="prototype-disclaimer" role="note">
@@ -152,7 +148,7 @@
                       type="button"
                       class="icon-btn"
                       [attr.aria-label]="'Enable ' + row.name"
-                      (click)="enableUser(row)"
+                      (click)="requestEnable(row)"
                     >
                       <app-icon name="check" [size]="14" />
                     </button>
@@ -581,6 +577,12 @@
         }
 
         @case ('workload') {
+          @if (row.status !== 'Pending') {
+            <p class="empty-note">
+              Sample data for preview only — this deployment does not yet track real assignment
+              counts.
+            </p>
+          }
           @if (workload(); as w) {
             <dl class="info-grid">
               <div>
@@ -785,7 +787,22 @@
     "
     confirmLabel="Disable"
     tone="danger"
-    (confirmed)="confirmDisable()"
+    reasonLabel="Why is this account being disabled?"
+    reasonPlaceholder="The account holder will be able to ask, so say plainly."
+    (confirmed)="confirmDisable($event)"
     (cancelled)="cancelDisable()"
+  />
+}
+
+@if (enableTarget(); as target) {
+  <app-confirm-dialog
+    title="Enable this account?"
+    [message]="target.name + ' will regain the access it had before it was disabled.'"
+    confirmLabel="Enable"
+    tone="default"
+    reasonLabel="Why is this account being enabled?"
+    reasonPlaceholder="The account holder will be able to ask, so say plainly."
+    (confirmed)="confirmEnable($event)"
+    (cancelled)="cancelEnable()"
   />
 }

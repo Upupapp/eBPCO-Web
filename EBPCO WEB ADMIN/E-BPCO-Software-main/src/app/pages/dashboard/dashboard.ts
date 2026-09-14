@@ -462,6 +462,13 @@ export class Dashboard {
 
   protected readonly activeFilterCount = computed(() => (this.statusFilter() === 'All' ? 0 : 1));
 
+  // A status filter with no typed term is not a "search" — reusing that
+  // wording for a Rejected-only filter with zero matches told an officer
+  // to reconsider a query they never typed.
+  protected readonly recentApplicationsEmptyMessage = computed(() =>
+    this.searchTerm().trim() ? 'No applications match your search.' : 'No applications match this filter.',
+  );
+
   protected clearFilters(): void {
     this.statusFilter.set('All');
   }
@@ -474,6 +481,12 @@ export class Dashboard {
 
   protected exportVisible(): void {
     const rows = this.filteredApplications();
+    // `downloadCsv` writes nothing for an empty set, so "Exported 0 rows."
+    // announced a file that was never created.
+    if (rows.length === 0) {
+      this.toast.info('Nothing to export — no applications match the current view.');
+      return;
+    }
     downloadCsv(
       'recent-applications',
       rows.map((row) => ({
@@ -493,6 +506,10 @@ export class Dashboard {
 
   protected exportQueueReport(): void {
     const rows = this.permitQueueRows();
+    if (rows.length === 0) {
+      this.toast.info('Nothing to export — the permit queue is empty.');
+      return;
+    }
     downloadCsv(
       'permit-queue-report',
       rows.map((row) => ({

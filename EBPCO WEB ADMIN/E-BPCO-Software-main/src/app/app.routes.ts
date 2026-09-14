@@ -19,6 +19,11 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () => import('./pages/register/register').then((m) => m.Register),
   },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./pages/reset-password/reset-password').then((m) => m.ResetPassword),
+  },
 
   // One authenticated shell, one sidebar, canonical resource-identifying
   // URLs — no `/tenant` prefix. Every child is guarded: no session -> back

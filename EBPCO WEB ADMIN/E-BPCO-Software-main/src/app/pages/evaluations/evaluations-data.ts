@@ -208,7 +208,11 @@ export interface EvalRingStat {
   bars?: number[];
 }
 
-export function buildEvalRingStats(rows: EvaluationQueueRow[], stageKey: EvalTypeKey): EvalRingStat[] {
+export function buildEvalRingStats(
+  rows: EvaluationQueueRow[],
+  stageKey: EvalTypeKey,
+  cardTitle?: string,
+): EvalRingStat[] {
   const appStage = EVAL_KEY_TO_APP_STAGE[stageKey];
   const scoped = scopedRows(rows, stageKey);
   const total = scoped.length || 1;
@@ -218,14 +222,20 @@ export function buildEvalRingStats(rows: EvaluationQueueRow[], stageKey: EvalTyp
   const accepted = stages.filter((s) => s === 'passed').length;
   return [
     {
-      label: 'Total Applications',
+      // Named for what it actually counts — every status combined for this
+      // evaluation type — since the worklist directly below only ever shows
+      // ONE status tab at a time. A plain "Total Applications" read as a
+      // claim about the table's own row count, and the two numbers
+      // disagreeing (e.g. 3 here, 1 row showing under "Under Review") looked
+      // like a bug rather than two different, both-correct scopes.
+      label: cardTitle ? `Total in ${cardTitle}` : 'Total Applications',
       value: String(scoped.length),
       icon: 'logs',
       tone: 'info',
       illustration: 'applications',
       pct: 100,
       isTotal: true,
-      support: 'Revision Required · Under Review · Accepted',
+      support: 'Across every status below — Revision Required · Under Review · Accepted',
       bars: [revisionRequired, underReview, accepted],
     },
     {

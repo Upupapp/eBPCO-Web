@@ -86,6 +86,44 @@
     color: #1f2430;
     background: transparent;
 
+    // Left spacing normally comes from `.input-icon`'s own margin. A field
+    // with no icon (the OTP field, most of Register's fields) had none at
+    // all, so its text sat flush against the border — this is what made
+    // those fields look cramped next to email/password.
+    &:first-child {
+      padding-left: 0.75rem;
+    }
+
+    &::placeholder {
+      color: #9a9aa5;
+    }
+  }
+
+  // A multi-line field (Register's "Why you need access") inside the same
+  // fixed 46px, vertically-centered wrapper as every single-line input was
+  // clipped down to one line's worth of height. This lets the wrapper grow
+  // with the textarea instead of cutting it off.
+  &:has(textarea) {
+    height: auto;
+    align-items: stretch;
+  }
+
+  textarea {
+    flex: 1;
+    min-height: 46px;
+    border: none;
+    outline: none;
+    padding: 0.65rem 0.75rem;
+    font: inherit;
+    font-size: 0.95rem;
+    color: #1f2430;
+    background: transparent;
+    resize: vertical;
+
+    &:first-child {
+      padding-left: 0.75rem;
+    }
+
     &::placeholder {
       color: #9a9aa5;
     }

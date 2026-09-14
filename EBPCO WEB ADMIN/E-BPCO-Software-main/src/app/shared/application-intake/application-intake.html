@@ -42,7 +42,7 @@
                 >*</span
               ></span
             >
-            <input aria-label="Juan Dela Cruz"
+            <input
               type="text"
               required
               aria-required="true"
@@ -70,7 +70,7 @@
                 >*</span
               ></span
             >
-            <input aria-label="juan.delacruz@gmail.com"
+            <input
               type="email"
               required
               aria-required="true"
@@ -137,7 +137,7 @@
                 >*</span
               ></span
             >
-            <input aria-label="Purok 1, Street/Sitio"
+            <input
               type="text"
               required
               aria-required="true"
@@ -200,7 +200,7 @@
                 >*</span
               ></span
             >
-            <input aria-label="Street address"
+            <input
               type="text"
               required
               aria-required="true"
@@ -247,18 +247,35 @@
               <span class="field-error">Owner or authorized representative is required.</span>
             }
           </label>
-          <label class="field span-2">
+          <label class="field">
             <span class="field-label"
               >Registration / Reference Number&nbsp;<span class="field-meta-inline"
                 >(where applicable)</span
               ></span
             >
-            <input aria-label="DTI/SEC/CDA number"
+            <input
               type="text"
               [(ngModel)]="business.registrationNumber"
               name="bizRegNumber"
               placeholder="DTI/SEC/CDA number"
             />
+          </label>
+          <label class="field">
+            <span class="field-label"
+              >Date Registered&nbsp;<span class="field-label-required" aria-hidden="true"
+                >*</span
+              ></span
+            >
+            <input
+              type="date"
+              required
+              aria-required="true"
+              [(ngModel)]="business.dateRegistered"
+              name="bizDateRegistered"
+            />
+            @if (showStepErrors() && !business.dateRegistered) {
+              <span class="field-error">Date registered is required.</span>
+            }
           </label>
         </div>
       }
@@ -327,7 +344,7 @@
                 >*</span
               ></span
             >
-            <textarea aria-label="Briefly describe the business activity or the scope of construction wo"
+            <textarea
               rows="3"
               required
               aria-required="true"
@@ -346,20 +363,11 @@
               [(ngModel)]="applicationInfo.assignedEvaluator"
               name="assignedEvaluator"
             />
+            <span class="not-stored">Not sent anywhere yet — the server does not track a named officer on an application.</span>
           </label>
           <label class="field">
             <span class="field-label">Assigned Office</span>
             <input type="text" [value]="responsibleDepartment()?.name ?? '—'" disabled />
-          </label>
-          <label class="field span-2">
-            <span class="field-label"
-              >Initial Remarks&nbsp;<span class="field-meta-inline">(optional)</span></span
-            >
-            <textarea
-              rows="2"
-              [(ngModel)]="applicationInfo.initialRemarks"
-              name="initialRemarks"
-            ></textarea>
           </label>
         </div>
       }
@@ -370,6 +378,12 @@
             Select a Permit Type in the previous step to load its required-document checklist.
           </p>
         } @else {
+          @if (documentsFallbackActive()) {
+            <p class="empty-note">
+              Showing the office's default checklist for this permit type — nothing has been
+              published live for it yet.
+            </p>
+          }
           @if (showStepErrors() && currentStepErrors().length > 0) {
             <div class="step-error-banner">
               @for (e of currentStepErrors(); track e) {
@@ -423,7 +437,7 @@
                   </label>
                   <label class="field">
                     <span class="field-label">Issuing Office</span>
-                    <input aria-label="Optional"
+                    <input
                       type="text"
                       [ngModel]="doc.issuingOffice"
                       (ngModelChange)="onDocFieldChange(doc, 'issuingOffice', $event)"

@@ -924,6 +924,40 @@ $stage-colors: (
   }
 }
 
+// "Retry" and "Reset Filter" above used `.btn-outline` — the same class the
+// rest of the app styles via `shared/styles/_data-table.scss` — but this
+// component never imports that partial, so neither button had any style
+// applied at all: bare browser-default buttons. Matched to that shared
+// definition exactly, rather than importing the whole (table-specific)
+// partial for two buttons.
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: $radius-md;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.83rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: $color-surface;
+  border: 1px solid $color-border-strong;
+  color: $color-ink-600;
+  transition:
+    transform $ease-fast,
+    background $ease-base,
+    color $ease-base,
+    border-color $ease-base;
+
+  &:hover {
+    border-color: $color-brand-600;
+    color: $color-brand-600;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
 // ---- Loading skeleton -----------------------------------------------------
 // Mirrors the final layout exactly (same header/divider/2x3 grid/footer
 // proportions) so the pane doesn't jump in height once data arrives.

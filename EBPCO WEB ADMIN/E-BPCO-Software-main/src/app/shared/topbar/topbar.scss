@@ -1,6 +1,7 @@
 @use '../styles/tokens' as *;
 
 .topbar {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -62,6 +63,37 @@
     &:hover {
       color: $color-ink-500;
     }
+  }
+}
+
+// Hidden ≥720px — the full search box is always visible there. Below that
+// width it's the only way to reach search once `.search-box` collapses,
+// matching the icon-only collapse pattern already used elsewhere in this
+// app (Applications/Businesses' Filters and Export controls) instead of
+// disappearing with nothing to reopen it.
+.search-icon-btn {
+  display: none;
+  border: 1px solid #ececf1;
+  background: $color-surface;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  color: $color-ink-500;
+  cursor: pointer;
+  transition:
+    color $ease-base,
+    border-color $ease-base;
+
+  &:hover,
+  &.active {
+    color: $color-brand-600;
+  }
+
+  &.active {
+    border-color: $color-brand-border;
   }
 }
 
@@ -368,8 +400,26 @@
 }
 
 @media (max-width: 720px) {
+  .search-icon-btn {
+    display: inline-flex;
+  }
+
   .search-box {
     display: none;
+
+    &--mobile-open {
+      display: flex;
+      position: absolute;
+      top: calc(100% + 0.65rem);
+      left: 0;
+      right: 0;
+      z-index: 50;
+      width: auto;
+      background: $color-surface;
+      border: 1px solid $color-border;
+      box-shadow: $shadow-card-hover;
+      animation: topbar-panel-in 0.15s ease both;
+    }
   }
 }
 

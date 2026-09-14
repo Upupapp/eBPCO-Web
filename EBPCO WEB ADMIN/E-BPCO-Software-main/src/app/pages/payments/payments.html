@@ -6,1567 +6,791 @@
 
 <app-queue-load-notice />
 
-<section class="card table-card">
-  <nav class="tab-nav">
-    @for (t of visibleTabs(); track t.key) {
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="activeTab() === t.key"
-        (click)="selectTab(t.key)"
-      >
-        <app-icon [name]="t.icon" [size]="15" />
-        {{ t.label }}
-      </button>
-    }
-  </nav>
-
-  <!-- ============================== ASSESSMENTS ============================== -->
-  @if (activeTab() === 'assessments') {
-    @if (assessmentView() === 'list') {
-      <section class="kpi-grid kpi-grid--compact">
-        <app-kpi-card
-          label="Draft"
-          [value]="assessmentCount(assessmentSummary().draft)"
-          icon="file-text"
-          tone="neutral"
-          illustration="pending"
-          [progress]="null"
-        />
-        <app-kpi-card
-          label="For Approval"
-          [value]="assessmentCount(assessmentSummary().forApproval)"
-          icon="clock"
-          tone="warning"
-          illustration="pending"
-          [progress]="null"
-        />
-        <app-kpi-card
-          label="Issued"
-          [value]="assessmentCount(assessmentSummary().issued)"
-          icon="send"
-          tone="info"
-          illustration="pending"
-          [progress]="null"
-        />
-        <app-kpi-card
-          label="Partially Paid"
-          [value]="assessmentCount(assessmentSummary().partiallyPaid)"
-          icon="wallet"
-          tone="warning"
-          illustration="pending"
-          [progress]="null"
-        />
-        <app-kpi-card
-          label="Paid"
-          [value]="assessmentCount(assessmentSummary().paid)"
-          icon="check-circle"
-          tone="success"
-          illustration="success"
-          [progress]="null"
-        />
-        <app-kpi-card
-          label="Overdue"
-          [value]="assessmentCount(assessmentSummary().overdue)"
-          icon="alert-triangle"
-          tone="danger"
-          illustration="critical"
-          [progress]="null"
-        />
-      </section>
-
-      <div class="table-toolbar">
-        <div class="search-input">
-          <app-icon name="search" [size]="16" />
-          <input aria-label="Search by Application ID, Applicant, Business/Project, Permit Type, or"
-            type="text"
-            placeholder="Search by Application ID, Applicant, Business/Project, Permit Type, or OPS No."
-            [(ngModel)]="searchTerm"
-            (ngModelChange)="onSearchChange()"
-          />
-        </div>
-        <div class="toolbar-actions">
-          <select aria-label="Assessment status filter"
-            class="filter-select"
-            [(ngModel)]="assessmentStatusFilter"
-            (ngModelChange)="page.set(1)"
-          >
-            <option value="All">All Statuses</option>
-            @for (opt of assessmentStatusOptions; track opt) {
-              <option [value]="opt">{{ opt }}</option>
-            }
-          </select>
-          <button type="button" class="btn-outline" (click)="exportAssessments()">
-            <app-icon name="download" [size]="15" />
-            Export
-          </button>
-        </div>
+@if (applicationId(); as appId) {
+  <!-- ============================== ASSESSMENT WORKSPACE ============================== -->
+  <!-- One application at a time — reached from that application's own detail page, the same way Evaluations already is. There is no browsable list of assessments; see the doc comment at the top of payments.ts for why. -->
+  <section class="card table-card">
+    <div class="detail-head">
+      <div class="detail-head-text">
+        <h1>Payment Assessment</h1>
+        @if (workspaceApp(); as app) {
+          <p class="detail-subtitle">
+            {{ app.applicant }} · {{ app.businessName || 'Not provided' }} · {{ app.permitType }}
+          </p>
+        }
       </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Assessment</th>
-              <th>Application</th>
-              <th>Citizen</th>
-              <th>Business / Project</th>
-              <th>Permit Type</th>
-              <th>Version</th>
-              <th>Status</th>
-              <th>Total</th>
-              <th>Balance</th>
-              <th>Due Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of pagedAssessmentRows(); track row.assessment.id) {
-              <tr
-                class="row-clickable"
-                tabindex="0"
-                role="button"
-                (click)="openAssessment(row)"
-                (keydown.enter)="openAssessment(row)"
-              >
-                <td class="id-cell">{{ row.assessment.id }}</td>
-                <td>{{ row.applicationId }}</td>
-                <td>
-                  <div class="applicant-cell">
-                    <app-avatar [name]="row.applicant" [size]="28" />
-                    <span class="truncate truncate--name" [title]="row.applicant">{{
-                      row.applicant
-                    }}</span>
-                  </div>
-                </td>
-                <td>
-                  <span class="truncate truncate--business" [title]="row.businessName">{{
-                    row.businessName
-                  }}</span>
-                </td>
-                <td>
-                  <span class="truncate truncate--type" [title]="row.permitType">{{
-                    row.permitType
-                  }}</span>
-                </td>
-                <td>v{{ row.assessment.version }}</td>
-                <td>
-                  <span class="status-pill" [class]="statusClass(row.assessment.status)">{{
-                    row.assessment.status
-                  }}</span>
-                </td>
-                <td>{{ formatPHP(row.assessment.totalCentavos) }}</td>
-                <td>{{ formatPHP(row.assessment.balanceCentavos) }}</td>
-                <td>{{ row.assessment.dueDate ?? '—' }}</td>
-                <td class="txn-actions-cell" (click)="$event.stopPropagation()">
-                  @if (
-                    row.assessment.status === 'Draft' &&
-                    !row.assessment.hasUnresolvedLines &&
-                    canEditAssessment()
-                  ) {
-                    <button
-                      type="button"
-                      class="pill-btn verify"
-                      [attr.aria-label]="'Submit assessment ' + row.assessment.id + ' for approval'"
-                      (click)="submitForApproval(row.assessment)"
-                    >
-                      Submit
-                    </button>
-                  } @else if (
-                    row.assessment.status === 'For Approval' &&
-                    !row.assessment.approvedBy &&
-                    canApproveAssessment()
-                  ) {
-                    <button
-                      type="button"
-                      class="pill-btn verify"
-                      [attr.aria-label]="'Approve assessment ' + row.assessment.id"
-                      (click)="approveAssessment(row.assessment)"
-                    >
-                      Approve
-                    </button>
-                  } @else if (
-                    row.assessment.status === 'For Approval' &&
-                    row.assessment.approvedBy &&
-                    canApproveAssessment()
-                  ) {
-                    <button
-                      type="button"
-                      class="pill-btn verify"
-                      [attr.aria-label]="
-                        'Issue order of payment for assessment ' + row.assessment.id
-                      "
-                      (click)="issueOrderOfPayment(row.assessment)"
-                    >
-                      Issue OP
-                    </button>
-                  }
-                </td>
-              </tr>
-            } @empty {
-              <tr class="table-empty-row">
-                <td colspan="11">No assessments match your search.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+      <div class="header-actions">
+        <button type="button" class="btn-primary" (click)="backFromWorkspace()">Back to Application</button>
       </div>
-      <app-pagination
-        [totalItems]="filteredAssessmentRows().length"
-        [pageSize]="pageSize"
-        [(page)]="page"
-      />
-    } @else if (selectedAssessment(); as a) {
-      <div class="detail-head">
-        <div class="detail-head-text">
-          <h1>Assessment {{ a.id }} (v{{ a.version }})</h1>
-          @if (selectedAssessmentApp(); as app) {
-            <p class="detail-subtitle">
-              {{ app.applicant }} · {{ app.businessName || 'Not provided' }}
-            </p>
-          }
-        </div>
-        <div class="header-actions">
-          <span class="status-pill" [class]="statusClass(a.status)">{{ a.status }}</span>
-          @if (latestReceiptTransaction(); as t) {
-            <button
-              type="button"
-              class="btn-outline"
-              title="View the official receipt for this payment"
-              (click)="openEmbeddedReceipt(t)"
-            >
-              <app-icon name="file-check" [size]="15" />
-              View Receipt
-            </button>
-          } @else if (verifiedTxnMissingOr(); as t) {
-            <button
-              type="button"
-              class="btn-outline"
-              title="No official receipt yet — attach the OR number issued by the Treasurer's Office to make it viewable"
-              (click)="openOrForm(t)"
-            >
-              <app-icon name="file-check" [size]="15" />
-              Attach OR Number
-            </button>
-          }
-          @if (selectedAssessmentApp(); as app) {
-            <button type="button" class="btn-outline" (click)="openApplicationRecord(app.id)">
-              View Application
-            </button>
-          }
-          <button type="button" class="btn-primary" (click)="backToAssessments()">
-            Back to List
-          </button>
-        </div>
-      </div>
+    </div>
 
-      <div class="stacked-panels">
+    @if (workspaceLoading()) {
+      <p class="muted-sub">Loading…</p>
+    } @else {
+      @if (workspaceError(); as err) {
+        <p class="error-banner">{{ err }}</p>
+      }
+
+      @if (workspaceOrder(); as order) {
+        <!-- An Order has already been issued — read-only from here; the line-item snapshot lives on the Order itself, not the (now Issued) assessment. -->
         <div class="summary-card">
           <div class="card-head">
-            <h2>Line Items</h2>
+            <h2>Order of Payment {{ order.number }}</h2>
+          </div>
+          <dl class="detail-fields">
+            <div><dt>Fee Schedule Version:</dt><dd>{{ order.feeScheduleVersion }}</dd></div>
+            <div><dt>Assessed:</dt><dd>{{ order.assessedAt }}</dd></div>
+            <div><dt>Due Date:</dt><dd>{{ order.dueDate ?? '—' }}</dd></div>
+          </dl>
+          <div class="table-wrap">
+            <table class="detail-table">
+              <thead><tr><th>Line</th><th>Amount</th></tr></thead>
+              <tbody>
+                <tr><td>{{ lineLabel('filing') }}</td><td>{{ formatPHP(order.filingCentavos) }}</td></tr>
+                <tr><td>{{ lineLabel('processing') }}</td><td>{{ formatPHP(order.processingCentavos) }}</td></tr>
+                <tr><td>{{ lineLabel('architectural') }}</td><td>{{ formatPHP(order.architecturalCentavos) }}</td></tr>
+                <tr><td>{{ lineLabel('structural') }}</td><td>{{ formatPHP(order.structuralCentavos) }}</td></tr>
+                <tr><td>{{ lineLabel('electrical') }}</td><td>{{ formatPHP(order.electricalCentavos) }}</td></tr>
+                <tr><td>{{ lineLabel('others') }}</td><td>{{ formatPHP(order.othersCentavos) }}</td></tr>
+                <tr class="strong-cell"><td>Total</td><td>{{ formatPHP(order.totalCentavos) }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          @if (canRecordPayment() && workspacePayments().length === 0) {
+            <button type="button" class="btn-primary" (click)="openPaymentForm()">Record Onsite Payment</button>
+          }
+        </div>
+
+        <div class="summary-card">
+          <div class="card-head"><h2>Payments</h2></div>
+          @if (workspacePayments().length === 0) {
+            <p class="muted-sub">No payment has been submitted against this Order yet.</p>
+          } @else {
+            <div class="table-wrap">
+              <table class="detail-table">
+                <thead>
+                  <tr>
+                    <th>Reference</th><th>Method</th><th>Amount</th><th>Status</th><th>OR No.</th><th>Submitted</th><th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (p of workspacePayments(); track p.id) {
+                    <tr>
+                      <td>{{ p.referenceNumber }}</td>
+                      <td>{{ p.method }}</td>
+                      <td>{{ formatPHP(p.amountCentavos) }}</td>
+                      <td><span class="status-pill" [class]="statusClass(p.status)">{{ p.status }}</span></td>
+                      <td>{{ p.officialReceiptNumber ?? '—' }}</td>
+                      <td>{{ p.submittedAt }}</td>
+                      <td class="txn-actions-cell">
+                        @if (p.status === 'Pending Verification' && canVerifyPayment()) {
+                          <button type="button" class="pill-btn verify" (click)="openVerify(toQueueRow(p, appId))">Verify</button>
+                          <button type="button" class="pill-btn reject" (click)="openReject(toQueueRow(p, appId))">Reject</button>
+                        }
+                        @if (p.status === 'Paid' && canAdjustPayment()) {
+                          <button type="button" class="btn-outline" (click)="openAdjust(toQueueRow(p, appId), 'Void')">Void</button>
+                          <button type="button" class="btn-outline" (click)="openAdjust(toQueueRow(p, appId), 'Reverse')">Reverse</button>
+                          <button type="button" class="btn-outline" (click)="openAdjust(toQueueRow(p, appId), 'Refund')">Refund</button>
+                        }
+                        @if (p.officialReceiptNumber && canVerifyPayment()) {
+                          <button type="button" class="link-btn" (click)="openCorrectReceipt(toQueueRow(p, appId))">Correct OR No.</button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      } @else if (workspaceAssessment(); as assessment) {
+        <!-- A Draft/Submitted/Approved assessment — being built up before an Order is issued. -->
+        <div class="summary-card">
+          <div class="card-head">
+            <h2>Assessment — {{ assessment.status }}</h2>
+            <span class="muted-sub">Fee schedule version {{ assessment.feeScheduleVersion }}</span>
           </div>
 
           <div class="table-wrap">
             <table class="detail-table">
               <thead>
                 <tr>
-                  <th>Fee</th>
-                  <th>Family / Authority</th>
-                  <th>Applicability</th>
-                  <th>Amount</th>
-                  @if (a.status === 'Draft') {
-                    <th>Include</th>
-                  }
+                  <th>Line</th><th>Included</th><th>Schedule Says</th><th>Amount (₱)</th><th>Basis</th><th></th>
                 </tr>
               </thead>
               <tbody>
-                @for (line of a.lineItems; track line.feeRuleId) {
-                  <tr [class.line-excluded]="!line.included">
-                    <td>{{ line.name }}</td>
-                    <td class="muted">{{ line.family }} · {{ line.authority }}</td>
-                    <td>
-                      <span class="status-pill" [class]="statusClass(line.applicability)">{{
-                        applicabilityLabel(line.applicability)
-                      }}</span>
-                    </td>
-                    <td>
-                      @if (a.status === 'Draft' && line.requiresAssessorInput) {
-                        <input aria-label="Requires assessor input"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          class="settings-amount-input"
-                          [value]="line.amountCentavos !== null ? line.amountCentavos / 100 : ''"
-                          placeholder="Requires assessor input"
-                          (change)="setLineAmount(a.id, line, $any($event.target).value)"
-                        />
-                      } @else {
-                        {{ formatPHP(line.amountCentavos) }}
-                      }
-                    </td>
-                    @if (a.status === 'Draft') {
-                      <td>
-                        <label class="toggle-switch">
-                          <input
-                            type="checkbox"
-                            [checked]="line.included"
-                            [disabled]="line.applicability === 'required'"
-                            (change)="toggleLineIncluded(a.id, line)"
-                          />
-                        </label>
-                      </td>
-                    }
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-
-          <dl class="assessment-totals">
-            <div class="assessment-totals-row assessment-totals-row--grand">
-              <dt>Total</dt>
-              <dd>{{ formatPHP(a.totalCentavos) }}</dd>
-            </div>
-            <div class="assessment-totals-row">
-              <dt>Amount Paid</dt>
-              <dd>{{ formatPHP(a.amountPaidCentavos) }}</dd>
-            </div>
-            <div class="assessment-totals-row">
-              <dt>Balance</dt>
-              <dd>{{ formatPHP(a.balanceCentavos) }}</dd>
-            </div>
-          </dl>
-
-          @if (a.hasUnresolvedLines && a.status === 'Draft') {
-            <p class="form-error">
-              One or more included lines still say "Requires assessor input" — enter a real amount
-              for each before this assessment can be submitted for approval.
-            </p>
-          }
-
-          <div class="assessment-actions">
-            @if (a.status === 'Draft') {
-              <label class="due-date-field">
-                Due Date
-                <input
-                  type="date"
-                  [value]="a.dueDate ? a.dueDate : ''"
-                  (change)="updateDueDate(a.id, $any($event.target).value)"
-                />
-              </label>
-              @if (canEditAssessment()) {
-                <button
-                  type="button"
-                  class="btn-primary"
-                  [disabled]="a.hasUnresolvedLines"
-                  (click)="submitForApproval(a)"
-                >
-                  Submit for Approval
-                </button>
-              }
-            } @else if (a.status === 'For Approval' && !a.approvedBy) {
-              @if (canApproveAssessment()) {
-                <button type="button" class="btn-primary" (click)="approveAssessment(a)">
-                  Approve Assessment
-                </button>
-              }
-            } @else if (a.status === 'For Approval' && a.approvedBy) {
-              <span class="muted">Approved by {{ a.approvedBy }}</span>
-              @if (canApproveAssessment()) {
-                <button type="button" class="btn-primary" (click)="issueOrderOfPayment(a)">
-                  Issue Order of Payment
-                </button>
-              }
-            } @else if (
-              a.status === 'Issued' || a.status === 'Partially Paid' || a.status === 'Overdue'
-            ) {
-              @if (canRecordPayment()) {
-                <button type="button" class="btn-primary" (click)="openPaymentForm()">
-                  Record Payment
-                </button>
-              }
-              @if (canEditAssessment() && canReviseSelected()) {
-                <button type="button" class="btn-outline" (click)="reviseAssessment()">
-                  Revise Assessment (new version)
-                </button>
-              }
-            }
-          </div>
-        </div>
-
-        <div class="summary-card">
-          <div class="card-head">
-            <h2>Payment Transactions</h2>
-          </div>
-          <div class="table-wrap">
-            <table class="detail-table txn-table">
-              <colgroup>
-                <col style="width: 16%" />
-                <col style="width: 8%" />
-                <col style="width: 9%" />
-                <col style="width: 16%" />
-                <col style="width: 10%" />
-                <col style="width: 18%" />
-                <col style="width: 11%" />
-                <col style="width: 12%" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>Transaction</th>
-                  <th>Method</th>
-                  <th>Agency</th>
-                  <th>Reference</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (t of selectedAssessmentTransactions(); track t.id) {
-                  <tr [class.line-excluded]="t.isVoid">
-                    <td class="muted">{{ t.id }}</td>
-                    <td>{{ t.method }}</td>
-                    <td>{{ t.agency }}</td>
-                    <td>{{ t.transactionReference }}</td>
-                    <td>{{ formatPHP(t.amountCentavos) }}</td>
-                    <td>
-                      <span class="status-pill" [class]="statusClass(t.status)">{{
-                        t.isVoid ? 'Voided' : t.status
-                      }}</span>
-                    </td>
-                    <td>{{ t.submittedAt }}</td>
-                    <td class="txn-actions-cell">
-                      @if (t.status === 'Pending Verification' && canVerifyPayment()) {
-                        <div class="txn-actions">
-                          <button
-                            type="button"
-                            class="btn-chip success"
-                            title="Verify this payment"
-                            (click)="verifyTransaction(t)"
-                          >
-                            <app-icon name="check-circle" [size]="14" />
-                            Verify
-                          </button>
-                          <button
-                            type="button"
-                            class="btn-chip danger"
-                            title="Reject this payment"
-                            (click)="openReject(t)"
-                          >
-                            <app-icon name="x-circle" [size]="14" />
-                            Reject
-                          </button>
-                        </div>
-                      }
-                      @if (t.status === 'Verified' && !t.isVoid) {
-                        <div class="txn-actions">
-                          @if (t.orNumber) {
-                            <button
-                              type="button"
-                              class="btn-chip info"
-                              title="View the official receipt for this payment"
-                              (click)="openEmbeddedReceipt(t)"
-                            >
-                              <app-icon name="file-check" [size]="14" />
-                              View Receipt
-                            </button>
-                          }
-                          @if (!t.orNumber || canAdjustPayment()) {
-                            <button
-                              type="button"
-                              class="txn-menu-trigger"
-                              cdkOverlayOrigin
-                              #txnMenuOrigin="cdkOverlayOrigin"
-                              title="More actions"
-                              [attr.aria-label]="'More actions for transaction ' + t.id"
-                              aria-haspopup="menu"
-                              [attr.aria-expanded]="openMenuTxnId() === t.id"
-                              (click)="toggleTxnMenu(t.id)"
-                            >
-                              <app-icon name="dots-vertical" [size]="16" />
-                            </button>
-                            <ng-template
-                              cdkConnectedOverlay
-                              [cdkConnectedOverlayOrigin]="txnMenuOrigin"
-                              [cdkConnectedOverlayOpen]="openMenuTxnId() === t.id"
-                              [cdkConnectedOverlayPositions]="txnMenuPositions"
-                              cdkConnectedOverlayHasBackdrop
-                              cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
-                              (backdropClick)="closeTxnMenu()"
-                              (detach)="closeTxnMenu()"
-                              (overlayKeydown)="onTxnMenuKeydown($event)"
-                            >
-                              <div
-                                class="txn-menu-panel"
-                                role="menu"
-                                [attr.aria-label]="'More actions for transaction ' + t.id"
-                              >
-                                @if (!t.orNumber) {
-                                  <button
-                                    type="button"
-                                    role="menuitem"
-                                    class="txn-menu-item"
-                                    title="Attach the official receipt number"
-                                    (click)="openOrForm(t); closeTxnMenu()"
-                                  >
-                                    <app-icon name="file-check" [size]="14" />
-                                    Attach OR No.
-                                  </button>
-                                }
-                                @if (canAdjustPayment()) {
-                                  <span class="txn-menu-label">Corrections</span>
-                                  <button
-                                    type="button"
-                                    role="menuitem"
-                                    class="txn-menu-item warning"
-                                    title="Reverse this transaction"
-                                    (click)="openAdjust(t, 'Reversal'); closeTxnMenu()"
-                                  >
-                                    <app-icon name="alert-triangle" [size]="14" />
-                                    Reverse
-                                  </button>
-                                  <button
-                                    type="button"
-                                    role="menuitem"
-                                    class="txn-menu-item danger"
-                                    title="Void this transaction"
-                                    (click)="openAdjust(t, 'Void'); closeTxnMenu()"
-                                  >
-                                    <app-icon name="x-circle" [size]="14" />
-                                    Void
-                                  </button>
-                                  <span class="txn-menu-label">Refunds</span>
-                                  <button
-                                    type="button"
-                                    role="menuitem"
-                                    class="txn-menu-item danger"
-                                    title="Refund this transaction"
-                                    (click)="openAdjust(t, 'Refund'); closeTxnMenu()"
-                                  >
-                                    <app-icon name="wallet" [size]="14" />
-                                    Refund
-                                  </button>
-                                }
-                              </div>
-                            </ng-template>
-                          }
-                        </div>
-                      }
-                    </td>
-                  </tr>
-                } @empty {
-                  <tr>
-                    <td colspan="8" class="muted">No payment transactions recorded yet.</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-
-          @if (selectedAssessmentHistory().length > 1) {
-            <h3>Version History</h3>
-            <div class="table-wrap">
-              <table class="detail-table">
-                <thead>
-                  <tr>
-                    <th>Version</th>
-                    <th>Status</th>
-                    <th>Total</th>
-                    <th>Created</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (v of selectedAssessmentHistory(); track v.id) {
-                    <tr class="row-clickable" (click)="selectedAssessmentId.set(v.id)">
-                      <td>v{{ v.version }}</td>
-                      <td>
-                        <span class="status-pill" [class]="statusClass(v.status)">{{
-                          v.status
-                        }}</span>
-                      </td>
-                      <td>{{ formatPHP(v.totalCentavos) }}</td>
-                      <td>{{ v.createdAt }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          }
-        </div>
-      </div>
-    }
-  }
-
-  <!-- ============================== TRANSACTIONS ============================== -->
-  @if (activeTab() === 'transactions') {
-    @if (transactionView() === 'list') {
-      <div class="table-toolbar">
-        <div class="search-input">
-          <app-icon name="search" [size]="16" />
-          <input aria-label="Search by Transaction ID, Reference, Applicant, or Business/Project"
-            type="text"
-            placeholder="Search by Transaction ID, Reference, Applicant, or Business/Project"
-            [(ngModel)]="searchTerm"
-            (ngModelChange)="onSearchChange()"
-          />
-        </div>
-        <div class="toolbar-actions">
-          <app-filter-panel [activeCount]="txnActiveFilterCount()" (clear)="clearTxnFilters()">
-            <div class="filter-field">
-              <label for="txn-permit-filter">Permit Type</label>
-              <select id="txn-permit-filter" [(ngModel)]="txnPermitTypeFilter">
-                <option value="All">All Permit Types</option>
-                @for (opt of permitTypeOptions; track opt) {
-                  <option [value]="opt">{{ opt }}</option>
-                }
-              </select>
-            </div>
-            <div class="filter-field">
-              <label for="txn-method-filter">Method</label>
-              <select id="txn-method-filter" [(ngModel)]="txnMethodFilter">
-                <option value="All">All Methods</option>
-                @for (opt of methodOptions; track opt) {
-                  <option [value]="opt">{{ opt }}</option>
-                }
-              </select>
-            </div>
-            <div class="filter-field">
-              <label for="txn-agency-filter">Agency</label>
-              <select id="txn-agency-filter" [(ngModel)]="txnAgencyFilter">
-                <option value="All">All Agencies</option>
-                @for (opt of agencyOptions; track opt) {
-                  <option [value]="opt">{{ opt }}</option>
-                }
-              </select>
-            </div>
-            <div class="filter-field">
-              <label for="txn-status-filter">Status</label>
-              <select id="txn-status-filter" [(ngModel)]="txnStatusFilter">
-                <option value="All">All Statuses</option>
-                @for (opt of txnStatusOptions; track opt) {
-                  <option [value]="opt">{{ opt }}</option>
-                }
-              </select>
-            </div>
-          </app-filter-panel>
-          <button type="button" class="btn-outline" (click)="exportTransactions()">
-            <app-icon name="download" [size]="15" />
-            Export
-          </button>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Transaction</th>
-              <th>Application</th>
-              <th>Citizen</th>
-              <th>Business / Project</th>
-              <th>Permit Type</th>
-              <th>Method</th>
-              <th>Agency</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of pagedTransactionRows(); track row.txn.id) {
-              <tr
-                class="row-clickable"
-                [class.line-excluded]="row.txn.isVoid"
-                tabindex="0"
-                role="button"
-                (click)="openTransaction(row)"
-                (keydown.enter)="openTransaction(row)"
-              >
-                <td class="id-cell">{{ row.txn.id }}</td>
-                <td>{{ row.txn.applicationId }}</td>
-                <td>
-                  <span class="truncate truncate--name" [title]="row.applicant">{{
-                    row.applicant
-                  }}</span>
-                </td>
-                <td>
-                  <span class="truncate truncate--business" [title]="row.businessName">{{
-                    row.businessName
-                  }}</span>
-                </td>
-                <td>
-                  <span class="truncate truncate--type" [title]="row.permitType">{{
-                    row.permitType
-                  }}</span>
-                </td>
-                <td>{{ row.txn.method }}</td>
-                <td>{{ row.txn.agency }}</td>
-                <td>{{ formatPHP(row.txn.amountCentavos) }}</td>
-                <td>
-                  <span class="status-pill" [class]="statusClass(row.txn.status)">{{
-                    row.txn.isVoid ? 'Voided' : row.txn.status
-                  }}</span>
-                </td>
-                <td>{{ row.txn.submittedAt }}</td>
-                <td class="txn-actions-cell" (click)="$event.stopPropagation()">
-                  @if (row.txn.status === 'Pending Verification' && canVerifyPayment()) {
-                    <button
-                      type="button"
-                      class="pill-btn verify"
-                      (click)="verifyTransaction(row.txn)"
-                    >
-                      Verify
-                    </button>
-                    <button type="button" class="pill-btn reject" (click)="openReject(row.txn)">
-                      Reject
-                    </button>
-                  }
-                </td>
-              </tr>
-            } @empty {
-              <tr class="table-empty-row">
-                <td colspan="11">No transactions match your search.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <app-pagination
-        [totalItems]="filteredTransactionRows().length"
-        [pageSize]="pageSize"
-        [(page)]="page"
-      />
-    } @else if (selectedTransaction(); as t) {
-      <div class="detail-head">
-        <div class="detail-head-text">
-          <h1>Transaction {{ t.id }}</h1>
-          @if (selectedTransactionApp(); as app) {
-            <p class="detail-subtitle">
-              {{ app.applicant }} · {{ app.businessName || 'Not provided' }}
-            </p>
-          }
-        </div>
-        <div class="header-actions">
-          <span class="status-pill" [class]="statusClass(t.status)">{{
-            t.isVoid ? 'Voided' : t.status
-          }}</span>
-          <button
-            type="button"
-            class="btn-outline"
-            (click)="openApplicationRecord(t.applicationId)"
-          >
-            View Application
-          </button>
-          <button type="button" class="btn-primary" (click)="backToTransactions()">
-            Back to List
-          </button>
-        </div>
-      </div>
-
-      <div class="stacked-panels">
-        <div class="summary-card">
-          <div class="card-head">
-            <h2>Transaction Detail</h2>
-            <div class="doc-actions">
-              <button type="button" class="btn-outline" (click)="openReceiptPreview()">
-                Preview Receipt / Acknowledgment
-              </button>
-            </div>
-          </div>
-          <dl class="detail-fields">
-            <div>
-              <dt>Application:</dt>
-              <dd>{{ t.applicationId }}</dd>
-            </div>
-            <div>
-              <dt>Assessment:</dt>
-              <dd>{{ t.assessmentId }}</dd>
-            </div>
-            <div>
-              <dt>Method:</dt>
-              <dd>{{ t.method }}</dd>
-            </div>
-            <div>
-              <dt>Agency:</dt>
-              <dd>{{ t.agency }}</dd>
-            </div>
-            <div>
-              <dt>Payer Reference:</dt>
-              <dd>{{ t.transactionReference }}</dd>
-            </div>
-            <div>
-              <dt>Amount:</dt>
-              <dd>{{ formatPHP(t.amountCentavos) }}</dd>
-            </div>
-            <div>
-              <dt>Submitted:</dt>
-              <dd>
-                {{ t.submittedAt }}
-                @if (t.recordedBy) {
-                  by {{ t.recordedBy }}
-                }
-              </dd>
-            </div>
-            @if (t.status === 'Verified' || t.isVoid) {
-              <div>
-                <dt>Verified:</dt>
-                <dd>{{ t.verifiedAt }} by {{ t.verifiedBy }}</dd>
-              </div>
-            }
-            @if (t.status === 'Rejected') {
-              <div>
-                <dt>Rejection Reason:</dt>
-                <dd>{{ t.rejectionReason }}</dd>
-              </div>
-            }
-            @if (t.proofFileName) {
-              <div>
-                <dt>Proof of Payment:</dt>
-                <dd>{{ t.proofFileName }}</dd>
-              </div>
-            }
-            <div>
-              <dt>OR No.:</dt>
-              <dd>
-                {{
-                  t.orNumber ??
-                    'Not yet entered — this transaction can only be presented as a Payment Acknowledgment'
-                }}
-              </dd>
-            </div>
-          </dl>
-
-          <div class="assessment-actions">
-            @if (t.status === 'Pending Verification' && canVerifyPayment()) {
-              <button type="button" class="btn-primary" (click)="verifyTransaction(t)">
-                Verify Transaction
-              </button>
-              <button type="button" class="btn-outline" (click)="openReject(t)">Reject</button>
-            }
-            @if (t.status === 'Verified' && !t.isVoid) {
-              @if (!t.orNumber) {
-                <button type="button" class="btn-outline" (click)="openOrForm(t)">
-                  Attach Official OR Number
-                </button>
-              }
-              @if (canAdjustPayment()) {
-                <button type="button" class="btn-outline" (click)="openAdjust(t, 'Void')">
-                  Void
-                </button>
-                <button type="button" class="btn-outline" (click)="openAdjust(t, 'Reversal')">
-                  Reverse
-                </button>
-                <button type="button" class="btn-outline" (click)="openAdjust(t, 'Refund')">
-                  Refund
-                </button>
-              }
-            }
-          </div>
-
-          @if (selectedTransactionAdjustments().length > 0) {
-            <h3>Adjustments</h3>
-            <div class="table-wrap">
-              <table class="detail-table">
-                <thead>
-                  <tr>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Reason</th>
-                    <th>By</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (adj of selectedTransactionAdjustments(); track adj.id) {
+                @for (line of feeLines; track line) {
+                  @if (assessment.status === 'Draft' && canEditAssessment()) {
                     <tr>
-                      <td>{{ adj.type }}</td>
-                      <td>{{ formatPHP(adj.amountCentavos) }}</td>
-                      <td>{{ adj.reason }}</td>
-                      <td>{{ adj.actor }}</td>
-                      <td>{{ adj.timestamp }}</td>
+                      <td>{{ lineLabel(line) }}</td>
+                      <td>
+                        <input type="checkbox" [(ngModel)]="lineDrafts[line].included" [attr.aria-label]="lineLabel(line) + ' included'" />
+                      </td>
+                      <td>{{ formatPHP(computedForLine(assessment, line)) }}</td>
+                      <td>
+                        <input
+                          type="number" min="0" step="0.01"
+                          [(ngModel)]="lineDrafts[line].amount"
+                          [attr.aria-label]="lineLabel(line) + ' amount in pesos'"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          placeholder="Ordinance or issuance this rests on"
+                          [(ngModel)]="lineDrafts[line].basis"
+                          [attr.aria-label]="lineLabel(line) + ' basis'"
+                        />
+                      </td>
+                      <td>
+                        <button
+                          type="button" class="btn-outline" [disabled]="workspaceWorking()"
+                          (click)="saveLine(line)"
+                        >
+                          Save
+                        </button>
+                      </td>
+                    </tr>
+                  } @else {
+                    <tr>
+                      <td>{{ lineLabel(line) }}</td>
+                      <td>{{ lineDrafts[line].included ? 'Yes' : 'No' }}</td>
+                      <td>{{ formatPHP(computedForLine(assessment, line)) }}</td>
+                      <td>{{ formatPHP(+lineDrafts[line].amount * 100) }}</td>
+                      <td>{{ lineDrafts[line].basis || '—' }}</td>
+                      <td></td>
                     </tr>
                   }
-                </tbody>
-              </table>
-            </div>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="strong-cell">
+                  <td colspan="3">Total</td>
+                  <td colspan="3">{{ formatPHP(assessment.totalCentavos) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <div class="assessment-actions">
+            @if (assessment.status === 'Draft' && canEditAssessment()) {
+              <button type="button" class="btn-primary" [disabled]="workspaceWorking()" (click)="submitAssessment()">
+                Submit for Approval
+              </button>
+            }
+            @if (assessment.status === 'Submitted' && canApproveAssessment()) {
+              <button type="button" class="btn-primary" [disabled]="workspaceWorking()" (click)="approveWorkspaceAssessment()">
+                Approve
+              </button>
+              <p class="muted-sub">A different officer from the one who drafted or submitted this must approve it — the server refuses a self-approval.</p>
+            }
+            @if (assessment.status === 'Approved' && canApproveAssessment()) {
+              <button type="button" class="btn-primary" [disabled]="workspaceWorking()" (click)="issueOrder()">
+                Issue Order of Payment
+              </button>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="summary-card">
+          <p class="muted-sub">No assessment has been started for this application yet.</p>
+          @if (canEditAssessment()) {
+            <button type="button" class="btn-primary" [disabled]="workspaceWorking()" (click)="startAssessment()">
+              Start Assessment
+            </button>
           }
         </div>
-      </div>
+      }
     }
-  }
-
-  <!-- ============================== PERMIT FEE MATRIX ============================== -->
-  @if (activeTab() === 'matrix') {
-    <div class="matrix-header">
-      <label for="matrix-permit-type">Permit Type</label>
-      <select id="matrix-permit-type" [(ngModel)]="matrixPermitType">
-        @for (opt of permitTypeOptions; track opt) {
-          <option [value]="opt">{{ opt }}</option>
-        }
-      </select>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Fee Family</th>
-            <th>Rule</th>
-            <th>Authority</th>
-            <th>Collecting Office</th>
-            <th>Applicability</th>
-            <th>Formula</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (entry of matrixRows(); track entry.rule.id) {
-            <tr [class.line-excluded]="entry.applicability === 'not-applicable'">
-              <td>{{ entry.rule.family }}</td>
-              <td>
-                {{ entry.rule.name }} <span class="muted">({{ entry.rule.code }})</span>
-              </td>
-              <td>{{ entry.rule.authority }}</td>
-              <td>{{ departmentLabel(entry.rule.collectingOfficeId) }}</td>
-              <td>
-                <span class="status-pill" [class]="statusClass(entry.applicability)">{{
-                  applicabilityLabel(entry.applicability)
-                }}</span>
-              </td>
-              <td>{{ calculationSummary(entry.rule) }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  }
-
-  <!-- ============================== CONFIGURATION ============================== -->
-  @if (activeTab() === 'configuration' && canConfigurePayments()) {
+  </section>
+} @else {
+  <section class="card table-card">
     <nav class="tab-nav">
-      @for (t of configSubTabs; track t.key) {
+      @for (t of visibleTabs(); track t.key) {
         <button
           type="button"
           class="tab-btn"
-          [class.active]="configSubTab() === t.key"
-          (click)="configSubTab.set(t.key)"
+          [class.active]="activeTab() === t.key"
+          (click)="selectTab(t.key)"
         >
+          <app-icon [name]="t.icon" [size]="15" />
           {{ t.label }}
         </button>
       }
     </nav>
 
-    @if (configSubTab() === 'fee-rules') {
-    <section class="settings-section">
-      <h3>Fee Rules</h3>
-      <p class="muted-sub">
-        Editing an amount or an applicability mapping creates a NEW VERSION of the rule rather than
-        overwriting it — the previous version is kept, marked superseded, and is still visible in
-        Version History below. An assessment already drafted/issued keeps the line-item snapshot it
-        was built with; only assessments drafted after this change use the new version.
-      </p>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Rule</th>
-              <th>Family</th>
-              <th>Authority</th>
-              <th>Calculation</th>
-              <th>Version</th>
-              <th>Active</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (rule of feeRules(); track rule.id) {
-              <tr>
-                <td class="strong-cell">
-                  {{ rule.name }} <span class="muted">({{ rule.code }})</span>
-                </td>
-                <td>{{ rule.family }}</td>
-                <td>{{ rule.authority }}</td>
-                <td>{{ calculationSummary(rule) }}</td>
-                <td>
-                  v{{ rule.version }}
-                  <button type="button" class="link-btn" (click)="toggleHistory(rule.id)">
-                    history
-                  </button>
-                </td>
-                <td>
-                  <label class="toggle-switch">
-                    <input
-                      type="checkbox"
-                      [checked]="rule.active"
-                      (change)="toggleFeeRuleActive(rule)"
-                    />
-                    <span>{{ rule.active ? 'Active' : 'Inactive' }}</span>
-                  </label>
-                </td>
-                <td>
-                  <button type="button" class="btn-outline" (click)="openEditRule(rule)">
-                    Edit
-                  </button>
-                </td>
-              </tr>
-              @if (historyFor() === rule.id) {
-                <tr>
-                  <td colspan="7">
-                    <div class="table-wrap">
-                      <table class="detail-table">
-                        <thead>
-                          <tr>
-                            <th>Version</th>
-                            <th>Effective</th>
-                            <th>Superseded</th>
-                            <th>Active</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @for (v of feeRuleHistory(rule.id); track v.id) {
-                            <tr>
-                              <td>v{{ v.version }}</td>
-                              <td>{{ v.effectiveDate }}</td>
-                              <td>{{ v.supersededDate ?? '—' }}</td>
-                              <td>{{ v.active ? 'Yes' : 'No' }}</td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                  </td>
-                </tr>
+    <!-- ============================== PAYMENT QUEUE ============================== -->
+    @if (activeTab() === 'transactions') {
+      @if (queueView() === 'list') {
+        <div class="table-toolbar">
+          <div class="search-input">
+            <app-icon name="search" [size]="16" />
+            <input aria-label="Search by reference, applicant, or business/project"
+              type="text"
+              placeholder="Search by reference, applicant, or business/project"
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchChange()"
+            />
+          </div>
+          <div class="toolbar-actions">
+            <select aria-label="Payment status filter"
+              class="filter-select"
+              [(ngModel)]="queueStatusFilter"
+              (ngModelChange)="onQueueStatusChange()"
+            >
+              @for (opt of queueStatusOptions; track opt) {
+                <option [value]="opt">{{ opt }}</option>
               }
-            }
-          </tbody>
-        </table>
-      </div>
-    </section>
-    }
+            </select>
+            <button type="button" class="btn-outline" (click)="exportQueue()">
+              <app-icon name="download" [size]="15" />
+              Export
+            </button>
+          </div>
+        </div>
 
-    @if (configSubTab() === 'payment-methods') {
-    <section class="settings-section">
-      <h3>Payment Methods</h3>
-      <p class="muted-sub">
-        Only methods marked Active are offered on the payment recording form. Methods without a live
-        integration in this build stay disabled rather than removed.
-      </p>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>Description</th>
-              <th>Active</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (method of methods(); track method.id) {
-              <tr>
-                <td class="strong-cell">{{ method.name }}</td>
-                <td class="muted">{{ method.description }}</td>
-                <td>
-                  <label class="toggle-switch">
-                    <input
-                      type="checkbox"
-                      [checked]="method.active"
-                      [disabled]="!method.domainMethod"
-                      (change)="toggleMethodActive(method.id, !method.active, method.domainMethod)"
-                    />
-                    <span>{{ method.active ? 'Active' : 'Inactive' }}</span>
-                  </label>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </section>
-    }
-
-    @if (configSubTab() === 'bank-information') {
-      <section class="settings-section">
-        <h3>Bank Information</h3>
-        <p class="muted-sub">
-          The office's own receiving-bank account — shown to applicants who choose "Bank Payment"
-          as their method, and used to verify a submitted proof-of-payment actually matches the
-          right account.
-        </p>
-
-        @if (!editingBankInfo()) {
-          @if (bankInfo().accountNumber) {
-            <dl class="info-grid with-dividers">
-              <div>
-                <dt>Bank Name</dt>
-                <dd>{{ bankInfo().bankName }}</dd>
-              </div>
-              <div>
-                <dt>Account Name</dt>
-                <dd>{{ bankInfo().accountName }}</dd>
-              </div>
-              <div>
-                <dt>Account Number</dt>
-                <dd>{{ bankInfo().accountNumber }}</dd>
-              </div>
-              <div>
-                <dt>Branch</dt>
-                <dd>{{ bankInfo().branch || 'Not provided' }}</dd>
-              </div>
-            </dl>
-            <p class="muted-sub">
-              Last updated {{ bankInfo().lastUpdated }} by {{ bankInfo().lastUpdatedBy }}
-            </p>
-          } @else {
-            <p class="muted-sub">
-              Not yet configured — "Bank Payment" cannot be verified against a real account until
-              this is filled in.
-            </p>
-          }
-          <button type="button" class="btn-outline" (click)="openEditBankInfo()">
-            {{ bankInfo().accountNumber ? 'Edit' : 'Configure' }} Bank Information
-          </button>
+        @if (queueLoading()) {
+          <p class="muted-sub">Loading…</p>
+        } @else if (queueUnavailable()) {
+          <p class="muted-sub">This deployment has no payment queue endpoint yet.</p>
+        } @else if (queueError(); as err) {
+          <p class="error-banner">{{ err }}</p>
         } @else {
-          <form class="create-form" (ngSubmit)="saveBankInfo()">
-            <label>
-              Bank Name
-              <input type="text" [(ngModel)]="bankInfoForm.bankName" name="bankName" required />
-            </label>
-            <label>
-              Account Name
-              <input
-                type="text"
-                [(ngModel)]="bankInfoForm.accountName"
-                name="accountName"
-                required
-              />
-            </label>
-            <label>
-              Account Number
-              <input
-                type="text"
-                [(ngModel)]="bankInfoForm.accountNumber"
-                name="accountNumber"
-                required
-              />
-            </label>
-            <label>
-              Branch <span class="optional">(optional)</span>
-              <input type="text" [(ngModel)]="bankInfoForm.branch" name="branch" />
-            </label>
-            <div class="modal-actions">
-              <button type="button" class="modal-btn neutral" (click)="cancelEditBankInfo()">
-                Cancel
-              </button>
-              <button type="submit" class="modal-btn confirm">Save</button>
-            </div>
-          </form>
-        }
-      </section>
-    }
-
-    @if (configSubTab() === 'payroll') {
-      <section class="settings-section">
-        <div class="card-head">
-          <div>
-            <h3>Payroll</h3>
-            <p class="muted-sub">
-              The office's own staff/collecting-officer roster and monthly salary. Starts empty —
-              add each real staff member; nothing here is a fabricated figure.
-            </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Application</th>
+                  <th>Citizen</th>
+                  <th>Business / Project</th>
+                  <th>Reference</th>
+                  <th>Method</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Submitted</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of pagedQueueRows(); track row.payment.id) {
+                  <tr
+                    class="row-clickable"
+                    tabindex="0"
+                    role="button"
+                    (click)="openPayment(row)"
+                    (keydown.enter)="openPayment(row)"
+                  >
+                    <td class="id-cell">{{ row.payment.applicationReference }}</td>
+                    <td>
+                      <div class="applicant-cell">
+                        <app-avatar [name]="row.applicant" [size]="28" />
+                        <span class="truncate truncate--name" [title]="row.applicant">{{ row.applicant }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="truncate truncate--business" [title]="row.businessName">{{ row.businessName }}</span>
+                    </td>
+                    <td>{{ row.payment.referenceNumber }}</td>
+                    <td>{{ row.payment.method }}</td>
+                    <td>{{ formatPHP(row.payment.amountCentavos) }}</td>
+                    <td>
+                      <span class="status-pill" [class]="statusClass(row.payment.status)">{{ row.payment.status }}</span>
+                    </td>
+                    <td>{{ row.payment.submittedAt | slice: 0 : 10 }}</td>
+                    <td class="txn-actions-cell" (click)="$event.stopPropagation()">
+                      @if (row.payment.status === 'Pending Verification' && canVerifyPayment()) {
+                        <button type="button" class="pill-btn verify" (click)="openVerify(row.payment)">Verify</button>
+                        <button type="button" class="pill-btn reject" (click)="openReject(row.payment)">Reject</button>
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr class="table-empty-row">
+                    <td colspan="9">No payments match your search.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
-          <button type="button" class="btn-outline" (click)="openAddPayroll()">
-            <app-icon name="plus" [size]="15" />
-            Add Staff
-          </button>
+          <app-pagination
+            [totalItems]="filteredQueueRows().length"
+            [pageSize]="pageSize"
+            [(page)]="page"
+          />
+        }
+      } @else if (selectedPayment(); as p) {
+        <div class="detail-head">
+          <div class="detail-head-text">
+            <h1>Payment {{ p.referenceNumber }}</h1>
+            <p class="detail-subtitle">{{ p.applicantName }} · {{ p.applicationReference }}</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-pill" [class]="statusClass(p.status)">{{ p.status }}</span>
+            <button type="button" class="btn-outline" (click)="openApplicationRecord(p.applicationId)">
+              View Application
+            </button>
+            <button type="button" class="btn-primary" (click)="backToQueue()">Back to List</button>
+          </div>
         </div>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Monthly Salary</th>
-                <th>Date Hired</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (staff of payrollRows(); track staff.id) {
-                <tr>
-                  <td class="strong-cell">{{ staff.name }}</td>
-                  <td>{{ staff.position }}</td>
-                  <td>
-                    {{
-                      staff.monthlySalaryCentavos !== null
-                        ? formatPHP(staff.monthlySalaryCentavos)
-                        : 'Not set'
-                    }}
-                  </td>
-                  <td class="muted">{{ staff.dateHired ?? '—' }}</td>
-                  <td>
-                    <label class="toggle-switch">
-                      <input
-                        type="checkbox"
-                        [checked]="staff.status === 'Active'"
-                        (change)="togglePayrollStatus(staff)"
-                      />
-                      <span>{{ staff.status }}</span>
-                    </label>
-                  </td>
-                  <td>
-                    <button type="button" class="btn-outline" (click)="openEditPayroll(staff)">
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="6" class="muted">
-                    No staff on the payroll roster yet — click "Add Staff" to add the first one.
-                  </td>
-                </tr>
+        <div class="stacked-panels">
+          <div class="summary-card">
+            <div class="card-head"><h2>Payment Detail</h2></div>
+            <dl class="detail-fields">
+              <div><dt>Application:</dt><dd>{{ p.applicationReference }}</dd></div>
+              <div><dt>Method:</dt><dd>{{ p.method }}</dd></div>
+              <div><dt>Reference:</dt><dd>{{ p.referenceNumber }}</dd></div>
+              <div><dt>Amount:</dt><dd>{{ formatPHP(p.amountCentavos) }}</dd></div>
+              <div><dt>Submitted:</dt><dd>{{ p.submittedAt }}</dd></div>
+              <div><dt>OR No.:</dt><dd>{{ p.officialReceiptNumber ?? 'Not yet verified' }}</dd></div>
+            </dl>
+
+            <div class="assessment-actions">
+              @if (p.status === 'Pending Verification' && canVerifyPayment()) {
+                <button type="button" class="btn-primary" (click)="openVerify(p)">Verify Payment</button>
+                <button type="button" class="btn-outline" (click)="openReject(p)">Reject</button>
               }
-            </tbody>
-          </table>
+              @if (p.status === 'Paid' && canAdjustPayment()) {
+                <button type="button" class="btn-outline" (click)="openAdjust(p, 'Void')">Void</button>
+                <button type="button" class="btn-outline" (click)="openAdjust(p, 'Reverse')">Reverse</button>
+                <button type="button" class="btn-outline" (click)="openAdjust(p, 'Refund')">Refund</button>
+              }
+              @if (p.officialReceiptNumber && canVerifyPayment()) {
+                <button type="button" class="btn-outline" (click)="openCorrectReceipt(p)">Correct OR No.</button>
+              }
+            </div>
+          </div>
         </div>
+      }
+    }
 
-        @if (editingPayrollId(); as id) {
-          <div class="modal-backdrop" (click)="cancelEditPayroll()">
-            <div class="modal-box create-box" (click)="$event.stopPropagation()">
-              <button
-                type="button"
-                class="modal-close"
-                aria-label="Close"
-                (click)="cancelEditPayroll()"
-              >
-                &#10005;
-              </button>
-              <h2>{{ id === 'new' ? 'Add Staff' : 'Edit Staff' }}</h2>
-              <form class="create-form" (ngSubmit)="savePayroll()">
-                <label>
-                  Name
-                  <input type="text" [(ngModel)]="payrollForm.name" name="staffName" required />
-                </label>
-                <label>
-                  Position
-                  <input
-                    type="text"
-                    [(ngModel)]="payrollForm.position"
-                    name="staffPosition"
-                    required
-                    placeholder="e.g. Collecting Officer, Payment Officer"
-                  />
-                </label>
-                <label>
-                  Monthly Salary (₱) <span class="optional">(optional)</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    [(ngModel)]="payrollForm.monthlySalary"
-                    name="staffSalary"
-                  />
-                </label>
-                <label>
-                  Date Hired <span class="optional">(optional)</span>
-                  <input type="date" [(ngModel)]="payrollForm.dateHired" name="staffDateHired" />
-                </label>
-                <div class="modal-actions">
-                  <button type="button" class="modal-btn neutral" (click)="cancelEditPayroll()">
-                    Cancel
-                  </button>
-                  <button type="submit" class="modal-btn confirm">Save</button>
-                </div>
-              </form>
+    <!-- ============================== FEE SCHEDULE ============================== -->
+    @if (activeTab() === 'fee-schedule') {
+      @if (schedulesLoading()) {
+        <p class="muted-sub">Loading…</p>
+      } @else if (schedulesUnavailable()) {
+        <p class="muted-sub">This deployment has no fee-schedule endpoint yet.</p>
+      } @else if (schedulesError(); as err) {
+        <p class="error-banner">{{ err }}</p>
+      } @else {
+        @if (canConfigurePayments()) {
+          <div class="table-toolbar">
+            <div></div>
+            <div class="toolbar-actions">
+              <button type="button" class="btn-primary" (click)="openPublishForm()">Publish New Schedule</button>
             </div>
           </div>
         }
-      </section>
+        @if (schedules().length === 0) {
+          <p class="muted-sub">
+            No fee schedule has ever been published. Nothing can be assessed until one is — see
+            "Publish New Schedule" above.
+          </p>
+        } @else {
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Version</th><th>Status</th><th>Effective From</th><th>Effective To</th><th>Published By</th><th>Lines</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of schedules(); track s.version) {
+                  <tr class="row-clickable" (click)="toggleSchedule(s.version)">
+                    <td class="id-cell">{{ s.version }}</td>
+                    <td><span class="status-pill" [class]="statusClass(s.status)">{{ s.status }}</span></td>
+                    <td>{{ s.effectiveFrom }}</td>
+                    <td>{{ s.effectiveTo ?? '—' }}</td>
+                    <td>{{ s.publishedBy ?? '—' }}</td>
+                    <td>{{ s.entries.length }}</td>
+                  </tr>
+                  @if (expandedScheduleVersion() === s.version) {
+                    <tr>
+                      <td colspan="6">
+                        <div class="table-wrap">
+                          <table class="detail-table">
+                            <thead><tr><th>Permit Type</th><th>Line</th><th>Amount</th><th>Basis</th></tr></thead>
+                            <tbody>
+                              @for (entry of s.entries; track entry.permitType + entry.line) {
+                                <tr>
+                                  <td>{{ entry.permitType }}</td>
+                                  <td>{{ lineLabel(entry.line) }}</td>
+                                  <td>{{ formatPHP(entry.amountCentavos) }}</td>
+                                  <td>{{ entry.basis }}</td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
     }
-  }
-</section>
 
-<!-- ============================== MODALS ============================== -->
+    <!-- ============================== CONFIGURATION ============================== -->
+    @if (activeTab() === 'configuration' && canConfigurePayments()) {
+      <nav class="tab-nav">
+        @for (t of configSubTabs; track t.key) {
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="configSubTab() === t.key"
+            (click)="configSubTab.set(t.key)"
+          >
+            {{ t.label }}
+          </button>
+        }
+      </nav>
 
-@if (showPaymentForm() && selectedAssessment(); as a) {
+      @if (configSubTab() === 'payment-methods') {
+        <section class="settings-section">
+          <h3>Payment Methods</h3>
+          <p class="muted-sub">
+            Only methods marked Active are offered to an applicant settling an Order of Payment.
+            Turning off the last active method is refused — it would leave applicants with no way
+            to pay at all.
+          </p>
+          @if (methodsLoading()) {
+            <p class="muted-sub">Loading…</p>
+          } @else if (methodsUnavailable()) {
+            <p class="muted-sub">This deployment has no payment-method configuration endpoint yet.</p>
+          } @else if (methodsError(); as err) {
+            <p class="error-banner">{{ err }}</p>
+          } @else {
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Method</th><th>Instructions Shown to Applicant</th><th>Active</th><th></th></tr>
+                </thead>
+                <tbody>
+                  @for (method of paymentMethods(); track method.method) {
+                    <tr>
+                      <td class="strong-cell">{{ method.label }}</td>
+                      <td class="muted">
+                        @if (editingMethodInstructions() === method.method) {
+                          <textarea aria-label="Instructions shown to applicant" rows="2" [(ngModel)]="instructionsDraft"></textarea>
+                          <div class="modal-actions">
+                            <button type="button" class="modal-btn neutral" (click)="cancelEditInstructions()">Cancel</button>
+                            <button type="button" class="modal-btn confirm" (click)="saveInstructions(method)">Save</button>
+                          </div>
+                        } @else {
+                          {{ method.instructions || 'Not yet written.' }}
+                          <button type="button" class="link-btn" (click)="openEditInstructions(method)">Edit</button>
+                        }
+                      </td>
+                      <td>
+                        <label class="toggle-switch">
+                          <input
+                            type="checkbox"
+                            [checked]="method.active"
+                            (change)="toggleMethodActive(method, $event)"
+                          />
+                          <span>{{ method.active ? 'Active' : 'Inactive' }}</span>
+                        </label>
+                      </td>
+                      <td></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+      }
+
+      @if (configSubTab() === 'bank-information') {
+        <section class="settings-section">
+          <h3>Bank Information</h3>
+          <p class="not-stored">
+            Not connected to anything real yet. The backend has no structured bank-account record —
+            what an applicant actually sees for "Bank Transfer" is the free-text Instructions field
+            on that method, above in Payment Methods, which IS real and wired.
+          </p>
+
+          @if (!editingBankInfo()) {
+            @if (bankInfo().accountNumber) {
+              <dl class="info-grid with-dividers">
+                <div><dt>Bank Name</dt><dd>{{ bankInfo().bankName }}</dd></div>
+                <div><dt>Account Name</dt><dd>{{ bankInfo().accountName }}</dd></div>
+                <div><dt>Account Number</dt><dd>{{ bankInfo().accountNumber }}</dd></div>
+                <div><dt>Branch</dt><dd>{{ bankInfo().branch || 'Not provided' }}</dd></div>
+              </dl>
+              <p class="muted-sub">
+                Last updated {{ bankInfo().lastUpdated }} by {{ bankInfo().lastUpdatedBy }}
+              </p>
+            } @else {
+              <p class="muted-sub">Not yet configured.</p>
+            }
+            <button type="button" class="btn-outline" (click)="openEditBankInfo()">
+              {{ bankInfo().accountNumber ? 'Edit' : 'Configure' }} Bank Information
+            </button>
+          } @else {
+            <form class="create-form" (ngSubmit)="saveBankInfo()">
+              <label>
+                Bank Name
+                <input type="text" [(ngModel)]="bankInfoForm.bankName" name="bankName" required />
+              </label>
+              <label>
+                Account Name
+                <input type="text" [(ngModel)]="bankInfoForm.accountName" name="accountName" required />
+              </label>
+              <label>
+                Account Number
+                <input type="text" [(ngModel)]="bankInfoForm.accountNumber" name="accountNumber" required />
+              </label>
+              <label>
+                Branch <span class="optional">(optional)</span>
+                <input type="text" [(ngModel)]="bankInfoForm.branch" name="branch" />
+              </label>
+              <div class="modal-actions">
+                <button type="button" class="modal-btn neutral" (click)="cancelEditBankInfo()">Cancel</button>
+                <button type="submit" class="modal-btn confirm">Save</button>
+              </div>
+            </form>
+          }
+        </section>
+      }
+
+      @if (configSubTab() === 'payroll') {
+        <section class="settings-section">
+          <h3>Payroll</h3>
+          <p class="muted-sub">
+            A real staff/collecting-officer roster — starts empty, an admin adds each real person
+            themselves. Not connected to a payslip/deductions engine.
+          </p>
+          <div class="table-toolbar">
+            <div></div>
+            <div class="toolbar-actions">
+              <button type="button" class="btn-primary" (click)="openAddPayroll()">Add Staff</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Position</th><th>Monthly Salary</th><th>Date Hired</th><th>Status</th><th>Action</th></tr>
+              </thead>
+              <tbody>
+                @for (staff of payrollRows(); track staff.id) {
+                  <tr>
+                    <td class="strong-cell">{{ staff.name }}</td>
+                    <td>{{ staff.position }}</td>
+                    <td>{{ formatPHP(staff.monthlySalaryCentavos) }}</td>
+                    <td>{{ staff.dateHired ?? '—' }}</td>
+                    <td>
+                      <label class="toggle-switch">
+                        <input type="checkbox" [checked]="staff.status === 'Active'" (change)="togglePayrollStatus(staff)" />
+                        <span>{{ staff.status }}</span>
+                      </label>
+                    </td>
+                    <td>
+                      <button type="button" class="btn-outline" (click)="openEditPayroll(staff)">Edit</button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr class="table-empty-row"><td colspan="6">No staff on the payroll roster yet.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (editingPayrollId()) {
+            <div class="modal-backdrop" (click)="cancelEditPayroll()">
+              <div class="modal-box" (click)="$event.stopPropagation()">
+                <h2>{{ editingPayrollId() === 'new' ? 'Add Staff' : 'Edit Staff' }}</h2>
+                <form class="create-form" (ngSubmit)="savePayroll()">
+                  <label>Name <input type="text" [(ngModel)]="payrollForm.name" name="name" required /></label>
+                  <label>Position <input type="text" [(ngModel)]="payrollForm.position" name="position" required /></label>
+                  <label>Monthly Salary (₱) <input type="number" min="0" step="0.01" [(ngModel)]="payrollForm.monthlySalary" name="monthlySalary" /></label>
+                  <label>Date Hired <input type="date" [(ngModel)]="payrollForm.dateHired" name="dateHired" /></label>
+                  <div class="modal-actions">
+                    <button type="button" class="modal-btn neutral" (click)="cancelEditPayroll()">Cancel</button>
+                    <button type="submit" class="modal-btn confirm">Save</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          }
+        </section>
+      }
+    }
+  </section>
+}
+
+<!-- ============================== Modals ============================== -->
+
+@if (showPaymentForm()) {
   <div class="modal-backdrop" (click)="cancelPaymentForm()">
-    <div class="modal-box create-box" (click)="$event.stopPropagation()">
-      <button type="button" class="modal-close" aria-label="Close" (click)="cancelPaymentForm()">
-        &#10005;
-      </button>
-      <h2>Record Payment</h2>
-      <p class="modal-hint">Outstanding balance: {{ formatPHP(a.balanceCentavos) }}</p>
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <h2>Record Onsite Payment</h2>
+      <p class="muted-sub">
+        The amount must equal the Order of Payment's total exactly — there is no partial payment.
+        Recording an onsite payment marks it Paid and verified immediately; there is no separate
+        verification step for cash across the counter.
+      </p>
+      @if (workspaceOrder(); as order) {
+        <p class="detail-total">Amount due: {{ formatPHP(order.totalCentavos) }}</p>
+      }
       <form class="create-form" (ngSubmit)="submitPaymentForm()">
         <label>
-          Method
-          <select [(ngModel)]="paymentForm.method" name="payMethod">
-            <option value="Onsite">Onsite (Cash)</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-          </select>
+          Official Receipt Number
+          <input type="text" [(ngModel)]="paymentForm.officialReceiptNumber" name="orNumber" required />
         </label>
-        <label>
-          Collecting Agency
-          <select [(ngModel)]="paymentForm.agency" name="payAgency">
-            <option value="OBO/LGU">OBO / LGU</option>
-            <option value="BFP">BFP</option>
-          </select>
-        </label>
-        @if (paymentForm.method === 'Onsite' && wherePaidInfo(paymentForm.agency); as where) {
-          <p class="modal-hint where-to-pay">
-            Pay onsite at: <strong>{{ where.name }}</strong> · {{ where.contactPhone }} ·
-            {{ where.officeHours }}
-          </p>
-        }
-        <label>
-          Amount (₱)
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            [(ngModel)]="paymentForm.amount"
-            name="payAmount"
-            required
-          />
-        </label>
-        <label>
-          Reference Number
-          <input aria-label="Bank/deposit reference or internal counter ref."
-            type="text"
-            [(ngModel)]="paymentForm.reference"
-            name="payRef"
-            required
-            placeholder="Bank/deposit reference or internal counter ref."
-          />
-        </label>
-        @if (paymentForm.method === 'Bank Transfer') {
-          <label>
-            Proof of Payment
-            <small class="not-stored">
-              The file name is recorded against the payment. The document itself
-              is not stored, so keep the original.
-            </small>
-            <input type="file" (change)="onProofFileChosen($event)" name="payProof" required />
-          </label>
-        }
-        @if (paymentFormError()) {
-          <p class="form-error">{{ paymentFormError() }}</p>
-        }
         <div class="modal-actions">
-          <button type="button" class="modal-btn neutral" (click)="cancelPaymentForm()">
-            Cancel
-          </button>
-          <button type="submit" class="modal-btn confirm">Record Payment</button>
+          <button type="button" class="modal-btn neutral" (click)="cancelPaymentForm()">Cancel</button>
+          <button type="submit" class="modal-btn confirm" [disabled]="workspaceWorking()">Record Payment</button>
         </div>
       </form>
     </div>
   </div>
 }
 
-@if (rejectTarget(); as txn) {
-  <div class="modal-backdrop" (click)="cancelReject()">
-    <div
-      class="modal-box"
-      (click)="$event.stopPropagation()"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Reject transaction"
-    >
-      <button type="button" class="modal-close" aria-label="Close" (click)="cancelReject()">
-        &#10005;
-      </button>
-      <h2>Reject Transaction {{ txn.id }}</h2>
-      <form class="create-form" (ngSubmit)="confirmReject()">
-        <label>
-          Reason (required)
-          <textarea [(ngModel)]="rejectReason" name="rejectReason" required rows="3"></textarea>
-        </label>
-        <div class="modal-actions">
-          <button type="button" class="modal-btn neutral" (click)="cancelReject()">Cancel</button>
-          <button type="submit" class="modal-btn confirm" [disabled]="!rejectReason.trim()">
-            Reject
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+@if (verifyTarget(); as t) {
+  <app-confirm-dialog
+    title="Verify this payment?"
+    [message]="'Confirms ' + formatPHP(t.amountCentavos) + ' received via ' + t.method + ' for ' + t.applicationReference + '.'"
+    confirmLabel="Verify"
+    tone="default"
+    reasonLabel="Official Receipt Number"
+    reasonPlaceholder="e.g. OR-2026-000123"
+    [reasonMinLength]="1"
+    (confirmed)="confirmVerify($event)"
+    (cancelled)="cancelVerify()"
+  />
+}
+
+@if (rejectTarget(); as t) {
+  <app-confirm-dialog
+    title="Reject this payment?"
+    [message]="'This travels to the applicant verbatim for ' + t.applicationReference + '.'"
+    confirmLabel="Reject"
+    tone="danger"
+    reasonLabel="Reason (the applicant will read this)"
+    reasonPlaceholder="Say what's wrong so they can fix it and resubmit."
+    [reasonMinLength]="10"
+    (confirmed)="confirmReject($event)"
+    (cancelled)="cancelReject()"
+  />
 }
 
 @if (adjustTarget(); as target) {
-  <div class="modal-backdrop" (click)="cancelAdjust()">
-    <div
-      class="modal-box"
-      (click)="$event.stopPropagation()"
-      role="dialog"
-      aria-modal="true"
-      [attr.aria-label]="target.type + ' transaction'"
-    >
-      <button type="button" class="modal-close" aria-label="Close" (click)="cancelAdjust()">
-        &#10005;
-      </button>
-      <h2>{{ target.type }} Transaction {{ target.txn.id }}</h2>
-      <p class="modal-hint">
-        This never edits the verified transaction directly — it records an auditable
-        {{ target.type.toLowerCase() }} and excludes this amount from the assessment's balance going
-        forward.
-      </p>
-      <form class="create-form" (ngSubmit)="confirmAdjust()">
-        <label>
-          Reason (required)
-          <textarea [(ngModel)]="adjustReason" name="adjustReason" required rows="3"></textarea>
-        </label>
-        <div class="modal-actions">
-          <button type="button" class="modal-btn neutral" (click)="cancelAdjust()">Cancel</button>
-          <button type="submit" class="modal-btn confirm" [disabled]="!adjustReason.trim()">
-            Confirm {{ target.type }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
-
-@if (showOrForm() && orFormTarget(); as t) {
-  <div class="modal-backdrop" (click)="cancelOrForm()">
-    <div
-      class="modal-box"
-      (click)="$event.stopPropagation()"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Attach official OR number"
-    >
-      <button type="button" class="modal-close" aria-label="Close" (click)="cancelOrForm()">
-        &#10005;
-      </button>
-      <h2>Attach Official OR Number</h2>
-      <p class="modal-hint">
-        Enter the real OR number from the cashier's receipt book or e-receipting system — never an
-        internally generated id. Until this is entered, generated documents for this transaction
-        read "Payment Acknowledgment", not "Official Receipt".
-      </p>
-      <form class="create-form" (ngSubmit)="submitOrForm()">
-        <label>
-          OR Number
-          <input type="text" [(ngModel)]="orForm.orNumber" name="orNumber" required />
-        </label>
-        <label>
-          OR Date
-          <input type="date" [(ngModel)]="orForm.orDate" name="orDate" required />
-        </label>
-        <label>
-          Issued By
-          <input type="text" [(ngModel)]="orForm.orIssuedBy" name="orIssuedBy" required />
-        </label>
-        <div class="modal-actions">
-          <button type="button" class="modal-btn neutral" (click)="cancelOrForm()">Cancel</button>
-          <button type="submit" class="modal-btn confirm">Attach OR Number</button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
-
-@if (editingRule(); as rule) {
-  <div class="modal-backdrop" (click)="cancelEditRule()">
-    <div
-      class="modal-box create-box wide-box"
-      (click)="$event.stopPropagation()"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Edit fee rule"
-    >
-      <button type="button" class="modal-close" aria-label="Close" (click)="cancelEditRule()">
-        &#10005;
-      </button>
-      <h2>Edit {{ rule.name }}</h2>
-      <p class="modal-hint">
-        Saves as a new version (v{{ rule.version + 1 }}) — the current version is kept for history.
-      </p>
-      <form class="create-form" (ngSubmit)="saveEditRule()">
-        @if (rule.calculationType === 'flat') {
-          <label>
-            Flat Amount (₱)
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              [(ngModel)]="editForm.amount"
-              name="editAmount"
-            />
-          </label>
-        }
-        @if (rule.calculationType === 'per-unit') {
-          <label>
-            Amount per unit ({{ rule.unitLabel }}) (₱)
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              [(ngModel)]="editForm.unitAmount"
-              name="editUnitAmount"
-            />
-          </label>
-        }
-        @if (rule.calculationType === 'percentage') {
-          <label>
-            Percentage Rate (%)
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              [(ngModel)]="editForm.percentageRate"
-              name="editPct"
-            />
-          </label>
-        }
-        <label>
-          Effective Date
-          <input type="date" [(ngModel)]="editForm.effectiveDate" name="editEffective" required />
-        </label>
-
-        <fieldset class="applicability-grid">
-          <legend>Applicability by Permit Type</legend>
-          @for (type of permitTypeOptions; track type) {
-            <div class="applicability-row">
-              <span>{{ type }}</span>
-              <select aria-label="Applicability"
-                [ngModel]="editForm.applicability[type]"
-                [name]="'app-' + type"
-                (ngModelChange)="setApplicability(type, $any($event))"
-              >
-                <option value="required">Required</option>
-                <option value="conditional">Conditional</option>
-                <option value="not-applicable">Not Applicable</option>
-              </select>
-            </div>
-          }
-        </fieldset>
-
-        <div class="modal-actions">
-          <button type="button" class="modal-btn neutral" (click)="cancelEditRule()">Cancel</button>
-          <button type="submit" class="modal-btn confirm">Save New Version</button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
-
-@if (showReceiptPreview() && selectedTransaction(); as t) {
-  <app-document-preview
-    [applicationId]="t.applicationId"
-    [transactionId]="t.id"
-    kind="official-receipt"
-    (closed)="closeReceiptPreview()"
+  <app-confirm-dialog
+    [title]="target.type + ' this payment?'"
+    [message]="'For ' + target.payment.applicationReference + ', ' + formatPHP(target.payment.amountCentavos) + '. Refused once a permit has been generated from this application.'"
+    [confirmLabel]="target.type"
+    tone="danger"
+    reasonLabel="Reason"
+    reasonPlaceholder="State a reason an applicant can be told."
+    [reasonMinLength]="10"
+    (confirmed)="confirmAdjust($event)"
+    (cancelled)="cancelAdjust()"
   />
 }
 
-@if (embeddedReceiptTxn(); as t) {
-  <app-document-preview
-    [applicationId]="t.applicationId"
-    [transactionId]="t.id"
-    kind="official-receipt"
-    (closed)="closeEmbeddedReceipt()"
-  />
+@if (correctReceiptTarget(); as t) {
+  <div class="modal-backdrop" (click)="cancelCorrectReceipt()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <h2>Correct Official Receipt Number</h2>
+      <p class="muted-sub">For {{ t.applicationReference }} — currently "{{ t.officialReceiptNumber }}".</p>
+      <form class="create-form" (ngSubmit)="confirmCorrectReceipt()">
+        <label>
+          Corrected OR Number
+          <input type="text" [(ngModel)]="correctReceiptForm.officialReceiptNumber" name="orNumber" required />
+        </label>
+        <label>
+          Reason
+          <textarea rows="2" [(ngModel)]="correctReceiptForm.reason" name="reason" required></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelCorrectReceipt()">Cancel</button>
+          <button type="submit" class="modal-btn confirm">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showPublishForm()) {
+  <div class="modal-backdrop" (click)="cancelPublishForm()">
+    <div class="modal-box modal-box--wide" (click)="$event.stopPropagation()">
+      <h2>Publish New Fee Schedule</h2>
+      <p class="muted-sub">
+        A schedule is never edited in place — this creates a new version, effective from a date,
+        closing whichever one it replaces. It cannot start in the past.
+      </p>
+      <div class="create-form">
+        <label>
+          Version
+          <input type="text" [(ngModel)]="publishForm.version" placeholder="e.g. 2026.2" />
+        </label>
+        <label>
+          Effective From
+          <input type="date" [(ngModel)]="publishForm.effectiveFrom" />
+        </label>
+        <label>
+          Authorizing Ordinance / Issuance
+          <input type="text" [(ngModel)]="publishForm.publishedBy" placeholder="e.g. City Ordinance 2026-011" />
+        </label>
+      </div>
+
+      <h3>Fee Lines</h3>
+      <div class="table-wrap">
+        <table class="detail-table">
+          <thead><tr><th>Permit Type</th><th>Line</th><th>Amount</th><th>Basis</th><th></th></tr></thead>
+          <tbody>
+            @for (entry of publishEntries(); track entry.permitType + entry.line) {
+              <tr>
+                <td>{{ entry.permitType }}</td>
+                <td>{{ lineLabel(entry.line) }}</td>
+                <td>{{ formatPHP(entry.amountCentavos) }}</td>
+                <td>{{ entry.basis }}</td>
+                <td><button type="button" class="link-btn" (click)="removePublishEntry(entry)">Remove</button></td>
+              </tr>
+            } @empty {
+              <tr class="table-empty-row"><td colspan="5">No lines added yet.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="create-form">
+        <label>
+          Permit Type
+          <select [(ngModel)]="newEntry.permitType">
+            @for (opt of permitTypeOptions; track opt) {
+              <option [value]="opt">{{ opt }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Line
+          <select [(ngModel)]="newEntry.line">
+            @for (line of feeLines; track line) {
+              <option [value]="line">{{ lineLabel(line) }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Amount (₱)
+          <input type="number" min="0" step="0.01" [(ngModel)]="newEntry.amount" />
+        </label>
+        <label>
+          Basis
+          <input type="text" [(ngModel)]="newEntry.basis" placeholder="Ordinance or issuance this rests on" />
+        </label>
+        <button type="button" class="btn-outline" (click)="addPublishEntry()">Add Line</button>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="modal-btn neutral" (click)="cancelPublishForm()">Cancel</button>
+        <button type="button" class="modal-btn confirm" (click)="confirmPublish()">Publish</button>
+      </div>
+    </div>
+  </div>
 }

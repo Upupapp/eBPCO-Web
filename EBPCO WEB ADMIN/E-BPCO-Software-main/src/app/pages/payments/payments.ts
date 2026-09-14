@@ -1,17 +1,16 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
+import { SlicePipe } from '@angular/common';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { Router } from '@angular/router';
 import { Topbar } from '../../shared/topbar/topbar';
 import { Icon } from '../../shared/icon/icon';
 import { Avatar } from '../../shared/avatar/avatar';
-import { KpiCard } from '../../shared/kpi-card/kpi-card';
 import { Pagination } from '../../shared/pagination/pagination';
-import { FilterPanel } from '../../shared/filter-panel/filter-panel';
+import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { ToastService } from '../../shared/toast/toast.service';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
-import { AssessmentStore } from '../../core/domain/assessment-store';
 import { PaymentConfigStore } from '../../core/domain/payment-config-store';
 import { DEFAULT_BANK_INFO, OfficeBankInfo } from '../../core/domain/payment-config.model';
 import { PayrollStore } from '../../core/domain/payroll-store';
@@ -19,27 +18,32 @@ import { PayrollStaffMember } from '../../core/domain/payroll.model';
 import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS } from '../../core/session/permissions';
 import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
-import { departmentById, departmentName } from '../../core/domain/department.model';
 import {
+  StaffApplicationsApi,
+  type ApplicationPaymentRow,
+  type ApplicationOrderOfPayment,
+} from '../../core/api/staff-applications.api';
+import {
+  StaffPaymentsApi,
   Assessment,
-  AssessmentLineItem,
-  AssessmentStatus,
-} from '../../core/domain/assessment.model';
+  FeeLine,
+  FEE_LINES,
+  PaymentQueueRow,
+  PaymentStatus,
+} from '../../core/api/staff-payments.api';
 import {
-  CollectingAgency,
-  PaymentMethod,
-  PaymentTransaction,
-  PaymentTransactionStatus,
-} from '../../core/domain/payment.model';
-import { FeeApplicability, FeeRule } from '../../core/domain/fee-rule.model';
-import { DocumentPreview } from '../../shared/document-preview/document-preview';
+  StaffFeeConfigApi,
+  FeeSchedule,
+  FeeScheduleEntry,
+  PaymentMethodConfig,
+} from '../../core/api/staff-fee-config.api';
 import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 
-type PaymentsTab = 'assessments' | 'transactions' | 'matrix' | 'configuration';
-type ConfigSubTab = 'fee-rules' | 'payment-methods' | 'bank-information' | 'payroll';
+type PaymentsTab = 'transactions' | 'fee-schedule' | 'configuration';
+type ConfigSubTab = 'payment-methods' | 'bank-information' | 'payroll';
 
 function formatPHP(centavos: number | null): string {
-  if (centavos === null) return 'Requires assessor input';
+  if (centavos === null) return '—';
   return `₱${(centavos / 100).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
@@ -47,36 +51,57 @@ function statusClass(status: string): string {
   return status.toLowerCase().replace(/[\s_]+/g, '-');
 }
 
-interface AssessmentRow {
-  assessment: Assessment;
-  applicationId: string;
-  applicant: string;
-  /** Canonical relationship — see ApplicationStore.getApplicationContext. Never derived from `applicant`; one applicant can own multiple businesses. */
-  businessId: string;
-  businessName: string;
-  permitType: string;
+const LINE_LABELS: Record<FeeLine, string> = {
+  filing: 'Filing Fee',
+  processing: 'Processing Fee',
+  architectural: 'Architectural Fee',
+  structural: 'Structural Fee',
+  electrical: 'Electrical Fee',
+  others: 'Other Fees',
+};
+
+interface PaymentRow {
+  readonly payment: PaymentQueueRow;
+  readonly applicant: string;
+  readonly businessName: string;
+  readonly permitType: string;
 }
 
-interface TransactionRow {
-  txn: PaymentTransaction;
-  applicant: string;
-  businessId: string;
-  businessName: string;
-  permitType: string;
-  assessmentVersion: number;
-}
-
+/**
+ * Payments, against the real backend.
+ *
+ * ── Why this page has no browsable "Assessments" list ────────────────────
+ *
+ * There is no such endpoint. An assessment lives entirely inside one
+ * application — opened, edited, submitted, approved and issued from THAT
+ * application's own record — and the server has no route that lists every
+ * assessment across every application the way `GET /staff/evaluations` lists
+ * every evaluation. Applications' own detail header links here with
+ * `?applicationId=`, exactly the way it already links to Evaluations, and
+ * this page opens straight into that one application's Assessment Workspace.
+ *
+ * ── The real model, not the one this page used to show ──────────────────
+ *
+ * Six fixed lines (`FEE_LINES`), flat pesos each, no bracket/percentage/
+ * per-unit catalog. No partial payment — one payment settles an Order of
+ * Payment's total exactly, or it is refused. Verifying a payment and
+ * recording its Official Receipt number are the SAME call; there is no
+ * separate "attach OR" step. An onsite payment is recorded already Paid and
+ * verified in one call; only a bank-transfer proof (submitted by the
+ * applicant, never by staff — see `StaffPaymentsApi.recordOnsitePayment`'s
+ * own doc comment) goes through a later verify()/reject().
+ */
 @Component({
   selector: 'app-payments',
-  imports: [QueueLoadNotice, 
+  imports: [
+    QueueLoadNotice,
     Topbar,
     Icon,
     Avatar,
-    KpiCard,
     Pagination,
     FormsModule,
-    FilterPanel,
-    DocumentPreview,
+    SlicePipe,
+    ConfirmDialog,
     OverlayModule,
   ],
   templateUrl: './payments.html',
@@ -84,36 +109,47 @@ interface TransactionRow {
 })
 export class Payments {
   private readonly store = inject(ApplicationStore);
-  protected readonly assessmentStore = inject(AssessmentStore);
+  private readonly applicationsApi = inject(StaffApplicationsApi);
+  protected readonly paymentsApi = inject(StaffPaymentsApi);
+  protected readonly feeConfigApi = inject(StaffFeeConfigApi);
   protected readonly paymentConfig = inject(PaymentConfigStore);
   protected readonly payrollStore = inject(PayrollStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
-  /** Bound to the `?tab=` query param (via withComponentInputBinding) — lets another page (Permit Release > Permit Types' "Manage Fee Rules" link) land directly on a specific tab. */
-  readonly tab = input<PaymentsTab | null>(null);
-  /** Bound to the `?permitType=` query param — pre-selects the Permit Fee Matrix tab's own permit-type filter. */
-  readonly queryPermitType = input<PermitType | null>(null, { alias: 'permitType' });
+  /** Bound to the `?applicationId=` query param — Applications' own detail header links straight to one application's Assessment Workspace here, the same way it already links to Evaluations. */
+  readonly applicationId = input<string>();
+
+  /** Bound to the `?tab=` query param — Permit Release's "View Fee Schedule" link deep-links here. Only a recognized tab key is honored; anything else is ignored rather than erroring. */
+  readonly tab = input<string>();
 
   constructor() {
-    // A due-date-derived status ('Overdue') is only ever true "as of
-    // now" — refresh once per page load rather than trusting whatever
-    // was computed at seed/construction time.
-    this.assessmentStore.refreshOverdueStatuses();
-
-    // Applies the incoming query params once, the same way selectTab()
-    // would — deliberately NOT re-run on every input change so the
-    // user's own subsequent tab clicks aren't overridden.
     effect(() => {
-      const tab = this.tab();
-      const permitType = this.queryPermitType();
-      if (tab) this.activeTab.set(tab);
-      if (permitType) this.matrixPermitType.set(permitType);
+      const id = this.applicationId();
+      if (id) untracked(() => this.loadWorkspace(id));
+    });
+    effect(() => {
+      const requested = this.tab();
+      if (requested === 'transactions' || requested === 'fee-schedule' || requested === 'configuration') {
+        untracked(() => this.activeTab.set(requested));
+      }
     });
   }
 
-  // ---- Tabs ---------------------------------------------------------------
+  protected formatPHP = formatPHP;
+  protected statusClass = statusClass;
+  protected readonly feeLines = FEE_LINES;
+  protected lineLabel(line: FeeLine): string {
+    return LINE_LABELS[line];
+  }
+
+  /** What the fee schedule in force said this line should be, before any officer override — kept beside the officer-set `amountCentavos` on every line so "charged less than the ordinance prescribes" is answerable later (see StaffPaymentsApi's own doc comment). */
+  protected computedForLine(assessment: Assessment, line: FeeLine): number {
+    return assessment.lines.find((l) => l.line === line)?.computedCentavos ?? 0;
+  }
+
+  // ---- Permissions ---------------------------------------------------------
 
   protected readonly canConfigurePayments = computed(() => {
     const role = this.session.role();
@@ -140,10 +176,11 @@ export class Payments {
     return !!role && ACTION_PERMISSIONS.adjustPayment(role);
   });
 
+  // ---- Tabs ------------------------------------------------------------
+
   protected readonly tabs: { key: PaymentsTab; label: string; icon: string }[] = [
-    { key: 'assessments', label: 'Assessments', icon: 'file-text' },
-    { key: 'transactions', label: 'Transactions', icon: 'wallet' },
-    { key: 'matrix', label: 'Permit Fee Matrix', icon: 'grid' },
+    { key: 'transactions', label: 'Payment Queue', icon: 'wallet' },
+    { key: 'fee-schedule', label: 'Fee Schedule', icon: 'grid' },
     { key: 'configuration', label: 'Configuration', icon: 'settings' },
   ];
 
@@ -151,7 +188,7 @@ export class Payments {
     this.tabs.filter((t) => t.key !== 'configuration' || this.canConfigurePayments()),
   );
 
-  protected readonly activeTab = signal<PaymentsTab>('assessments');
+  protected readonly activeTab = signal<PaymentsTab>('transactions');
 
   protected selectTab(tab: PaymentsTab): void {
     if (tab === 'configuration' && !this.canConfigurePayments()) return;
@@ -169,795 +206,765 @@ export class Payments {
 
   private applicationLabel(applicationId: string): {
     applicant: string;
-    businessId: string;
     businessName: string;
     permitType: string;
   } {
     const ctx = this.store.getApplicationContext(applicationId);
     return {
       applicant: ctx?.applicant ?? '—',
-      businessId: ctx?.businessId ?? '',
       businessName: ctx?.businessLabel ?? 'Not provided',
       permitType: ctx?.permitType ?? '—',
     };
   }
 
-  // ---- Tab 1: Assessments ---------------------------------------------------
+  // ============================================================
+  // Assessment Workspace — one application at a time (?applicationId=)
+  // ============================================================
 
-  protected readonly assessmentStatusOptions: AssessmentStatus[] = [
-    'Draft',
-    'For Approval',
-    'Issued',
-    'Partially Paid',
-    'Paid',
-    'Overdue',
-    'Superseded',
-    'Voided',
-  ];
-  protected readonly assessmentStatusFilter = signal<'All' | AssessmentStatus>('All');
-
-  protected readonly assessmentRows = computed<AssessmentRow[]>(() => {
-    return this.assessmentStore
-      .allAssessments()
-      .map((assessment) => ({
-        assessment,
-        applicationId: assessment.applicationId,
-        ...this.applicationLabel(assessment.applicationId),
-      }))
-      .sort(
-        (a, b) => b.assessment.createdAtValue.getTime() - a.assessment.createdAtValue.getTime(),
-      );
+  protected readonly workspaceApp = computed(() => {
+    const id = this.applicationId();
+    return id ? this.store.getById(id) : undefined;
   });
 
-  protected readonly filteredAssessmentRows = computed(() => {
-    const term = this.searchTerm().trim().toLowerCase();
-    const status = this.assessmentStatusFilter();
-    return this.assessmentRows().filter((r) => {
-      if (status !== 'All' && r.assessment.status !== status) return false;
-      if (!term) return true;
-      return (
-        r.applicationId.toLowerCase().includes(term) ||
-        r.applicant.toLowerCase().includes(term) ||
-        r.businessName.toLowerCase().includes(term) ||
-        r.permitType.toLowerCase().includes(term) ||
-        (r.assessment.opsNumber ?? '').toLowerCase().includes(term)
-      );
-    });
-  });
-
-  protected readonly pagedAssessmentRows = computed(() => {
-    const start = (this.page() - 1) * this.pageSize;
-    return this.filteredAssessmentRows().slice(start, start + this.pageSize);
-  });
+  protected readonly workspaceLoading = signal(false);
+  protected readonly workspaceWorking = signal(false);
+  protected readonly workspaceError = signal<string | null>(null);
+  protected readonly workspaceAssessment = signal<Assessment | null>(null);
+  protected readonly workspaceOrder = signal<ApplicationOrderOfPayment | null>(null);
+  protected readonly workspacePayments = signal<readonly ApplicationPaymentRow[]>([]);
 
   /**
-   * True when the portal holds no assessment data at all, as distinct from
-   * holding data in which nothing is Draft, Issued, Overdue and so on.
-   *
-   * Assessments have no endpoint, so a successful queue load clears them (see
-   * ApplicationStore.replaceApplications). Every tile then counts zero — and
-   * six zeros read as "no assessment is in any of these states", which is a
-   * claim. The absence of data is not the same claim.
+   * The one in-progress (Draft/Submitted/Approved) assessment id this
+   * session knows about per application — kept only in memory, for exactly
+   * the reason explained on `StaffPaymentsApi.getAssessment`: the server has
+   * no "find the open assessment for this application" route. Reloading the
+   * page loses this; the officer would then see "no open assessment" even
+   * though one may still exist server-side (see `draftAssessment`'s
+   * `already-open` handling below).
    */
-  protected readonly hasNoAssessmentData = computed(
-    () => this.assessmentStore.allAssessments().length === 0,
-  );
+  private readonly knownAssessmentId = new Map<string, string>();
 
-  /** A count, or '—' when there is nothing to count over. */
-  protected assessmentCount(value: number): string {
-    return this.hasNoAssessmentData() ? '—' : value.toString();
-  }
+  /**
+   * The editable draft for each of the six lines, kept as a plain mutable
+   * object rather than a signal — the same reasoning as `application-intake.
+   * ts`'s form state: this binds to `ngModel` across six rows, and nothing
+   * here needs to be reactively derived FROM. Reset from the server's own
+   * values every time an assessment is loaded or one line is saved, so an
+   * unsaved edit to a DIFFERENT line is never silently discarded by that
+   * save's response.
+   */
+  protected lineDrafts: Record<FeeLine, { amount: string; basis: string; included: boolean }> =
+    this.emptyLineDrafts();
 
-  protected readonly assessmentSummary = computed(() => {
-    const rows = this.assessmentStore.allAssessments();
+  private emptyLineDrafts(): Record<FeeLine, { amount: string; basis: string; included: boolean }> {
     return {
-      draft: rows.filter((a) => a.status === 'Draft').length,
-      forApproval: rows.filter((a) => a.status === 'For Approval').length,
-      issued: rows.filter((a) => a.status === 'Issued').length,
-      partiallyPaid: rows.filter((a) => a.status === 'Partially Paid').length,
-      paid: rows.filter((a) => a.status === 'Paid').length,
-      overdue: rows.filter((a) => a.status === 'Overdue').length,
+      filing: { amount: '0.00', basis: '', included: true },
+      processing: { amount: '0.00', basis: '', included: true },
+      architectural: { amount: '0.00', basis: '', included: true },
+      structural: { amount: '0.00', basis: '', included: true },
+      electrical: { amount: '0.00', basis: '', included: true },
+      others: { amount: '0.00', basis: '', included: true },
     };
-  });
-
-  protected readonly assessmentView = signal<'list' | 'detail'>('list');
-  protected readonly selectedAssessmentId = signal<string | null>(null);
-  protected readonly selectedAssessment = computed(() => {
-    const id = this.selectedAssessmentId();
-    return id ? this.assessmentStore.getAssessmentById(id) : undefined;
-  });
-  protected readonly selectedAssessmentApp = computed(() => {
-    const a = this.selectedAssessment();
-    return a ? this.store.getById(a.applicationId) : undefined;
-  });
-  protected readonly selectedAssessmentHistory = computed(() => {
-    const a = this.selectedAssessment();
-    return a ? this.assessmentStore.getAssessments(a.applicationId) : [];
-  });
-  protected readonly selectedAssessmentTransactions = computed(() => {
-    const a = this.selectedAssessment();
-    return a ? this.assessmentStore.getTransactionsForAssessment(a.id) : [];
-  });
-
-  /** The most recent transaction with a real OR number attached, for a one-click "View Receipt" in the Assessment detail header — null (button hidden) rather than opening an empty/fake receipt when no OR has actually been issued yet, even if the assessment itself already shows Paid. */
-  protected readonly latestReceiptTransaction = computed(() => {
-    const withOr = this.selectedAssessmentTransactions().filter((t) => t.orNumber && !t.isVoid);
-    if (withOr.length === 0) return null;
-    return withOr.reduce((latest, t) =>
-      t.submittedAtValue.getTime() > latest.submittedAtValue.getTime() ? t : latest,
-    );
-  });
-
-  /**
-   * A verified, paid transaction that still has no OR number — Verify and
-   * "Attach OR No." are two separate real steps (see openOrForm below), so
-   * an assessment can genuinely show "Paid" with no receipt to view yet.
-   * Surfaced here so the Assessment detail header can point straight at
-   * the actual missing step instead of just having no "View Receipt"
-   * button and no explanation why.
-   */
-  protected readonly verifiedTxnMissingOr = computed(() =>
-    this.selectedAssessmentTransactions().find(
-      (t) => t.status === 'Verified' && !t.isVoid && !t.orNumber,
-    ),
-  );
-
-  openAssessment(row: AssessmentRow): void {
-    this.selectedAssessmentId.set(row.assessment.id);
-    this.assessmentView.set('detail');
   }
 
-  backToAssessments(): void {
-    this.assessmentView.set('list');
-    this.selectedAssessmentId.set(null);
+  private setWorkspaceAssessment(assessment: Assessment | null): void {
+    this.workspaceAssessment.set(assessment);
+    const drafts = this.emptyLineDrafts();
+    if (assessment) {
+      for (const line of assessment.lines) {
+        drafts[line.line] = {
+          amount: (line.amountCentavos / 100).toFixed(2),
+          basis: line.basis,
+          included: line.included,
+        };
+      }
+    }
+    this.lineDrafts = drafts;
   }
 
-  protected departmentLabel(id: string): string {
-    return departmentName(id);
-  }
+  private async loadWorkspace(applicationId: string): Promise<void> {
+    this.workspaceLoading.set(true);
+    this.workspaceError.set(null);
+    this.setWorkspaceAssessment(null);
+    this.workspaceOrder.set(null);
+    this.workspacePayments.set([]);
+    try {
+      const detail = await this.applicationsApi.detail(applicationId);
+      if (detail.kind === 'ok') {
+        this.workspaceOrder.set(detail.detail.orderOfPayment);
+        this.workspacePayments.set(detail.detail.payments);
+      } else if (detail.kind === 'failed') {
+        this.workspaceError.set(detail.message);
+      }
 
-  protected formatPHP = formatPHP;
-  protected statusClass = statusClass;
-
-  protected calculationSummary(
-    rule: Pick<FeeRule, 'calculationType' | 'unitLabel' | 'percentageOf' | 'flatAmountCentavos'>,
-  ): string {
-    switch (rule.calculationType) {
-      case 'flat':
-        return rule.flatAmountCentavos !== null
-          ? formatPHP(rule.flatAmountCentavos)
-          : 'Flat — requires assessor input';
-      case 'per-unit':
-        return rule.unitLabel ? `Per-unit (${rule.unitLabel})` : 'Per-unit';
-      case 'percentage':
-        return rule.percentageOf ? `Percentage of ${rule.percentageOf}` : 'Percentage';
-      case 'bracketed':
-        return 'Bracketed (see legal basis for the schedule)';
-      case 'manual':
-        return 'Manual assessment';
+      const cachedId = this.knownAssessmentId.get(applicationId);
+      if (cachedId) {
+        const result = await this.paymentsApi.getAssessment(cachedId);
+        if (result.kind === 'ok' && result.assessment.status !== 'Issued' && result.assessment.status !== 'Withdrawn') {
+          this.setWorkspaceAssessment(result.assessment);
+        } else {
+          this.knownAssessmentId.delete(applicationId);
+        }
+      }
+    } finally {
+      this.workspaceLoading.set(false);
     }
   }
 
-  // ---- Draft editing (line amounts / inclusion / due date) ----------------
-
-  protected setLineAmount(assessmentId: string, line: AssessmentLineItem, value: string): void {
-    if (!this.canEditAssessment()) return;
-    const pesos = Number(value);
-    if (!Number.isFinite(pesos) || pesos < 0) return;
-    this.assessmentStore.setLineAmount(
-      assessmentId,
-      line.feeRuleId,
-      Math.round(pesos * 100),
-      this.session.name() || 'Payment Officer',
-      this.session.role() ?? 'Payment Officer',
-    );
+  protected backFromWorkspace(): void {
+    const id = this.applicationId();
+    if (id) this.router.navigateByUrl(`/applications/${id}`);
   }
 
-  protected toggleLineIncluded(assessmentId: string, line: AssessmentLineItem): void {
-    if (!this.canEditAssessment()) return;
-    this.assessmentStore.setLineIncluded(
-      assessmentId,
-      line.feeRuleId,
-      !line.included,
-      this.session.name() || 'Payment Officer',
-      this.session.role() ?? 'Payment Officer',
-    );
-  }
-
-  protected updateDueDate(assessmentId: string, value: string): void {
-    if (!this.canEditAssessment() || !value) return;
-    this.assessmentStore.updateDraftAssessment(
-      assessmentId,
-      { dueDate: value },
-      this.session.name() || 'Payment Officer',
-      this.session.role() ?? 'Payment Officer',
-    );
-  }
-
-  protected submitForApproval(assessment: Assessment): void {
-    if (!this.canEditAssessment()) {
-      this.toast.error("You don't have permission to submit this assessment for approval.");
-      return;
-    }
-    const ok = this.assessmentStore.submitForApproval(
-      assessment.id,
-      this.session.name() || 'Staff',
-      this.session.role() ?? 'Payment Officer',
-    );
-    if (ok) this.toast.success('Assessment submitted for approval.');
-    else this.toast.error("Couldn't submit this assessment for approval from its current status.");
-  }
-
-  protected approveAssessment(assessment: Assessment): void {
-    if (!this.canApproveAssessment()) {
-      this.toast.error("You don't have permission to approve this assessment.");
-      return;
-    }
-    const ok = this.assessmentStore.approveAssessment(
-      assessment.id,
-      this.session.name() || 'Administrator',
-      this.session.role() ?? 'Administrator',
-    );
-    if (ok) this.toast.success('Assessment approved.');
-    else this.toast.error("Couldn't approve this assessment from its current status.");
-  }
-
-  protected issueOrderOfPayment(assessment: Assessment): void {
-    if (!this.canApproveAssessment()) {
-      this.toast.error("You don't have permission to issue an Order of Payment.");
-      return;
-    }
-    const ok = this.assessmentStore.issueOrderOfPayment(
-      assessment.id,
-      this.session.name() || 'Administrator',
-      this.session.role() ?? 'Administrator',
-    );
-    if (!ok) {
-      this.toast.error("Couldn't issue an Order of Payment — the assessment must be approved first.");
-      return;
-    }
-    this.toast.success('Order of Payment issued.');
-    this.store.refreshPaymentProjection(
-      assessment.applicationId,
-      this.session.name() || 'Administrator',
-      this.session.role() ?? 'Administrator',
-    );
-  }
-
-  protected readonly canReviseSelected = computed(() => {
-    const a = this.selectedAssessment();
-    if (!a || (a.status !== 'Issued' && a.status !== 'Overdue' && a.status !== 'Partially Paid'))
-      return false;
-    return !this.selectedAssessmentTransactions().some((t) => t.status === 'Verified' && !t.isVoid);
-  });
-
-  protected reviseAssessment(): void {
-    const a = this.selectedAssessment();
-    const app = this.selectedAssessmentApp();
-    if (!a || !app || !this.canEditAssessment() || !this.canReviseSelected()) {
-      this.toast.error("Can't revise this assessment from its current status.");
-      return;
-    }
-    // Without a permit type there is no fee schedule to revise against.
-    if (app.permitType === null) return;
-    const revised = this.assessmentStore.reviseIssuedAssessment(
-      a.id,
-      app.permitType,
-      this.session.name() || 'Payment Officer',
-      this.session.role() ?? 'Payment Officer',
-    );
-    if (revised) {
-      this.store.refreshPaymentProjection(
-        app.id,
-        this.session.name() || 'Payment Officer',
-        this.session.role() ?? 'Payment Officer',
+  protected async startAssessment(): Promise<void> {
+    const id = this.applicationId();
+    if (!id || !this.canEditAssessment()) return;
+    this.workspaceWorking.set(true);
+    try {
+      const result = await this.paymentsApi.draftAssessment(id);
+      if (result.kind === 'done') {
+        this.knownAssessmentId.set(id, result.assessment.id);
+        this.setWorkspaceAssessment(result.assessment);
+        this.toast.success('Assessment drafted from the fee schedule in force today.');
+        return;
+      }
+      // `already-open` lands here too: this session has no record of that
+      // draft's id (a reload, or drafted from another tab/officer) — there
+      // is no server route to find it by applicationId, so the honest
+      // answer is the server's own refusal text, not a guess at the id.
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot draft assessments yet.' : result.message,
       );
-      this.selectedAssessmentId.set(revised.id);
-      this.toast.success('New assessment version drafted.');
-    } else {
-      this.toast.error("Couldn't create a new assessment version.");
+    } finally {
+      this.workspaceWorking.set(false);
     }
   }
 
-  // ---- Recording a payment against the selected assessment ----------------
+  protected async saveLine(line: FeeLine): Promise<void> {
+    const assessment = this.workspaceAssessment();
+    if (!assessment || !this.canEditAssessment()) return;
+    const draft = this.lineDrafts[line];
+    const pesos = Number(draft.amount);
+    if (!Number.isFinite(pesos) || pesos < 0) {
+      this.toast.error('Enter a valid, non-negative amount.');
+      return;
+    }
+    this.workspaceWorking.set(true);
+    try {
+      const result = await this.paymentsApi.setAssessmentLine(assessment.id, line, {
+        amountCentavos: Math.round(pesos * 100),
+        included: draft.included,
+        basis: draft.basis.trim(),
+      });
+      if (result.kind === 'done') {
+        this.setWorkspaceAssessment(result.assessment);
+        this.toast.success(`${this.lineLabel(line)} updated.`);
+        return;
+      }
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot edit assessment lines yet.' : result.message,
+      );
+    } finally {
+      this.workspaceWorking.set(false);
+    }
+  }
+
+  protected async submitAssessment(): Promise<void> {
+    const assessment = this.workspaceAssessment();
+    if (!assessment || !this.canEditAssessment()) return;
+    this.workspaceWorking.set(true);
+    try {
+      const result = await this.paymentsApi.submitAssessment(assessment.id);
+      if (result.kind === 'done') {
+        this.setWorkspaceAssessment(result.assessment);
+        this.toast.success('Assessment submitted for approval.');
+        return;
+      }
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot submit assessments yet.' : result.message,
+      );
+    } finally {
+      this.workspaceWorking.set(false);
+    }
+  }
+
+  protected async approveWorkspaceAssessment(): Promise<void> {
+    const assessment = this.workspaceAssessment();
+    if (!assessment || !this.canApproveAssessment()) return;
+    this.workspaceWorking.set(true);
+    try {
+      const result = await this.paymentsApi.approveAssessment(assessment.id);
+      if (result.kind === 'done') {
+        this.setWorkspaceAssessment(result.assessment);
+        this.toast.success('Assessment approved.');
+        return;
+      }
+      // Self-approval surfaces here as the server's own wording — the same
+      // account drafted or submitted it, and a DIFFERENT officer has to
+      // approve it instead.
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot approve assessments yet.' : result.message,
+      );
+    } finally {
+      this.workspaceWorking.set(false);
+    }
+  }
+
+  protected async issueOrder(): Promise<void> {
+    const assessment = this.workspaceAssessment();
+    const appId = this.applicationId();
+    if (!assessment || !appId || !this.canApproveAssessment()) return;
+    this.workspaceWorking.set(true);
+    try {
+      const result = await this.paymentsApi.issueOrderOfPayment(appId);
+      if (result.kind === 'done') {
+        this.toast.success(`Order of Payment ${result.number} issued.`);
+        this.knownAssessmentId.delete(appId);
+        await this.loadWorkspace(appId);
+        return;
+      }
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot issue an Order of Payment yet.' : result.message,
+      );
+    } finally {
+      this.workspaceWorking.set(false);
+    }
+  }
+
+  // ---- Recording an onsite payment against the issued Order --------------
+  // No partial payment exists server-side: the amount must equal the
+  // Order's total exactly, so this form has nothing to compute — only an OR
+  // number to key in. There is no way for staff to originate a bank-transfer
+  // payment on an applicant's behalf (see StaffPaymentsApi's own doc
+  // comment) — a bank-transfer proof only ever arrives already submitted,
+  // and shows up in `workspacePayments` for staff to verify/reject.
 
   protected readonly showPaymentForm = signal(false);
-  protected readonly paymentFormError = signal('');
-  protected paymentForm: {
-    method: PaymentMethod;
-    agency: CollectingAgency;
-    amount: string;
-    reference: string;
-    proofFileName: string;
-  } = { method: 'Onsite', agency: 'OBO/LGU', amount: '', reference: '', proofFileName: '' };
+  protected paymentForm = { officialReceiptNumber: '' };
 
   protected openPaymentForm(): void {
     if (!this.canRecordPayment()) {
       this.toast.error("You don't have permission to record a payment.");
       return;
     }
-    const balance = this.selectedAssessment()?.balanceCentavos ?? 0;
-    this.paymentForm = {
-      method: 'Onsite',
-      agency: 'OBO/LGU',
-      amount: (balance / 100).toFixed(2),
-      reference: '',
-      proofFileName: '',
-    };
-    this.paymentFormError.set('');
+    this.paymentForm = { officialReceiptNumber: '' };
     this.showPaymentForm.set(true);
-  }
-
-  /** "Where to pay" for the Record Payment modal's currently selected Collecting Agency — the real Treasury/BFP office name, contact number, and office hours from department.model.ts, never surfaced anywhere in the payment flow before. */
-  protected wherePaidInfo(agency: CollectingAgency): { name: string; contactPhone: string; officeHours: string } | null {
-    const dept = departmentById(agency === 'BFP' ? 'bfp' : 'treasury');
-    return dept ? { name: dept.name, contactPhone: dept.contactPhone, officeHours: dept.officeHours } : null;
   }
 
   protected cancelPaymentForm(): void {
     this.showPaymentForm.set(false);
   }
 
-  protected onProofFileChosen(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.paymentForm.proofFileName = input.files?.[0]?.name ?? '';
-  }
-
-  protected submitPaymentForm(): void {
-    const a = this.selectedAssessment();
-    if (!a || !this.canRecordPayment()) {
-      this.toast.error("You don't have permission to record a payment.");
+  protected async submitPaymentForm(): Promise<void> {
+    const appId = this.applicationId();
+    const order = this.workspaceOrder();
+    if (!appId || !order || !this.canRecordPayment()) return;
+    if (!this.paymentForm.officialReceiptNumber.trim()) {
+      this.toast.error('Enter the Official Receipt number.');
       return;
     }
-    const amountCentavos = Math.round(Number(this.paymentForm.amount) * 100);
-    const actor = this.session.name() || 'Cashier';
-    const role = this.session.role() ?? 'Payment Officer';
-    const txn =
-      this.paymentForm.method === 'Onsite'
-        ? this.assessmentStore.recordOnsitePayment(
-            a.id,
-            amountCentavos,
-            this.paymentForm.reference,
-            this.paymentForm.agency,
-            actor,
-            role,
-          )
-        : this.assessmentStore.submitBankTransferProof(
-            a.id,
-            amountCentavos,
-            this.paymentForm.reference,
-            this.paymentForm.proofFileName,
-            this.paymentForm.agency,
-            actor,
-            role,
-          );
-    if (!txn) {
-      const message =
-        this.paymentForm.method === 'Bank Transfer' && !this.paymentForm.proofFileName
-          ? 'A proof-of-payment file is required for a bank transfer.'
-          : 'Could not record this payment — check the amount (must not exceed the outstanding balance) and that the reference number hasn’t already been used.';
-      this.paymentFormError.set(message);
-      this.toast.error(message);
-      return;
+    this.workspaceWorking.set(true);
+    try {
+      const result = await this.paymentsApi.recordOnsitePayment(appId, {
+        officialReceiptNumber: this.paymentForm.officialReceiptNumber.trim(),
+        amountCentavos: order.totalCentavos,
+      });
+      if (result.kind === 'done') {
+        this.toast.success('Onsite payment recorded and verified.');
+        this.showPaymentForm.set(false);
+        await this.loadWorkspace(appId);
+        return;
+      }
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot record onsite payments yet.' : result.message,
+      );
+    } finally {
+      this.workspaceWorking.set(false);
     }
-    this.store.refreshPaymentProjection(a.applicationId, actor, role);
-    this.showPaymentForm.set(false);
-    this.toast.success('Payment recorded.');
   }
 
-  // ---- Tab 2: Transactions --------------------------------------------------
+  /** Adapts one row of the Assessment Workspace's own payment list (`ApplicationPaymentRow`, from the application detail) into the shape `openVerify`/`openReject`/`openAdjust`/`openCorrectReceipt` expect (`PaymentQueueRow`, from the global queue) — same underlying `payments` table row, two different read shapes, one set of write actions. */
+  protected toQueueRow(payment: ApplicationPaymentRow, applicationId: string): PaymentQueueRow {
+    const app = this.workspaceApp();
+    return {
+      id: payment.id,
+      applicationId,
+      applicationReference: app?.referenceNumber ?? applicationId,
+      referenceNumber: payment.referenceNumber,
+      applicantName: app?.applicant ?? '—',
+      amountCentavos: payment.amountCentavos,
+      method: payment.method,
+      status: payment.status,
+      submittedAt: payment.submittedAt,
+      officialReceiptNumber: payment.officialReceiptNumber,
+    };
+  }
 
-  protected readonly txnPermitTypeFilter = signal<'All' | PermitType>('All');
-  protected readonly txnMethodFilter = signal<'All' | PaymentMethod>('All');
-  protected readonly txnAgencyFilter = signal<'All' | CollectingAgency>('All');
-  protected readonly txnStatusFilter = signal<'All' | PaymentTransactionStatus>('All');
-  protected readonly permitTypeOptions = ALL_PERMIT_TYPES;
-  protected readonly txnStatusOptions: PaymentTransactionStatus[] = [
+  // ============================================================
+  // Payment Queue tab — GET /staff/payments (real bulk endpoint)
+  // ============================================================
+
+  protected readonly queueStatusFilter = signal<PaymentStatus>('Pending Verification');
+  protected readonly queueStatusOptions: PaymentStatus[] = [
     'Pending Verification',
-    'Verified',
-    'Rejected',
-    'Voided',
+    'Paid',
+    'Not Yet Available',
+    'Overdue',
   ];
-  protected readonly methodOptions: PaymentMethod[] = ['Onsite', 'Bank Transfer'];
-  protected readonly agencyOptions: CollectingAgency[] = ['OBO/LGU', 'BFP'];
+  protected readonly queueLoading = signal(false);
+  protected readonly queueUnavailable = signal(false);
+  protected readonly queueError = signal<string | null>(null);
+  protected readonly queueRows = signal<readonly PaymentQueueRow[]>([]);
 
-  protected readonly transactionRows = computed<TransactionRow[]>(() => {
-    return this.assessmentStore
-      .allTransactions()
-      .map((txn) => {
-        const app = this.applicationLabel(txn.applicationId);
-        const assessment = this.assessmentStore.getAssessmentById(txn.assessmentId);
-        return {
-          txn,
-          applicant: app.applicant,
-          businessId: app.businessId,
-          businessName: app.businessName,
-          permitType: app.permitType,
-          assessmentVersion: assessment?.version ?? 0,
-        };
-      })
-      .sort((a, b) => b.txn.submittedAtValue.getTime() - a.txn.submittedAtValue.getTime());
-  });
+  async ngOnInit(): Promise<void> {
+    await Promise.all([this.loadQueue(), this.loadSchedules(), this.loadPaymentMethods()]);
+  }
 
-  protected readonly txnActiveFilterCount = computed(
-    () =>
-      (this.txnPermitTypeFilter() !== 'All' ? 1 : 0) +
-      (this.txnMethodFilter() !== 'All' ? 1 : 0) +
-      (this.txnAgencyFilter() !== 'All' ? 1 : 0) +
-      (this.txnStatusFilter() !== 'All' ? 1 : 0),
+  protected async loadQueue(): Promise<void> {
+    this.queueLoading.set(true);
+    this.queueUnavailable.set(false);
+    this.queueError.set(null);
+    try {
+      const result = await this.paymentsApi.queue({ status: this.queueStatusFilter(), limit: 100 });
+      if (result.kind === 'ok') {
+        this.queueRows.set(result.rows);
+        return;
+      }
+      this.queueRows.set([]);
+      if (result.kind === 'unavailable') this.queueUnavailable.set(true);
+      else this.queueError.set(result.message);
+    } finally {
+      this.queueLoading.set(false);
+    }
+  }
+
+  protected onQueueStatusChange(): void {
+    this.page.set(1);
+    void this.loadQueue();
+  }
+
+  protected readonly queueTableRows = computed<PaymentRow[]>(() =>
+    this.queueRows().map((payment) => ({
+      payment,
+      ...this.applicationLabel(payment.applicationId),
+    })),
   );
 
-  protected clearTxnFilters(): void {
-    this.txnPermitTypeFilter.set('All');
-    this.txnMethodFilter.set('All');
-    this.txnAgencyFilter.set('All');
-    this.txnStatusFilter.set('All');
-    this.page.set(1);
-  }
-
-  protected readonly filteredTransactionRows = computed(() => {
+  protected readonly filteredQueueRows = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
-    const permitType = this.txnPermitTypeFilter();
-    const method = this.txnMethodFilter();
-    const agency = this.txnAgencyFilter();
-    const status = this.txnStatusFilter();
-    return this.transactionRows().filter((r) => {
-      if (permitType !== 'All' && r.permitType !== permitType) return false;
-      if (method !== 'All' && r.txn.method !== method) return false;
-      if (agency !== 'All' && r.txn.agency !== agency) return false;
-      if (status !== 'All' && r.txn.status !== status) return false;
-      if (!term) return true;
-      return (
-        r.txn.id.toLowerCase().includes(term) ||
-        r.txn.transactionReference.toLowerCase().includes(term) ||
+    if (!term) return this.queueTableRows();
+    return this.queueTableRows().filter(
+      (r) =>
+        r.payment.referenceNumber.toLowerCase().includes(term) ||
+        r.payment.applicationReference.toLowerCase().includes(term) ||
         r.applicant.toLowerCase().includes(term) ||
-        r.businessName.toLowerCase().includes(term) ||
-        r.txn.applicationId.toLowerCase().includes(term)
-      );
-    });
-  });
-
-  protected readonly pagedTransactionRows = computed(() => {
-    const start = (this.page() - 1) * this.pageSize;
-    return this.filteredTransactionRows().slice(start, start + this.pageSize);
-  });
-
-  protected readonly transactionView = signal<'list' | 'detail'>('list');
-  protected readonly selectedTransactionId = signal<string | null>(null);
-  protected readonly selectedTransaction = computed(() => {
-    const id = this.selectedTransactionId();
-    return id ? this.assessmentStore.getTransactionById(id) : undefined;
-  });
-  /** The applicant/business context for the currently open transaction — mirrors selectedAssessmentApp above; this detail view previously showed neither. */
-  protected readonly selectedTransactionApp = computed(() => {
-    const t = this.selectedTransaction();
-    return t ? this.store.getById(t.applicationId) : undefined;
-  });
-  protected readonly selectedTransactionAdjustments = computed(() => {
-    const id = this.selectedTransactionId();
-    return id ? this.assessmentStore.getAdjustmentsForTransaction(id) : [];
-  });
-
-  openTransaction(row: TransactionRow): void {
-    this.selectedTransactionId.set(row.txn.id);
-    this.transactionView.set('detail');
-  }
-
-  backToTransactions(): void {
-    this.transactionView.set('list');
-    this.selectedTransactionId.set(null);
-  }
-
-  protected verifyTransaction(txn: PaymentTransaction): void {
-    if (!this.canVerifyPayment()) {
-      this.toast.error("You don't have permission to verify this payment.");
-      return;
-    }
-    const actor = this.session.name() || 'Payment Officer';
-    const role = this.session.role() ?? 'Payment Officer';
-    if (this.assessmentStore.verifyTransaction(txn.id, actor, role)) {
-      this.store.refreshPaymentProjection(txn.applicationId, actor, role);
-      this.toast.success('Payment verified.');
-    } else {
-      this.toast.error("Couldn't verify this transaction from its current status.");
-    }
-  }
-
-  protected readonly rejectTarget = signal<PaymentTransaction | null>(null);
-  protected rejectReason = '';
-
-  protected openReject(txn: PaymentTransaction): void {
-    if (!this.canVerifyPayment()) {
-      this.toast.error("You don't have permission to reject this payment.");
-      return;
-    }
-    this.rejectReason = '';
-    this.rejectTarget.set(txn);
-  }
-
-  protected cancelReject(): void {
-    this.rejectTarget.set(null);
-  }
-
-  protected confirmReject(): void {
-    const txn = this.rejectTarget();
-    if (!txn || !this.rejectReason.trim()) {
-      this.toast.error('Add a reason before rejecting this payment.');
-      return;
-    }
-    const actor = this.session.name() || 'Payment Officer';
-    const role = this.session.role() ?? 'Payment Officer';
-    if (this.assessmentStore.rejectTransaction(txn.id, actor, role, this.rejectReason)) {
-      this.store.refreshPaymentProjection(txn.applicationId, actor, role);
-      this.toast.success('Payment rejected.');
-    } else {
-      this.toast.error("Couldn't reject this transaction from its current status.");
-    }
-    this.rejectTarget.set(null);
-  }
-
-  protected readonly adjustTarget = signal<{
-    txn: PaymentTransaction;
-    type: 'Void' | 'Reversal' | 'Refund';
-  } | null>(null);
-  protected adjustReason = '';
-
-  protected openAdjust(txn: PaymentTransaction, type: 'Void' | 'Reversal' | 'Refund'): void {
-    if (!this.canAdjustPayment()) {
-      this.toast.error("You don't have permission to adjust this payment.");
-      return;
-    }
-    this.adjustReason = '';
-    this.adjustTarget.set({ txn, type });
-  }
-
-  protected cancelAdjust(): void {
-    this.adjustTarget.set(null);
-  }
-
-  protected confirmAdjust(): void {
-    const target = this.adjustTarget();
-    if (!target || !this.adjustReason.trim()) {
-      this.toast.error('Add a reason before continuing.');
-      return;
-    }
-    const actor = this.session.name() || 'Administrator';
-    const role = this.session.role() ?? 'Administrator';
-    const { txn, type } = target;
-    const ok =
-      type === 'Void'
-        ? this.assessmentStore.voidTransaction(txn.id, actor, role, this.adjustReason)
-        : type === 'Reversal'
-          ? this.assessmentStore.reverseTransaction(txn.id, actor, role, this.adjustReason)
-          : this.assessmentStore.refundTransaction(txn.id, actor, role, this.adjustReason);
-    const pastTense = type === 'Void' ? 'voided' : type === 'Reversal' ? 'reversed' : 'refunded';
-    if (ok) {
-      this.store.refreshPaymentProjection(txn.applicationId, actor, role);
-      this.toast.success(`Transaction ${pastTense}.`);
-    } else {
-      this.toast.error(`Couldn't ${type.toLowerCase()} this transaction.`);
-    }
-    this.adjustTarget.set(null);
-  }
-
-  // ---- Payment Transactions table: "More actions" overlay menu ----------
-  // A real CDK-overlay popover (not an in-flow disclosure) — it renders
-  // into the CDK overlay container, layered above everything including
-  // the table's own `.table-wrap` scroll clipping, so opening/closing it
-  // never changes the row's height or the table's width/column layout.
-
-  /** The one transaction (by id) whose "More actions" menu is open, or null — never more than one at a time. */
-  protected readonly openMenuTxnId = signal<string | null>(null);
-
-  /** Bottom-start by default, flipping to top-start if the panel would run past the viewport bottom (e.g. the last row in a long table). */
-  protected readonly txnMenuPositions: ConnectedPosition[] = [
-    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 4 },
-    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -4 },
-  ];
-
-  protected toggleTxnMenu(id: string): void {
-    this.openMenuTxnId.update((current) => (current === id ? null : id));
-  }
-
-  protected closeTxnMenu(): void {
-    this.openMenuTxnId.set(null);
-  }
-
-  /** cdkConnectedOverlay only emits keydown events while the overlay is open — Escape is the one key it doesn't already close on by itself. */
-  protected onTxnMenuKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape') this.closeTxnMenu();
-  }
-
-  protected readonly orForm = { orNumber: '', orDate: '', orIssuedBy: '' };
-  protected readonly showOrForm = signal(false);
-  // Explicit target rather than reading `selectedTransaction()` — this form
-  // is opened from more than one table (the standalone Transaction detail
-  // view AND the Payment Transactions table nested in an Assessment's
-  // detail view), and only the former actually sets `selectedTransactionId`.
-  protected readonly orFormTarget = signal<PaymentTransaction | null>(null);
-
-  protected openOrForm(txn: PaymentTransaction): void {
-    this.orFormTarget.set(txn);
-    this.orForm.orNumber = '';
-    this.orForm.orDate = new Date().toISOString().slice(0, 10);
-    this.orForm.orIssuedBy = this.session.name() || '';
-    this.showOrForm.set(true);
-  }
-
-  protected cancelOrForm(): void {
-    this.showOrForm.set(false);
-    this.orFormTarget.set(null);
-  }
-
-  protected submitOrForm(): void {
-    const txn = this.orFormTarget();
-    if (!txn || !this.orForm.orNumber.trim()) {
-      this.toast.error('Enter the OR number before saving.');
-      return;
-    }
-    this.assessmentStore.attachOfficialReceipt(
-      txn.id,
-      this.orForm.orNumber,
-      this.orForm.orDate,
-      this.orForm.orIssuedBy,
+        r.businessName.toLowerCase().includes(term),
     );
-    this.toast.success('Official Receipt attached.');
-    this.showOrForm.set(false);
-    this.orFormTarget.set(null);
+  });
+
+  protected readonly pagedQueueRows = computed(() => {
+    const start = (this.page() - 1) * this.pageSize;
+    return this.filteredQueueRows().slice(start, start + this.pageSize);
+  });
+
+  protected readonly queueView = signal<'list' | 'detail'>('list');
+  protected readonly selectedPaymentId = signal<string | null>(null);
+  protected readonly selectedPayment = computed(() => {
+    const id = this.selectedPaymentId();
+    return id ? this.queueRows().find((r) => r.id === id) ?? null : null;
+  });
+
+  protected openPayment(row: PaymentRow): void {
+    this.selectedPaymentId.set(row.payment.id);
+    this.queueView.set('detail');
   }
 
-  protected readonly showReceiptPreview = signal(false);
-  protected openReceiptPreview(): void {
-    this.showReceiptPreview.set(true);
-  }
-  protected closeReceiptPreview(): void {
-    this.showReceiptPreview.set(false);
-  }
-
-  // Same `<app-document-preview kind="official-receipt">` the standalone
-  // Transactions tab's own detail view already uses (see
-  // showReceiptPreview/selectedTransaction above) — this just gives the
-  // Payment Transactions table nested inside an Assessment's detail view
-  // (a different transaction list, `selectedAssessmentTransactions`) its
-  // own entry point into the same real receipt view, since that table has
-  // no `selectedTransactionId` of its own to key off of.
-  protected readonly embeddedReceiptTxn = signal<PaymentTransaction | null>(null);
-
-  protected openEmbeddedReceipt(txn: PaymentTransaction): void {
-    this.embeddedReceiptTxn.set(txn);
-  }
-
-  protected closeEmbeddedReceipt(): void {
-    this.embeddedReceiptTxn.set(null);
+  protected backToQueue(): void {
+    this.queueView.set('list');
+    this.selectedPaymentId.set(null);
   }
 
   openApplicationRecord(applicationId: string): void {
     this.router.navigateByUrl(`/applications/${applicationId}`);
   }
 
-  // ---- Tab 3: Permit Fee Matrix ----------------------------------------------
+  // ---- Verify / reject / void / reverse / refund / correct-receipt -------
+  // Verifying and recording the Official Receipt number are the SAME real
+  // call — there is no separate "attach OR" step (see StaffPaymentsApi).
 
-  protected readonly matrixPermitType = signal<PermitType>(ALL_PERMIT_TYPES[0]);
+  protected readonly verifyTarget = signal<PaymentQueueRow | null>(null);
 
-  protected readonly matrixRows = computed(() =>
-    this.paymentConfig.feeMatrixFor(this.matrixPermitType()),
-  );
-
-  protected applicabilityLabel(a: FeeApplicability): string {
-    return a === 'required' ? 'Required' : a === 'conditional' ? 'Conditional' : 'Not Applicable';
+  protected openVerify(payment: PaymentQueueRow): void {
+    if (!this.canVerifyPayment()) {
+      this.toast.error("You don't have permission to verify this payment.");
+      return;
+    }
+    this.verifyTarget.set(payment);
   }
 
-  // ---- Tab 4: Configuration ---------------------------------------------------
+  protected cancelVerify(): void {
+    this.verifyTarget.set(null);
+  }
+
+  protected async confirmVerify(officialReceiptNumber: string): Promise<void> {
+    const payment = this.verifyTarget();
+    this.verifyTarget.set(null);
+    if (!payment || !officialReceiptNumber.trim()) {
+      this.toast.error('Enter the Official Receipt number before verifying.');
+      return;
+    }
+    const result = await this.paymentsApi.verifyPayment(payment.id, officialReceiptNumber.trim());
+    if (result.kind === 'done') {
+      this.toast.success('Payment verified.');
+      await this.afterPaymentChange(payment.applicationId);
+    } else {
+      // Self-verification (the officer who submitted/recorded this payment
+      // may not also confirm it) comes back here as the server's own wording.
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot verify payments yet.' : result.message,
+      );
+    }
+  }
+
+  protected readonly rejectTarget = signal<PaymentQueueRow | null>(null);
+
+  protected openReject(payment: PaymentQueueRow): void {
+    if (!this.canVerifyPayment()) {
+      this.toast.error("You don't have permission to reject this payment.");
+      return;
+    }
+    this.rejectTarget.set(payment);
+  }
+
+  protected cancelReject(): void {
+    this.rejectTarget.set(null);
+  }
+
+  protected async confirmReject(reason: string): Promise<void> {
+    const payment = this.rejectTarget();
+    this.rejectTarget.set(null);
+    if (!payment || !reason.trim()) {
+      this.toast.error('Add a reason before rejecting this payment.');
+      return;
+    }
+    const result = await this.paymentsApi.rejectPayment(payment.id, reason.trim());
+    if (result.kind === 'done') {
+      this.toast.success('Payment rejected.');
+      await this.afterPaymentChange(payment.applicationId);
+    } else {
+      this.toast.error(result.kind === 'unavailable' ? 'This deployment cannot reject payments yet.' : result.message);
+    }
+  }
+
+  protected readonly adjustTarget = signal<{ payment: PaymentQueueRow; type: 'Void' | 'Reverse' | 'Refund' } | null>(null);
+
+  protected openAdjust(payment: PaymentQueueRow, type: 'Void' | 'Reverse' | 'Refund'): void {
+    if (!this.canAdjustPayment()) {
+      this.toast.error("You don't have permission to adjust this payment.");
+      return;
+    }
+    this.adjustTarget.set({ payment, type });
+  }
+
+  protected cancelAdjust(): void {
+    this.adjustTarget.set(null);
+  }
+
+  protected async confirmAdjust(reason: string): Promise<void> {
+    const target = this.adjustTarget();
+    this.adjustTarget.set(null);
+    if (!target || !reason.trim()) {
+      this.toast.error('Add a reason before continuing.');
+      return;
+    }
+    const { payment, type } = target;
+    const trimmed = reason.trim();
+    const result =
+      type === 'Void'
+        ? await this.paymentsApi.voidPayment(payment.id, trimmed)
+        : type === 'Reverse'
+          ? await this.paymentsApi.reversePayment(payment.id, trimmed)
+          : await this.paymentsApi.refundPayment(payment.id, trimmed);
+    if (result.kind === 'done') {
+      this.toast.success(`Payment ${type === 'Void' ? 'voided' : type === 'Reverse' ? 'reversed' : 'refunded'}.`);
+      await this.afterPaymentChange(payment.applicationId);
+    } else {
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot adjust payments yet.' : result.message,
+      );
+    }
+  }
+
+  protected readonly correctReceiptTarget = signal<PaymentQueueRow | null>(null);
+  protected correctReceiptForm = { officialReceiptNumber: '', reason: '' };
+
+  protected openCorrectReceipt(payment: PaymentQueueRow): void {
+    if (!this.canVerifyPayment()) return;
+    this.correctReceiptForm = { officialReceiptNumber: payment.officialReceiptNumber ?? '', reason: '' };
+    this.correctReceiptTarget.set(payment);
+  }
+
+  protected cancelCorrectReceipt(): void {
+    this.correctReceiptTarget.set(null);
+  }
+
+  protected async confirmCorrectReceipt(): Promise<void> {
+    const payment = this.correctReceiptTarget();
+    if (!payment || !this.correctReceiptForm.officialReceiptNumber.trim() || !this.correctReceiptForm.reason.trim()) {
+      this.toast.error('Enter both the corrected OR number and a reason.');
+      return;
+    }
+    const result = await this.paymentsApi.correctReceipt(
+      payment.id,
+      this.correctReceiptForm.officialReceiptNumber.trim(),
+      this.correctReceiptForm.reason.trim(),
+    );
+    if (result.kind === 'done') {
+      this.toast.success('Official Receipt number corrected.');
+      await this.afterPaymentChange(payment.applicationId);
+    } else {
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot correct a receipt yet.' : result.message,
+      );
+    }
+    this.correctReceiptTarget.set(null);
+  }
+
+  /** Reloads whichever real data just changed underneath — the global queue always, and the Assessment Workspace too when the payment belonged to the application currently open there. */
+  private async afterPaymentChange(applicationId: string): Promise<void> {
+    await this.loadQueue();
+    if (this.applicationId() === applicationId) await this.loadWorkspace(applicationId);
+    if (this.queueView() === 'detail') this.backToQueue();
+  }
+
+  // ============================================================
+  // Fee Schedule tab — GET/POST /staff/config/fee-schedules
+  // ============================================================
+
+  protected readonly permitTypeOptions = ALL_PERMIT_TYPES;
+  protected readonly schedulesLoading = signal(false);
+  protected readonly schedulesUnavailable = signal(false);
+  protected readonly schedulesError = signal<string | null>(null);
+  protected readonly schedules = signal<readonly FeeSchedule[]>([]);
+
+  protected async loadSchedules(): Promise<void> {
+    this.schedulesLoading.set(true);
+    this.schedulesUnavailable.set(false);
+    this.schedulesError.set(null);
+    try {
+      const result = await this.feeConfigApi.schedules();
+      if (result.kind === 'ok') {
+        this.schedules.set(result.schedules);
+        return;
+      }
+      this.schedules.set([]);
+      if (result.kind === 'unavailable') this.schedulesUnavailable.set(true);
+      else this.schedulesError.set(result.message);
+    } finally {
+      this.schedulesLoading.set(false);
+    }
+  }
+
+  protected readonly expandedScheduleVersion = signal<string | null>(null);
+  protected toggleSchedule(version: string): void {
+    this.expandedScheduleVersion.update((current) => (current === version ? null : version));
+  }
+
+  // ---- Publishing a new schedule (minimal: build entries one at a time) --
+
+  protected readonly showPublishForm = signal(false);
+  protected publishForm = { version: '', effectiveFrom: '', publishedBy: '' };
+  protected readonly publishEntries = signal<FeeScheduleEntry[]>([]);
+  protected newEntry: { permitType: PermitType; line: FeeLine; amount: string; basis: string } = {
+    permitType: ALL_PERMIT_TYPES[0],
+    line: 'filing',
+    amount: '',
+    basis: '',
+  };
+
+  protected openPublishForm(): void {
+    if (!this.canConfigurePayments()) return;
+    this.publishForm = { version: '', effectiveFrom: new Date().toISOString().slice(0, 10), publishedBy: '' };
+    this.publishEntries.set([]);
+    this.showPublishForm.set(true);
+  }
+
+  protected cancelPublishForm(): void {
+    this.showPublishForm.set(false);
+  }
+
+  protected addPublishEntry(): void {
+    const pesos = Number(this.newEntry.amount);
+    if (!Number.isFinite(pesos) || pesos < 0) {
+      this.toast.error('Enter a valid, non-negative amount.');
+      return;
+    }
+    if (!this.newEntry.basis.trim()) {
+      this.toast.error('Name the ordinance or issuance this line rests on.');
+      return;
+    }
+    const entry: FeeScheduleEntry = {
+      permitType: this.newEntry.permitType,
+      line: this.newEntry.line,
+      amountCentavos: Math.round(pesos * 100),
+      basis: this.newEntry.basis.trim(),
+    };
+    this.publishEntries.update((rows) => [
+      ...rows.filter((r) => !(r.permitType === entry.permitType && r.line === entry.line)),
+      entry,
+    ]);
+    this.newEntry = { ...this.newEntry, amount: '', basis: '' };
+  }
+
+  protected removePublishEntry(entry: FeeScheduleEntry): void {
+    this.publishEntries.update((rows) =>
+      rows.filter((r) => !(r.permitType === entry.permitType && r.line === entry.line)),
+    );
+  }
+
+  protected async confirmPublish(): Promise<void> {
+    if (!this.canConfigurePayments()) return;
+    const { version, effectiveFrom, publishedBy } = this.publishForm;
+    if (!version.trim() || !effectiveFrom || !publishedBy.trim()) {
+      this.toast.error('Version, effective date, and the authorizing ordinance/issuance are all required.');
+      return;
+    }
+    if (this.publishEntries().length === 0) {
+      this.toast.error('Add at least one fee line before publishing.');
+      return;
+    }
+    // `feeConfigApi.publish()` only ever REJECTS for something that isn't an
+    // `ApiError` at all (a genuine network failure, a non-Problem-Details
+    // response) — its own catch block turns every real HTTP refusal,
+    // including this one, into a resolved `{kind:'refused', message}`. That
+    // rejection path had nothing here to catch it: an uncaught rejection is
+    // silent to a user (Angular only logs it to the console), which is
+    // exactly the "no toast, no inline error, nothing" symptom a past-date
+    // Effective From produced — the server's own clear, helpful refusal
+    // reason was being computed and then never given anywhere to land.
+    try {
+      const result = await this.feeConfigApi.publish({
+        version: version.trim(),
+        effectiveFrom,
+        publishedBy: publishedBy.trim(),
+        entries: this.publishEntries(),
+      });
+      if (result.kind === 'done') {
+        this.toast.success(`Fee schedule "${result.schedule.version}" published.`);
+        this.showPublishForm.set(false);
+        await this.loadSchedules();
+        return;
+      }
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot publish a fee schedule yet.' : result.message,
+      );
+    } catch (error) {
+      this.toast.error(
+        error instanceof Error && error.message !== '' ? error.message : 'That could not be published. Try again.',
+      );
+    }
+  }
+
+  // ============================================================
+  // Configuration tab
+  // ============================================================
 
   protected readonly configSubTabs: { key: ConfigSubTab; label: string }[] = [
-    { key: 'fee-rules', label: 'Fee Rules' },
     { key: 'payment-methods', label: 'Payment Methods' },
     { key: 'bank-information', label: 'Bank Information' },
     { key: 'payroll', label: 'Payroll' },
   ];
-  protected readonly configSubTab = signal<ConfigSubTab>('fee-rules');
+  protected readonly configSubTab = signal<ConfigSubTab>('payment-methods');
 
-  protected readonly feeRules = this.paymentConfig.activeFeeRules;
-  protected readonly methods = this.paymentConfig.methods;
+  // ---- Payment Methods sub-tab — GET/PUT /staff/config/payment-methods ---
 
-  protected toggleFeeRuleActive(rule: FeeRule): void {
-    if (!this.canConfigurePayments()) {
-      this.toast.error("You don't have permission to change fee rules.");
-      return;
+  protected readonly methodsLoading = signal(false);
+  protected readonly methodsUnavailable = signal(false);
+  protected readonly methodsError = signal<string | null>(null);
+  protected readonly paymentMethods = signal<readonly PaymentMethodConfig[]>([]);
+
+  protected async loadPaymentMethods(): Promise<void> {
+    this.methodsLoading.set(true);
+    this.methodsUnavailable.set(false);
+    this.methodsError.set(null);
+    try {
+      const result = await this.feeConfigApi.methods();
+      if (result.kind === 'ok') {
+        this.paymentMethods.set(result.methods);
+        return;
+      }
+      this.paymentMethods.set([]);
+      if (result.kind === 'unavailable') this.methodsUnavailable.set(true);
+      else this.methodsError.set(result.message);
+    } finally {
+      this.methodsLoading.set(false);
     }
-    this.paymentConfig.setFeeRuleActive(rule.id, !rule.active);
-    this.toast.success(`"${rule.name}" ${rule.active ? 'deactivated' : 'activated'}.`);
   }
 
-  protected toggleMethodActive(
-    methodId: string,
-    active: boolean,
-    domainMethod: string | null,
-  ): void {
+  protected async toggleMethodActive(method: PaymentMethodConfig, event: Event): Promise<void> {
+    const checkbox = event.target as HTMLInputElement;
     if (!this.canConfigurePayments()) {
+      // The click already flipped the checkbox's own DOM state before this
+      // handler ran (native checkbox behavior) — revert it immediately
+      // rather than leaving it showing the attempted, refused value.
+      checkbox.checked = method.active;
       this.toast.error("You don't have permission to change payment methods.");
       return;
     }
-    if (!domainMethod) {
-      this.toast.error('This method has no live integration in this build yet.');
-      return;
+    const result = await this.feeConfigApi.setMethod(method.method, { active: !method.active });
+    if (result.kind === 'done') {
+      this.toast.success(`"${method.label}" ${result.active ? 'activated' : 'deactivated'}.`);
+      await this.loadPaymentMethods();
+    } else {
+      // Real refusal (e.g. turning off the last active method would leave
+      // applicants with no way to pay at all) — `method.active` never
+      // changed, but the checkbox's own DOM property already flipped as
+      // soon as it was clicked. Angular's `[checked]="method.active"`
+      // binding only rewrites the DOM `checked` property when the BOUND
+      // VALUE changes since it last wrote it; here the value is still the
+      // same `true`/`false` it always was, so Angular sees nothing to
+      // update and leaves the browser's own already-flipped state in
+      // place — the checkbox is left showing exactly the attempted (and
+      // rejected) value. Setting the DOM property back explicitly is the
+      // only thing that actually corrects it.
+      checkbox.checked = method.active;
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot change payment methods yet.' : result.message,
+      );
     }
-    this.paymentConfig.setMethodActive(methodId, active);
-    this.toast.success(`Payment method ${active ? 'activated' : 'deactivated'}.`);
   }
 
-  protected readonly editingRule = signal<FeeRule | null>(null);
-  protected editForm: {
-    amount: string;
-    unitAmount: string;
-    percentageRate: string;
-    effectiveDate: string;
-    applicability: Partial<Record<PermitType, FeeApplicability>>;
-  } = { amount: '', unitAmount: '', percentageRate: '', effectiveDate: '', applicability: {} };
+  protected readonly editingMethodInstructions = signal<string | null>(null);
+  protected instructionsDraft = '';
 
-  protected openEditRule(rule: FeeRule): void {
+  protected openEditInstructions(method: PaymentMethodConfig): void {
     if (!this.canConfigurePayments()) return;
-    this.editForm = {
-      amount: rule.flatAmountCentavos !== null ? (rule.flatAmountCentavos / 100).toFixed(2) : '',
-      unitAmount:
-        rule.unitAmountCentavos !== null ? (rule.unitAmountCentavos / 100).toFixed(2) : '',
-      percentageRate: rule.percentageRate !== null ? String(rule.percentageRate * 100) : '',
-      effectiveDate: new Date().toISOString().slice(0, 10),
-      applicability: { ...rule.applicability },
-    };
-    this.editingRule.set(rule);
+    this.instructionsDraft = method.instructions;
+    this.editingMethodInstructions.set(method.method);
   }
 
-  protected cancelEditRule(): void {
-    this.editingRule.set(null);
+  protected cancelEditInstructions(): void {
+    this.editingMethodInstructions.set(null);
   }
 
-  protected setApplicability(type: PermitType, value: FeeApplicability): void {
-    this.editForm.applicability = { ...this.editForm.applicability, [type]: value };
-  }
-
-  protected saveEditRule(): void {
-    const rule = this.editingRule();
-    if (!rule || !this.canConfigurePayments()) {
-      this.toast.error("You don't have permission to edit fee rules.");
-      return;
+  protected async saveInstructions(method: PaymentMethodConfig): Promise<void> {
+    const result = await this.feeConfigApi.setMethod(method.method, { instructions: this.instructionsDraft });
+    if (result.kind === 'done') {
+      this.toast.success(`Instructions for "${method.label}" saved.`);
+      this.editingMethodInstructions.set(null);
+      await this.loadPaymentMethods();
+    } else {
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot change payment methods yet.' : result.message,
+      );
     }
-    const patch: Partial<FeeRule> = {
-      applicability: this.editForm.applicability,
-      effectiveDate: this.editForm.effectiveDate || undefined,
-    };
-    if (rule.calculationType === 'flat' && this.editForm.amount) {
-      patch.flatAmountCentavos = Math.round(Number(this.editForm.amount) * 100);
-    }
-    if (rule.calculationType === 'per-unit' && this.editForm.unitAmount) {
-      patch.unitAmountCentavos = Math.round(Number(this.editForm.unitAmount) * 100);
-      patch.requiresAssessorInput = false;
-    }
-    if (rule.calculationType === 'percentage' && this.editForm.percentageRate) {
-      patch.percentageRate = Number(this.editForm.percentageRate) / 100;
-      patch.requiresAssessorInput = false;
-    }
-    this.paymentConfig.updateFeeRule(rule.id, patch, this.session.name() || 'Super Admin');
-    this.editingRule.set(null);
-    this.toast.success(`"${rule.name}" updated to a new version.`);
   }
 
-  protected readonly historyFor = signal<string | null>(null);
-
-  protected toggleHistory(ruleId: string): void {
-    this.historyFor.update((current) => (current === ruleId ? null : ruleId));
-  }
-
-  protected feeRuleHistory(ruleId: string): FeeRule[] {
-    return this.paymentConfig.feeRuleHistory(ruleId);
-  }
-
-  // ---- Tab 4: Configuration — Bank Information sub-tab ----------------------
-  // The office's own receiving-bank details, referenced by the "Bank
-  // Payment" method (Payment Methods sub-tab) but never specified anywhere
-  // until now. Edits replace the whole record in one go (unlike fee rules,
-  // there's no versioning need here — this isn't something an issued
-  // assessment snapshots).
+  // ---- Bank Information sub-tab -------------------------------------------
+  // Left as a clearly-labeled local-only mock — see the note in the
+  // template. The real, wired equivalent is the free-text "instructions" on
+  // the Bank Transfer payment method above; the backend has no structured
+  // bank-account record at all.
 
   protected readonly bankInfo = this.paymentConfig.bankInfo;
   protected readonly editingBankInfo = signal(false);
@@ -988,14 +995,10 @@ export class Payments {
       this.session.name() || 'Super Admin',
     );
     this.editingBankInfo.set(false);
-    this.toast.success('Bank information saved.');
+    this.toast.success('Bank information saved (local only — not sent anywhere real; see the note above).');
   }
 
-  // ---- Tab 4: Configuration — Payroll sub-tab --------------------------------
-  // A real staff/collecting-officer roster — starts empty, an admin adds
-  // each real person themselves. See payroll.model.ts for why this is a
-  // roster (who's on payroll, position, monthly salary), not a payslip/
-  // deductions engine.
+  // ---- Payroll sub-tab — untouched, out of scope for this pass -----------
 
   protected readonly payrollRows = this.payrollStore.staff;
   protected readonly editingPayrollId = signal<string | null>(null);
@@ -1070,48 +1073,28 @@ export class Payments {
 
   // ---- Export ---------------------------------------------------------------
 
-  protected exportAssessments(): void {
-    const rows = this.filteredAssessmentRows();
+  protected exportQueue(): void {
+    const rows = this.filteredQueueRows();
+    // `downloadCsv` writes nothing for an empty set, so "Exported 0
+    // payments." announced a file that was never created.
+    if (rows.length === 0) {
+      this.toast.info('Nothing to export — no payments match the current view.');
+      return;
+    }
     downloadCsv(
-      'assessments',
+      'payments',
       rows.map((r) => ({
-        'Assessment ID': r.assessment.id,
-        'Application ID': r.applicationId,
+        'Payment ID': r.payment.id,
+        Application: r.payment.applicationReference,
         Applicant: r.applicant,
-        'Business ID': r.businessId,
         'Business / Project': r.businessName,
-        'Permit Type': r.permitType,
-        Version: r.assessment.version,
-        Status: r.assessment.status,
-        'OPS No.': r.assessment.opsNumber ?? '',
-        Total: formatPHP(r.assessment.totalCentavos),
-        Balance: formatPHP(r.assessment.balanceCentavos),
-        'Due Date': r.assessment.dueDate ?? '',
+        Amount: formatPHP(r.payment.amountCentavos),
+        Method: r.payment.method,
+        Status: r.payment.status,
+        'OR No.': r.payment.officialReceiptNumber ?? '',
+        'Submitted At': r.payment.submittedAt,
       })),
     );
-    this.toast.success(`Exported ${rows.length} assessment${rows.length === 1 ? '' : 's'}.`);
-  }
-
-  protected exportTransactions(): void {
-    const rows = this.filteredTransactionRows();
-    downloadCsv(
-      'transactions',
-      rows.map((r) => ({
-        'Transaction ID': r.txn.id,
-        'Application ID': r.txn.applicationId,
-        Applicant: r.applicant,
-        'Business ID': r.businessId,
-        'Business / Project': r.businessName,
-        'Permit Type': r.permitType,
-        Method: r.txn.method,
-        Agency: r.txn.agency,
-        Reference: r.txn.transactionReference,
-        Amount: formatPHP(r.txn.amountCentavos),
-        Status: r.txn.status,
-        'OR No.': r.txn.orNumber ?? '',
-        'Submitted At': r.txn.submittedAt,
-      })),
-    );
-    this.toast.success(`Exported ${rows.length} transaction${rows.length === 1 ? '' : 's'}.`);
+    this.toast.success(`Exported ${rows.length} payment${rows.length === 1 ? '' : 's'}.`);
   }
 }

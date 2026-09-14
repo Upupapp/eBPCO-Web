@@ -49,6 +49,15 @@
       <form (ngSubmit)="onSubmit(requestForm)" #requestForm="ngForm" novalidate>
         <label class="field-label" for="fullName">Full name</label>
         <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="8.2" r="3.4" stroke="currentColor" stroke-width="1.6" />
+            <path
+              d="M5 19.2c1-3.3 3.8-5.2 7-5.2s6 1.9 7 5.2"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+            />
+          </svg>
           <input
             id="fullName"
             name="fullName"
@@ -63,6 +72,14 @@
 
         <label class="field-label" for="email">Work email address</label>
         <div class="input-wrap" [class.invalid]="emailInvalid()">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-11Z"
+              stroke="currentColor"
+              stroke-width="1.6"
+            />
+            <path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
           <input
             id="email"
             name="email"
@@ -78,6 +95,14 @@
 
         <label class="field-label" for="mobileNumber">Mobile number</label>
         <div class="input-wrap" [class.invalid]="mobileInvalid()">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M8 3.5h8a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 19V5A1.5 1.5 0 0 1 8 3.5Z"
+              stroke="currentColor"
+              stroke-width="1.6"
+            />
+            <path d="M11 18h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
           <input
             id="mobileNumber"
             name="mobileNumber"
@@ -93,6 +118,15 @@
 
         <label class="field-label" for="position">Office and position</label>
         <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="3.5" y="8" width="17" height="11" rx="1.8" stroke="currentColor" stroke-width="1.6" />
+            <path
+              d="M8.5 8V6a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2"
+              stroke="currentColor"
+              stroke-width="1.6"
+            />
+            <path d="M3.5 13h17" stroke="currentColor" stroke-width="1.6" />
+          </svg>
           <input
             id="position"
             name="position"

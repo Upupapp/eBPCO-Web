@@ -3,6 +3,7 @@ import qrcodegen from 'qrcode-generator';
 import { USER_PORTAL_BASE_URL } from '../../core/config/user-portal.config';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
+import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 import { formatPHP } from './doc-format';
@@ -33,6 +34,7 @@ interface QrCell {
 export class UserPortalPermitPreview {
   private readonly store = inject(ApplicationStore);
   private readonly assessmentStore = inject(AssessmentStore);
+  private readonly sessionCache = inject(PermitReleaseSessionCache);
   private readonly userPortalBaseUrl = inject(USER_PORTAL_BASE_URL);
 
   readonly applicationId = input.required<string>();
@@ -56,7 +58,26 @@ export class UserPortalPermitPreview {
     const row = this.row();
     return row ? this.store.getBusiness(row.businessId) : undefined;
   });
-  protected readonly permit = computed(() => this.store.getPermit(this.applicationId()));
+  // A real backend-generated permit lives in `PermitReleaseSessionCache`, not
+  // `ApplicationStore` — `replaceApplications()` deliberately empties the
+  // store's own `_permits` on every real server load (see its doc comment),
+  // so `store.getPermit()` alone always answers "no permit" for a real
+  // application even moments after this session generated one. The store
+  // fallback stays for the seed/demo dataset, where the cache never has
+  // anything and `store.getPermit()` is the only source there is.
+  protected readonly permit = computed(() => {
+    const cached = this.sessionCache.permitFor(this.applicationId());
+    if (cached) {
+      return {
+        permitNumber: cached.permitNumber,
+        issuedDate: cached.issuedDate,
+        expiryDate: null as string | null,
+        approvingOfficial: undefined as string | undefined,
+        approvingOffice: undefined as string | undefined,
+      };
+    }
+    return this.store.getPermit(this.applicationId());
+  });
   protected readonly assessment = computed(() =>
     this.assessmentStore.getActiveAssessment(this.applicationId()),
   );
