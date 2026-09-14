@@ -1,0 +1,98 @@
+- generic [ref=f3e48]:
+  - complementary [ref=f3e50]:
+    - generic [ref=f3e51]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f3e53]
+      - generic [ref=f3e54]: E-BPCO
+    - navigation [ref=f3e55]:
+      - link "Dashboard" [ref=f3e58] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f3e64]:
+        - generic [ref=f3e65]: Operations
+        - generic [ref=f3e66]:
+          - link "Applications" [ref=f3e67] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f3e73] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f3e78] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f3e85] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f3e92]:
+        - generic [ref=f3e93]: Administration
+        - generic [ref=f3e94]:
+          - link "Businesses" [ref=f3e95] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f3e101] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f3e107] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f3e114] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f3e123] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f3e129] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f3e135] [cursor=pointer]
+  - main [ref=f3e141]:
+    - generic [ref=f3e142]:
+      - generic "Payments" [ref=f3e143]:
+        - generic [ref=f3e144]:
+          - heading "Payments" [level=1] [ref=f3e145]
+          - generic [ref=f3e146]:
+            - button "Notifications" [ref=f3e148] [cursor=pointer]
+            - button "E evaluator@lgu.gov.ph Super Admin" [ref=f3e154] [cursor=pointer]:
+              - generic [ref=f3e155]: E
+              - generic [ref=f3e159]:
+                - generic [ref=f3e160]: evaluator@lgu.gov.ph
+                - generic [ref=f3e161]: Super Admin
+      - generic [ref=f3e165]:
+        - navigation [ref=f3e166]:
+          - button [ref=f3e167] [cursor=pointer]
+          - button [ref=f3e170] [cursor=pointer]
+          - button [ref=f3e176] [cursor=pointer]
+          - button [ref=f3e179] [cursor=pointer]
+        - navigation [ref=f3e182]:
+          - button "Fee Rules" [ref=f3e183] [cursor=pointer]
+          - button "Payment Methods" [ref=f3e184] [cursor=pointer]
+          - button "Bank Information" [ref=f3e185] [cursor=pointer]
+          - button "Payroll" [ref=f3e186] [cursor=pointer]
+        - generic [ref=f3e493]:
+          - generic [ref=f3e494]:
+            - generic [ref=f3e495]:
+              - heading "Payroll" [level=3] [ref=f3e496]
+              - paragraph [ref=f3e497]: The office's own staff/collecting-officer roster and monthly salary. Starts empty — add each real staff member; nothing here is a fabricated figure.
+            - button [active] [ref=f3e498] [cursor=pointer]
+          - table [ref=f3e502]:
+            - rowgroup [ref=f3e503]:
+              - row [ref=f3e504]:
+                - columnheader "Name" [ref=f3e505]
+                - columnheader "Position" [ref=f3e506]
+                - columnheader "Monthly Salary" [ref=f3e507]
+                - columnheader "Date Hired" [ref=f3e508]
+                - columnheader "Status" [ref=f3e509]
+                - columnheader "Actions" [ref=f3e510]
+            - rowgroup [ref=f3e511]:
+              - row [ref=f3e512]:
+                - cell "No staff on the payroll roster yet — click \"Add Staff\" to add the first one." [ref=f3e513]
+          - generic [ref=f3e515]:
+            - button "Close" [ref=f3e516] [cursor=pointer]: ✕
+            - heading "Add Staff" [level=2] [ref=f3e517]
+            - generic [ref=f3e518]:
+              - generic [ref=f3e519]:
+                - text: Name
+                - textbox "Name" [ref=f3e520]
+              - generic [ref=f3e521]:
+                - text: Position
+                - textbox "Position" [ref=f3e522]:
+                  - /placeholder: e.g. Collecting Officer, Payment Officer
+              - generic [ref=f3e523]:
+                - text: Monthly Salary (₱)
+                - generic [ref=f3e524]: (optional)
+                - spinbutton "Monthly Salary (₱) (optional)" [ref=f3e525]
+              - generic [ref=f3e526]:
+                - text: Date Hired
+                - generic [ref=f3e527]: (optional)
+                - textbox "Date Hired (optional)" [ref=f3e528]
+              - generic [ref=f3e529]:
+                - button "Cancel" [ref=f3e530] [cursor=pointer]
+                - button "Save" [ref=f3e531] [cursor=pointer]

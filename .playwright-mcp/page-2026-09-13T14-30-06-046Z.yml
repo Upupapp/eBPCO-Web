@@ -1,0 +1,29 @@
+- generic [ref=e5]:
+  - generic [ref=e12]:
+    - img "Municipality of Castilla, Sorsogon seal" [ref=e16]
+    - paragraph [ref=e17]: Electronic Building Permit and Certificate of Occupancy
+    - paragraph [ref=e18]: Municipality of Castilla, Sorsogon
+  - generic [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=e23]
+        - generic [ref=e24]: E-BPCO
+      - heading "Set your password" [level=1] [ref=e25]
+      - paragraph [ref=e26]: Choose a password for your E-BPCO Admin Portal account.
+      - generic [ref=e27]:
+        - generic [ref=e28]: New Password
+        - generic [ref=e29]:
+          - textbox "New Password" [ref=e33]:
+            - /placeholder: At least 12 characters
+            - text: short
+          - button "Show password" [ref=e34] [cursor=pointer]
+        - generic [ref=e39]: Confirm Password
+        - textbox "Confirm Password" [ref=e44]:
+          - /placeholder: Type it again
+          - text: short
+        - alert [ref=e49]: Use at least 12 characters.
+        - button "Set password" [active] [ref=e45] [cursor=pointer]
+      - paragraph [ref=e46]:
+        - link "Back to sign in" [ref=e47] [cursor=pointer]:
+          - /url: /login
+    - paragraph [ref=e48]: © 2026 Municipality of Castilla, Sorsogon. All rights reserved.

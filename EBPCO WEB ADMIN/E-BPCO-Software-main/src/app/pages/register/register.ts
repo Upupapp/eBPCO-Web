@@ -16,6 +16,15 @@ const MOBILE_PATTERN = /^(09\d{9}|\+639\d{9})$/;
 /** The server requires 20 characters. Matched exactly, so neither side surprises. */
 const MIN_JUSTIFICATION = 20;
 
+/** Every required field's `name` attribute, mapped to the label a person reads on screen — so a blank-form submit can say which ones, not just that some exist. */
+const REQUIRED_FIELD_LABELS: Record<string, string> = {
+  fullName: 'Full name',
+  email: 'Work email address',
+  mobileNumber: 'Mobile number',
+  position: 'Office and position',
+  justification: 'Why you need access',
+};
+
 /**
  * Requesting an account. It does not create one.
  *
@@ -92,7 +101,17 @@ export class Register {
     this.onFieldChange();
 
     if (form.invalid) {
-      this.formError.set('Please fill in every field.');
+      // Named, not generic — a single "fill in every field" on a form this
+      // long left the requester to scan every field themselves to find
+      // which one(s) were actually still empty.
+      const missing = Object.entries(REQUIRED_FIELD_LABELS)
+        .filter(([name]) => form.controls?.[name]?.invalid)
+        .map(([, label]) => label);
+      this.formError.set(
+        missing.length > 0
+          ? `Fill in: ${missing.join(', ')}.`
+          : 'Please fill in every field.',
+      );
       return;
     }
     if (!EMAIL_PATTERN.test(this.email.trim().toLowerCase())) {

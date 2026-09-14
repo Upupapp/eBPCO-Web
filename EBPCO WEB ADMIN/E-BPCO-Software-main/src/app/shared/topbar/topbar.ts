@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, input, output, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Icon } from '../icon/icon';
 import { Avatar } from '../avatar/avatar';
@@ -49,6 +49,11 @@ export class Topbar {
   protected readonly notifications = this.store.notifications;
   protected readonly notifPanelOpen = signal(false);
   protected readonly userMenuOpen = signal(false);
+  // Narrow viewports only (see topbar.scss) — the search box itself is
+  // still the full-width control ≥720px; below that it used to collapse to
+  // `display: none` with nothing to reopen it, unlike the icon-triggered
+  // collapse every other narrow-width control in this app already uses.
+  protected readonly mobileSearchOpen = signal(false);
 
   constructor(private readonly router: Router) {}
 
@@ -82,6 +87,23 @@ export class Topbar {
   protected closeMenus(): void {
     this.notifPanelOpen.set(false);
     this.userMenuOpen.set(false);
+    this.mobileSearchOpen.set(false);
+  }
+
+  protected toggleMobileSearch(): void {
+    this.mobileSearchOpen.update((open) => !open);
+    this.notifPanelOpen.set(false);
+    this.userMenuOpen.set(false);
+  }
+
+  // Escape is the standard way to dismiss any open dropdown/menu. Listening
+  // on the document (rather than the panel markup) catches it regardless of
+  // which element inside the panel currently has focus.
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    if (this.notifPanelOpen() || this.userMenuOpen() || this.mobileSearchOpen()) {
+      this.closeMenus();
+    }
   }
 
   protected markAllRead(): void {

@@ -1,0 +1,140 @@
+- generic [ref=f1e1437]:
+  - complementary [ref=f1e1439]:
+    - generic [ref=f1e1440]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e1442]
+      - generic [ref=f1e1443]: E-BPCO
+    - navigation [ref=f1e1444]:
+      - link "Dashboard" [ref=f1e1447] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e1453]:
+        - generic [ref=f1e1454]: Operations
+        - generic [ref=f1e1455]:
+          - link "Applications" [ref=f1e1456] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e1462] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f1e1467] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e1474] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e1481]:
+        - generic [ref=f1e1482]: Administration
+        - generic [ref=f1e1483]:
+          - link "Businesses" [ref=f1e1484] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f1e1490] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e1496] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e1503] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e1512] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f1e1518] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e1524] [cursor=pointer]
+  - main [ref=f1e1530]:
+    - generic [ref=f1e3003]:
+      - generic "Permit Release" [ref=f1e3004]:
+        - generic [ref=f1e3005]:
+          - heading "Permit Release" [level=1] [ref=f1e3006]
+          - generic [ref=f1e3007]:
+            - generic [ref=f1e3008]:
+              - generic [ref=f1e3013]: Search
+              - textbox "Search" [ref=f1e3014]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f1e3016] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f1e3022] [cursor=pointer]:
+              - generic [ref=f1e3023]: Q
+              - generic [ref=f1e3027]:
+                - generic [ref=f1e3028]: QA@lguids.com.ph
+                - generic [ref=f1e3029]: Super Admin
+      - navigation [ref=f1e3033]:
+        - button [ref=f1e3034] [cursor=pointer]
+        - button [ref=f1e3040] [cursor=pointer]
+      - generic [ref=f1e3502]:
+        - heading "Fencing Permit" [level=1] [ref=f1e3503]
+        - button "Back to List" [ref=f1e3505] [cursor=pointer]
+      - generic [ref=f1e3506]:
+        - generic [ref=f1e3507]:
+          - generic [ref=f1e3508]:
+            - heading "Required Documents" [level=2] [ref=f1e3509]
+            - generic [ref=f1e3510]:
+              - button "Reset to Default" [ref=f1e3511] [cursor=pointer]
+              - button [ref=f1e3512] [cursor=pointer]
+              - button "Save Checklist" [ref=f1e3515] [cursor=pointer]
+          - table [ref=f1e3517]:
+            - rowgroup [ref=f1e3518]:
+              - row [ref=f1e3519]:
+                - columnheader "Document" [ref=f1e3520]
+                - columnheader "Required" [ref=f1e3521]
+                - columnheader "Reviewing Department" [ref=f1e3522]
+                - columnheader "Actions" [ref=f1e3523]
+            - rowgroup [ref=f1e3524]:
+              - row [ref=f1e3525]:
+                - cell "Land Title or Tax Declaration of the property" [ref=f1e3526]
+                - cell "Required" [ref=f1e3527]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f1e3529]
+                - cell [ref=f1e3530]:
+                  - button "Edit" [ref=f1e3531] [cursor=pointer]
+                  - button "Remove" [ref=f1e3532] [cursor=pointer]
+              - row [ref=f1e3600]:
+                - cell [ref=f1e3601]:
+                  - textbox "Label" [ref=f1e3602]: Owner's Written Consent (if applicant is not the lot owner)
+                  - textbox "Description" [ref=f1e3603]:
+                    - /placeholder: Description (optional)
+                - cell [ref=f1e3604]:
+                  - checkbox "Required" [ref=f1e3605]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f1e3606]
+                - cell [ref=f1e3607]:
+                  - button "Save" [ref=f1e3608] [cursor=pointer]
+                  - button "Cancel" [ref=f1e3609] [cursor=pointer]
+              - row [ref=f1e3541]:
+                - cell "Barangay Clearance" [ref=f1e3542]
+                - cell "Required" [ref=f1e3543]
+                - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f1e3545]
+                - cell [ref=f1e3546]:
+                  - button "Edit" [ref=f1e3547] [cursor=pointer]
+                  - button "Remove" [ref=f1e3548] [cursor=pointer]
+              - row [ref=f1e3549]:
+                - cell "Locational Clearance / Zoning Certification" [ref=f1e3550]
+                - cell "Required" [ref=f1e3551]
+                - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f1e3553]
+                - cell [ref=f1e3554]:
+                  - button "Edit" [ref=f1e3555] [cursor=pointer]
+                  - button "Remove" [ref=f1e3556] [cursor=pointer]
+              - row [ref=f1e3557]:
+                - cell "Valid Government-Issued ID of Applicant/Owner" [ref=f1e3558]
+                - cell "Required" [ref=f1e3559]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f1e3561]
+                - cell [ref=f1e3562]:
+                  - button "Edit" [ref=f1e3563] [cursor=pointer]
+                  - button "Remove" [ref=f1e3564] [cursor=pointer]
+              - row [ref=f1e3565]:
+                - cell "Fence Plan / Site Development Plan" [ref=f1e3566]
+                - cell "Required" [ref=f1e3567]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f1e3569]
+                - cell [ref=f1e3570]:
+                  - button "Edit" [ref=f1e3571] [cursor=pointer]
+                  - button "Remove" [ref=f1e3572] [cursor=pointer]
+        - generic [ref=f1e3573]:
+          - generic [ref=f1e3574]:
+            - heading "Fee Rules" [level=2] [ref=f1e3575]
+            - button [ref=f1e3576] [cursor=pointer]
+          - paragraph [ref=f1e3580]: Reference only — may not reflect the live fee schedule.
+          - table [ref=f1e3582]:
+            - rowgroup [ref=f1e3583]:
+              - row [ref=f1e3584]:
+                - columnheader "Fee" [ref=f1e3585]
+                - columnheader "Applicability" [ref=f1e3586]
+                - columnheader "Amount" [ref=f1e3587]
+            - rowgroup [ref=f1e3588]:
+              - row [ref=f1e3589]:
+                - cell "Filing / Application Fee (LGU-FIL-01)" [ref=f1e3590]
+                - cell "Required" [ref=f1e3591]
+                - cell "₱250.00" [ref=f1e3593]
+              - row [ref=f1e3594]:
+                - cell "Fencing Permit Fee (DPWH-ACC-FEN)" [ref=f1e3595]
+                - cell "Required" [ref=f1e3596]
+                - cell "Requires assessor input" [ref=f1e3598]
+          - paragraph [ref=f1e3599]: Building/permit fee, line-item fees per discipline (architectural/structural/electrical/mechanical/sanitary as applicable), and other regulatory fees assessed by the Municipal Treasurer’s Office based on project cost/floor area.

@@ -1,0 +1,91 @@
+- generic [ref=f34e2]:
+  - generic [ref=f34e3237]:
+    - complementary [ref=f34e3239]:
+      - generic [ref=f34e3240]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f34e3242]
+        - generic [ref=f34e3243]: E-BPCO
+      - navigation [ref=f34e3244]:
+        - link "Dashboard" [ref=f34e3247] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f34e3253]:
+          - generic [ref=f34e3254]: Operations
+          - generic [ref=f34e3255]:
+            - link "Applications" [ref=f34e3256] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f34e3262] [cursor=pointer]:
+              - /url: /evaluations
+            - link "Payments" [ref=f34e3267] [cursor=pointer]:
+              - /url: /payments
+            - link "Permit Release" [ref=f34e3274] [cursor=pointer]:
+              - /url: /permit-release
+        - generic [ref=f34e3281]:
+          - generic [ref=f34e3282]: Administration
+          - generic [ref=f34e3283]:
+            - link "Businesses" [ref=f34e3284] [cursor=pointer]:
+              - /url: /businesses
+            - link "Access Requests" [ref=f34e3290] [cursor=pointer]:
+              - /url: /access-requests
+            - link "Users & Roles" [ref=f34e3296] [cursor=pointer]:
+              - /url: /user-roles
+            - link "Workflow" [ref=f34e3303] [cursor=pointer]:
+              - /url: /workflow
+            - link "Archive" [ref=f34e3312] [cursor=pointer]:
+              - /url: /archive
+            - link "System Logs" [ref=f34e3318] [cursor=pointer]:
+              - /url: /system-logs
+      - button "Log Out" [ref=f34e3324] [cursor=pointer]
+    - main [ref=f34e3330]:
+      - generic [ref=f34e4317]:
+        - generic "Payments" [ref=f34e4318]:
+          - generic [ref=f34e4319]:
+            - heading "Payments" [level=1] [ref=f34e4320]
+            - generic [ref=f34e4321]:
+              - button "Notifications" [ref=f34e4323] [cursor=pointer]
+              - button "Q QA@lguids.com.ph Super Admin" [ref=f34e4329] [cursor=pointer]:
+                - generic [ref=f34e4330]: Q
+                - generic [ref=f34e4334]:
+                  - generic [ref=f34e4335]: QA@lguids.com.ph
+                  - generic [ref=f34e4336]: Super Admin
+        - generic [ref=f34e4340]:
+          - navigation [ref=f34e4341]:
+            - button [ref=f34e4342] [cursor=pointer]
+            - button [ref=f34e4348] [cursor=pointer]
+            - button [ref=f34e4351] [cursor=pointer]
+          - navigation [ref=f34e4538]:
+            - button "Payment Methods" [ref=f34e4539] [cursor=pointer]
+            - button "Bank Information" [ref=f34e4540] [cursor=pointer]
+            - button "Payroll" [ref=f34e4541] [cursor=pointer]
+          - generic [ref=f34e4542]:
+            - heading "Payment Methods" [level=3] [ref=f34e4543]
+            - paragraph [ref=f34e4544]: Only methods marked Active are offered to an applicant settling an Order of Payment. Turning off the last active method is refused — it would leave applicants with no way to pay at all.
+            - table [ref=f34e4573]:
+              - rowgroup [ref=f34e4574]:
+                - row [ref=f34e4575]:
+                  - columnheader "Method" [ref=f34e4576]
+                  - columnheader "Instructions Shown to Applicant" [ref=f34e4577]
+                  - columnheader "Active" [ref=f34e4578]
+                  - columnheader [ref=f34e4579]
+              - rowgroup [ref=f34e4580]:
+                - row [ref=f34e4581]:
+                  - cell "Bank Transfer" [ref=f34e4582]
+                  - cell [ref=f34e4583]:
+                    - text: Not yet written.
+                    - button "Edit" [ref=f34e4584] [cursor=pointer]
+                  - cell "Inactive" [ref=f34e4585]:
+                    - generic [ref=f34e4586] [cursor=pointer]:
+                      - checkbox "Inactive" [ref=f34e4587]
+                      - generic [ref=f34e4588]: Inactive
+                  - cell [ref=f34e4589]
+                - row [ref=f34e4590]:
+                  - cell "Onsite (cashier)" [ref=f34e4591]
+                  - cell [ref=f34e4592]:
+                    - text: Not yet written.
+                    - button "Edit" [ref=f34e4593] [cursor=pointer]
+                  - cell "Active" [ref=f34e4594]:
+                    - generic [ref=f34e4595] [cursor=pointer]:
+                      - checkbox "Active" [checked] [ref=f34e4596]
+                      - generic [ref=f34e4597]: Active
+                  - cell [ref=f34e4598]
+  - status [ref=f34e4599]:
+    - generic [ref=f34e4604]: "\"Bank Transfer\" deactivated."
+    - button "Dismiss" [ref=f34e4605] [cursor=pointer]: ✕

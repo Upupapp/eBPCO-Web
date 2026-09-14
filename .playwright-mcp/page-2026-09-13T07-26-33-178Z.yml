@@ -1,0 +1,63 @@
+- generic [ref=f34e4705]:
+  - complementary [ref=f34e4707]:
+    - generic [ref=f34e4708]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f34e4710]
+      - generic [ref=f34e4711]: E-BPCO
+    - navigation [ref=f34e4712]:
+      - link "Dashboard" [ref=f34e4715] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f34e4721]:
+        - generic [ref=f34e4722]: Operations
+        - link "Payments" [active] [ref=f34e4724] [cursor=pointer]:
+          - /url: /payments
+      - generic [ref=f34e4731]:
+        - generic [ref=f34e4732]: Administration
+        - link "Archive" [ref=f34e4734] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f34e4740] [cursor=pointer]
+  - main [ref=f34e4746]:
+    - generic [ref=f34e5323]:
+      - generic "Payments" [ref=f34e5324]:
+        - generic [ref=f34e5325]:
+          - heading "Payments" [level=1] [ref=f34e5326]
+          - generic [ref=f34e5327]:
+            - button "Notifications" [ref=f34e5329] [cursor=pointer]
+            - button "C cashier@lgu.gov.ph Payment Officer" [ref=f34e5335] [cursor=pointer]:
+              - generic [ref=f34e5336]: C
+              - generic [ref=f34e5340]:
+                - generic [ref=f34e5341]: cashier@lgu.gov.ph
+                - generic [ref=f34e5342]: Payment Officer
+      - generic [ref=f34e5346]:
+        - navigation [ref=f34e5347]:
+          - button [ref=f34e5348] [cursor=pointer]
+          - button [ref=f34e5354] [cursor=pointer]
+        - generic [ref=f34e5357]:
+          - textbox "Search by reference, applicant, or business/project" [ref=f34e5363]
+          - generic [ref=f34e5364]:
+            - combobox "Payment status filter" [ref=f34e5365] [cursor=pointer]:
+              - option "Pending Verification" [selected]
+              - option "Paid"
+              - option "Not Yet Available"
+              - option "Overdue"
+            - button [ref=f34e5366] [cursor=pointer]
+        - table [ref=f34e5372]:
+          - rowgroup [ref=f34e5373]:
+            - row [ref=f34e5374]:
+              - columnheader "Application" [ref=f34e5375]
+              - columnheader "Citizen" [ref=f34e5376]
+              - columnheader "Business / Project" [ref=f34e5377]
+              - columnheader "Reference" [ref=f34e5378]
+              - columnheader "Method" [ref=f34e5379]
+              - columnheader "Amount" [ref=f34e5380]
+              - columnheader "Status" [ref=f34e5381]
+              - columnheader "Submitted" [ref=f34e5382]
+              - columnheader "Action" [ref=f34e5383]
+          - rowgroup [ref=f34e5384]:
+            - row [ref=f34e5385]:
+              - cell "No payments match your search." [ref=f34e5386]
+        - navigation "Pagination" [ref=f34e5388]:
+          - generic [ref=f34e5389]: Showing 0 of 0
+          - generic [ref=f34e5390]:
+            - button "First page" [disabled] [ref=f34e5391]
+            - button "Page 1" [ref=f34e5396] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f34e5397]

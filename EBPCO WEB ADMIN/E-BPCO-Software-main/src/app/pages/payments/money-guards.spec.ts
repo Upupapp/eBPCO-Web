@@ -80,17 +80,20 @@ describe('Payment guards', () => {
     expect(assessments.recordOnsitePayment(a.id, 1000, 'REF-DUP-1', 'OBO/LGU', 'Cashier', 'Payment Officer')).toBeNull();
   });
 
-  it('keeps voiding a verified payment narrower than recording one', () => {
+  it('keeps payment actions off an Auditor, and includes Payment Officer on the ones the real backend actually scopes to a cashier', () => {
     const roles: StaffRole[] = ['Payment Officer', 'Administrator', 'Super Admin', 'Auditor'];
     const can = (f: (r: StaffRole) => boolean) => roles.filter(f);
 
-    // A cashier may take money and confirm it arrived. Reversing a payment the
-    // office has already accepted is an admin act — it changes what the record
-    // says happened.
+    // A cashier records and confirms money. The real backend gates BOTH on
+    // `staff:verify-payment`, a scope only a cashier account holds at all
+    // (Super Admin/Administrator hold neither this nor `staff:assess`) — see
+    // permissions.ts's own doc comment on `adjustPayment`. An Auditor holds
+    // neither scope and must never see either action regardless.
     expect(can(ACTION_PERMISSIONS.recordPayment)).toContain('Payment Officer');
-    expect(can(ACTION_PERMISSIONS.adjustPayment)).not.toContain('Payment Officer');
+    expect(can(ACTION_PERMISSIONS.adjustPayment)).toContain('Payment Officer');
     expect(can(ACTION_PERMISSIONS.recordPayment)).not.toContain('Auditor');
     expect(can(ACTION_PERMISSIONS.verifyPayment)).not.toContain('Auditor');
+    expect(can(ACTION_PERMISSIONS.adjustPayment)).not.toContain('Auditor');
   });
 
   it('requires proof for a bank transfer — and the proof is only a FILE NAME', () => {

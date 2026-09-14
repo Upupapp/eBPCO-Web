@@ -1,0 +1,153 @@
+- generic [ref=f34e56]:
+  - complementary [ref=f34e58]:
+    - generic [ref=f34e59]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f34e61]
+      - generic [ref=f34e62]: E-BPCO
+    - navigation [ref=f34e63]:
+      - link "Dashboard" [ref=f34e66] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f34e72]:
+        - generic [ref=f34e73]: Operations
+        - generic [ref=f34e74]:
+          - link "Applications" [ref=f34e75] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f34e81] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f34e86] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f34e93] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f34e100]:
+        - generic [ref=f34e101]: Administration
+        - generic [ref=f34e102]:
+          - link "Businesses" [ref=f34e103] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f34e109] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f34e115] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f34e122] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f34e131] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f34e137] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f34e143] [cursor=pointer]
+  - main [ref=f34e149]:
+    - generic [ref=f34e1206]:
+      - generic "Evaluations" [ref=f34e1207]:
+        - generic [ref=f34e1208]:
+          - heading "Evaluations" [level=1] [ref=f34e1209]
+          - generic [ref=f34e1210]:
+            - button "Notifications" [ref=f34e1212] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f34e1218] [cursor=pointer]:
+              - generic [ref=f34e1219]: Q
+              - generic [ref=f34e1223]:
+                - generic [ref=f34e1224]: QA@lguids.com.ph
+                - generic [ref=f34e1225]: Super Admin
+      - generic [ref=f34e1404]:
+        - heading "Initial Evaluation" [level=1] [ref=f34e1405]
+        - generic [ref=f34e1406]:
+          - button "Back" [ref=f34e1407] [cursor=pointer]
+          - button "More actions" [ref=f34e1409] [cursor=pointer]
+      - generic [ref=f34e1415]:
+        - generic [ref=f34e1417]:
+          - generic [ref=f34e1419]:
+            - paragraph [ref=f34e1420]: Total Applications
+            - paragraph [ref=f34e1421]: "3"
+          - generic [ref=f34e1422]:
+            - generic [ref=f34e1423]: Revision Required · Under Review · Accepted
+            - 'img "3 categories: 1, 2, 0" [ref=f34e1425]'
+        - generic [ref=f34e1430]:
+          - generic [ref=f34e1432]:
+            - paragraph [ref=f34e1433]: Revision Required
+            - paragraph [ref=f34e1434]: "1"
+          - generic [ref=f34e1435]:
+            - generic [ref=f34e1436]: 33% of all applications
+            - 'img "Revision Required progress: 33 percent" [ref=f34e1438]'
+        - generic [ref=f34e1441]:
+          - generic [ref=f34e1443]:
+            - paragraph [ref=f34e1444]: Under Review
+            - paragraph [ref=f34e1445]: "2"
+          - generic [ref=f34e1446]:
+            - generic [ref=f34e1447]: 67% of all applications
+            - 'img "Under Review progress: 67 percent" [ref=f34e1449]'
+        - generic [ref=f34e1452]:
+          - generic [ref=f34e1454]:
+            - paragraph [ref=f34e1455]: Accepted
+            - paragraph [ref=f34e1456]: "0"
+          - generic [ref=f34e1457]:
+            - generic [ref=f34e1458]: 0% of all applications
+            - 'img "Accepted progress: 0 percent" [ref=f34e1460]'
+      - generic [ref=f34e1462]:
+        - button [ref=f34e1463] [cursor=pointer]
+        - button [ref=f34e1468] [cursor=pointer]
+        - button [ref=f34e1473] [cursor=pointer]
+      - generic [ref=f34e1478]:
+        - generic [ref=f34e1479]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Ty" [ref=f34e1485]:
+            - /placeholder: Search Here By Application ID, Applicant Name, Business/Project, or Type
+          - generic [ref=f34e1486]:
+            - button [ref=f34e1489] [cursor=pointer]
+            - button [ref=f34e1493] [cursor=pointer]
+        - table [ref=f34e1499]:
+          - rowgroup [ref=f34e1500]:
+            - row [ref=f34e1501]:
+              - columnheader [ref=f34e1502]:
+                - checkbox "Select all applications in this stage" [ref=f34e1503]
+              - columnheader "APPLICATION ID" [ref=f34e1504]
+              - columnheader "APPLICANT NAME" [ref=f34e1505]
+              - columnheader "MISSING DOCUMENTS" [ref=f34e1506]
+              - columnheader "TYPE" [ref=f34e1507]
+              - columnheader "REVIEWING DEPARTMENT" [ref=f34e1508]
+              - columnheader "DATE SUBMITTED" [ref=f34e1509]
+              - columnheader "ASSIGNED OFFICER" [ref=f34e1510]
+              - columnheader "STATUS" [ref=f34e1511]
+              - columnheader "ACTION" [ref=f34e1512]
+          - rowgroup [ref=f34e1513]:
+            - button "View evaluation for eaec1f1d-cc82-47e4-9c2d-2d393d52b5a8, Maria Santos" [ref=f34e1514] [cursor=pointer]:
+              - cell [ref=f34e1515]:
+                - checkbox "Select eaec1f1d-cc82-47e4-9c2d-2d393d52b5a8" [ref=f34e1516]
+              - cell "eaec1f1d-cc82-47e4-9c2d-2d393d52b5a8" [ref=f34e1517]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f34e1518]:
+                - generic [ref=f34e1519]:
+                  - generic [ref=f34e1520]: MS
+                  - generic [ref=f34e1522]:
+                    - generic "Maria Santos" [ref=f34e1523]
+                    - generic "Santos Sari-Sari Store" [ref=f34e1524]
+              - cell "0" [ref=f34e1525]
+              - cell "Fencing Permit" [ref=f34e1526]
+              - cell "Office of the Municipal Engineer / Building Official" [ref=f34e1527]
+              - cell "2026-09-13" [ref=f34e1528]
+              - cell "—" [ref=f34e1529]
+              - cell "Under Review" [ref=f34e1530]
+              - cell [ref=f34e1532]:
+                - generic [ref=f34e1533]:
+                  - button "Review application eaec1f1d-cc82-47e4-9c2d-2d393d52b5a8" [ref=f34e1534]: Review
+                  - button "More actions for application eaec1f1d-cc82-47e4-9c2d-2d393d52b5a8" [ref=f34e1536]
+            - button "View evaluation for ce1c8013-90fb-4df7-84f1-91668d2c4a7a, Maria Santos" [ref=f34e1542] [cursor=pointer]:
+              - cell [ref=f34e1543]:
+                - checkbox "Select ce1c8013-90fb-4df7-84f1-91668d2c4a7a" [ref=f34e1544]
+              - cell "ce1c8013-90fb-4df7-84f1-91668d2c4a7a" [ref=f34e1545]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f34e1546]:
+                - generic [ref=f34e1547]:
+                  - generic [ref=f34e1548]: MS
+                  - generic [ref=f34e1550]:
+                    - generic "Maria Santos" [ref=f34e1551]
+                    - generic "Santos Sari-Sari Store" [ref=f34e1552]
+              - cell "0" [ref=f34e1553]
+              - cell "Fencing Permit" [ref=f34e1554]
+              - cell "Office of the Municipal Engineer / Building Official" [ref=f34e1555]
+              - cell "2026-09-13" [ref=f34e1556]
+              - cell "—" [ref=f34e1557]
+              - cell "Under Review" [ref=f34e1558]
+              - cell [ref=f34e1560]:
+                - generic [ref=f34e1561]:
+                  - button "Review application ce1c8013-90fb-4df7-84f1-91668d2c4a7a" [ref=f34e1562]: Review
+                  - button "More actions for application ce1c8013-90fb-4df7-84f1-91668d2c4a7a" [ref=f34e1564]
+        - navigation "Pagination" [ref=f34e1571]:
+          - generic [ref=f34e1572]: Showing 1-2 from 2
+          - generic [ref=f34e1573]:
+            - button "First page" [disabled] [ref=f34e1574]
+            - button "Page 1" [ref=f34e1579] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f34e1580]

@@ -1,0 +1,269 @@
+- generic [ref=f1e4996]:
+  - complementary [ref=f1e4998]:
+    - generic [ref=f1e4999]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e5001]
+      - generic [ref=f1e5002]: E-BPCO
+    - navigation [ref=f1e5003]:
+      - link "Dashboard" [ref=f1e5006] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e5012]:
+        - generic [ref=f1e5013]: Operations
+        - generic [ref=f1e5014]:
+          - link "Applications" [ref=f1e5015] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e5021] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f1e5026] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e5033] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e5040]:
+        - generic [ref=f1e5041]: Administration
+        - generic [ref=f1e5042]:
+          - link "Businesses" [ref=f1e5043] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f1e5049] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e5055] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e5062] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e5071] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [active] [ref=f1e5077] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e5083] [cursor=pointer]
+  - main [ref=f1e5089]:
+    - generic [ref=f1e7997]:
+      - generic "System Logs" [ref=f1e7998]:
+        - generic [ref=f1e7999]:
+          - heading "System Logs" [level=1] [ref=f1e8000]
+          - generic [ref=f1e8001]:
+            - generic [ref=f1e8002]:
+              - generic [ref=f1e8007]: Search
+              - textbox "Search" [ref=f1e8008]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f1e8010] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f1e8016] [cursor=pointer]:
+              - generic [ref=f1e8017]: Q
+              - generic [ref=f1e8021]:
+                - generic [ref=f1e8022]: QA@lguids.com.ph
+                - generic [ref=f1e8023]: Super Admin
+      - generic [ref=f1e8027]:
+        - generic [ref=f1e8029]:
+          - generic [ref=f1e8031]:
+            - paragraph [ref=f1e8032]: Total Logs (Today)
+            - paragraph [ref=f1e8033]: "30"
+          - generic [ref=f1e8034]: All activity logged today
+        - generic [ref=f1e8038]:
+          - generic [ref=f1e8040]:
+            - paragraph [ref=f1e8041]: Errors (Critical)
+            - paragraph [ref=f1e8042]: "0"
+          - generic [ref=f1e8043]: 0% of today's logs
+        - generic [ref=f1e8047]:
+          - generic [ref=f1e8049]:
+            - paragraph [ref=f1e8050]: Warnings (Today)
+            - paragraph [ref=f1e8051]: "0"
+          - generic [ref=f1e8052]: 0% of today's logs
+        - generic [ref=f1e8056]:
+          - generic [ref=f1e8058]:
+            - paragraph [ref=f1e8059]: Successful Actions
+            - paragraph [ref=f1e8060]: "30"
+          - generic [ref=f1e8061]: 100% of today's logs
+        - generic [ref=f1e8065]:
+          - generic [ref=f1e8067]:
+            - paragraph [ref=f1e8068]: Active Sessions
+            - paragraph [ref=f1e8069]: "20"
+          - generic [ref=f1e8070]: Across All Tenants
+      - generic [ref=f1e8073]:
+        - navigation [ref=f1e8074]:
+          - button [ref=f1e8075] [cursor=pointer]
+          - button [ref=f1e8080] [cursor=pointer]
+          - button [ref=f1e8087] [cursor=pointer]
+          - button [ref=f1e8092] [cursor=pointer]
+          - button [ref=f1e8096] [cursor=pointer]
+        - note [ref=f1e8101]:
+          - generic [ref=f1e8106]: Live activity from the server's audit trail — every row is a genuine action taken in Applications, Payments, or Permit Release. Showing 30 entries.
+        - generic [ref=f1e8107]:
+          - generic [ref=f1e8108]: Sep 13, 2026
+          - combobox "Filter by tenant" [ref=f1e8113] [cursor=pointer]:
+            - option "All Tenants" [selected]
+            - option "Santos Sari-Sari Store"
+            - option "System"
+            - option "Test Sari-Sari Store QA"
+          - combobox "Status filter" [ref=f1e8114] [cursor=pointer]:
+            - option "All Statuses" [selected]
+            - option "Active"
+            - option "Inactive"
+          - combobox "Severity filter" [ref=f1e8115] [cursor=pointer]:
+            - option "All Severity" [selected]
+            - option "Critical"
+            - option "Warning"
+            - option "Info"
+          - generic [ref=f1e8116]:
+            - generic [ref=f1e8117]: Live Stream
+            - switch "Live Stream" [checked] [ref=f1e8118] [cursor=pointer]
+          - button [disabled] [ref=f1e8120]
+          - button [ref=f1e8124] [cursor=pointer]
+        - table [ref=f1e8130]:
+          - rowgroup [ref=f1e8131]:
+            - row [ref=f1e8132]:
+              - columnheader "Time Stamp" [ref=f1e8133]
+              - columnheader "Event type" [ref=f1e8134]
+              - columnheader "Description" [ref=f1e8135]
+              - columnheader "User/Action" [ref=f1e8136]
+              - columnheader "Tenant" [ref=f1e8137]
+              - columnheader "Module" [ref=f1e8138]
+              - columnheader "IP Address" [ref=f1e8139]
+              - columnheader "Status" [ref=f1e8140]
+              - columnheader "Severity" [ref=f1e8141]
+              - columnheader "ACTION" [ref=f1e8142]
+          - rowgroup [ref=f1e8143]:
+            - row [ref=f1e8144] [cursor=pointer]:
+              - cell "Sep 13, 2026, 10:19 PM" [ref=f1e8145]
+              - cell "Staff Account Enabled" [ref=f1e8146]
+              - cell "staff.account.enabled" [ref=f1e8147]
+              - cell "administrator" [ref=f1e8148]
+              - cell "System" [ref=f1e8149]
+              - cell "User Management" [ref=f1e8150]
+              - cell "127.0.0.1" [ref=f1e8151]
+              - cell "Active" [ref=f1e8152]
+              - cell "Info" [ref=f1e8154]
+              - cell [ref=f1e8156]:
+                - generic [ref=f1e8157]:
+                  - button "View" [ref=f1e8158]
+                  - button "Edit" [ref=f1e8163]
+            - row [ref=f1e8167] [cursor=pointer]:
+              - cell "Sep 13, 2026, 10:19 PM" [ref=f1e8168]
+              - cell "Staff Account Disabled" [ref=f1e8169]
+              - cell "staff.account.disabled" [ref=f1e8170]
+              - cell "administrator" [ref=f1e8171]
+              - cell "System" [ref=f1e8172]
+              - cell "User Management" [ref=f1e8173]
+              - cell "127.0.0.1" [ref=f1e8174]
+              - cell "Active" [ref=f1e8175]
+              - cell "Info" [ref=f1e8177]
+              - cell [ref=f1e8179]:
+                - generic [ref=f1e8180]:
+                  - button "View" [ref=f1e8181]
+                  - button "Edit" [ref=f1e8186]
+            - row [ref=f1e8190] [cursor=pointer]:
+              - cell "Sep 13, 2026, 10:07 PM" [ref=f1e8191]
+              - cell "Requirements Replaced" [ref=f1e8192]
+              - cell "requirements.replaced" [ref=f1e8193]
+              - cell "staff" [ref=f1e8194]
+              - cell "System" [ref=f1e8195]
+              - cell "Applications" [ref=f1e8196]
+              - cell "127.0.0.1" [ref=f1e8197]
+              - cell "Active" [ref=f1e8198]
+              - cell "Info" [ref=f1e8200]
+              - cell [ref=f1e8202]:
+                - generic [ref=f1e8203]:
+                  - button "View" [ref=f1e8204]
+                  - button "Edit" [ref=f1e8209]
+            - row [ref=f1e8213] [cursor=pointer]:
+              - cell "Sep 13, 2026, 10:06 PM" [ref=f1e8214]
+              - cell "Requirements Replaced" [ref=f1e8215]
+              - cell "requirements.replaced" [ref=f1e8216]
+              - cell "staff" [ref=f1e8217]
+              - cell "System" [ref=f1e8218]
+              - cell "Applications" [ref=f1e8219]
+              - cell "127.0.0.1" [ref=f1e8220]
+              - cell "Active" [ref=f1e8221]
+              - cell "Info" [ref=f1e8223]
+              - cell [ref=f1e8225]:
+                - generic [ref=f1e8226]:
+                  - button "View" [ref=f1e8227]
+                  - button "Edit" [ref=f1e8232]
+            - row [ref=f1e8236] [cursor=pointer]:
+              - cell "Sep 13, 2026, 10:05 PM" [ref=f1e8237]
+              - cell "Requirements Replaced" [ref=f1e8238]
+              - cell "requirements.replaced" [ref=f1e8239]
+              - cell "staff" [ref=f1e8240]
+              - cell "System" [ref=f1e8241]
+              - cell "Applications" [ref=f1e8242]
+              - cell "127.0.0.1" [ref=f1e8243]
+              - cell "Active" [ref=f1e8244]
+              - cell "Info" [ref=f1e8246]
+              - cell [ref=f1e8248]:
+                - generic [ref=f1e8249]:
+                  - button "View" [ref=f1e8250]
+                  - button "Edit" [ref=f1e8255]
+            - row [ref=f1e8259] [cursor=pointer]:
+              - cell "Sep 13, 2026, 10:04 PM" [ref=f1e8260]
+              - cell "Requirements Replaced" [ref=f1e8261]
+              - cell "requirements.replaced" [ref=f1e8262]
+              - cell "staff" [ref=f1e8263]
+              - cell "System" [ref=f1e8264]
+              - cell "Applications" [ref=f1e8265]
+              - cell "127.0.0.1" [ref=f1e8266]
+              - cell "Active" [ref=f1e8267]
+              - cell "Info" [ref=f1e8269]
+              - cell [ref=f1e8271]:
+                - generic [ref=f1e8272]:
+                  - button "View" [ref=f1e8273]
+                  - button "Edit" [ref=f1e8278]
+            - row [ref=f1e8282] [cursor=pointer]:
+              - cell "Sep 13, 2026, 10:01 PM" [ref=f1e8283]
+              - cell "Assessment Submitted" [ref=f1e8284]
+              - cell "assessment.submitted" [ref=f1e8285]
+              - cell "system" [ref=f1e8286]
+              - cell "System" [ref=f1e8287]
+              - cell "Billing" [ref=f1e8288]
+              - cell "127.0.0.1" [ref=f1e8289]
+              - cell "Active" [ref=f1e8290]
+              - cell "Info" [ref=f1e8292]
+              - cell [ref=f1e8294]:
+                - generic [ref=f1e8295]:
+                  - button "View" [ref=f1e8296]
+                  - button "Edit" [ref=f1e8301]
+            - row [ref=f1e8305] [cursor=pointer]:
+              - cell "Sep 13, 2026, 10:01 PM" [ref=f1e8306]
+              - cell "Assessment Line Changed" [ref=f1e8307]
+              - cell "assessment.line-changed" [ref=f1e8308]
+              - cell "system" [ref=f1e8309]
+              - cell "System" [ref=f1e8310]
+              - cell "Billing" [ref=f1e8311]
+              - cell "127.0.0.1" [ref=f1e8312]
+              - cell "Active" [ref=f1e8313]
+              - cell "Info" [ref=f1e8315]
+              - cell [ref=f1e8317]:
+                - generic [ref=f1e8318]:
+                  - button "View" [ref=f1e8319]
+                  - button "Edit" [ref=f1e8324]
+            - row [ref=f1e8328] [cursor=pointer]:
+              - cell "Sep 13, 2026, 10:00 PM" [ref=f1e8329]
+              - cell "Assessment Drafted" [ref=f1e8330]
+              - cell "assessment.drafted" [ref=f1e8331]
+              - cell "system" [ref=f1e8332]
+              - cell "System" [ref=f1e8333]
+              - cell "Billing" [ref=f1e8334]
+              - cell "127.0.0.1" [ref=f1e8335]
+              - cell "Active" [ref=f1e8336]
+              - cell "Info" [ref=f1e8338]
+              - cell [ref=f1e8340]:
+                - generic [ref=f1e8341]:
+                  - button "View" [ref=f1e8342]
+                  - button "Edit" [ref=f1e8347]
+            - row [ref=f1e8351] [cursor=pointer]:
+              - cell "Sep 13, 2026, 9:59 PM" [ref=f1e8352]
+              - cell "Fee Schedule Published" [ref=f1e8353]
+              - cell "fee-schedule.published" [ref=f1e8354]
+              - cell "system" [ref=f1e8355]
+              - cell "System" [ref=f1e8356]
+              - cell "Billing" [ref=f1e8357]
+              - cell "127.0.0.1" [ref=f1e8358]
+              - cell "Active" [ref=f1e8359]
+              - cell "Info" [ref=f1e8361]
+              - cell [ref=f1e8363]:
+                - generic [ref=f1e8364]:
+                  - button "View" [ref=f1e8365]
+                  - button "Edit" [ref=f1e8370]
+        - navigation "Pagination" [ref=f1e8375]:
+          - generic [ref=f1e8376]: Showing 1-10 from 30
+          - generic [ref=f1e8377]:
+            - button "First page" [disabled] [ref=f1e8378]
+            - button "Page 1" [ref=f1e8383] [cursor=pointer]: "1"
+            - button "Page 2" [ref=f1e8384] [cursor=pointer]: "2"
+            - button "Page 3" [ref=f1e8385] [cursor=pointer]: "3"
+            - button "Last page" [ref=f1e8386] [cursor=pointer]

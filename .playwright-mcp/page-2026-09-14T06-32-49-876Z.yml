@@ -1,0 +1,246 @@
+- generic [ref=f46e61]:
+  - complementary [ref=f46e63]:
+    - generic [ref=f46e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f46e66]
+      - generic [ref=f46e67]: E-BPCO
+    - navigation [ref=f46e68]:
+      - link "Dashboard" [ref=f46e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f46e77]:
+        - generic [ref=f46e78]: Operations
+        - generic [ref=f46e79]:
+          - link "Applications" [ref=f46e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f46e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f46e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f46e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f46e105]:
+        - generic [ref=f46e106]: Administration
+        - generic [ref=f46e107]:
+          - link "Businesses" [ref=f46e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f46e114] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f46e120] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f46e127] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f46e136] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [active] [ref=f46e142] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f46e148] [cursor=pointer]
+  - main [ref=f46e154]:
+    - generic [ref=f46e1261]:
+      - generic "System Logs" [ref=f46e1262]:
+        - generic [ref=f46e1263]:
+          - heading "System Logs" [level=1] [ref=f46e1264]
+          - generic [ref=f46e1265]:
+            - generic [ref=f46e1266]:
+              - generic [ref=f46e1271]: Search
+              - textbox "Search" [ref=f46e1272]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f46e1274] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f46e1280] [cursor=pointer]:
+              - generic [ref=f46e1281]: Q
+              - generic [ref=f46e1285]:
+                - generic [ref=f46e1286]: QA@lguids.com.ph
+                - generic [ref=f46e1287]: Super Admin
+      - generic [ref=f46e1291]:
+        - generic [ref=f46e1293]:
+          - generic [ref=f46e1295]:
+            - paragraph [ref=f46e1296]: Total Logs (Today)
+            - paragraph [ref=f46e1297]: "14"
+          - generic [ref=f46e1298]: All activity logged today
+        - generic [ref=f46e1302]:
+          - generic [ref=f46e1304]:
+            - paragraph [ref=f46e1305]: Errors (Critical)
+            - paragraph [ref=f46e1306]: "0"
+          - generic [ref=f46e1307]: 0% of today's logs
+        - generic [ref=f46e1311]:
+          - generic [ref=f46e1313]:
+            - paragraph [ref=f46e1314]: Warnings (Today)
+            - paragraph [ref=f46e1315]: "0"
+          - generic [ref=f46e1316]: 0% of today's logs
+        - generic [ref=f46e1320]:
+          - generic [ref=f46e1322]:
+            - paragraph [ref=f46e1323]: Successful Actions
+            - paragraph [ref=f46e1324]: "14"
+          - generic [ref=f46e1325]: 100% of today's logs
+        - generic [ref=f46e1329]:
+          - generic [ref=f46e1331]:
+            - paragraph [ref=f46e1332]: Active Sessions
+            - paragraph [ref=f46e1333]: "20"
+          - generic [ref=f46e1334]: Across All Tenants
+      - generic [ref=f46e1337]:
+        - navigation [ref=f46e1338]:
+          - button [ref=f46e1339] [cursor=pointer]
+          - button [ref=f46e1344] [cursor=pointer]
+          - button [ref=f46e1351] [cursor=pointer]
+          - button [ref=f46e1356] [cursor=pointer]
+          - button [ref=f46e1360] [cursor=pointer]
+        - note [ref=f46e1365]:
+          - generic [ref=f46e1370]: Live activity from the server's audit trail — every row is a genuine action taken in Applications, Payments, or Permit Release. Showing 14 entries.
+        - generic [ref=f46e1371]:
+          - generic [ref=f46e1372]: Sep 14, 2026
+          - combobox "Filter by tenant" [ref=f46e1377] [cursor=pointer]:
+            - option "All Tenants" [selected]
+            - option "System"
+          - combobox "Status filter" [ref=f46e1378] [cursor=pointer]:
+            - option "All Statuses" [selected]
+            - option "Active"
+            - option "Inactive"
+          - combobox "Severity filter" [ref=f46e1379] [cursor=pointer]:
+            - option "All Severity" [selected]
+            - option "Critical"
+            - option "Warning"
+            - option "Info"
+          - generic [ref=f46e1380]:
+            - generic [ref=f46e1381]: Live Stream
+            - switch "Live Stream" [checked] [ref=f46e1382] [cursor=pointer]
+          - button [disabled] [ref=f46e1384]
+          - button [ref=f46e1388] [cursor=pointer]
+        - table [ref=f46e1394]:
+          - rowgroup [ref=f46e1395]:
+            - row [ref=f46e1396]:
+              - columnheader "Time Stamp" [ref=f46e1397]
+              - columnheader "Event type" [ref=f46e1398]
+              - columnheader "Description" [ref=f46e1399]
+              - columnheader "User/Action" [ref=f46e1400]
+              - columnheader "Tenant" [ref=f46e1401]
+              - columnheader "Module" [ref=f46e1402]
+              - columnheader "IP Address" [ref=f46e1403]
+              - columnheader "Status" [ref=f46e1404]
+              - columnheader "Severity" [ref=f46e1405]
+              - columnheader "ACTION" [ref=f46e1406]
+          - rowgroup [ref=f46e1407]:
+            - row [ref=f46e1408] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:31 PM" [ref=f46e1409]
+              - cell "Mfa Enrolled" [ref=f46e1410]
+              - cell "mfa.enrolled" [ref=f46e1411]
+              - cell "system" [ref=f46e1412]
+              - cell "System" [ref=f46e1413]
+              - cell "User Management" [ref=f46e1414]
+              - cell "—" [ref=f46e1415]
+              - cell "Active" [ref=f46e1416]
+              - cell "Info" [ref=f46e1418]
+              - cell [ref=f46e1420]:
+                - button "View" [ref=f46e1422]
+            - row [ref=f46e1427] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:31 PM" [ref=f46e1428]
+              - cell "Mfa Enrolment Started" [ref=f46e1429]
+              - cell "mfa.enrolment-started" [ref=f46e1430]
+              - cell "system" [ref=f46e1431]
+              - cell "System" [ref=f46e1432]
+              - cell "User Management" [ref=f46e1433]
+              - cell "—" [ref=f46e1434]
+              - cell "Active" [ref=f46e1435]
+              - cell "Info" [ref=f46e1437]
+              - cell [ref=f46e1439]:
+                - button "View" [ref=f46e1441]
+            - row [ref=f46e1446] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:31 PM" [ref=f46e1447]
+              - cell "Mfa Enrolled" [ref=f46e1448]
+              - cell "mfa.enrolled" [ref=f46e1449]
+              - cell "system" [ref=f46e1450]
+              - cell "System" [ref=f46e1451]
+              - cell "User Management" [ref=f46e1452]
+              - cell "—" [ref=f46e1453]
+              - cell "Active" [ref=f46e1454]
+              - cell "Info" [ref=f46e1456]
+              - cell [ref=f46e1458]:
+                - button "View" [ref=f46e1460]
+            - row [ref=f46e1465] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:31 PM" [ref=f46e1466]
+              - cell "Mfa Enrolment Started" [ref=f46e1467]
+              - cell "mfa.enrolment-started" [ref=f46e1468]
+              - cell "system" [ref=f46e1469]
+              - cell "System" [ref=f46e1470]
+              - cell "User Management" [ref=f46e1471]
+              - cell "—" [ref=f46e1472]
+              - cell "Active" [ref=f46e1473]
+              - cell "Info" [ref=f46e1475]
+              - cell [ref=f46e1477]:
+                - button "View" [ref=f46e1479]
+            - row [ref=f46e1484] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:31 PM" [ref=f46e1485]
+              - cell "Mfa Enrolled" [ref=f46e1486]
+              - cell "mfa.enrolled" [ref=f46e1487]
+              - cell "system" [ref=f46e1488]
+              - cell "System" [ref=f46e1489]
+              - cell "User Management" [ref=f46e1490]
+              - cell "—" [ref=f46e1491]
+              - cell "Active" [ref=f46e1492]
+              - cell "Info" [ref=f46e1494]
+              - cell [ref=f46e1496]:
+                - button "View" [ref=f46e1498]
+            - row [ref=f46e1503] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:31 PM" [ref=f46e1504]
+              - cell "Mfa Enrolment Started" [ref=f46e1505]
+              - cell "mfa.enrolment-started" [ref=f46e1506]
+              - cell "system" [ref=f46e1507]
+              - cell "System" [ref=f46e1508]
+              - cell "User Management" [ref=f46e1509]
+              - cell "—" [ref=f46e1510]
+              - cell "Active" [ref=f46e1511]
+              - cell "Info" [ref=f46e1513]
+              - cell [ref=f46e1515]:
+                - button "View" [ref=f46e1517]
+            - row [ref=f46e1522] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:31 PM" [ref=f46e1523]
+              - cell "Mfa Enrolled" [ref=f46e1524]
+              - cell "mfa.enrolled" [ref=f46e1525]
+              - cell "system" [ref=f46e1526]
+              - cell "System" [ref=f46e1527]
+              - cell "User Management" [ref=f46e1528]
+              - cell "—" [ref=f46e1529]
+              - cell "Active" [ref=f46e1530]
+              - cell "Info" [ref=f46e1532]
+              - cell [ref=f46e1534]:
+                - button "View" [ref=f46e1536]
+            - row [ref=f46e1541] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:31 PM" [ref=f46e1542]
+              - cell "Mfa Enrolment Started" [ref=f46e1543]
+              - cell "mfa.enrolment-started" [ref=f46e1544]
+              - cell "system" [ref=f46e1545]
+              - cell "System" [ref=f46e1546]
+              - cell "User Management" [ref=f46e1547]
+              - cell "—" [ref=f46e1548]
+              - cell "Active" [ref=f46e1549]
+              - cell "Info" [ref=f46e1551]
+              - cell [ref=f46e1553]:
+                - button "View" [ref=f46e1555]
+            - row [ref=f46e1560] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:31 PM" [ref=f46e1561]
+              - cell "Mfa Enrolled" [ref=f46e1562]
+              - cell "mfa.enrolled" [ref=f46e1563]
+              - cell "system" [ref=f46e1564]
+              - cell "System" [ref=f46e1565]
+              - cell "User Management" [ref=f46e1566]
+              - cell "—" [ref=f46e1567]
+              - cell "Active" [ref=f46e1568]
+              - cell "Info" [ref=f46e1570]
+              - cell [ref=f46e1572]:
+                - button "View" [ref=f46e1574]
+            - row [ref=f46e1579] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:31 PM" [ref=f46e1580]
+              - cell "Mfa Enrolment Started" [ref=f46e1581]
+              - cell "mfa.enrolment-started" [ref=f46e1582]
+              - cell "system" [ref=f46e1583]
+              - cell "System" [ref=f46e1584]
+              - cell "User Management" [ref=f46e1585]
+              - cell "—" [ref=f46e1586]
+              - cell "Active" [ref=f46e1587]
+              - cell "Info" [ref=f46e1589]
+              - cell [ref=f46e1591]:
+                - button "View" [ref=f46e1593]
+        - navigation "Pagination" [ref=f46e1599]:
+          - generic [ref=f46e1600]: Showing 1-10 from 14
+          - generic [ref=f46e1601]:
+            - button "First page" [disabled] [ref=f46e1602]
+            - button "Page 1" [ref=f46e1607] [cursor=pointer]: "1"
+            - button "Page 2" [ref=f46e1608] [cursor=pointer]: "2"
+            - button "Last page" [ref=f46e1609] [cursor=pointer]

@@ -1,0 +1,180 @@
+- generic [ref=f3e48]:
+  - complementary [ref=f3e50]:
+    - generic [ref=f3e51]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f3e53]
+      - generic [ref=f3e54]: E-BPCO
+    - navigation [ref=f3e55]:
+      - link "Dashboard" [ref=f3e58] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f3e64]:
+        - generic [ref=f3e65]: Operations
+        - generic [ref=f3e66]:
+          - link "Applications" [ref=f3e67] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f3e73] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f3e78] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f3e85] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f3e92]:
+        - generic [ref=f3e93]: Administration
+        - generic [ref=f3e94]:
+          - link "Businesses" [ref=f3e95] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f3e101] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f3e107] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f3e114] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f3e123] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f3e129] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f3e135] [cursor=pointer]
+  - main [ref=f3e141]:
+    - generic [ref=f3e532]:
+      - generic "User & Roles" [ref=f3e533]:
+        - generic [ref=f3e534]:
+          - heading "User & Roles" [level=1] [ref=f3e535]
+          - generic [ref=f3e536]:
+            - button "Notifications" [ref=f3e538] [cursor=pointer]
+            - button "E evaluator@lgu.gov.ph Super Admin" [ref=f3e544] [cursor=pointer]:
+              - generic [ref=f3e545]: E
+              - generic [ref=f3e549]:
+                - generic [ref=f3e550]: evaluator@lgu.gov.ph
+                - generic [ref=f3e551]: Super Admin
+      - note [ref=f3e555]:
+        - generic [ref=f3e560]:
+          - text: This page is a UI prototype — creating a user or editing a role's permissions here does not change real access control. The system's actual sign-in roles and action permissions are defined in code (
+          - code [ref=f3e561]: core/session/permissions.ts
+          - text: ) and are not editable from here yet.
+      - generic [ref=f3e562]:
+        - generic [ref=f3e564]:
+          - generic [ref=f3e566]:
+            - paragraph [ref=f3e567]: Total Users
+            - paragraph [ref=f3e568]: "0"
+          - generic [ref=f3e569]: Across All Departments
+        - generic [ref=f3e573]:
+          - generic [ref=f3e575]:
+            - paragraph [ref=f3e576]: Active Users
+            - paragraph [ref=f3e577]: —
+          - generic [ref=f3e578]: Status not recorded
+        - generic [ref=f3e582]:
+          - generic [ref=f3e584]:
+            - paragraph [ref=f3e585]: Pending Invites
+            - paragraph [ref=f3e586]: —
+          - generic [ref=f3e587]: Awaiting acceptance
+        - generic [ref=f3e591]:
+          - generic [ref=f3e593]:
+            - paragraph [ref=f3e594]: Roles Defined
+            - paragraph [ref=f3e595]: "9"
+          - generic [ref=f3e596]: Across the platform
+      - generic [ref=f3e599]:
+        - navigation [ref=f3e600]:
+          - button [ref=f3e601] [cursor=pointer]
+          - button [active] [ref=f3e606] [cursor=pointer]
+        - generic [ref=f3e610]:
+          - generic [ref=f3e611]:
+            - generic [ref=f3e617]:
+              - heading "Super Admin" [level=3] [ref=f3e618]
+              - text: 3 users
+            - paragraph [ref=f3e619]: Full platform access across LGU Castilla and all its modules.
+            - generic [ref=f3e620]:
+              - generic [ref=f3e621]: All Modules
+              - generic [ref=f3e622]: User Management
+              - generic [ref=f3e623]: System Settings
+            - generic [ref=f3e624]:
+              - button [ref=f3e625] [cursor=pointer]
+              - button [ref=f3e629] [cursor=pointer]
+          - generic [ref=f3e635]:
+            - generic [ref=f3e641]:
+              - heading "Tenant Admin" [level=3] [ref=f3e642]
+              - text: 12 users
+            - paragraph [ref=f3e643]: Manages tenant (business owner / applicant) accounts, verification, and profile settings.
+            - generic [ref=f3e644]:
+              - generic [ref=f3e645]: Tenant Settings
+              - generic [ref=f3e646]: User Management
+              - generic [ref=f3e647]: Reports
+            - generic [ref=f3e648]:
+              - button [ref=f3e649] [cursor=pointer]
+              - button [ref=f3e653] [cursor=pointer]
+          - generic [ref=f3e659]:
+            - generic [ref=f3e665]:
+              - heading "Initial Evaluator" [level=3] [ref=f3e666]
+              - text: 18 users
+            - paragraph [ref=f3e667]: Performs first-level document verification and checklist review.
+            - generic [ref=f3e668]:
+              - generic [ref=f3e669]: View Applications
+              - generic [ref=f3e670]: Initial Evaluation
+            - generic [ref=f3e671]:
+              - button [ref=f3e672] [cursor=pointer]
+              - button [ref=f3e676] [cursor=pointer]
+          - generic [ref=f3e682]:
+            - generic [ref=f3e688]:
+              - heading "Zoning Evaluator" [level=3] [ref=f3e689]
+              - text: 14 users
+            - paragraph [ref=f3e690]: Reviews land-use classification and zoning compliance.
+            - generic [ref=f3e691]:
+              - generic [ref=f3e692]: View Applications
+              - generic [ref=f3e693]: Zoning Evaluation
+            - generic [ref=f3e694]:
+              - button [ref=f3e695] [cursor=pointer]
+              - button [ref=f3e699] [cursor=pointer]
+          - generic [ref=f3e705]:
+            - generic [ref=f3e711]:
+              - heading "Fire Safety Evaluator" [level=3] [ref=f3e712]
+              - text: 9 users
+            - paragraph [ref=f3e713]: Validates Bureau of Fire Protection compliance and inspection reports.
+            - generic [ref=f3e714]:
+              - generic [ref=f3e715]: View Applications
+              - generic [ref=f3e716]: Fire Safety Evaluation
+            - generic [ref=f3e717]:
+              - button [ref=f3e718] [cursor=pointer]
+              - button [ref=f3e722] [cursor=pointer]
+          - generic [ref=f3e728]:
+            - generic [ref=f3e734]:
+              - heading "OBO Evaluator" [level=3] [ref=f3e735]
+              - text: 11 users
+            - paragraph [ref=f3e736]: Office of the Building Official engineering review and sign-off.
+            - generic [ref=f3e737]:
+              - generic [ref=f3e738]: View Applications
+              - generic [ref=f3e739]: OBO Evaluation
+              - generic [ref=f3e740]: Final Approval
+            - generic [ref=f3e741]:
+              - button [ref=f3e742] [cursor=pointer]
+              - button [ref=f3e746] [cursor=pointer]
+          - generic [ref=f3e752]:
+            - generic [ref=f3e758]:
+              - heading "Cashier" [level=3] [ref=f3e759]
+              - text: 7 users
+            - paragraph [ref=f3e760]: Processes application fee payments and issues official receipts.
+            - generic [ref=f3e761]:
+              - generic [ref=f3e762]: View Applications
+              - generic [ref=f3e763]: Payment Processing
+            - generic [ref=f3e764]:
+              - button [ref=f3e765] [cursor=pointer]
+              - button [ref=f3e769] [cursor=pointer]
+          - generic [ref=f3e775]:
+            - generic [ref=f3e781]:
+              - heading "Releasing Officer" [level=3] [ref=f3e782]
+              - text: 5 users
+            - paragraph [ref=f3e783]: Generates and releases approved permit documents to applicants.
+            - generic [ref=f3e784]:
+              - generic [ref=f3e785]: View Applications
+              - generic [ref=f3e786]: Document Release
+            - generic [ref=f3e787]:
+              - button [ref=f3e788] [cursor=pointer]
+              - button [ref=f3e792] [cursor=pointer]
+          - generic [ref=f3e798]:
+            - generic [ref=f3e804]:
+              - heading "Viewer / Auditor" [level=3] [ref=f3e805]
+              - text: 6 users
+            - paragraph [ref=f3e806]: Read-only access across applications and reports for oversight.
+            - generic [ref=f3e807]:
+              - generic [ref=f3e808]: View Applications
+              - generic [ref=f3e809]: View Reports
+            - generic [ref=f3e810]:
+              - button [ref=f3e811] [cursor=pointer]
+              - button [ref=f3e815] [cursor=pointer]

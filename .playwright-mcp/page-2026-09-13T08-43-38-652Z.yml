@@ -1,0 +1,75 @@
+- generic [ref=f35e1577]:
+  - complementary [ref=f35e1579]:
+    - generic [ref=f35e1580]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f35e1582]
+      - generic [ref=f35e1583]: E-BPCO
+    - navigation [ref=f35e1584]:
+      - link "Dashboard" [ref=f35e1587] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f35e1593]:
+        - generic [ref=f35e1594]: Operations
+        - generic [ref=f35e1595]:
+          - link "Applications" [ref=f35e1596] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f35e1602] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f35e1607] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f35e1614] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f35e1621]:
+        - generic [ref=f35e1622]: Administration
+        - generic [ref=f35e1623]:
+          - link "Businesses" [ref=f35e1624] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [active] [ref=f35e1630] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f35e1636] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f35e1643] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f35e1652] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f35e1658] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f35e1664] [cursor=pointer]
+  - main [ref=f35e1670]:
+    - generic [ref=f35e2136]:
+      - generic "Access Requests" [ref=f35e2137]:
+        - generic [ref=f35e2138]:
+          - heading "Access Requests" [level=1] [ref=f35e2139]
+          - generic [ref=f35e2140]:
+            - button "Notifications" [ref=f35e2142] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f35e2148] [cursor=pointer]:
+              - generic [ref=f35e2149]: Q
+              - generic [ref=f35e2153]:
+                - generic [ref=f35e2154]: QA@lguids.com.ph
+                - generic [ref=f35e2155]: Super Admin
+      - generic [ref=f35e2159]:
+        - generic [ref=f35e2160]:
+          - generic [ref=f35e2161]:
+            - heading "Awaiting your approval" [level=2] [ref=f35e2162]
+            - paragraph [ref=f35e2163]: Nobody can sign themselves up. Approving a request creates the account and assigns the forms and level you choose.
+          - button [ref=f35e2164] [cursor=pointer]
+        - paragraph [ref=f35e2171]: 1 request waiting.
+        - list [ref=f35e2172]:
+          - listitem [ref=f35e2173]:
+            - generic [ref=f35e2174]:
+              - generic [ref=f35e2175]:
+                - heading "Second Assessor" [level=3] [ref=f35e2176]
+                - paragraph [ref=f35e2177]: Municipal Treasurer's Office — Assessor
+                - paragraph [ref=f35e2178]: assessor2@lgu.gov.ph · 09171234599
+              - generic [ref=f35e2179]: Raised today
+            - generic [ref=f35e2180]:
+              - term [ref=f35e2181]: Requested level
+              - definition [ref=f35e2182]:
+                - generic [ref=f35e2183]: View and edit
+              - term [ref=f35e2184]: Forms requested
+              - definition [ref=f35e2185]:
+                - list [ref=f35e2186]:
+                  - listitem [ref=f35e2187]: Fencing Permit
+              - term [ref=f35e2188]: Reason given
+              - definition [ref=f35e2189]: "QA test: need a second assessor account to test cross-officer approval of a submitted assessment."
+            - generic [ref=f35e2190]:
+              - button "Reject" [ref=f35e2191] [cursor=pointer]
+              - button "Review and approve" [ref=f35e2192] [cursor=pointer]

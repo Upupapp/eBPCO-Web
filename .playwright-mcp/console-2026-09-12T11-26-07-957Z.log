@@ -1,0 +1,12 @@
+[     259ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943
+[  121607ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:4200/auth/token:0
+[  901788ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943
+[  908417ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943
+[ 1061645ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:4200/auth/token:0
+[ 1129423ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:4200/staff/applications/becf94a6-0cc7-43e9-8f5d-a6b2309a5b9d/evaluations:0
+[ 1447928ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943
+[ 1476693ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:4200/auth/token:0
+[ 3592065ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:4200/staff/applications?limit=100:0
+[ 3597363ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:4200/staff/applications?limit=100:0
+[ 8939724ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:4200/staff/applications?limit=100:0
+[10752182ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943

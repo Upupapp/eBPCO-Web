@@ -47,9 +47,10 @@
       </span>
     </div>
   } @else if (pendingCount() === 0) {
-    <p class="state-note">
-      No requests are waiting. The server was asked and answered.
-    </p>
+    <div class="state-note" role="status">
+      <app-icon name="info" [size]="16" />
+      <span>No requests are waiting. The server was asked and answered.</span>
+    </div>
   } @else {
     <p class="count-line">
       {{ pendingCount() }} request{{ pendingCount() === 1 ? '' : 's' }} waiting.

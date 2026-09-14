@@ -1,0 +1,167 @@
+- generic [ref=f34e56]:
+  - complementary [ref=f34e58]:
+    - generic [ref=f34e59]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f34e61]
+      - generic [ref=f34e62]: E-BPCO
+    - navigation [ref=f34e63]:
+      - link "Dashboard" [ref=f34e66] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f34e72]:
+        - generic [ref=f34e73]: Operations
+        - generic [ref=f34e74]:
+          - link "Applications" [ref=f34e75] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f34e81] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f34e86] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f34e93] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f34e100]:
+        - generic [ref=f34e101]: Administration
+        - generic [ref=f34e102]:
+          - link "Businesses" [ref=f34e103] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f34e109] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f34e115] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f34e122] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f34e131] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f34e137] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f34e143] [cursor=pointer]
+  - main [ref=f34e149]:
+    - generic [ref=f34e1206]:
+      - generic "Evaluations" [ref=f34e1207]:
+        - generic [ref=f34e1208]:
+          - heading "Evaluations" [level=1] [ref=f34e1209]
+          - generic [ref=f34e1210]:
+            - button "Notifications" [ref=f34e1212] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f34e1218] [cursor=pointer]:
+              - generic [ref=f34e1219]: Q
+              - generic [ref=f34e1223]:
+                - generic [ref=f34e1224]: QA@lguids.com.ph
+                - generic [ref=f34e1225]: Super Admin
+      - generic [ref=f34e1618]:
+        - heading "73a29e43-b2d7-44a3-9346-77a3280ba87b" [level=1] [ref=f34e1619]
+        - generic [ref=f34e1620]:
+          - generic [ref=f34e1621]: Revision Required
+          - button "Back to Returned" [ref=f34e1622] [cursor=pointer]
+      - generic [ref=f34e1623]:
+        - generic [ref=f34e1624]:
+          - generic [ref=f34e1625]: MS
+          - generic [ref=f34e1633]:
+            - heading "Maria Santos" [level=2] [ref=f34e1634]
+            - generic [ref=f34e1635]: Revision Required
+            - generic [ref=f34e1636]:
+              - generic [ref=f34e1637]:
+                - term [ref=f34e1638]: "Business / Project :"
+                - definition [ref=f34e1639]: Santos Sari-Sari Store
+              - generic [ref=f34e1640]:
+                - term [ref=f34e1641]: "Type :"
+                - definition [ref=f34e1642]: Fencing Permit
+              - generic [ref=f34e1643]:
+                - term [ref=f34e1644]: "Location :"
+                - definition [ref=f34e1645]: 50 Rizal Street, Poblacion
+              - generic [ref=f34e1646]:
+                - term [ref=f34e1647]: "Missing Documents :"
+                - definition [ref=f34e1648]: "5"
+              - generic [ref=f34e1649]:
+                - term [ref=f34e1650]: "Reviewing Department :"
+                - definition [ref=f34e1651]: Office of the Municipal Engineer / Building Official
+          - generic [ref=f34e1652]:
+            - generic [ref=f34e1653]:
+              - strong [ref=f34e1654]: 2026-09-13
+              - generic [ref=f34e1655]: Date Submitted
+            - generic [ref=f34e1656]:
+              - strong [ref=f34e1657]: 73a29e43-b2d7-44a3-9346-77a3280ba87b
+              - generic [ref=f34e1658]: Application ID
+        - generic [ref=f34e1659]:
+          - generic [ref=f34e1660]:
+            - heading "Evaluation Summary" [level=2] [ref=f34e1661]
+            - button [ref=f34e1662] [cursor=pointer]
+          - heading "Evaluation Stage" [level=3] [ref=f34e1667]
+          - list [ref=f34e1668]:
+            - listitem [ref=f34e1669]:
+              - generic [ref=f34e1671]: Initial
+            - listitem [ref=f34e1672]:
+              - generic [ref=f34e1674]: Zoning
+            - listitem [ref=f34e1675]:
+              - generic [ref=f34e1677]: Fire Safety
+            - listitem [ref=f34e1678]:
+              - generic [ref=f34e1680]: OBO
+            - listitem [ref=f34e1681]:
+              - generic [ref=f34e1683]: Final Approval
+          - heading "Assigned Officer" [level=3] [ref=f34e1684]
+          - generic [ref=f34e1685]:
+            - generic [ref=f34e1686]: —
+            - generic [ref=f34e1688]:
+              - strong [ref=f34e1689]: —
+              - text: Reviewing this evaluation
+          - heading "Documents" [level=3] [ref=f34e1690]
+          - table [ref=f34e1692]:
+            - rowgroup [ref=f34e1693]:
+              - row [ref=f34e1694]:
+                - columnheader "Document" [ref=f34e1695]
+                - columnheader "Required" [ref=f34e1696]
+                - columnheader "Department" [ref=f34e1697]
+                - columnheader "Uploaded" [ref=f34e1698]
+                - columnheader "Status" [ref=f34e1699]
+                - columnheader [ref=f34e1700]
+            - rowgroup [ref=f34e1701]:
+              - row [ref=f34e1702]:
+                - cell "Land Title or Tax Declaration of the property" [ref=f34e1703]
+                - cell "Required" [ref=f34e1704]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f34e1705]
+                - cell "—" [ref=f34e1706]
+                - cell "Missing" [ref=f34e1707]
+                - cell [ref=f34e1709]
+              - row [ref=f34e1710]:
+                - cell "Owner's Written Consent (if applicant is not the lot owner)" [ref=f34e1711]
+                - cell "Optional" [ref=f34e1712]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f34e1713]
+                - cell "—" [ref=f34e1714]
+                - cell "Missing" [ref=f34e1715]
+                - cell [ref=f34e1717]
+              - row [ref=f34e1718]:
+                - cell "Barangay Clearance" [ref=f34e1719]
+                - cell "Required" [ref=f34e1720]
+                - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f34e1721]
+                - cell "—" [ref=f34e1722]
+                - cell "Missing" [ref=f34e1723]
+                - cell [ref=f34e1725]
+              - row [ref=f34e1726]:
+                - cell "Locational Clearance / Zoning Certification" [ref=f34e1727]
+                - cell "Required" [ref=f34e1728]
+                - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f34e1729]
+                - cell "—" [ref=f34e1730]
+                - cell "Missing" [ref=f34e1731]
+                - cell [ref=f34e1733]
+              - row [ref=f34e1734]:
+                - cell "Valid Government-Issued ID of Applicant/Owner" [ref=f34e1735]
+                - cell "Required" [ref=f34e1736]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f34e1737]
+                - cell "—" [ref=f34e1738]
+                - cell "Missing" [ref=f34e1739]
+                - cell [ref=f34e1741]
+              - row [ref=f34e1742]:
+                - cell "Fence Plan / Site Development Plan" [ref=f34e1743]
+                - cell "Required" [ref=f34e1744]
+                - cell "Office of the Municipal Engineer / Building Official" [ref=f34e1745]
+                - cell "—" [ref=f34e1746]
+                - cell "Missing" [ref=f34e1747]
+                - cell [ref=f34e1749]
+          - heading "Timeline" [level=3] [ref=f34e1750]
+          - list [ref=f34e1751]:
+            - listitem [ref=f34e1752]:
+              - paragraph [ref=f34e1754]: No activity recorded yet.
+          - heading "Actions" [level=3] [ref=f34e1755]
+          - generic [ref=f34e1756]:
+            - button [ref=f34e1757] [cursor=pointer]
+            - generic [ref=f34e1762]: Remarks (required to return)
+            - textbox "Remarks (required to return)" [ref=f34e1763]:
+              - /placeholder: What needs to be revised?
+            - button [disabled] [ref=f34e1764]

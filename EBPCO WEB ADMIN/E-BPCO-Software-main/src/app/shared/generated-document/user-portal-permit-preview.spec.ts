@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { UserPortalPermitPreview } from './user-portal-permit-preview';
 import { USER_PORTAL_BASE_URL } from '../../core/config/user-portal.config';
 import { ApplicationStore } from '../../core/domain/application-store';
+import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
 
 /**
  * The verification QR's link.
@@ -75,5 +76,40 @@ describe('UserPortalPermitPreview — the verification QR link', () => {
       expect(text).toContain('https://portal.castillasorsogon.gov.ph/verify/');
       expect(text).not.toContain(window.location.origin);
     }
+  }, MOUNT_BUDGET);
+});
+
+describe('UserPortalPermitPreview — a real, backend-generated permit', () => {
+  const MOUNT_BUDGET = 20_000;
+
+  it('shows the real permit number from the session cache, not "Not yet assigned"', async () => {
+    // Reproduces PERMIT-013: `ApplicationStore.replaceApplications()`
+    // deliberately empties `_permits` on every real server load (see its own
+    // doc comment), so a real backend-generated permit was never findable via
+    // `store.getPermit()` at all — this preview showed a DRAFT placeholder for
+    // an application that had actually already been issued a real permit.
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [{ provide: USER_PORTAL_BASE_URL, useValue: '' }],
+    });
+    const store = TestBed.inject(ApplicationStore);
+    const cache = TestBed.inject(PermitReleaseSessionCache);
+    const applicationId = store.applications()[0].id;
+    // Simulate a real server load: the store's own permit collection is gone,
+    // exactly as replaceApplications() leaves it — only the session cache
+    // knows about a permit generated this session.
+    store.replaceApplications(store.applications());
+    cache.recordPermit(applicationId, { permitNumber: 'FP-2026-000001', issuedDate: '2026-09-14' });
+
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.id = applicationId;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('FP-2026-000001');
+    expect(text).not.toContain('Not yet assigned');
+    expect(text).not.toContain('DRAFT');
   }, MOUNT_BUDGET);
 });

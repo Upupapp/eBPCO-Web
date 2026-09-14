@@ -1,0 +1,107 @@
+- generic [ref=f36e2]:
+  - generic [ref=f36e198]:
+    - complementary [ref=f36e200]:
+      - generic [ref=f36e201]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f36e203]
+        - generic [ref=f36e204]: E-BPCO
+      - navigation [ref=f36e205]:
+        - link "Dashboard" [ref=f36e208] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f36e214]:
+          - generic [ref=f36e215]: Operations
+          - generic [ref=f36e216]:
+            - link "Applications" [ref=f36e217] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f36e223] [cursor=pointer]:
+              - /url: /evaluations
+            - link "Payments" [ref=f36e228] [cursor=pointer]:
+              - /url: /payments
+            - link "Permit Release" [ref=f36e235] [cursor=pointer]:
+              - /url: /permit-release
+        - generic [ref=f36e242]:
+          - generic [ref=f36e243]: Administration
+          - generic [ref=f36e244]:
+            - link "Businesses" [ref=f36e245] [cursor=pointer]:
+              - /url: /businesses
+            - link "Access Requests" [ref=f36e251] [cursor=pointer]:
+              - /url: /access-requests
+            - link "Users & Roles" [ref=f36e257] [cursor=pointer]:
+              - /url: /user-roles
+            - link "Workflow" [ref=f36e264] [cursor=pointer]:
+              - /url: /workflow
+            - link "Archive" [ref=f36e273] [cursor=pointer]:
+              - /url: /archive
+            - link "System Logs" [ref=f36e279] [cursor=pointer]:
+              - /url: /system-logs
+      - button "Log Out" [ref=f36e285] [cursor=pointer]
+    - main [ref=f36e291]:
+      - generic [ref=f36e3319]:
+        - generic "Payments" [ref=f36e3320]:
+          - generic [ref=f36e3321]:
+            - heading "Payments" [level=1] [ref=f36e3322]
+            - generic [ref=f36e3323]:
+              - generic [ref=f36e3324]:
+                - generic [ref=f36e3329]: Search
+                - textbox "Search" [ref=f36e3330]:
+                  - /placeholder: Search here...
+              - button "Notifications" [ref=f36e3332] [cursor=pointer]
+              - button "Q QA@lguids.com.ph Super Admin" [ref=f36e3338] [cursor=pointer]:
+                - generic [ref=f36e3339]: Q
+                - generic [ref=f36e3343]:
+                  - generic [ref=f36e3344]: QA@lguids.com.ph
+                  - generic [ref=f36e3345]: Super Admin
+        - generic [ref=f36e3349]:
+          - navigation [ref=f36e3350]:
+            - button [ref=f36e3351] [cursor=pointer]
+            - button [ref=f36e3357] [cursor=pointer]
+            - button [ref=f36e3360] [cursor=pointer]
+          - generic [ref=f36e3454]:
+            - generic [ref=f36e3455]:
+              - heading "Payment PAY-2026-000001" [level=1] [ref=f36e3456]
+              - paragraph [ref=f36e3457]: Maria Santos · E-BPCO-2026-000006
+            - generic [ref=f36e3458]:
+              - generic [ref=f36e3459]: Paid
+              - button "View Application" [ref=f36e3460] [cursor=pointer]
+              - button "Back to List" [ref=f36e3461] [cursor=pointer]
+          - generic [ref=f36e3463]:
+            - heading "Payment Detail" [level=2] [ref=f36e3465]
+            - generic [ref=f36e3466]:
+              - generic [ref=f36e3467]:
+                - term [ref=f36e3468]: "Application:"
+                - definition [ref=f36e3469]: E-BPCO-2026-000006
+              - generic [ref=f36e3470]:
+                - term [ref=f36e3471]: "Method:"
+                - definition [ref=f36e3472]: Onsite
+              - generic [ref=f36e3473]:
+                - term [ref=f36e3474]: "Reference:"
+                - definition [ref=f36e3475]: PAY-2026-000001
+              - generic [ref=f36e3476]:
+                - term [ref=f36e3477]: "Amount:"
+                - definition [ref=f36e3478]: ₱1,700.00
+              - generic [ref=f36e3479]:
+                - term [ref=f36e3480]: "Submitted:"
+                - definition [ref=f36e3481]: 2026-09-13T18:02:28.574Z
+              - generic [ref=f36e3482]:
+                - term [ref=f36e3483]: "OR No.:"
+                - definition [ref=f36e3484]: OR-2026-000001
+            - generic [ref=f36e3485]:
+              - button "Void" [ref=f36e3486] [cursor=pointer]
+              - button "Reverse" [ref=f36e3487] [cursor=pointer]
+              - button "Refund" [ref=f36e3488] [cursor=pointer]
+              - button "Correct OR No." [ref=f36e3489] [cursor=pointer]
+        - generic [ref=f36e3491]:
+          - heading "Correct Official Receipt Number" [level=2] [ref=f36e3492]
+          - paragraph [ref=f36e3493]: For E-BPCO-2026-000006 — currently "OR-2026-000001".
+          - generic [ref=f36e3494]:
+            - generic [ref=f36e3495]:
+              - text: Corrected OR Number
+              - textbox "Corrected OR Number" [ref=f36e3496]: OR-2026-000001
+            - generic [ref=f36e3497]:
+              - text: Reason
+              - textbox "Reason" [ref=f36e3498]
+            - generic [ref=f36e3499]:
+              - button "Cancel" [ref=f36e3500] [cursor=pointer]
+              - button "Save" [active] [ref=f36e3501] [cursor=pointer]
+  - status [ref=f36e3503]:
+    - generic [ref=f36e3508]: Enter both the corrected OR number and a reason.
+    - button "Dismiss" [ref=f36e3509] [cursor=pointer]: ✕

@@ -1,0 +1,50 @@
+- generic [ref=f21e2801]:
+  - complementary [ref=f21e2803]:
+    - generic [ref=f21e2804]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f21e2806]
+      - generic [ref=f21e2807]: E-BPCO
+    - navigation [ref=f21e2808]:
+      - link "Dashboard" [ref=f21e2811] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f21e2817]:
+        - generic [ref=f21e2818]: Operations
+        - generic [ref=f21e2819]:
+          - link "Applications" [ref=f21e2820] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f21e2826] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f21e2831] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f21e2838] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f21e2845]:
+        - generic [ref=f21e2846]: Administration
+        - generic [ref=f21e2847]:
+          - link "Businesses" [ref=f21e2848] [cursor=pointer]:
+            - /url: /businesses
+          - link "Users & Roles" [ref=f21e2854] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f21e2861] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f21e2870] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f21e2876] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f21e2882] [cursor=pointer]
+  - main [ref=f21e2888]:
+    - generic [ref=f21e3778]:
+      - generic "Payments" [ref=f21e3779]:
+        - generic [ref=f21e3780]:
+          - heading "Payments" [level=1] [ref=f21e3781]
+          - generic [ref=f21e3782]:
+            - button "Notifications" [ref=f21e3784] [cursor=pointer]
+            - button "A admin@lgu.gov.ph Administrator" [ref=f21e3790] [cursor=pointer]:
+              - generic [ref=f21e3791]: A
+              - generic [ref=f21e3795]:
+                - generic [ref=f21e3796]: admin@lgu.gov.ph
+                - generic [ref=f21e3797]: Administrator
+      - generic [ref=f21e3801]:
+        - navigation [ref=f21e3802]:
+          - button [ref=f21e3803] [cursor=pointer]
+          - button [ref=f21e3809] [cursor=pointer]
+        - paragraph [ref=f21e3812]: This account does not hold the permission this action requires.

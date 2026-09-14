@@ -1,0 +1,5 @@
+[    1054ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943
+[   13918ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:4200/auth/token:0
+[  205152ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:4200/staff/applications/e6777e8c-58c2-42bd-80c4-c19825c0c520/transitions:0
+[  342634ms] [ERROR] Access to fetch at 'http://localhost:3000/staff/users/0cf92c49-b1e7-4a88-9c71-14f53e0f7693/access' from origin 'http://localhost:4200' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:4200/applications/e6777e8c-58c2-42bd-80c4-c19825c0c520:0
+[  342641ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3000/staff/users/0cf92c49-b1e7-4a88-9c71-14f53e0f7693/access:0

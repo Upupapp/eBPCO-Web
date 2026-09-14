@@ -1,0 +1,84 @@
+- generic [ref=f36e198]:
+  - complementary [ref=f36e200]:
+    - generic [ref=f36e201]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f36e203]
+      - generic [ref=f36e204]: E-BPCO
+    - navigation [ref=f36e205]:
+      - link "Dashboard" [ref=f36e208] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f36e214]:
+        - generic [ref=f36e215]: Operations
+        - generic [ref=f36e216]:
+          - link "Applications" [ref=f36e217] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f36e223] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f36e228] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f36e235] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f36e242]:
+        - generic [ref=f36e243]: Administration
+        - generic [ref=f36e244]:
+          - link "Businesses" [ref=f36e245] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f36e251] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f36e257] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f36e264] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f36e273] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f36e279] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f36e285] [cursor=pointer]
+  - main [ref=f36e291]:
+    - generic [ref=f36e1231]:
+      - generic "Access Requests" [ref=f36e1232]:
+        - generic [ref=f36e1233]:
+          - heading "Access Requests" [level=1] [ref=f36e1234]
+          - generic [ref=f36e1235]:
+            - generic [ref=f36e1236]:
+              - generic [ref=f36e1241]: Search
+              - textbox "Search" [ref=f36e1242]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f36e1244] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f36e1250] [cursor=pointer]:
+              - generic [ref=f36e1251]: Q
+              - generic [ref=f36e1255]:
+                - generic [ref=f36e1256]: QA@lguids.com.ph
+                - generic [ref=f36e1257]: Super Admin
+      - generic [ref=f36e1261]:
+        - generic [ref=f36e1262]:
+          - generic [ref=f36e1263]:
+            - heading "Awaiting your approval" [level=2] [ref=f36e1264]
+            - paragraph [ref=f36e1265]: Nobody can sign themselves up. Approving a request creates the account and assigns the forms and level you choose.
+          - button [ref=f36e1266] [cursor=pointer]
+        - paragraph [ref=f36e1273]: 1 request waiting.
+        - list [ref=f36e1274]:
+          - listitem [ref=f36e1275]:
+            - generic [ref=f36e1276]:
+              - generic [ref=f36e1277]:
+                - heading "Reject Test Applicant" [level=3] [ref=f36e1278]
+                - paragraph [ref=f36e1279]: Office of the Building Official — Evaluator
+                - paragraph [ref=f36e1280]: rejecttest@lgu.gov.ph · 09171234599
+              - generic [ref=f36e1281]: Raised today
+            - generic [ref=f36e1282]:
+              - term [ref=f36e1283]: Requested level
+              - definition [ref=f36e1284]:
+                - generic [ref=f36e1285]: View only
+              - term [ref=f36e1286]: Forms requested
+              - definition [ref=f36e1287]:
+                - list [ref=f36e1288]:
+                  - listitem [ref=f36e1289]: Fencing Permit
+              - term [ref=f36e1290]: Reason given
+              - definition [ref=f36e1291]: QA gap-testing the reject flow.
+            - generic [ref=f36e1295]:
+              - heading "Reject this request" [level=4] [ref=f36e1296]
+              - generic [ref=f36e1297]: Reason
+              - textbox "Reason" [ref=f36e1298]:
+                - /placeholder: The requester is a colleague and will ask why.
+              - generic [ref=f36e1299]:
+                - button "Cancel" [ref=f36e1300] [cursor=pointer]
+                - button "Reject request" [ref=f36e1301] [cursor=pointer]

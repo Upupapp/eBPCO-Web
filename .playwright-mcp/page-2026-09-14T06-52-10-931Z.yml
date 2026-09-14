@@ -1,0 +1,156 @@
+- generic [ref=f56e61]:
+  - complementary [ref=f56e63]:
+    - generic [ref=f56e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f56e66]
+      - generic [ref=f56e67]: E-BPCO
+    - navigation [ref=f56e68]:
+      - link "Dashboard" [ref=f56e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f56e77]:
+        - generic [ref=f56e78]: Operations
+        - generic [ref=f56e79]:
+          - link "Applications" [ref=f56e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f56e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f56e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f56e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f56e105]:
+        - generic [ref=f56e106]: Administration
+        - generic [ref=f56e107]:
+          - link "Businesses" [ref=f56e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f56e114] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f56e120] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f56e127] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f56e136] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f56e142] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f56e148] [cursor=pointer]
+  - main [ref=f56e154]:
+    - generic [ref=f56e735]:
+      - generic "Evaluations" [ref=f56e736]:
+        - generic [ref=f56e737]:
+          - heading "Evaluations" [level=1] [ref=f56e738]
+          - generic [ref=f56e739]:
+            - generic [ref=f56e740]:
+              - generic [ref=f56e745]: Search
+              - textbox "Search" [ref=f56e746]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f56e748] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f56e754] [cursor=pointer]:
+              - generic [ref=f56e755]: Q
+              - generic [ref=f56e759]:
+                - generic [ref=f56e760]: QA@lguids.com.ph
+                - generic [ref=f56e761]: Super Admin
+      - generic [ref=f56e940]:
+        - heading "Initial Evaluation" [level=1] [ref=f56e941]
+        - generic [ref=f56e942]:
+          - button "Back" [ref=f56e943] [cursor=pointer]
+          - button "More actions" [ref=f56e945] [cursor=pointer]
+      - generic [ref=f56e951]:
+        - generic [ref=f56e953]:
+          - generic [ref=f56e955]:
+            - paragraph [ref=f56e956]: Total in Initial Evaluation
+            - paragraph [ref=f56e957]: "3"
+          - generic [ref=f56e958]:
+            - generic [ref=f56e959]: Across every status below — Revision Required · Under Review · Accepted
+            - 'img "3 categories: 1, 2, 0" [ref=f56e961]'
+        - generic [ref=f56e966]:
+          - generic [ref=f56e968]:
+            - paragraph [ref=f56e969]: Revision Required
+            - paragraph [ref=f56e970]: "1"
+          - generic [ref=f56e971]:
+            - generic [ref=f56e972]: 33% of all applications
+            - 'img "Revision Required progress: 33 percent" [ref=f56e974]'
+        - generic [ref=f56e977]:
+          - generic [ref=f56e979]:
+            - paragraph [ref=f56e980]: Under Review
+            - paragraph [ref=f56e981]: "2"
+          - generic [ref=f56e982]:
+            - generic [ref=f56e983]: 67% of all applications
+            - 'img "Under Review progress: 67 percent" [ref=f56e985]'
+        - generic [ref=f56e988]:
+          - generic [ref=f56e990]:
+            - paragraph [ref=f56e991]: Accepted
+            - paragraph [ref=f56e992]: "0"
+          - generic [ref=f56e993]:
+            - generic [ref=f56e994]: 0% of all applications
+            - 'img "Accepted progress: 0 percent" [ref=f56e996]'
+      - generic [ref=f56e998]:
+        - button [ref=f56e999] [cursor=pointer]
+        - button [ref=f56e1004] [cursor=pointer]
+        - button [ref=f56e1009] [cursor=pointer]
+      - generic [ref=f56e1014]:
+        - generic [ref=f56e1015]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Type" [ref=f56e1021]
+          - generic [ref=f56e1022]:
+            - button [ref=f56e1025] [cursor=pointer]
+            - button [ref=f56e1029] [cursor=pointer]
+        - table [ref=f56e1035]:
+          - rowgroup [ref=f56e1036]:
+            - row [ref=f56e1037]:
+              - columnheader [ref=f56e1038]:
+                - checkbox "Select all applications in this stage" [ref=f56e1039]
+              - columnheader "APPLICATION ID" [ref=f56e1040]
+              - columnheader "APPLICANT NAME" [ref=f56e1041]
+              - columnheader "MISSING DOCUMENTS" [ref=f56e1042]
+              - columnheader "TYPE" [ref=f56e1043]
+              - columnheader "REVIEWING DEPARTMENT" [ref=f56e1044]
+              - columnheader "DATE SUBMITTED" [ref=f56e1045]
+              - columnheader "ASSIGNED OFFICER" [ref=f56e1046]
+              - columnheader "STATUS" [ref=f56e1047]
+              - columnheader "ACTION" [ref=f56e1048]
+          - rowgroup [ref=f56e1049]:
+            - button "View evaluation for b15382e1-40a9-4339-b13a-1a5eb7a8076f, Maria Santos" [ref=f56e1050] [cursor=pointer]:
+              - cell [ref=f56e1051]:
+                - checkbox "Select b15382e1-40a9-4339-b13a-1a5eb7a8076f" [ref=f56e1052]
+              - cell "b15382e1-40a9-4339-b13a-1a5eb7a8076f" [ref=f56e1053]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f56e1054]:
+                - generic [ref=f56e1055]:
+                  - generic [ref=f56e1056]: MS
+                  - generic [ref=f56e1058]:
+                    - generic "Maria Santos" [ref=f56e1059]
+                    - generic "Santos Sari-Sari Store" [ref=f56e1060]
+              - cell "0" [ref=f56e1061]
+              - cell "Fencing Permit" [ref=f56e1062]
+              - cell "Office of the Municipal Engineer / Building Official" [ref=f56e1063]
+              - cell "2026-09-14" [ref=f56e1064]
+              - cell "—" [ref=f56e1065]
+              - cell "Under Review" [ref=f56e1066]
+              - cell [ref=f56e1068]:
+                - generic [ref=f56e1069]:
+                  - button "Review application b15382e1-40a9-4339-b13a-1a5eb7a8076f" [ref=f56e1070]: Review
+                  - button "More actions for application b15382e1-40a9-4339-b13a-1a5eb7a8076f" [ref=f56e1072]
+            - button "View evaluation for 3b9ad6a0-97cc-4e2f-8a76-9905291c0014, Maria Santos" [ref=f56e1078] [cursor=pointer]:
+              - cell [ref=f56e1079]:
+                - checkbox "Select 3b9ad6a0-97cc-4e2f-8a76-9905291c0014" [ref=f56e1080]
+              - cell "3b9ad6a0-97cc-4e2f-8a76-9905291c0014" [ref=f56e1081]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f56e1082]:
+                - generic [ref=f56e1083]:
+                  - generic [ref=f56e1084]: MS
+                  - generic [ref=f56e1086]:
+                    - generic "Maria Santos" [ref=f56e1087]
+                    - generic "Santos Sari-Sari Store" [ref=f56e1088]
+              - cell "0" [ref=f56e1089]
+              - cell "Fencing Permit" [ref=f56e1090]
+              - cell "Office of the Municipal Engineer / Building Official" [ref=f56e1091]
+              - cell "2026-09-14" [ref=f56e1092]
+              - cell "—" [ref=f56e1093]
+              - cell "Under Review" [ref=f56e1094]
+              - cell [ref=f56e1096]:
+                - generic [ref=f56e1097]:
+                  - button "Review application 3b9ad6a0-97cc-4e2f-8a76-9905291c0014" [ref=f56e1098]: Review
+                  - button "More actions for application 3b9ad6a0-97cc-4e2f-8a76-9905291c0014" [ref=f56e1100]
+        - navigation "Pagination" [ref=f56e1107]:
+          - generic [ref=f56e1108]: Showing 1-2 from 2
+          - generic [ref=f56e1109]:
+            - button "First page" [disabled] [ref=f56e1110]
+            - button "Page 1" [ref=f56e1115] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f56e1116]

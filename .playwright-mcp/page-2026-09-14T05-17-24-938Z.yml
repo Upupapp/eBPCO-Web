@@ -1,0 +1,104 @@
+- generic [ref=f33e4]:
+  - complementary [ref=f33e6]:
+    - generic [ref=f33e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f33e9]
+      - generic [ref=f33e10]: E-BPCO
+    - navigation [ref=f33e11]:
+      - link "Dashboard" [ref=f33e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f33e20]:
+        - generic [ref=f33e21]: Operations
+        - generic [ref=f33e22]:
+          - link "Applications" [ref=f33e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f33e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f33e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f33e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f33e48]:
+        - generic [ref=f33e49]: Administration
+        - generic [ref=f33e50]:
+          - link "Businesses" [ref=f33e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f33e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f33e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f33e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f33e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f33e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f33e91] [cursor=pointer]
+  - main [ref=f33e97]:
+    - generic [ref=f33e98]:
+      - generic "Workflow" [ref=f33e99]:
+        - generic [ref=f33e100]:
+          - heading "Workflow" [level=1] [ref=f33e101]
+          - generic [ref=f33e102]:
+            - generic [ref=f33e103]:
+              - generic [ref=f33e108]: Search
+              - textbox "Search" [ref=f33e109]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f33e111] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f33e117] [cursor=pointer]:
+              - generic [ref=f33e118]: Q
+              - generic [ref=f33e122]:
+                - generic [ref=f33e123]: QA@lguids.com.ph
+                - generic [ref=f33e124]: Super Admin
+      - generic [ref=f33e128]:
+        - heading "System Flowchart" [level=2] [ref=f33e129]
+        - generic [ref=f33e130]:
+          - button "Back to Dashboard" [ref=f33e131] [cursor=pointer]
+          - generic [ref=f33e132]:
+            - button [active] [ref=f33e502] [cursor=pointer]
+            - generic [ref=f33e505]:
+              - generic [ref=f33e506]: Filter
+              - generic [ref=f33e507] [cursor=pointer]:
+                - radio "Overall" [ref=f33e508]
+                - text: Overall
+              - generic [ref=f33e509] [cursor=pointer]:
+                - radio "Applicant" [ref=f33e510]
+                - text: Applicant
+              - generic [ref=f33e511] [cursor=pointer]:
+                - radio "Zoning" [ref=f33e512]
+                - text: Zoning
+              - generic [ref=f33e513] [cursor=pointer]:
+                - radio "Fire Safety" [ref=f33e514]
+                - text: Fire Safety
+              - generic [ref=f33e515] [cursor=pointer]:
+                - radio "OBO Review" [ref=f33e516]
+                - text: OBO Review
+              - generic [ref=f33e517] [cursor=pointer]:
+                - radio "Building Official" [ref=f33e518]
+                - text: Building Official
+              - generic [ref=f33e519] [cursor=pointer]:
+                - radio "Payment" [ref=f33e520]
+                - text: Payment
+              - generic [ref=f33e521] [cursor=pointer]:
+                - radio "Releasing" [checked] [ref=f33e522]
+                - text: Releasing
+      - generic [ref=f33e157]:
+        - heading "Releasing Flowchart" [level=2] [ref=f33e503]
+        - img [ref=f33e160]:
+          - generic [ref=f33e239]: START
+          - generic [ref=f33e246]:
+            - generic:
+              - generic: Generate Permit PDF
+              - generic: "[Platform: System]"
+          - generic [ref=f33e250]:
+            - generic:
+              - generic: Mark as Released
+              - generic: "[Platform: Web]"
+          - generic [ref=f33e254]:
+            - generic:
+              - generic: Receive Notification
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f33e258]:
+            - generic:
+              - generic: Claim Permit
+              - generic: "[Platform: External]"
+          - generic [ref=f33e259]: "END: Application Completed"

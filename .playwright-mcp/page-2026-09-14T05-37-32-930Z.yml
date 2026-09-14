@@ -1,0 +1,146 @@
+- generic [ref=f37e61]:
+  - complementary [ref=f37e63]:
+    - generic [ref=f37e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f37e66]
+      - generic [ref=f37e67]: E-BPCO
+    - navigation [ref=f37e68]:
+      - link "Dashboard" [ref=f37e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f37e77]:
+        - generic [ref=f37e78]: Operations
+        - generic [ref=f37e79]:
+          - link "Applications" [ref=f37e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f37e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f37e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f37e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f37e105]:
+        - generic [ref=f37e106]: Administration
+        - generic [ref=f37e107]:
+          - link "Businesses" [ref=f37e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f37e114] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f37e120] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f37e127] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f37e136] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f37e142] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f37e148] [cursor=pointer]
+  - main [ref=f37e154]:
+    - generic [ref=f37e1435]:
+      - generic "Permit Release" [ref=f37e1436]:
+        - generic [ref=f37e1437]:
+          - heading "Permit Release" [level=1] [ref=f37e1438]
+          - generic [ref=f37e1439]:
+            - generic [ref=f37e1440]:
+              - generic [ref=f37e1445]: Search
+              - textbox "Search" [ref=f37e1446]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f37e1448] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f37e1454] [cursor=pointer]:
+              - generic [ref=f37e1455]: Q
+              - generic [ref=f37e1459]:
+                - generic [ref=f37e1460]: QA@lguids.com.ph
+                - generic [ref=f37e1461]: Super Admin
+      - navigation [ref=f37e1465]:
+        - button [ref=f37e1466] [cursor=pointer]
+        - button [ref=f37e1472] [cursor=pointer]
+      - generic [ref=f37e1477]:
+        - generic [ref=f37e1479]:
+          - generic [ref=f37e1481]:
+            - paragraph [ref=f37e1482]: Awaiting Preparation
+            - paragraph [ref=f37e1483]: "0"
+          - generic [ref=f37e1484]:
+            - generic [ref=f37e1485]: 0% of total release
+            - 'img "Awaiting Preparation progress: 0 percent" [ref=f37e1721]'
+        - generic [ref=f37e1490]:
+          - generic [ref=f37e1492]:
+            - paragraph [ref=f37e1493]: Ready for Release
+            - paragraph [ref=f37e1494]: "1"
+          - generic [ref=f37e1495]:
+            - generic [ref=f37e1496]: 100% of total release
+            - 'img "Ready for Release progress: 100 percent" [ref=f37e1722]'
+        - generic [ref=f37e1501]:
+          - generic [ref=f37e1503]:
+            - paragraph [ref=f37e1504]: Released
+            - paragraph [ref=f37e1505]: "0"
+          - generic [ref=f37e1506]:
+            - generic [ref=f37e1507]: 0% of total release
+            - 'img "Released progress: 0 percent" [ref=f37e1509]'
+        - generic [ref=f37e1512]:
+          - generic [ref=f37e1514]:
+            - paragraph [ref=f37e1515]: Total Release
+            - paragraph [ref=f37e1516]: "1"
+          - generic [ref=f37e1517]:
+            - generic [ref=f37e1518]: Awaiting Preparation · Ready for Release · Released
+            - 'img "3 categories: 0, 1, 0" [ref=f37e1723]'
+      - generic [ref=f37e1524]:
+        - generic [ref=f37e1525]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Location" [ref=f37e1531]
+          - generic [ref=f37e1532]:
+            - button [ref=f37e1535] [cursor=pointer]
+            - button [ref=f37e1539] [cursor=pointer]
+            - button [ref=f37e1544] [cursor=pointer]
+        - table [ref=f37e1552]:
+          - rowgroup [ref=f37e1553]:
+            - row [ref=f37e1554]:
+              - columnheader [ref=f37e1555]:
+                - checkbox "Select all permit releases" [ref=f37e1556]
+              - columnheader "APPLICATION ID" [ref=f37e1557]
+              - columnheader "APPLICANT NAME" [ref=f37e1558]
+              - columnheader "LOCATION" [ref=f37e1559]
+              - columnheader "TYPE" [ref=f37e1560]
+              - columnheader "APPROVAL STATUS" [ref=f37e1561]
+              - columnheader "PAYMENT STATUS" [ref=f37e1562]
+              - columnheader "PERMIT STATUS" [ref=f37e1563]
+              - columnheader "ACTION" [ref=f37e1564]
+          - rowgroup [ref=f37e1565]:
+            - row [ref=f37e1724] [cursor=pointer]:
+              - cell [ref=f37e1567]:
+                - checkbox "Select permit release 182ccc5d-482b-4206-a09b-d754a1704a90" [ref=f37e1568]
+              - cell [ref=f37e1569]:
+                - button "View permit release for 182ccc5d-482b-4206-a09b-d754a1704a90, Maria Santos" [ref=f37e1570]: 182ccc5d-482b-4206-a09b-d754a1704a90
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f37e1571]:
+                - generic [ref=f37e1572]:
+                  - generic [ref=f37e1573]: MS
+                  - generic [ref=f37e1575]:
+                    - generic "Maria Santos" [ref=f37e1576]
+                    - generic "Santos Sari-Sari Store" [ref=f37e1577]
+              - cell "60 Rizal Street, Poblacion" [ref=f37e1578]
+              - cell "Fencing Permit" [ref=f37e1579]
+              - cell "Approved" [ref=f37e1580]
+              - cell "Paid" [ref=f37e1581]
+              - cell "Ready for Release" [ref=f37e1725]
+              - cell [ref=f37e1726]:
+                - generic [ref=f37e1585]:
+                  - button "Preview permit for 182ccc5d-482b-4206-a09b-d754a1704a90" [ref=f37e1586]
+                  - button "Release permit for 182ccc5d-482b-4206-a09b-d754a1704a90" [active] [ref=f37e1727]
+        - navigation "Pagination" [ref=f37e1597]:
+          - generic [ref=f37e1598]: Showing 1-1 from 1
+          - generic [ref=f37e1599]:
+            - button "First page" [disabled] [ref=f37e1600]
+            - button "Page 1" [ref=f37e1605] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f37e1606]
+      - generic [ref=f37e1739]:
+        - button "Close" [ref=f37e1740] [cursor=pointer]: ✕
+        - heading "Release Permit FP-2026-000001" [level=2] [ref=f37e1741]
+        - paragraph [ref=f37e1742]: 182ccc5d-482b-4206-a09b-d754a1704a90 — Maria Santos · Santos Sari-Sari Store
+        - generic [ref=f37e1743]:
+          - generic [ref=f37e1744]:
+            - text: Claimant Name
+            - textbox "Claimant Name" [ref=f37e1745]: Maria Santos
+          - generic [ref=f37e1746]:
+            - text: Release Method
+            - combobox "Release Method" [ref=f37e1747]:
+              - option "Physical Claim" [selected]
+              - option "Authorized Representative"
+          - generic [ref=f37e1748]:
+            - button "Cancel" [ref=f37e1749] [cursor=pointer]
+            - button "Confirm Release" [ref=f37e1750] [cursor=pointer]

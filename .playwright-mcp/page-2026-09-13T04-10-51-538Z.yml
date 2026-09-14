@@ -1,0 +1,133 @@
+- generic [ref=f5e2]:
+  - generic [ref=f5e56]:
+    - complementary [ref=f5e58]:
+      - generic [ref=f5e59]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f5e61]
+        - generic [ref=f5e62]: E-BPCO
+      - navigation [ref=f5e63]:
+        - link "Dashboard" [ref=f5e66] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f5e72]:
+          - generic [ref=f5e73]: Operations
+          - link "Payments" [ref=f5e75] [cursor=pointer]:
+            - /url: /payments
+        - generic [ref=f5e82]:
+          - generic [ref=f5e83]: Administration
+          - link "Archive" [ref=f5e85] [cursor=pointer]:
+            - /url: /archive
+      - button "Log Out" [ref=f5e91] [cursor=pointer]
+    - main [ref=f5e97]:
+      - generic [ref=f5e563]:
+        - generic "Payments" [ref=f5e564]:
+          - generic [ref=f5e565]:
+            - heading "Payments" [level=1] [ref=f5e566]
+            - generic [ref=f5e567]:
+              - button "Notifications" [ref=f5e569] [cursor=pointer]
+              - button "A assessor@lgu.gov.ph Payment Officer" [ref=f5e575] [cursor=pointer]:
+                - generic [ref=f5e576]: A
+                - generic [ref=f5e580]:
+                  - generic [ref=f5e581]: assessor@lgu.gov.ph
+                  - generic [ref=f5e582]: Payment Officer
+        - generic [ref=f5e612]:
+          - generic [ref=f5e613]:
+            - generic [ref=f5e614]:
+              - heading "Payment Assessment" [level=1] [ref=f5e615]
+              - paragraph [ref=f5e616]: Maria Santos · Santos Sari-Sari Store · Fencing Permit
+            - button "Back to Application" [ref=f5e618] [cursor=pointer]
+          - generic [ref=f5e622]:
+            - generic [ref=f5e623]:
+              - heading "Assessment — Draft" [level=2] [ref=f5e624]
+              - generic [ref=f5e625]: Fee schedule version 2026.1
+            - table [ref=f5e627]:
+              - rowgroup [ref=f5e628]:
+                - row [ref=f5e629]:
+                  - columnheader "Line" [ref=f5e630]
+                  - columnheader "Included" [ref=f5e631]
+                  - columnheader "Schedule Says" [ref=f5e632]
+                  - columnheader "Amount (₱)" [ref=f5e633]
+                  - columnheader "Basis" [ref=f5e634]
+                  - columnheader [ref=f5e635]
+              - rowgroup [ref=f5e636]:
+                - row [ref=f5e637]:
+                  - cell "Filing Fee" [ref=f5e638]
+                  - cell [ref=f5e639]:
+                    - checkbox "Filing Fee included" [checked] [ref=f5e640]
+                  - cell "₱500.00" [ref=f5e641]
+                  - cell [ref=f5e642]:
+                    - spinbutton "Filing Fee amount in pesos" [ref=f5e643]: "500.00"
+                  - cell [ref=f5e644]:
+                    - textbox "Filing Fee basis" [ref=f5e645]:
+                      - /placeholder: Ordinance or issuance this rests on
+                      - text: City Ordinance 2026-004 s.3
+                  - cell [ref=f5e646]:
+                    - button "Save" [ref=f5e647] [cursor=pointer]
+                - row [ref=f5e648]:
+                  - cell "Processing Fee" [ref=f5e649]
+                  - cell [ref=f5e650]:
+                    - checkbox "Processing Fee included" [checked] [ref=f5e651]
+                  - cell "₱1,200.00" [ref=f5e652]
+                  - cell [ref=f5e653]:
+                    - spinbutton "Processing Fee amount in pesos" [ref=f5e654]: "1200.00"
+                  - cell [ref=f5e655]:
+                    - textbox "Processing Fee basis" [ref=f5e656]:
+                      - /placeholder: Ordinance or issuance this rests on
+                      - text: City Ordinance 2026-004 s.3
+                  - cell [ref=f5e657]:
+                    - button "Save" [ref=f5e658] [cursor=pointer]
+                - row [ref=f5e659]:
+                  - cell "Architectural Fee" [ref=f5e660]
+                  - cell [ref=f5e661]:
+                    - checkbox "Architectural Fee included" [checked] [ref=f5e662]
+                  - cell "₱0.00" [ref=f5e663]
+                  - cell [ref=f5e664]:
+                    - spinbutton "Architectural Fee amount in pesos" [ref=f5e665]: "0.00"
+                  - cell [ref=f5e666]:
+                    - textbox "Architectural Fee basis" [ref=f5e667]:
+                      - /placeholder: Ordinance or issuance this rests on
+                  - cell [ref=f5e668]:
+                    - button "Save" [ref=f5e669] [cursor=pointer]
+                - row [ref=f5e670]:
+                  - cell "Structural Fee" [ref=f5e671]
+                  - cell [ref=f5e672]:
+                    - checkbox "Structural Fee included" [checked] [ref=f5e673]
+                  - cell "₱5,120.00" [ref=f5e674]
+                  - cell [ref=f5e675]:
+                    - spinbutton "Structural Fee amount in pesos" [ref=f5e676]: "5120.00"
+                  - cell [ref=f5e677]:
+                    - textbox "Structural Fee basis" [ref=f5e678]:
+                      - /placeholder: Ordinance or issuance this rests on
+                      - text: City Ordinance 2026-004 s.3
+                  - cell [ref=f5e679]:
+                    - button "Save" [ref=f5e680] [cursor=pointer]
+                - row [ref=f5e681]:
+                  - cell "Electrical Fee" [ref=f5e682]
+                  - cell [ref=f5e683]:
+                    - checkbox "Electrical Fee included" [checked] [ref=f5e684]
+                  - cell "₱0.00" [ref=f5e685]
+                  - cell [ref=f5e686]:
+                    - spinbutton "Electrical Fee amount in pesos" [ref=f5e687]: "0.00"
+                  - cell [ref=f5e688]:
+                    - textbox "Electrical Fee basis" [ref=f5e689]:
+                      - /placeholder: Ordinance or issuance this rests on
+                  - cell [ref=f5e690]:
+                    - button "Save" [ref=f5e691] [cursor=pointer]
+                - row [ref=f5e692]:
+                  - cell "Other Fees" [ref=f5e693]
+                  - cell [ref=f5e694]:
+                    - checkbox "Other Fees included" [checked] [ref=f5e695]
+                  - cell "₱0.00" [ref=f5e696]
+                  - cell [ref=f5e697]:
+                    - spinbutton "Other Fees amount in pesos" [ref=f5e698]: "0.00"
+                  - cell [ref=f5e699]:
+                    - textbox "Other Fees basis" [ref=f5e700]:
+                      - /placeholder: Ordinance or issuance this rests on
+                  - cell [ref=f5e701]:
+                    - button "Save" [ref=f5e702] [cursor=pointer]
+              - rowgroup [ref=f5e703]:
+                - row [ref=f5e704]:
+                  - cell "Total" [ref=f5e705]
+                  - cell "₱6,820.00" [ref=f5e706]
+            - button "Submit for Approval" [ref=f5e708] [cursor=pointer]
+  - status [ref=f5e717]:
+    - generic [ref=f5e722]: The request failed
+    - button "Dismiss" [ref=f5e723] [cursor=pointer]: ✕

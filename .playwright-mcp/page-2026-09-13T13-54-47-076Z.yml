@@ -1,0 +1,64 @@
+- generic [ref=f1e2]:
+  - generic [ref=f1e1437]:
+    - complementary [ref=f1e1439]:
+      - generic [ref=f1e1440]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f1e1442]
+        - generic [ref=f1e1443]: E-BPCO
+      - navigation [ref=f1e1444]:
+        - link "Dashboard" [ref=f1e1447] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f1e1453]:
+          - generic [ref=f1e1454]: Operations
+          - generic [ref=f1e1455]:
+            - link "Applications" [ref=f1e1456] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f1e1462] [cursor=pointer]:
+              - /url: /evaluations
+            - link "Payments" [ref=f1e1467] [cursor=pointer]:
+              - /url: /payments
+            - link "Permit Release" [ref=f1e1474] [cursor=pointer]:
+              - /url: /permit-release
+        - generic [ref=f1e1481]:
+          - generic [ref=f1e1482]: Administration
+          - generic [ref=f1e1483]:
+            - link "Businesses" [ref=f1e1484] [cursor=pointer]:
+              - /url: /businesses
+            - link "Access Requests" [ref=f1e1490] [cursor=pointer]:
+              - /url: /access-requests
+            - link "Users & Roles" [ref=f1e1496] [cursor=pointer]:
+              - /url: /user-roles
+            - link "Workflow" [ref=f1e1503] [cursor=pointer]:
+              - /url: /workflow
+            - link "Archive" [ref=f1e1512] [cursor=pointer]:
+              - /url: /archive
+            - link "System Logs" [ref=f1e1518] [cursor=pointer]:
+              - /url: /system-logs
+      - button "Log Out" [ref=f1e1524] [cursor=pointer]
+    - main [ref=f1e1530]:
+      - generic [ref=f1e2040]:
+        - generic "Payments" [ref=f1e2041]:
+          - generic [ref=f1e2042]:
+            - heading "Payments" [level=1] [ref=f1e2043]
+            - generic [ref=f1e2044]:
+              - generic [ref=f1e2045]:
+                - generic [ref=f1e2050]: Search
+                - textbox "Search" [ref=f1e2051]:
+                  - /placeholder: Search here...
+              - button "Notifications" [ref=f1e2053] [cursor=pointer]
+              - button "Q QA@lguids.com.ph Super Admin" [ref=f1e2059] [cursor=pointer]:
+                - generic [ref=f1e2060]: Q
+                - generic [ref=f1e2064]:
+                  - generic [ref=f1e2065]: QA@lguids.com.ph
+                  - generic [ref=f1e2066]: Super Admin
+        - generic [ref=f1e2070]:
+          - generic [ref=f1e2071]:
+            - generic [ref=f1e2072]:
+              - heading "Payment Assessment" [level=1] [ref=f1e2073]
+              - paragraph [ref=f1e2074]: Test Applicant One · Test Sari-Sari Store QA · Sign Permit
+            - button "Back to Application" [ref=f1e2076] [cursor=pointer]
+          - generic [ref=f1e2077]:
+            - paragraph [ref=f1e2078]: No assessment has been started for this application yet.
+            - button "Start Assessment" [ref=f1e2079] [cursor=pointer]
+  - status [ref=f1e2080]:
+    - generic [ref=f1e2085]: The schedule in force does not cover "Sign Permit".
+    - button "Dismiss" [ref=f1e2086] [cursor=pointer]: ✕

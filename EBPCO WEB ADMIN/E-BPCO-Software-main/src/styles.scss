@@ -148,6 +148,34 @@ button {
   font-family: inherit;
 }
 
+// A slim, on-brand scrollbar everywhere the app scrolls — the sidebar's own
+// internal scroll included — instead of each browser's default wide grey
+// one. A softer, pastel tint of the sidebar's brand red
+// ($color-brand-600 in shared/styles/_tokens.scss), not the full-strength
+// red itself — a scrollbar is chrome, not a call to action.
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #e3a3a8 #fbeff0;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #fbeff0;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #e3a3a8;
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #d38a90;
+}
+
 // Suppress the browser's own built-in password reveal/clear icon so it
 // doesn't double up with our custom eye/eye-off toggle button — Edge/IE
 // inject theirs via -ms-reveal once the field has text.

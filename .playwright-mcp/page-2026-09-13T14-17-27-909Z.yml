@@ -1,0 +1,205 @@
+- generic [ref=f1e4996]:
+  - complementary [ref=f1e4998]:
+    - generic [ref=f1e4999]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e5001]
+      - generic [ref=f1e5002]: E-BPCO
+    - navigation [ref=f1e5003]:
+      - link "Dashboard" [ref=f1e5006] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e5012]:
+        - generic [ref=f1e5013]: Operations
+        - generic [ref=f1e5014]:
+          - link "Applications" [ref=f1e5015] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e5021] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f1e5026] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e5033] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e5040]:
+        - generic [ref=f1e5041]: Administration
+        - generic [ref=f1e5042]:
+          - link "Businesses" [ref=f1e5043] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f1e5049] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e5055] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e5062] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e5071] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f1e5077] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e5083] [cursor=pointer]
+  - main [ref=f1e5089]:
+    - generic [ref=f1e5701]:
+      - generic "Access Requests" [ref=f1e5702]:
+        - generic [ref=f1e5703]:
+          - heading "Access Requests" [level=1] [ref=f1e5704]
+          - generic [ref=f1e5705]:
+            - generic [ref=f1e5706]:
+              - generic [ref=f1e5711]: Search
+              - textbox "Search" [ref=f1e5712]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f1e5714] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f1e5720] [cursor=pointer]:
+              - generic [ref=f1e5721]: Q
+              - generic [ref=f1e5725]:
+                - generic [ref=f1e5726]: QA@lguids.com.ph
+                - generic [ref=f1e5727]: Super Admin
+      - generic [ref=f1e5731]:
+        - generic [ref=f1e5732]:
+          - generic [ref=f1e5733]:
+            - heading "Awaiting your approval" [level=2] [ref=f1e5734]
+            - paragraph [ref=f1e5735]: Nobody can sign themselves up. Approving a request creates the account and assigns the forms and level you choose.
+          - button [ref=f1e5736] [cursor=pointer]
+        - paragraph [ref=f1e5755]: 1 request waiting.
+        - list [ref=f1e5756]:
+          - listitem [ref=f1e5757]:
+            - generic [ref=f1e5758]:
+              - generic [ref=f1e5759]:
+                - heading "QA Test Evaluator" [level=3] [ref=f1e5760]
+                - paragraph [ref=f1e5761]: Municipal Engineering Office — QA Tester
+                - paragraph [ref=f1e5762]: qa.evaluator2@example.gov.ph · 09171234567
+              - generic [ref=f1e5763]: Raised today
+            - generic [ref=f1e5764]:
+              - term [ref=f1e5765]: Requested level
+              - definition [ref=f1e5766]:
+                - generic [ref=f1e5767]: View only
+              - term [ref=f1e5768]: Forms requested
+              - definition [ref=f1e5769]:
+                - list [ref=f1e5770]:
+                  - listitem [ref=f1e5771]: Fencing Permit
+              - term [ref=f1e5772]: Reason given
+              - definition [ref=f1e5773]: QA pass — testing Access Requests approval flow end to end
+            - generic [ref=f1e5777]:
+              - heading "Grant access" [level=4] [ref=f1e5778]
+              - paragraph [ref=f1e5779]: Seeded from what was asked for. Change it before approving — this is what the account will be able to do.
+              - group "Forms this account may work on 1 selected" [ref=f1e5780]:
+                - generic [ref=f1e5781]:
+                  - text: Forms this account may work on
+                  - generic [ref=f1e5782]: 1 selected
+                - generic [ref=f1e5783]:
+                  - generic [ref=f1e5784] [cursor=pointer]:
+                    - checkbox "Building Permit – New Construction" [ref=f1e5785]
+                    - generic [ref=f1e5786]: Building Permit – New Construction
+                  - generic [ref=f1e5787] [cursor=pointer]:
+                    - checkbox "Building Permit – Renovation / Alteration" [ref=f1e5788]
+                    - generic [ref=f1e5789]: Building Permit – Renovation / Alteration
+                  - generic [ref=f1e5790] [cursor=pointer]:
+                    - checkbox "Building Permit – Addition / Extension" [ref=f1e5791]
+                    - generic [ref=f1e5792]: Building Permit – Addition / Extension
+                  - generic [ref=f1e5793] [cursor=pointer]:
+                    - checkbox "Demolition Permit" [ref=f1e5794]
+                    - generic [ref=f1e5795]: Demolition Permit
+                  - generic [ref=f1e5796] [cursor=pointer]:
+                    - checkbox "Zoning / Locational Clearance" [ref=f1e5797]
+                    - generic [ref=f1e5798]: Zoning / Locational Clearance
+                  - generic [ref=f1e5799] [cursor=pointer]:
+                    - checkbox "Architectural Permit" [ref=f1e5800]
+                    - generic [ref=f1e5801]: Architectural Permit
+                  - generic [ref=f1e5802] [cursor=pointer]:
+                    - checkbox "Civil / Structural Permit" [ref=f1e5803]
+                    - generic [ref=f1e5804]: Civil / Structural Permit
+                  - generic [ref=f1e5805] [cursor=pointer]:
+                    - checkbox "Electrical Permit" [ref=f1e5806]
+                    - generic [ref=f1e5807]: Electrical Permit
+                  - generic [ref=f1e5808] [cursor=pointer]:
+                    - checkbox "Mechanical Permit" [ref=f1e5809]
+                    - generic [ref=f1e5810]: Mechanical Permit
+                  - generic [ref=f1e5811] [cursor=pointer]:
+                    - checkbox "Sanitary Permit" [ref=f1e5812]
+                    - generic [ref=f1e5813]: Sanitary Permit
+                  - generic [ref=f1e5814] [cursor=pointer]:
+                    - checkbox "Plumbing Permit" [ref=f1e5815]
+                    - generic [ref=f1e5816]: Plumbing Permit
+                  - generic [ref=f1e5817] [cursor=pointer]:
+                    - checkbox "Electronics Permit" [ref=f1e5818]
+                    - generic [ref=f1e5819]: Electronics Permit
+                  - generic [ref=f1e5820] [cursor=pointer]:
+                    - checkbox "Interior Design Permit" [ref=f1e5821]
+                    - generic [ref=f1e5822]: Interior Design Permit
+                  - generic [ref=f1e5823] [cursor=pointer]:
+                    - checkbox "Fencing Permit" [checked] [ref=f1e5824]
+                    - generic [ref=f1e5825]: Fencing Permit
+                  - generic [ref=f1e5826] [cursor=pointer]:
+                    - checkbox "Sign Permit" [ref=f1e5827]
+                    - generic [ref=f1e5828]: Sign Permit
+                  - generic [ref=f1e5829] [cursor=pointer]:
+                    - checkbox "Excavation Permit" [ref=f1e5830]
+                    - generic [ref=f1e5831]: Excavation Permit
+                  - generic [ref=f1e5832] [cursor=pointer]:
+                    - checkbox "FSEC for Building Permit (BFP)" [ref=f1e5833]
+                    - generic [ref=f1e5834]: FSEC for Building Permit (BFP)
+                  - generic [ref=f1e5835] [cursor=pointer]:
+                    - checkbox "Certificate of Occupancy" [ref=f1e5836]
+                    - generic [ref=f1e5837]: Certificate of Occupancy
+                  - generic [ref=f1e5838] [cursor=pointer]:
+                    - checkbox "FSIC for Occupancy Permit (BFP)" [ref=f1e5839]
+                    - generic [ref=f1e5840]: FSIC for Occupancy Permit (BFP)
+              - group "Role 1 selected" [ref=f1e5906]:
+                - generic [ref=f1e5842]:
+                  - text: Role
+                  - generic [ref=f1e5843]: 1 selected
+                - generic [ref=f1e5844]:
+                  - generic [ref=f1e5845] [cursor=pointer]:
+                    - checkbox "Receiving Officer Takes applications in at the counter." [ref=f1e5846]
+                    - generic [ref=f1e5847]:
+                      - strong [ref=f1e5848]: Receiving Officer
+                      - generic [ref=f1e5849]: Takes applications in at the counter.
+                  - generic [ref=f1e5850] [cursor=pointer]:
+                    - checkbox "Records Officer Maintains the record; withdrawals and expiries." [ref=f1e5851]
+                    - generic [ref=f1e5852]:
+                      - strong [ref=f1e5853]: Records Officer
+                      - generic [ref=f1e5854]: Maintains the record; withdrawals and expiries.
+                  - generic [ref=f1e5855] [cursor=pointer]:
+                    - checkbox "Evaluator Reviews submissions stage by stage." [checked] [active] [ref=f1e5856]
+                    - generic [ref=f1e5857]:
+                      - strong [ref=f1e5858]: Evaluator
+                      - generic [ref=f1e5859]: Reviews submissions stage by stage.
+                  - generic [ref=f1e5860] [cursor=pointer]:
+                    - checkbox "Assessor Computes the order of payment." [ref=f1e5861]
+                    - generic [ref=f1e5862]:
+                      - strong [ref=f1e5863]: Assessor
+                      - generic [ref=f1e5864]: Computes the order of payment.
+                  - generic [ref=f1e5865] [cursor=pointer]:
+                    - checkbox "Cashier Verifies that payment was received." [ref=f1e5866]
+                    - generic [ref=f1e5867]:
+                      - strong [ref=f1e5868]: Cashier
+                      - generic [ref=f1e5869]: Verifies that payment was received.
+                  - generic [ref=f1e5870] [cursor=pointer]:
+                    - checkbox "Building Official Approves or refuses the permit." [ref=f1e5871]
+                    - generic [ref=f1e5872]:
+                      - strong [ref=f1e5873]: Building Official
+                      - generic [ref=f1e5874]: Approves or refuses the permit.
+                  - generic [ref=f1e5875] [cursor=pointer]:
+                    - checkbox "Releasing Officer Prepares and releases the permit." [ref=f1e5876]
+                    - generic [ref=f1e5877]:
+                      - strong [ref=f1e5878]: Releasing Officer
+                      - generic [ref=f1e5879]: Prepares and releases the permit.
+                  - generic [ref=f1e5880] [cursor=pointer]:
+                    - checkbox "Auditor Reads everything, changes nothing." [ref=f1e5881]
+                    - generic [ref=f1e5882]:
+                      - strong [ref=f1e5883]: Auditor
+                      - generic [ref=f1e5884]: Reads everything, changes nothing.
+                  - generic [ref=f1e5885] [cursor=pointer]:
+                    - checkbox "Administrator Manages staff accounts and access." [ref=f1e5886]
+                    - generic [ref=f1e5887]:
+                      - strong [ref=f1e5888]: Administrator
+                      - generic [ref=f1e5889]: Manages staff accounts and access.
+              - group "Level of access" [ref=f1e5890]:
+                - generic [ref=f1e5892] [cursor=pointer]:
+                  - radio "View only See applications and documents. Cannot change anything." [checked] [ref=f1e5893]
+                  - generic [ref=f1e5894]:
+                    - strong [ref=f1e5895]: View only
+                    - generic [ref=f1e5896]: See applications and documents. Cannot change anything.
+                - generic [ref=f1e5897] [cursor=pointer]:
+                  - radio "View and edit Respond to citizens and decide on applications." [ref=f1e5898]
+                  - generic [ref=f1e5899]:
+                    - strong [ref=f1e5900]: View and edit
+                    - generic [ref=f1e5901]: Respond to citizens and decide on applications.
+              - generic [ref=f1e5902]:
+                - button "Cancel" [ref=f1e5903] [cursor=pointer]
+                - button "Approve and create account" [ref=f1e5904] [cursor=pointer]

@@ -1,0 +1,116 @@
+- generic [ref=e48]:
+  - complementary [ref=e50]:
+    - generic [ref=e51]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=e53]
+      - generic [ref=e54]: E-BPCO
+    - navigation [ref=e55]:
+      - link "Dashboard" [ref=e58] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=e64]:
+        - generic [ref=e65]: Operations
+        - generic [ref=e66]:
+          - link "Applications" [ref=e67] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=e73] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=e78] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=e85] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=e92]:
+        - generic [ref=e93]: Administration
+        - generic [ref=e94]:
+          - link "Businesses" [ref=e95] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=e101] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=e107] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=e114] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=e123] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=e129] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=e135] [cursor=pointer]
+  - main [ref=e141]:
+    - generic [ref=e516]:
+      - generic "User & Roles" [ref=e517]:
+        - generic [ref=e518]:
+          - heading "User & Roles" [level=1] [ref=e519]
+          - generic [ref=e520]:
+            - button "Notifications" [ref=e522] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=e528] [cursor=pointer]:
+              - generic [ref=e529]: Q
+              - generic [ref=e533]:
+                - generic [ref=e534]: QA@lguids.com.ph
+                - generic [ref=e535]: Super Admin
+      - generic [ref=e885]:
+        - heading "evaluator@lgu.gov.ph" [level=1] [ref=e886]
+        - generic [ref=e887]:
+          - generic [ref=e888]: Active
+          - button "Back to List" [ref=e889] [cursor=pointer]
+      - generic [ref=e890]:
+        - generic [ref=e894]:
+          - paragraph [ref=e895]: Open Assignments
+          - paragraph [ref=e896]: "10"
+        - generic [ref=e905]:
+          - paragraph [ref=e906]: Overdue
+          - paragraph [ref=e907]: "0"
+        - generic [ref=e916]:
+          - paragraph [ref=e917]: Completed This Month
+          - paragraph [ref=e918]: "28"
+        - generic [ref=e927]:
+          - paragraph [ref=e928]: Assigned Role
+          - paragraph [ref=e929]: —
+      - generic [ref=e934]:
+        - generic [ref=e935]:
+          - generic [ref=e936]: E
+          - generic [ref=e944]:
+            - heading "evaluator@lgu.gov.ph" [level=2] [ref=e945]
+            - generic [ref=e946]: Active
+            - generic [ref=e947]:
+              - generic [ref=e948]:
+                - term [ref=e949]: "Email :"
+                - definition [ref=e950]: evaluator@lgu.gov.ph
+              - generic [ref=e951]:
+                - term [ref=e952]: "Role :"
+                - definition [ref=e953]: View only
+              - generic [ref=e954]:
+                - term [ref=e955]: "Department :"
+                - definition [ref=e956]: No forms assigned
+          - generic [ref=e957]:
+            - generic [ref=e958]:
+              - strong [ref=e959]: 2026-09-12T11:20:26.612Z
+              - generic [ref=e960]: Last Active
+            - generic [ref=e961]:
+              - strong [ref=e962]: Active
+              - generic [ref=e963]: Account Status
+        - generic [ref=e964]:
+          - heading "Staff Account" [level=2] [ref=e966]
+          - navigation [ref=e967]:
+            - button "Profile" [ref=e968] [cursor=pointer]
+            - button "Role & Permissions" [ref=e969] [cursor=pointer]
+            - button "Workload" [ref=e970] [cursor=pointer]
+            - button "Security" [ref=e971] [cursor=pointer]
+            - button "Activity" [ref=e972] [cursor=pointer]
+          - heading "Contact Information" [level=3] [ref=e973]
+          - generic [ref=e974]:
+            - generic [ref=e975]:
+              - term [ref=e976]: Full Name
+              - definition [ref=e977]: evaluator@lgu.gov.ph
+            - generic [ref=e978]:
+              - term [ref=e979]: Email
+              - definition [ref=e980]: evaluator@lgu.gov.ph
+            - generic [ref=e981]:
+              - term [ref=e982]: Department
+              - definition [ref=e983]: No forms assigned
+            - generic [ref=e984]:
+              - term [ref=e985]: Account Status
+              - definition [ref=e986]: Active
+          - heading "Department" [level=3] [ref=e987]
+          - generic [ref=e988]:
+            - generic [ref=e989]: NF
+            - generic [ref=e991]:
+              - strong [ref=e992]: No forms assigned
+              - text: Assigned Department

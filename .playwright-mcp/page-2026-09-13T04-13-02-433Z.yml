@@ -1,0 +1,43 @@
+- generic [ref=f8e56]:
+  - complementary [ref=f8e58]:
+    - generic [ref=f8e59]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f8e61]
+      - generic [ref=f8e62]: E-BPCO
+    - navigation [ref=f8e63]:
+      - link "Dashboard" [ref=f8e66] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f8e72]:
+        - generic [ref=f8e73]: Operations
+        - link "Payments" [active] [ref=f8e75] [cursor=pointer]:
+          - /url: /payments
+      - generic [ref=f8e82]:
+        - generic [ref=f8e83]: Administration
+        - link "Archive" [ref=f8e85] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f8e91] [cursor=pointer]
+  - main [ref=f8e97]:
+    - generic [ref=f8e562]:
+      - generic "Payments" [ref=f8e563]:
+        - generic [ref=f8e564]:
+          - heading "Payments" [level=1] [ref=f8e565]
+          - generic [ref=f8e566]:
+            - button "Notifications" [ref=f8e568] [cursor=pointer]
+            - button "A assessor@lgu.gov.ph Payment Officer" [ref=f8e574] [cursor=pointer]:
+              - generic [ref=f8e575]: A
+              - generic [ref=f8e579]:
+                - generic [ref=f8e580]: assessor@lgu.gov.ph
+                - generic [ref=f8e581]: Payment Officer
+      - generic [ref=f8e585]:
+        - navigation [ref=f8e586]:
+          - button [ref=f8e587] [cursor=pointer]
+          - button [ref=f8e593] [cursor=pointer]
+        - generic [ref=f8e596]:
+          - textbox "Search by reference, applicant, or business/project" [ref=f8e602]
+          - generic [ref=f8e603]:
+            - combobox "Payment status filter" [ref=f8e604] [cursor=pointer]:
+              - option "Pending Verification" [selected]
+              - option "Paid"
+              - option "Not Yet Available"
+              - option "Overdue"
+            - button [ref=f8e605] [cursor=pointer]
+        - paragraph [ref=f8e610]: This account does not hold the permission this action requires.

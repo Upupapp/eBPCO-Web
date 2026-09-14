@@ -1,0 +1,96 @@
+- generic [ref=f1e1437]:
+  - complementary [ref=f1e1439]:
+    - generic [ref=f1e1440]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e1442]
+      - generic [ref=f1e1443]: E-BPCO
+    - navigation [ref=f1e1444]:
+      - link "Dashboard" [ref=f1e1447] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e1453]:
+        - generic [ref=f1e1454]: Operations
+        - generic [ref=f1e1455]:
+          - link "Applications" [ref=f1e1456] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e1462] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f1e1467] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e1474] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e1481]:
+        - generic [ref=f1e1482]: Administration
+        - generic [ref=f1e1483]:
+          - link "Businesses" [ref=f1e1484] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f1e1490] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e1496] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e1503] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e1512] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f1e1518] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e1524] [cursor=pointer]
+  - main [ref=f1e1530]:
+    - generic [ref=f1e3003]:
+      - generic "Permit Release" [ref=f1e3004]:
+        - generic [ref=f1e3005]:
+          - heading "Permit Release" [level=1] [ref=f1e3006]
+          - generic [ref=f1e3007]:
+            - generic [ref=f1e3008]:
+              - generic [ref=f1e3013]: Search
+              - textbox "Search" [ref=f1e3014]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f1e3016] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f1e3022] [cursor=pointer]:
+              - generic [ref=f1e3023]: Q
+              - generic [ref=f1e3027]:
+                - generic [ref=f1e3028]: QA@lguids.com.ph
+                - generic [ref=f1e3029]: Super Admin
+      - navigation [ref=f1e3033]:
+        - button [ref=f1e3034] [cursor=pointer]
+        - button [ref=f1e3040] [cursor=pointer]
+      - generic [ref=f1e3269]:
+        - heading "Fencing Permit" [level=1] [ref=f1e3270]
+        - button "Back to List" [ref=f1e3272] [cursor=pointer]
+      - generic [ref=f1e3273]:
+        - generic [ref=f1e3274]:
+          - generic [ref=f1e3275]:
+            - heading "Required Documents" [level=2] [ref=f1e3276]
+            - generic [ref=f1e3277]:
+              - button "Reset to Default" [ref=f1e3278] [cursor=pointer]
+              - button [ref=f1e3279] [cursor=pointer]
+              - button "Save Checklist" [ref=f1e3282] [cursor=pointer]
+          - table [ref=f1e3284]:
+            - rowgroup [ref=f1e3285]:
+              - row [ref=f1e3286]:
+                - columnheader "Document" [ref=f1e3287]
+                - columnheader "Required" [ref=f1e3288]
+                - columnheader "Reviewing Department" [ref=f1e3289]
+                - columnheader "Actions" [ref=f1e3290]
+            - rowgroup [ref=f1e3291]:
+              - row [ref=f1e3292]:
+                - cell "No documents are required for this permit type." [ref=f1e3293]
+        - generic [ref=f1e3294]:
+          - generic [ref=f1e3295]:
+            - heading "Fee Rules" [level=2] [ref=f1e3296]
+            - button [ref=f1e3297] [cursor=pointer]
+          - paragraph [ref=f1e3301]: Reference only — may not reflect the live fee schedule.
+          - table [ref=f1e3303]:
+            - rowgroup [ref=f1e3304]:
+              - row [ref=f1e3305]:
+                - columnheader "Fee" [ref=f1e3306]
+                - columnheader "Applicability" [ref=f1e3307]
+                - columnheader "Amount" [ref=f1e3308]
+            - rowgroup [ref=f1e3309]:
+              - row [ref=f1e3310]:
+                - cell "Filing / Application Fee (LGU-FIL-01)" [ref=f1e3311]
+                - cell "Required" [ref=f1e3312]
+                - cell "₱250.00" [ref=f1e3314]
+              - row [ref=f1e3315]:
+                - cell "Fencing Permit Fee (DPWH-ACC-FEN)" [ref=f1e3316]
+                - cell "Required" [ref=f1e3317]
+                - cell "Requires assessor input" [ref=f1e3319]
+          - paragraph [ref=f1e3320]: Building/permit fee, line-item fees per discipline (architectural/structural/electrical/mechanical/sanitary as applicable), and other regulatory fees assessed by the Municipal Treasurer’s Office based on project cost/floor area.

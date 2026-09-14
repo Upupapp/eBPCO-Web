@@ -212,14 +212,31 @@ export interface AppDetail {
 // caller via ApplicationStore.getBusiness, never by matching on the
 // applicant's name) — falls back to the application's own denormalized
 // businessName, then to 'Not provided', per getApplicationContext's rule.
-export function buildDetailFor(row: AppRow, applicant?: Applicant, business?: Business): AppDetail {
+//
+// `realContact` is the applicant's own account contact info from
+// `GET /staff/applications/:id` (`applicantEmail`/`applicantMobile`) — the
+// real backend record, present for every application the API actually
+// created. `applicant` above only resolves for the frontend's own local
+// mock seed data, which a real (server-created) application never matches;
+// this used to silently fall through to a FABRICATED email (the applicant's
+// display name, lowercased, stripped of spaces, plus "@gmail.com") and a
+// hardcoded fake phone number whenever that happened — real data existed
+// one call away and a made-up value was shown instead. Priority is real API
+// data, then the local mock record, then an honest "not on file" rather
+// than ever inventing a value again.
+export function buildDetailFor(
+  row: AppRow,
+  applicant?: Applicant,
+  business?: Business,
+  realContact?: { email: string; mobile: string | null },
+): AppDetail {
   const businessLabel = business?.name || row.businessName || 'Not provided';
   return {
     row,
     businessLabel,
     region: 'Region V (Bicol Region)',
-    email: applicant?.email ?? `${row.applicant.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
-    phone: applicant?.mobileNumber ?? '+63 912 345 6789',
+    email: realContact?.email || applicant?.email || 'Not on file',
+    phone: realContact?.mobile || applicant?.mobileNumber || 'Not on file',
     lastUpdated: row.dateSubmitted,
     emailVerification: applicant?.emailVerification ?? unverifiedContact(),
     mobileVerification: applicant?.mobileVerification ?? unverifiedContact(),

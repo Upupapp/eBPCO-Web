@@ -14,6 +14,7 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS } from '../../core/session/permissions';
 import { ALL_PERMIT_TYPES, PermitType, ReleaseMethod } from '../../core/domain/permit.model';
+import { ApplicationLifecycleStatus } from '../../core/domain/status.model';
 import { DocumentPreview } from '../../shared/document-preview/document-preview';
 import { GeneratedPermitDocumentModal } from '../../shared/generated-document/generated-permit-document-modal';
 import { requirementsFor, RequirementDocument } from '../../core/domain/requirements-catalog';
@@ -21,6 +22,10 @@ import { RequirementsConfigStore } from '../../core/domain/requirements-config-s
 import { PaymentConfigStore } from '../../core/domain/payment-config-store';
 import { DEPARTMENTS, departmentName } from '../../core/domain/department.model';
 import { FeeApplicability } from '../../core/domain/fee-rule.model';
+import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { QueueLoader } from '../../core/domain/queue-loader';
+import { PermitReleaseApi } from '../../core/api/permit-release.api';
+import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
 
 type PermitReleaseTab = 'release' | 'permit-types';
 
@@ -29,12 +34,32 @@ function formatPHP(centavos: number | null): string {
   return `₱${(centavos / 100).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-// 'Ready for Release' mirrors E-BPCO Mobile's ApplicationStatus.released
-// display label exactly (application_model.dart) — from the applicant's
-// side, that status IS "Ready for Release". 'Released' is the LGU-internal
-// state once staff hand over the physical permit, which mobile doesn't
-// track as a separate status.
-type PermitStatus = 'Ready for Release' | 'Released';
+/**
+ * The real, staff-drivable stages from `Approved` onward
+ * (`applications/domain/lifecycle.ts`): `Approved -> Permit Generated ->
+ * Ready for Release -> Released -> Completed`. Every row this queue shows
+ * already has a permit by construction (see `rows()` below) — Generate
+ * itself lives only on the Applications page, since no role that reaches
+ * this page (Super Admin, Administrator, Releasing Officer) holds
+ * `staff:approve`.
+ */
+type PermitStage = 'Permit Generated' | 'Ready for Release' | 'Released' | 'Completed';
+
+/** The externally-visible bucket a stage collapses to — Released and Completed read as the same outcome from the release desk's point of view, the same way the shared `PermitReleaseStatus` already does. */
+type DisplayStatus = 'Awaiting Preparation' | 'Ready for Release' | 'Released';
+
+function displayStatusFor(stage: PermitStage): DisplayStatus {
+  if (stage === 'Permit Generated') return 'Awaiting Preparation';
+  if (stage === 'Ready for Release') return 'Ready for Release';
+  return 'Released';
+}
+
+const RELEASE_QUEUE_STAGES: ReadonlySet<ApplicationLifecycleStatus> = new Set([
+  'Permit Generated',
+  'Ready for Release',
+  'Released',
+  'Completed',
+]);
 
 interface ReleaseRow {
   id: string;
@@ -47,8 +72,11 @@ interface ReleaseRow {
   type: string | null;
   approvalStatus: string;
   paymentStatus: string;
-  permitStatus: PermitStatus;
+  permitStage: PermitStage;
+  displayStatus: DisplayStatus;
   permitNumber: string;
+  /** Optimistic-concurrency token threaded into every transition call in the generate/prepare/release chain. */
+  version?: number;
 }
 
 interface RingStat {
@@ -87,6 +115,10 @@ export class PermitRelease {
   private readonly toast = inject(ToastService);
   private readonly requirementsConfig = inject(RequirementsConfigStore);
   private readonly paymentConfig = inject(PaymentConfigStore);
+  private readonly applicationsApi = inject(StaffApplicationsApi);
+  private readonly loader = inject(QueueLoader);
+  private readonly permitReleaseApi = inject(PermitReleaseApi);
+  private readonly sessionCache = inject(PermitReleaseSessionCache);
 
   protected readonly canRelease = computed(() => {
     const role = this.session.role();
@@ -107,8 +139,8 @@ export class PermitRelease {
   }
 
   // ---- Permit Types: the required-document checklist + a fee-rule summary
-  // per permit type. Every one of the fixed 16 permit types is shown here —
-  // this office (OBO) is the responsible department for all of them (see
+  // per permit type. Every one of the 19 permit types is shown here — this
+  // office (OBO) is the responsible department for all of them (see
   // department.model.ts), so there is no meaningful subset to filter down
   // to; viewing is open to anyone who can reach Permit Release at all,
   // while editing the checklist is narrowed further (see canConfigureRequirements).
@@ -122,11 +154,15 @@ export class PermitRelease {
   protected readonly departmentOptions = DEPARTMENTS;
 
   protected readonly selectedPermitType = signal<PermitType | null>(null);
+  protected readonly checklistDirty = signal(false);
+  protected readonly savingChecklist = signal(false);
 
   protected selectPermitType(type: PermitType): void {
     this.selectedPermitType.set(type);
+    this.checklistDirty.set(false);
     this.cancelAddDocument();
     this.cancelEditDocument();
+    void this.requirementsConfig.ensureLoaded(type);
   }
 
   protected backToPermitTypesList(): void {
@@ -144,6 +180,27 @@ export class PermitRelease {
   protected readonly selectedDocuments = computed<RequirementDocument[]>(() => {
     const type = this.selectedPermitType();
     return type ? this.requirementsConfig.documentsFor(type) : [];
+  });
+
+  protected readonly checklistLoadFailed = computed(() => {
+    const type = this.selectedPermitType();
+    return type ? this.requirementsConfig.loadFailed(type) : false;
+  });
+
+  /**
+   * True when the live checklist genuinely loaded (not a fetch failure —
+   * `checklistLoadFailed` covers that) and came back with nothing published
+   * for this type yet. The list this page opened FROM shows a document
+   * count sourced from the static reference catalog (`referenceFor`), which
+   * this same, real, successful GET does not reflect — a real administrator
+   * following that count in here otherwise finds a plain "No documents are
+   * required for this permit type." with nothing explaining the mismatch
+   * or what to do about it.
+   */
+  protected readonly checklistNothingPublishedYet = computed(() => {
+    const type = this.selectedPermitType();
+    if (!type) return false;
+    return !this.checklistLoadFailed() && this.selectedDocuments().length === 0;
   });
 
   protected requirementsConfigDocCount(type: PermitType): number {
@@ -168,23 +225,33 @@ export class PermitRelease {
     return a === 'required' ? 'Required' : a === 'conditional' ? 'Conditional' : 'Not Applicable';
   }
 
-  goToFeeMatrix(type: PermitType): void {
-    this.router.navigate(['/payments'], { queryParams: { tab: 'matrix', permitType: type } });
+  /** Fee Schedule has no per-permit-type filtering concept anymore (Stage 3 rebuilt it around published schedule *versions*, not a matrix) — this deep-links to the tab only, dropping the dead `permitType` query param. */
+  goToFeeMatrix(): void {
+    this.router.navigate(['/payments'], { queryParams: { tab: 'fee-schedule' } });
   }
 
-  // ---- Permit Types: add/edit/remove a required document ----------------
+  // ---- Permit Types: add/edit/remove a required document -----------------
+  // Local-draft mutators only — the server has no per-document CRUD route,
+  // just a full-list-replace PUT (see saveChecklist() below).
 
   protected readonly addDocumentOpen = signal(false);
-  protected newDocument = { label: '', required: true, reviewingDepartmentId: 'obo' };
+  protected newDocument = { label: '', required: true, description: '' };
 
   protected startAddDocument(): void {
     if (!this.canConfigureRequirements()) return;
-    this.newDocument = { label: '', required: true, reviewingDepartmentId: 'obo' };
+    this.newDocument = { label: '', required: true, description: '' };
     this.addDocumentOpen.set(true);
   }
 
   protected cancelAddDocument(): void {
     this.addDocumentOpen.set(false);
+  }
+
+  /** Preview-only — the actual code is (re)derived at add-time from whatever the label is at that moment, so this never drifts from what confirmAddDocument() will actually mint. */
+  protected previewNewDocumentCode(): string {
+    const type = this.selectedPermitType();
+    if (!type || !this.newDocument.label.trim()) return '';
+    return this.requirementsConfig.deriveUniqueCode(type, this.newDocument.label);
   }
 
   protected confirmAddDocument(): void {
@@ -198,24 +265,40 @@ export class PermitRelease {
       this.toast.error('Enter a document label before adding it.');
       return;
     }
+    // The auto-derived code de-duplicates against this draft (see
+    // `deriveUniqueCode` — a second "Barangay Clearance" mints
+    // "barangay-clearance-2"), so the server's own duplicate-CODE refusal
+    // never triggers here; two documents ending up with the same LABEL and
+    // merely different codes reads to an officer as the same requirement
+    // listed twice, which is confusing even though it isn't a code
+    // collision. Caught here instead, before it's added.
+    const alreadyListed = this.requirementsConfig
+      .documentsFor(type)
+      .some((d) => d.label.trim().toLowerCase() === label.toLowerCase());
+    if (alreadyListed) {
+      this.toast.error(`"${label}" is already on this checklist.`);
+      return;
+    }
     this.requirementsConfig.addDocument(type, {
       label,
       required: this.newDocument.required,
-      reviewingDepartmentId: this.newDocument.reviewingDepartmentId,
+      description: this.newDocument.description.trim() || undefined,
+      reviewingDepartmentId: this.referenceFor(type).responsibleDepartmentId,
     });
-    this.toast.success(`"${label}" added to the checklist.`);
+    this.checklistDirty.set(true);
+    this.toast.success(`"${label}" added to the checklist. Select "Save Checklist" to publish it.`);
     this.addDocumentOpen.set(false);
   }
 
   protected readonly editingDocumentId = signal<string | null>(null);
-  protected editDraft = { label: '', required: true, reviewingDepartmentId: 'obo' };
+  protected editDraft = { label: '', required: true, description: '' };
 
   protected startEditDocument(doc: RequirementDocument): void {
     if (!this.canConfigureRequirements()) return;
     this.editDraft = {
       label: doc.label,
       required: doc.required,
-      reviewingDepartmentId: doc.reviewingDepartmentId,
+      description: doc.description ?? '',
     };
     this.editingDocumentId.set(doc.id);
   }
@@ -239,9 +322,10 @@ export class PermitRelease {
     this.requirementsConfig.updateDocument(type, id, {
       label,
       required: this.editDraft.required,
-      reviewingDepartmentId: this.editDraft.reviewingDepartmentId,
+      description: this.editDraft.description.trim() || undefined,
     });
-    this.toast.success(`"${label}" updated.`);
+    this.checklistDirty.set(true);
+    this.toast.success(`"${label}" updated. Select "Save Checklist" to publish it.`);
     this.editingDocumentId.set(null);
   }
 
@@ -252,7 +336,8 @@ export class PermitRelease {
       return;
     }
     this.requirementsConfig.removeDocument(type, doc.id);
-    this.toast.success(`"${doc.label}" removed from the checklist.`);
+    this.checklistDirty.set(true);
+    this.toast.success(`"${doc.label}" removed from the draft. Select "Save Checklist" to publish it.`);
   }
 
   protected resetDocumentsToDefault(): void {
@@ -262,43 +347,86 @@ export class PermitRelease {
       return;
     }
     this.requirementsConfig.resetToDefault(type);
-    this.toast.success('Checklist reset to default.');
+    this.checklistDirty.set(true);
+    this.toast.success('Checklist reset to default in this draft. Select "Save Checklist" to publish it.');
   }
 
+  /** Batches the whole current draft into one `PUT` — there is no per-document write route server-side. */
+  protected async saveChecklist(): Promise<void> {
+    const type = this.selectedPermitType();
+    if (!type || !this.canConfigureRequirements()) {
+      this.toast.error("You don't have permission to configure requirements.");
+      return;
+    }
+    this.savingChecklist.set(true);
+    try {
+      const result = await this.requirementsConfig.saveDocuments(type);
+      if (result.kind === 'done') {
+        this.checklistDirty.set(false);
+        this.toast.success('Checklist saved.');
+      } else {
+        const message =
+          result.kind === 'unavailable' ? 'This deployment cannot save the checklist yet.' : result.message;
+        this.toast.error(message);
+      }
+    } finally {
+      this.savingChecklist.set(false);
+    }
+  }
+
+  // ---- Release Queue -------------------------------------------------------
   // Every row is an application whose permit has actually been generated —
-  // read from the same store Applications/Payments/Dashboard read, with
-  // its real permit number, instead of a locally-invented 10-row table.
+  // read from the same store Applications/Payments/Dashboard read, filtered
+  // on the real `lifecycleStatus` values a generated permit can produce.
+
   protected readonly rows = computed<ReleaseRow[]>(() => {
     return this.store
       .applications()
-      .filter((app) => app.permitReleaseStatus !== 'Not Ready')
-      .map((app): ReleaseRow => ({
-        id: app.id,
-        applicant: app.applicant,
-        businessId: app.businessId,
-        businessName: app.businessName,
-        city: app.location,
-        type: app.permitType,
-        approvalStatus: 'Approved',
-        paymentStatus: app.paymentStatus,
-        permitStatus: app.permitReleaseStatus as PermitStatus,
-        permitNumber: this.store.getPermit(app.id)?.permitNumber ?? '—',
-      }));
+      .filter((app) => RELEASE_QUEUE_STAGES.has(app.lifecycleStatus))
+      .map((app): ReleaseRow => {
+        const stage = app.lifecycleStatus as PermitStage;
+        const cached = this.sessionCache.permitFor(app.id);
+        const seedPermit = this.store.isSeedData() ? this.store.getPermit(app.id) : undefined;
+        return {
+          id: app.id,
+          applicant: app.applicant,
+          businessId: app.businessId,
+          businessName: app.businessName,
+          city: app.location,
+          type: app.permitType,
+          approvalStatus: 'Approved',
+          paymentStatus: app.paymentStatus,
+          permitStage: stage,
+          displayStatus: displayStatusFor(stage),
+          permitNumber: cached?.permitNumber ?? seedPermit?.permitNumber ?? 'Not available in this session',
+          version: app.version,
+        };
+      });
   });
 
-  // Ring totals are derived from the same rows() the table shows, so
-  // "Total Release" always equals Ready-for-Release + Released.
+  // Ring totals are derived from the same rows() the table shows.
   protected readonly ringStats = computed<RingStat[]>(() => {
     const rows = this.rows();
     const total = rows.length || 1;
-    const ready = rows.filter((r) => r.permitStatus === 'Ready for Release').length;
-    const released = rows.filter((r) => r.permitStatus === 'Released').length;
+    const awaiting = rows.filter((r) => r.displayStatus === 'Awaiting Preparation').length;
+    const ready = rows.filter((r) => r.displayStatus === 'Ready for Release').length;
+    const released = rows.filter((r) => r.displayStatus === 'Released').length;
     return [
+      {
+        label: 'Awaiting Preparation',
+        value: String(awaiting),
+        icon: 'clock',
+        tone: 'warning',
+        illustration: 'pending',
+        pct: Math.round((awaiting / total) * 100),
+        isTotal: false,
+        support: `${Math.round((awaiting / total) * 100)}% of total release`,
+      },
       {
         label: 'Ready for Release',
         value: String(ready),
         icon: 'clock',
-        tone: 'warning',
+        tone: 'info',
         illustration: 'pending',
         pct: Math.round((ready / total) * 100),
         isTotal: false,
@@ -322,8 +450,8 @@ export class PermitRelease {
         illustration: 'permit',
         pct: 100,
         isTotal: true,
-        support: 'Ready for Release · Released',
-        bars: [ready, released],
+        support: 'Awaiting Preparation · Ready for Release · Released',
+        bars: [awaiting, ready, released],
       },
     ];
   });
@@ -331,8 +459,12 @@ export class PermitRelease {
   protected readonly page = signal(1);
   protected readonly pageSize = 10;
   protected readonly searchTerm = signal('');
-  protected readonly statusFilter = signal<'All' | PermitStatus>('All');
-  protected readonly statusOptions: PermitStatus[] = ['Ready for Release', 'Released'];
+  protected readonly statusFilter = signal<'All' | DisplayStatus>('All');
+  protected readonly statusOptions: DisplayStatus[] = [
+    'Awaiting Preparation',
+    'Ready for Release',
+    'Released',
+  ];
 
   protected readonly activeFilterCount = computed(() => (this.statusFilter() === 'All' ? 0 : 1));
 
@@ -344,7 +476,7 @@ export class PermitRelease {
     const term = this.searchTerm().trim().toLowerCase();
     const status = this.statusFilter();
     return this.rows().filter((r) => {
-      if (status !== 'All' && r.permitStatus !== status) return false;
+      if (status !== 'All' && r.displayStatus !== status) return false;
       if (!term) return true;
       return (
         r.id.toLowerCase().includes(term) ||
@@ -416,13 +548,19 @@ export class PermitRelease {
       Type: row.type,
       'Approval Status': row.approvalStatus,
       'Payment Status': row.paymentStatus,
-      'Permit Status': row.permitStatus,
+      'Permit Status': row.displayStatus,
       'Permit Number': row.permitNumber,
     };
   }
 
   protected exportVisible(): void {
     const rows = this.filteredRows();
+    // `downloadCsv` writes nothing for an empty set, so "Exported 0 rows."
+    // announced a file that was never created.
+    if (rows.length === 0) {
+      this.toast.info('Nothing to export — no rows match the current view.');
+      return;
+    }
     downloadCsv(
       'permit-releases',
       rows.map((row) => this.releaseCsvRow(row)),
@@ -433,6 +571,10 @@ export class PermitRelease {
   protected exportSelected(): void {
     const ids = this.selectedIds();
     const rows = this.rows().filter((row) => ids.has(row.id));
+    if (rows.length === 0) {
+      this.toast.info('Nothing to export — select at least one row first.');
+      return;
+    }
     downloadCsv(
       'permit-releases-selected',
       rows.map((row) => this.releaseCsvRow(row)),
@@ -440,43 +582,21 @@ export class PermitRelease {
     this.toast.success(`Exported ${rows.length} row${rows.length === 1 ? '' : 's'}.`);
   }
 
-  // ---- Generate / print ---------------------------------------------------
+  // ---- Print (preview-only; nothing is generated here — see Applications'
+  // own Generate action, the only place `staff:approve` is actually held) --
 
-  protected readonly showGenerateModal = signal(false);
-  protected readonly generateTarget = signal<ReleaseRow | null>(null);
+  protected readonly showPrintModal = signal(false);
+  protected readonly printTarget = signal<ReleaseRow | null>(null);
 
-  generate(row?: ReleaseRow): void {
-    // Actually generate the permit record here (mirroring the Applications
-    // page's own "Generate {finalDocumentName}" button) rather than only
-    // opening a print preview over whatever may or may not already exist —
-    // previously this modal never called ApplicationStore.generatePermit(),
-    // so a staffer working exclusively from this page had no way to create
-    // a permit that didn't already exist.
-    if (row && !this.store.getPermit(row.id)) {
-      const application = this.store.getById(row.id);
-      if (application?.lifecycleStatus === 'Approved' && application.paymentStatus === 'Paid') {
-        const ok = this.store.generatePermit(
-          row.id,
-          this.session.name() || 'Approving Officer',
-          this.session.role() ?? 'Administrator',
-        );
-        if (ok) this.toast.success('Permit generated.');
-        else this.toast.error("Couldn't generate the permit for this application.");
-      } else {
-        this.toast.error(
-          "Can't generate a permit yet — the application must be Approved and fully paid.",
-        );
-        return;
-      }
-    }
-    this.generateTarget.set(row ?? null);
-    this.showGenerateModal.set(true);
+  printPermit(row?: ReleaseRow): void {
+    this.printTarget.set(row ?? null);
+    this.showPrintModal.set(true);
   }
 
   protected readonly printRows = computed(() => {
-    const target = this.generateTarget();
+    const target = this.printTarget();
     if (target) return [target];
-    return this.rows().filter((r) => r.permitStatus === 'Ready for Release');
+    return this.rows().filter((r) => r.displayStatus === 'Ready for Release');
   });
 
   printPdf(): void {
@@ -484,23 +604,98 @@ export class PermitRelease {
   }
 
   closeModal(): void {
-    this.showGenerateModal.set(false);
-    this.generateTarget.set(null);
+    this.showPrintModal.set(false);
+    this.printTarget.set(null);
+  }
+
+  // ---- Prepare Release ------------------------------------------------------
+  // The real precondition to Release below — the server refuses `release`
+  // outright without a prior successful `release-preparation` call.
+
+  protected readonly prepareReleaseTarget = signal<ReleaseRow | null>(null);
+  protected readonly preparingRelease = signal(false);
+  protected readonly prepareReleaseError = signal('');
+  protected claimLocation = '';
+  protected officeHours = '';
+  protected bringWithYouText = '';
+
+  protected requestPrepareRelease(row: ReleaseRow): void {
+    if (!this.canRelease() || row.permitStage !== 'Permit Generated') return;
+    this.claimLocation = '';
+    this.officeHours = '';
+    this.bringWithYouText = '';
+    this.prepareReleaseError.set('');
+    this.prepareReleaseTarget.set(row);
+  }
+
+  protected cancelPrepareRelease(): void {
+    this.prepareReleaseTarget.set(null);
+  }
+
+  protected async confirmPrepareRelease(): Promise<void> {
+    const row = this.prepareReleaseTarget();
+    if (!row) return;
+    const claimLocation = this.claimLocation.trim();
+    const officeHours = this.officeHours.trim();
+    if (!claimLocation || !officeHours) {
+      const message = 'Claim location and office hours are required.';
+      this.prepareReleaseError.set(message);
+      this.toast.error(message);
+      return;
+    }
+    const bringWithYou = this.bringWithYouText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    this.preparingRelease.set(true);
+    try {
+      const result = await this.permitReleaseApi.prepareRelease(row.id, {
+        claimLocation,
+        officeHours,
+        bringWithYou: bringWithYou.length > 0 ? bringWithYou : undefined,
+      });
+      if (result.kind !== 'done') {
+        const message =
+          result.kind === 'unavailable' ? 'This deployment cannot prepare releases yet.' : result.message;
+        this.prepareReleaseError.set(message);
+        this.toast.error(message);
+        return;
+      }
+      this.sessionCache.recordPreparation(row.id, { claimLocation, officeHours, bringWithYou });
+      const transitionResult = await this.applicationsApi.transition(row.id, 'Ready for Release', {
+        expectedVersion: row.version,
+      });
+      if (transitionResult.kind !== 'done') {
+        const message =
+          transitionResult.kind === 'unavailable'
+            ? 'this deployment cannot update it yet.'
+            : transitionResult.message;
+        this.toast.error(`Release prepared, but the status update failed — ${message} Reload and try again.`);
+      } else {
+        this.toast.success('Release prepared.');
+      }
+      this.prepareReleaseTarget.set(null);
+      await this.loader.reload();
+    } finally {
+      this.preparingRelease.set(false);
+    }
   }
 
   // ---- Release (claim) ----------------------------------------------------
-  // Requires an approved application, verified payment, and generated
-  // permit — all enforced by the store, which also refuses a second
-  // release for the same application and marks the application Completed
-  // once released.
+  // Requires an existing prepared release — enforced by the server, not this
+  // page. On success, chains both remaining real transitions
+  // (`Ready for Release -> Released -> Completed`) in the one click, since
+  // that already matches how a single "Release" action reads to an officer.
 
   protected readonly releaseTarget = signal<ReleaseRow | null>(null);
   protected readonly releaseError = signal('');
+  protected readonly releasingPermit = signal(false);
   protected claimantName = '';
   protected releaseMethod: ReleaseMethod = 'Physical Claim';
 
   protected requestRelease(row: ReleaseRow): void {
-    if (!this.canRelease() || row.permitStatus !== 'Ready for Release') return;
+    if (!this.canRelease() || row.permitStage !== 'Ready for Release') return;
     this.claimantName = row.applicant;
     this.releaseMethod = 'Physical Claim';
     this.releaseError.set('');
@@ -511,7 +706,7 @@ export class PermitRelease {
     this.releaseTarget.set(null);
   }
 
-  protected confirmRelease(): void {
+  protected async confirmRelease(): Promise<void> {
     const row = this.releaseTarget();
     if (!row) return;
     const claimant = this.claimantName.trim();
@@ -521,21 +716,54 @@ export class PermitRelease {
       this.toast.error(message);
       return;
     }
-    const ok = this.store.releasePermit(
-      row.id,
-      this.session.name() || 'Releasing Officer',
-      claimant,
-      this.releaseMethod,
-    );
-    if (!ok) {
-      const message =
-        'This application is not eligible for release yet (needs an approved status, verified payment, and generated permit), or has already been released.';
-      this.releaseError.set(message);
-      this.toast.error(message);
-      return;
+    this.releasingPermit.set(true);
+    try {
+      const result = await this.permitReleaseApi.release(row.id, {
+        claimantName: claimant,
+        method: this.releaseMethod,
+      });
+      if (result.kind !== 'done') {
+        const message =
+          result.kind === 'unavailable' ? 'This deployment cannot release permits yet.' : result.message;
+        this.releaseError.set(message);
+        this.toast.error(message);
+        return;
+      }
+      this.sessionCache.recordRelease(row.id, {
+        claimantName: claimant,
+        method: this.releaseMethod,
+        releasedAt: result.releasedAt,
+      });
+      const releasedTransition = await this.applicationsApi.transition(row.id, 'Released', {
+        expectedVersion: row.version,
+      });
+      if (releasedTransition.kind !== 'done') {
+        const message =
+          releasedTransition.kind === 'unavailable'
+            ? 'this deployment cannot update it yet.'
+            : releasedTransition.message;
+        this.toast.error(`Permit released to ${claimant}, but the status update failed — ${message} Reload and try again.`);
+      } else {
+        const completedTransition = await this.applicationsApi.transition(row.id, 'Completed', {
+          expectedVersion: releasedTransition.version,
+        });
+        if (completedTransition.kind !== 'done') {
+          const message =
+            completedTransition.kind === 'unavailable'
+              ? 'this deployment cannot update it yet.'
+              : completedTransition.message;
+          this.toast.error(
+            `Permit released to ${claimant}, but marking it Completed failed — ${message} Reload and try again.`,
+          );
+        } else {
+          this.toast.success(`Permit released to ${claimant}.`);
+        }
+      }
+      this.releaseTarget.set(null);
+      await this.loader.reload();
+    } finally {
+      this.releasingPermit.set(false);
     }
-    this.toast.success(`Permit released to ${claimant}.`);
-    this.releaseTarget.set(null);
   }
 
   protected readonly view = signal<'list' | 'detail'>('list');

@@ -1,0 +1,243 @@
+- generic [ref=f22e192]:
+  - complementary [ref=f22e194]:
+    - generic [ref=f22e195]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f22e197]
+      - generic [ref=f22e198]: E-BPCO
+    - navigation [ref=f22e199]:
+      - link "Dashboard" [ref=f22e202] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f22e208]:
+        - generic [ref=f22e209]: Operations
+        - generic [ref=f22e210]:
+          - link "Applications" [ref=f22e211] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f22e217] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f22e222] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f22e229] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f22e236]:
+        - generic [ref=f22e237]: Administration
+        - generic [ref=f22e238]:
+          - link "Businesses" [ref=f22e239] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f22e245] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f22e251] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [active] [ref=f22e258] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f22e267] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f22e273] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f22e279] [cursor=pointer]
+  - main [ref=f22e285]:
+    - generic [ref=f22e2160]:
+      - generic "Workflow" [ref=f22e2161]:
+        - generic [ref=f22e2162]:
+          - heading "Workflow" [level=1] [ref=f22e2163]
+          - generic [ref=f22e2164]:
+            - button "Notifications" [ref=f22e2166] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f22e2172] [cursor=pointer]:
+              - generic [ref=f22e2173]: Q
+              - generic [ref=f22e2177]:
+                - generic [ref=f22e2178]: QA@lguids.com.ph
+                - generic [ref=f22e2179]: Super Admin
+      - generic [ref=f22e2183]:
+        - heading "System Flowchart" [level=2] [ref=f22e2184]
+        - generic [ref=f22e2185]:
+          - button "Back to List" [ref=f22e2186] [cursor=pointer]
+          - button [ref=f22e2188] [cursor=pointer]
+      - generic [ref=f22e2194]:
+        - heading "OVERALL Flowchart" [level=2] [ref=f22e2195]
+        - img [ref=f22e2197]:
+          - generic [ref=f22e2219]: Return
+          - generic [ref=f22e2222]: "NO"
+          - generic [ref=f22e2225]: "YES"
+          - generic [ref=f22e2228]: "YES"
+          - generic [ref=f22e2231]: "NO"
+          - generic [ref=f22e2234]: "YES"
+          - generic [ref=f22e2237]: Return
+          - generic [ref=f22e2240]: "YES"
+          - generic [ref=f22e2243]: "NO"
+          - generic [ref=f22e2246]: Return
+          - generic [ref=f22e2249]: "NO"
+          - generic [ref=f22e2252]: "YES"
+          - generic [ref=f22e2255]: "NO"
+          - generic [ref=f22e2258]: "YES"
+          - generic [ref=f22e2261]: "NO"
+          - generic [ref=f22e2264]: "YES"
+          - generic [ref=f22e2267]: "NO"
+          - generic [ref=f22e2270]: "YES"
+          - generic [ref=f22e2273]: Retry
+          - generic [ref=f22e2276]: START
+          - generic [ref=f22e2283]:
+            - generic:
+              - generic: Login / Register
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2287]:
+            - generic:
+              - generic: View Dashboard
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2291]:
+            - generic:
+              - generic: Click 'Start New Application'
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2295]:
+            - generic:
+              - generic: Initialize New Application
+              - generic: "[Platform: System]"
+          - generic [ref=f22e2299]:
+            - generic:
+              - generic: Select Form Type (Building Permit / Certificate of Occupancy)
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2303]:
+            - generic:
+              - generic: Load Selected Form Template
+              - generic: "[Platform: System]"
+          - generic [ref=f22e2307]:
+            - generic:
+              - generic: Fill Out Dynamic Form
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2311]:
+            - generic:
+              - generic: Auto-Save Draft
+              - generic: "[Platform: System]"
+          - generic [ref=f22e2315]:
+            - generic:
+              - generic: Validate Required Fields
+              - generic: "[Platform: System]"
+          - generic [ref=f22e2316]: Is Form Complete?
+          - generic [ref=f22e2323]:
+            - generic:
+              - generic: Review Missing Fields
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2327]:
+            - generic:
+              - generic: Click 'Download Form (PDF)'
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2331]:
+            - generic:
+              - generic: Generate PDF
+              - generic: "[Platform: System]"
+          - generic [ref=f22e2335]:
+            - generic:
+              - generic: Engineer Reviews and Signs Form
+              - generic: "[Platform: External]"
+          - generic [ref=f22e2339]:
+            - generic:
+              - generic: Upload Signed Form
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2343]:
+            - generic:
+              - generic: Validate Uploaded File
+              - generic: "[Platform: System]"
+          - generic [ref=f22e2344]: Is Signed Form Uploaded?
+          - generic [ref=f22e2351]:
+            - generic:
+              - generic: Show Upload Error
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2355]:
+            - generic:
+              - generic: Submit Application
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2359]:
+            - generic:
+              - generic: Generate Tracking Number
+              - generic: "[Platform: System]"
+          - generic [ref=f22e2363]:
+            - generic:
+              - generic: Forward to Zoning
+              - generic: "[Platform: Web]"
+          - generic [ref=f22e2367]:
+            - generic:
+              - generic: Zoning Evaluation
+              - generic: "[Platform: Web]"
+          - generic [ref=f22e2368]: Is Signed Form Uploaded?
+          - generic [ref=f22e2375]:
+            - generic:
+              - generic: Submit Application
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2379]:
+            - generic:
+              - generic: Show Upload Error
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2383]:
+            - generic:
+              - generic: Upload Signed Form
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2384]: Zoning Approved?
+          - generic [ref=f22e2391]:
+            - generic:
+              - generic: Return to Applicant
+              - generic: "[Platform: Web]"
+          - generic [ref=f22e2395]:
+            - generic:
+              - generic: Forward to Fire
+              - generic: "[Platform: Web]"
+          - generic [ref=f22e2399]:
+            - generic:
+              - generic: Fire Safety Evaluation
+              - generic: "[Platform: Web]"
+          - generic [ref=f22e2400]: Fire Safety Approved?
+          - generic [ref=f22e2407]:
+            - generic:
+              - generic: Return Application
+              - generic: "[Platform: Web]"
+          - generic [ref=f22e2411]:
+            - generic:
+              - generic: Forward to OBO
+              - generic: "[Platform: Web]"
+          - generic [ref=f22e2415]:
+            - generic:
+              - generic: Multi-Discipline Review
+              - generic: "[Platform: Web]"
+          - generic [ref=f22e2419]:
+            - generic:
+              - generic: Track Approvals
+              - generic: "[Platform: System]"
+          - generic [ref=f22e2420]: All Disciplines Reviewed?
+          - generic [ref=f22e2427]:
+            - generic:
+              - generic: Building Official Approval
+              - generic: "[Platform: Web]"
+          - generic [ref=f22e2431]:
+            - generic:
+              - generic: Generate Order of Payment
+              - generic: "[Platform: System]"
+          - generic [ref=f22e2435]:
+            - generic:
+              - generic: Select Payment Method
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2439]:
+            - generic:
+              - generic: Payment Gateway Processing
+              - generic: "[Platform: External]"
+          - generic [ref=f22e2443]:
+            - generic:
+              - generic: Verify Payment
+              - generic: "[Platform: System]"
+          - generic [ref=f22e2444]: Payment Successful?
+          - generic [ref=f22e2451]:
+            - generic:
+              - generic: Retry Payment
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2455]:
+            - generic:
+              - generic: Generate Permit PDF
+              - generic: "[Platform: System]"
+          - generic [ref=f22e2459]:
+            - generic:
+              - generic: Mark as Released
+              - generic: "[Platform: Web]"
+          - generic [ref=f22e2463]:
+            - generic:
+              - generic: Receive Notification
+              - generic: "[Platform: Mobile]"
+          - generic [ref=f22e2467]:
+            - generic:
+              - generic: Claim Permit
+              - generic: "[Platform: External]"
+          - generic [ref=f22e2468]: "END: Application Completed"

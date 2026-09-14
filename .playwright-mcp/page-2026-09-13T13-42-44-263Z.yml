@@ -1,0 +1,66 @@
+- generic [ref=f1e53]:
+  - complementary [ref=f1e55]:
+    - generic [ref=f1e56]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e58]
+      - generic [ref=f1e59]: E-BPCO
+    - navigation [ref=f1e60]:
+      - link "Dashboard" [ref=f1e63] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e69]:
+        - generic [ref=f1e70]: Operations
+        - generic [ref=f1e71]:
+          - link "Applications" [ref=f1e72] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e78] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [active] [ref=f1e83] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e90] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e97]:
+        - generic [ref=f1e98]: Administration
+        - generic [ref=f1e99]:
+          - link "Businesses" [ref=f1e100] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f1e106] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e112] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e119] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e128] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f1e134] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e140] [cursor=pointer]
+  - main [ref=f1e146]:
+    - generic [ref=f1e1031]:
+      - generic "Payments" [ref=f1e1032]:
+        - generic [ref=f1e1033]:
+          - heading "Payments" [level=1] [ref=f1e1034]
+          - generic [ref=f1e1035]:
+            - generic [ref=f1e1036]:
+              - generic [ref=f1e1041]: Search
+              - textbox "Search" [ref=f1e1042]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f1e1044] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f1e1050] [cursor=pointer]:
+              - generic [ref=f1e1051]: Q
+              - generic [ref=f1e1055]:
+                - generic [ref=f1e1056]: QA@lguids.com.ph
+                - generic [ref=f1e1057]: Super Admin
+      - generic [ref=f1e1061]:
+        - navigation [ref=f1e1062]:
+          - button [ref=f1e1063] [cursor=pointer]
+          - button [ref=f1e1069] [cursor=pointer]
+          - button [ref=f1e1072] [cursor=pointer]
+        - generic [ref=f1e1075]:
+          - textbox "Search by reference, applicant, or business/project" [ref=f1e1081]
+          - generic [ref=f1e1082]:
+            - combobox "Payment status filter" [ref=f1e1083] [cursor=pointer]:
+              - option "Pending Verification" [selected]
+              - option "Paid"
+              - option "Not Yet Available"
+              - option "Overdue"
+            - button [ref=f1e1084] [cursor=pointer]
+        - paragraph [ref=f1e1089]: Authentication is required

@@ -1,0 +1,124 @@
+- generic [ref=f21e56]:
+  - complementary [ref=f21e58]:
+    - generic [ref=f21e59]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f21e61]
+      - generic [ref=f21e62]: E-BPCO
+    - navigation [ref=f21e63]:
+      - link "Dashboard" [ref=f21e66] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f21e72]:
+        - generic [ref=f21e73]: Operations
+        - link "Applications" [ref=f21e75] [cursor=pointer]:
+          - /url: /applications
+      - generic [ref=f21e81]:
+        - generic [ref=f21e82]: Administration
+        - link "Archive" [ref=f21e84] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f21e90] [cursor=pointer]
+  - main [ref=f21e96]:
+    - generic [ref=f21e1004]:
+      - generic "Applications" [ref=f21e1005]:
+        - generic [ref=f21e1006]:
+          - heading "Applications" [level=1] [ref=f21e1007]
+          - generic [ref=f21e1008]:
+            - button "Notifications" [ref=f21e1010] [cursor=pointer]
+            - button "O official@lgu.gov.ph Approving Officer" [ref=f21e1016] [cursor=pointer]:
+              - generic [ref=f21e1017]: O
+              - generic [ref=f21e1021]:
+                - generic [ref=f21e1022]: official@lgu.gov.ph
+                - generic [ref=f21e1023]: Approving Officer
+      - generic [ref=f21e1027]:
+        - heading "Application Details" [level=1] [ref=f21e1028]
+        - generic [ref=f21e1029]:
+          - button "Action" [ref=f21e1031] [cursor=pointer]
+          - button "Evaluate" [ref=f21e1032] [cursor=pointer]
+          - button "Back to List" [ref=f21e1033] [cursor=pointer]
+          - button "More actions" [ref=f21e1035] [cursor=pointer]
+      - generic [ref=f21e1041]:
+        - generic [ref=f21e1042]:
+          - generic [ref=f21e1043]: MS
+          - generic [ref=f21e1051]:
+            - heading "f3a5b847-a558-4b3f-9f72-c60598ad9ed6 - Maria Santos" [level=2] [ref=f21e1052]
+            - generic [ref=f21e1053]: Approved
+            - generic [ref=f21e1054]:
+              - generic [ref=f21e1055]:
+                - term [ref=f21e1056]: "Business / Project :"
+                - definition [ref=f21e1057]: Santos Sari-Sari Store
+              - generic [ref=f21e1058]:
+                - term [ref=f21e1059]: "City :"
+                - definition [ref=f21e1060]: 60 Rizal Street, Poblacion
+              - generic [ref=f21e1061]:
+                - term [ref=f21e1062]: "Region :"
+                - definition [ref=f21e1063]: Region V (Bicol Region)
+              - generic [ref=f21e1064]:
+                - term [ref=f21e1065]: "Type :"
+                - definition [ref=f21e1066]: Fencing Permit
+              - generic [ref=f21e1067]:
+                - term [ref=f21e1068]: "Email :"
+                - definition [ref=f21e1069]:
+                  - text: mariasantos@gmail.com
+                  - generic [ref=f21e1070]: Unverified
+              - generic [ref=f21e1071]:
+                - term [ref=f21e1072]: "Phone :"
+                - definition [ref=f21e1073]:
+                  - text: +63 912 345 6789
+                  - generic [ref=f21e1074]: Unverified
+              - generic [ref=f21e1075]:
+                - term [ref=f21e1076]: "Barangay :"
+                - definition [ref=f21e1077]: 60 Rizal Street, Poblacion
+          - generic [ref=f21e1078]:
+            - generic [ref=f21e1079]:
+              - strong [ref=f21e1080]: 2026-09-13
+              - generic [ref=f21e1081]: Date Submitted
+            - generic [ref=f21e1082]:
+              - strong [ref=f21e1083]: —
+              - generic [ref=f21e1084]: Assigned Officer
+          - button [ref=f21e1085] [cursor=pointer]
+        - generic [ref=f21e1089]:
+          - generic [ref=f21e1090]:
+            - button "Timeline" [ref=f21e1091] [cursor=pointer]
+            - button "Documents" [ref=f21e1092] [cursor=pointer]
+            - button "Permit Result" [ref=f21e1093] [cursor=pointer]
+            - button "Comments" [ref=f21e1094] [cursor=pointer]
+          - generic [ref=f21e1095]:
+            - heading "Activity Summary" [level=2] [ref=f21e1096]
+            - paragraph [ref=f21e1097]:
+              - text: This Application Is Currently At
+              - strong [ref=f21e1098]: Approved
+            - heading "Lifecycle Progress" [level=3] [ref=f21e1099]
+            - list [ref=f21e1100]:
+              - listitem [ref=f21e1101]: Draft
+              - listitem [ref=f21e1102]: Submitted
+              - listitem [ref=f21e1103]: Received
+              - listitem [ref=f21e1104]: Document Verification
+              - listitem [ref=f21e1105]: Under Evaluation
+              - listitem [ref=f21e1106]: Assessed
+              - listitem [ref=f21e1107]: Payment Submitted
+              - listitem [ref=f21e1108]: Payment Under Verification
+              - listitem [ref=f21e1109]: Payment Verified
+              - listitem [ref=f21e1110]: For Approval
+              - listitem [ref=f21e1111]: Approved
+              - listitem [ref=f21e1112]: Permit Generated
+              - listitem [ref=f21e1113]: Ready for Release
+              - listitem [ref=f21e1114]: Released
+              - listitem [ref=f21e1115]: Completed
+            - heading "Quick Information :" [level=3] [ref=f21e1116]
+            - generic [ref=f21e1117]:
+              - list [ref=f21e1118]:
+                - listitem [ref=f21e1119]: "Assigned To: —"
+                - listitem [ref=f21e1120]: "Current Step: Approved"
+                - listitem [ref=f21e1121]: "Days In Current Step: 0 Days"
+              - generic [ref=f21e1122]: "Total Elapsed Time: 0 Days"
+            - heading "Audit Trail" [level=3] [ref=f21e1123]
+            - table [ref=f21e1125]:
+              - rowgroup [ref=f21e1126]:
+                - row [ref=f21e1127]:
+                  - columnheader "#" [ref=f21e1128]
+                  - columnheader "Timeline Event" [ref=f21e1129]
+                  - columnheader "Date" [ref=f21e1130]
+                  - columnheader "Time" [ref=f21e1131]
+                  - columnheader "Details" [ref=f21e1132]
+                  - columnheader "Action" [ref=f21e1133]
+              - rowgroup [ref=f21e1134]:
+                - row [ref=f21e1135]:
+                  - cell "No audit events recorded yet." [ref=f21e1136]

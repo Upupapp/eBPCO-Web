@@ -32,20 +32,37 @@
   gap: 9px;
   align-items: flex-start;
   padding: 12px 14px;
+  border: 1px solid var(--border, #e2e2e6);
   border-radius: 8px;
   background: var(--surface-muted, #f4f6fa);
   color: var(--text-secondary, #4a5568);
   font-size: 13.5px;
   line-height: 1.5;
 
+  app-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #8b8f9b;
+  }
+
   &.warn {
     background: #fff8e6;
+    border-color: #f0d999;
     color: #7a5b00;
+
+    app-icon {
+      color: #b8860b;
+    }
   }
 
   &.error {
     background: #fdecec;
+    border-color: #f0c2c2;
     color: #8a2020;
+
+    app-icon {
+      color: #a52222;
+    }
   }
 }
 
@@ -269,15 +286,95 @@
   }
 }
 
+// This page used `.btn-primary`/`.btn-secondary` throughout its template —
+// on Refresh, Cancel, Reject, and every approve/reject action in the
+// decision panel — but neither class was ever actually defined here, so
+// every one of those rendered as a bare, unstyled browser button. Matched
+// to the `.btn-primary`/`.btn-outline` pair the rest of the app already
+// uses (see applications.scss), so this page stops being the one place
+// buttons look like nothing was applied at all.
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.5rem;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #2563eb;
+  border: 1px solid #2563eb;
+  color: #fff;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: #1d4ed8;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+    transform: none;
+  }
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  font: inherit;
+  font-size: 0.83rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #e2e2e6;
+  color: #454a58;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
 .btn-danger {
-  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
   border: 1px solid #d94b4b;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   background: #fff;
   color: #a52222;
   font: inherit;
-  font-weight: 600;
+  font-size: 0.83rem;
+  font-weight: 700;
   cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    background: #fdecec;
+    border-color: #a52222;
+  }
 
   &:disabled {
     opacity: 0.6;

@@ -32,7 +32,7 @@
     <div class="table-toolbar">
       <div class="search-input">
         <app-icon name="search" [size]="16" />
-        <input aria-label="Search Here By Application ID, Applicant Name, Business/Project, or Lo"
+        <input aria-label="Search Here By Application ID, Applicant Name, Business/Project, or Location"
           type="text"
           placeholder="Search Here By Application ID, Applicant Name, Business/Project, or Location"
           [(ngModel)]="searchTerm"
@@ -54,8 +54,8 @@
             <label for="app-business-filter">Business / Project</label>
             <select id="app-business-filter" [(ngModel)]="businessFilter">
               <option value="All">All Businesses</option>
-              @for (b of businessOptions(); track b.id) {
-                <option [value]="b.id">{{ b.name }}</option>
+              @for (b of businessOptions(); track b) {
+                <option [value]="b">{{ b }}</option>
               }
             </select>
           </div>
@@ -265,6 +265,9 @@
         </ng-template>
       </div>
       <button type="button" class="btn-primary" (click)="openEvaluations()">Evaluate</button>
+      @if (canEditAssessment()) {
+        <button type="button" class="btn-primary" (click)="openPaymentAssessment()">Payment</button>
+      }
       <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
       <div class="menu-wrap">
         <button
@@ -811,15 +814,15 @@
                   </div>
                   <div>
                     <dt>Validity / Expiry</dt>
-                    <dd>{{ permit.expiryDate ?? 'No fixed expiry' }}</dd>
+                    <dd>{{ permit.expiryDate === undefined ? 'Not tracked by this deployment' : (permit.expiryDate ?? 'No fixed expiry') }}</dd>
                   </div>
                   <div>
                     <dt>Approving Official</dt>
-                    <dd>{{ permit.approvingOfficial }}</dd>
+                    <dd>{{ permit.approvingOfficial ?? 'Not tracked by this deployment' }}</dd>
                   </div>
                   <div>
                     <dt>Approving Office</dt>
-                    <dd>{{ permit.approvingOffice }}</dd>
+                    <dd>{{ permit.approvingOffice ?? 'Not tracked by this deployment' }}</dd>
                   </div>
                 </dl>
                 @if (releaseResult(); as release) {
@@ -868,6 +871,14 @@
                   }
                 </div>
               </div>
+            } @else if (permitNotVisible()) {
+              <div class="permit-result-panel empty">
+                <p>
+                  This application's status ({{ detail.row.lifecycleStatus }}) means a permit has
+                  already been generated, but its number isn't available in this session — this
+                  deployment has no lookup route for a permit generated earlier or by someone else.
+                </p>
+              </div>
             } @else {
               <div class="permit-result-panel empty">
                 <p>
@@ -882,7 +893,7 @@
                   </button>
                 }
                 @if (canGeneratePermit()) {
-                  <button type="button" class="btn-primary" (click)="generatePermitAction()">
+                  <button type="button" class="btn-primary" (click)="openGeneratePermitModal()">
                     Generate {{ finalDocumentName() }}
                   </button>
                 }
@@ -891,6 +902,10 @@
           }
 
           @case ('comments') {
+            <p class="empty-note">
+              Notes here are local to this browser session and are not sent anywhere — there is no
+              backend endpoint yet to store or share them.
+            </p>
             @if (replyTarget(); as target) {
               <div class="reply-banner">
                 Replying to <strong>{{ target.author }}</strong>
@@ -951,13 +966,17 @@
                     </div>
                   </div>
                 </div>
+              } @empty {
+                <p class="empty-note">No notes yet on this application.</p>
               }
             </div>
 
-            <button type="button" class="load-more" disabled title="No more comments to load">
-              <app-icon name="sparkles" [size]="14" />
-              All comments loaded
-            </button>
+            @if (comments().length > 0) {
+              <button type="button" class="load-more" disabled title="No more comments to load">
+                <app-icon name="sparkles" [size]="14" />
+                All comments loaded
+              </button>
+            }
           }
         }
       </div>
@@ -1326,6 +1345,49 @@
             [disabled]="!quickRejectRemarks().trim()"
           >
             Reject Application
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showGeneratePermitModal()) {
+  <div class="modal-backdrop" (click)="cancelGeneratePermit()">
+    <div class="modal-box create-box" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelGeneratePermit()">
+        &#10005;
+      </button>
+      <h2>Generate {{ finalDocumentName() }}</h2>
+      <form class="create-form" (ngSubmit)="confirmGeneratePermit()">
+        <label>
+          Scope <span class="optional">(what this permit covers — required)</span>
+          <textarea aria-label="Scope of the permit"
+            rows="3"
+            required
+            [(ngModel)]="generatePermitScope"
+            name="generatePermitScope"
+            placeholder="Describe what this permit covers…"
+          ></textarea>
+        </label>
+        <label>
+          Conditions <span class="optional">(optional, one per line)</span>
+          <textarea aria-label="Conditions of the permit, one per line"
+            rows="3"
+            [(ngModel)]="generatePermitConditionsText"
+            name="generatePermitConditions"
+            placeholder="One condition per line…"
+          ></textarea>
+        </label>
+        @if (generatePermitError()) {
+          <p class="form-error">{{ generatePermitError() }}</p>
+        }
+        <div class="modal-actions">
+          <button type="button" class="modal-btn neutral" (click)="cancelGeneratePermit()">
+            Cancel
+          </button>
+          <button type="submit" class="modal-btn confirm" [disabled]="generatingPermit()">
+            {{ generatingPermit() ? 'Generating…' : 'Generate' }}
           </button>
         </div>
       </form>

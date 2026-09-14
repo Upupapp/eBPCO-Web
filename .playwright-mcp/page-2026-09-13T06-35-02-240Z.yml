@@ -1,0 +1,155 @@
+- generic [ref=f32e56]:
+  - complementary [ref=f32e58]:
+    - generic [ref=f32e59]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f32e61]
+      - generic [ref=f32e62]: E-BPCO
+    - navigation [ref=f32e63]:
+      - link "Dashboard" [ref=f32e66] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f32e72]:
+        - generic [ref=f32e73]: Operations
+        - generic [ref=f32e74]:
+          - link "Applications" [ref=f32e75] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f32e81] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f32e86] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f32e93] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f32e100]:
+        - generic [ref=f32e101]: Administration
+        - generic [ref=f32e102]:
+          - link "Businesses" [active] [ref=f32e103] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f32e109] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f32e115] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f32e122] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f32e131] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f32e137] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f32e143] [cursor=pointer]
+  - main [ref=f32e149]:
+    - generic [ref=f32e726]:
+      - generic "Businesses" [ref=f32e727]:
+        - generic [ref=f32e728]:
+          - heading "Businesses" [level=1] [ref=f32e729]
+          - generic [ref=f32e730]:
+            - button "Notifications" [ref=f32e732] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f32e738] [cursor=pointer]:
+              - generic [ref=f32e739]: Q
+              - generic [ref=f32e743]:
+                - generic [ref=f32e744]: QA@lguids.com.ph
+                - generic [ref=f32e745]: Super Admin
+      - generic [ref=f32e749]:
+        - generic [ref=f32e751]:
+          - generic [ref=f32e753]:
+            - paragraph [ref=f32e754]: Total Users
+            - paragraph [ref=f32e755]: "1"
+          - generic [ref=f32e756]: Distinct applicants across the real applications queue
+        - generic [ref=f32e760]:
+          - generic [ref=f32e762]:
+            - paragraph [ref=f32e763]: Active Businesses
+            - paragraph [ref=f32e764]: —
+          - generic [ref=f32e765]:
+            - generic [ref=f32e766]: Not tracked by this deployment
+            - 'img "Active Businesses progress: 0 percent" [ref=f32e768]'
+        - generic [ref=f32e771]:
+          - generic [ref=f32e773]:
+            - paragraph [ref=f32e774]: Inactive Businesses
+            - paragraph [ref=f32e775]: —
+          - generic [ref=f32e776]:
+            - generic [ref=f32e777]: Not tracked by this deployment
+            - 'img "Inactive Businesses progress: 0 percent" [ref=f32e779]'
+        - generic [ref=f32e782]:
+          - generic [ref=f32e784]:
+            - paragraph [ref=f32e785]: Total Businesses
+            - paragraph [ref=f32e786]: "1"
+          - generic [ref=f32e787]:
+            - generic [ref=f32e788]: Distinct business names across the real applications queue
+            - 'img "Total Businesses progress: 100 percent" [ref=f32e790]'
+      - generic [ref=f32e792]:
+        - generic [ref=f32e793]:
+          - textbox "Search Here By Application ID, Applicant Name, or Location" [ref=f32e799]
+          - generic [ref=f32e800]:
+            - button [ref=f32e803] [cursor=pointer]
+            - button [ref=f32e807] [cursor=pointer]
+            - button [ref=f32e812] [cursor=pointer]
+        - note [ref=f32e815]:
+          - generic [ref=f32e820]: This deployment has no business-directory endpoint yet — the applications queue has real businesses on it, but nothing here can list them independently. Only businesses added through "Create New Business" this session appear below.
+        - table [ref=f32e822]:
+          - rowgroup [ref=f32e823]:
+            - row [ref=f32e824]:
+              - columnheader [ref=f32e825]:
+                - checkbox "Select all businesses" [ref=f32e826]
+              - columnheader "Business ID" [ref=f32e827]
+              - columnheader "BUSINESS NAME" [ref=f32e828]
+              - columnheader "CATEGORY" [ref=f32e829]
+              - columnheader "CONTACT PERSON" [ref=f32e830]
+              - columnheader "DATE CREATED" [ref=f32e831]
+              - columnheader "User Count" [ref=f32e832]
+              - columnheader "STATUS" [ref=f32e833]
+              - columnheader "ACTION" [ref=f32e834]
+          - rowgroup [ref=f32e835]:
+            - row [ref=f32e836]:
+              - cell "No businesses match your search." [ref=f32e837]
+        - navigation "Pagination" [ref=f32e839]:
+          - generic [ref=f32e840]: Showing 0 of 0
+          - generic [ref=f32e841]:
+            - button "First page" [disabled] [ref=f32e842]
+            - button "Page 1" [ref=f32e847] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f32e848]
+      - generic [ref=f32e853]:
+        - navigation [ref=f32e854]:
+          - button [ref=f32e855] [cursor=pointer]
+          - button [ref=f32e860] [cursor=pointer]
+          - button [ref=f32e864] [cursor=pointer]
+        - generic [ref=f32e869]:
+          - generic [ref=f32e870]:
+            - heading "Businesses Growth" [level=2] [ref=f32e872]
+            - generic [ref=f32e876]:
+              - generic [ref=f32e877]: Jan
+              - generic [ref=f32e878]: Feb
+              - generic [ref=f32e879]: Mar
+              - generic [ref=f32e880]: Apr
+              - generic [ref=f32e881]: May
+              - generic [ref=f32e882]: Jun
+              - generic [ref=f32e883]: Jul
+              - generic [ref=f32e884]: Aug
+              - generic [ref=f32e885]: Sep
+              - generic [ref=f32e886]: Oct
+              - generic [ref=f32e887]: Nov
+              - generic [ref=f32e888]: Dec
+          - generic [ref=f32e889]:
+            - generic [ref=f32e891]:
+              - generic [ref=f32e893]:
+                - paragraph [ref=f32e894]: Applications Processed
+                - paragraph [ref=f32e895]: 2,032
+              - generic [ref=f32e897]:
+                - generic [ref=f32e898]: 12.5%
+                - generic [ref=f32e903]: Vs Previous 30 days
+            - generic [ref=f32e905]:
+              - generic [ref=f32e907]:
+                - paragraph [ref=f32e908]: Avg. Processing Time
+                - paragraph [ref=f32e909]: 3.6 days
+              - generic [ref=f32e911]:
+                - generic [ref=f32e912]: 8.3%
+                - generic [ref=f32e917]: Vs Previous 30 days
+            - generic [ref=f32e919]:
+              - generic [ref=f32e921]:
+                - paragraph [ref=f32e922]: Active Users
+                - paragraph [ref=f32e923]: 1,524
+              - generic [ref=f32e925]:
+                - generic [ref=f32e926]: 9.7%
+                - generic [ref=f32e931]: Vs Previous 30 days
+            - generic [ref=f32e933]:
+              - generic [ref=f32e935]:
+                - paragraph [ref=f32e936]: Storage Used
+                - paragraph [ref=f32e937]: 245 GB
+              - generic [ref=f32e939]:
+                - generic [ref=f32e940]: 15.2%
+                - generic [ref=f32e945]: Vs Previous 30 days

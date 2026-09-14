@@ -1,0 +1,5 @@
+[     127ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943
+[   17925ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:4200/auth/token:0
+[  136715ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:4200/staff/payments?status=Pending%20Verification&limit=100:0
+[  150603ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:4200/staff/applications/5e9d799a-6b58-4180-80a6-ec2b0d16ddc2/assessments:0
+[  192449ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:4200/auth/token:0

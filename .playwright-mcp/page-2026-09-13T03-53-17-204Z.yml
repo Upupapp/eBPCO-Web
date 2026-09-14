@@ -1,0 +1,62 @@
+- generic [ref=f1e56]:
+  - complementary [ref=f1e58]:
+    - generic [ref=f1e59]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e61]
+      - generic [ref=f1e62]: E-BPCO
+    - navigation [ref=f1e63]:
+      - link "Dashboard" [ref=f1e66] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e72]:
+        - generic [ref=f1e73]: Operations
+        - generic [ref=f1e74]:
+          - link "Applications" [ref=f1e75] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e81] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [active] [ref=f1e86] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e93] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e100]:
+        - generic [ref=f1e101]: Administration
+        - generic [ref=f1e102]:
+          - link "Businesses" [ref=f1e103] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f1e109] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e115] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e122] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e131] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f1e137] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e143] [cursor=pointer]
+  - main [ref=f1e149]:
+    - generic [ref=f1e920]:
+      - generic "Payments" [ref=f1e921]:
+        - generic [ref=f1e922]:
+          - heading "Payments" [level=1] [ref=f1e923]
+          - generic [ref=f1e924]:
+            - button "Notifications" [ref=f1e926] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f1e932] [cursor=pointer]:
+              - generic [ref=f1e933]: Q
+              - generic [ref=f1e937]:
+                - generic [ref=f1e938]: QA@lguids.com.ph
+                - generic [ref=f1e939]: Super Admin
+      - generic [ref=f1e943]:
+        - navigation [ref=f1e944]:
+          - button [ref=f1e945] [cursor=pointer]
+          - button [ref=f1e951] [cursor=pointer]
+          - button [ref=f1e954] [cursor=pointer]
+        - generic [ref=f1e957]:
+          - textbox "Search by reference, applicant, or business/project" [ref=f1e963]
+          - generic [ref=f1e964]:
+            - combobox "Payment status filter" [ref=f1e965] [cursor=pointer]:
+              - option "Pending Verification" [selected]
+              - option "Paid"
+              - option "Not Yet Available"
+              - option "Overdue"
+            - button [ref=f1e966] [cursor=pointer]
+        - paragraph [ref=f1e971]: This account does not hold the permission this action requires.

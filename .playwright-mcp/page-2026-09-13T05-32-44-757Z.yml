@@ -1,0 +1,258 @@
+- generic [ref=f20e56]:
+  - complementary [ref=f20e58]:
+    - generic [ref=f20e59]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f20e61]
+      - generic [ref=f20e62]: E-BPCO
+    - navigation [ref=f20e63]:
+      - link "Dashboard" [ref=f20e66] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f20e72]:
+        - generic [ref=f20e73]: Operations
+        - link "Applications" [ref=f20e75] [cursor=pointer]:
+          - /url: /applications
+      - generic [ref=f20e81]:
+        - generic [ref=f20e82]: Administration
+        - link "Archive" [ref=f20e84] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f20e90] [cursor=pointer]
+  - main [ref=f20e96]:
+    - generic [ref=f20e97]:
+      - generic "Dashboard" [ref=f20e98]:
+        - generic [ref=f20e99]:
+          - heading "Dashboard" [level=1] [ref=f20e100]
+          - generic [ref=f20e101]:
+            - button "Notifications" [ref=f20e103] [cursor=pointer]
+            - button "O official@lgu.gov.ph Approving Officer" [ref=f20e109] [cursor=pointer]:
+              - generic [ref=f20e110]: O
+              - generic [ref=f20e114]:
+                - generic [ref=f20e115]: official@lgu.gov.ph
+                - generic [ref=f20e116]: Approving Officer
+      - generic [ref=f20e120]:
+        - generic [ref=f20e122]:
+          - generic [ref=f20e124]:
+            - paragraph [ref=f20e125]: Total Applications
+            - paragraph [ref=f20e126]: "0"
+          - generic [ref=f20e127]: All Time
+        - generic [ref=f20e131]:
+          - generic [ref=f20e133]:
+            - paragraph [ref=f20e134]: Pending / Under Review
+            - paragraph [ref=f20e135]: "0"
+          - generic [ref=f20e136]: Submitted through Under Evaluation
+        - generic [ref=f20e140]:
+          - generic [ref=f20e142]:
+            - paragraph [ref=f20e143]: Payments Awaiting Verification
+            - paragraph [ref=f20e144]: "0"
+          - generic [ref=f20e145]: Submitted, not yet verified
+        - generic [ref=f20e149]:
+          - generic [ref=f20e151]:
+            - paragraph [ref=f20e152]: Approved
+            - paragraph [ref=f20e153]: "0"
+          - generic [ref=f20e154]: Approved through Completed
+        - generic [ref=f20e158]:
+          - generic [ref=f20e160]:
+            - paragraph [ref=f20e161]: Ready for Release
+            - paragraph [ref=f20e162]: "0"
+          - generic [ref=f20e163]: Permit generated, awaiting claim
+      - generic [ref=f20e167]:
+        - generic [ref=f20e168]:
+          - generic [ref=f20e169]:
+            - heading "Business Application Stages" [level=2] [ref=f20e170]
+            - paragraph [ref=f20e171]: Track businesses across each stage of the application process.
+          - generic [ref=f20e172]:
+            - generic [ref=f20e173]:
+              - button [ref=f20e175] [cursor=pointer]
+              - button [ref=f20e183] [cursor=pointer]
+              - button [ref=f20e191] [cursor=pointer]
+            - group "Board display mode" [ref=f20e198]:
+              - button [pressed] [ref=f20e199] [cursor=pointer]
+              - button [ref=f20e207] [cursor=pointer]
+        - generic [ref=f20e212]:
+          - paragraph [ref=f20e217]: No business applications found for this period.
+          - button "Reset Filter" [ref=f20e218] [cursor=pointer]
+      - generic [ref=f20e219]:
+        - generic [ref=f20e220]:
+          - generic [ref=f20e221]:
+            - heading "Over All Applications Queue" [level=2] [ref=f20e222]
+            - generic [ref=f20e223]:
+              - generic [ref=f20e224]: Under Review
+              - generic [ref=f20e226]: Approved
+              - generic [ref=f20e228]: Rejected
+          - button [ref=f20e235] [cursor=pointer]
+        - generic [ref=f20e241]:
+          - 'img "Building Permit – New Construction — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e242]':
+            - generic [ref=f20e243]: Building Permit – New Construction
+            - generic [ref=f20e245]: "0"
+          - 'img "Building Permit – Renovation / Alteration — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e246]':
+            - generic [ref=f20e247]: Building Permit – Renovation / Alteration
+            - generic [ref=f20e249]: "0"
+          - 'img "Building Permit – Addition / Extension — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e250]':
+            - generic [ref=f20e251]: Building Permit – Addition / Extension
+            - generic [ref=f20e253]: "0"
+          - 'img "Demolition Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e254]':
+            - generic [ref=f20e255]: Demolition Permit
+            - generic [ref=f20e257]: "0"
+          - 'img "Zoning / Locational Clearance — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e258]':
+            - generic [ref=f20e259]: Zoning / Locational Clearance
+            - generic [ref=f20e261]: "0"
+          - 'img "Architectural Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e262]':
+            - generic [ref=f20e263]: Architectural Permit
+            - generic [ref=f20e265]: "0"
+          - 'img "Civil / Structural Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e266]':
+            - generic [ref=f20e267]: Civil / Structural Permit
+            - generic [ref=f20e269]: "0"
+          - 'img "Electrical Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e270]':
+            - generic [ref=f20e271]: Electrical Permit
+            - generic [ref=f20e273]: "0"
+          - 'img "Mechanical Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e274]':
+            - generic [ref=f20e275]: Mechanical Permit
+            - generic [ref=f20e277]: "0"
+          - 'img "Sanitary Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e278]':
+            - generic [ref=f20e279]: Sanitary Permit
+            - generic [ref=f20e281]: "0"
+          - 'img "Plumbing Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e282]':
+            - generic [ref=f20e283]: Plumbing Permit
+            - generic [ref=f20e285]: "0"
+          - 'img "Electronics Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e286]':
+            - generic [ref=f20e287]: Electronics Permit
+            - generic [ref=f20e289]: "0"
+          - 'img "Interior Design Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e290]':
+            - generic [ref=f20e291]: Interior Design Permit
+            - generic [ref=f20e293]: "0"
+          - 'img "Fencing Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e294]':
+            - generic [ref=f20e295]: Fencing Permit
+            - generic [ref=f20e297]: "0"
+          - 'img "Sign Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e298]':
+            - generic [ref=f20e299]: Sign Permit
+            - generic [ref=f20e301]: "0"
+          - 'img "Excavation Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e302]':
+            - generic [ref=f20e303]: Excavation Permit
+            - generic [ref=f20e305]: "0"
+          - 'img "FSEC for Building Permit (BFP) — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e306]':
+            - generic [ref=f20e307]: FSEC for Building Permit (BFP)
+            - generic [ref=f20e309]: "0"
+          - 'img "Certificate of Occupancy — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e310]':
+            - generic [ref=f20e311]: Certificate of Occupancy
+            - generic [ref=f20e313]: "0"
+          - 'img "FSIC for Occupancy Permit (BFP) — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f20e314]':
+            - generic [ref=f20e315]: FSIC for Occupancy Permit (BFP)
+            - generic [ref=f20e317]: "0"
+      - generic [ref=f20e318]:
+        - generic [ref=f20e319]:
+          - generic [ref=f20e320]:
+            - generic [ref=f20e321]:
+              - heading "Applications by Evaluation Stage" [level=2] [ref=f20e322]
+              - paragraph [ref=f20e323]: Active applications across the current review workflow
+            - generic [ref=f20e324]: Filter by evaluation result
+            - combobox "Filter by evaluation result" [ref=f20e325] [cursor=pointer]:
+              - option "All Results" [selected]
+              - option "Pending"
+              - option "Passed"
+              - option "Revision Required"
+              - option "Rejected"
+          - paragraph [ref=f20e326]:
+            - strong [ref=f20e327]: "0"
+            - text: applications currently in evaluation
+          - paragraph [ref=f20e332]: No applications match this filter.
+          - button [ref=f20e333] [cursor=pointer]
+        - generic [ref=f20e337]:
+          - generic [ref=f20e338]:
+            - heading "Overdue Review" [level=2] [ref=f20e339]
+            - button "View All" [ref=f20e340] [cursor=pointer]
+          - generic [ref=f20e341]:
+            - generic [ref=f20e342]: Low
+            - generic [ref=f20e344]: Medium
+            - generic [ref=f20e346]: High
+          - paragraph [ref=f20e349]: Nothing overdue right now.
+      - generic [ref=f20e350]:
+        - generic [ref=f20e351]:
+          - heading "Applications By Status" [level=2] [ref=f20e353]
+          - generic [ref=f20e354]:
+            - img "Distribution of 4 categories" [ref=f20e357]:
+              - generic [ref=f20e359]:
+                - 'img "For Evaluation: 0 (0%)" [ref=f20e360] [cursor=pointer]'
+                - 'img "Approved: 0 (0%)" [ref=f20e361] [cursor=pointer]'
+                - 'img "Return: 0 (0%)" [ref=f20e362] [cursor=pointer]'
+                - 'img "Pending: 0 (0%)" [ref=f20e363] [cursor=pointer]'
+              - generic: "0"
+              - generic: Total Applications
+            - list [ref=f20e364]:
+              - listitem [ref=f20e365]:
+                - generic [ref=f20e366]: For Evaluation
+                - generic [ref=f20e368]:
+                  - text: "0"
+                  - emphasis [ref=f20e369]: 0%
+              - listitem [ref=f20e370]:
+                - generic [ref=f20e371]: Approved
+                - generic [ref=f20e373]:
+                  - text: "0"
+                  - emphasis [ref=f20e374]: 0%
+              - listitem [ref=f20e375]:
+                - generic [ref=f20e376]: Return
+                - generic [ref=f20e378]:
+                  - text: "0"
+                  - emphasis [ref=f20e379]: 0%
+              - listitem [ref=f20e380]:
+                - generic [ref=f20e381]: Pending
+                - generic [ref=f20e383]:
+                  - text: "0"
+                  - emphasis [ref=f20e384]: 0%
+        - generic [ref=f20e385]:
+          - heading "Applications By Business" [level=2] [ref=f20e387]
+          - navigation "Pagination" [ref=f20e389]:
+            - generic [ref=f20e390]: Showing 0 of 0
+            - generic [ref=f20e391]:
+              - button "First page" [disabled] [ref=f20e392]
+              - button "Page 1" [ref=f20e397] [cursor=pointer]: "1"
+              - button "Last page" [disabled] [ref=f20e398]
+      - generic [ref=f20e403]:
+        - heading "Application Overview" [level=2] [ref=f20e405]
+        - generic [ref=f20e406]:
+          - generic [ref=f20e407]:
+            - text: "New Application:"
+            - strong [ref=f20e409]: "0"
+          - generic [ref=f20e410]:
+            - text: "Approved Application:"
+            - strong [ref=f20e412]: "0"
+        - generic [ref=f20e414]:
+          - generic [ref=f20e415]:
+            - generic [ref=f20e416]: "400"
+            - generic [ref=f20e417]: "300"
+            - generic [ref=f20e418]: "200"
+            - generic [ref=f20e419]: "100"
+            - generic [ref=f20e420]: "0"
+          - generic [ref=f20e421]:
+            - 'img "Line chart: 2 series across 12 months" [ref=f20e422]'
+            - generic [ref=f20e427]:
+              - generic [ref=f20e428]: Jan
+              - generic [ref=f20e429]: Feb
+              - generic [ref=f20e430]: Mar
+              - generic [ref=f20e431]: Apr
+              - generic [ref=f20e432]: May
+              - generic [ref=f20e433]: Jun
+              - generic [ref=f20e434]: Jul
+              - generic [ref=f20e435]: Aug
+              - generic [ref=f20e436]: Sep
+              - generic [ref=f20e437]: Oct
+              - generic [ref=f20e438]: Nov
+              - generic [ref=f20e439]: Dec
+      - generic [ref=f20e440]:
+        - generic [ref=f20e441]:
+          - heading "Recent Applications" [level=2] [ref=f20e442]
+          - generic [ref=f20e443]:
+            - button [ref=f20e446] [cursor=pointer]
+            - button [ref=f20e450] [cursor=pointer]
+            - button "View All" [ref=f20e455] [cursor=pointer]
+        - table "Recent applications" [ref=f20e457]:
+          - rowgroup [ref=f20e458]:
+            - row [ref=f20e459]:
+              - columnheader "APPLICATION ID" [ref=f20e460]
+              - columnheader "APPLICANT NAME" [ref=f20e461]
+              - columnheader "LOCATION" [ref=f20e462]
+              - columnheader "TYPE" [ref=f20e463]
+              - columnheader "DATE SUBMITTED" [ref=f20e464]
+              - columnheader "ASSIGNED OFFICER" [ref=f20e465]
+              - columnheader "STATUS" [ref=f20e466]
+          - rowgroup [ref=f20e467]:
+            - row [ref=f20e468]:
+              - cell "No applications match your search." [ref=f20e469]
+        - paragraph [ref=f20e470]: Showing 0 Applications

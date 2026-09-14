@@ -1,0 +1,64 @@
+- generic [ref=f34e1821]:
+  - complementary [ref=f34e1823]:
+    - generic [ref=f34e1824]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f34e1826]
+      - generic [ref=f34e1827]: E-BPCO
+    - navigation [ref=f34e1828]:
+      - link "Dashboard" [ref=f34e1831] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f34e1837]:
+        - generic [ref=f34e1838]: Operations
+        - generic [ref=f34e1839]:
+          - link "Applications" [ref=f34e1840] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [active] [ref=f34e1846] [cursor=pointer]:
+            - /url: /evaluations
+      - generic [ref=f34e1851]:
+        - generic [ref=f34e1852]: Administration
+        - link "Archive" [ref=f34e1854] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f34e1860] [cursor=pointer]
+  - main [ref=f34e1866]:
+    - generic [ref=f34e2443]:
+      - generic "Evaluations" [ref=f34e2444]:
+        - generic [ref=f34e2445]:
+          - heading "Evaluations" [level=1] [ref=f34e2446]
+          - generic [ref=f34e2447]:
+            - button "Notifications" [ref=f34e2449] [cursor=pointer]
+            - button "E evaluator@lgu.gov.ph Evaluator" [ref=f34e2455] [cursor=pointer]:
+              - generic [ref=f34e2456]: E
+              - generic [ref=f34e2460]:
+                - generic [ref=f34e2461]: evaluator@lgu.gov.ph
+                - generic [ref=f34e2462]: Evaluator
+      - heading "List Of Evaluations" [level=2] [ref=f34e2466]
+      - generic [ref=f34e2467]:
+        - 'button "Initial Evaluation: 3 applications. Review and process building permit applications." [ref=f34e2468] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f34e2470]: "01"
+          - paragraph [ref=f34e2493]: "3"
+          - paragraph [ref=f34e2494]: Initial Evaluation
+          - paragraph [ref=f34e2495]: Review and process building permit applications.
+        - 'button "Zoning Evaluation: 0 applications. A local authority review for compliance with zoning and building regulations." [ref=f34e2496] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f34e2498]: "02"
+          - paragraph [ref=f34e2521]: "0"
+          - paragraph [ref=f34e2522]: Zoning Evaluation
+          - paragraph [ref=f34e2523]: A local authority review for compliance with zoning and building regulations.
+        - 'button "Fire Safety Evaluation: 0 applications. An assessment of a building''s compliance with fire safety standards." [ref=f34e2524] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f34e2526]: "03"
+          - paragraph [ref=f34e2552]: "0"
+          - paragraph [ref=f34e2553]: Fire Safety Evaluation
+          - paragraph [ref=f34e2554]: An assessment of a building's compliance with fire safety standards.
+        - 'button "OBO Evaluation: 0 applications. An OBO review for fire and building code compliance." [ref=f34e2555] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f34e2557]: "04"
+          - paragraph [ref=f34e2580]: "0"
+          - paragraph [ref=f34e2581]: OBO Evaluation
+          - paragraph [ref=f34e2582]: An OBO review for fire and building code compliance.
+        - 'button "Final Evaluation: 0 applications. A final sign-off confirming the application is ready for permit release." [ref=f34e2583] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f34e2585]: "05"
+          - paragraph [ref=f34e2611]: "0"
+          - paragraph [ref=f34e2612]: Final Evaluation
+          - paragraph [ref=f34e2613]: A final sign-off confirming the application is ready for permit release.
+        - 'button "Stage not recorded: 0 applications. Applications the server has not told this portal the evaluation stage for." [ref=f34e2614] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f34e2616]: "06"
+          - paragraph [ref=f34e2638]: "0"
+          - paragraph [ref=f34e2639]: Stage not recorded
+          - paragraph [ref=f34e2640]: Applications the server has not told this portal the evaluation stage for.

@@ -1,0 +1,61 @@
+- generic [ref=f34e3237]:
+  - complementary [ref=f34e3239]:
+    - generic [ref=f34e3240]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f34e3242]
+      - generic [ref=f34e3243]: E-BPCO
+    - navigation [ref=f34e3244]:
+      - link "Dashboard" [ref=f34e3247] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f34e3253]:
+        - generic [ref=f34e3254]: Operations
+        - generic [ref=f34e3255]:
+          - link "Applications" [ref=f34e3256] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f34e3262] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f34e3267] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f34e3274] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f34e3281]:
+        - generic [ref=f34e3282]: Administration
+        - generic [ref=f34e3283]:
+          - link "Businesses" [ref=f34e3284] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f34e3290] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f34e3296] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f34e3303] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f34e3312] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f34e3318] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f34e3324] [cursor=pointer]
+  - main [ref=f34e3330]:
+    - generic [ref=f34e4317]:
+      - generic "Payments" [ref=f34e4318]:
+        - generic [ref=f34e4319]:
+          - heading "Payments" [level=1] [ref=f34e4320]
+          - generic [ref=f34e4321]:
+            - button "Notifications" [ref=f34e4323] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f34e4329] [cursor=pointer]:
+              - generic [ref=f34e4330]: Q
+              - generic [ref=f34e4334]:
+                - generic [ref=f34e4335]: QA@lguids.com.ph
+                - generic [ref=f34e4336]: Super Admin
+      - generic [ref=f34e4340]:
+        - navigation [ref=f34e4341]:
+          - button [ref=f34e4342] [cursor=pointer]
+          - button [ref=f34e4348] [cursor=pointer]
+          - button [ref=f34e4351] [cursor=pointer]
+        - navigation [ref=f34e4538]:
+          - button "Payment Methods" [ref=f34e4539] [cursor=pointer]
+          - button "Bank Information" [active] [ref=f34e4540] [cursor=pointer]
+          - button "Payroll" [ref=f34e4541] [cursor=pointer]
+        - generic [ref=f34e4647]:
+          - heading "Bank Information" [level=3] [ref=f34e4648]
+          - paragraph [ref=f34e4649]: Not connected to anything real yet. The backend has no structured bank-account record — what an applicant actually sees for "Bank Transfer" is the free-text Instructions field on that method, above in Payment Methods, which IS real and wired.
+          - paragraph [ref=f34e4650]: Not yet configured.
+          - button "Configure Bank Information" [ref=f34e4651] [cursor=pointer]

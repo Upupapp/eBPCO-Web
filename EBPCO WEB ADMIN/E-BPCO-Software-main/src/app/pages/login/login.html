@@ -7,6 +7,12 @@
 
     <h1 class="title">Admin Portal</h1>
 
+    @if (reason() === 'session-expired') {
+      <p class="session-expired-note" role="status">
+        You were signed out because your session expired. Sign in again to continue.
+      </p>
+    }
+
     <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm" novalidate>
       <label class="field-label" for="email">Enter Email Address</label>
       <div class="input-wrap" [class.invalid]="emailError()">
@@ -94,10 +100,41 @@
       </div>
 
       @if (showForgotPassword()) {
-        <p class="forgot-note">
-          Contact your administrator to reset your password.
-          <button type="button" (click)="closeForgotPassword()">Dismiss</button>
-        </p>
+        <div class="forgot-panel">
+          @if (forgotPasswordSent()) {
+            <p role="status">
+              If that address has an account, a link to set a new password has
+              been sent to it.
+            </p>
+            <button type="button" class="cancel-link" (click)="closeForgotPassword()">Dismiss</button>
+          } @else {
+            <label class="field-label" for="forgotEmail">Email address</label>
+            <div class="input-wrap">
+              <input
+                id="forgotEmail"
+                name="forgotEmail"
+                type="email"
+                placeholder="Your email here"
+                [(ngModel)]="forgotPasswordEmail"
+                [ngModelOptions]="{ standalone: true }"
+              />
+            </div>
+            @if (forgotPasswordError(); as message) {
+              <p class="field-error">{{ message }}</p>
+            }
+            <div class="forgot-actions">
+              <button
+                type="button"
+                class="btn-primary"
+                [disabled]="forgotPasswordSending()"
+                (click)="sendForgotPassword()"
+              >
+                {{ forgotPasswordSending() ? 'Sending' : 'Send reset link' }}
+              </button>
+              <button type="button" class="cancel-link" (click)="closeForgotPassword()">Cancel</button>
+            </div>
+          }
+        </div>
       }
 
       <!--
@@ -119,6 +156,21 @@
         </p>
         <label class="field-label" for="totp">Authentication code</label>
         <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M12 3.5 5 6v5.5c0 4.8 3.2 7.9 7 9 3.8-1.1 7-4.2 7-9V6l-7-2.5Z"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            />
+            <path
+              d="m9 12.2 2 2 4-4.4"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
           <input
             id="totp"
             name="totp"
@@ -150,7 +202,7 @@
       >
         {{
           signingIn()
-            ? 'Signing in…'
+            ? 'Signing in'
             : mfaRequired()
               ? 'Verify and sign in'
               : 'Login Account'

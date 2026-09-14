@@ -1,0 +1,43 @@
+- generic [ref=f34e5460]:
+  - complementary [ref=f34e5462]:
+    - generic [ref=f34e5463]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f34e5465]
+      - generic [ref=f34e5466]: E-BPCO
+    - navigation [ref=f34e5467]:
+      - link "Dashboard" [ref=f34e5470] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f34e5476]:
+        - generic [ref=f34e5477]: Operations
+        - link "Payments" [active] [ref=f34e5479] [cursor=pointer]:
+          - /url: /payments
+      - generic [ref=f34e5486]:
+        - generic [ref=f34e5487]: Administration
+        - link "Archive" [ref=f34e5489] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f34e5495] [cursor=pointer]
+  - main [ref=f34e5501]:
+    - generic [ref=f34e6078]:
+      - generic "Payments" [ref=f34e6079]:
+        - generic [ref=f34e6080]:
+          - heading "Payments" [level=1] [ref=f34e6081]
+          - generic [ref=f34e6082]:
+            - button "Notifications" [ref=f34e6084] [cursor=pointer]
+            - button "A assessor@lgu.gov.ph Payment Officer" [ref=f34e6090] [cursor=pointer]:
+              - generic [ref=f34e6091]: A
+              - generic [ref=f34e6095]:
+                - generic [ref=f34e6096]: assessor@lgu.gov.ph
+                - generic [ref=f34e6097]: Payment Officer
+      - generic [ref=f34e6101]:
+        - navigation [ref=f34e6102]:
+          - button [ref=f34e6103] [cursor=pointer]
+          - button [ref=f34e6109] [cursor=pointer]
+        - generic [ref=f34e6112]:
+          - textbox "Search by reference, applicant, or business/project" [ref=f34e6118]
+          - generic [ref=f34e6119]:
+            - combobox "Payment status filter" [ref=f34e6120] [cursor=pointer]:
+              - option "Pending Verification" [selected]
+              - option "Paid"
+              - option "Not Yet Available"
+              - option "Overdue"
+            - button [ref=f34e6121] [cursor=pointer]
+        - paragraph [ref=f34e6126]: This account does not hold the permission this action requires.

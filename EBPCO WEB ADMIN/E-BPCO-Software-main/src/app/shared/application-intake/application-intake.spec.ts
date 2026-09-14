@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { ApplicationIntake } from './application-intake';
 import { ApplicationStore } from '../../core/domain/application-store';
+import { ApplicationRecord, withProjectedFields } from '../../core/domain/application.model';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
+import { FileOnBehalfInput, FileOnBehalfResult, StaffApplicationsApi } from '../../core/api/staff-applications.api';
 
 function fillApplicant(component: any): void {
   component.applicant.fullName = 'Juan Dela Cruz';
@@ -17,6 +19,7 @@ function fillBusiness(component: any): void {
   component.business.addressLine = '123 Rizal Street';
   component.business.barangay = component.barangays[0];
   component.business.ownerOrRepresentative = 'Juan Dela Cruz';
+  component.business.dateRegistered = new Date().toISOString().slice(0, 10);
 }
 
 function fillApplication(component: any, permitType: string): void {
@@ -32,7 +35,7 @@ function attachAllRequiredDocuments(component: any): void {
   }
 }
 
-describe('ApplicationIntake — step navigation is never blocked, but validation feedback is still detectable', () => {
+describe('ApplicationIntake — next() refuses to advance past an invalid step', () => {
   let fixture: ReturnType<typeof TestBed.createComponent<ApplicationIntake>>;
   let component: any;
 
@@ -48,10 +51,11 @@ describe('ApplicationIntake — step navigation is never blocked, but validation
     expect(component.showStepErrors()).toBe(false);
   });
 
-  it('next() advances past Applicant even while required fields are empty — validation no longer blocks progress', () => {
-    expect(component.currentStepErrors().length).toBeGreaterThan(0); // still detects the empty fields
+  it('next() does not advance past Applicant while required fields are empty, but does reveal the errors', () => {
+    expect(component.currentStepErrors().length).toBeGreaterThan(0);
     component.next();
-    expect(component.stepIndex()).toBe(1);
+    expect(component.stepIndex()).toBe(0);
+    expect(component.showStepErrors()).toBe(true);
   });
 
   it('detects an invalid email/mobile with specific field errors, even when other fields are filled', () => {
@@ -72,29 +76,27 @@ describe('ApplicationIntake — step navigation is never blocked, but validation
     expect(component.applicant.mobileNumber).toBe('09171234567');
   });
 
-  it('advances through every step in sequence regardless of validation state', () => {
+  it('advances only as far as each step passes its own validation', () => {
     fillApplicant(component);
     component.next();
     expect(component.stepIndex()).toBe(1);
-    component.next(); // Business left blank
+    component.next(); // Business left blank — refused
+    expect(component.stepIndex()).toBe(1);
+    fillBusiness(component);
+    component.next();
     expect(component.stepIndex()).toBe(2);
-    component.next(); // Application left blank
-    expect(component.stepIndex()).toBe(3);
-    expect(component.currentStep()).toBe('documents');
   });
 
-  it('reaches Review even with required documents left unattached, and allStepsValid() correctly reports it as invalid', () => {
+  it('does not reach Review while required documents are left unattached', () => {
     fillApplicant(component);
     component.next();
     fillBusiness(component);
     component.next();
     fillApplication(component, 'Building Permit – New Construction');
     component.next();
-    component.next(); // no files attached yet
-    expect(component.currentStep()).toBe('review');
+    component.next(); // no files attached yet — refused, stays on documents
+    expect(component.currentStep()).toBe('documents');
     expect(component.allStepsValid()).toBe(false);
-    const errors: string[] = component.currentStepErrors();
-    expect(errors).toEqual([]); // 'review' itself carries no field errors of its own
   });
 });
 
@@ -149,17 +151,77 @@ describe('ApplicationIntake — dynamic document checklist', () => {
   });
 });
 
-describe('ApplicationIntake — creation goes through the shared store honestly', () => {
+/**
+ * Filing now goes through `POST /staff/applications` (`StaffApplicationsApi.
+ * fileOnBehalf`) — the server creates the applicant's account and the
+ * business row, and this screen only gets back `{applicationId,
+ * referenceNumber, applicantId}`. It then reloads the queue and reopens the
+ * server's own record rather than trusting a locally-assembled guess, which
+ * is why what an applicant's email normalizes to or whether they start
+ * Unverified are no longer things this screen can observe directly — those
+ * are server-owned facts now, not something a client-side test can honestly
+ * assert against a local store mutation.
+ */
+describe('ApplicationIntake — filing goes through the real backend', () => {
   let fixture: ReturnType<typeof TestBed.createComponent<ApplicationIntake>>;
   let component: any;
   let store: ApplicationStore;
+  let fileOnBehalfCalls: FileOnBehalfInput[];
+  let filedRecord: ApplicationRecord | null;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [ApplicationIntake] });
+  function serverRecord(id: string, referenceNumber: string): ApplicationRecord {
+    return withProjectedFields({
+      id,
+      referenceNumber,
+      businessId: '',
+      businessName: 'Dela Cruz Sari-Sari Store',
+      applicantId: 'APL-server-9',
+      applicant: 'Juan Dela Cruz',
+      location: 'Barangay ' + (component.barangays?.[0] ?? 'Poblacion'),
+      permitType: 'Building Permit – New Construction',
+      applicationAction: 'New',
+      officer: '—',
+      dateSubmitted: new Date().toISOString().slice(0, 10),
+      dateValue: new Date(),
+      lifecycleStatus: 'Submitted',
+      evaluationStage: null,
+      evaluationResult: null,
+      paymentStatus: 'Not Yet Available',
+      permitReleaseStatus: 'Not Ready',
+      assessedAmountCentavos: null,
+    });
+  }
+
+  function setup(fileOnBehalfResult: FileOnBehalfResult): void {
+    fileOnBehalfCalls = [];
+    filedRecord = null;
+    TestBed.configureTestingModule({
+      imports: [ApplicationIntake],
+      providers: [
+        {
+          provide: StaffApplicationsApi,
+          useValue: {
+            fileOnBehalf: (input: FileOnBehalfInput) => {
+              fileOnBehalfCalls.push(input);
+              return Promise.resolve(fileOnBehalfResult);
+            },
+            page: () =>
+              Promise.resolve({
+                rows: filedRecord ? [filedRecord] : [],
+                nextCursor: null,
+              }),
+          },
+        },
+      ],
+    });
     fixture = TestBed.createComponent(ApplicationIntake);
     component = fixture.componentInstance;
     store = TestBed.inject(ApplicationStore);
     fixture.detectChanges();
+
+    if (fileOnBehalfResult.kind === 'done') {
+      filedRecord = serverRecord(fileOnBehalfResult.applicationId, fileOnBehalfResult.referenceNumber);
+    }
 
     fillApplicant(component);
     component.next();
@@ -169,74 +231,64 @@ describe('ApplicationIntake — creation goes through the shared store honestly'
     component.next();
     attachAllRequiredDocuments(component);
     component.next();
-  });
+  }
 
   it('reaches the Review step once every earlier step is valid', () => {
+    setup({ kind: 'done', applicationId: 'APP-1', referenceNumber: 'E-BPCO-2026-000099', applicantId: 'APL-9' });
     expect(component.currentStep()).toBe('review');
     expect(component.allStepsValid()).toBe(true);
   });
 
-  it('creates exactly one new ApplicationRecord in the shared store on submit, in an honest starting state', () => {
-    const before = store.applications().length;
-    component.submit();
-    // `create()` prepends new records (see ApplicationStore.create), so
-    // the newest one is always at index 0 — avoids depending on the
-    // `output()` API's subscribe surface for a plain unit test.
-    const created = store.applications()[0];
+  it('files exactly once and reopens the server\'s own record, in an honest starting state', async () => {
+    setup({ kind: 'done', applicationId: 'APP-1', referenceNumber: 'E-BPCO-2026-000099', applicantId: 'APL-9' });
 
-    expect(store.applications().length).toBe(before + 1);
-    expect(created).toBeTruthy();
-    const record = store.getById(created.id);
+    await component.submit();
+
+    expect(fileOnBehalfCalls.length).toBe(1);
+    // The business/permit/action this screen collected, sent as the real
+    // request shape — not a locally-invented Applicant/Business/
+    // ApplicationRecord trio.
+    expect(fileOnBehalfCalls[0].business?.name).toBe('Dela Cruz Sari-Sari Store');
+    expect(fileOnBehalfCalls[0].permitType).toBe('Building Permit – New Construction');
+
+    const record = store.getById('APP-1');
     expect(record).toBeTruthy();
     // Honest starting state — never a fabricated completed evaluation or payment.
     expect(record!.lifecycleStatus).toBe('Submitted');
-    expect(record!.evaluationStage).toBe('Initial');
-    expect(record!.evaluationResult).toBe('Pending');
+    expect(record!.evaluationStage).toBeNull();
     expect(record!.paymentStatus).toBe('Not Yet Available');
     expect(record!.permitReleaseStatus).toBe('Not Ready');
     expect(record!.assessedAmountCentavos).toBeNull();
   });
 
-  it('the new applicant starts Unverified on both email and mobile, even though both passed format validation', () => {
-    component.submit();
-    // `create()` prepends new records (see ApplicationStore.create), so
-    // the newest one is always at index 0 — avoids depending on the
-    // `output()` API's subscribe surface for a plain unit test.
-    const created = store.applications()[0];
-    const applicant = store.getApplicant(created.applicantId)!;
-    expect(applicant.emailVerification.status).toBe('Unverified');
-    expect(applicant.mobileVerification.status).toBe('Unverified');
-  });
+  it('attaches every provided document to the reopened server record', async () => {
+    setup({ kind: 'done', applicationId: 'APP-1', referenceNumber: 'E-BPCO-2026-000099', applicantId: 'APL-9' });
 
-  it('normalizes the applicant email and mobile number before storing them', () => {
-    component.applicant.email = '  Juan.DelaCruz@GMAIL.com  ';
-    component.submit();
-    // `create()` prepends new records (see ApplicationStore.create), so
-    // the newest one is always at index 0 — avoids depending on the
-    // `output()` API's subscribe surface for a plain unit test.
-    const created = store.applications()[0];
-    const applicant = store.getApplicant(created.applicantId)!;
-    expect(applicant.email).toBe('juan.delacruz@gmail.com');
-    expect(applicant.mobileNumber).toBe('+63 917 123 4567');
-  });
+    await component.submit();
 
-  it('attaches every provided document to the created application through the store', () => {
-    component.submit();
-    // `create()` prepends new records (see ApplicationStore.create), so
-    // the newest one is always at index 0 — avoids depending on the
-    // `output()` API's subscribe surface for a plain unit test.
-    const created = store.applications()[0];
-    const docs = store.getDocuments(created.id);
+    const docs = store.getDocuments('APP-1');
     const requiredCount = requirementsFor('Building Permit – New Construction').documents.filter(
       (d) => d.required,
     ).length;
     expect(docs.length).toBeGreaterThanOrEqual(requiredCount);
   });
 
-  it('prevents a duplicate submission from creating a second record', () => {
-    const before = store.applications().length;
-    component.submit();
-    component.submit(); // second call while `submitting` is still true (or after) must not double-create
-    expect(store.applications().length).toBe(before + 1);
+  it('prevents a duplicate submission from filing a second time', async () => {
+    setup({ kind: 'done', applicationId: 'APP-1', referenceNumber: 'E-BPCO-2026-000099', applicantId: 'APL-9' });
+
+    const first = component.submit();
+    const second = component.submit(); // second call while `submitting` is still true must not double-file
+    await Promise.all([first, second]);
+
+    expect(fileOnBehalfCalls.length).toBe(1);
+  });
+
+  it('surfaces a server refusal instead of pretending the application was filed', async () => {
+    setup({ kind: 'refused', message: 'Staff cannot file under their own email address.' });
+
+    await component.submit();
+
+    expect(component.submitError()).toContain('Staff cannot file under their own email address.');
+    expect(store.applications().find((a: ApplicationRecord) => a.id === 'APP-1')).toBeUndefined();
   });
 });

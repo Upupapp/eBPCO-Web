@@ -153,7 +153,7 @@ export class Evaluations implements OnInit {
   // of the whole application pool.
   protected readonly ringStats = computed(() => {
     const card = this.selectedCard();
-    return card ? buildEvalRingStats(this.queueRows(), card.key) : [];
+    return card ? buildEvalRingStats(this.queueRows(), card.key, card.title) : [];
   });
   protected readonly activeStage = signal<Stage>('under-review');
   protected readonly page = signal(1);
@@ -404,14 +404,15 @@ export class Evaluations implements OnInit {
   protected toggleRowMenu(row: EvalRow): void {
     this.openRowMenuId.update((current) => {
       const next = current === row.id ? null : row.id;
-      // Reset the shared remarks field whenever a *different* row's menu
-      // opens — this field used to carry over whatever text was left in
-      // it from the previously-opened row (nothing cleared it except a
-      // successful submit), so leftover remarks from one application
-      // could silently get attached to a completely different one's
-      // "Return for Revision" if a staffer didn't notice the box was
-      // already pre-filled.
-      if (next !== null && next !== current) this.revisionRemarks.set('');
+      // Reset the shared remarks field on every open, not just when the
+      // row id differs from the previously-open one — the same
+      // application can reappear under a different evaluation stage
+      // (e.g. after Back navigation), where row.id alone doesn't change
+      // even though the remarks apply to a different record. Nothing
+      // else clears this field except a successful submit, so without
+      // an unconditional reset here, leftover text can silently get
+      // attached to the wrong stage's "Return for Revision".
+      if (next !== null) this.revisionRemarks.set('');
       return next;
     });
   }
@@ -510,6 +511,12 @@ export class Evaluations implements OnInit {
 
   protected exportVisible(): void {
     const rows = this.stageRows();
+    // `downloadCsv` writes nothing for an empty set, so "Exported 0 rows."
+    // announced a file that was never created.
+    if (rows.length === 0) {
+      this.toast.info('Nothing to export — no rows match the current stage.');
+      return;
+    }
     downloadCsv(
       'evaluations',
       rows.map((row) => this.evalCsvRow(row)),
@@ -519,6 +526,11 @@ export class Evaluations implements OnInit {
 
   protected exportAll(): void {
     const rows = this.cardRows();
+    if (rows.length === 0) {
+      this.toast.info('Nothing to export — there are no evaluations yet.');
+      this.closeMenu();
+      return;
+    }
     downloadCsv(
       'all-evaluations',
       rows.map((row) => this.evalCsvRow(row)),

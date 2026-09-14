@@ -1,0 +1,21 @@
+- generic [ref=f22e5]:
+  - generic [ref=f22e7]:
+    - img "Municipality of Castilla, Sorsogon seal" [ref=f22e11]
+    - paragraph [ref=f22e12]: Electronic Building Permit and Certificate of Occupancy
+    - paragraph [ref=f22e13]: Municipality of Castilla, Sorsogon
+  - generic [ref=f22e14]:
+    - generic [ref=f22e15]:
+      - generic [ref=f22e16]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f22e18]
+        - generic [ref=f22e19]: E-BPCO
+      - heading "Request received" [level=1] [ref=f22e132]
+      - status [ref=f22e133]:
+        - paragraph [ref=f22e134]:
+          - text: Your request has been sent to the LGU administrator for approval.
+          - strong [ref=f22e135]: No account exists yet.
+          - text: If it is approved, you will be told which forms you may work on and at what level.
+        - paragraph [ref=f22e136]: You may not hear back by email if this address is not eligible for an account, so follow up with your administrator if you hear nothing.
+      - paragraph [ref=f22e137]:
+        - link "Back to sign in" [ref=f22e138] [cursor=pointer]:
+          - /url: /login
+    - paragraph [ref=f22e127]: © 2026 Municipality of Castilla, Sorsogon. All rights reserved.

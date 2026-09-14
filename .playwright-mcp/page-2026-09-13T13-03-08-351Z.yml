@@ -1,0 +1,148 @@
+- generic [ref=e56]:
+  - complementary [ref=e58]:
+    - generic [ref=e59]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=e61]
+      - generic [ref=e62]: E-BPCO
+    - navigation [ref=e63]:
+      - link "Dashboard" [ref=e66] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=e72]:
+        - generic [ref=e73]: Operations
+        - generic [ref=e74]:
+          - link "Applications" [ref=e75] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=e81] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=e86] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=e93] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=e100]:
+        - generic [ref=e101]: Administration
+        - generic [ref=e102]:
+          - link "Businesses" [ref=e103] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=e109] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=e115] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=e122] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=e131] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=e137] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=e143] [cursor=pointer]
+  - main [ref=e149]:
+    - generic [ref=e1053]:
+      - generic "Applications" [ref=e1054]:
+        - generic [ref=e1055]:
+          - heading "Applications" [level=1] [ref=e1056]
+          - generic [ref=e1057]:
+            - generic [ref=e1058]:
+              - generic [ref=e1063]: Search
+              - textbox "Search" [ref=e1064]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=e1066] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=e1072] [cursor=pointer]:
+              - generic [ref=e1073]: Q
+              - generic [ref=e1077]:
+                - generic [ref=e1078]: QA@lguids.com.ph
+                - generic [ref=e1079]: Super Admin
+      - note [ref=e1084]:
+        - generic [ref=e1089]: "You are assigned 20 forms: Certificate of Occupancy, Business Permit, Building Permit – New Construction, Building Permit – Renovation / Alteration, Building Permit – Addition / Extension, Demolition Permit, Architectural Permit, Civil / Structural Permit, Electrical Permit, Mechanical Permit, Plumbing Permit, Electronics Permit, Interior Design Permit, Fencing Permit, Sign Permit, Excavation Permit, Sanitary Permit, Zoning / Locational Clearance, FSEC for Building Permit (BFP), FSIC for Occupancy Permit (BFP). Applications for other permit types are not shown here."
+      - generic [ref=e1090]:
+        - generic [ref=e1092]:
+          - generic [ref=e1094]:
+            - paragraph [ref=e1095]: Under Review
+            - paragraph [ref=e1096]: "5"
+          - generic [ref=e1097]:
+            - generic [ref=e1098]: 83% of all applications
+            - 'img "Under Review progress: 83 percent" [ref=e1100]'
+        - generic [ref=e1103]:
+          - generic [ref=e1105]:
+            - paragraph [ref=e1106]: Approved
+            - paragraph [ref=e1107]: "1"
+          - generic [ref=e1108]:
+            - generic [ref=e1109]: 17% of all applications
+            - 'img "Approved progress: 17 percent" [ref=e1111]'
+        - generic [ref=e1114]:
+          - generic [ref=e1116]:
+            - paragraph [ref=e1117]: Rejected
+            - paragraph [ref=e1118]: "0"
+          - generic [ref=e1119]:
+            - generic [ref=e1120]: 0% of all applications
+            - 'img "Rejected progress: 0 percent" [ref=e1122]'
+        - generic [ref=e1125]:
+          - generic [ref=e1127]:
+            - paragraph [ref=e1128]: Total Applications
+            - paragraph [ref=e1129]: "6"
+          - generic [ref=e1130]:
+            - generic [ref=e1131]: Under Review · Approved · Rejected
+            - 'img "3 categories: 5, 1, 0" [ref=e1133]'
+      - generic [ref=e1137]:
+        - generic [ref=e1138]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Lo" [ref=e1144]:
+            - /placeholder: Search Here By Application ID, Applicant Name, Business/Project, or Location
+          - generic [ref=e1145]:
+            - generic [ref=e1147]:
+              - button "Filters 1" [active] [ref=e1606] [cursor=pointer]:
+                - text: Filters
+                - generic [ref=e1607]: "1"
+              - menu [ref=e1395]:
+                - generic [ref=e1396]:
+                  - generic [ref=e1397]: Status
+                  - combobox "Status" [ref=e1398]:
+                    - option "All Statuses"
+                    - option "Approved" [selected]
+                    - option "Under Review"
+                    - option "Rejected"
+                - generic [ref=e1399]:
+                  - generic [ref=e1400]: Business / Project
+                  - combobox "Business / Project" [ref=e1401]:
+                    - option "All Businesses" [selected]
+                - button "Clear all" [ref=e1608] [cursor=pointer]
+            - button [ref=e1152] [cursor=pointer]
+            - button [ref=e1157] [cursor=pointer]
+        - table [ref=e1161]:
+          - rowgroup [ref=e1162]:
+            - row [ref=e1163]:
+              - columnheader [ref=e1164]:
+                - checkbox "Select all applications" [ref=e1165]
+              - columnheader "APPLICATION ID" [ref=e1166]
+              - columnheader "APPLICANT NAME" [ref=e1167]
+              - columnheader "LOCATION" [ref=e1168]
+              - columnheader "TYPE" [ref=e1169]
+              - columnheader "DATE SUBMITTED" [ref=e1170]
+              - columnheader "ASSIGNED OFFICER" [ref=e1171]
+              - columnheader "STATUS" [ref=e1172]
+              - columnheader "ACTION" [ref=e1173]
+          - rowgroup [ref=e1174]:
+            - row [ref=e1402] [cursor=pointer]:
+              - cell [ref=e1403]:
+                - checkbox "Select application ac89616e-7492-4b17-9fd0-3c772602f987" [ref=e1404]
+              - cell "ac89616e-7492-4b17-9fd0-3c772602f987 E-BPCO-2026-000006" [ref=e1405]:
+                - text: ac89616e-7492-4b17-9fd0-3c772602f987
+                - generic [ref=e1406]: E-BPCO-2026-000006
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=e1407]:
+                - generic [ref=e1408]:
+                  - generic [ref=e1409]: MS
+                  - generic [ref=e1411]:
+                    - generic "Maria Santos" [ref=e1412]
+                    - generic "Santos Sari-Sari Store" [ref=e1413]
+              - cell "60 Rizal Street, Poblacion" [ref=e1414]
+              - cell "Fencing Permit" [ref=e1415]
+              - cell "2026-09-13" [ref=e1416]
+              - cell "—" [ref=e1417]
+              - cell "Approved" [ref=e1418]
+              - cell [ref=e1420]:
+                - generic [ref=e1421]:
+                  - button "View application ac89616e-7492-4b17-9fd0-3c772602f987" [ref=e1422]
+                  - button "Edit application ac89616e-7492-4b17-9fd0-3c772602f987" [ref=e1427]
+                  - button "Delete application ac89616e-7492-4b17-9fd0-3c772602f987" [ref=e1431]
+        - navigation "Pagination" [ref=e1380]:
+          - generic [ref=e1381]: Showing 1-1 from 1
+          - generic [ref=e1382]:
+            - button "First page" [disabled] [ref=e1383]
+            - button "Page 1" [ref=e1388] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=e1389]

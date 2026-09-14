@@ -1,0 +1,268 @@
+- generic [ref=f36e198]:
+  - complementary [ref=f36e200]:
+    - generic [ref=f36e201]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f36e203]
+      - generic [ref=f36e204]: E-BPCO
+    - navigation [ref=f36e205]:
+      - link "Dashboard" [ref=f36e208] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f36e214]:
+        - generic [ref=f36e215]: Operations
+        - generic [ref=f36e216]:
+          - link "Applications" [ref=f36e217] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f36e223] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f36e228] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f36e235] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f36e242]:
+        - generic [ref=f36e243]: Administration
+        - generic [ref=f36e244]:
+          - link "Businesses" [ref=f36e245] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f36e251] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f36e257] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f36e264] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f36e273] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [active] [ref=f36e279] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f36e285] [cursor=pointer]
+  - main [ref=f36e291]:
+    - generic [ref=f36e1319]:
+      - generic "System Logs" [ref=f36e1320]:
+        - generic [ref=f36e1321]:
+          - heading "System Logs" [level=1] [ref=f36e1322]
+          - generic [ref=f36e1323]:
+            - generic [ref=f36e1324]:
+              - generic [ref=f36e1329]: Search
+              - textbox "Search" [ref=f36e1330]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f36e1332] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f36e1338] [cursor=pointer]:
+              - generic [ref=f36e1339]: Q
+              - generic [ref=f36e1343]:
+                - generic [ref=f36e1344]: QA@lguids.com.ph
+                - generic [ref=f36e1345]: Super Admin
+      - generic [ref=f36e1349]:
+        - generic [ref=f36e1351]:
+          - generic [ref=f36e1353]:
+            - paragraph [ref=f36e1354]: Total Logs (Today)
+            - paragraph [ref=f36e1355]: "22"
+          - generic [ref=f36e1356]: All activity logged today
+        - generic [ref=f36e1360]:
+          - generic [ref=f36e1362]:
+            - paragraph [ref=f36e1363]: Errors (Critical)
+            - paragraph [ref=f36e1364]: "0"
+          - generic [ref=f36e1365]: 0% of today's logs
+        - generic [ref=f36e1369]:
+          - generic [ref=f36e1371]:
+            - paragraph [ref=f36e1372]: Warnings (Today)
+            - paragraph [ref=f36e1373]: "0"
+          - generic [ref=f36e1374]: 0% of today's logs
+        - generic [ref=f36e1378]:
+          - generic [ref=f36e1380]:
+            - paragraph [ref=f36e1381]: Successful Actions
+            - paragraph [ref=f36e1382]: "22"
+          - generic [ref=f36e1383]: 100% of today's logs
+        - generic [ref=f36e1387]:
+          - generic [ref=f36e1389]:
+            - paragraph [ref=f36e1390]: Active Sessions
+            - paragraph [ref=f36e1391]: "20"
+          - generic [ref=f36e1392]: Across All Tenants
+      - generic [ref=f36e1395]:
+        - navigation [ref=f36e1396]:
+          - button [ref=f36e1397] [cursor=pointer]
+          - button [ref=f36e1402] [cursor=pointer]
+          - button [ref=f36e1409] [cursor=pointer]
+          - button [ref=f36e1414] [cursor=pointer]
+          - button [ref=f36e1418] [cursor=pointer]
+        - note [ref=f36e1423]:
+          - generic [ref=f36e1428]: Live activity from the server's audit trail — every row is a genuine action taken in Applications, Payments, or Permit Release. Showing 22 entries.
+        - generic [ref=f36e1429]:
+          - generic [ref=f36e1430]: Sep 14, 2026
+          - combobox "Filter by tenant" [ref=f36e1435] [cursor=pointer]:
+            - option "All Tenants" [selected]
+            - option "Santos Sari-Sari Store"
+            - option "System"
+          - combobox "Status filter" [ref=f36e1436] [cursor=pointer]:
+            - option "All Statuses" [selected]
+            - option "Active"
+            - option "Inactive"
+          - combobox "Severity filter" [ref=f36e1437] [cursor=pointer]:
+            - option "All Severity" [selected]
+            - option "Critical"
+            - option "Warning"
+            - option "Info"
+          - generic [ref=f36e1438]:
+            - generic [ref=f36e1439]: Live Stream
+            - switch "Live Stream" [checked] [ref=f36e1440] [cursor=pointer]
+          - button [disabled] [ref=f36e1442]
+          - button [ref=f36e1446] [cursor=pointer]
+        - table [ref=f36e1452]:
+          - rowgroup [ref=f36e1453]:
+            - row [ref=f36e1454]:
+              - columnheader "Time Stamp" [ref=f36e1455]
+              - columnheader "Event type" [ref=f36e1456]
+              - columnheader "Description" [ref=f36e1457]
+              - columnheader "User/Action" [ref=f36e1458]
+              - columnheader "Tenant" [ref=f36e1459]
+              - columnheader "Module" [ref=f36e1460]
+              - columnheader "IP Address" [ref=f36e1461]
+              - columnheader "Status" [ref=f36e1462]
+              - columnheader "Severity" [ref=f36e1463]
+              - columnheader "ACTION" [ref=f36e1464]
+          - rowgroup [ref=f36e1465]:
+            - row [ref=f36e1466] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:17 AM" [ref=f36e1467]
+              - cell "Application Transitioned" [ref=f36e1468]
+              - cell "application.transitioned" [ref=f36e1469]
+              - cell "staff" [ref=f36e1470]
+              - cell "Santos Sari-Sari Store" [ref=f36e1471]
+              - cell "Applications" [ref=f36e1472]
+              - cell "127.0.0.1" [ref=f36e1473]
+              - cell "Active" [ref=f36e1474]
+              - cell "Info" [ref=f36e1476]
+              - cell [ref=f36e1478]:
+                - generic [ref=f36e1479]:
+                  - button "View" [ref=f36e1480]
+                  - button "Edit" [ref=f36e1485]
+            - row [ref=f36e1489] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:16 AM" [ref=f36e1490]
+              - cell "Evaluation Recorded" [ref=f36e1491]
+              - cell "evaluation.recorded" [ref=f36e1492]
+              - cell "system" [ref=f36e1493]
+              - cell "Santos Sari-Sari Store" [ref=f36e1494]
+              - cell "Applications" [ref=f36e1495]
+              - cell "127.0.0.1" [ref=f36e1496]
+              - cell "Active" [ref=f36e1497]
+              - cell "Info" [ref=f36e1499]
+              - cell [ref=f36e1501]:
+                - generic [ref=f36e1502]:
+                  - button "View" [ref=f36e1503]
+                  - button "Edit" [ref=f36e1508]
+            - row [ref=f36e1512] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:15 AM" [ref=f36e1513]
+              - cell "Evaluation Recorded" [ref=f36e1514]
+              - cell "evaluation.recorded" [ref=f36e1515]
+              - cell "system" [ref=f36e1516]
+              - cell "Santos Sari-Sari Store" [ref=f36e1517]
+              - cell "Applications" [ref=f36e1518]
+              - cell "127.0.0.1" [ref=f36e1519]
+              - cell "Active" [ref=f36e1520]
+              - cell "Info" [ref=f36e1522]
+              - cell [ref=f36e1524]:
+                - generic [ref=f36e1525]:
+                  - button "View" [ref=f36e1526]
+                  - button "Edit" [ref=f36e1531]
+            - row [ref=f36e1535] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:15 AM" [ref=f36e1536]
+              - cell "Evaluation Recorded" [ref=f36e1537]
+              - cell "evaluation.recorded" [ref=f36e1538]
+              - cell "system" [ref=f36e1539]
+              - cell "Santos Sari-Sari Store" [ref=f36e1540]
+              - cell "Applications" [ref=f36e1541]
+              - cell "127.0.0.1" [ref=f36e1542]
+              - cell "Active" [ref=f36e1543]
+              - cell "Info" [ref=f36e1545]
+              - cell [ref=f36e1547]:
+                - generic [ref=f36e1548]:
+                  - button "View" [ref=f36e1549]
+                  - button "Edit" [ref=f36e1554]
+            - row [ref=f36e1558] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:10 AM" [ref=f36e1559]
+              - cell "Evaluation Recorded" [ref=f36e1560]
+              - cell "evaluation.recorded" [ref=f36e1561]
+              - cell "system" [ref=f36e1562]
+              - cell "Santos Sari-Sari Store" [ref=f36e1563]
+              - cell "Applications" [ref=f36e1564]
+              - cell "127.0.0.1" [ref=f36e1565]
+              - cell "Active" [ref=f36e1566]
+              - cell "Info" [ref=f36e1568]
+              - cell [ref=f36e1570]:
+                - generic [ref=f36e1571]:
+                  - button "View" [ref=f36e1572]
+                  - button "Edit" [ref=f36e1577]
+            - row [ref=f36e1581] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:09 AM" [ref=f36e1582]
+              - cell "Evaluation Recorded" [ref=f36e1583]
+              - cell "evaluation.recorded" [ref=f36e1584]
+              - cell "system" [ref=f36e1585]
+              - cell "Santos Sari-Sari Store" [ref=f36e1586]
+              - cell "Applications" [ref=f36e1587]
+              - cell "127.0.0.1" [ref=f36e1588]
+              - cell "Active" [ref=f36e1589]
+              - cell "Info" [ref=f36e1591]
+              - cell [ref=f36e1593]:
+                - generic [ref=f36e1594]:
+                  - button "View" [ref=f36e1595]
+                  - button "Edit" [ref=f36e1600]
+            - row [ref=f36e1604] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:08 AM" [ref=f36e1605]
+              - cell "Evaluation Recorded" [ref=f36e1606]
+              - cell "evaluation.recorded" [ref=f36e1607]
+              - cell "system" [ref=f36e1608]
+              - cell "Santos Sari-Sari Store" [ref=f36e1609]
+              - cell "Applications" [ref=f36e1610]
+              - cell "127.0.0.1" [ref=f36e1611]
+              - cell "Active" [ref=f36e1612]
+              - cell "Info" [ref=f36e1614]
+              - cell [ref=f36e1616]:
+                - generic [ref=f36e1617]:
+                  - button "View" [ref=f36e1618]
+                  - button "Edit" [ref=f36e1623]
+            - row [ref=f36e1627] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:06 AM" [ref=f36e1628]
+              - cell "Evaluation Recorded" [ref=f36e1629]
+              - cell "evaluation.recorded" [ref=f36e1630]
+              - cell "system" [ref=f36e1631]
+              - cell "Santos Sari-Sari Store" [ref=f36e1632]
+              - cell "Applications" [ref=f36e1633]
+              - cell "127.0.0.1" [ref=f36e1634]
+              - cell "Active" [ref=f36e1635]
+              - cell "Info" [ref=f36e1637]
+              - cell [ref=f36e1639]:
+                - generic [ref=f36e1640]:
+                  - button "View" [ref=f36e1641]
+                  - button "Edit" [ref=f36e1646]
+            - row [ref=f36e1650] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:02 AM" [ref=f36e1651]
+              - cell "Mfa Enrolled" [ref=f36e1652]
+              - cell "mfa.enrolled" [ref=f36e1653]
+              - cell "system" [ref=f36e1654]
+              - cell "System" [ref=f36e1655]
+              - cell "User Management" [ref=f36e1656]
+              - cell "—" [ref=f36e1657]
+              - cell "Active" [ref=f36e1658]
+              - cell "Info" [ref=f36e1660]
+              - cell [ref=f36e1662]:
+                - generic [ref=f36e1663]:
+                  - button "View" [ref=f36e1664]
+                  - button "Edit" [ref=f36e1669]
+            - row [ref=f36e1673] [cursor=pointer]:
+              - cell "Sep 14, 2026, 2:02 AM" [ref=f36e1674]
+              - cell "Mfa Enrolment Started" [ref=f36e1675]
+              - cell "mfa.enrolment-started" [ref=f36e1676]
+              - cell "system" [ref=f36e1677]
+              - cell "System" [ref=f36e1678]
+              - cell "User Management" [ref=f36e1679]
+              - cell "—" [ref=f36e1680]
+              - cell "Active" [ref=f36e1681]
+              - cell "Info" [ref=f36e1683]
+              - cell [ref=f36e1685]:
+                - generic [ref=f36e1686]:
+                  - button "View" [ref=f36e1687]
+                  - button "Edit" [ref=f36e1692]
+        - navigation "Pagination" [ref=f36e1697]:
+          - generic [ref=f36e1698]: Showing 1-10 from 22
+          - generic [ref=f36e1699]:
+            - button "First page" [disabled] [ref=f36e1700]
+            - button "Page 1" [ref=f36e1705] [cursor=pointer]: "1"
+            - button "Page 2" [ref=f36e1706] [cursor=pointer]: "2"
+            - button "Page 3" [ref=f36e1707] [cursor=pointer]: "3"
+            - button "Last page" [ref=f36e1708] [cursor=pointer]

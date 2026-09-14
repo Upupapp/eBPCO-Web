@@ -1,0 +1,241 @@
+- generic [ref=f36e198]:
+  - complementary [ref=f36e200]:
+    - generic [ref=f36e201]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f36e203]
+      - generic [ref=f36e204]: E-BPCO
+    - navigation [ref=f36e205]:
+      - link "Dashboard" [ref=f36e208] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f36e214]:
+        - generic [ref=f36e215]: Operations
+        - generic [ref=f36e216]:
+          - link "Applications" [active] [ref=f36e217] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f36e223] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f36e228] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f36e235] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f36e242]:
+        - generic [ref=f36e243]: Administration
+        - generic [ref=f36e244]:
+          - link "Businesses" [ref=f36e245] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f36e251] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f36e257] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f36e264] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f36e273] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f36e279] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f36e285] [cursor=pointer]
+  - main [ref=f36e291]:
+    - generic [ref=f36e3736]:
+      - generic "Applications" [ref=f36e3737]:
+        - generic [ref=f36e3738]:
+          - heading "Applications" [level=1] [ref=f36e3739]
+          - generic [ref=f36e3740]:
+            - generic [ref=f36e3741]:
+              - generic [ref=f36e3746]: Search
+              - textbox "Search" [ref=f36e3747]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f36e3749] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f36e3755] [cursor=pointer]:
+              - generic [ref=f36e3756]: Q
+              - generic [ref=f36e3760]:
+                - generic [ref=f36e3761]: QA@lguids.com.ph
+                - generic [ref=f36e3762]: Super Admin
+      - note [ref=f36e3767]:
+        - generic [ref=f36e3772]: "You are assigned 20 forms: Certificate of Occupancy, Business Permit, Building Permit – New Construction, Building Permit – Renovation / Alteration, Building Permit – Addition / Extension, Demolition Permit, Architectural Permit, Civil / Structural Permit, Electrical Permit, Mechanical Permit, Plumbing Permit, Electronics Permit, Interior Design Permit, Fencing Permit, Sign Permit, Excavation Permit, Sanitary Permit, Zoning / Locational Clearance, FSEC for Building Permit (BFP), FSIC for Occupancy Permit (BFP). Applications for other permit types are not shown here."
+      - generic [ref=f36e3773]:
+        - generic [ref=f36e3775]:
+          - generic [ref=f36e3777]:
+            - paragraph [ref=f36e3778]: Under Review
+            - paragraph [ref=f36e3779]: "4"
+          - generic [ref=f36e3780]:
+            - generic [ref=f36e3781]: 67% of all applications
+            - 'img "Under Review progress: 67 percent" [ref=f36e3783]'
+        - generic [ref=f36e3786]:
+          - generic [ref=f36e3788]:
+            - paragraph [ref=f36e3789]: Approved
+            - paragraph [ref=f36e3790]: "1"
+          - generic [ref=f36e3791]:
+            - generic [ref=f36e3792]: 17% of all applications
+            - 'img "Approved progress: 17 percent" [ref=f36e3794]'
+        - generic [ref=f36e3797]:
+          - generic [ref=f36e3799]:
+            - paragraph [ref=f36e3800]: Rejected
+            - paragraph [ref=f36e3801]: "1"
+          - generic [ref=f36e3802]:
+            - generic [ref=f36e3803]: 17% of all applications
+            - 'img "Rejected progress: 17 percent" [ref=f36e3805]'
+        - generic [ref=f36e3808]:
+          - generic [ref=f36e3810]:
+            - paragraph [ref=f36e3811]: Total Applications
+            - paragraph [ref=f36e3812]: "6"
+          - generic [ref=f36e3813]:
+            - generic [ref=f36e3814]: Under Review · Approved · Rejected
+            - 'img "3 categories: 4, 1, 1" [ref=f36e3816]'
+      - generic [ref=f36e3820]:
+        - generic [ref=f36e3821]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Location" [ref=f36e3827]
+          - generic [ref=f36e3828]:
+            - button [ref=f36e3831] [cursor=pointer]
+            - button [ref=f36e3835] [cursor=pointer]
+            - button [ref=f36e3840] [cursor=pointer]
+        - table [ref=f36e3844]:
+          - rowgroup [ref=f36e3845]:
+            - row [ref=f36e3846]:
+              - columnheader [ref=f36e3847]:
+                - checkbox "Select all applications" [ref=f36e3848]
+              - columnheader "APPLICATION ID" [ref=f36e3849]
+              - columnheader "APPLICANT NAME" [ref=f36e3850]
+              - columnheader "LOCATION" [ref=f36e3851]
+              - columnheader "TYPE" [ref=f36e3852]
+              - columnheader "DATE SUBMITTED" [ref=f36e3853]
+              - columnheader "ASSIGNED OFFICER" [ref=f36e3854]
+              - columnheader "STATUS" [ref=f36e3855]
+              - columnheader "ACTION" [ref=f36e3856]
+          - rowgroup [ref=f36e3857]:
+            - row [ref=f36e3858] [cursor=pointer]:
+              - cell [ref=f36e3859]:
+                - checkbox "Select application f29fc2e7-0736-4ab6-ae3b-24db04300f72" [ref=f36e3860]
+              - cell "f29fc2e7-0736-4ab6-ae3b-24db04300f72 E-BPCO-2026-000001" [ref=f36e3861]:
+                - text: f29fc2e7-0736-4ab6-ae3b-24db04300f72
+                - generic [ref=f36e3862]: E-BPCO-2026-000001
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f36e3863]:
+                - generic [ref=f36e3864]:
+                  - generic [ref=f36e3865]: MS
+                  - generic [ref=f36e3867]:
+                    - generic "Maria Santos" [ref=f36e3868]
+                    - generic "Santos Sari-Sari Store" [ref=f36e3869]
+              - cell "10 Rizal Street, Poblacion" [ref=f36e3870]
+              - cell "Fencing Permit" [ref=f36e3871]
+              - cell "2026-09-13" [ref=f36e3872]
+              - cell "—" [ref=f36e3873]
+              - cell "Rejected" [ref=f36e3874]
+              - cell [ref=f36e3876]:
+                - generic [ref=f36e3877]:
+                  - button "View application f29fc2e7-0736-4ab6-ae3b-24db04300f72" [ref=f36e3878]
+                  - button "Edit application f29fc2e7-0736-4ab6-ae3b-24db04300f72" [ref=f36e3883]
+                  - button "Delete application f29fc2e7-0736-4ab6-ae3b-24db04300f72" [ref=f36e3887]
+            - row [ref=f36e3892] [cursor=pointer]:
+              - cell [ref=f36e3893]:
+                - checkbox "Select application 182ccc5d-482b-4206-a09b-d754a1704a90" [ref=f36e3894]
+              - cell "182ccc5d-482b-4206-a09b-d754a1704a90 E-BPCO-2026-000006" [ref=f36e3895]:
+                - text: 182ccc5d-482b-4206-a09b-d754a1704a90
+                - generic [ref=f36e3896]: E-BPCO-2026-000006
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f36e3897]:
+                - generic [ref=f36e3898]:
+                  - generic [ref=f36e3899]: MS
+                  - generic [ref=f36e3901]:
+                    - generic "Maria Santos" [ref=f36e3902]
+                    - generic "Santos Sari-Sari Store" [ref=f36e3903]
+              - cell "60 Rizal Street, Poblacion" [ref=f36e3904]
+              - cell "Fencing Permit" [ref=f36e3905]
+              - cell "2026-09-13" [ref=f36e3906]
+              - cell "—" [ref=f36e3907]
+              - cell "Approved" [ref=f36e3908]
+              - cell [ref=f36e3910]:
+                - generic [ref=f36e3911]:
+                  - button "View application 182ccc5d-482b-4206-a09b-d754a1704a90" [ref=f36e3912]
+                  - button "Edit application 182ccc5d-482b-4206-a09b-d754a1704a90" [ref=f36e3917]
+                  - button "Delete application 182ccc5d-482b-4206-a09b-d754a1704a90" [ref=f36e3921]
+            - row [ref=f36e3926] [cursor=pointer]:
+              - cell [ref=f36e3927]:
+                - checkbox "Select application 3ba3506c-f5d6-4486-88f4-4a8e7beb9478" [ref=f36e3928]
+              - cell "3ba3506c-f5d6-4486-88f4-4a8e7beb9478 E-BPCO-2026-000005" [ref=f36e3929]:
+                - text: 3ba3506c-f5d6-4486-88f4-4a8e7beb9478
+                - generic [ref=f36e3930]: E-BPCO-2026-000005
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f36e3931]:
+                - generic [ref=f36e3932]:
+                  - generic [ref=f36e3933]: MS
+                  - generic [ref=f36e3935]:
+                    - generic "Maria Santos" [ref=f36e3936]
+                    - generic "Santos Sari-Sari Store" [ref=f36e3937]
+              - cell "50 Rizal Street, Poblacion" [ref=f36e3938]
+              - cell "Fencing Permit" [ref=f36e3939]
+              - cell "2026-09-13" [ref=f36e3940]
+              - cell "—" [ref=f36e3941]
+              - cell "Under Review" [ref=f36e3942]
+              - cell [ref=f36e3944]:
+                - generic [ref=f36e3945]:
+                  - button "View application 3ba3506c-f5d6-4486-88f4-4a8e7beb9478" [ref=f36e3946]
+                  - button "Edit application 3ba3506c-f5d6-4486-88f4-4a8e7beb9478" [ref=f36e3951]
+                  - button "Delete application 3ba3506c-f5d6-4486-88f4-4a8e7beb9478" [ref=f36e3955]
+            - row [ref=f36e3960] [cursor=pointer]:
+              - cell [ref=f36e3961]:
+                - checkbox "Select application 0581bbe7-c547-4102-9da0-b9b8afe5d905" [ref=f36e3962]
+              - cell "0581bbe7-c547-4102-9da0-b9b8afe5d905 E-BPCO-2026-000004" [ref=f36e3963]:
+                - text: 0581bbe7-c547-4102-9da0-b9b8afe5d905
+                - generic [ref=f36e3964]: E-BPCO-2026-000004
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f36e3965]:
+                - generic [ref=f36e3966]:
+                  - generic [ref=f36e3967]: MS
+                  - generic [ref=f36e3969]:
+                    - generic "Maria Santos" [ref=f36e3970]
+                    - generic "Santos Sari-Sari Store" [ref=f36e3971]
+              - cell "40 Rizal Street, Poblacion" [ref=f36e3972]
+              - cell "Fencing Permit" [ref=f36e3973]
+              - cell "2026-09-13" [ref=f36e3974]
+              - cell "—" [ref=f36e3975]
+              - cell "Under Review" [ref=f36e3976]
+              - cell [ref=f36e3978]:
+                - generic [ref=f36e3979]:
+                  - button "View application 0581bbe7-c547-4102-9da0-b9b8afe5d905" [ref=f36e3980]
+                  - button "Edit application 0581bbe7-c547-4102-9da0-b9b8afe5d905" [ref=f36e3985]
+                  - button "Delete application 0581bbe7-c547-4102-9da0-b9b8afe5d905" [ref=f36e3989]
+            - row [ref=f36e3994] [cursor=pointer]:
+              - cell [ref=f36e3995]:
+                - checkbox "Select application 7a741d71-f919-4c04-94a6-ef59176d59db" [ref=f36e3996]
+              - cell "7a741d71-f919-4c04-94a6-ef59176d59db E-BPCO-2026-000003" [ref=f36e3997]:
+                - text: 7a741d71-f919-4c04-94a6-ef59176d59db
+                - generic [ref=f36e3998]: E-BPCO-2026-000003
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f36e3999]:
+                - generic [ref=f36e4000]:
+                  - generic [ref=f36e4001]: MS
+                  - generic [ref=f36e4003]:
+                    - generic "Maria Santos" [ref=f36e4004]
+                    - generic "Santos Sari-Sari Store" [ref=f36e4005]
+              - cell "30 Rizal Street, Poblacion" [ref=f36e4006]
+              - cell "Fencing Permit" [ref=f36e4007]
+              - cell "2026-09-13" [ref=f36e4008]
+              - cell "—" [ref=f36e4009]
+              - cell "Under Review" [ref=f36e4010]
+              - cell [ref=f36e4012]:
+                - generic [ref=f36e4013]:
+                  - button "View application 7a741d71-f919-4c04-94a6-ef59176d59db" [ref=f36e4014]
+                  - button "Edit application 7a741d71-f919-4c04-94a6-ef59176d59db" [ref=f36e4019]
+                  - button "Delete application 7a741d71-f919-4c04-94a6-ef59176d59db" [ref=f36e4023]
+            - row [ref=f36e4028] [cursor=pointer]:
+              - cell [ref=f36e4029]:
+                - checkbox "Select application ed0578d8-aca1-43b9-9138-fc397c2440b5" [ref=f36e4030]
+              - cell "ed0578d8-aca1-43b9-9138-fc397c2440b5 E-BPCO-2026-000002" [ref=f36e4031]:
+                - text: ed0578d8-aca1-43b9-9138-fc397c2440b5
+                - generic [ref=f36e4032]: E-BPCO-2026-000002
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f36e4033]:
+                - generic [ref=f36e4034]:
+                  - generic [ref=f36e4035]: MS
+                  - generic [ref=f36e4037]:
+                    - generic "Maria Santos" [ref=f36e4038]
+                    - generic "Santos Sari-Sari Store" [ref=f36e4039]
+              - cell "20 Rizal Street, Poblacion" [ref=f36e4040]
+              - cell "Fencing Permit" [ref=f36e4041]
+              - cell "2026-09-13" [ref=f36e4042]
+              - cell "—" [ref=f36e4043]
+              - cell "Under Review" [ref=f36e4044]
+              - cell [ref=f36e4046]:
+                - generic [ref=f36e4047]:
+                  - button "View application ed0578d8-aca1-43b9-9138-fc397c2440b5" [ref=f36e4048]
+                  - button "Edit application ed0578d8-aca1-43b9-9138-fc397c2440b5" [ref=f36e4053]
+                  - button "Delete application ed0578d8-aca1-43b9-9138-fc397c2440b5" [ref=f36e4057]
+        - navigation "Pagination" [ref=f36e4063]:
+          - generic [ref=f36e4064]: Showing 1-6 from 6
+          - generic [ref=f36e4065]:
+            - button "First page" [disabled] [ref=f36e4066]
+            - button "Page 1" [ref=f36e4071] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f36e4072]

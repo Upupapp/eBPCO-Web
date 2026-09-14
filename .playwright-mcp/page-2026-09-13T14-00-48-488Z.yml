@@ -1,0 +1,155 @@
+- generic [ref=f1e2]:
+  - generic [ref=f1e1437]:
+    - complementary [ref=f1e1439]:
+      - generic [ref=f1e1440]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f1e1442]
+        - generic [ref=f1e1443]: E-BPCO
+      - navigation [ref=f1e1444]:
+        - link "Dashboard" [ref=f1e1447] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f1e1453]:
+          - generic [ref=f1e1454]: Operations
+          - generic [ref=f1e1455]:
+            - link "Applications" [ref=f1e1456] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f1e1462] [cursor=pointer]:
+              - /url: /evaluations
+            - link "Payments" [ref=f1e1467] [cursor=pointer]:
+              - /url: /payments
+            - link "Permit Release" [ref=f1e1474] [cursor=pointer]:
+              - /url: /permit-release
+        - generic [ref=f1e1481]:
+          - generic [ref=f1e1482]: Administration
+          - generic [ref=f1e1483]:
+            - link "Businesses" [ref=f1e1484] [cursor=pointer]:
+              - /url: /businesses
+            - link "Access Requests" [ref=f1e1490] [cursor=pointer]:
+              - /url: /access-requests
+            - link "Users & Roles" [ref=f1e1496] [cursor=pointer]:
+              - /url: /user-roles
+            - link "Workflow" [ref=f1e1503] [cursor=pointer]:
+              - /url: /workflow
+            - link "Archive" [ref=f1e1512] [cursor=pointer]:
+              - /url: /archive
+            - link "System Logs" [ref=f1e1518] [cursor=pointer]:
+              - /url: /system-logs
+      - button "Log Out" [ref=f1e1524] [cursor=pointer]
+    - main [ref=f1e1530]:
+      - generic [ref=f1e2462]:
+        - generic "Payments" [ref=f1e2463]:
+          - generic [ref=f1e2464]:
+            - heading "Payments" [level=1] [ref=f1e2465]
+            - generic [ref=f1e2466]:
+              - generic [ref=f1e2467]:
+                - generic [ref=f1e2472]: Search
+                - textbox "Search" [ref=f1e2473]:
+                  - /placeholder: Search here...
+              - button "Notifications" [ref=f1e2475] [cursor=pointer]
+              - button "Q QA@lguids.com.ph Super Admin" [ref=f1e2481] [cursor=pointer]:
+                - generic [ref=f1e2482]: Q
+                - generic [ref=f1e2486]:
+                  - generic [ref=f1e2487]: QA@lguids.com.ph
+                  - generic [ref=f1e2488]: Super Admin
+        - generic [ref=f1e2701]:
+          - generic [ref=f1e2702]:
+            - generic [ref=f1e2703]:
+              - heading "Payment Assessment" [level=1] [ref=f1e2704]
+              - paragraph [ref=f1e2705]: Maria Santos · Santos Sari-Sari Store · Fencing Permit
+            - button "Back to Application" [ref=f1e2707] [cursor=pointer]
+          - generic [ref=f1e2712]:
+            - generic [ref=f1e2713]:
+              - heading "Assessment — Draft" [level=2] [ref=f1e2714]
+              - generic [ref=f1e2715]: Fee schedule version 2026.100-restore
+            - table [ref=f1e2717]:
+              - rowgroup [ref=f1e2718]:
+                - row [ref=f1e2719]:
+                  - columnheader "Line" [ref=f1e2720]
+                  - columnheader "Included" [ref=f1e2721]
+                  - columnheader "Schedule Says" [ref=f1e2722]
+                  - columnheader "Amount (₱)" [ref=f1e2723]
+                  - columnheader "Basis" [ref=f1e2724]
+                  - columnheader [ref=f1e2725]
+              - rowgroup [ref=f1e2726]:
+                - row [ref=f1e2727]:
+                  - cell "Filing Fee" [ref=f1e2728]
+                  - cell [ref=f1e2729]:
+                    - checkbox "Filing Fee included" [checked] [ref=f1e2730]
+                  - cell "₱500.00" [ref=f1e2731]
+                  - cell [ref=f1e2732]:
+                    - spinbutton "Filing Fee amount in pesos" [ref=f1e2733]: "500.00"
+                  - cell [ref=f1e2734]:
+                    - textbox "Filing Fee basis" [ref=f1e2735]:
+                      - /placeholder: Ordinance or issuance this rests on
+                      - text: City Ordinance 2026-004
+                  - cell [ref=f1e2736]:
+                    - button "Save" [ref=f1e2737] [cursor=pointer]
+                - row [ref=f1e2738]:
+                  - cell "Processing Fee" [ref=f1e2739]
+                  - cell [ref=f1e2740]:
+                    - checkbox "Processing Fee included" [checked] [ref=f1e2741]
+                  - cell "₱1,200.00" [ref=f1e2742]
+                  - cell [ref=f1e2743]:
+                    - spinbutton "Processing Fee amount in pesos" [ref=f1e2744]: "1200.00"
+                  - cell [ref=f1e2745]:
+                    - textbox "Processing Fee basis" [ref=f1e2746]:
+                      - /placeholder: Ordinance or issuance this rests on
+                      - text: City Ordinance 2026-004
+                  - cell [ref=f1e2747]:
+                    - button "Save" [ref=f1e2748] [cursor=pointer]
+                - row [ref=f1e2749]:
+                  - cell "Architectural Fee" [ref=f1e2750]
+                  - cell [ref=f1e2751]:
+                    - checkbox "Architectural Fee included" [checked] [ref=f1e2752]
+                  - cell "₱0.00" [ref=f1e2753]
+                  - cell [ref=f1e2754]:
+                    - spinbutton "Architectural Fee amount in pesos" [ref=f1e2755]: "0.00"
+                  - cell [ref=f1e2756]:
+                    - textbox "Architectural Fee basis" [ref=f1e2757]:
+                      - /placeholder: Ordinance or issuance this rests on
+                  - cell [ref=f1e2758]:
+                    - button "Save" [ref=f1e2759] [cursor=pointer]
+                - row [ref=f1e2760]:
+                  - cell "Structural Fee" [ref=f1e2761]
+                  - cell [ref=f1e2762]:
+                    - checkbox "Structural Fee included" [checked] [ref=f1e2763]
+                  - cell "₱5,120.00" [ref=f1e2764]
+                  - cell [ref=f1e2765]:
+                    - spinbutton "Structural Fee amount in pesos" [ref=f1e2766]: "5120.00"
+                  - cell [ref=f1e2767]:
+                    - textbox "Structural Fee basis" [ref=f1e2768]:
+                      - /placeholder: Ordinance or issuance this rests on
+                      - text: City Ordinance 2026-004
+                  - cell [ref=f1e2769]:
+                    - button "Save" [ref=f1e2770] [cursor=pointer]
+                - row [ref=f1e2771]:
+                  - cell "Electrical Fee" [ref=f1e2772]
+                  - cell [ref=f1e2773]:
+                    - checkbox "Electrical Fee included" [checked] [ref=f1e2774]
+                  - cell "₱0.00" [ref=f1e2775]
+                  - cell [ref=f1e2776]:
+                    - spinbutton "Electrical Fee amount in pesos" [ref=f1e2777]: "0.00"
+                  - cell [ref=f1e2778]:
+                    - textbox "Electrical Fee basis" [ref=f1e2779]:
+                      - /placeholder: Ordinance or issuance this rests on
+                  - cell [ref=f1e2780]:
+                    - button "Save" [ref=f1e2781] [cursor=pointer]
+                - row [ref=f1e2782]:
+                  - cell "Other Fees" [ref=f1e2783]
+                  - cell [ref=f1e2784]:
+                    - checkbox "Other Fees included" [checked] [ref=f1e2785]
+                  - cell "₱0.00" [ref=f1e2786]
+                  - cell [ref=f1e2787]:
+                    - spinbutton "Other Fees amount in pesos" [ref=f1e2788]: "0.00"
+                  - cell [ref=f1e2789]:
+                    - textbox "Other Fees basis" [ref=f1e2790]:
+                      - /placeholder: Ordinance or issuance this rests on
+                  - cell [ref=f1e2791]:
+                    - button "Save" [ref=f1e2792] [cursor=pointer]
+              - rowgroup [ref=f1e2793]:
+                - row [ref=f1e2794]:
+                  - cell "Total" [ref=f1e2795]
+                  - cell "₱6,820.00" [ref=f1e2796]
+            - button "Submit for Approval" [ref=f1e2798] [cursor=pointer]
+  - status [ref=f1e2799]:
+    - generic [ref=f1e2804]: Assessment drafted from the fee schedule in force today.
+    - button "Dismiss" [ref=f1e2805] [cursor=pointer]: ✕

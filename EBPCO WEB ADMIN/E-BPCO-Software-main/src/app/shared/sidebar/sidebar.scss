@@ -12,6 +12,13 @@
   padding: 1.5rem 1.25rem;
   background: $color-surface;
   border-right: 1px solid $color-border;
+  // Safety net for a short viewport: Super Admin's full 11-item menu plus
+  // the logout button can be taller than the available height. Without
+  // this, that overflow had nowhere contained to go and bled out of the
+  // sidebar into the whole page, inflating the page's own scroll height —
+  // this way the SIDEBAR scrolls on its own when it must, and the rest of
+  // the app never does because of it.
+  overflow-y: auto;
 }
 
 .brand {
@@ -90,7 +97,16 @@
 }
 
 .logout-btn {
-  margin-top: auto;
+  // Was `margin-top: auto`, which always pins this to the very bottom of
+  // the sidebar's full height regardless of how much nav content there is
+  // above it — on a tall viewport, that put a large dead gap directly
+  // between "System Logs" and this button instead of at the bottom of the
+  // sidebar, where empty space actually reads as normal.
+  margin-top: 2rem;
+  // Paired with `.sidebar`'s `overflow-y: auto` above: on a short viewport
+  // where the nav list scrolls, this stops the button itself from being
+  // squashed by the column's own sizing rules.
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;

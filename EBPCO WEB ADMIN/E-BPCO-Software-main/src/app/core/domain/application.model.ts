@@ -107,6 +107,14 @@ export interface ApplicationRecord {
    */
   filedAs: string | null;
   status: CoarseStatus;
+  /**
+   * Optimistic-concurrency token from `GET /staff/applications`, threaded
+   * back as `expectedVersion` on a transition so a stale edit is refused
+   * rather than silently overwriting a decision made elsewhere in the
+   * meantime. `undefined` for seed/local-only records, which have no server
+   * row to be stale against.
+   */
+  version?: number;
 }
 
 /** Builds the two migration-bridge fields from the rest of a record — used by the store on every create/update so `type`/`status` never drift. */
@@ -123,7 +131,27 @@ export function withProjectedFields<
   };
 }
 
-/** Bare barangay name (e.g. "Poblacion") from a record's `location` display string (e.g. "Barangay Poblacion") — the one place that mapping happens, so the Business Stages board's Barangay filter and the intake form's location field never diverge on how they derive it. */
+/**
+ * Bare barangay name (e.g. "Poblacion") from a record's `location` display
+ * string — the one place that mapping happens, so the Business Stages
+ * board's Barangay filter and the intake form's location field never
+ * diverge on how they derive it.
+ *
+ * Two real shapes reach this function: seed/intake-built locations already
+ * write "Barangay Poblacion" (stripped below), but the real backend's own
+ * `location` field for an application is a full street address in the usual
+ * Philippine order — "60 Rizal Street, Poblacion" — with the barangay as the
+ * last comma-separated segment, not a "Barangay "-prefixed string at all.
+ * Only handling the prefix case (the original implementation) left the whole
+ * address unstripped for real applications, which the filter's own label
+ * then re-prefixed with "Barangay " a second time — "Barangay 60 Rizal
+ * Street, Poblacion" — nonsensical to a real user even though the filter
+ * itself still narrowed correctly.
+ */
 export function barangayOf(app: Pick<ApplicationRecord, 'location'>): string {
-  return app.location.replace(/^Barangay\s+/i, '').trim();
+  const raw = app.location.trim();
+  const prefixStripped = raw.replace(/^Barangay\s+/i, '');
+  if (prefixStripped !== raw) return prefixStripped.trim();
+  const lastComma = raw.lastIndexOf(',');
+  return (lastComma === -1 ? raw : raw.slice(lastComma + 1)).trim();
 }

@@ -1,0 +1,164 @@
+- generic [ref=f36e198]:
+  - complementary [ref=f36e200]:
+    - generic [ref=f36e201]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f36e203]
+      - generic [ref=f36e204]: E-BPCO
+    - navigation [ref=f36e205]:
+      - link "Dashboard" [ref=f36e208] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f36e214]:
+        - generic [ref=f36e215]: Operations
+        - generic [ref=f36e216]:
+          - link "Applications" [ref=f36e217] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f36e223] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f36e228] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f36e235] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f36e242]:
+        - generic [ref=f36e243]: Administration
+        - generic [ref=f36e244]:
+          - link "Businesses" [ref=f36e245] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f36e251] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f36e257] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f36e264] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f36e273] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f36e279] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f36e285] [cursor=pointer]
+  - main [ref=f36e291]:
+    - generic [ref=f36e1319]:
+      - generic "System Logs" [ref=f36e1320]:
+        - generic [ref=f36e1321]:
+          - heading "System Logs" [level=1] [ref=f36e1322]
+          - generic [ref=f36e1323]:
+            - generic [ref=f36e1324]:
+              - generic [ref=f36e1329]: Search
+              - textbox "Search" [ref=f36e1330]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f36e1332] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f36e1338] [cursor=pointer]:
+              - generic [ref=f36e1339]: Q
+              - generic [ref=f36e1343]:
+                - generic [ref=f36e1344]: QA@lguids.com.ph
+                - generic [ref=f36e1345]: Super Admin
+      - generic [ref=f36e2842]:
+        - generic [ref=f36e3207]:
+          - generic [ref=f36e3209]:
+            - paragraph [ref=f36e3210]: Security Events (Today)
+            - paragraph [ref=f36e3211]: "2"
+          - generic [ref=f36e3212]: All security events today
+        - generic [ref=f36e3216]:
+          - generic [ref=f36e3218]:
+            - paragraph [ref=f36e3219]: Failed Login Attempts
+            - paragraph [ref=f36e3220]: "0"
+          - generic [ref=f36e3221]: 0% of today's logs
+        - generic [ref=f36e3225]:
+          - generic [ref=f36e3227]:
+            - paragraph [ref=f36e3228]: Suspicious Activities
+            - paragraph [ref=f36e3229]: "0"
+          - generic [ref=f36e3230]: 0% of today's logs
+        - generic [ref=f36e3234]:
+          - generic [ref=f36e3236]:
+            - paragraph [ref=f36e3237]: Blocked IP Addresses
+            - paragraph [ref=f36e3238]: "0"
+          - generic [ref=f36e3239]: Distinct IPs blocked
+        - generic [ref=f36e3243]:
+          - generic [ref=f36e3245]:
+            - paragraph [ref=f36e3246]: Password Changes
+            - paragraph [ref=f36e3247]: "0"
+          - generic [ref=f36e3248]: 0% of today's logs
+      - generic [ref=f36e2888]:
+        - navigation [ref=f36e2889]:
+          - button [ref=f36e2890] [cursor=pointer]
+          - button [ref=f36e2895] [cursor=pointer]
+          - button [ref=f36e2902] [cursor=pointer]
+          - button [active] [ref=f36e2907] [cursor=pointer]
+          - button [ref=f36e2911] [cursor=pointer]
+        - note [ref=f36e3251]:
+          - generic [ref=f36e3256]: Live security events from the server's audit trail — access decisions, refused sign-ins and MFA failures. Showing 2 entries.
+        - generic [ref=f36e2922]:
+          - generic [ref=f36e2923]: May 5, 2026 - May 6, 2026
+          - combobox "Filter by tenant" [ref=f36e2928] [cursor=pointer]:
+            - option "All Tenants" [selected]
+            - option "Villanueva Hardware & Construction Supply"
+            - option "Simbulan Sari-Sari Store"
+            - option "Rodrigo Bakeshop"
+            - option "Zaballero Auto Repair Shop"
+            - option "Martirez Rice Mill"
+            - option "Nuñez Feeds & Agri Supply"
+            - option "Villareal Eatery"
+            - option "Barrera Internet Café"
+            - option "Morales General Merchandise"
+            - option "Bermudez Furniture Shop"
+            - option "Salazar Water Refilling Station"
+            - option "Fajota Trading Corp."
+          - combobox "Status filter" [ref=f36e2929] [cursor=pointer]:
+            - option "All Statuses" [selected]
+            - option "Active"
+            - option "Inactive"
+          - combobox "Severity filter" [ref=f36e2930] [cursor=pointer]:
+            - option "All Severity" [selected]
+            - option "Critical"
+            - option "Warning"
+            - option "Info"
+          - generic [ref=f36e2931]:
+            - generic [ref=f36e2932]: Live Stream
+            - switch "Live Stream" [checked] [ref=f36e2933] [cursor=pointer]
+          - button [disabled] [ref=f36e2935]
+          - button [ref=f36e2939] [cursor=pointer]
+        - table [ref=f36e3257]:
+          - rowgroup [ref=f36e3258]:
+            - row [ref=f36e3259]:
+              - columnheader "Time Stamp" [ref=f36e3260]
+              - columnheader "Event Type" [ref=f36e3261]
+              - columnheader "User" [ref=f36e3262]
+              - columnheader "Tenant" [ref=f36e3263]
+              - columnheader "Message" [ref=f36e3264]
+              - columnheader "IP Address" [ref=f36e3265]
+              - columnheader "Environment" [ref=f36e3266]
+              - columnheader "Severity" [ref=f36e3267]
+              - columnheader "Status" [ref=f36e3268]
+              - columnheader "ACTION" [ref=f36e3269]
+          - rowgroup [ref=f36e3270]:
+            - row [ref=f36e3271] [cursor=pointer]:
+              - cell "Sep 14, 2026, 1:26 PM" [ref=f36e3272]
+              - cell "Access Rejected" [ref=f36e3273]
+              - cell "super-admin" [ref=f36e3274]
+              - cell "System" [ref=f36e3275]
+              - cell "access.rejected — denied" [ref=f36e3276]
+              - cell "127.0.0.1" [ref=f36e3278]
+              - cell "—" [ref=f36e3279]
+              - cell "Warning" [ref=f36e3280]
+              - cell "Inactive" [ref=f36e3282]
+              - cell [ref=f36e3284]:
+                - generic [ref=f36e3285]:
+                  - button "View" [ref=f36e3286]
+                  - button "Edit" [ref=f36e3291]
+            - row [ref=f36e3295] [cursor=pointer]:
+              - cell "Sep 14, 2026, 1:25 PM" [ref=f36e3296]
+              - cell "Access Requested" [ref=f36e3297]
+              - cell "system" [ref=f36e3298]
+              - cell "System" [ref=f36e3299]
+              - cell "access.requested" [ref=f36e3300]
+              - cell "127.0.0.1" [ref=f36e3302]
+              - cell "—" [ref=f36e3303]
+              - cell "Info" [ref=f36e3304]
+              - cell "Active" [ref=f36e3306]
+              - cell [ref=f36e3308]:
+                - generic [ref=f36e3309]:
+                  - button "View" [ref=f36e3310]
+                  - button "Edit" [ref=f36e3315]
+        - navigation "Pagination" [ref=f36e3190]:
+          - generic [ref=f36e3191]: Showing 1-2 from 2
+          - generic [ref=f36e3192]:
+            - button "First page" [disabled] [ref=f36e3193]
+            - button "Page 1" [ref=f36e3198] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f36e3201]

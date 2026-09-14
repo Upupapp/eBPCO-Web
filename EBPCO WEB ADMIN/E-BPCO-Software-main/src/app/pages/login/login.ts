@@ -1,9 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthLayout } from '../../shared/auth-layout/auth-layout';
 import { DilgSeal } from '../../shared/dilg-seal/dilg-seal';
 import { SessionService } from '../../core/session/session.service';
+import { IdentityApi } from '../../core/api/identity.api';
 import { ApiError } from '../../core/api/problem';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -15,6 +16,13 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   styleUrl: './login.scss',
 })
 export class Login {
+  /**
+   * `/login?reason=session-expired` — sent here by `auth.interceptor.ts`
+   * when a request that was carrying a token comes back 401, rather than
+   * leaving the officer on the page they were on with no visible way out.
+   */
+  readonly reason = input<string>('');
+
   email = '';
   password = '';
   rememberMe = false;
@@ -34,6 +42,19 @@ export class Login {
    */
   readonly signInError = signal('');
   readonly showForgotPassword = signal(false);
+  /** Prefilled from whatever is already in the email field, editable from there. */
+  forgotPasswordEmail = '';
+  readonly forgotPasswordSending = signal(false);
+  /**
+   * Set once a request has been sent. Deliberately one message regardless of
+   * whether the address has an account — the server answers
+   * `POST /auth/password/forgot` identically either way, on purpose (see its
+   * doc comment in `auth.controller.ts`), and a portal that said something
+   * different for a known address would be the enumeration oracle that
+   * endpoint exists to prevent.
+   */
+  readonly forgotPasswordSent = signal(false);
+  readonly forgotPasswordError = signal('');
   /**
    * A missing password — a fact about THIS field, same treatment as
    * `emailError`. Previously `form.invalid` silently blocked submission with
@@ -43,6 +64,7 @@ export class Login {
   readonly passwordError = signal('');
 
   private readonly session = inject(SessionService);
+  private readonly identity = inject(IdentityApi);
 
   constructor(private readonly router: Router) {}
 
@@ -51,11 +73,42 @@ export class Login {
   }
 
   openForgotPassword(): void {
+    this.forgotPasswordEmail = this.email;
+    this.forgotPasswordSent.set(false);
+    this.forgotPasswordError.set('');
     this.showForgotPassword.set(true);
   }
 
   closeForgotPassword(): void {
     this.showForgotPassword.set(false);
+  }
+
+  async sendForgotPassword(): Promise<void> {
+    if (this.forgotPasswordSending()) return;
+    this.forgotPasswordError.set('');
+    const normalized = this.forgotPasswordEmail.trim().toLowerCase();
+    if (!EMAIL_PATTERN.test(normalized)) {
+      this.forgotPasswordError.set('Please enter a valid email address.');
+      return;
+    }
+
+    this.forgotPasswordSending.set(true);
+    try {
+      await this.identity.requestPasswordReset(normalized);
+      this.forgotPasswordSent.set(true);
+    } catch (error) {
+      // A real network/server failure IS reported — that is a fact about the
+      // connection, not about the address. Anything the server itself
+      // answered (202 always, whatever the address) already reads as success
+      // above and must not be second-guessed here.
+      this.forgotPasswordError.set(
+        error instanceof Error && error.message !== ''
+          ? error.message
+          : 'That could not be sent. Try again.',
+      );
+    } finally {
+      this.forgotPasswordSending.set(false);
+    }
   }
 
   onEmailChange(): void {

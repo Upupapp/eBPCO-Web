@@ -1,0 +1,81 @@
+- generic [ref=f1e2]:
+  - generic [ref=f1e56]:
+    - complementary [ref=f1e58]:
+      - generic [ref=f1e59]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f1e61]
+        - generic [ref=f1e62]: E-BPCO
+      - navigation [ref=f1e63]:
+        - link "Dashboard" [ref=f1e66] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f1e72]:
+          - generic [ref=f1e73]: Operations
+          - generic [ref=f1e74]:
+            - link "Applications" [ref=f1e75] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f1e81] [cursor=pointer]:
+              - /url: /evaluations
+            - link "Payments" [ref=f1e86] [cursor=pointer]:
+              - /url: /payments
+            - link "Permit Release" [ref=f1e93] [cursor=pointer]:
+              - /url: /permit-release
+        - generic [ref=f1e100]:
+          - generic [ref=f1e101]: Administration
+          - generic [ref=f1e102]:
+            - link "Businesses" [ref=f1e103] [cursor=pointer]:
+              - /url: /businesses
+            - link "Access Requests" [ref=f1e109] [cursor=pointer]:
+              - /url: /access-requests
+            - link "Users & Roles" [ref=f1e115] [cursor=pointer]:
+              - /url: /user-roles
+            - link "Workflow" [ref=f1e122] [cursor=pointer]:
+              - /url: /workflow
+            - link "Archive" [ref=f1e131] [cursor=pointer]:
+              - /url: /archive
+            - link "System Logs" [ref=f1e137] [cursor=pointer]:
+              - /url: /system-logs
+      - button "Log Out" [ref=f1e143] [cursor=pointer]
+    - main [ref=f1e149]:
+      - generic [ref=f1e920]:
+        - generic "Payments" [ref=f1e921]:
+          - generic [ref=f1e922]:
+            - heading "Payments" [level=1] [ref=f1e923]
+            - generic [ref=f1e924]:
+              - button "Notifications" [ref=f1e926] [cursor=pointer]
+              - button "Q QA@lguids.com.ph Super Admin" [ref=f1e932] [cursor=pointer]:
+                - generic [ref=f1e933]: Q
+                - generic [ref=f1e937]:
+                  - generic [ref=f1e938]: QA@lguids.com.ph
+                  - generic [ref=f1e939]: Super Admin
+        - generic [ref=f1e943]:
+          - navigation [ref=f1e944]:
+            - button [ref=f1e945] [cursor=pointer]
+            - button [ref=f1e951] [cursor=pointer]
+            - button [ref=f1e954] [cursor=pointer]
+          - button "Publish New Schedule" [ref=f1e1040] [cursor=pointer]
+          - table [ref=f1e1042]:
+            - rowgroup [ref=f1e1043]:
+              - row [ref=f1e1044]:
+                - columnheader "Version" [ref=f1e1045]
+                - columnheader "Status" [ref=f1e1046]
+                - columnheader "Effective From" [ref=f1e1047]
+                - columnheader "Effective To" [ref=f1e1048]
+                - columnheader "Published By" [ref=f1e1049]
+                - columnheader "Lines" [ref=f1e1050]
+            - rowgroup [ref=f1e1051]:
+              - row [ref=f1e1052] [cursor=pointer]:
+                - cell "2026.2-test" [ref=f1e1053]
+                - cell "In force" [ref=f1e1054]
+                - cell "2026-09-13" [ref=f1e1056]
+                - cell "—" [ref=f1e1057]
+                - cell "Stage 3 live verification test" [ref=f1e1058]
+                - cell "1" [ref=f1e1059]
+              - row [ref=f1e1060] [cursor=pointer]:
+                - cell "2026.1" [ref=f1e1061]
+                - cell "Superseded" [ref=f1e1062]
+                - cell "2026-01-01" [ref=f1e1064]
+                - cell "2026-09-13" [ref=f1e1065]
+                - cell "City Ordinance 2026-004" [ref=f1e1066]
+                - cell "3" [ref=f1e1067]
+  - status [ref=f1e1069]:
+    - generic [ref=f1e1074]: Fee schedule "2026.2-test" published.
+    - button "Dismiss" [ref=f1e1075] [cursor=pointer]: ✕

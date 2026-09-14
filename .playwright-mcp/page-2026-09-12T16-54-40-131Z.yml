@@ -1,0 +1,639 @@
+- generic [ref=f26e56]:
+  - complementary [ref=f26e58]:
+    - generic [ref=f26e59]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f26e61]
+      - generic [ref=f26e62]: E-BPCO
+    - navigation [ref=f26e63]:
+      - link "Dashboard" [ref=f26e66] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f26e72]:
+        - generic [ref=f26e73]: Operations
+        - generic [ref=f26e74]:
+          - link "Applications" [ref=f26e75] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f26e81] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f26e86] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f26e93] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f26e100]:
+        - generic [ref=f26e101]: Administration
+        - generic [ref=f26e102]:
+          - link "Businesses" [ref=f26e103] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f26e109] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f26e115] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f26e122] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f26e131] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f26e137] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f26e143] [cursor=pointer]
+  - main [ref=f26e149]:
+    - generic [ref=f26e524]:
+      - generic "Applications" [ref=f26e525]:
+        - generic [ref=f26e526]:
+          - heading "Applications" [level=1] [ref=f26e527]
+          - generic [ref=f26e528]:
+            - button "Notifications" [ref=f26e530] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f26e536] [cursor=pointer]:
+              - generic [ref=f26e537]: Q
+              - generic [ref=f26e541]:
+                - generic [ref=f26e542]: QA@lguids.com.ph
+                - generic [ref=f26e543]: Super Admin
+      - note [ref=f26e548]:
+        - generic [ref=f26e553]: Your account is assigned no forms, so nothing can appear here. An administrator has to assign at least one.
+      - generic [ref=f26e554]:
+        - generic [ref=f26e556]:
+          - generic [ref=f26e558]:
+            - paragraph [ref=f26e559]: Under Review
+            - paragraph [ref=f26e560]: "0"
+          - generic [ref=f26e561]:
+            - generic [ref=f26e562]: 0% of all applications
+            - 'img "Under Review progress: 0 percent" [ref=f26e564]'
+        - generic [ref=f26e567]:
+          - generic [ref=f26e569]:
+            - paragraph [ref=f26e570]: Approved
+            - paragraph [ref=f26e571]: "0"
+          - generic [ref=f26e572]:
+            - generic [ref=f26e573]: 0% of all applications
+            - 'img "Approved progress: 0 percent" [ref=f26e575]'
+        - generic [ref=f26e578]:
+          - generic [ref=f26e580]:
+            - paragraph [ref=f26e581]: Rejected
+            - paragraph [ref=f26e582]: "0"
+          - generic [ref=f26e583]:
+            - generic [ref=f26e584]: 0% of all applications
+            - 'img "Rejected progress: 0 percent" [ref=f26e586]'
+        - generic [ref=f26e589]:
+          - generic [ref=f26e591]:
+            - paragraph [ref=f26e592]: Total Applications
+            - paragraph [ref=f26e593]: "0"
+          - generic [ref=f26e594]:
+            - generic [ref=f26e595]: Under Review · Approved · Rejected
+            - 'img "3 categories: 0, 0, 0" [ref=f26e597]'
+      - generic [ref=f26e601]:
+        - generic [ref=f26e602]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Lo" [ref=f26e608]:
+            - /placeholder: Search Here By Application ID, Applicant Name, Business/Project, or Location
+          - generic [ref=f26e609]:
+            - button [ref=f26e612] [cursor=pointer]
+            - button [ref=f26e616] [cursor=pointer]
+            - button [ref=f26e621] [cursor=pointer]
+        - table [ref=f26e625]:
+          - rowgroup [ref=f26e626]:
+            - row [ref=f26e627]:
+              - columnheader [ref=f26e628]:
+                - checkbox "Select all applications" [ref=f26e629]
+              - columnheader "APPLICATION ID" [ref=f26e630]
+              - columnheader "APPLICANT NAME" [ref=f26e631]
+              - columnheader "LOCATION" [ref=f26e632]
+              - columnheader "TYPE" [ref=f26e633]
+              - columnheader "DATE SUBMITTED" [ref=f26e634]
+              - columnheader "ASSIGNED OFFICER" [ref=f26e635]
+              - columnheader "STATUS" [ref=f26e636]
+              - columnheader "ACTION" [ref=f26e637]
+          - rowgroup [ref=f26e638]:
+            - row [ref=f26e639]:
+              - cell "No applications match your search." [ref=f26e640]
+        - navigation "Pagination" [ref=f26e642]:
+          - generic [ref=f26e643]: Showing 0 of 0
+          - generic [ref=f26e644]:
+            - button "First page" [disabled] [ref=f26e645]
+            - button "Page 1" [ref=f26e650] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f26e651]
+      - dialog "New Application" [ref=f26e658]:
+        - button "Close" [ref=f26e659] [cursor=pointer]: ✕
+        - heading "New Application" [level=2] [ref=f26e660]
+        - paragraph [ref=f26e661]: Encode a walk-in or manually submitted application.
+        - tablist "Application form sections" [ref=f26e662]:
+          - tab "1 Applicant Information" [ref=f26e663] [cursor=pointer]:
+            - generic [ref=f26e664]: "1"
+            - text: Applicant Information
+          - tab "2 Business Information" [ref=f26e665] [cursor=pointer]:
+            - generic [ref=f26e666]: "2"
+            - text: Business Information
+          - tab "3 Application Information" [ref=f26e667] [cursor=pointer]:
+            - generic [ref=f26e668]: "3"
+            - text: Application Information
+          - tab "4 Document Attachments" [selected] [ref=f26e669] [cursor=pointer]:
+            - generic [ref=f26e670]: "4"
+            - text: Document Attachments
+          - tab "5 Review & Confirm" [ref=f26e671] [cursor=pointer]:
+            - generic [ref=f26e672]: "5"
+            - text: Review & Confirm
+        - paragraph [ref=f26e673]: "* Required field"
+        - generic [ref=f26e747]:
+          - generic [ref=f26e748]:
+            - generic [ref=f26e749]:
+              - generic [ref=f26e750]: Certified True Copy of OCT/TCT
+              - generic [ref=f26e751]: Required
+              - generic [ref=f26e752]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e753]:
+              - generic [ref=f26e754]:
+                - generic [ref=f26e755]:
+                  - text: File name
+                  - generic [ref=f26e756]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e757]
+              - generic [ref=f26e758]:
+                - generic [ref=f26e759]: Document Type
+                - textbox "Document Type" [ref=f26e760]: Certified True Copy of OCT/TCT
+              - generic [ref=f26e761]:
+                - generic [ref=f26e762]: Issuing Office
+                - textbox "Optional" [ref=f26e763]
+              - generic [ref=f26e764]:
+                - generic [ref=f26e765]: Issue Date
+                - textbox "Issue Date" [ref=f26e766]
+              - generic [ref=f26e767]:
+                - generic [ref=f26e768]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e769]
+          - generic [ref=f26e770]:
+            - generic [ref=f26e771]:
+              - generic [ref=f26e772]: Survey Plan
+              - generic [ref=f26e773]: Required
+              - generic [ref=f26e774]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e775]:
+              - generic [ref=f26e776]:
+                - generic [ref=f26e777]:
+                  - text: File name
+                  - generic [ref=f26e778]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e779]
+              - generic [ref=f26e780]:
+                - generic [ref=f26e781]: Document Type
+                - textbox "Document Type" [ref=f26e782]: Survey Plan
+              - generic [ref=f26e783]:
+                - generic [ref=f26e784]: Issuing Office
+                - textbox "Optional" [ref=f26e785]
+              - generic [ref=f26e786]:
+                - generic [ref=f26e787]: Issue Date
+                - textbox "Issue Date" [ref=f26e788]
+              - generic [ref=f26e789]:
+                - generic [ref=f26e790]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e791]
+          - generic [ref=f26e792]:
+            - generic [ref=f26e793]:
+              - generic [ref=f26e794]: Design Plans (duly signed and sealed)
+              - generic [ref=f26e795]: Required
+              - generic [ref=f26e796]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e797]:
+              - generic [ref=f26e798]:
+                - generic [ref=f26e799]:
+                  - text: File name
+                  - generic [ref=f26e800]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e801]
+              - generic [ref=f26e802]:
+                - generic [ref=f26e803]: Document Type
+                - textbox "Document Type" [ref=f26e804]: Design Plans (duly signed and sealed)
+              - generic [ref=f26e805]:
+                - generic [ref=f26e806]: Issuing Office
+                - textbox "Optional" [ref=f26e807]
+              - generic [ref=f26e808]:
+                - generic [ref=f26e809]: Issue Date
+                - textbox "Issue Date" [ref=f26e810]
+              - generic [ref=f26e811]:
+                - generic [ref=f26e812]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e813]
+          - generic [ref=f26e814]:
+            - generic [ref=f26e815]:
+              - generic [ref=f26e816]: Unified Building Permit Form
+              - generic [ref=f26e817]: Required
+              - generic [ref=f26e818]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e819]:
+              - generic [ref=f26e820]:
+                - generic [ref=f26e821]:
+                  - text: File name
+                  - generic [ref=f26e822]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e823]
+              - generic [ref=f26e824]:
+                - generic [ref=f26e825]: Document Type
+                - textbox "Document Type" [ref=f26e826]: Unified Building Permit Form
+              - generic [ref=f26e827]:
+                - generic [ref=f26e828]: Issuing Office
+                - textbox "Optional" [ref=f26e829]
+              - generic [ref=f26e830]:
+                - generic [ref=f26e831]: Issue Date
+                - textbox "Issue Date" [ref=f26e832]
+              - generic [ref=f26e833]:
+                - generic [ref=f26e834]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e835]
+          - generic [ref=f26e836]:
+            - generic [ref=f26e837]:
+              - generic [ref=f26e838]: Electrical Permit (ancillary application form)
+              - generic [ref=f26e839]: Optional
+              - generic [ref=f26e840]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e841]:
+              - generic [ref=f26e842]:
+                - generic [ref=f26e843]:
+                  - text: File name
+                  - generic [ref=f26e844]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e845]
+              - generic [ref=f26e846]:
+                - generic [ref=f26e847]: Document Type
+                - textbox "Document Type" [ref=f26e848]: Electrical Permit (ancillary application form)
+              - generic [ref=f26e849]:
+                - generic [ref=f26e850]: Issuing Office
+                - textbox "Optional" [ref=f26e851]
+              - generic [ref=f26e852]:
+                - generic [ref=f26e853]: Issue Date
+                - textbox "Issue Date" [ref=f26e854]
+              - generic [ref=f26e855]:
+                - generic [ref=f26e856]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e857]
+          - generic [ref=f26e858]:
+            - generic [ref=f26e859]:
+              - generic [ref=f26e860]: Fencing Permit (ancillary application form)
+              - generic [ref=f26e861]: Optional
+              - generic [ref=f26e862]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e863]:
+              - generic [ref=f26e864]:
+                - generic [ref=f26e865]:
+                  - text: File name
+                  - generic [ref=f26e866]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e867]
+              - generic [ref=f26e868]:
+                - generic [ref=f26e869]: Document Type
+                - textbox "Document Type" [ref=f26e870]: Fencing Permit (ancillary application form)
+              - generic [ref=f26e871]:
+                - generic [ref=f26e872]: Issuing Office
+                - textbox "Optional" [ref=f26e873]
+              - generic [ref=f26e874]:
+                - generic [ref=f26e875]: Issue Date
+                - textbox "Issue Date" [ref=f26e876]
+              - generic [ref=f26e877]:
+                - generic [ref=f26e878]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e879]
+          - generic [ref=f26e880]:
+            - generic [ref=f26e881]:
+              - generic [ref=f26e882]: Architectural Permit (ancillary application form)
+              - generic [ref=f26e883]: Optional
+              - generic [ref=f26e884]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e885]:
+              - generic [ref=f26e886]:
+                - generic [ref=f26e887]:
+                  - text: File name
+                  - generic [ref=f26e888]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e889]
+              - generic [ref=f26e890]:
+                - generic [ref=f26e891]: Document Type
+                - textbox "Document Type" [ref=f26e892]: Architectural Permit (ancillary application form)
+              - generic [ref=f26e893]:
+                - generic [ref=f26e894]: Issuing Office
+                - textbox "Optional" [ref=f26e895]
+              - generic [ref=f26e896]:
+                - generic [ref=f26e897]: Issue Date
+                - textbox "Issue Date" [ref=f26e898]
+              - generic [ref=f26e899]:
+                - generic [ref=f26e900]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e901]
+          - generic [ref=f26e902]:
+            - generic [ref=f26e903]:
+              - generic [ref=f26e904]: Sanitary/Plumbing Permit (ancillary application form)
+              - generic [ref=f26e905]: Optional
+              - generic [ref=f26e906]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e907]:
+              - generic [ref=f26e908]:
+                - generic [ref=f26e909]:
+                  - text: File name
+                  - generic [ref=f26e910]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e911]
+              - generic [ref=f26e912]:
+                - generic [ref=f26e913]: Document Type
+                - textbox "Document Type" [ref=f26e914]: Sanitary/Plumbing Permit (ancillary application form)
+              - generic [ref=f26e915]:
+                - generic [ref=f26e916]: Issuing Office
+                - textbox "Optional" [ref=f26e917]
+              - generic [ref=f26e918]:
+                - generic [ref=f26e919]: Issue Date
+                - textbox "Issue Date" [ref=f26e920]
+              - generic [ref=f26e921]:
+                - generic [ref=f26e922]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e923]
+          - generic [ref=f26e924]:
+            - generic [ref=f26e925]:
+              - generic [ref=f26e926]: Mechanical Permit (ancillary application form)
+              - generic [ref=f26e927]: Optional
+              - generic [ref=f26e928]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e929]:
+              - generic [ref=f26e930]:
+                - generic [ref=f26e931]:
+                  - text: File name
+                  - generic [ref=f26e932]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e933]
+              - generic [ref=f26e934]:
+                - generic [ref=f26e935]: Document Type
+                - textbox "Document Type" [ref=f26e936]: Mechanical Permit (ancillary application form)
+              - generic [ref=f26e937]:
+                - generic [ref=f26e938]: Issuing Office
+                - textbox "Optional" [ref=f26e939]
+              - generic [ref=f26e940]:
+                - generic [ref=f26e941]: Issue Date
+                - textbox "Issue Date" [ref=f26e942]
+              - generic [ref=f26e943]:
+                - generic [ref=f26e944]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e945]
+          - generic [ref=f26e946]:
+            - generic [ref=f26e947]:
+              - generic [ref=f26e948]: Civil/Structural Permit (ancillary application form)
+              - generic [ref=f26e949]: Optional
+              - generic [ref=f26e950]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e951]:
+              - generic [ref=f26e952]:
+                - generic [ref=f26e953]:
+                  - text: File name
+                  - generic [ref=f26e954]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e955]
+              - generic [ref=f26e956]:
+                - generic [ref=f26e957]: Document Type
+                - textbox "Document Type" [ref=f26e958]: Civil/Structural Permit (ancillary application form)
+              - generic [ref=f26e959]:
+                - generic [ref=f26e960]: Issuing Office
+                - textbox "Optional" [ref=f26e961]
+              - generic [ref=f26e962]:
+                - generic [ref=f26e963]: Issue Date
+                - textbox "Issue Date" [ref=f26e964]
+              - generic [ref=f26e965]:
+                - generic [ref=f26e966]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e967]
+          - generic [ref=f26e968]:
+            - generic [ref=f26e969]:
+              - generic [ref=f26e970]: Excavation Permit (ancillary application form)
+              - generic [ref=f26e971]: Optional
+              - generic [ref=f26e972]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e973]:
+              - generic [ref=f26e974]:
+                - generic [ref=f26e975]:
+                  - text: File name
+                  - generic [ref=f26e976]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e977]
+              - generic [ref=f26e978]:
+                - generic [ref=f26e979]: Document Type
+                - textbox "Document Type" [ref=f26e980]: Excavation Permit (ancillary application form)
+              - generic [ref=f26e981]:
+                - generic [ref=f26e982]: Issuing Office
+                - textbox "Optional" [ref=f26e983]
+              - generic [ref=f26e984]:
+                - generic [ref=f26e985]: Issue Date
+                - textbox "Issue Date" [ref=f26e986]
+              - generic [ref=f26e987]:
+                - generic [ref=f26e988]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e989]
+          - generic [ref=f26e990]:
+            - generic [ref=f26e991]:
+              - generic [ref=f26e992]: Electronics Permit (ancillary application form)
+              - generic [ref=f26e993]: Optional
+              - generic [ref=f26e994]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e995]:
+              - generic [ref=f26e996]:
+                - generic [ref=f26e997]:
+                  - text: File name
+                  - generic [ref=f26e998]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e999]
+              - generic [ref=f26e1000]:
+                - generic [ref=f26e1001]: Document Type
+                - textbox "Document Type" [ref=f26e1002]: Electronics Permit (ancillary application form)
+              - generic [ref=f26e1003]:
+                - generic [ref=f26e1004]: Issuing Office
+                - textbox "Optional" [ref=f26e1005]
+              - generic [ref=f26e1006]:
+                - generic [ref=f26e1007]: Issue Date
+                - textbox "Issue Date" [ref=f26e1008]
+              - generic [ref=f26e1009]:
+                - generic [ref=f26e1010]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e1011]
+          - generic [ref=f26e1012]:
+            - generic [ref=f26e1013]:
+              - generic [ref=f26e1014]: Cost Estimate (duly signed and sealed)
+              - generic [ref=f26e1015]: Required
+              - generic [ref=f26e1016]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e1017]:
+              - generic [ref=f26e1018]:
+                - generic [ref=f26e1019]:
+                  - text: File name
+                  - generic [ref=f26e1020]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e1021]
+              - generic [ref=f26e1022]:
+                - generic [ref=f26e1023]: Document Type
+                - textbox "Document Type" [ref=f26e1024]: Cost Estimate (duly signed and sealed)
+              - generic [ref=f26e1025]:
+                - generic [ref=f26e1026]: Issuing Office
+                - textbox "Optional" [ref=f26e1027]
+              - generic [ref=f26e1028]:
+                - generic [ref=f26e1029]: Issue Date
+                - textbox "Issue Date" [ref=f26e1030]
+              - generic [ref=f26e1031]:
+                - generic [ref=f26e1032]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e1033]
+          - generic [ref=f26e1034]:
+            - generic [ref=f26e1035]:
+              - generic [ref=f26e1036]: Technical Specifications (duly signed and sealed)
+              - generic [ref=f26e1037]: Required
+              - generic [ref=f26e1038]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e1039]:
+              - generic [ref=f26e1040]:
+                - generic [ref=f26e1041]:
+                  - text: File name
+                  - generic [ref=f26e1042]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e1043]
+              - generic [ref=f26e1044]:
+                - generic [ref=f26e1045]: Document Type
+                - textbox "Document Type" [ref=f26e1046]: Technical Specifications (duly signed and sealed)
+              - generic [ref=f26e1047]:
+                - generic [ref=f26e1048]: Issuing Office
+                - textbox "Optional" [ref=f26e1049]
+              - generic [ref=f26e1050]:
+                - generic [ref=f26e1051]: Issue Date
+                - textbox "Issue Date" [ref=f26e1052]
+              - generic [ref=f26e1053]:
+                - generic [ref=f26e1054]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e1055]
+          - generic [ref=f26e1056]:
+            - generic [ref=f26e1057]:
+              - generic [ref=f26e1058]: Structural Design and Analysis
+              - generic [ref=f26e1059]: Required
+              - generic [ref=f26e1060]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e1061]:
+              - generic [ref=f26e1062]:
+                - generic [ref=f26e1063]:
+                  - text: File name
+                  - generic [ref=f26e1064]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e1065]
+              - generic [ref=f26e1066]:
+                - generic [ref=f26e1067]: Document Type
+                - textbox "Document Type" [ref=f26e1068]: Structural Design and Analysis
+              - generic [ref=f26e1069]:
+                - generic [ref=f26e1070]: Issuing Office
+                - textbox "Optional" [ref=f26e1071]
+              - generic [ref=f26e1072]:
+                - generic [ref=f26e1073]: Issue Date
+                - textbox "Issue Date" [ref=f26e1074]
+              - generic [ref=f26e1075]:
+                - generic [ref=f26e1076]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e1077]
+          - generic [ref=f26e1078]:
+            - generic [ref=f26e1079]:
+              - generic [ref=f26e1080]: Soil Analysis / Plate Load Test / Seismic Analysis
+              - generic [ref=f26e1081]: Required
+              - generic [ref=f26e1082]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e1083]:
+              - generic [ref=f26e1084]:
+                - generic [ref=f26e1085]:
+                  - text: File name
+                  - generic [ref=f26e1086]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e1087]
+              - generic [ref=f26e1088]:
+                - generic [ref=f26e1089]: Document Type
+                - textbox "Document Type" [ref=f26e1090]: Soil Analysis / Plate Load Test / Seismic Analysis
+              - generic [ref=f26e1091]:
+                - generic [ref=f26e1092]: Issuing Office
+                - textbox "Optional" [ref=f26e1093]
+              - generic [ref=f26e1094]:
+                - generic [ref=f26e1095]: Issue Date
+                - textbox "Issue Date" [ref=f26e1096]
+              - generic [ref=f26e1097]:
+                - generic [ref=f26e1098]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e1099]
+          - generic [ref=f26e1100]:
+            - generic [ref=f26e1101]:
+              - generic [ref=f26e1102]: Valid Licenses (PRC) of all involved professionals
+              - generic [ref=f26e1103]: Required
+              - generic [ref=f26e1104]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e1105]:
+              - generic [ref=f26e1106]:
+                - generic [ref=f26e1107]:
+                  - text: File name
+                  - generic [ref=f26e1108]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e1109]
+              - generic [ref=f26e1110]:
+                - generic [ref=f26e1111]: Document Type
+                - textbox "Document Type" [ref=f26e1112]: Valid Licenses (PRC) of all involved professionals
+              - generic [ref=f26e1113]:
+                - generic [ref=f26e1114]: Issuing Office
+                - textbox "Optional" [ref=f26e1115]
+              - generic [ref=f26e1116]:
+                - generic [ref=f26e1117]: Issue Date
+                - textbox "Issue Date" [ref=f26e1118]
+              - generic [ref=f26e1119]:
+                - generic [ref=f26e1120]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e1121]
+          - generic [ref=f26e1122]:
+            - generic [ref=f26e1123]:
+              - generic [ref=f26e1124]: Valid ID of Applicant and Owner of Lot
+              - generic [ref=f26e1125]: Required
+              - generic [ref=f26e1126]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e1127]:
+              - generic [ref=f26e1128]:
+                - generic [ref=f26e1129]:
+                  - text: File name
+                  - generic [ref=f26e1130]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e1131]
+              - generic [ref=f26e1132]:
+                - generic [ref=f26e1133]: Document Type
+                - textbox "Document Type" [ref=f26e1134]: Valid ID of Applicant and Owner of Lot
+              - generic [ref=f26e1135]:
+                - generic [ref=f26e1136]: Issuing Office
+                - textbox "Optional" [ref=f26e1137]
+              - generic [ref=f26e1138]:
+                - generic [ref=f26e1139]: Issue Date
+                - textbox "Issue Date" [ref=f26e1140]
+              - generic [ref=f26e1141]:
+                - generic [ref=f26e1142]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e1143]
+          - generic [ref=f26e1144]:
+            - generic [ref=f26e1145]:
+              - generic [ref=f26e1146]: Zoning / Locational Clearance
+              - generic [ref=f26e1147]: Required
+              - generic [ref=f26e1148]: Reviewed by Municipal Planning and Development Office (Zoning Section)
+            - generic [ref=f26e1149]:
+              - generic [ref=f26e1150]:
+                - generic [ref=f26e1151]:
+                  - text: File name
+                  - generic [ref=f26e1152]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e1153]
+              - generic [ref=f26e1154]:
+                - generic [ref=f26e1155]: Document Type
+                - textbox "Document Type" [ref=f26e1156]: Zoning / Locational Clearance
+              - generic [ref=f26e1157]:
+                - generic [ref=f26e1158]: Issuing Office
+                - textbox "Optional" [ref=f26e1159]
+              - generic [ref=f26e1160]:
+                - generic [ref=f26e1161]: Issue Date
+                - textbox "Issue Date" [ref=f26e1162]
+              - generic [ref=f26e1163]:
+                - generic [ref=f26e1164]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e1165]
+          - generic [ref=f26e1166]:
+            - generic [ref=f26e1167]:
+              - generic [ref=f26e1168]: Fire Safety Evaluation Clearance
+              - generic [ref=f26e1169]: Required
+              - generic [ref=f26e1170]: Reviewed by Bureau of Fire Protection – Castilla Fire Station
+            - generic [ref=f26e1171]:
+              - generic [ref=f26e1172]:
+                - generic [ref=f26e1173]:
+                  - text: File name
+                  - generic [ref=f26e1174]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e1175]
+              - generic [ref=f26e1176]:
+                - generic [ref=f26e1177]: Document Type
+                - textbox "Document Type" [ref=f26e1178]: Fire Safety Evaluation Clearance
+              - generic [ref=f26e1179]:
+                - generic [ref=f26e1180]: Issuing Office
+                - textbox "Optional" [ref=f26e1181]
+              - generic [ref=f26e1182]:
+                - generic [ref=f26e1183]: Issue Date
+                - textbox "Issue Date" [ref=f26e1184]
+              - generic [ref=f26e1185]:
+                - generic [ref=f26e1186]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e1187]
+          - generic [ref=f26e1188]:
+            - generic [ref=f26e1189]:
+              - generic [ref=f26e1190]: Approved Construction Safety and Health Program
+              - generic [ref=f26e1191]: Required
+              - generic [ref=f26e1192]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e1193]:
+              - generic [ref=f26e1194]:
+                - generic [ref=f26e1195]:
+                  - text: File name
+                  - generic [ref=f26e1196]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e1197]
+              - generic [ref=f26e1198]:
+                - generic [ref=f26e1199]: Document Type
+                - textbox "Document Type" [ref=f26e1200]: Approved Construction Safety and Health Program
+              - generic [ref=f26e1201]:
+                - generic [ref=f26e1202]: Issuing Office
+                - textbox "Optional" [ref=f26e1203]
+              - generic [ref=f26e1204]:
+                - generic [ref=f26e1205]: Issue Date
+                - textbox "Issue Date" [ref=f26e1206]
+              - generic [ref=f26e1207]:
+                - generic [ref=f26e1208]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e1209]
+          - generic [ref=f26e1210]:
+            - generic [ref=f26e1211]:
+              - generic [ref=f26e1212]: Road Clearance
+              - generic [ref=f26e1213]: Required
+              - generic [ref=f26e1214]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f26e1215]:
+              - generic [ref=f26e1216]:
+                - generic [ref=f26e1217]:
+                  - text: File name
+                  - generic [ref=f26e1218]: Recorded for the checklist. The file itself is not sent anywhere yet.
+                - button "File name Recorded for the checklist. The file itself is not sent anywhere yet." [ref=f26e1219]
+              - generic [ref=f26e1220]:
+                - generic [ref=f26e1221]: Document Type
+                - textbox "Document Type" [ref=f26e1222]: Road Clearance
+              - generic [ref=f26e1223]:
+                - generic [ref=f26e1224]: Issuing Office
+                - textbox "Optional" [ref=f26e1225]
+              - generic [ref=f26e1226]:
+                - generic [ref=f26e1227]: Issue Date
+                - textbox "Issue Date" [ref=f26e1228]
+              - generic [ref=f26e1229]:
+                - generic [ref=f26e1230]: Expiry Date
+                - textbox "Expiry Date" [ref=f26e1231]
+        - generic [ref=f26e698]:
+          - button "Back" [ref=f26e726] [cursor=pointer]
+          - button "Next" [active] [ref=f26e700] [cursor=pointer]

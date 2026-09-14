@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
 import { ApiClient } from './api.client';
+import { ApiError } from './problem';
 import { TokenStore } from './token-store';
 
 /**
@@ -82,6 +83,58 @@ export class IdentityApi {
       // Deliberately ignored; the local clear below is what the officer sees.
     } finally {
       this.tokens.clear();
+    }
+  }
+
+  /**
+   * Start account recovery.
+   *
+   * Always resolves — never throws for the address being unknown, because the
+   * server answers 202 identically either way, on purpose: an endpoint that
+   * answered differently would let anyone learn which addresses have accounts
+   * just by asking. This method must not undo that by surfacing a different
+   * outcome on the client for the two cases the server treats as one.
+   */
+  async requestPasswordReset(email: string): Promise<void> {
+    await this.api.post('/auth/password/forgot', { email });
+  }
+
+  /**
+   * Finish account recovery with the token from the emailed link.
+   *
+   * A typed result rather than a throw for the expected failures. Both are
+   * reported by the server as 400 — a weak password AND an already-used,
+   * expired, or never-valid link — so the two are told apart the same way the
+   * server tells them apart internally: a weak password comes back with
+   * `fieldErrors` pointing at `/password`, and "link no longer valid" does not
+   * (see `auth.controller.ts`'s `reset()` — one branch is
+   * `ProblemException.validation`, the other is a plain `ProblemException`
+   * with none). Anything else is a real failure the caller re-throws.
+   *
+   * The `/password` pointer check matters, not just "any field errors": a
+   * malformed token (never issued, or the wrong shape entirely) also fails
+   * the server's Zod schema and comes back as a 400 with a field error too —
+   * pointing at `/token`, carrying that field's own raw validator message
+   * ("must be a reset token"). Treating every field error as a weak password
+   * used to surface that string verbatim on this screen instead of the
+   * intended "link no longer valid" message.
+   */
+  async resetPassword(
+    token: string, password: string,
+  ): Promise<{ kind: 'done' } | { kind: 'invalid-link' } | { kind: 'weak-password'; message: string }> {
+    try {
+      await this.api.post('/auth/password/reset', { token, password });
+      return { kind: 'done' };
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 400) {
+        const fieldErrors = error.problem.fieldErrors ?? [];
+        const passwordErrors = fieldErrors.filter((e) => e.pointer === '/password');
+        if (passwordErrors.length > 0) {
+          return { kind: 'weak-password', message: passwordErrors.map((e) => e.message).join(' ') };
+        }
+        return { kind: 'invalid-link' };
+      }
+      throw error;
     }
   }
 }

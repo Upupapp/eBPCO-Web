@@ -1,0 +1,42 @@
+- generic [ref=f8e2]:
+  - generic [ref=f8e56]:
+    - complementary [ref=f8e58]:
+      - generic [ref=f8e59]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f8e61]
+        - generic [ref=f8e62]: E-BPCO
+      - navigation [ref=f8e63]:
+        - link "Dashboard" [ref=f8e66] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f8e72]:
+          - generic [ref=f8e73]: Operations
+          - link "Payments" [ref=f8e75] [cursor=pointer]:
+            - /url: /payments
+        - generic [ref=f8e82]:
+          - generic [ref=f8e83]: Administration
+          - link "Archive" [ref=f8e85] [cursor=pointer]:
+            - /url: /archive
+      - button "Log Out" [ref=f8e91] [cursor=pointer]
+    - main [ref=f8e97]:
+      - generic [ref=f8e562]:
+        - generic "Payments" [ref=f8e563]:
+          - generic [ref=f8e564]:
+            - heading "Payments" [level=1] [ref=f8e565]
+            - generic [ref=f8e566]:
+              - button "Notifications" [ref=f8e568] [cursor=pointer]
+              - button "A assessor@lgu.gov.ph Payment Officer" [ref=f8e574] [cursor=pointer]:
+                - generic [ref=f8e575]: A
+                - generic [ref=f8e579]:
+                  - generic [ref=f8e580]: assessor@lgu.gov.ph
+                  - generic [ref=f8e581]: Payment Officer
+        - generic [ref=f8e611]:
+          - generic [ref=f8e612]:
+            - generic [ref=f8e613]:
+              - heading "Payment Assessment" [level=1] [ref=f8e614]
+              - paragraph [ref=f8e615]: Maria Santos · Santos Sari-Sari Store · Fencing Permit
+            - button "Back to Application" [ref=f8e617] [cursor=pointer]
+          - generic [ref=f8e618]:
+            - paragraph [ref=f8e619]: No assessment has been started for this application yet.
+            - button "Start Assessment" [ref=f8e620] [cursor=pointer]
+  - status [ref=f8e622]:
+    - generic [ref=f8e627]: An assessment for this application is already Draft. Withdraw it before starting another.
+    - button "Dismiss" [ref=f8e628] [cursor=pointer]: ✕

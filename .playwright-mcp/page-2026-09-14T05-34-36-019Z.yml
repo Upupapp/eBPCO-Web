@@ -1,0 +1,112 @@
+- generic [ref=f36e198]:
+  - complementary [ref=f36e200]:
+    - generic [ref=f36e201]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f36e203]
+      - generic [ref=f36e204]: E-BPCO
+    - navigation [ref=f36e205]:
+      - link "Dashboard" [ref=f36e208] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f36e214]:
+        - generic [ref=f36e215]: Operations
+        - generic [ref=f36e216]:
+          - link "Applications" [ref=f36e217] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f36e223] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f36e228] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [active] [ref=f36e235] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f36e242]:
+        - generic [ref=f36e243]: Administration
+        - generic [ref=f36e244]:
+          - link "Businesses" [ref=f36e245] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f36e251] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f36e257] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f36e264] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f36e273] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f36e279] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f36e285] [cursor=pointer]
+  - main [ref=f36e291]:
+    - generic [ref=f36e4443]:
+      - generic "Permit Release" [ref=f36e4444]:
+        - generic [ref=f36e4445]:
+          - heading "Permit Release" [level=1] [ref=f36e4446]
+          - generic [ref=f36e4447]:
+            - generic [ref=f36e4448]:
+              - generic [ref=f36e4453]: Search
+              - textbox "Search" [ref=f36e4454]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f36e4456] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f36e4462] [cursor=pointer]:
+              - generic [ref=f36e4463]: Q
+              - generic [ref=f36e4467]:
+                - generic [ref=f36e4468]: QA@lguids.com.ph
+                - generic [ref=f36e4469]: Super Admin
+      - navigation [ref=f36e4473]:
+        - button [ref=f36e4474] [cursor=pointer]
+        - button [ref=f36e4480] [cursor=pointer]
+      - generic [ref=f36e4485]:
+        - generic [ref=f36e4487]:
+          - generic [ref=f36e4489]:
+            - paragraph [ref=f36e4490]: Awaiting Preparation
+            - paragraph [ref=f36e4491]: "0"
+          - generic [ref=f36e4492]:
+            - generic [ref=f36e4493]: 0% of total release
+            - 'img "Awaiting Preparation progress: 0 percent" [ref=f36e4495]'
+        - generic [ref=f36e4498]:
+          - generic [ref=f36e4500]:
+            - paragraph [ref=f36e4501]: Ready for Release
+            - paragraph [ref=f36e4502]: "0"
+          - generic [ref=f36e4503]:
+            - generic [ref=f36e4504]: 0% of total release
+            - 'img "Ready for Release progress: 0 percent" [ref=f36e4506]'
+        - generic [ref=f36e4509]:
+          - generic [ref=f36e4511]:
+            - paragraph [ref=f36e4512]: Released
+            - paragraph [ref=f36e4513]: "0"
+          - generic [ref=f36e4514]:
+            - generic [ref=f36e4515]: 0% of total release
+            - 'img "Released progress: 0 percent" [ref=f36e4517]'
+        - generic [ref=f36e4520]:
+          - generic [ref=f36e4522]:
+            - paragraph [ref=f36e4523]: Total Release
+            - paragraph [ref=f36e4524]: "0"
+          - generic [ref=f36e4525]:
+            - generic [ref=f36e4526]: Awaiting Preparation · Ready for Release · Released
+            - 'img "3 categories: 0, 0, 0" [ref=f36e4528]'
+      - generic [ref=f36e4532]:
+        - generic [ref=f36e4533]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Location" [ref=f36e4539]
+          - generic [ref=f36e4540]:
+            - button [ref=f36e4543] [cursor=pointer]
+            - button [ref=f36e4547] [cursor=pointer]
+            - button [ref=f36e4552] [cursor=pointer]
+        - table [ref=f36e4560]:
+          - rowgroup [ref=f36e4561]:
+            - row [ref=f36e4562]:
+              - columnheader [ref=f36e4563]:
+                - checkbox "Select all permit releases" [ref=f36e4564]
+              - columnheader "APPLICATION ID" [ref=f36e4565]
+              - columnheader "APPLICANT NAME" [ref=f36e4566]
+              - columnheader "LOCATION" [ref=f36e4567]
+              - columnheader "TYPE" [ref=f36e4568]
+              - columnheader "APPROVAL STATUS" [ref=f36e4569]
+              - columnheader "PAYMENT STATUS" [ref=f36e4570]
+              - columnheader "PERMIT STATUS" [ref=f36e4571]
+              - columnheader "ACTION" [ref=f36e4572]
+          - rowgroup [ref=f36e4573]:
+            - row [ref=f36e4574]:
+              - cell "No applications match your search." [ref=f36e4575]
+        - navigation "Pagination" [ref=f36e4577]:
+          - generic [ref=f36e4578]: Showing 0 of 0
+          - generic [ref=f36e4579]:
+            - button "First page" [disabled] [ref=f36e4580]
+            - button "Page 1" [ref=f36e4585] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f36e4586]

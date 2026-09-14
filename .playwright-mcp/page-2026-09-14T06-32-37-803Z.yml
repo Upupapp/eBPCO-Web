@@ -1,0 +1,240 @@
+- generic [ref=f46e61]:
+  - complementary [ref=f46e63]:
+    - generic [ref=f46e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f46e66]
+      - generic [ref=f46e67]: E-BPCO
+    - navigation [ref=f46e68]:
+      - link "Dashboard" [ref=f46e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f46e77]:
+        - generic [ref=f46e78]: Operations
+        - generic [ref=f46e79]:
+          - link "Applications" [ref=f46e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f46e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f46e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f46e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f46e105]:
+        - generic [ref=f46e106]: Administration
+        - generic [ref=f46e107]:
+          - link "Businesses" [ref=f46e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f46e114] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [active] [ref=f46e120] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f46e127] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f46e136] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f46e142] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f46e148] [cursor=pointer]
+  - main [ref=f46e154]:
+    - generic [ref=f46e738]:
+      - generic "User & Roles" [ref=f46e739]:
+        - generic [ref=f46e740]:
+          - heading "User & Roles" [level=1] [ref=f46e741]
+          - generic [ref=f46e742]:
+            - generic [ref=f46e743]:
+              - generic [ref=f46e748]: Search
+              - textbox "Search" [ref=f46e749]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f46e751] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f46e757] [cursor=pointer]:
+              - generic [ref=f46e758]: Q
+              - generic [ref=f46e762]:
+                - generic [ref=f46e763]: QA@lguids.com.ph
+                - generic [ref=f46e764]: Super Admin
+      - note [ref=f46e768]:
+        - generic [ref=f46e773]:
+          - text: This page is a UI prototype — creating a user or editing a role's permissions here does not change real access control. The system's actual sign-in roles and action permissions are defined in code (
+          - code [ref=f46e774]: core/session/permissions.ts
+          - text: ) and are not editable from here yet.
+      - generic [ref=f46e775]:
+        - generic [ref=f46e777]:
+          - generic [ref=f46e779]:
+            - paragraph [ref=f46e780]: Total Users
+            - paragraph [ref=f46e781]: "10"
+          - generic [ref=f46e782]: Across All Departments
+        - generic [ref=f46e786]:
+          - generic [ref=f46e788]:
+            - paragraph [ref=f46e789]: Active Users
+            - paragraph [ref=f46e790]: "1"
+          - generic [ref=f46e791]: 10% of total
+        - generic [ref=f46e795]:
+          - generic [ref=f46e797]:
+            - paragraph [ref=f46e798]: Pending Invites
+            - paragraph [ref=f46e799]: "9"
+          - generic [ref=f46e800]: Awaiting acceptance
+        - generic [ref=f46e804]:
+          - generic [ref=f46e806]:
+            - paragraph [ref=f46e807]: Roles Defined
+            - paragraph [ref=f46e808]: "7"
+          - generic [ref=f46e809]: Across the platform
+      - generic [ref=f46e812]:
+        - navigation [ref=f46e813]:
+          - button [ref=f46e814] [cursor=pointer]
+          - button [ref=f46e819] [cursor=pointer]
+        - generic [ref=f46e823]:
+          - generic [ref=f46e824]:
+            - generic [ref=f46e829]: Search users
+            - textbox "Search users" [ref=f46e830]:
+              - /placeholder: Search name, email, or role...
+          - combobox "Role filter" [ref=f46e831] [cursor=pointer]:
+            - option "All Roles" [selected]
+            - option "Super Admin"
+            - option "Administrator"
+            - option "Evaluator"
+            - option "Payment Officer"
+            - option "Approving Officer"
+            - option "Releasing Officer"
+            - option "Auditor"
+          - combobox "Status filter" [ref=f46e832] [cursor=pointer]:
+            - option "All Statuses" [selected]
+            - option "Active"
+            - option "Inactive"
+            - option "Pending"
+          - button [disabled] [ref=f46e833]
+          - button [ref=f46e837] [cursor=pointer]
+          - button [ref=f46e842] [cursor=pointer]
+        - table [ref=f46e846]:
+          - rowgroup [ref=f46e847]:
+            - row [ref=f46e848]:
+              - columnheader "User" [ref=f46e849]
+              - columnheader "Role" [ref=f46e850]
+              - columnheader "Department" [ref=f46e851]
+              - columnheader "Status" [ref=f46e852]
+              - columnheader "Last Active" [ref=f46e853]
+              - columnheader "Action" [ref=f46e854]
+          - rowgroup [ref=f46e855]:
+            - button "View profile for QA@lguids.com.ph" [ref=f46e856] [cursor=pointer]:
+              - cell "Q QA@lguids.com.ph QA@lguids.com.ph" [ref=f46e857]:
+                - generic [ref=f46e858]:
+                  - generic [ref=f46e859]: Q
+                  - generic [ref=f46e861]:
+                    - generic [ref=f46e862]: QA@lguids.com.ph
+                    - generic [ref=f46e863]: QA@lguids.com.ph
+              - cell "Super Admin" [ref=f46e864]
+              - cell "20 forms" [ref=f46e865]
+              - cell "Active" [ref=f46e866]
+              - cell "Sep 14, 2026, 2:32 PM" [ref=f46e868]
+              - cell [ref=f46e869]:
+                - button "View QA@lguids.com.ph" [ref=f46e870]
+                - button "Edit QA@lguids.com.ph" [ref=f46e875]
+                - button "Disable QA@lguids.com.ph" [ref=f46e879]
+            - button "View profile for admin@lgu.gov.ph" [ref=f46e884] [cursor=pointer]:
+              - cell "A admin@lgu.gov.ph admin@lgu.gov.ph" [ref=f46e885]:
+                - generic [ref=f46e886]:
+                  - generic [ref=f46e887]: A
+                  - generic [ref=f46e889]:
+                    - generic [ref=f46e890]: admin@lgu.gov.ph
+                    - generic [ref=f46e891]: admin@lgu.gov.ph
+              - cell "Administrator" [ref=f46e892]
+              - cell "1 form" [ref=f46e893]
+              - cell "Pending" [ref=f46e894]
+              - cell "—" [ref=f46e896]
+              - cell [ref=f46e897]:
+                - button "View admin@lgu.gov.ph" [ref=f46e898]
+                - button "Edit admin@lgu.gov.ph" [ref=f46e903]
+                - button "Disable admin@lgu.gov.ph" [ref=f46e907]
+            - button "View profile for assessor@lgu.gov.ph" [ref=f46e912] [cursor=pointer]:
+              - cell "A assessor@lgu.gov.ph assessor@lgu.gov.ph" [ref=f46e913]:
+                - generic [ref=f46e914]:
+                  - generic [ref=f46e915]: A
+                  - generic [ref=f46e917]:
+                    - generic [ref=f46e918]: assessor@lgu.gov.ph
+                    - generic [ref=f46e919]: assessor@lgu.gov.ph
+              - cell "Payment Officer" [ref=f46e920]
+              - cell "1 form" [ref=f46e921]
+              - cell "Pending" [ref=f46e922]
+              - cell "—" [ref=f46e924]
+              - cell [ref=f46e925]:
+                - button "View assessor@lgu.gov.ph" [ref=f46e926]
+                - button "Edit assessor@lgu.gov.ph" [ref=f46e931]
+                - button "Disable assessor@lgu.gov.ph" [ref=f46e935]
+            - button "View profile for auditor@lgu.gov.ph" [ref=f46e940] [cursor=pointer]:
+              - cell "A auditor@lgu.gov.ph auditor@lgu.gov.ph" [ref=f46e941]:
+                - generic [ref=f46e942]:
+                  - generic [ref=f46e943]: A
+                  - generic [ref=f46e945]:
+                    - generic [ref=f46e946]: auditor@lgu.gov.ph
+                    - generic [ref=f46e947]: auditor@lgu.gov.ph
+              - cell "Auditor" [ref=f46e948]
+              - cell "1 form" [ref=f46e949]
+              - cell "Pending" [ref=f46e950]
+              - cell "—" [ref=f46e952]
+              - cell [ref=f46e953]:
+                - button "View auditor@lgu.gov.ph" [ref=f46e954]
+                - button "Edit auditor@lgu.gov.ph" [ref=f46e959]
+                - button "Disable auditor@lgu.gov.ph" [ref=f46e963]
+            - button "View profile for cashier@lgu.gov.ph" [ref=f46e968] [cursor=pointer]:
+              - cell "C cashier@lgu.gov.ph cashier@lgu.gov.ph" [ref=f46e969]:
+                - generic [ref=f46e970]:
+                  - generic [ref=f46e971]: C
+                  - generic [ref=f46e973]:
+                    - generic [ref=f46e974]: cashier@lgu.gov.ph
+                    - generic [ref=f46e975]: cashier@lgu.gov.ph
+              - cell "Payment Officer" [ref=f46e976]
+              - cell "1 form" [ref=f46e977]
+              - cell "Pending" [ref=f46e978]
+              - cell "—" [ref=f46e980]
+              - cell [ref=f46e981]:
+                - button "View cashier@lgu.gov.ph" [ref=f46e982]
+                - button "Edit cashier@lgu.gov.ph" [ref=f46e987]
+                - button "Disable cashier@lgu.gov.ph" [ref=f46e991]
+            - button "View profile for evaluator@lgu.gov.ph" [ref=f46e996] [cursor=pointer]:
+              - cell "E evaluator@lgu.gov.ph evaluator@lgu.gov.ph" [ref=f46e997]:
+                - generic [ref=f46e998]:
+                  - generic [ref=f46e999]: E
+                  - generic [ref=f46e1001]:
+                    - generic [ref=f46e1002]: evaluator@lgu.gov.ph
+                    - generic [ref=f46e1003]: evaluator@lgu.gov.ph
+              - cell "Evaluator" [ref=f46e1004]
+              - cell "1 form" [ref=f46e1005]
+              - cell "Pending" [ref=f46e1006]
+              - cell "—" [ref=f46e1008]
+              - cell [ref=f46e1009]:
+                - button "View evaluator@lgu.gov.ph" [ref=f46e1010]
+                - button "Edit evaluator@lgu.gov.ph" [ref=f46e1015]
+                - button "Disable evaluator@lgu.gov.ph" [ref=f46e1019]
+            - button "View profile for official@lgu.gov.ph" [ref=f46e1024] [cursor=pointer]:
+              - cell "O official@lgu.gov.ph official@lgu.gov.ph" [ref=f46e1025]:
+                - generic [ref=f46e1026]:
+                  - generic [ref=f46e1027]: O
+                  - generic [ref=f46e1029]:
+                    - generic [ref=f46e1030]: official@lgu.gov.ph
+                    - generic [ref=f46e1031]: official@lgu.gov.ph
+              - cell "Approving Officer" [ref=f46e1032]
+              - cell "1 form" [ref=f46e1033]
+              - cell "Pending" [ref=f46e1034]
+              - cell "—" [ref=f46e1036]
+              - cell [ref=f46e1037]:
+                - button "View official@lgu.gov.ph" [ref=f46e1038]
+                - button "Edit official@lgu.gov.ph" [ref=f46e1043]
+                - button "Disable official@lgu.gov.ph" [ref=f46e1047]
+            - button "View profile for records@lgu.gov.ph" [ref=f46e1052] [cursor=pointer]:
+              - cell "R records@lgu.gov.ph records@lgu.gov.ph" [ref=f46e1053]:
+                - generic [ref=f46e1054]:
+                  - generic [ref=f46e1055]: R
+                  - generic [ref=f46e1057]:
+                    - generic [ref=f46e1058]: records@lgu.gov.ph
+                    - generic [ref=f46e1059]: records@lgu.gov.ph
+              - cell "Administrator" [ref=f46e1060]
+              - cell "1 form" [ref=f46e1061]
+              - cell "Pending" [ref=f46e1062]
+              - cell "—" [ref=f46e1064]
+              - cell [ref=f46e1065]:
+                - button "View records@lgu.gov.ph" [ref=f46e1066]
+                - button "Edit records@lgu.gov.ph" [ref=f46e1071]
+                - button "Disable records@lgu.gov.ph" [ref=f46e1075]
+        - navigation "Pagination" [ref=f46e1081]:
+          - generic [ref=f46e1082]: Showing 1-8 from 10
+          - generic [ref=f46e1083]:
+            - button "First page" [disabled] [ref=f46e1084]
+            - button "Page 1" [ref=f46e1089] [cursor=pointer]: "1"
+            - button "Page 2" [ref=f46e1090] [cursor=pointer]: "2"
+            - button "Last page" [ref=f46e1091] [cursor=pointer]

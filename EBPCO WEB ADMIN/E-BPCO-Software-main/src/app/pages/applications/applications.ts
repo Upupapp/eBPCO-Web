@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Router } from '@angular/router';
@@ -19,6 +19,7 @@ import {
   ApplicationLifecycleStatus,
   LIFECYCLE_SEQUENCE,
   canTransition,
+  isTerminalStatus,
 } from '../../core/domain/status.model';
 import { AuditEvent } from '../../core/domain/audit.model';
 import { SessionService } from '../../core/session/session.service';
@@ -40,14 +41,15 @@ import {
   AppStatus,
   AppDetail,
   buildDetailFor,
-  COMMENTS,
   CommentItem,
   TIMELINE,
   TimelineItem,
 } from './applications-data';
-import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { ApplicationDetail as RealApplicationDetail, StaffApplicationsApi } from '../../core/api/staff-applications.api';
 import { QueueLoader } from '../../core/domain/queue-loader';
 import { AssignedFormsNotice } from '../../shared/assigned-forms-notice/assigned-forms-notice';
+import { PermitReleaseApi } from '../../core/api/permit-release.api';
+import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
 
 /** One row of the real per-application Documents tab — a required-but-not-yet-uploaded requirement has `doc: null` and renders as "Missing". */
 interface DocumentRow {
@@ -139,6 +141,9 @@ export class Applications {
   private readonly session = inject(SessionService);
   private readonly toast = inject(ToastService);
   private readonly loader = inject(QueueLoader);
+  private readonly applicationsApi = inject(StaffApplicationsApi);
+  private readonly permitReleaseApi = inject(PermitReleaseApi);
+  private readonly sessionCache = inject(PermitReleaseSessionCache);
 
   /** Null until the first fetch resolves; a message when it fails. */
   protected readonly loadError = signal<string | null>(null);
@@ -212,6 +217,16 @@ export class Applications {
   readonly status = input<string>();
 
   constructor() {
+    // This page is the only one that overwrites the browser tab title with a
+    // per-record one (`${applicant} (${id}) — E-BPCO Admin`). Nothing else in
+    // the app ever resets it, so navigating away entirely — a different
+    // module, or Log Out — left that record's title showing indefinitely on
+    // routes that never set their own. Restored to the generic title the
+    // moment this component itself goes away, regardless of where to.
+    inject(DestroyRef).onDestroy(() => {
+      this.titleService.setTitle('E-BPCO Admin');
+    });
+
     effect(() => {
       const status = this.status();
       untracked(() => {
@@ -228,6 +243,8 @@ export class Applications {
       // would otherwise snap the user back out of Info/Evaluations
       // sub-views any time another page edited some other row).
       untracked(() => {
+        this.realDetail.set(null);
+        this.comments.set([]);
         if (!id) {
           this.view.set('list');
           this.selectedRow.set(null);
@@ -245,6 +262,15 @@ export class Applications {
         this.detailTab.set('timeline');
         this.view.set('detail');
         this.titleService.setTitle(`${row.applicant} (${row.id}) — E-BPCO Admin`);
+        // Real applicant contact info and the record's own real transition
+        // history — neither is on the queue row. Fire-and-forget: the
+        // detail view already renders from the queue row and local mock
+        // data immediately, this only replaces the fabricated fallbacks
+        // once it lands (see `selectedDetail`/`realTimeline`).
+        void this.applicationsApi.detail(id).then((result) => {
+          if (this.id() !== id) return; // navigated away before this resolved
+          if (result.kind === 'ok') this.realDetail.set(result.detail);
+        });
       });
     });
   }
@@ -253,7 +279,16 @@ export class Applications {
   // Stages board read/write the same records) rather than an
   // independently hardcoded 10-row array.
   protected readonly rows = computed(() => this.store.applications());
-  protected readonly comments = signal<CommentItem[]>(COMMENTS);
+  /**
+   * Local-only notes, per application — no backend endpoint exists to store
+   * or share these (see the tab's own honest notice). Starts empty and is
+   * reset to empty on every application change (see the `id()` effect); it
+   * used to be one signal seeded once with the shared mock `COMMENTS` array,
+   * so every application showed the exact same canned conversation —
+   * including a brand-new application seconds old, with a full "thread"
+   * already attached that could not possibly be its own.
+   */
+  protected readonly comments = signal<CommentItem[]>([]);
   protected readonly timeline = TIMELINE;
   /**
    * The real position of the selected application within the "happy path"
@@ -281,10 +316,36 @@ export class Applications {
       ? null
       : row.lifecycleStatus;
   });
-  /** Real per-application audit trail (ApplicationStore.getAuditTrail), most-recent-first — replaces the shared static TIMELINE mock rows. */
+  /**
+   * The record's own real transition history from `GET /staff/applications/:id`
+   * when it has loaded — the database's own trigger-written audit trail, not
+   * a local mock. `ApplicationStore.getAuditTrail`'s local mock events are
+   * only a placeholder for the moment before that real fetch resolves (or
+   * for an application the API never created at all); a real application
+   * whose real trail has loaded and is genuinely empty stays empty here
+   * rather than falling back to seed data that was never this record's own.
+   */
   protected readonly realTimeline = computed<TimelineItem[]>(() => {
     const row = this.selectedRow();
     if (!row) return [];
+    const real = this.realDetail();
+    if (real) {
+      return [...real.timeline]
+        .map((e, i): TimelineItem => {
+          const occurred = new Date(e.occurredAt);
+          const validDate = !Number.isNaN(occurred.getTime());
+          return {
+            num: String(i + 1).padStart(2, '0'),
+            event: e.toStatus,
+            date: validDate ? occurred.toLocaleDateString() : e.occurredAt,
+            time: validDate ? occurred.toLocaleTimeString() : '',
+            detail: e.remarks
+              ? `${e.remarks}${e.office ? ` — ${e.office}` : ''}`
+              : (e.office ?? (e.fromStatus ? `From ${e.fromStatus}` : 'Application filed')),
+          };
+        })
+        .reverse();
+    }
     const events = this.store.getAuditTrail(row.id);
     return events
       .map((e: AuditEvent, i: number) => {
@@ -419,11 +480,23 @@ export class Applications {
   protected readonly pageSize = 10;
   protected readonly searchTerm = signal('');
   protected readonly statusFilter = signal<'All' | AppStatus>('All');
-  /** Stores a real Business.id — canonical, never matched by applicant name. */
+  /**
+   * Stores a real `businessName` from the current queue, not a `Business.id`.
+   *
+   * The queue row carries the NAME but not the id (see this file's own note
+   * on `ApplicationApiRecord.businessId` above) — every real row's
+   * `businessId` is `''`, so a filter keyed on it could never match a real
+   * business no matter what was selected. `store.businesses()` is a
+   * separate, hand-seeded mock list unrelated to the real queue, which is
+   * why it never offered "Santos Sari-Sari Store" or any other real
+   * business as an option. Options are generated from the real rows
+   * instead, same pattern as the Business Stages board's Barangay filter.
+   */
   protected readonly businessFilter = signal<'All' | string>('All');
 
   protected readonly businessOptions = computed(() =>
-    [...this.store.businesses()].sort((a, b) => a.name.localeCompare(b.name)),
+    Array.from(new Set(this.rows().map((r) => r.businessName).filter((name) => name.trim() !== '')))
+      .sort((a, b) => a.localeCompare(b)),
   );
 
   protected readonly activeFilterCount = computed(
@@ -438,10 +511,10 @@ export class Applications {
   protected readonly filteredRows = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
     const status = this.statusFilter();
-    const businessId = this.businessFilter();
+    const business = this.businessFilter();
     return this.rows().filter((r) => {
       if (status !== 'All' && r.status !== status) return false;
-      if (businessId !== 'All' && r.businessId !== businessId) return false;
+      if (business !== 'All' && r.businessName !== business) return false;
       if (!term) return true;
       return (
         r.id.toLowerCase().includes(term) ||
@@ -469,13 +542,25 @@ export class Applications {
   protected readonly newMessage = signal('');
   protected readonly previewItem = signal<PreviewDoc | null>(null);
 
+  /**
+   * `GET /staff/applications/:id`'s real payload — the applicant's real
+   * account email/mobile and the record's own real transition history live
+   * only here, never in the queue row or the local mock `Applicant`/
+   * `Business` lookups `selectedRow`/`selectedDetail` are otherwise built
+   * from. `null` while unfetched/loading, so callers can tell "still
+   * loading" apart from "loaded, no timeline events" (an empty array).
+   */
+  protected readonly realDetail = signal<RealApplicationDetail | null>(null);
+
   protected readonly selectedDetail = computed<AppDetail | null>(() => {
     const row = this.selectedRow();
     if (!row) return null;
+    const real = this.realDetail();
     return buildDetailFor(
       row,
       this.store.getApplicant(row.applicantId),
       this.store.getBusiness(row.businessId),
+      real ? { email: real.applicantEmail, mobile: real.applicantMobile } : undefined,
     );
   });
 
@@ -485,9 +570,44 @@ export class Applications {
   // result of the process (or an honest "not yet generated" state) rather
   // than sample/lorem-ipsum content once a real result exists.
 
-  protected readonly permitResult = computed(() => {
+  /**
+   * `PermitReleaseApi.generatePermit()` has no matching GET route anywhere —
+   * `sessionCache` is the honest answer (see its own doc comment): populated
+   * only by this session's own successful generate call, never wiped by a
+   * queue reload. Once real data is loaded, `ApplicationStore.getPermit()`
+   * (the old, fully-local mutator's own read side) is used only as the
+   * seed/demo-mode fallback, never as a claim about real server state.
+   *
+   * `expiryDate`/`approvingOfficial`/`approvingOffice` are `undefined` — not
+   * `null` — when this session's cache is the source, since the real
+   * `generatePermit` response carries only `permitNumber`/`issuedDate` and
+   * this portal has no route to read the rest back. The template shows that
+   * honestly rather than displaying a fabricated or seed-only value.
+   */
+  protected readonly permitResult = computed<{
+    permitNumber: string;
+    issuedDate: string;
+    expiryDate?: string | null;
+    approvingOfficial?: string;
+    approvingOffice?: string;
+  } | null>(() => {
     const row = this.selectedRow();
-    return row ? (this.store.getPermit(row.id) ?? null) : null;
+    if (!row) return null;
+    const cached = this.sessionCache.permitFor(row.id);
+    if (cached) return { permitNumber: cached.permitNumber, issuedDate: cached.issuedDate };
+    if (!this.store.isSeedData()) return null;
+    const seedPermit = this.store.getPermit(row.id);
+    return seedPermit ? { ...seedPermit } : null;
+  });
+
+  /** True once this row's own status implies a permit exists, but neither this session's cache nor the seed data can show it — an honest gap, not a blank. */
+  protected readonly permitNotVisible = computed(() => {
+    const row = this.selectedRow();
+    if (!row || this.permitResult()) return false;
+    return row.lifecycleStatus === 'Permit Generated'
+      || row.lifecycleStatus === 'Ready for Release'
+      || row.lifecycleStatus === 'Released'
+      || row.lifecycleStatus === 'Completed';
   });
 
   protected readonly releaseResult = computed(() => {
@@ -512,6 +632,17 @@ export class Applications {
     );
   });
 
+  /**
+   * Same-tick UI hint only — `row.lifecycleStatus === 'Approved'` is the real
+   * gate the server enforces (via the `Approved -> Permit Generated`
+   * transition's own precondition); `paymentStatus === 'Paid'` is kept
+   * alongside it even though `generatePermit`'s confirmed refusal reasons
+   * (not-approved/already-generated/invalid) carry no distinct "unpaid"
+   * cause — payment settlement may already be a precondition of reaching
+   * Approved in the first place, in which case this check is redundant but
+   * harmless; live-verify with an Approved-but-unpaid application if one can
+   * be constructed.
+   */
   protected readonly canGeneratePermit = computed(() => {
     const row = this.selectedRow();
     const role = this.session.role();
@@ -541,20 +672,80 @@ export class Applications {
     this.selectedRow.set(this.store.getById(row.id) ?? row);
   }
 
-  protected generatePermitAction(): void {
-    const row = this.selectedRow();
-    if (!row || !this.canGeneratePermit()) {
+  // ---- Generate permit (real staff:approve call, then the real transition) --
+
+  protected readonly showGeneratePermitModal = signal(false);
+  protected generatePermitScope = '';
+  protected generatePermitConditionsText = '';
+  protected readonly generatePermitError = signal('');
+  protected readonly generatingPermit = signal(false);
+
+  protected openGeneratePermitModal(): void {
+    if (!this.canGeneratePermit()) {
       this.toast.error("Can't generate a permit yet — the application must be Approved and fully paid.");
       return;
     }
-    const ok = this.store.generatePermit(
-      row.id,
-      this.session.name() || 'Staff',
-      this.session.role() ?? 'Administrator',
-    );
-    if (ok) this.toast.success(`${this.finalDocumentName()} generated.`);
-    else this.toast.error("Couldn't generate the permit for this application.");
-    this.selectedRow.set(this.store.getById(row.id) ?? row);
+    this.generatePermitScope = '';
+    this.generatePermitConditionsText = '';
+    this.generatePermitError.set('');
+    this.showGeneratePermitModal.set(true);
+  }
+
+  protected cancelGeneratePermit(): void {
+    this.showGeneratePermitModal.set(false);
+  }
+
+  protected async confirmGeneratePermit(): Promise<void> {
+    const row = this.selectedRow();
+    if (!row || !this.canGeneratePermit()) return;
+    const scope = this.generatePermitScope.trim();
+    if (!scope) {
+      this.generatePermitError.set('Describe what this permit covers before generating it.');
+      return;
+    }
+    const conditions = this.generatePermitConditionsText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    this.generatingPermit.set(true);
+    try {
+      const result = await this.permitReleaseApi.generatePermit(row.id, {
+        scope,
+        conditions: conditions.length > 0 ? conditions : undefined,
+      });
+      if (result.kind !== 'done') {
+        const message =
+          result.kind === 'unavailable'
+            ? 'This deployment cannot generate permits yet.'
+            : result.message;
+        this.generatePermitError.set(message);
+        this.toast.error(message);
+        return;
+      }
+      this.sessionCache.recordPermit(row.id, {
+        permitNumber: result.permitNumber,
+        issuedDate: result.issuedDate,
+      });
+      const transitionResult = await this.applicationsApi.transition(row.id, 'Permit Generated', {
+        expectedVersion: row.version,
+      });
+      if (transitionResult.kind !== 'done') {
+        this.toast.error(
+          `${this.finalDocumentName()} generated (${result.permitNumber}), but the status update failed — `
+            + `${transitionResult.kind === 'unavailable' ? 'this deployment cannot update it yet.' : transitionResult.message} `
+            + 'Reload and try again.',
+        );
+      } else {
+        this.toast.success(`${this.finalDocumentName()} generated.`);
+      }
+      this.showGeneratePermitModal.set(false);
+      await this.loader.reload();
+      const refreshed = this.store.getById(row.id);
+      if (refreshed) this.selectedRow.set(refreshed);
+    } finally {
+      this.generatingPermit.set(false);
+    }
   }
 
   // ---- Sample document preview (application form / permit / etc.) -----
@@ -577,13 +768,30 @@ export class Applications {
       this.toast.error("You don't have permission to verify this contact.");
       return;
     }
-    this.store.setContactVerification(
+    // On real data `row.applicantId` is always '' (the queue API sends the
+    // applicant's NAME, never a joinable id — see staff-applications.api.ts's
+    // own doc comment), so this local-only mutation can never find a
+    // matching Applicant record to update. Before this check, the return
+    // value was ignored and a "marked Verified" success toast fired
+    // unconditionally — an active false positive telling the officer their
+    // action landed when nothing changed, worse than the button silently
+    // doing nothing. There is still no backend route for this (see the
+    // gap list in the Stage 2 plan); this only makes that gap visible
+    // instead of hidden behind a fake success.
+    const ok = this.store.setContactVerification(
       row.applicantId,
       channel,
       outcome,
       'Manual Administrator Confirmation',
       this.session.name() || 'Administrator',
     );
+    if (!ok) {
+      this.toast.error(
+        'This deployment cannot verify contacts for this application — no local applicant '
+          + 'record is available to update, and there is no backend route for this yet.',
+      );
+      return;
+    }
     this.toast.success(
       `${channel === 'email' ? 'Email' : 'Mobile number'} marked "${outcome}".`,
     );
@@ -631,6 +839,18 @@ export class Applications {
     this.router.navigateByUrl(`/evaluations?applicationId=${row.id}`);
   }
 
+  /** Same pattern as openEvaluations() above — the Assessment Workspace lives on the standalone Payments page (no per-application route here), reached with `?applicationId=`. There is no bulk "assessments" list to link to instead; see payments.ts's own doc comment for why. */
+  protected readonly canEditAssessment = computed(() => {
+    const role = this.session.role();
+    return !!role && ACTION_PERMISSIONS.editAssessment(role);
+  });
+
+  openPaymentAssessment(): void {
+    const row = this.selectedRow();
+    if (!row) return;
+    this.router.navigateByUrl(`/payments?applicationId=${row.id}`);
+  }
+
   closeDocPreview(): void {
     this.previewItem.set(null);
   }
@@ -645,35 +865,43 @@ export class Applications {
   }
 
   // ---- Row status mutation --------------------------------------------
-  // Routed through the store's validated `transitionStatus`, targeting the
-  // real ApplicationLifecycleStatus directly (see STATUS_ACTIONS/
-  // availableStatusActions above) rather than the old coarse-status
-  // indirection that could only ever reach 'Approved'/'Rejected' or a
-  // hardcoded 'Under Evaluation' — the menu now only offers legal next
-  // steps in the first place, so this is normally a straight pass-through;
-  // the boolean return is still checked and surfaced via `quickActionError`
-  // as a defense-in-depth backstop (see its own doc comment).
-  private updateRowStatus(
+  // Routed through the real server transition (`POST
+  // /staff/applications/:id/transitions`), targeting the real
+  // ApplicationLifecycleStatus directly (see STATUS_ACTIONS/
+  // availableStatusActions above). `availableStatusActions`'s own
+  // `canTransition`/`canApprove` filtering stays in place as a same-tick
+  // hint (grey out illegal menu items immediately) but the actual result —
+  // and its exact reason when refused — always comes from the server, never
+  // a locally-decided boolean; `expectedVersion` is the row's own `version`
+  // so a decision made elsewhere in the meantime surfaces as "reload and
+  // look again" rather than silently overwriting it.
+  private async updateRowStatus(
     id: string,
     target: ApplicationLifecycleStatus,
     remarks?: string,
-  ): void {
+  ): Promise<void> {
     this.quickActionError.set(null);
-    const actor = this.session.name() || 'Staff';
-    const role = this.session.role() ?? 'Administrator';
-    const ok = this.store.transitionStatus(id, target, actor, role, remarks);
-    if (!ok) {
-      const message = `Couldn't move this application to "${target}" — it no longer meets the requirements for that step (re-check its documents/role access and try again).`;
-      this.quickActionError.set(message);
-      this.toast.error(message);
+    const row = this.store.getById(id);
+    const result = await this.applicationsApi.transition(id, target, {
+      expectedVersion: row?.version,
+      remarks,
+    });
+    if (result.kind === 'done') {
+      this.toast.success(`Status updated to "${target}".`);
+      await this.loader.reload();
+      const current = this.selectedRow();
+      if (current && current.id === id) {
+        const refreshed = this.store.getById(id);
+        if (refreshed) this.selectedRow.set(refreshed);
+      }
       return;
     }
-    this.toast.success(`Status updated to "${target}".`);
-    const current = this.selectedRow();
-    if (current && current.id === id) {
-      const refreshed = this.store.getById(id);
-      if (refreshed) this.selectedRow.set(refreshed);
-    }
+    const message =
+      result.kind === 'unavailable'
+        ? "This deployment cannot change an application's status yet."
+        : result.message;
+    this.quickActionError.set(message);
+    this.toast.error(message);
   }
 
   // ---- Selection + delete ---------------------------------------------
@@ -728,54 +956,98 @@ export class Applications {
     const target = this.deleteTarget();
     if (target === 'bulk') {
       const n = this.selectedIds().size;
-      return `${n} selected application${n === 1 ? '' : 's'} will be moved to Cancelled, `
-        + 'where they stay visible and auditable. Nothing is deleted.';
+      return `${n} selected application${n === 1 ? '' : 's'} will be archived if already finished, `
+        + 'or moved to Cancelled if still active. Nothing is deleted.';
     }
     if (target) {
-      return `${target.applicant}'s application (${target.id}) will be moved to Cancelled, `
+      const action = isTerminalStatus(target.lifecycleStatus) ? 'archived' : 'moved to Cancelled';
+      return `${target.applicant}'s application (${target.id}) will be ${action}, `
         + 'where it stays visible and auditable. Nothing is deleted.';
     }
     return '';
   });
 
   /**
-   * Archiving, with the remarks stored against the record.
+   * "Delete" against the real backend, which splits this into two different
+   * operations depending on the row's own status.
    *
-   * The store has taken `remarks` all along and writes them into the audit
-   * entry; this page simply never passed any, so every archive in the trail
-   * read "Application cancelled/archived" with no reason attached. An audit
-   * entry that records the act but not the why answers the easy question.
+   * `POST /staff/applications/archive` only accepts applications already at a
+   * terminal status (Completed/Rejected/Cancelled/Expired) — it is a
+   * housekeeping action, not a way to call off work in progress. An active
+   * application is cancelled instead, through the same real `Cancelled`
+   * transition the Action menu would use — which some statuses (Document
+   * Verification, Under Evaluation, anything from Payment Submitted onward)
+   * do not legally reach at all; the server's own refusal for those is
+   * surfaced rather than guessed at here.
    *
-   * The server requires at least three characters for the same reason, so the
-   * dialog enforces it here rather than discovering it in a round trip.
+   * The server requires at least three characters on `remarks` for the same
+   * reason this dialog does — so a short remark is refused before a round
+   * trip, not after one.
    */
-  protected confirmDelete(remarks: string): void {
+  protected async confirmDelete(remarks: string): Promise<void> {
     const target = this.deleteTarget();
     if (!target) return;
-    const idsToRemove = target === 'bulk' ? this.selectedIds() : new Set([target.id]);
-    // No hard deletion of submitted applications — this moves them to the
-    // terminal Cancelled status instead (still visible, filterable, and
-    // auditable) rather than removing them from the store.
-    this.store.archive(
-      idsToRemove,
-      this.session.name() || 'Staff',
-      this.session.role() ?? 'Administrator',
-      remarks,
-    );
-    this.toast.success(
-      idsToRemove.size === 1
-        ? 'Application moved to Cancelled.'
-        : `${idsToRemove.size} applications moved to Cancelled.`,
-    );
+    this.deleteTarget.set(null);
+    const rows = target === 'bulk'
+      ? [...this.selectedIds()].map((id) => this.store.getById(id)).filter((r): r is AppRow => r !== undefined)
+      : [target];
+
+    const toArchive = rows.filter((r) => isTerminalStatus(r.lifecycleStatus));
+    const toCancel = rows.filter((r) => !isTerminalStatus(r.lifecycleStatus));
+
+    let archivedCount = 0;
+    let cancelledCount = 0;
+    const succeededIds = new Set<string>();
+    const failures: string[] = [];
+
+    if (toArchive.length > 0) {
+      const result = await this.applicationsApi.archive(toArchive.map((r) => r.id), remarks);
+      if (result.kind === 'done') {
+        archivedCount = toArchive.length;
+        for (const r of toArchive) succeededIds.add(r.id);
+      } else {
+        failures.push(
+          result.kind === 'unavailable' ? 'This deployment cannot archive applications yet.' : result.message,
+        );
+      }
+    }
+
+    for (const row of toCancel) {
+      const result = await this.applicationsApi.transition(row.id, 'Cancelled', {
+        expectedVersion: row.version,
+        remarks,
+      });
+      if (result.kind === 'done') {
+        cancelledCount += 1;
+        succeededIds.add(row.id);
+      } else {
+        const message = result.kind === 'unavailable' ? 'this deployment cannot cancel it yet' : result.message;
+        failures.push(`${row.applicant} (${row.id}): ${message}`);
+      }
+    }
+
+    const succeeded = archivedCount + cancelledCount;
+    if (succeeded === 1 && failures.length === 0) {
+      this.toast.success(archivedCount === 1 ? 'Application archived.' : 'Application moved to Cancelled.');
+    } else if (succeeded > 0) {
+      const parts: string[] = [];
+      if (archivedCount > 0) parts.push(`${archivedCount} archived`);
+      if (cancelledCount > 0) parts.push(`${cancelledCount} moved to Cancelled`);
+      this.toast.success(`${succeeded} application${succeeded === 1 ? '' : 's'} updated (${parts.join(', ')}).`);
+    }
+    if (failures.length > 0) {
+      this.toast.error(failures.length === 1 ? failures[0] : `${failures.length} could not be updated: ${failures.join(' ')}`);
+    }
+    if (succeeded === 0) return;
+
     this.selectedIds.update((current) => {
       const next = new Set(current);
-      for (const id of idsToRemove) next.delete(id);
+      for (const id of succeededIds) next.delete(id);
       return next;
     });
-    if (target !== 'bulk' && this.selectedRow()?.id === target.id) {
-      this.backToList();
-    }
-    this.deleteTarget.set(null);
+    const wasShowingUpdated = target !== 'bulk' && succeededIds.has(target.id);
+    await this.loader.reload();
+    if (wasShowingUpdated) this.backToList();
   }
 
   // ---- Export -------------------------------------------------------------
@@ -796,6 +1068,12 @@ export class Applications {
 
   protected exportVisible(): void {
     const rows = this.filteredRows();
+    // `downloadCsv` writes nothing for an empty set, so "Exported 0
+    // applications." announced a file that was never created.
+    if (rows.length === 0) {
+      this.toast.info('Nothing to export — no applications match the current view.');
+      return;
+    }
     downloadCsv(
       'applications',
       rows.map((row) => this.appCsvRow(row)),
@@ -1192,7 +1470,7 @@ export class Applications {
     const depth = target ? (Math.min(target.depth + 1, 2) as 0 | 1 | 2) : 0;
     this.comments.update((list) => [
       ...list,
-      { author: 'Engr. Ricardo Buenaflor', timeAgo: 'just now', text, depth },
+      { author: this.session.name() || 'You', timeAgo: 'just now', text, depth },
     ]);
     this.newMessage.set('');
     this.replyTarget.set(null);

@@ -1,0 +1,106 @@
+- generic [ref=f28e48]:
+  - complementary [ref=f28e50]:
+    - generic [ref=f28e51]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f28e53]
+      - generic [ref=f28e54]: E-BPCO
+    - navigation [ref=f28e55]:
+      - link "Dashboard" [ref=f28e58] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f28e64]:
+        - generic [ref=f28e65]: Operations
+        - generic [ref=f28e66]:
+          - link "Applications" [active] [ref=f28e67] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f28e73] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f28e78] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f28e85] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f28e92]:
+        - generic [ref=f28e93]: Administration
+        - generic [ref=f28e94]:
+          - link "Businesses" [ref=f28e95] [cursor=pointer]:
+            - /url: /businesses
+          - link "Users & Roles" [ref=f28e101] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f28e108] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f28e117] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f28e123] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f28e129] [cursor=pointer]
+  - main [ref=f28e135]:
+    - generic [ref=f28e510]:
+      - generic "Applications" [ref=f28e511]:
+        - generic [ref=f28e512]:
+          - heading "Applications" [level=1] [ref=f28e513]
+          - generic [ref=f28e514]:
+            - button "Notifications" [ref=f28e516] [cursor=pointer]
+            - button "R records@lgu.gov.ph Administrator" [ref=f28e522] [cursor=pointer]:
+              - generic [ref=f28e523]: R
+              - generic [ref=f28e527]:
+                - generic [ref=f28e528]: records@lgu.gov.ph
+                - generic [ref=f28e529]: Administrator
+      - note [ref=f28e534]:
+        - generic [ref=f28e539]: Your account is assigned no forms, so nothing can appear here. An administrator has to assign at least one.
+      - generic [ref=f28e540]:
+        - generic [ref=f28e542]:
+          - generic [ref=f28e544]:
+            - paragraph [ref=f28e545]: Under Review
+            - paragraph [ref=f28e546]: "0"
+          - generic [ref=f28e547]:
+            - generic [ref=f28e548]: 0% of all applications
+            - 'img "Under Review progress: 0 percent" [ref=f28e550]'
+        - generic [ref=f28e553]:
+          - generic [ref=f28e555]:
+            - paragraph [ref=f28e556]: Approved
+            - paragraph [ref=f28e557]: "0"
+          - generic [ref=f28e558]:
+            - generic [ref=f28e559]: 0% of all applications
+            - 'img "Approved progress: 0 percent" [ref=f28e561]'
+        - generic [ref=f28e564]:
+          - generic [ref=f28e566]:
+            - paragraph [ref=f28e567]: Rejected
+            - paragraph [ref=f28e568]: "0"
+          - generic [ref=f28e569]:
+            - generic [ref=f28e570]: 0% of all applications
+            - 'img "Rejected progress: 0 percent" [ref=f28e572]'
+        - generic [ref=f28e575]:
+          - generic [ref=f28e577]:
+            - paragraph [ref=f28e578]: Total Applications
+            - paragraph [ref=f28e579]: "0"
+          - generic [ref=f28e580]:
+            - generic [ref=f28e581]: Under Review · Approved · Rejected
+            - 'img "3 categories: 0, 0, 0" [ref=f28e583]'
+      - generic [ref=f28e587]:
+        - generic [ref=f28e588]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Lo" [ref=f28e594]:
+            - /placeholder: Search Here By Application ID, Applicant Name, Business/Project, or Location
+          - generic [ref=f28e595]:
+            - button [ref=f28e598] [cursor=pointer]
+            - button [ref=f28e602] [cursor=pointer]
+            - button [ref=f28e607] [cursor=pointer]
+        - table [ref=f28e611]:
+          - rowgroup [ref=f28e612]:
+            - row [ref=f28e613]:
+              - columnheader [ref=f28e614]:
+                - checkbox "Select all applications" [ref=f28e615]
+              - columnheader "APPLICATION ID" [ref=f28e616]
+              - columnheader "APPLICANT NAME" [ref=f28e617]
+              - columnheader "LOCATION" [ref=f28e618]
+              - columnheader "TYPE" [ref=f28e619]
+              - columnheader "DATE SUBMITTED" [ref=f28e620]
+              - columnheader "ASSIGNED OFFICER" [ref=f28e621]
+              - columnheader "STATUS" [ref=f28e622]
+              - columnheader "ACTION" [ref=f28e623]
+          - rowgroup [ref=f28e624]:
+            - row [ref=f28e625]:
+              - cell "No applications match your search." [ref=f28e626]
+        - navigation "Pagination" [ref=f28e628]:
+          - generic [ref=f28e629]: Showing 0 of 0
+          - generic [ref=f28e630]:
+            - button "First page" [disabled] [ref=f28e631]
+            - button "Page 1" [ref=f28e636] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f28e637]

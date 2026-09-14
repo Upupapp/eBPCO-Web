@@ -64,6 +64,14 @@ export function buildPermissionMatrix(role: RoleRow): PermissionMatrixRow[] {
 }
 
 export function buildWorkload(user: UserRow): WorkloadSummary {
+  // A Pending account has never signed in — it has no assignments to be
+  // open, overdue, or completed, and a seeded-random number here would
+  // directly contradict the "Pending"/"Last Active —" state shown two lines
+  // above it on the same page. This is real, not mock: zero is the actual
+  // fact about an account nothing has ever been assigned to yet.
+  if (user.status === 'Pending') {
+    return { openAssignments: 0, overdue: 0, completedThisMonth: 0 };
+  }
   const rand = seedFrom(user.email);
   const openAssignments = Math.floor(rand() * 18) + 2;
   return {

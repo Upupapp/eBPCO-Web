@@ -75,7 +75,7 @@ describe('Login — the sign-in button while a request is in flight', () => {
     fixture.detectChanges();
 
     expect(button.disabled).toBe(true);
-    expect(button.textContent?.trim()).toBe('Signing in…');
+    expect(button.textContent?.trim()).toBe('Signing in');
     expect(button.getAttribute('aria-busy')).toBe('true');
 
     settle.resolve();

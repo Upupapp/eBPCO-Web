@@ -35,12 +35,34 @@
       }
     </nav>
 
-    @if (activeTab() === 'activity') {
+    @if (activeTab() === 'activity' && activityLoading()) {
+      <div class="prototype-disclaimer" role="status">
+        <app-icon name="info" [size]="16" />
+        <span>Reading the activity audit trail…</span>
+      </div>
+    } @else if (activeTab() === 'activity' && activityLive()) {
+      <div class="prototype-disclaimer" role="note">
+        <app-icon name="info" [size]="16" />
+        <span>
+          Live activity from the server's audit trail — every row is a genuine action taken in
+          Applications, Payments, or Permit Release. Showing
+          {{ activityEntries().length }} entr{{ activityEntries().length === 1 ? 'y' : 'ies' }}.
+        </span>
+      </div>
+    } @else if (activeTab() === 'activity' && activityError()) {
+      <div class="prototype-disclaimer" role="alert">
+        <app-icon name="alert-triangle" [size]="16" />
+        <span>
+          The activity audit trail could not be read, so what follows is only this session's own
+          locally-tracked actions, not the full record. {{ activityError() }}
+        </span>
+      </div>
+    } @else if (activeTab() === 'activity') {
       <div class="prototype-disclaimer" role="note">
         <app-icon name="info" [size]="16" />
         <span
-          >Backed by this app's real audit trail — every row here is a genuine action taken in
-          Applications or Payments.</span
+          >This deployment has no activity audit trail available right now — showing only this
+          session's own locally-tracked actions, not the full record.</span
         >
       </div>
     } @else if (activeTab() === 'security' && securityLoading()) {
@@ -92,12 +114,12 @@
     <div class="filter-bar">
       <div class="filter-item date-filter">
         <app-icon name="calendar" [size]="15" />
-        <span>May {{ dateRange }}</span>
+        <span>{{ dateRangeLabel() }}</span>
       </div>
 
       <select aria-label="Filter by tenant" class="filter-select" [(ngModel)]="tenantFilter" (ngModelChange)="page.set(1)">
         <option>All Tenants</option>
-        @for (t of tenantOptions; track t) {
+        @for (t of tenantOptions(); track t) {
           <option [value]="t">{{ t }}</option>
         }
       </select>
@@ -203,14 +225,6 @@
                       >
                         <app-icon name="eye" [size]="14" />
                       </button>
-                      <button
-                        type="button"
-                        class="icon-btn edit"
-                        aria-label="Edit"
-                        (click)="openActivityDetail(row)"
-                      >
-                        <app-icon name="edit" [size]="14" />
-                      </button>
                       <!-- No delete here — this tab now reads the real, append-only audit trail (ApplicationStore/AssessmentStore auditEvents), which nothing in the app ever removes once written. See audit.model.ts. -->
                     </div>
                   </td>
@@ -270,14 +284,6 @@
                         (click)="openAccessDetail(row)"
                       >
                         <app-icon name="eye" [size]="14" />
-                      </button>
-                      <button
-                        type="button"
-                        class="icon-btn edit"
-                        aria-label="Edit"
-                        (click)="openAccessDetail(row)"
-                      >
-                        <app-icon name="edit" [size]="14" />
                       </button>
                     </div>
                   </td>
@@ -342,14 +348,6 @@
                       >
                         <app-icon name="eye" [size]="14" />
                       </button>
-                      <button
-                        type="button"
-                        class="icon-btn edit"
-                        aria-label="Edit"
-                        (click)="openErrorDetail(row)"
-                      >
-                        <app-icon name="edit" [size]="14" />
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -413,14 +411,6 @@
                       >
                         <app-icon name="eye" [size]="14" />
                       </button>
-                      <button
-                        type="button"
-                        class="icon-btn edit"
-                        aria-label="Edit"
-                        (click)="openSecurityDetail(row)"
-                      >
-                        <app-icon name="edit" [size]="14" />
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -479,14 +469,6 @@
                         (click)="openEventDetail(row)"
                       >
                         <app-icon name="eye" [size]="14" />
-                      </button>
-                      <button
-                        type="button"
-                        class="icon-btn edit"
-                        aria-label="Edit"
-                        (click)="openEventDetail(row)"
-                      >
-                        <app-icon name="edit" [size]="14" />
                       </button>
                     </div>
                   </td>

@@ -1,0 +1,134 @@
+- generic [ref=f46e61]:
+  - complementary [ref=f46e63]:
+    - generic [ref=f46e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f46e66]
+      - generic [ref=f46e67]: E-BPCO
+    - navigation [ref=f46e68]:
+      - link "Dashboard" [ref=f46e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f46e77]:
+        - generic [ref=f46e78]: Operations
+        - generic [ref=f46e79]:
+          - link "Applications" [ref=f46e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f46e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f46e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f46e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f46e105]:
+        - generic [ref=f46e106]: Administration
+        - generic [ref=f46e107]:
+          - link "Businesses" [ref=f46e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f46e114] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f46e120] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f46e127] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f46e136] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f46e142] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f46e148] [cursor=pointer]
+  - main [ref=f46e154]:
+    - generic [ref=f46e2489]:
+      - generic "Applications" [ref=f46e2490]:
+        - generic [ref=f46e2491]:
+          - heading "Applications" [level=1] [ref=f46e2492]
+          - generic [ref=f46e2493]:
+            - generic [ref=f46e2494]:
+              - generic [ref=f46e2499]: Search
+              - textbox "Search" [ref=f46e2500]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f46e2502] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f46e2508] [cursor=pointer]:
+              - generic [ref=f46e2509]: Q
+              - generic [ref=f46e2513]:
+                - generic [ref=f46e2514]: QA@lguids.com.ph
+                - generic [ref=f46e2515]: Super Admin
+      - generic [ref=f46e2519]:
+        - heading "Application Details" [level=1] [ref=f46e2520]
+        - generic [ref=f46e2521]:
+          - button "Action" [ref=f46e2523] [cursor=pointer]
+          - button "Evaluate" [ref=f46e2524] [cursor=pointer]
+          - button "Payment" [ref=f46e2525] [cursor=pointer]
+          - button "Back to List" [ref=f46e2526] [cursor=pointer]
+          - button "More actions" [ref=f46e2528] [cursor=pointer]
+      - generic [ref=f46e2534]:
+        - generic [ref=f46e2535]:
+          - generic [ref=f46e2536]: MS
+          - generic [ref=f46e2544]:
+            - heading "888c1f71-ee86-4ce7-8c1c-bea375fa5078 - Maria Santos" [level=2] [ref=f46e2545]
+            - generic [ref=f46e2546]: Approved
+            - generic [ref=f46e2547]:
+              - generic [ref=f46e2548]:
+                - term [ref=f46e2549]: "Business / Project :"
+                - definition [ref=f46e2550]: Santos Sari-Sari Store
+              - generic [ref=f46e2551]:
+                - term [ref=f46e2552]: "City :"
+                - definition [ref=f46e2553]: 60 Rizal Street, Poblacion
+              - generic [ref=f46e2554]:
+                - term [ref=f46e2555]: "Region :"
+                - definition [ref=f46e2556]: Region V (Bicol Region)
+              - generic [ref=f46e2557]:
+                - term [ref=f46e2558]: "Type :"
+                - definition [ref=f46e2559]: Fencing Permit
+              - generic [ref=f46e2560]:
+                - term [ref=f46e2561]: "Email :"
+                - definition [ref=f46e2562]:
+                  - text: maria@example.ph
+                  - generic [ref=f46e2563]: Unverified
+                  - button "Confirm" [ref=f46e2564] [cursor=pointer]
+                  - button "Mark Failed" [ref=f46e2565] [cursor=pointer]
+              - generic [ref=f46e2566]:
+                - term [ref=f46e2567]: "Phone :"
+                - definition [ref=f46e2568]:
+                  - text: "+639171234567"
+                  - generic [ref=f46e2569]: Unverified
+                  - button "Confirm" [ref=f46e2570] [cursor=pointer]
+                  - button "Mark Failed" [ref=f46e2571] [cursor=pointer]
+              - generic [ref=f46e2572]:
+                - term [ref=f46e2573]: "Barangay :"
+                - definition [ref=f46e2574]: 60 Rizal Street, Poblacion
+          - generic [ref=f46e2575]:
+            - generic [ref=f46e2576]:
+              - strong [ref=f46e2577]: 2026-09-14
+              - generic [ref=f46e2578]: Date Submitted
+            - generic [ref=f46e2579]:
+              - strong [ref=f46e2580]: —
+              - generic [ref=f46e2581]: Assigned Officer
+          - button [ref=f46e2582] [cursor=pointer]
+        - generic [ref=f46e2586]:
+          - generic [ref=f46e2587]:
+            - button "Timeline" [ref=f46e2588] [cursor=pointer]
+            - button "Documents" [ref=f46e2589] [cursor=pointer]
+            - button "Permit Result" [ref=f46e2590] [cursor=pointer]
+            - button "Comments" [ref=f46e2591] [cursor=pointer]
+          - generic [ref=f46e2592]:
+            - heading "Permit Result" [level=2] [ref=f46e2593]
+            - generic [ref=f46e2594]:
+              - paragraph [ref=f46e2595]:
+                - text: No permit or clearance has been generated yet for this application. Its current status is
+                - strong [ref=f46e2596]: Approved
+                - text: (Approved).
+              - button "Generate Fencing Permit" [active] [ref=f46e2597] [cursor=pointer]
+      - generic [ref=f46e2599]:
+        - button "Close" [ref=f46e2600] [cursor=pointer]: ✕
+        - heading "Generate Fencing Permit" [level=2] [ref=f46e2601]
+        - generic [ref=f46e2602]:
+          - generic [ref=f46e2603]:
+            - text: Scope
+            - generic [ref=f46e2604]: (what this permit covers — required)
+            - textbox "Scope of the permit" [ref=f46e2605]:
+              - /placeholder: Describe what this permit covers…
+          - generic [ref=f46e2606]:
+            - text: Conditions
+            - generic [ref=f46e2607]: (optional, one per line)
+            - textbox "Conditions of the permit, one per line" [ref=f46e2608]:
+              - /placeholder: One condition per line…
+          - generic [ref=f46e2609]:
+            - button "Cancel" [ref=f46e2610] [cursor=pointer]
+            - button "Generate" [ref=f46e2611] [cursor=pointer]

@@ -1,0 +1,90 @@
+- generic [ref=f36e198]:
+  - complementary [ref=f36e200]:
+    - generic [ref=f36e201]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f36e203]
+      - generic [ref=f36e204]: E-BPCO
+    - navigation [ref=f36e205]:
+      - link "Dashboard" [ref=f36e208] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f36e214]:
+        - generic [ref=f36e215]: Operations
+        - generic [ref=f36e216]:
+          - link "Applications" [ref=f36e217] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f36e223] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f36e228] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f36e235] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f36e242]:
+        - generic [ref=f36e243]: Administration
+        - generic [ref=f36e244]:
+          - link "Businesses" [ref=f36e245] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f36e251] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f36e257] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f36e264] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f36e273] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f36e279] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f36e285] [cursor=pointer]
+  - main [ref=f36e291]:
+    - generic [ref=f36e3319]:
+      - generic "Payments" [ref=f36e3320]:
+        - generic [ref=f36e3321]:
+          - heading "Payments" [level=1] [ref=f36e3322]
+          - generic [ref=f36e3323]:
+            - generic [ref=f36e3324]:
+              - generic [ref=f36e3329]: Search
+              - textbox "Search" [ref=f36e3330]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f36e3332] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f36e3338] [cursor=pointer]:
+              - generic [ref=f36e3339]: Q
+              - generic [ref=f36e3343]:
+                - generic [ref=f36e3344]: QA@lguids.com.ph
+                - generic [ref=f36e3345]: Super Admin
+      - generic [ref=f36e3349]:
+        - navigation [ref=f36e3350]:
+          - button [ref=f36e3351] [cursor=pointer]
+          - button [ref=f36e3357] [cursor=pointer]
+          - button [ref=f36e3360] [cursor=pointer]
+        - generic [ref=f36e3583]:
+          - generic [ref=f36e3584]:
+            - heading "Payment PAY-2026-000001" [level=1] [ref=f36e3585]
+            - paragraph [ref=f36e3586]: Maria Santos · E-BPCO-2026-000006
+          - generic [ref=f36e3587]:
+            - generic [ref=f36e3588]: Paid
+            - button "View Application" [ref=f36e3589] [cursor=pointer]
+            - button "Back to List" [ref=f36e3590] [cursor=pointer]
+        - generic [ref=f36e3592]:
+          - heading "Payment Detail" [level=2] [ref=f36e3594]
+          - generic [ref=f36e3595]:
+            - generic [ref=f36e3596]:
+              - term [ref=f36e3597]: "Application:"
+              - definition [ref=f36e3598]: E-BPCO-2026-000006
+            - generic [ref=f36e3599]:
+              - term [ref=f36e3600]: "Method:"
+              - definition [ref=f36e3601]: Onsite
+            - generic [ref=f36e3602]:
+              - term [ref=f36e3603]: "Reference:"
+              - definition [ref=f36e3604]: PAY-2026-000001
+            - generic [ref=f36e3605]:
+              - term [ref=f36e3606]: "Amount:"
+              - definition [ref=f36e3607]: ₱1,700.00
+            - generic [ref=f36e3608]:
+              - term [ref=f36e3609]: "Submitted:"
+              - definition [ref=f36e3610]: 2026-09-13T18:02:28.574Z
+            - generic [ref=f36e3611]:
+              - term [ref=f36e3612]: "OR No.:"
+              - definition [ref=f36e3613]: OR-2026-000001-A
+          - generic [ref=f36e3614]:
+            - button "Void" [ref=f36e3615] [cursor=pointer]
+            - button "Reverse" [ref=f36e3616] [cursor=pointer]
+            - button "Refund" [ref=f36e3617] [cursor=pointer]
+            - button "Correct OR No." [ref=f36e3618] [cursor=pointer]

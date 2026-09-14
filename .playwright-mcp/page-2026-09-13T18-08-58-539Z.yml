@@ -1,0 +1,118 @@
+- generic [ref=f32e61]:
+  - complementary [ref=f32e63]:
+    - generic [ref=f32e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f32e66]
+      - generic [ref=f32e67]: E-BPCO
+    - navigation [ref=f32e68]:
+      - link "Dashboard" [ref=f32e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f32e77]:
+        - generic [ref=f32e78]: Operations
+        - generic [ref=f32e79]:
+          - link "Applications" [ref=f32e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f32e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f32e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f32e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f32e105]:
+        - generic [ref=f32e106]: Administration
+        - generic [ref=f32e107]:
+          - link "Businesses" [ref=f32e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f32e114] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f32e120] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f32e127] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f32e136] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f32e142] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f32e148] [cursor=pointer]
+  - main [ref=f32e154]:
+    - generic [ref=f32e738]:
+      - generic "Evaluations" [ref=f32e739]:
+        - generic [ref=f32e740]:
+          - heading "Evaluations" [level=1] [ref=f32e741]
+          - generic [ref=f32e742]:
+            - generic [ref=f32e743]:
+              - generic [ref=f32e748]: Search
+              - textbox "Search" [ref=f32e749]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f32e751] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f32e757] [cursor=pointer]:
+              - generic [ref=f32e758]: Q
+              - generic [ref=f32e762]:
+                - generic [ref=f32e763]: QA@lguids.com.ph
+                - generic [ref=f32e764]: Super Admin
+      - generic [ref=f32e1922]:
+        - heading "Zoning Evaluation" [level=1] [ref=f32e1923]
+        - generic [ref=f32e1924]:
+          - button "Back" [ref=f32e1925] [cursor=pointer]
+          - button "More actions" [ref=f32e1927] [cursor=pointer]
+      - generic [ref=f32e1933]:
+        - generic [ref=f32e1935]:
+          - generic [ref=f32e1937]:
+            - paragraph [ref=f32e1938]: Total Applications
+            - paragraph [ref=f32e1939]: "0"
+          - generic [ref=f32e1940]:
+            - generic [ref=f32e1941]: Revision Required · Under Review · Accepted
+            - 'img "3 categories: 0, 0, 0" [ref=f32e1943]'
+        - generic [ref=f32e1948]:
+          - generic [ref=f32e1950]:
+            - paragraph [ref=f32e1951]: Revision Required
+            - paragraph [ref=f32e1952]: "0"
+          - generic [ref=f32e1953]:
+            - generic [ref=f32e1954]: 0% of all applications
+            - 'img "Revision Required progress: 0 percent" [ref=f32e1956]'
+        - generic [ref=f32e1959]:
+          - generic [ref=f32e1961]:
+            - paragraph [ref=f32e1962]: Under Review
+            - paragraph [ref=f32e1963]: "0"
+          - generic [ref=f32e1964]:
+            - generic [ref=f32e1965]: 0% of all applications
+            - 'img "Under Review progress: 0 percent" [ref=f32e1967]'
+        - generic [ref=f32e1970]:
+          - generic [ref=f32e1972]:
+            - paragraph [ref=f32e1973]: Accepted
+            - paragraph [ref=f32e1974]: "0"
+          - generic [ref=f32e1975]:
+            - generic [ref=f32e1976]: 0% of all applications
+            - 'img "Accepted progress: 0 percent" [ref=f32e1978]'
+      - generic [ref=f32e1980]:
+        - button [ref=f32e1981] [cursor=pointer]
+        - button [ref=f32e1986] [cursor=pointer]
+        - button [ref=f32e1991] [cursor=pointer]
+      - generic [ref=f32e1996]:
+        - generic [ref=f32e1997]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Type" [ref=f32e2003]
+          - generic [ref=f32e2004]:
+            - button [ref=f32e2007] [cursor=pointer]
+            - button [ref=f32e2011] [cursor=pointer]
+        - table [ref=f32e2017]:
+          - rowgroup [ref=f32e2018]:
+            - row [ref=f32e2019]:
+              - columnheader [ref=f32e2020]:
+                - checkbox "Select all applications in this stage" [ref=f32e2021]
+              - columnheader "APPLICATION ID" [ref=f32e2022]
+              - columnheader "APPLICANT NAME" [ref=f32e2023]
+              - columnheader "MISSING DOCUMENTS" [ref=f32e2024]
+              - columnheader "TYPE" [ref=f32e2025]
+              - columnheader "REVIEWING DEPARTMENT" [ref=f32e2026]
+              - columnheader "DATE SUBMITTED" [ref=f32e2027]
+              - columnheader "ASSIGNED OFFICER" [ref=f32e2028]
+              - columnheader "STATUS" [ref=f32e2029]
+              - columnheader "ACTION" [ref=f32e2030]
+          - rowgroup [ref=f32e2031]:
+            - row [ref=f32e2032]:
+              - cell "No applications match your search." [ref=f32e2033]
+        - navigation "Pagination" [ref=f32e2035]:
+          - generic [ref=f32e2036]: Showing 0 of 0
+          - generic [ref=f32e2037]:
+            - button "First page" [disabled] [ref=f32e2038]
+            - button "Page 1" [ref=f32e2043] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f32e2044]

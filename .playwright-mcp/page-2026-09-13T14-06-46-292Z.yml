@@ -1,0 +1,114 @@
+- generic [ref=f1e1437]:
+  - complementary [ref=f1e1439]:
+    - generic [ref=f1e1440]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e1442]
+      - generic [ref=f1e1443]: E-BPCO
+    - navigation [ref=f1e1444]:
+      - link "Dashboard" [ref=f1e1447] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e1453]:
+        - generic [ref=f1e1454]: Operations
+        - generic [ref=f1e1455]:
+          - link "Applications" [ref=f1e1456] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e1462] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f1e1467] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e1474] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e1481]:
+        - generic [ref=f1e1482]: Administration
+        - generic [ref=f1e1483]:
+          - link "Businesses" [ref=f1e1484] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f1e1490] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e1496] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e1503] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e1512] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f1e1518] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e1524] [cursor=pointer]
+  - main [ref=f1e1530]:
+    - generic [ref=f1e3003]:
+      - generic "Permit Release" [ref=f1e3004]:
+        - generic [ref=f1e3005]:
+          - heading "Permit Release" [level=1] [ref=f1e3006]
+          - generic [ref=f1e3007]:
+            - generic [ref=f1e3008]:
+              - generic [ref=f1e3013]: Search
+              - textbox "Search" [ref=f1e3014]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f1e3016] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f1e3022] [cursor=pointer]:
+              - generic [ref=f1e3023]: Q
+              - generic [ref=f1e3027]:
+                - generic [ref=f1e3028]: QA@lguids.com.ph
+                - generic [ref=f1e3029]: Super Admin
+      - navigation [ref=f1e3033]:
+        - button [ref=f1e3034] [cursor=pointer]
+        - button [ref=f1e3040] [cursor=pointer]
+      - generic [ref=f1e3711]:
+        - paragraph [ref=f1e3713]: Every permit type this office issues, with the documents it requires to be filed and a summary of its assessed fees.
+        - generic [ref=f1e3714]:
+          - button "Building Permit – New Construction 22 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3715] [cursor=pointer]:
+            - generic [ref=f1e3716]: Building Permit – New Construction
+            - generic [ref=f1e3717]: 22 documents · Office of the Municipal Engineer / Building Official
+          - button "Building Permit – Renovation / Alteration 9 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3721] [cursor=pointer]:
+            - generic [ref=f1e3722]: Building Permit – Renovation / Alteration
+            - generic [ref=f1e3723]: 9 documents · Office of the Municipal Engineer / Building Official
+          - button "Building Permit – Addition / Extension 9 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3727] [cursor=pointer]:
+            - generic [ref=f1e3728]: Building Permit – Addition / Extension
+            - generic [ref=f1e3729]: 9 documents · Office of the Municipal Engineer / Building Official
+          - button "Demolition Permit 9 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3733] [cursor=pointer]:
+            - generic [ref=f1e3734]: Demolition Permit
+            - generic [ref=f1e3735]: 9 documents · Office of the Municipal Engineer / Building Official
+          - button "Zoning / Locational Clearance 16 documents · Municipal Planning and Development Office (Zoning Section)" [ref=f1e3739] [cursor=pointer]:
+            - generic [ref=f1e3740]: Zoning / Locational Clearance
+            - generic [ref=f1e3741]: 16 documents · Municipal Planning and Development Office (Zoning Section)
+          - button "Architectural Permit 7 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3745] [cursor=pointer]:
+            - generic [ref=f1e3746]: Architectural Permit
+            - generic [ref=f1e3747]: 7 documents · Office of the Municipal Engineer / Building Official
+          - button "Civil / Structural Permit 8 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3751] [cursor=pointer]:
+            - generic [ref=f1e3752]: Civil / Structural Permit
+            - generic [ref=f1e3753]: 8 documents · Office of the Municipal Engineer / Building Official
+          - button "Electrical Permit 7 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3757] [cursor=pointer]:
+            - generic [ref=f1e3758]: Electrical Permit
+            - generic [ref=f1e3759]: 7 documents · Office of the Municipal Engineer / Building Official
+          - button "Mechanical Permit 7 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3763] [cursor=pointer]:
+            - generic [ref=f1e3764]: Mechanical Permit
+            - generic [ref=f1e3765]: 7 documents · Office of the Municipal Engineer / Building Official
+          - button "Sanitary Permit 7 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3769] [cursor=pointer]:
+            - generic [ref=f1e3770]: Sanitary Permit
+            - generic [ref=f1e3771]: 7 documents · Office of the Municipal Engineer / Building Official
+          - button "Plumbing Permit 7 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3775] [cursor=pointer]:
+            - generic [ref=f1e3776]: Plumbing Permit
+            - generic [ref=f1e3777]: 7 documents · Office of the Municipal Engineer / Building Official
+          - button "Electronics Permit 7 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3781] [cursor=pointer]:
+            - generic [ref=f1e3782]: Electronics Permit
+            - generic [ref=f1e3783]: 7 documents · Office of the Municipal Engineer / Building Official
+          - button "Interior Design Permit 7 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3787] [cursor=pointer]:
+            - generic [ref=f1e3788]: Interior Design Permit
+            - generic [ref=f1e3789]: 7 documents · Office of the Municipal Engineer / Building Official
+          - button "Fencing Permit 7 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3793] [cursor=pointer]:
+            - generic [ref=f1e3794]: Fencing Permit
+            - generic [ref=f1e3795]: 7 documents · Office of the Municipal Engineer / Building Official
+          - button "Sign Permit 7 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3799] [cursor=pointer]:
+            - generic [ref=f1e3800]: Sign Permit
+            - generic [ref=f1e3801]: 7 documents · Office of the Municipal Engineer / Building Official
+          - button "Excavation Permit 8 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3805] [cursor=pointer]:
+            - generic [ref=f1e3806]: Excavation Permit
+            - generic [ref=f1e3807]: 8 documents · Office of the Municipal Engineer / Building Official
+          - button "FSEC for Building Permit (BFP) 9 documents · Bureau of Fire Protection – Castilla Fire Station" [ref=f1e3811] [cursor=pointer]:
+            - generic [ref=f1e3812]: FSEC for Building Permit (BFP)
+            - generic [ref=f1e3813]: 9 documents · Bureau of Fire Protection – Castilla Fire Station
+          - button "Certificate of Occupancy 9 documents · Office of the Municipal Engineer / Building Official" [ref=f1e3817] [cursor=pointer]:
+            - generic [ref=f1e3818]: Certificate of Occupancy
+            - generic [ref=f1e3819]: 9 documents · Office of the Municipal Engineer / Building Official
+          - button "FSIC for Occupancy Permit (BFP) 10 documents · Bureau of Fire Protection – Castilla Fire Station" [ref=f1e3823] [cursor=pointer]:
+            - generic [ref=f1e3824]: FSIC for Occupancy Permit (BFP)
+            - generic [ref=f1e3825]: 10 documents · Bureau of Fire Protection – Castilla Fire Station

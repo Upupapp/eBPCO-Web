@@ -95,4 +95,42 @@ describe('IdentityApi', () => {
     expect(tokens.refreshToken()).toBe('a-refresh');
     tokens.clear();
   });
+
+  it('requestPasswordReset posts the address and resolves on the server\'s 202', async () => {
+    const started = api.requestPasswordReset('officer@lgu.gov.ph');
+    const req = http.expectOne('/auth/password/forgot');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'officer@lgu.gov.ph' });
+    req.flush(null, { status: 202, statusText: 'Accepted' });
+    await expect(started).resolves.toBeUndefined();
+  });
+
+  describe('resetPassword', () => {
+    it('reports "done" on a real success', async () => {
+      const result = api.resetPassword('a-token', 'a-long-enough-passphrase');
+      http.expectOne('/auth/password/reset').flush(null, { status: 204, statusText: 'No Content' });
+      await expect(result).resolves.toEqual({ kind: 'done' });
+    });
+
+    it('tells an invalid/expired/used link apart from a weak password — same 400, different shape', async () => {
+      const invalidLink = api.resetPassword('a-token', 'a-long-enough-passphrase');
+      http.expectOne('/auth/password/reset').flush(
+        { type: '/problems/bad-request', title: 'x', status: 400, detail: 'That reset link is no longer valid' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+      await expect(invalidLink).resolves.toEqual({ kind: 'invalid-link' });
+
+      const weakPassword = api.resetPassword('a-token', 'password');
+      http.expectOne('/auth/password/reset').flush(
+        // The server's actual wire shape uses `errors`, not `fieldErrors` —
+        // see `problem.ts`'s `toProblem`. Asserted here so this test would
+        // have caught the mismatch this method was first written against.
+        { type: '/problems/validation-failed', title: 'x', status: 400, errors: [{ pointer: '/password', message: 'Use at least 12 characters.' }] },
+        { status: 400, statusText: 'Bad Request' },
+      );
+      await expect(weakPassword).resolves.toEqual({
+        kind: 'weak-password', message: 'Use at least 12 characters.',
+      });
+    });
+  });
 });

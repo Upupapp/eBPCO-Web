@@ -1,0 +1,131 @@
+- generic [ref=f33e4]:
+  - complementary [ref=f33e6]:
+    - generic [ref=f33e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f33e9]
+      - generic [ref=f33e10]: E-BPCO
+    - navigation [ref=f33e11]:
+      - link "Dashboard" [ref=f33e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f33e20]:
+        - generic [ref=f33e21]: Operations
+        - generic [ref=f33e22]:
+          - link "Applications" [ref=f33e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f33e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f33e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f33e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f33e48]:
+        - generic [ref=f33e49]: Administration
+        - generic [ref=f33e50]:
+          - link "Businesses" [ref=f33e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f33e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f33e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f33e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f33e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f33e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f33e91] [cursor=pointer]
+  - main [ref=f33e97]:
+    - generic [ref=f33e1500]:
+      - generic "Businesses" [ref=f33e1501]:
+        - generic [ref=f33e1502]:
+          - heading "Businesses" [level=1] [ref=f33e1503]
+          - generic [ref=f33e1504]:
+            - generic [ref=f33e1505]:
+              - generic [ref=f33e1510]: Search
+              - textbox "Search" [ref=f33e1511]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f33e1513] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f33e1519] [cursor=pointer]:
+              - generic [ref=f33e1520]: Q
+              - generic [ref=f33e1524]:
+                - generic [ref=f33e1525]: QA@lguids.com.ph
+                - generic [ref=f33e1526]: Super Admin
+      - generic [ref=f33e1832]:
+        - heading "QA Gap Test Store" [level=1] [ref=f33e1833]
+        - generic [ref=f33e1834]:
+          - generic [ref=f33e1835]: Active
+          - button "Back to List" [ref=f33e1836] [cursor=pointer]
+      - generic [ref=f33e1837]:
+        - generic [ref=f33e1841]:
+          - paragraph [ref=f33e1842]: Total Applications
+          - paragraph [ref=f33e1843]: "0"
+        - generic [ref=f33e1852]:
+          - paragraph [ref=f33e1853]: Approved Permits
+          - paragraph [ref=f33e1854]: "0"
+        - generic [ref=f33e1863]:
+          - paragraph [ref=f33e1864]: Pending Payments
+          - paragraph [ref=f33e1865]: —
+        - generic [ref=f33e1875]:
+          - paragraph [ref=f33e1876]: Active Users
+          - paragraph [ref=f33e1877]: "1"
+      - generic [ref=f33e1885]:
+        - generic [ref=f33e1886]:
+          - generic [ref=f33e1887]: PR
+          - generic [ref=f33e1895]:
+            - heading "Pedro Reyes" [level=2] [ref=f33e1896]
+            - generic [ref=f33e1897]: Active
+            - generic [ref=f33e1898]:
+              - generic [ref=f33e1899]:
+                - term [ref=f33e1900]: "Category :"
+                - definition [ref=f33e1901]: Retail
+              - generic [ref=f33e1902]:
+                - term [ref=f33e1903]: "Barangay :"
+                - definition [ref=f33e1904]: Barangay Poblacion
+              - generic [ref=f33e1905]:
+                - term [ref=f33e1906]: "Contact No. :"
+                - definition [ref=f33e1907]: +63 917 123 4567
+          - generic [ref=f33e1908]:
+            - generic [ref=f33e1909]:
+              - strong [ref=f33e1910]: Just now
+              - generic [ref=f33e1911]: Date Created
+            - generic [ref=f33e1912]:
+              - strong [ref=f33e1913]: "1"
+              - generic [ref=f33e1914]: User Count
+        - generic [ref=f33e1915]:
+          - generic [ref=f33e1916]:
+            - heading "Account Overview" [level=2] [ref=f33e1917]
+            - button [ref=f33e1918] [cursor=pointer]
+          - navigation [ref=f33e1923]:
+            - button "Overview" [ref=f33e1924] [cursor=pointer]
+            - button "Applications" [ref=f33e1925] [cursor=pointer]
+            - button "Documents" [ref=f33e1926] [cursor=pointer]
+            - button "Users" [ref=f33e1927] [cursor=pointer]
+            - button "Activity" [ref=f33e1928] [cursor=pointer]
+          - heading "Registration" [level=3] [ref=f33e1929]
+          - generic [ref=f33e1930]:
+            - generic [ref=f33e1931]:
+              - term [ref=f33e1932]: Business ID
+              - definition [ref=f33e1933]: REG-2026-000001
+            - generic [ref=f33e1934]:
+              - term [ref=f33e1935]: Business Name
+              - definition [ref=f33e1936]: QA Gap Test Store
+            - generic [ref=f33e1937]:
+              - term [ref=f33e1938]: Category
+              - definition [ref=f33e1939]: Retail
+            - generic [ref=f33e1940]:
+              - term [ref=f33e1941]: Registered
+              - definition [ref=f33e1942]: Just now
+            - generic [ref=f33e1943]:
+              - term [ref=f33e1944]: Barangay
+              - definition [ref=f33e1945]: Barangay Poblacion, Castilla
+            - generic [ref=f33e1946]:
+              - term [ref=f33e1947]: Province
+              - definition [ref=f33e1948]: Sorsogon, Region V
+            - generic [ref=f33e1950]:
+              - term [ref=f33e1951]: Account Status
+              - definition [ref=f33e1952]: Active
+          - heading "Contact Person" [level=3] [ref=f33e1953]
+          - generic [ref=f33e1954]:
+            - generic [ref=f33e1955]: PR
+            - generic [ref=f33e1957]:
+              - strong [ref=f33e1958]: Pedro Reyes
+              - text: +63 917 123 4567

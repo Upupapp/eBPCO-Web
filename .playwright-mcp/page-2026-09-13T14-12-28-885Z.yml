@@ -1,0 +1,178 @@
+- generic [ref=f1e1437]:
+  - complementary [ref=f1e1439]:
+    - generic [ref=f1e1440]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e1442]
+      - generic [ref=f1e1443]: E-BPCO
+    - navigation [ref=f1e1444]:
+      - link "Dashboard" [ref=f1e1447] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e1453]:
+        - generic [ref=f1e1454]: Operations
+        - generic [ref=f1e1455]:
+          - link "Applications" [ref=f1e1456] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e1462] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f1e1467] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e1474] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e1481]:
+        - generic [ref=f1e1482]: Administration
+        - generic [ref=f1e1483]:
+          - link "Businesses" [ref=f1e1484] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f1e1490] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e1496] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e1503] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e1512] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f1e1518] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e1524] [cursor=pointer]
+  - main [ref=f1e1530]:
+    - generic [ref=f1e3950]:
+      - generic "Businesses" [ref=f1e3951]:
+        - generic [ref=f1e3952]:
+          - heading "Businesses" [level=1] [ref=f1e3953]
+          - generic [ref=f1e3954]:
+            - generic [ref=f1e3955]:
+              - generic [ref=f1e3960]: Search
+              - textbox "Search" [ref=f1e3961]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f1e3963] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f1e3969] [cursor=pointer]:
+              - generic [ref=f1e3970]: Q
+              - generic [ref=f1e3974]:
+                - generic [ref=f1e3975]: QA@lguids.com.ph
+                - generic [ref=f1e3976]: Super Admin
+      - generic [ref=f1e4643]:
+        - generic [ref=f1e4645]:
+          - generic [ref=f1e4647]:
+            - paragraph [ref=f1e4648]: Total Users
+            - paragraph [ref=f1e4649]: "2"
+          - generic [ref=f1e4650]: Distinct applicants across the real applications queue
+        - generic [ref=f1e4654]:
+          - generic [ref=f1e4656]:
+            - paragraph [ref=f1e4657]: Active Businesses
+            - paragraph [ref=f1e4658]: —
+          - generic [ref=f1e4659]:
+            - generic [ref=f1e4660]: Not tracked by this deployment
+            - 'img "Active Businesses progress: 0 percent" [ref=f1e4662]'
+        - generic [ref=f1e4665]:
+          - generic [ref=f1e4667]:
+            - paragraph [ref=f1e4668]: Inactive Businesses
+            - paragraph [ref=f1e4669]: —
+          - generic [ref=f1e4670]:
+            - generic [ref=f1e4671]: Not tracked by this deployment
+            - 'img "Inactive Businesses progress: 0 percent" [ref=f1e4673]'
+        - generic [ref=f1e4676]:
+          - generic [ref=f1e4678]:
+            - paragraph [ref=f1e4679]: Total Businesses
+            - paragraph [ref=f1e4680]: "2"
+          - generic [ref=f1e4681]:
+            - generic [ref=f1e4682]: Distinct business names across the real applications queue
+            - 'img "Total Businesses progress: 100 percent" [ref=f1e4684]'
+      - generic [ref=f1e4686]:
+        - generic [ref=f1e4687]:
+          - textbox "Search Here By Application ID, Applicant Name, or Location" [ref=f1e4693]
+          - generic [ref=f1e4694]:
+            - button [ref=f1e4697] [cursor=pointer]
+            - button [ref=f1e4701] [cursor=pointer]
+            - button [ref=f1e4706] [cursor=pointer]
+        - note [ref=f1e4709]:
+          - generic [ref=f1e4714]: This deployment has no business-directory endpoint yet — the applications queue has real businesses on it, but nothing here can list them independently. Only businesses added through "Create New Business" this session appear below.
+        - table [ref=f1e4716]:
+          - rowgroup [ref=f1e4717]:
+            - row [ref=f1e4718]:
+              - columnheader [ref=f1e4719]:
+                - checkbox "Select all businesses" [ref=f1e4720]
+              - columnheader "Business ID" [ref=f1e4721]
+              - columnheader "BUSINESS NAME" [ref=f1e4722]
+              - columnheader "CATEGORY" [ref=f1e4723]
+              - columnheader "CONTACT PERSON" [ref=f1e4724]
+              - columnheader "DATE CREATED" [ref=f1e4725]
+              - columnheader "User Count" [ref=f1e4726]
+              - columnheader "STATUS" [ref=f1e4727]
+              - columnheader "ACTION" [ref=f1e4728]
+          - rowgroup [ref=f1e4729]:
+            - row [ref=f1e4730] [cursor=pointer]:
+              - cell [ref=f1e4731]:
+                - checkbox "Select QA Test Sari-Sari Store" [ref=f1e4732]
+              - cell "REG-2026--Infinity" [ref=f1e4733]
+              - cell "JD QA Test Sari-Sari Store" [ref=f1e4734]:
+                - generic [ref=f1e4735]:
+                  - generic [ref=f1e4736]: JD
+                  - text: QA Test Sari-Sari Store
+              - cell "Retail" [ref=f1e4738]
+              - cell "Juan Dela Cruz 12345" [ref=f1e4739]:
+                - generic [ref=f1e4740]:
+                  - generic [ref=f1e4741]: Juan Dela Cruz
+                  - generic [ref=f1e4742]: "12345"
+              - cell "Just now" [ref=f1e4743]
+              - cell "1" [ref=f1e4744]
+              - cell "Active" [ref=f1e4745]
+              - cell [ref=f1e4747]:
+                - generic [ref=f1e4748]:
+                  - button "View business" [ref=f1e4749]
+                  - button "Edit business" [ref=f1e4754]
+                  - button "Hide business from this view" [ref=f1e4758]
+        - navigation "Pagination" [ref=f1e4765]:
+          - generic [ref=f1e4766]: Showing 1-1 from 1
+          - generic [ref=f1e4767]:
+            - button "First page" [disabled] [ref=f1e4768]
+            - button "Page 1" [ref=f1e4773] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f1e4774]
+      - generic [ref=f1e4779]:
+        - navigation [ref=f1e4780]:
+          - button [ref=f1e4781] [cursor=pointer]
+          - button [ref=f1e4786] [cursor=pointer]
+          - button [ref=f1e4790] [cursor=pointer]
+        - generic [ref=f1e4795]:
+          - generic [ref=f1e4796]:
+            - heading "Businesses Growth" [level=2] [ref=f1e4798]
+            - generic [ref=f1e4802]:
+              - generic [ref=f1e4803]: Jan
+              - generic [ref=f1e4804]: Feb
+              - generic [ref=f1e4805]: Mar
+              - generic [ref=f1e4806]: Apr
+              - generic [ref=f1e4807]: May
+              - generic [ref=f1e4808]: Jun
+              - generic [ref=f1e4809]: Jul
+              - generic [ref=f1e4810]: Aug
+              - generic [ref=f1e4811]: Sep
+              - generic [ref=f1e4812]: Oct
+              - generic [ref=f1e4813]: Nov
+              - generic [ref=f1e4814]: Dec
+          - generic [ref=f1e4815]:
+            - generic [ref=f1e4817]:
+              - generic [ref=f1e4819]:
+                - paragraph [ref=f1e4820]: Applications Processed
+                - paragraph [ref=f1e4821]: 2,032
+              - generic [ref=f1e4823]:
+                - generic [ref=f1e4824]: 12.5%
+                - generic [ref=f1e4829]: Vs Previous 30 days
+            - generic [ref=f1e4831]:
+              - generic [ref=f1e4833]:
+                - paragraph [ref=f1e4834]: Avg. Processing Time
+                - paragraph [ref=f1e4835]: 3.6 days
+              - generic [ref=f1e4837]:
+                - generic [ref=f1e4838]: 8.3%
+                - generic [ref=f1e4843]: Vs Previous 30 days
+            - generic [ref=f1e4845]:
+              - generic [ref=f1e4847]:
+                - paragraph [ref=f1e4848]: Active Users
+                - paragraph [ref=f1e4849]: 1,524
+              - generic [ref=f1e4851]:
+                - generic [ref=f1e4852]: 9.7%
+                - generic [ref=f1e4857]: Vs Previous 30 days
+            - generic [ref=f1e4859]:
+              - generic [ref=f1e4861]:
+                - paragraph [ref=f1e4862]: Storage Used
+                - paragraph [ref=f1e4863]: 245 GB
+              - generic [ref=f1e4865]:
+                - generic [ref=f1e4866]: 15.2%
+                - generic [ref=f1e4871]: Vs Previous 30 days

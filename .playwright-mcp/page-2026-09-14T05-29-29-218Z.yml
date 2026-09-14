@@ -1,0 +1,278 @@
+- generic [ref=f36e198]:
+  - complementary [ref=f36e200]:
+    - generic [ref=f36e201]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f36e203]
+      - generic [ref=f36e204]: E-BPCO
+    - navigation [ref=f36e205]:
+      - link "Dashboard" [ref=f36e208] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f36e214]:
+        - generic [ref=f36e215]: Operations
+        - generic [ref=f36e216]:
+          - link "Applications" [ref=f36e217] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f36e223] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f36e228] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f36e235] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f36e242]:
+        - generic [ref=f36e243]: Administration
+        - generic [ref=f36e244]:
+          - link "Businesses" [ref=f36e245] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f36e251] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f36e257] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f36e264] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f36e273] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f36e279] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f36e285] [cursor=pointer]
+  - main [ref=f36e291]:
+    - generic [ref=f36e1319]:
+      - generic "System Logs" [ref=f36e1320]:
+        - generic [ref=f36e1321]:
+          - heading "System Logs" [level=1] [ref=f36e1322]
+          - generic [ref=f36e1323]:
+            - generic [ref=f36e1324]:
+              - generic [ref=f36e1329]: Search
+              - textbox "Search" [ref=f36e1330]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f36e1332] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f36e1338] [cursor=pointer]:
+              - generic [ref=f36e1339]: Q
+              - generic [ref=f36e1343]:
+                - generic [ref=f36e1344]: QA@lguids.com.ph
+                - generic [ref=f36e1345]: Super Admin
+      - generic [ref=f36e2842]:
+        - generic [ref=f36e2844]:
+          - generic [ref=f36e2846]:
+            - paragraph [ref=f36e2847]: Total Logs (Today)
+            - paragraph [ref=f36e2848]: "24"
+          - generic [ref=f36e2849]: All access events today
+        - generic [ref=f36e2853]:
+          - generic [ref=f36e2855]:
+            - paragraph [ref=f36e2856]: Successful Logins
+            - paragraph [ref=f36e2857]: "6"
+          - generic [ref=f36e2858]: 25% of today's logs
+        - generic [ref=f36e2862]:
+          - generic [ref=f36e2864]:
+            - paragraph [ref=f36e2865]: Failed Logins
+            - paragraph [ref=f36e2866]: "6"
+          - generic [ref=f36e2867]: 25% of today's logs
+        - generic [ref=f36e2871]:
+          - generic [ref=f36e2873]:
+            - paragraph [ref=f36e2874]: Blocked IPs
+            - paragraph [ref=f36e2875]: "4"
+          - generic [ref=f36e2876]: Distinct IPs, inactive sessions
+        - generic [ref=f36e2880]:
+          - generic [ref=f36e2882]:
+            - paragraph [ref=f36e2883]: Active Sessions
+            - paragraph [ref=f36e2884]: "20"
+          - generic [ref=f36e2885]: Across All Tenants
+      - generic [ref=f36e2888]:
+        - navigation [ref=f36e2889]:
+          - button [ref=f36e2890] [cursor=pointer]
+          - button [ref=f36e2895] [cursor=pointer]
+          - button [ref=f36e2902] [cursor=pointer]
+          - button [ref=f36e2907] [cursor=pointer]
+          - button [ref=f36e2911] [cursor=pointer]
+        - note [ref=f36e2916]:
+          - generic [ref=f36e2921]: Sample data for preview only. This prototype doesn't yet track real sign-ins/sessions, so nothing on this tab reflects real activity.
+        - generic [ref=f36e2922]:
+          - generic [ref=f36e2923]: May 5, 2026 - May 6, 2026
+          - combobox "Filter by tenant" [ref=f36e2928] [cursor=pointer]:
+            - option "All Tenants" [selected]
+            - option "Villanueva Hardware & Construction Supply"
+            - option "Simbulan Sari-Sari Store"
+            - option "Rodrigo Bakeshop"
+            - option "Zaballero Auto Repair Shop"
+            - option "Martirez Rice Mill"
+            - option "Nuñez Feeds & Agri Supply"
+            - option "Villareal Eatery"
+            - option "Barrera Internet Café"
+            - option "Morales General Merchandise"
+            - option "Bermudez Furniture Shop"
+            - option "Salazar Water Refilling Station"
+            - option "Fajota Trading Corp."
+          - combobox "Status filter" [ref=f36e2929] [cursor=pointer]:
+            - option "All Statuses" [selected]
+            - option "Active"
+            - option "Inactive"
+          - combobox "Severity filter" [ref=f36e2930] [cursor=pointer]:
+            - option "All Severity" [selected]
+            - option "Critical"
+            - option "Warning"
+            - option "Info"
+          - generic [ref=f36e2931]:
+            - generic [ref=f36e2932]: Live Stream
+            - switch "Live Stream" [checked] [ref=f36e2933] [cursor=pointer]
+          - button [disabled] [ref=f36e2935]
+          - button [ref=f36e2939] [cursor=pointer]
+        - table [ref=f36e2945]:
+          - rowgroup [ref=f36e2946]:
+            - row [ref=f36e2947]:
+              - columnheader "Time Stamp" [ref=f36e2948]
+              - columnheader "Users" [ref=f36e2949]
+              - columnheader "Tenant" [ref=f36e2950]
+              - columnheader "Event" [ref=f36e2951]
+              - columnheader "Status" [ref=f36e2952]
+              - columnheader "IP Address" [ref=f36e2953]
+              - columnheader "Device/Browser" [ref=f36e2954]
+              - columnheader "Location" [ref=f36e2955]
+              - columnheader "Session Duration" [ref=f36e2956]
+              - columnheader "ACTION" [ref=f36e2957]
+          - rowgroup [ref=f36e2958]:
+            - row [ref=f36e2959] [cursor=pointer]:
+              - cell "1 Jan 2026 8:00 AM" [ref=f36e2960]
+              - cell "Daniel Bermas" [ref=f36e2961]
+              - cell "Villanueva Hardware & Construction Supply" [ref=f36e2962]
+              - cell "Login Success" [ref=f36e2963]
+              - cell "Active" [ref=f36e2964]
+              - cell "192.168.1.10" [ref=f36e2966]
+              - cell "Chrome / Windows" [ref=f36e2967]
+              - cell "Villanueva Hardware & Construction Supply" [ref=f36e2968]
+              - cell "5m" [ref=f36e2969]
+              - cell [ref=f36e2971]:
+                - generic [ref=f36e2972]:
+                  - button "View" [ref=f36e2973]
+                  - button "Edit" [ref=f36e2978]
+            - row [ref=f36e2982] [cursor=pointer]:
+              - cell "2 Feb 2026 9:07 AM" [ref=f36e2983]
+              - cell "Maria Santos" [ref=f36e2984]
+              - cell "Simbulan Sari-Sari Store" [ref=f36e2985]
+              - cell "Login Failed" [ref=f36e2986]
+              - cell "Active" [ref=f36e2987]
+              - cell "192.168.2.11" [ref=f36e2989]
+              - cell "Safari / macOS" [ref=f36e2990]
+              - cell "Simbulan Sari-Sari Store" [ref=f36e2991]
+              - cell "6m" [ref=f36e2992]
+              - cell [ref=f36e2994]:
+                - generic [ref=f36e2995]:
+                  - button "View" [ref=f36e2996]
+                  - button "Edit" [ref=f36e3001]
+            - row [ref=f36e3005] [cursor=pointer]:
+              - cell "3 Mar 2026 10:14 AM" [ref=f36e3006]
+              - cell "Jose Bragais" [ref=f36e3007]
+              - cell "Rodrigo Bakeshop" [ref=f36e3008]
+              - cell "Password Reset" [ref=f36e3009]
+              - cell "Active" [ref=f36e3010]
+              - cell "192.168.3.12" [ref=f36e3012]
+              - cell "Edge / Windows" [ref=f36e3013]
+              - cell "Rodrigo Bakeshop" [ref=f36e3014]
+              - cell "7m" [ref=f36e3015]
+              - cell [ref=f36e3017]:
+                - generic [ref=f36e3018]:
+                  - button "View" [ref=f36e3019]
+                  - button "Edit" [ref=f36e3024]
+            - row [ref=f36e3028] [cursor=pointer]:
+              - cell "4 Apr 2026 11:21 AM" [ref=f36e3029]
+              - cell "Ana Rosales" [ref=f36e3030]
+              - cell "Zaballero Auto Repair Shop" [ref=f36e3031]
+              - cell "Session Expired" [ref=f36e3032]
+              - cell "Active" [ref=f36e3033]
+              - cell "192.168.4.13" [ref=f36e3035]
+              - cell "Chrome / Android" [ref=f36e3036]
+              - cell "Zaballero Auto Repair Shop" [ref=f36e3037]
+              - cell "8m" [ref=f36e3038]
+              - cell [ref=f36e3040]:
+                - generic [ref=f36e3041]:
+                  - button "View" [ref=f36e3042]
+                  - button "Edit" [ref=f36e3047]
+            - row [ref=f36e3051] [cursor=pointer]:
+              - cell "5 May 2026 12:28 PM" [ref=f36e3052]
+              - cell "Mark Olivar" [ref=f36e3053]
+              - cell "Martirez Rice Mill" [ref=f36e3054]
+              - cell "Login Success" [ref=f36e3055]
+              - cell "Inactive" [ref=f36e3056]
+              - cell "192.168.5.14" [ref=f36e3058]
+              - cell "Chrome / Windows" [ref=f36e3059]
+              - cell "Martirez Rice Mill" [ref=f36e3060]
+              - cell "9m" [ref=f36e3061]
+              - cell [ref=f36e3063]:
+                - generic [ref=f36e3064]:
+                  - button "View" [ref=f36e3065]
+                  - button "Edit" [ref=f36e3070]
+            - row [ref=f36e3074] [cursor=pointer]:
+              - cell "6 Jun 2026 1:35 PM" [ref=f36e3075]
+              - cell "Grace Fajota" [ref=f36e3076]
+              - cell "Nuñez Feeds & Agri Supply" [ref=f36e3077]
+              - cell "Login Failed" [ref=f36e3078]
+              - cell "Active" [ref=f36e3079]
+              - cell "192.168.6.15" [ref=f36e3081]
+              - cell "Safari / macOS" [ref=f36e3082]
+              - cell "Nuñez Feeds & Agri Supply" [ref=f36e3083]
+              - cell "10m" [ref=f36e3084]
+              - cell [ref=f36e3086]:
+                - generic [ref=f36e3087]:
+                  - button "View" [ref=f36e3088]
+                  - button "Edit" [ref=f36e3093]
+            - row [ref=f36e3097] [cursor=pointer]:
+              - cell "7 Jul 2026 2:42 PM" [ref=f36e3098]
+              - cell "Paolo Escueta" [ref=f36e3099]
+              - cell "Villareal Eatery" [ref=f36e3100]
+              - cell "Password Reset" [ref=f36e3101]
+              - cell "Active" [ref=f36e3102]
+              - cell "192.168.7.16" [ref=f36e3104]
+              - cell "Edge / Windows" [ref=f36e3105]
+              - cell "Villareal Eatery" [ref=f36e3106]
+              - cell "11m" [ref=f36e3107]
+              - cell [ref=f36e3109]:
+                - generic [ref=f36e3110]:
+                  - button "View" [ref=f36e3111]
+                  - button "Edit" [ref=f36e3116]
+            - row [ref=f36e3120] [cursor=pointer]:
+              - cell "8 Aug 2026 3:49 PM" [ref=f36e3121]
+              - cell "Liza Buenaflor" [ref=f36e3122]
+              - cell "Barrera Internet Café" [ref=f36e3123]
+              - cell "Session Expired" [ref=f36e3124]
+              - cell "Active" [ref=f36e3125]
+              - cell "192.168.8.17" [ref=f36e3127]
+              - cell "Chrome / Android" [ref=f36e3128]
+              - cell "Barrera Internet Café" [ref=f36e3129]
+              - cell "12m" [ref=f36e3130]
+              - cell [ref=f36e3132]:
+                - generic [ref=f36e3133]:
+                  - button "View" [ref=f36e3134]
+                  - button "Edit" [ref=f36e3139]
+            - row [ref=f36e3143] [cursor=pointer]:
+              - cell "9 Sep 2026 4:56 PM" [ref=f36e3144]
+              - cell "Ramon Estioco" [ref=f36e3145]
+              - cell "Morales General Merchandise" [ref=f36e3146]
+              - cell "Login Success" [ref=f36e3147]
+              - cell "Active" [ref=f36e3148]
+              - cell "192.168.9.18" [ref=f36e3150]
+              - cell "Chrome / Windows" [ref=f36e3151]
+              - cell "Morales General Merchandise" [ref=f36e3152]
+              - cell "13m" [ref=f36e3153]
+              - cell [ref=f36e3155]:
+                - generic [ref=f36e3156]:
+                  - button "View" [ref=f36e3157]
+                  - button "Edit" [ref=f36e3162]
+            - row [ref=f36e3166] [cursor=pointer]:
+              - cell "10 Oct 2026 5:03 PM" [ref=f36e3167]
+              - cell "Carmen Salvador" [ref=f36e3168]
+              - cell "Bermudez Furniture Shop" [ref=f36e3169]
+              - cell "Login Failed" [ref=f36e3170]
+              - cell "Inactive" [ref=f36e3171]
+              - cell "192.168.1.19" [ref=f36e3173]
+              - cell "Safari / macOS" [ref=f36e3174]
+              - cell "Bermudez Furniture Shop" [ref=f36e3175]
+              - cell "14m" [ref=f36e3176]
+              - cell [ref=f36e3178]:
+                - generic [ref=f36e3179]:
+                  - button "View" [ref=f36e3180]
+                  - button "Edit" [ref=f36e3185]
+        - navigation "Pagination" [ref=f36e3190]:
+          - generic [ref=f36e3191]: Showing 1-10 from 24
+          - generic [ref=f36e3192]:
+            - button "First page" [disabled] [ref=f36e3193]
+            - button "Page 1" [ref=f36e3198] [cursor=pointer]: "1"
+            - button "Page 2" [ref=f36e3199] [cursor=pointer]: "2"
+            - button "Page 3" [ref=f36e3200] [cursor=pointer]: "3"
+            - button "Last page" [ref=f36e3201] [cursor=pointer]

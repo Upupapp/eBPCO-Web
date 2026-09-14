@@ -1,0 +1,59 @@
+- generic [ref=f1e1437]:
+  - complementary [ref=f1e1439]:
+    - generic [ref=f1e1440]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e1442]
+      - generic [ref=f1e1443]: E-BPCO
+    - navigation [ref=f1e1444]:
+      - link "Dashboard" [ref=f1e1447] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e1453]:
+        - generic [ref=f1e1454]: Operations
+        - generic [ref=f1e1455]:
+          - link "Applications" [ref=f1e1456] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e1462] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f1e1467] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e1474] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e1481]:
+        - generic [ref=f1e1482]: Administration
+        - generic [ref=f1e1483]:
+          - link "Businesses" [ref=f1e1484] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [active] [ref=f1e1490] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e1496] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e1503] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e1512] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f1e1518] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e1524] [cursor=pointer]
+  - main [ref=f1e1530]:
+    - generic [ref=f1e4890]:
+      - generic "Access Requests" [ref=f1e4891]:
+        - generic [ref=f1e4892]:
+          - heading "Access Requests" [level=1] [ref=f1e4893]
+          - generic [ref=f1e4894]:
+            - generic [ref=f1e4895]:
+              - generic [ref=f1e4900]: Search
+              - textbox "Search" [ref=f1e4901]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f1e4903] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f1e4909] [cursor=pointer]:
+              - generic [ref=f1e4910]: Q
+              - generic [ref=f1e4914]:
+                - generic [ref=f1e4915]: QA@lguids.com.ph
+                - generic [ref=f1e4916]: Super Admin
+      - generic [ref=f1e4920]:
+        - generic [ref=f1e4921]:
+          - generic [ref=f1e4922]:
+            - heading "Awaiting your approval" [level=2] [ref=f1e4923]
+            - paragraph [ref=f1e4924]: Nobody can sign themselves up. Approving a request creates the account and assigns the forms and level you choose.
+          - button [ref=f1e4925] [cursor=pointer]
+        - alert [ref=f1e4932]:
+          - generic [ref=f1e4937]: Access requests could not be loaded, so this page is not a picture of who is waiting. Authentication is required

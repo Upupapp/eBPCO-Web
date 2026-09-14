@@ -1,0 +1,111 @@
+- generic [ref=f21e2]:
+  - generic [ref=f21e56]:
+    - complementary [ref=f21e58]:
+      - generic [ref=f21e59]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f21e61]
+        - generic [ref=f21e62]: E-BPCO
+      - navigation [ref=f21e63]:
+        - link "Dashboard" [ref=f21e66] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f21e72]:
+          - generic [ref=f21e73]: Operations
+          - link "Applications" [ref=f21e75] [cursor=pointer]:
+            - /url: /applications
+        - generic [ref=f21e81]:
+          - generic [ref=f21e82]: Administration
+          - link "Archive" [ref=f21e84] [cursor=pointer]:
+            - /url: /archive
+      - button "Log Out" [ref=f21e90] [cursor=pointer]
+    - main [ref=f21e96]:
+      - generic [ref=f21e1004]:
+        - generic "Applications" [ref=f21e1005]:
+          - generic [ref=f21e1006]:
+            - heading "Applications" [level=1] [ref=f21e1007]
+            - generic [ref=f21e1008]:
+              - button "Notifications" [ref=f21e1010] [cursor=pointer]
+              - button "O official@lgu.gov.ph Approving Officer" [ref=f21e1016] [cursor=pointer]:
+                - generic [ref=f21e1017]: O
+                - generic [ref=f21e1021]:
+                  - generic [ref=f21e1022]: official@lgu.gov.ph
+                  - generic [ref=f21e1023]: Approving Officer
+        - generic [ref=f21e1027]:
+          - heading "Application Details" [level=1] [ref=f21e1028]
+          - generic [ref=f21e1029]:
+            - button "Action" [ref=f21e1031] [cursor=pointer]
+            - button "Evaluate" [ref=f21e1032] [cursor=pointer]
+            - button "Back to List" [ref=f21e1033] [cursor=pointer]
+            - button "More actions" [ref=f21e1035] [cursor=pointer]
+        - generic [ref=f21e1041]:
+          - generic [ref=f21e1042]:
+            - generic [ref=f21e1043]: MS
+            - generic [ref=f21e1051]:
+              - heading "f3a5b847-a558-4b3f-9f72-c60598ad9ed6 - Maria Santos" [level=2] [ref=f21e1052]
+              - generic [ref=f21e1053]: Approved
+              - generic [ref=f21e1054]:
+                - generic [ref=f21e1055]:
+                  - term [ref=f21e1056]: "Business / Project :"
+                  - definition [ref=f21e1057]: Santos Sari-Sari Store
+                - generic [ref=f21e1058]:
+                  - term [ref=f21e1059]: "City :"
+                  - definition [ref=f21e1060]: 60 Rizal Street, Poblacion
+                - generic [ref=f21e1061]:
+                  - term [ref=f21e1062]: "Region :"
+                  - definition [ref=f21e1063]: Region V (Bicol Region)
+                - generic [ref=f21e1064]:
+                  - term [ref=f21e1065]: "Type :"
+                  - definition [ref=f21e1066]: Fencing Permit
+                - generic [ref=f21e1067]:
+                  - term [ref=f21e1068]: "Email :"
+                  - definition [ref=f21e1069]:
+                    - text: mariasantos@gmail.com
+                    - generic [ref=f21e1070]: Unverified
+                - generic [ref=f21e1071]:
+                  - term [ref=f21e1072]: "Phone :"
+                  - definition [ref=f21e1073]:
+                    - text: +63 912 345 6789
+                    - generic [ref=f21e1074]: Unverified
+                - generic [ref=f21e1075]:
+                  - term [ref=f21e1076]: "Barangay :"
+                  - definition [ref=f21e1077]: 60 Rizal Street, Poblacion
+            - generic [ref=f21e1078]:
+              - generic [ref=f21e1079]:
+                - strong [ref=f21e1080]: 2026-09-13
+                - generic [ref=f21e1081]: Date Submitted
+              - generic [ref=f21e1082]:
+                - strong [ref=f21e1083]: —
+                - generic [ref=f21e1084]: Assigned Officer
+            - button [ref=f21e1085] [cursor=pointer]
+          - generic [ref=f21e1089]:
+            - generic [ref=f21e1090]:
+              - button "Timeline" [ref=f21e1091] [cursor=pointer]
+              - button "Documents" [ref=f21e1092] [cursor=pointer]
+              - button "Permit Result" [ref=f21e1093] [cursor=pointer]
+              - button "Comments" [ref=f21e1094] [cursor=pointer]
+            - generic [ref=f21e1095]:
+              - heading "Permit Result" [level=2] [ref=f21e1137]
+              - generic [ref=f21e1156]:
+                - generic [ref=f21e1157]: Approved
+                - heading "Fencing Permit" [level=3] [ref=f21e1158]
+                - generic [ref=f21e1159]:
+                  - generic [ref=f21e1160]:
+                    - term [ref=f21e1161]: Permit Number
+                    - definition [ref=f21e1162]: FP-2026-000001
+                  - generic [ref=f21e1163]:
+                    - term [ref=f21e1164]: Issued
+                    - definition [ref=f21e1165]: 2026-09-13T05:49:42.354Z
+                  - generic [ref=f21e1166]:
+                    - term [ref=f21e1167]: Validity / Expiry
+                    - definition [ref=f21e1168]: Not tracked by this deployment
+                  - generic [ref=f21e1169]:
+                    - term [ref=f21e1170]: Approving Official
+                    - definition [ref=f21e1171]: Not tracked by this deployment
+                  - generic [ref=f21e1172]:
+                    - term [ref=f21e1173]: Approving Office
+                    - definition [ref=f21e1174]: Not tracked by this deployment
+                - paragraph [ref=f21e1175]: Ready for release — not yet claimed.
+                - generic [ref=f21e1176]:
+                  - button [ref=f21e1177] [cursor=pointer]
+                  - button [ref=f21e1183] [cursor=pointer]
+  - status [ref=f21e1190]:
+    - generic [ref=f21e1195]: Fencing Permit generated.
+    - button "Dismiss" [ref=f21e1196] [cursor=pointer]: ✕

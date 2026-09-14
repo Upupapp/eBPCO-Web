@@ -1,0 +1,176 @@
+- generic [ref=f32e2]:
+  - generic [ref=f32e61]:
+    - complementary [ref=f32e63]:
+      - generic [ref=f32e64]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f32e66]
+        - generic [ref=f32e67]: E-BPCO
+      - navigation [ref=f32e68]:
+        - link "Dashboard" [ref=f32e71] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f32e77]:
+          - generic [ref=f32e78]: Operations
+          - generic [ref=f32e79]:
+            - link "Applications" [ref=f32e80] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f32e86] [cursor=pointer]:
+              - /url: /evaluations
+            - link "Payments" [ref=f32e91] [cursor=pointer]:
+              - /url: /payments
+            - link "Permit Release" [ref=f32e98] [cursor=pointer]:
+              - /url: /permit-release
+        - generic [ref=f32e105]:
+          - generic [ref=f32e106]: Administration
+          - generic [ref=f32e107]:
+            - link "Businesses" [ref=f32e108] [cursor=pointer]:
+              - /url: /businesses
+            - link "Access Requests" [ref=f32e114] [cursor=pointer]:
+              - /url: /access-requests
+            - link "Users & Roles" [ref=f32e120] [cursor=pointer]:
+              - /url: /user-roles
+            - link "Workflow" [ref=f32e127] [cursor=pointer]:
+              - /url: /workflow
+            - link "Archive" [ref=f32e136] [cursor=pointer]:
+              - /url: /archive
+            - link "System Logs" [ref=f32e142] [cursor=pointer]:
+              - /url: /system-logs
+      - button "Log Out" [ref=f32e148] [cursor=pointer]
+    - main [ref=f32e154]:
+      - generic [ref=f32e738]:
+        - generic "Evaluations" [ref=f32e739]:
+          - generic [ref=f32e740]:
+            - heading "Evaluations" [level=1] [ref=f32e741]
+            - generic [ref=f32e742]:
+              - generic [ref=f32e743]:
+                - generic [ref=f32e748]: Search
+                - textbox "Search" [ref=f32e749]:
+                  - /placeholder: Search here...
+              - button "Notifications" [ref=f32e751] [cursor=pointer]
+              - button "Q QA@lguids.com.ph Super Admin" [ref=f32e757] [cursor=pointer]:
+                - generic [ref=f32e758]: Q
+                - generic [ref=f32e762]:
+                  - generic [ref=f32e763]: QA@lguids.com.ph
+                  - generic [ref=f32e764]: Super Admin
+        - generic [ref=f32e2224]:
+          - heading "7a741d71-f919-4c04-94a6-ef59176d59db" [level=1] [ref=f32e2225]
+          - generic [ref=f32e2226]:
+            - generic [ref=f32e2227]: Under Review
+            - button "Back to Under Review" [ref=f32e2228] [cursor=pointer]
+        - generic [ref=f32e2229]:
+          - generic [ref=f32e2230]:
+            - generic [ref=f32e2231]: MS
+            - generic [ref=f32e2239]:
+              - heading "Maria Santos" [level=2] [ref=f32e2240]
+              - generic [ref=f32e2241]: Under Review
+              - generic [ref=f32e2242]:
+                - generic [ref=f32e2243]:
+                  - term [ref=f32e2244]: "Business / Project :"
+                  - definition [ref=f32e2245]: Santos Sari-Sari Store
+                - generic [ref=f32e2246]:
+                  - term [ref=f32e2247]: "Type :"
+                  - definition [ref=f32e2248]: Fencing Permit
+                - generic [ref=f32e2249]:
+                  - term [ref=f32e2250]: "Location :"
+                  - definition [ref=f32e2251]: 30 Rizal Street, Poblacion
+                - generic [ref=f32e2252]:
+                  - term [ref=f32e2253]: "Missing Documents :"
+                  - definition [ref=f32e2254]: "5"
+                - generic [ref=f32e2255]:
+                  - term [ref=f32e2256]: "Reviewing Department :"
+                  - definition [ref=f32e2257]: Office of the Municipal Engineer / Building Official
+            - generic [ref=f32e2258]:
+              - generic [ref=f32e2259]:
+                - strong [ref=f32e2260]: 2026-09-13
+                - generic [ref=f32e2261]: Date Submitted
+              - generic [ref=f32e2262]:
+                - strong [ref=f32e2263]: 7a741d71-f919-4c04-94a6-ef59176d59db
+                - generic [ref=f32e2264]: Application ID
+          - generic [ref=f32e2265]:
+            - generic [ref=f32e2266]:
+              - heading "Evaluation Summary" [level=2] [ref=f32e2267]
+              - button [ref=f32e2268] [cursor=pointer]
+            - heading "Evaluation Stage" [level=3] [ref=f32e2273]
+            - list [ref=f32e2274]:
+              - listitem [ref=f32e2275]:
+                - generic [ref=f32e2277]: Initial
+              - listitem [ref=f32e2278]:
+                - generic [ref=f32e2280]: Zoning
+              - listitem [ref=f32e2281]:
+                - generic [ref=f32e2283]: Fire Safety
+              - listitem [ref=f32e2284]:
+                - generic [ref=f32e2286]: OBO
+              - listitem [ref=f32e2287]:
+                - generic [ref=f32e2289]: Final Approval
+            - heading "Assigned Officer" [level=3] [ref=f32e2290]
+            - generic [ref=f32e2291]:
+              - generic [ref=f32e2292]: —
+              - generic [ref=f32e2294]:
+                - strong [ref=f32e2295]: —
+                - text: Reviewing this evaluation
+            - heading "Documents" [level=3] [ref=f32e2296]
+            - table [ref=f32e2298]:
+              - rowgroup [ref=f32e2299]:
+                - row [ref=f32e2300]:
+                  - columnheader "Document" [ref=f32e2301]
+                  - columnheader "Required" [ref=f32e2302]
+                  - columnheader "Department" [ref=f32e2303]
+                  - columnheader "Uploaded" [ref=f32e2304]
+                  - columnheader "Status" [ref=f32e2305]
+                  - columnheader [ref=f32e2306]
+              - rowgroup [ref=f32e2307]:
+                - row [ref=f32e2308]:
+                  - cell "Land Title or Tax Declaration of the property" [ref=f32e2309]
+                  - cell "Required" [ref=f32e2310]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f32e2311]
+                  - cell "—" [ref=f32e2312]
+                  - cell "Missing" [ref=f32e2313]
+                  - cell [ref=f32e2315]
+                - row [ref=f32e2316]:
+                  - cell "Owner's Written Consent (if applicant is not the lot owner)" [ref=f32e2317]
+                  - cell "Optional" [ref=f32e2318]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f32e2319]
+                  - cell "—" [ref=f32e2320]
+                  - cell "Missing" [ref=f32e2321]
+                  - cell [ref=f32e2323]
+                - row [ref=f32e2324]:
+                  - cell "Barangay Clearance" [ref=f32e2325]
+                  - cell "Required" [ref=f32e2326]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f32e2327]
+                  - cell "—" [ref=f32e2328]
+                  - cell "Missing" [ref=f32e2329]
+                  - cell [ref=f32e2331]
+                - row [ref=f32e2332]:
+                  - cell "Locational Clearance / Zoning Certification" [ref=f32e2333]
+                  - cell "Required" [ref=f32e2334]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f32e2335]
+                  - cell "—" [ref=f32e2336]
+                  - cell "Missing" [ref=f32e2337]
+                  - cell [ref=f32e2339]
+                - row [ref=f32e2340]:
+                  - cell "Valid Government-Issued ID of Applicant/Owner" [ref=f32e2341]
+                  - cell "Required" [ref=f32e2342]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f32e2343]
+                  - cell "—" [ref=f32e2344]
+                  - cell "Missing" [ref=f32e2345]
+                  - cell [ref=f32e2347]
+                - row [ref=f32e2348]:
+                  - cell "Fence Plan / Site Development Plan" [ref=f32e2349]
+                  - cell "Required" [ref=f32e2350]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f32e2351]
+                  - cell "—" [ref=f32e2352]
+                  - cell "Missing" [ref=f32e2353]
+                  - cell [ref=f32e2355]
+            - heading "Timeline" [level=3] [ref=f32e2356]
+            - list [ref=f32e2357]:
+              - listitem [ref=f32e2358]:
+                - paragraph [ref=f32e2360]: No activity recorded yet.
+            - heading "Actions" [level=3] [ref=f32e2361]
+            - generic [ref=f32e2362]:
+              - button [active] [ref=f32e2363] [cursor=pointer]
+              - generic [ref=f32e2368]: Remarks (required to return)
+              - textbox "Remarks (required to return)" [ref=f32e2369]:
+                - /placeholder: What needs to be revised?
+                - text: Advancing through initial review.
+              - button [ref=f32e2370] [cursor=pointer]
+  - status [ref=f32e2375]:
+    - generic [ref=f32e2380]: Maria Santos's application advanced past Initial Evaluation.
+    - button "Dismiss" [ref=f32e2381] [cursor=pointer]: ✕

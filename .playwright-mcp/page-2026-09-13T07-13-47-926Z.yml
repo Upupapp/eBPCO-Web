@@ -1,0 +1,125 @@
+- generic [ref=f34e3237]:
+  - complementary [ref=f34e3239]:
+    - generic [ref=f34e3240]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f34e3242]
+      - generic [ref=f34e3243]: E-BPCO
+    - navigation [ref=f34e3244]:
+      - link "Dashboard" [ref=f34e3247] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f34e3253]:
+        - generic [ref=f34e3254]: Operations
+        - generic [ref=f34e3255]:
+          - link "Applications" [ref=f34e3256] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f34e3262] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f34e3267] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [active] [ref=f34e3274] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f34e3281]:
+        - generic [ref=f34e3282]: Administration
+        - generic [ref=f34e3283]:
+          - link "Businesses" [ref=f34e3284] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f34e3290] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f34e3296] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f34e3303] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f34e3312] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f34e3318] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f34e3324] [cursor=pointer]
+  - main [ref=f34e3330]:
+    - generic [ref=f34e3907]:
+      - generic "Permit Release" [ref=f34e3908]:
+        - generic [ref=f34e3909]:
+          - heading "Permit Release" [level=1] [ref=f34e3910]
+          - generic [ref=f34e3911]:
+            - button "Notifications" [ref=f34e3913] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f34e3919] [cursor=pointer]:
+              - generic [ref=f34e3920]: Q
+              - generic [ref=f34e3924]:
+                - generic [ref=f34e3925]: QA@lguids.com.ph
+                - generic [ref=f34e3926]: Super Admin
+      - navigation [ref=f34e3930]:
+        - button [ref=f34e3931] [cursor=pointer]
+        - button [ref=f34e3937] [cursor=pointer]
+      - generic [ref=f34e3942]:
+        - generic [ref=f34e3944]:
+          - generic [ref=f34e3946]:
+            - paragraph [ref=f34e3947]: Awaiting Preparation
+            - paragraph [ref=f34e3948]: "0"
+          - generic [ref=f34e3949]:
+            - generic [ref=f34e3950]: 0% of total release
+            - 'img "Awaiting Preparation progress: 0 percent" [ref=f34e3952]'
+        - generic [ref=f34e3955]:
+          - generic [ref=f34e3957]:
+            - paragraph [ref=f34e3958]: Ready for Release
+            - paragraph [ref=f34e3959]: "0"
+          - generic [ref=f34e3960]:
+            - generic [ref=f34e3961]: 0% of total release
+            - 'img "Ready for Release progress: 0 percent" [ref=f34e3963]'
+        - generic [ref=f34e3966]:
+          - generic [ref=f34e3968]:
+            - paragraph [ref=f34e3969]: Released
+            - paragraph [ref=f34e3970]: "1"
+          - generic [ref=f34e3971]:
+            - generic [ref=f34e3972]: 100% of total release
+            - 'img "Released progress: 100 percent" [ref=f34e3974]'
+        - generic [ref=f34e3977]:
+          - generic [ref=f34e3979]:
+            - paragraph [ref=f34e3980]: Total Release
+            - paragraph [ref=f34e3981]: "1"
+          - generic [ref=f34e3982]:
+            - generic [ref=f34e3983]: Awaiting Preparation · Ready for Release · Released
+            - 'img "3 categories: 0, 0, 1" [ref=f34e3985]'
+      - generic [ref=f34e3989]:
+        - generic [ref=f34e3990]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Lo" [ref=f34e3996]:
+            - /placeholder: Search Here By Application ID, Applicant Name, Business/Project, or Location
+          - generic [ref=f34e3997]:
+            - button [ref=f34e4000] [cursor=pointer]
+            - button [ref=f34e4004] [cursor=pointer]
+            - button [ref=f34e4009] [cursor=pointer]
+        - table [ref=f34e4017]:
+          - rowgroup [ref=f34e4018]:
+            - row [ref=f34e4019]:
+              - columnheader [ref=f34e4020]:
+                - checkbox "Select all permit releases" [ref=f34e4021]
+              - columnheader "APPLICATION ID" [ref=f34e4022]
+              - columnheader "APPLICANT NAME" [ref=f34e4023]
+              - columnheader "LOCATION" [ref=f34e4024]
+              - columnheader "TYPE" [ref=f34e4025]
+              - columnheader "APPROVAL STATUS" [ref=f34e4026]
+              - columnheader "PAYMENT STATUS" [ref=f34e4027]
+              - columnheader "PERMIT STATUS" [ref=f34e4028]
+              - columnheader "ACTION" [ref=f34e4029]
+          - rowgroup [ref=f34e4030]:
+            - row [ref=f34e4031] [cursor=pointer]:
+              - cell [ref=f34e4032]:
+                - checkbox "Select permit release f3a5b847-a558-4b3f-9f72-c60598ad9ed6" [ref=f34e4033]
+              - cell [ref=f34e4034]:
+                - button "View permit release for f3a5b847-a558-4b3f-9f72-c60598ad9ed6, Maria Santos" [ref=f34e4035]: f3a5b847-a558-4b3f-9f72-c60598ad9ed6
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f34e4036]:
+                - generic [ref=f34e4037]:
+                  - generic [ref=f34e4038]: MS
+                  - generic [ref=f34e4040]:
+                    - generic "Maria Santos" [ref=f34e4041]
+                    - generic "Santos Sari-Sari Store" [ref=f34e4042]
+              - cell "60 Rizal Street, Poblacion" [ref=f34e4043]
+              - cell "Fencing Permit" [ref=f34e4044]
+              - cell "Approved" [ref=f34e4045]
+              - cell "Paid" [ref=f34e4046]
+              - cell "Released" [ref=f34e4047]
+              - cell [ref=f34e4049]:
+                - button "Preview permit for f3a5b847-a558-4b3f-9f72-c60598ad9ed6" [ref=f34e4051]
+        - navigation "Pagination" [ref=f34e4058]:
+          - generic [ref=f34e4059]: Showing 1-1 from 1
+          - generic [ref=f34e4060]:
+            - button "First page" [disabled] [ref=f34e4061]
+            - button "Page 1" [ref=f34e4066] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f34e4067]

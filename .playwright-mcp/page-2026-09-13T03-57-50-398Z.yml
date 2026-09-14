@@ -1,0 +1,151 @@
+- generic [ref=f2e61]:
+  - complementary [ref=f2e63]:
+    - generic [ref=f2e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f2e66]
+      - generic [ref=f2e67]: E-BPCO
+    - navigation [ref=f2e68]:
+      - link "Dashboard" [ref=f2e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f2e77]:
+        - generic [ref=f2e78]: Operations
+        - generic [ref=f2e79]:
+          - link "Applications" [ref=f2e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f2e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f2e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f2e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f2e105]:
+        - generic [ref=f2e106]: Administration
+        - generic [ref=f2e107]:
+          - link "Businesses" [ref=f2e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f2e114] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f2e120] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f2e127] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f2e136] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f2e142] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f2e148] [cursor=pointer]
+  - main [ref=f2e154]:
+    - generic [ref=f2e1597]:
+      - generic "Applications" [ref=f2e1598]:
+        - generic [ref=f2e1599]:
+          - heading "Applications" [level=1] [ref=f2e1600]
+          - generic [ref=f2e1601]:
+            - generic [ref=f2e1602]:
+              - generic [ref=f2e1607]: Search
+              - textbox "Search" [ref=f2e1608]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f2e1610] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f2e1616] [cursor=pointer]:
+              - generic [ref=f2e1617]: Q
+              - generic [ref=f2e1621]:
+                - generic [ref=f2e1622]: QA@lguids.com.ph
+                - generic [ref=f2e1623]: Super Admin
+      - generic [ref=f2e1627]:
+        - heading "Application Details" [level=1] [ref=f2e1628]
+        - generic [ref=f2e1629]:
+          - button "Action" [ref=f2e1631] [cursor=pointer]
+          - button "Evaluate" [ref=f2e1632] [cursor=pointer]
+          - button "Payment" [ref=f2e1633] [cursor=pointer]
+          - button "Back to List" [ref=f2e1634] [cursor=pointer]
+          - button "More actions" [ref=f2e1636] [cursor=pointer]
+      - generic [ref=f2e1642]:
+        - generic [ref=f2e1643]:
+          - generic [ref=f2e1644]: MS
+          - generic [ref=f2e1652]:
+            - heading "5e9d799a-6b58-4180-80a6-ec2b0d16ddc2 - Maria Santos" [level=2] [ref=f2e1653]
+            - generic [ref=f2e1654]: Under Review
+            - generic [ref=f2e1655]:
+              - generic [ref=f2e1656]:
+                - term [ref=f2e1657]: "Business / Project :"
+                - definition [ref=f2e1658]: Santos Sari-Sari Store
+              - generic [ref=f2e1659]:
+                - term [ref=f2e1660]: "City :"
+                - definition [ref=f2e1661]: 10 Rizal Street, Poblacion
+              - generic [ref=f2e1662]:
+                - term [ref=f2e1663]: "Region :"
+                - definition [ref=f2e1664]: Region V (Bicol Region)
+              - generic [ref=f2e1665]:
+                - term [ref=f2e1666]: "Type :"
+                - definition [ref=f2e1667]: Fencing Permit
+              - generic [ref=f2e1668]:
+                - term [ref=f2e1669]: "Email :"
+                - definition [ref=f2e1670]:
+                  - text: mariasantos@gmail.com
+                  - generic [ref=f2e1671]: Unverified
+                  - button "Confirm" [ref=f2e1672] [cursor=pointer]
+                  - button "Mark Failed" [ref=f2e1673] [cursor=pointer]
+              - generic [ref=f2e1674]:
+                - term [ref=f2e1675]: "Phone :"
+                - definition [ref=f2e1676]:
+                  - text: +63 912 345 6789
+                  - generic [ref=f2e1677]: Unverified
+                  - button "Confirm" [ref=f2e1678] [cursor=pointer]
+                  - button "Mark Failed" [ref=f2e1679] [cursor=pointer]
+              - generic [ref=f2e1680]:
+                - term [ref=f2e1681]: "Barangay :"
+                - definition [ref=f2e1682]: 10 Rizal Street, Poblacion
+          - generic [ref=f2e1683]:
+            - generic [ref=f2e1684]:
+              - strong [ref=f2e1685]: 2026-09-13
+              - generic [ref=f2e1686]: Date Submitted
+            - generic [ref=f2e1687]:
+              - strong [ref=f2e1688]: —
+              - generic [ref=f2e1689]: Assigned Officer
+          - button [ref=f2e1690] [cursor=pointer]
+        - generic [ref=f2e1694]:
+          - generic [ref=f2e1695]:
+            - button "Timeline" [ref=f2e1696] [cursor=pointer]
+            - button "Documents" [ref=f2e1697] [cursor=pointer]
+            - button "Permit Result" [ref=f2e1698] [cursor=pointer]
+            - button "Comments" [ref=f2e1699] [cursor=pointer]
+          - generic [ref=f2e1700]:
+            - heading "Activity Summary" [level=2] [ref=f2e1701]
+            - paragraph [ref=f2e1702]:
+              - text: This Application Is Currently At
+              - strong [ref=f2e1703]: Submitted
+            - heading "Lifecycle Progress" [level=3] [ref=f2e1704]
+            - list [ref=f2e1705]:
+              - listitem [ref=f2e1706]: Draft
+              - listitem [ref=f2e1707]: Submitted
+              - listitem [ref=f2e1708]: Received
+              - listitem [ref=f2e1709]: Document Verification
+              - listitem [ref=f2e1710]: Under Evaluation
+              - listitem [ref=f2e1711]: Assessed
+              - listitem [ref=f2e1712]: Payment Submitted
+              - listitem [ref=f2e1713]: Payment Under Verification
+              - listitem [ref=f2e1714]: Payment Verified
+              - listitem [ref=f2e1715]: For Approval
+              - listitem [ref=f2e1716]: Approved
+              - listitem [ref=f2e1717]: Permit Generated
+              - listitem [ref=f2e1718]: Ready for Release
+              - listitem [ref=f2e1719]: Released
+              - listitem [ref=f2e1720]: Completed
+            - heading "Quick Information :" [level=3] [ref=f2e1721]
+            - generic [ref=f2e1722]:
+              - list [ref=f2e1723]:
+                - listitem [ref=f2e1724]: "Assigned To: —"
+                - listitem [ref=f2e1725]: "Current Step: Submitted"
+                - listitem [ref=f2e1726]: "Days In Current Step: 0 Days"
+              - generic [ref=f2e1727]: "Total Elapsed Time: 0 Days"
+            - heading "Audit Trail" [level=3] [ref=f2e1728]
+            - table [ref=f2e1730]:
+              - rowgroup [ref=f2e1731]:
+                - row [ref=f2e1732]:
+                  - columnheader "#" [ref=f2e1733]
+                  - columnheader "Timeline Event" [ref=f2e1734]
+                  - columnheader "Date" [ref=f2e1735]
+                  - columnheader "Time" [ref=f2e1736]
+                  - columnheader "Details" [ref=f2e1737]
+                  - columnheader "Action" [ref=f2e1738]
+              - rowgroup [ref=f2e1739]:
+                - row [ref=f2e1740]:
+                  - cell "No audit events recorded yet." [ref=f2e1741]

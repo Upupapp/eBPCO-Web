@@ -1,0 +1,158 @@
+- generic [ref=f1e1437]:
+  - complementary [ref=f1e1439]:
+    - generic [ref=f1e1440]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e1442]
+      - generic [ref=f1e1443]: E-BPCO
+    - navigation [ref=f1e1444]:
+      - link "Dashboard" [ref=f1e1447] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e1453]:
+        - generic [ref=f1e1454]: Operations
+        - generic [ref=f1e1455]:
+          - link "Applications" [ref=f1e1456] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e1462] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f1e1467] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e1474] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e1481]:
+        - generic [ref=f1e1482]: Administration
+        - generic [ref=f1e1483]:
+          - link "Businesses" [ref=f1e1484] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f1e1490] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e1496] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e1503] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e1512] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f1e1518] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e1524] [cursor=pointer]
+  - main [ref=f1e1530]:
+    - generic [ref=f1e2462]:
+      - generic "Payments" [ref=f1e2463]:
+        - generic [ref=f1e2464]:
+          - heading "Payments" [level=1] [ref=f1e2465]
+          - generic [ref=f1e2466]:
+            - generic [ref=f1e2467]:
+              - generic [ref=f1e2472]: Search
+              - textbox "Search" [ref=f1e2473]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f1e2475] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f1e2481] [cursor=pointer]:
+              - generic [ref=f1e2482]: Q
+              - generic [ref=f1e2486]:
+                - generic [ref=f1e2487]: QA@lguids.com.ph
+                - generic [ref=f1e2488]: Super Admin
+      - generic [ref=f1e2509]:
+        - navigation [ref=f1e2510]:
+          - button [ref=f1e2511] [cursor=pointer]
+          - button [ref=f1e2517] [cursor=pointer]
+          - button [ref=f1e2520] [cursor=pointer]
+        - button "Publish New Schedule" [ref=f1e2570] [cursor=pointer]
+        - table [ref=f1e2572]:
+          - rowgroup [ref=f1e2573]:
+            - row [ref=f1e2574]:
+              - columnheader "Version" [ref=f1e2575]
+              - columnheader "Status" [ref=f1e2576]
+              - columnheader "Effective From" [ref=f1e2577]
+              - columnheader "Effective To" [ref=f1e2578]
+              - columnheader "Published By" [ref=f1e2579]
+              - columnheader "Lines" [ref=f1e2580]
+          - rowgroup [ref=f1e2581]:
+            - row [ref=f1e2582] [cursor=pointer]:
+              - cell "2026.99-test" [ref=f1e2583]
+              - cell "In force" [ref=f1e2584]
+              - cell "2026-09-13" [ref=f1e2586]
+              - cell "—" [ref=f1e2587]
+              - cell "Test Ordinance QA" [ref=f1e2588]
+              - cell "1" [ref=f1e2589]
+            - row [ref=f1e2590] [cursor=pointer]:
+              - cell "2026.1" [ref=f1e2591]
+              - cell "Superseded" [ref=f1e2592]
+              - cell "2026-01-01" [ref=f1e2594]
+              - cell "2026-09-13" [ref=f1e2595]
+              - cell "City Ordinance 2026-004" [ref=f1e2596]
+              - cell "3" [ref=f1e2597]
+      - generic [ref=f1e2599]:
+        - heading "Publish New Fee Schedule" [level=2] [ref=f1e2600]
+        - paragraph [ref=f1e2601]: A schedule is never edited in place — this creates a new version, effective from a date, closing whichever one it replaces. It cannot start in the past.
+        - generic [ref=f1e2602]:
+          - generic [ref=f1e2603]:
+            - text: Version
+            - textbox "Version" [ref=f1e2604]:
+              - /placeholder: e.g. 2026.2
+              - text: 2026.100-restore
+          - generic [ref=f1e2605]:
+            - text: Effective From
+            - textbox "Effective From" [ref=f1e2606]: 2026-09-13
+          - generic [ref=f1e2607]:
+            - text: Authorizing Ordinance / Issuance
+            - textbox "Authorizing Ordinance / Issuance" [ref=f1e2608]:
+              - /placeholder: e.g. City Ordinance 2026-011
+              - text: City Ordinance 2026-004 (restored coverage)
+        - heading "Fee Lines" [level=3] [ref=f1e2609]
+        - table [ref=f1e2611]:
+          - rowgroup [ref=f1e2612]:
+            - row [ref=f1e2613]:
+              - columnheader "Permit Type" [ref=f1e2614]
+              - columnheader "Line" [ref=f1e2615]
+              - columnheader "Amount" [ref=f1e2616]
+              - columnheader "Basis" [ref=f1e2617]
+              - columnheader [ref=f1e2618]
+          - rowgroup [ref=f1e2619]:
+            - row [ref=f1e2635]:
+              - cell "Fencing Permit" [ref=f1e2636]
+              - cell "Filing Fee" [ref=f1e2637]
+              - cell "₱500.00" [ref=f1e2638]
+              - cell "City Ordinance 2026-004" [ref=f1e2639]
+              - cell [ref=f1e2640]:
+                - button "Remove" [ref=f1e2641] [cursor=pointer]
+        - generic [ref=f1e2622]:
+          - generic [ref=f1e2623]:
+            - text: Permit Type
+            - combobox "Permit Type" [ref=f1e2624]:
+              - option "Building Permit – New Construction"
+              - option "Building Permit – Renovation / Alteration"
+              - option "Building Permit – Addition / Extension"
+              - option "Demolition Permit"
+              - option "Zoning / Locational Clearance"
+              - option "Architectural Permit"
+              - option "Civil / Structural Permit"
+              - option "Electrical Permit"
+              - option "Mechanical Permit"
+              - option "Sanitary Permit"
+              - option "Plumbing Permit"
+              - option "Electronics Permit"
+              - option "Interior Design Permit"
+              - option "Fencing Permit" [selected]
+              - option "Sign Permit"
+              - option "Excavation Permit"
+              - option "FSEC for Building Permit (BFP)"
+              - option "Certificate of Occupancy"
+              - option "FSIC for Occupancy Permit (BFP)"
+          - generic [ref=f1e2625]:
+            - text: Line
+            - combobox "Line" [ref=f1e2626]:
+              - option "Filing Fee"
+              - option "Processing Fee" [selected]
+              - option "Architectural Fee"
+              - option "Structural Fee"
+              - option "Electrical Fee"
+              - option "Other Fees"
+          - generic [ref=f1e2627]:
+            - text: Amount (₱)
+            - spinbutton "Amount (₱)" [ref=f1e2628]
+          - generic [ref=f1e2629]:
+            - text: Basis
+            - textbox "Basis" [ref=f1e2630]:
+              - /placeholder: Ordinance or issuance this rests on
+          - button "Add Line" [active] [ref=f1e2631] [cursor=pointer]
+        - generic [ref=f1e2632]:
+          - button "Cancel" [ref=f1e2633] [cursor=pointer]
+          - button "Publish" [ref=f1e2634] [cursor=pointer]

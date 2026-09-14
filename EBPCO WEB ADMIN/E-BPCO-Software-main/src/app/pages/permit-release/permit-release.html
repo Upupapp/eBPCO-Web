@@ -41,7 +41,7 @@
       <div class="table-toolbar">
         <div class="search-input">
           <app-icon name="search" [size]="16" />
-          <input aria-label="Search Here By Application ID, Applicant Name, Business/Project, or Lo"
+          <input aria-label="Search Here By Application ID, Applicant Name, Business/Project, or Location"
             type="text"
             placeholder="Search Here By Application ID, Applicant Name, Business/Project, or Location"
             [(ngModel)]="searchTerm"
@@ -64,9 +64,9 @@
             <app-icon name="download" [size]="15" />
             Export
           </button>
-          <button type="button" class="btn-primary" (click)="generate()">
-            <app-icon name="sparkles" [size]="15" />
-            Generate
+          <button type="button" class="btn-primary" (click)="printPermit()">
+            <app-icon name="printer" [size]="15" />
+            Print Permits
           </button>
         </div>
       </div>
@@ -155,20 +155,12 @@
                 <td>
                   <span
                     class="status-pill"
-                    [class]="row.permitStatus.toLowerCase().replace(/\s+/g, '-')"
-                    >{{ row.permitStatus }}</span
+                    [class]="row.displayStatus.toLowerCase().replace(/\s+/g, '-')"
+                    >{{ row.displayStatus }}</span
                   >
                 </td>
                 <td (click)="$event.stopPropagation()">
                   <div class="actions-cell">
-                    <button
-                      type="button"
-                      class="icon-btn generate"
-                      [attr.aria-label]="'Generate release document for ' + row.id"
-                      (click)="generate(row)"
-                    >
-                      <app-icon name="sparkles" [size]="15" />
-                    </button>
                     <button
                       type="button"
                       class="icon-btn view"
@@ -178,12 +170,23 @@
                     >
                       <app-icon name="file-check" [size]="15" />
                     </button>
-                    @if (canRelease()) {
+                    @if (canRelease() && row.permitStage === 'Permit Generated') {
+                      <button
+                        type="button"
+                        class="icon-btn"
+                        [attr.aria-label]="'Prepare release for ' + row.id"
+                        title="Prepare Release"
+                        (click)="requestPrepareRelease(row)"
+                      >
+                        <app-icon name="edit" [size]="15" />
+                      </button>
+                    }
+                    @if (canRelease() && row.permitStage === 'Ready for Release') {
                       <button
                         type="button"
                         class="icon-btn release"
                         [attr.aria-label]="'Release permit for ' + row.id"
-                        [disabled]="row.permitStatus === 'Released'"
+                        title="Release"
                         (click)="requestRelease(row)"
                       >
                         <app-icon name="send" [size]="15" />
@@ -207,8 +210,8 @@
     <div class="detail-head">
       <h1>{{ row.id }}</h1>
       <div class="header-actions">
-        <span class="status-pill" [class]="row.permitStatus.toLowerCase().replace(/\s+/g, '-')">{{
-          row.permitStatus
+        <span class="status-pill" [class]="row.displayStatus.toLowerCase().replace(/\s+/g, '-')">{{
+          row.displayStatus
         }}</span>
         <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
       </div>
@@ -223,8 +226,8 @@
 
         <div class="record-info">
           <h2>{{ row.applicant }}</h2>
-          <span class="status-pill" [class]="row.permitStatus.toLowerCase().replace(/\s+/g, '-')">{{
-            row.permitStatus
+          <span class="status-pill" [class]="row.displayStatus.toLowerCase().replace(/\s+/g, '-')">{{
+            row.displayStatus
           }}</span>
 
           <dl class="info-list">
@@ -248,6 +251,10 @@
               <dt>Payment Status :</dt>
               <dd>{{ row.paymentStatus }}</dd>
             </div>
+            <div>
+              <dt>Permit Number :</dt>
+              <dd>{{ row.permitNumber }}</dd>
+            </div>
           </dl>
         </div>
 
@@ -270,17 +277,20 @@
 
         <h3>Permit Status</h3>
         <p class="release-note">
-          @if (row.permitStatus === 'Ready for Release') {
-            This permit has been approved and paid, and is ready to be handed over to the applicant.
+          @if (row.permitStage === 'Permit Generated') {
+            This permit has been generated and is awaiting a release preparation (claim location and
+            office hours) before it can be released.
+          } @else if (row.permitStage === 'Ready for Release') {
+            This permit has been prepared and is ready to be handed over to the applicant.
           } @else {
             This permit has already been released to the applicant.
           }
         </p>
 
         <div class="header-actions">
-          <button type="button" class="btn-outline" (click)="generate(row)">
-            <app-icon name="sparkles" [size]="15" />
-            Generate PDF
+          <button type="button" class="btn-outline" (click)="printPermit(row)">
+            <app-icon name="printer" [size]="15" />
+            Print Permit
           </button>
           <button type="button" class="btn-outline" (click)="previewPermit(row)">
             <app-icon name="file-check" [size]="15" />
@@ -290,18 +300,64 @@
             <app-icon name="file-check" [size]="15" />
             View Receipt
           </button>
-          @if (canRelease()) {
-            <button
-              type="button"
-              class="btn-primary"
-              [disabled]="row.permitStatus === 'Released'"
-              (click)="requestRelease(row)"
-            >
+          @if (canRelease() && row.permitStage === 'Permit Generated') {
+            <button type="button" class="btn-primary" (click)="requestPrepareRelease(row)">
+              <app-icon name="edit" [size]="15" />
+              Prepare Release
+            </button>
+          }
+          @if (canRelease() && row.permitStage === 'Ready for Release') {
+            <button type="button" class="btn-primary" (click)="requestRelease(row)">
               <app-icon name="send" [size]="15" />
               Mark as Released
             </button>
           }
         </div>
+      </div>
+    </div>
+  }
+
+  @if (prepareReleaseTarget(); as target) {
+    <div class="modal-backdrop" (click)="cancelPrepareRelease()">
+      <div class="modal-box create-box" (click)="$event.stopPropagation()">
+        <button type="button" class="modal-close" aria-label="Close" (click)="cancelPrepareRelease()">
+          &#10005;
+        </button>
+        <h2>Prepare Release — {{ target.permitNumber }}</h2>
+        <p class="modal-hint">
+          {{ target.id }} — {{ target.applicant }} · {{ target.businessName || 'Not provided' }}
+        </p>
+        <form class="create-form" (ngSubmit)="confirmPrepareRelease()">
+          <label>
+            Claim Location
+            <input type="text" [(ngModel)]="claimLocation" name="claimLocation" required />
+          </label>
+          <label>
+            Office Hours
+            <input type="text" [(ngModel)]="officeHours" name="officeHours" required
+              placeholder="e.g. Mon–Fri, 8:00 AM – 5:00 PM" />
+          </label>
+          <label>
+            Bring With You <span class="optional">(optional, one per line)</span>
+            <textarea aria-label="Items the claimant should bring, one per line"
+              rows="3"
+              [(ngModel)]="bringWithYouText"
+              name="bringWithYou"
+              placeholder="One item per line…"
+            ></textarea>
+          </label>
+          @if (prepareReleaseError()) {
+            <p class="form-error">{{ prepareReleaseError() }}</p>
+          }
+          <div class="modal-actions">
+            <button type="button" class="modal-btn neutral" (click)="cancelPrepareRelease()">
+              Cancel
+            </button>
+            <button type="submit" class="modal-btn confirm" [disabled]="preparingRelease()">
+              {{ preparingRelease() ? 'Saving…' : 'Confirm Preparation' }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   }
@@ -335,19 +391,21 @@
             <button type="button" class="modal-btn neutral" (click)="cancelRelease()">
               Cancel
             </button>
-            <button type="submit" class="modal-btn confirm">Confirm Release</button>
+            <button type="submit" class="modal-btn confirm" [disabled]="releasingPermit()">
+              {{ releasingPermit() ? 'Releasing…' : 'Confirm Release' }}
+            </button>
           </div>
         </form>
       </div>
     </div>
   }
 
-  @if (showGenerateModal()) {
+  @if (showPrintModal()) {
     <div class="modal-backdrop" (click)="closeModal()">
       <div class="modal-box" (click)="$event.stopPropagation()">
         <button type="button" class="modal-close" (click)="closeModal()">&#10005;</button>
-        <span class="modal-icon"><app-icon name="sparkles" [size]="34" /></span>
-        <h2>PDF GENERATED SUCCESSFULLY</h2>
+        <span class="modal-icon"><app-icon name="printer" [size]="34" /></span>
+        <h2>READY TO PRINT</h2>
         <button type="button" class="print-btn" (click)="printPdf()">
           <app-icon name="printer" [size]="17" />
           Print PDF
@@ -359,7 +417,7 @@
   <div class="print-only">
     <h1>Permit Release Summary</h1>
     <p class="print-meta">
-      {{ generateTarget() ? 'Single application' : 'Ready for Release batch' }} — generated
+      {{ printTarget() ? 'Single application' : 'Ready for Release batch' }} — printed
       {{ printRows().length }} record{{ printRows().length === 1 ? '' : 's' }}
     </p>
     <table>
@@ -385,7 +443,7 @@
             <td>{{ row.type }}</td>
             <td>{{ row.approvalStatus }}</td>
             <td>{{ row.paymentStatus }}</td>
-            <td>{{ row.permitStatus }}</td>
+            <td>{{ row.displayStatus }}</td>
           </tr>
         }
       </tbody>
@@ -440,6 +498,12 @@
       </div>
     </div>
 
+    @if (checklistLoadFailed()) {
+      <p class="form-error">
+        Could not load the live checklist for this type — showing the office's default list.
+      </p>
+    }
+
     <div class="detail-grid permit-type-detail-grid">
       <div class="summary-card">
         <div class="card-head">
@@ -449,9 +513,21 @@
               <button type="button" class="btn-outline" (click)="resetDocumentsToDefault()">
                 Reset to Default
               </button>
-              <button type="button" class="btn-primary" (click)="startAddDocument()">
+              <button type="button" class="btn-outline" (click)="startAddDocument()">
                 <app-icon name="plus" [size]="14" />
                 Add Document
+              </button>
+              <button
+                type="button"
+                class="btn-primary"
+                [class.dirty]="checklistDirty()"
+                [disabled]="savingChecklist()"
+                (click)="saveChecklist()"
+              >
+                @if (checklistDirty()) {
+                  <span class="dirty-dot" aria-hidden="true">●</span>
+                }
+                {{ savingChecklist() ? 'Saving…' : 'Save Checklist' }}
               </button>
             </div>
           }
@@ -463,13 +539,10 @@
               Document Label
               <input type="text" [(ngModel)]="newDocument.label" name="newDocLabel" required />
             </label>
+            <p class="modal-hint">Code: {{ previewNewDocumentCode() || '—' }}</p>
             <label>
-              Reviewing Department
-              <select [(ngModel)]="newDocument.reviewingDepartmentId" name="newDocDept">
-                @for (d of departmentOptions; track d.id) {
-                  <option [value]="d.id">{{ d.name }}</option>
-                }
-              </select>
+              Description <span class="optional">(optional)</span>
+              <textarea aria-label="Description" rows="2" [(ngModel)]="newDocument.description" name="newDocDescription"></textarea>
             </label>
             <label class="checkbox-field">
               <input type="checkbox" [(ngModel)]="newDocument.required" name="newDocRequired" />
@@ -506,6 +579,12 @@
                         [(ngModel)]="editDraft.label"
                         name="editLabel-{{ doc.id }}"
                       />
+                      <input aria-label="Description"
+                        type="text"
+                        [(ngModel)]="editDraft.description"
+                        name="editDescription-{{ doc.id }}"
+                        placeholder="Description (optional)"
+                      />
                     </td>
                     <td>
                       <input aria-label="Required"
@@ -514,16 +593,7 @@
                         name="editRequired-{{ doc.id }}"
                       />
                     </td>
-                    <td>
-                      <select aria-label="Reviewing department id"
-                        [(ngModel)]="editDraft.reviewingDepartmentId"
-                        name="editDept-{{ doc.id }}"
-                      >
-                        @for (d of departmentOptions; track d.id) {
-                          <option [value]="d.id">{{ d.name }}</option>
-                        }
-                      </select>
-                    </td>
+                    <td>{{ departmentLabel(doc.reviewingDepartmentId) }}</td>
                     <td>
                       <button type="button" class="link-btn" (click)="confirmEditDocument()">
                         Save
@@ -535,7 +605,12 @@
                   </tr>
                 } @else {
                   <tr>
-                    <td>{{ doc.label }}</td>
+                    <td>
+                      {{ doc.label }}
+                      @if (doc.description) {
+                        <div class="muted">{{ doc.description }}</div>
+                      }
+                    </td>
                     <td>
                       <span class="status-pill" [class]="doc.required ? 'required' : 'optional'">{{
                         doc.required ? 'Required' : 'Optional'
@@ -557,7 +632,20 @@
               } @empty {
                 <tr class="table-empty-row">
                   <td [attr.colspan]="canConfigureRequirements() ? 4 : 3">
-                    No documents are required for this permit type.
+                    @if (checklistNothingPublishedYet()) {
+                      Nothing has been published live for this permit type yet — this is not the
+                      same as requiring zero documents.
+                      @if (selectedPermitType(); as type) {
+                        The office's reference default lists
+                        {{ referenceFor(type).documents.length }}
+                        document{{ referenceFor(type).documents.length === 1 ? '' : 's' }}.
+                      }
+                      @if (canConfigureRequirements()) {
+                        Select "Reset to Default" then "Save Checklist" to publish it.
+                      }
+                    } @else {
+                      No documents are required for this permit type.
+                    }
                   </td>
                 </tr>
               }
@@ -569,11 +657,12 @@
       <div class="summary-card">
         <div class="card-head">
           <h2>Fee Rules</h2>
-          <button type="button" class="btn-outline" (click)="goToFeeMatrix(selectedPermitType()!)">
-            Manage Fee Rules
+          <button type="button" class="btn-outline" (click)="goToFeeMatrix()">
+            View Fee Schedule
             <app-icon name="chevron-right" [size]="14" />
           </button>
         </div>
+        <p class="muted">Reference only — may not reflect the live fee schedule.</p>
         <div class="table-wrap">
           <table class="detail-table">
             <thead>

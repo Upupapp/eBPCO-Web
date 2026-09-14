@@ -1,0 +1,116 @@
+- generic [ref=f28e695]:
+  - complementary [ref=f28e697]:
+    - generic [ref=f28e698]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f28e700]
+      - generic [ref=f28e701]: E-BPCO
+    - navigation [ref=f28e702]:
+      - link "Dashboard" [ref=f28e705] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f28e711]:
+        - generic [ref=f28e712]: Operations
+        - generic [ref=f28e713]:
+          - link "Applications" [ref=f28e714] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f28e720] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f28e725] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f28e732] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f28e739]:
+        - generic [ref=f28e740]: Administration
+        - generic [ref=f28e741]:
+          - link "Businesses" [ref=f28e742] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f28e748] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f28e754] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f28e761] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f28e770] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f28e776] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f28e782] [cursor=pointer]
+  - main [ref=f28e788]:
+    - generic [ref=f28e1163]:
+      - generic "User & Roles" [ref=f28e1164]:
+        - generic [ref=f28e1165]:
+          - heading "User & Roles" [level=1] [ref=f28e1166]
+          - generic [ref=f28e1167]:
+            - button "Notifications" [ref=f28e1169] [cursor=pointer]
+            - button "Q QA@lguids.com.ph Super Admin" [ref=f28e1175] [cursor=pointer]:
+              - generic [ref=f28e1176]: Q
+              - generic [ref=f28e1180]:
+                - generic [ref=f28e1181]: QA@lguids.com.ph
+                - generic [ref=f28e1182]: Super Admin
+      - generic [ref=f28e1514]:
+        - heading "records@lgu.gov.ph" [level=1] [ref=f28e1515]
+        - generic [ref=f28e1516]:
+          - generic [ref=f28e1517]: Active
+          - button "Back to List" [ref=f28e1518] [cursor=pointer]
+      - generic [ref=f28e1519]:
+        - generic [ref=f28e1523]:
+          - paragraph [ref=f28e1524]: Open Assignments
+          - paragraph [ref=f28e1525]: "18"
+        - generic [ref=f28e1534]:
+          - paragraph [ref=f28e1535]: Overdue
+          - paragraph [ref=f28e1536]: "2"
+        - generic [ref=f28e1545]:
+          - paragraph [ref=f28e1546]: Completed This Month
+          - paragraph [ref=f28e1547]: "16"
+        - generic [ref=f28e1556]:
+          - paragraph [ref=f28e1557]: Assigned Role
+          - paragraph [ref=f28e1558]: —
+      - generic [ref=f28e1563]:
+        - generic [ref=f28e1564]:
+          - generic [ref=f28e1565]: R
+          - generic [ref=f28e1573]:
+            - heading "records@lgu.gov.ph" [level=2] [ref=f28e1574]
+            - generic [ref=f28e1575]: Active
+            - generic [ref=f28e1576]:
+              - generic [ref=f28e1577]:
+                - term [ref=f28e1578]: "Email :"
+                - definition [ref=f28e1579]: records@lgu.gov.ph
+              - generic [ref=f28e1580]:
+                - term [ref=f28e1581]: "Role :"
+                - definition [ref=f28e1582]: View only
+              - generic [ref=f28e1583]:
+                - term [ref=f28e1584]: "Department :"
+                - definition [ref=f28e1585]: No forms assigned
+          - generic [ref=f28e1586]:
+            - generic [ref=f28e1587]:
+              - strong [ref=f28e1588]: Sep 13, 2026, 1:06 AM
+              - generic [ref=f28e1589]: Last Active
+            - generic [ref=f28e1590]:
+              - strong [ref=f28e1591]: Active
+              - generic [ref=f28e1592]: Account Status
+        - generic [ref=f28e1593]:
+          - heading "Staff Account" [level=2] [ref=f28e1595]
+          - navigation [ref=f28e1596]:
+            - button "Profile" [ref=f28e1597] [cursor=pointer]
+            - button "Role & Permissions" [ref=f28e1598] [cursor=pointer]
+            - button "Workload" [ref=f28e1599] [cursor=pointer]
+            - button "Security" [ref=f28e1600] [cursor=pointer]
+            - button "Activity" [ref=f28e1601] [cursor=pointer]
+          - heading "Contact Information" [level=3] [ref=f28e1602]
+          - generic [ref=f28e1603]:
+            - generic [ref=f28e1604]:
+              - term [ref=f28e1605]: Full Name
+              - definition [ref=f28e1606]: records@lgu.gov.ph
+            - generic [ref=f28e1607]:
+              - term [ref=f28e1608]: Email
+              - definition [ref=f28e1609]: records@lgu.gov.ph
+            - generic [ref=f28e1610]:
+              - term [ref=f28e1611]: Department
+              - definition [ref=f28e1612]: No forms assigned
+            - generic [ref=f28e1613]:
+              - term [ref=f28e1614]: Account Status
+              - definition [ref=f28e1615]: Active
+          - heading "Department" [level=3] [ref=f28e1616]
+          - generic [ref=f28e1617]:
+            - generic [ref=f28e1618]: NF
+            - generic [ref=f28e1620]:
+              - strong [ref=f28e1621]: No forms assigned
+              - text: Assigned Department
