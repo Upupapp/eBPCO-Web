@@ -17,9 +17,17 @@
     "Deliberately NOT done by setting EBPCO_API_BASE_URL to localhost in",
     "public/config.js. That file ships: a localhost value committed there would",
     "point the deployed portal at the officer's own machine, where nothing",
-    "answers, and the failure would look exactly like the API being down."
+    "answers, and the failure would look exactly like the API being down.",
+    "",
+    "TARGET IS THE SHARED LINODE INSTANCE, NOT localhost. Owner decision: every",
+    "device running `ng serve` should see the same real, persistent database",
+    "(one Postgres on the Linode box), not its own empty local one. Point back",
+    "at http://localhost:3000 if you specifically need an isolated local API for",
+    "one-off testing. Swap to https://api.castilla-ebpco.online once that",
+    "domain's DNS/TLS is live (see docs/OPERATIONS.md-style notes in the backend",
+    "repo) -- the bare IP is a stand-in until then."
   ],
-  "/auth": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true },
-  "/me": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true },
-  "/staff": { "target": "http://localhost:3000", "secure": false, "changeOrigin": true }
+  "/auth": { "target": "http://139.162.51.165:3000", "secure": false, "changeOrigin": true },
+  "/me": { "target": "http://139.162.51.165:3000", "secure": false, "changeOrigin": true },
+  "/staff": { "target": "http://139.162.51.165:3000", "secure": false, "changeOrigin": true }
 }
