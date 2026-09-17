@@ -1,0 +1,124 @@
+- generic [ref=f42e1359]:
+  - complementary [ref=f42e1361]:
+    - generic [ref=f42e1362]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f42e1364]
+      - generic [ref=f42e1365]: E-BPCO
+    - navigation [ref=f42e1366]:
+      - link "Dashboard" [ref=f42e1369] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f42e1375]:
+        - generic [ref=f42e1376]: Operations
+        - generic [ref=f42e1377]:
+          - link "Applications" [ref=f42e1378] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f42e1384] [cursor=pointer]:
+            - /url: /evaluations
+      - generic [ref=f42e1389]:
+        - generic [ref=f42e1390]: Administration
+        - link "Archive" [ref=f42e1392] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f42e1398] [cursor=pointer]
+  - main [ref=f42e1404]:
+    - generic [ref=f42e3204]:
+      - generic "Evaluations" [ref=f42e3205]:
+        - generic [ref=f42e3206]:
+          - heading "Evaluations" [level=1] [ref=f42e3207]
+          - generic [ref=f42e3208]:
+            - generic [ref=f42e3209]:
+              - generic [ref=f42e3214]: Search
+              - textbox "Search" [ref=f42e3215]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f42e3217] [cursor=pointer]
+            - button "E evaluator@lgu.gov.ph Evaluator" [ref=f42e3223] [cursor=pointer]:
+              - generic [ref=f42e3224]: E
+              - generic [ref=f42e3228]:
+                - generic [ref=f42e3229]: evaluator@lgu.gov.ph
+                - generic [ref=f42e3230]: Evaluator
+      - generic [ref=f42e4043]:
+        - heading "OBO Evaluation" [level=1] [ref=f42e4044]
+        - generic [ref=f42e4045]:
+          - button "Back" [ref=f42e4046] [cursor=pointer]
+          - button "More actions" [ref=f42e4048] [cursor=pointer]
+      - alert [ref=f42e4054]:
+        - generic [ref=f42e4059]: The Fire Safety stage has already been decided. Correcting it means a new evaluation cycle.
+        - button "Dismiss" [ref=f42e4060] [cursor=pointer]: ✕
+      - generic [ref=f42e4061]:
+        - generic [ref=f42e4063]:
+          - generic [ref=f42e4065]:
+            - paragraph [ref=f42e4066]: Total in OBO Evaluation
+            - paragraph [ref=f42e4067]: "1"
+          - generic [ref=f42e4068]:
+            - generic [ref=f42e4069]: Across every status below — Revision Required · Under Review · Accepted
+            - 'img "3 categories: 0, 1, 0" [ref=f42e4071]'
+        - generic [ref=f42e4076]:
+          - generic [ref=f42e4078]:
+            - paragraph [ref=f42e4079]: Revision Required
+            - paragraph [ref=f42e4080]: "0"
+          - generic [ref=f42e4081]:
+            - generic [ref=f42e4082]: 0% of all applications
+            - 'img "Revision Required progress: 0 percent" [ref=f42e4084]'
+        - generic [ref=f42e4087]:
+          - generic [ref=f42e4089]:
+            - paragraph [ref=f42e4090]: Under Review
+            - paragraph [ref=f42e4091]: "1"
+          - generic [ref=f42e4092]:
+            - generic [ref=f42e4093]: 100% of all applications
+            - 'img "Under Review progress: 100 percent" [ref=f42e4095]'
+        - generic [ref=f42e4098]:
+          - generic [ref=f42e4100]:
+            - paragraph [ref=f42e4101]: Accepted
+            - paragraph [ref=f42e4102]: "0"
+          - generic [ref=f42e4103]:
+            - generic [ref=f42e4104]: 0% of all applications
+            - 'img "Accepted progress: 0 percent" [ref=f42e4106]'
+      - generic [ref=f42e4108]:
+        - button [ref=f42e4109] [cursor=pointer]
+        - button [ref=f42e4114] [cursor=pointer]
+        - button [ref=f42e4119] [cursor=pointer]
+      - generic [ref=f42e4124]:
+        - generic [ref=f42e4125]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Type" [ref=f42e4131]
+          - generic [ref=f42e4132]:
+            - button [ref=f42e4135] [cursor=pointer]
+            - button [ref=f42e4139] [cursor=pointer]
+        - table [ref=f42e4145]:
+          - rowgroup [ref=f42e4146]:
+            - row [ref=f42e4147]:
+              - columnheader [ref=f42e4148]:
+                - checkbox "Select all applications in this stage" [ref=f42e4149]
+              - columnheader "APPLICATION ID" [ref=f42e4150]
+              - columnheader "APPLICANT NAME" [ref=f42e4151]
+              - columnheader "MISSING DOCUMENTS" [ref=f42e4152]
+              - columnheader "TYPE" [ref=f42e4153]
+              - columnheader "REVIEWING DEPARTMENT" [ref=f42e4154]
+              - columnheader "DATE SUBMITTED" [ref=f42e4155]
+              - columnheader "ASSIGNED OFFICER" [ref=f42e4156]
+              - columnheader "STATUS" [ref=f42e4157]
+              - columnheader "ACTION" [ref=f42e4158]
+          - rowgroup [ref=f42e4159]:
+            - button "View evaluation for 279a2be6-fb86-4eb0-b35c-ea676960d393, Stage FourteenD" [ref=f42e4160] [cursor=pointer]:
+              - cell [ref=f42e4161]:
+                - checkbox "Select 279a2be6-fb86-4eb0-b35c-ea676960d393" [ref=f42e4162]
+              - cell "279a2be6-fb86-4eb0-b35c-ea676960d393" [ref=f42e4163]
+              - cell "SF Stage FourteenD —" [ref=f42e4164]:
+                - generic [ref=f42e4165]:
+                  - generic [ref=f42e4166]: SF
+                  - generic [ref=f42e4168]:
+                    - generic "Stage FourteenD" [ref=f42e4169]
+                    - generic "—" [ref=f42e4170]
+              - cell "-5" [ref=f42e4171]
+              - cell "Fencing Permit" [ref=f42e4172]
+              - cell "Office of the Municipal Engineer / Building Official" [ref=f42e4173]
+              - cell "2026-09-16" [ref=f42e4174]
+              - cell "—" [ref=f42e4175]
+              - cell "Under Review" [ref=f42e4176]
+              - cell [ref=f42e4178]:
+                - generic [ref=f42e4179]:
+                  - button "Review application 279a2be6-fb86-4eb0-b35c-ea676960d393" [ref=f42e4180]: Review
+                  - button "More actions for application 279a2be6-fb86-4eb0-b35c-ea676960d393" [ref=f42e4182]
+        - navigation "Pagination" [ref=f42e4189]:
+          - generic [ref=f42e4190]: Showing 1-1 from 1
+          - generic [ref=f42e4191]:
+            - button "First page" [disabled] [ref=f42e4192]
+            - button "Page 1" [ref=f42e4197] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f42e4198]

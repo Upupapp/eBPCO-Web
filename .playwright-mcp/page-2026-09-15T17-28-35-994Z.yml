@@ -1,0 +1,247 @@
+- generic [ref=f65e22]:
+  - generic [ref=f65e23]:
+    - complementary [ref=f65e24]:
+      - generic [ref=f65e25]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f65e26] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f65e27]
+          - generic [ref=f65e28]: Collapse sidebar
+        - generic [ref=f65e29]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f65e30]:
+        - link "Home" [ref=f65e31] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f65e36] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [active] [ref=f65e43] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f65e48] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f65e54] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f65e58] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications 1" [ref=f65e62] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f65e66]: Notifications
+          - generic [ref=f65e67]: "1"
+        - link "Profile" [ref=f65e68] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f65e73] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f65e78] [cursor=pointer]
+    - generic [ref=f65e83]:
+      - link "View profile and settings" [ref=f65e85] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f65e86]: Test Citizen
+      - status [ref=f65e91]:
+        - strong [ref=f65e92]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f65e289]:
+        - generic [ref=f65e290]:
+          - generic [ref=f65e291]:
+            - heading "Permit Services" [level=1] [ref=f65e292]
+            - generic [ref=f65e293]: Browse requirements before you start, or begin a new application.
+          - link "Start Generic Application" [ref=f65e294] [cursor=pointer]:
+            - /url: /permits/apply?type=generic
+        - heading "Building Permit" [level=3] [ref=f65e295]
+        - generic [ref=f65e296]:
+          - generic [ref=f65e297]:
+            - generic [ref=f65e298]: Verified Checklist
+            - generic [ref=f65e304]:
+              - heading "Building Permit – New Construction" [level=4] [ref=f65e305]
+              - paragraph [ref=f65e306]: Office of the Building Official (OBO) · 22 documents
+            - separator [ref=f65e307]
+            - generic [ref=f65e308]:
+              - button "View Requirements" [ref=f65e309] [cursor=pointer]
+              - link "Start Application" [ref=f65e310] [cursor=pointer]:
+                - /url: /permits/apply?type=Building%20Permit%20%E2%80%93%20New%20Construction
+          - generic [ref=f65e311]:
+            - generic [ref=f65e312]: Pending Verification
+            - generic [ref=f65e318]:
+              - heading "Building Permit – Renovation / Alteration" [level=4] [ref=f65e319]
+              - paragraph [ref=f65e320]: Office of the Building Official (OBO) · 9 documents
+            - separator [ref=f65e321]
+            - generic [ref=f65e322]:
+              - button "View Requirements" [ref=f65e323] [cursor=pointer]
+              - link "Start Application" [ref=f65e324] [cursor=pointer]:
+                - /url: /permits/apply?type=Building%20Permit%20%E2%80%93%20Renovation%20%2F%20Alteration
+          - generic [ref=f65e325]:
+            - generic [ref=f65e326]: Pending Verification
+            - generic [ref=f65e332]:
+              - heading "Building Permit – Addition / Extension" [level=4] [ref=f65e333]
+              - paragraph [ref=f65e334]: Office of the Building Official (OBO) · 9 documents
+            - separator [ref=f65e335]
+            - generic [ref=f65e336]:
+              - button "View Requirements" [ref=f65e337] [cursor=pointer]
+              - link "Start Application" [ref=f65e338] [cursor=pointer]:
+                - /url: /permits/apply?type=Building%20Permit%20%E2%80%93%20Addition%20%2F%20Extension
+          - generic [ref=f65e339]:
+            - generic [ref=f65e340]: Pending Verification
+            - generic [ref=f65e346]:
+              - heading "Demolition Permit" [level=4] [ref=f65e347]
+              - paragraph [ref=f65e348]: Office of the Building Official (OBO) · 9 documents
+            - separator [ref=f65e349]
+            - generic [ref=f65e350]:
+              - button "View Requirements" [ref=f65e351] [cursor=pointer]
+              - link "Start Application" [ref=f65e352] [cursor=pointer]:
+                - /url: /permits/apply?type=Demolition%20Permit
+          - generic [ref=f65e353]:
+            - generic [ref=f65e354]: Verified Checklist
+            - generic [ref=f65e360]:
+              - heading "Zoning / Locational Clearance" [level=4] [ref=f65e361]
+              - paragraph [ref=f65e362]: Municipal Planning and Development Office (MPDO / Zoning) · 16 documents
+            - separator [ref=f65e363]
+            - generic [ref=f65e364]:
+              - button "View Requirements" [ref=f65e365] [cursor=pointer]
+              - link "Start Application" [ref=f65e366] [cursor=pointer]:
+                - /url: /permits/apply?type=Zoning%20%2F%20Locational%20Clearance
+        - heading "Ancillary Permits" [level=3] [ref=f65e367]
+        - generic [ref=f65e368]:
+          - generic [ref=f65e369]:
+            - generic [ref=f65e370]: Pending Verification
+            - generic [ref=f65e379]:
+              - heading "Architectural Permit" [level=4] [ref=f65e380]
+              - paragraph [ref=f65e381]: Office of the Building Official (OBO) · 7 documents
+            - separator [ref=f65e382]
+            - generic [ref=f65e383]:
+              - button "View Requirements" [ref=f65e384] [cursor=pointer]
+              - link "Start Application" [ref=f65e385] [cursor=pointer]:
+                - /url: /permits/apply?type=Architectural%20Permit
+          - generic [ref=f65e386]:
+            - generic [ref=f65e387]: Pending Verification
+            - generic [ref=f65e396]:
+              - heading "Civil / Structural Permit" [level=4] [ref=f65e397]
+              - paragraph [ref=f65e398]: Office of the Building Official (OBO) · 8 documents
+            - separator [ref=f65e399]
+            - generic [ref=f65e400]:
+              - button "View Requirements" [ref=f65e401] [cursor=pointer]
+              - link "Start Application" [ref=f65e402] [cursor=pointer]:
+                - /url: /permits/apply?type=Civil%20%2F%20Structural%20Permit
+          - generic [ref=f65e403]:
+            - generic [ref=f65e404]: Pending Verification
+            - generic [ref=f65e409]:
+              - heading "Electrical Permit" [level=4] [ref=f65e410]
+              - paragraph [ref=f65e411]: Office of the Building Official (OBO) · 7 documents
+            - separator [ref=f65e412]
+            - generic [ref=f65e413]:
+              - button "View Requirements" [ref=f65e414] [cursor=pointer]
+              - link "Start Application" [ref=f65e415] [cursor=pointer]:
+                - /url: /permits/apply?type=Electrical%20Permit
+          - generic [ref=f65e416]:
+            - generic [ref=f65e417]: Pending Verification
+            - generic [ref=f65e426]:
+              - heading "Mechanical Permit" [level=4] [ref=f65e427]
+              - paragraph [ref=f65e428]: Office of the Building Official (OBO) · 7 documents
+            - separator [ref=f65e429]
+            - generic [ref=f65e430]:
+              - button "View Requirements" [ref=f65e431] [cursor=pointer]
+              - link "Start Application" [ref=f65e432] [cursor=pointer]:
+                - /url: /permits/apply?type=Mechanical%20Permit
+          - generic [ref=f65e433]:
+            - generic [ref=f65e434]: Pending Verification
+            - generic [ref=f65e439]:
+              - heading "Sanitary Permit" [level=4] [ref=f65e440]
+              - paragraph [ref=f65e441]: Office of the Building Official (OBO) · 7 documents
+            - separator [ref=f65e442]
+            - generic [ref=f65e443]:
+              - button "View Requirements" [ref=f65e444] [cursor=pointer]
+              - link "Start Application" [ref=f65e445] [cursor=pointer]:
+                - /url: /permits/apply?type=Sanitary%20Permit
+          - generic [ref=f65e446]:
+            - generic [ref=f65e447]: Pending Verification
+            - generic [ref=f65e452]:
+              - heading "Plumbing Permit" [level=4] [ref=f65e453]
+              - paragraph [ref=f65e454]: Office of the Building Official (OBO) · 7 documents
+            - separator [ref=f65e455]
+            - generic [ref=f65e456]:
+              - button "View Requirements" [ref=f65e457] [cursor=pointer]
+              - link "Start Application" [ref=f65e458] [cursor=pointer]:
+                - /url: /permits/apply?type=Plumbing%20Permit
+          - generic [ref=f65e459]:
+            - generic [ref=f65e460]: Pending Verification
+            - generic [ref=f65e465]:
+              - heading "Electronics Permit" [level=4] [ref=f65e466]
+              - paragraph [ref=f65e467]: Office of the Building Official (OBO) · 7 documents
+            - separator [ref=f65e468]
+            - generic [ref=f65e469]:
+              - button "View Requirements" [ref=f65e470] [cursor=pointer]
+              - link "Start Application" [ref=f65e471] [cursor=pointer]:
+                - /url: /permits/apply?type=Electronics%20Permit
+          - generic [ref=f65e472]:
+            - generic [ref=f65e473]: Pending Verification
+            - generic [ref=f65e482]:
+              - heading "Interior Design Permit" [level=4] [ref=f65e483]
+              - paragraph [ref=f65e484]: Office of the Building Official (OBO) · 7 documents
+            - separator [ref=f65e485]
+            - generic [ref=f65e486]:
+              - button "View Requirements" [ref=f65e487] [cursor=pointer]
+              - link "Start Application" [ref=f65e488] [cursor=pointer]:
+                - /url: /permits/apply?type=Interior%20Design%20Permit
+        - heading "Other Permits" [level=3] [ref=f65e489]
+        - generic [ref=f65e490]:
+          - generic [ref=f65e491]:
+            - generic [ref=f65e492]: Pending Verification
+            - generic [ref=f65e501]:
+              - heading "Fencing Permit" [level=4] [ref=f65e502]
+              - paragraph [ref=f65e503]: Office of the Building Official (OBO) · 6 documents
+            - separator [ref=f65e504]
+            - generic [ref=f65e505]:
+              - button "View Requirements" [ref=f65e506] [cursor=pointer]
+              - link "Start Application" [ref=f65e507] [cursor=pointer]:
+                - /url: /permits/apply?type=Fencing%20Permit
+          - generic [ref=f65e508]:
+            - generic [ref=f65e509]: Pending Verification
+            - generic [ref=f65e518]:
+              - heading "Sign Permit" [level=4] [ref=f65e519]
+              - paragraph [ref=f65e520]: Office of the Building Official (OBO) · 7 documents
+            - separator [ref=f65e521]
+            - generic [ref=f65e522]:
+              - button "View Requirements" [ref=f65e523] [cursor=pointer]
+              - link "Start Application" [ref=f65e524] [cursor=pointer]:
+                - /url: /permits/apply?type=Sign%20Permit
+          - generic [ref=f65e525]:
+            - generic [ref=f65e526]: Pending Verification
+            - generic [ref=f65e535]:
+              - heading "Excavation Permit" [level=4] [ref=f65e536]
+              - paragraph [ref=f65e537]: Office of the Building Official (OBO) · 8 documents
+            - separator [ref=f65e538]
+            - generic [ref=f65e539]:
+              - button "View Requirements" [ref=f65e540] [cursor=pointer]
+              - link "Start Application" [ref=f65e541] [cursor=pointer]:
+                - /url: /permits/apply?type=Excavation%20Permit
+        - heading "Certificates" [level=3] [ref=f65e542]
+        - generic [ref=f65e543]:
+          - generic [ref=f65e544]:
+            - generic [ref=f65e545]: Verified Checklist
+            - generic [ref=f65e551]:
+              - heading "FSEC for Building Permit (BFP)" [level=4] [ref=f65e552]
+              - paragraph [ref=f65e553]: Bureau of Fire Protection — Castilla Fire Station · 9 documents
+            - separator [ref=f65e554]
+            - generic [ref=f65e555]:
+              - button "View Requirements" [ref=f65e556] [cursor=pointer]
+              - link "Start Application" [ref=f65e557] [cursor=pointer]:
+                - /url: /permits/apply?type=FSEC%20for%20Building%20Permit%20(BFP)
+          - generic [ref=f65e558]:
+            - generic [ref=f65e559]: Pending Verification
+            - generic [ref=f65e565]:
+              - heading "Certificate of Occupancy" [level=4] [ref=f65e566]
+              - paragraph [ref=f65e567]: Office of the Building Official (OBO) / BFP · 9 documents
+            - separator [ref=f65e568]
+            - generic [ref=f65e569]:
+              - button "View Requirements" [ref=f65e570] [cursor=pointer]
+              - link "Start Application" [ref=f65e571] [cursor=pointer]:
+                - /url: /permits/apply?type=Certificate%20of%20Occupancy
+          - generic [ref=f65e572]:
+            - generic [ref=f65e573]: Verified Checklist
+            - generic [ref=f65e579]:
+              - heading "FSIC for Occupancy Permit (BFP)" [level=4] [ref=f65e580]
+              - paragraph [ref=f65e581]: Bureau of Fire Protection — Castilla Fire Station · 10 documents
+            - separator [ref=f65e582]
+            - generic [ref=f65e583]:
+              - button "View Requirements" [ref=f65e584] [cursor=pointer]
+              - link "Start Application" [ref=f65e585] [cursor=pointer]:
+                - /url: /permits/apply?type=FSIC%20for%20Occupancy%20Permit%20(BFP)
+  - generic:
+    - generic:
+      - status
+      - alert

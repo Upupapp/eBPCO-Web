@@ -1,0 +1,161 @@
+- generic [ref=f11e61]:
+  - complementary [ref=f11e63]:
+    - generic [ref=f11e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f11e66]
+      - generic [ref=f11e67]: E-BPCO
+    - navigation [ref=f11e68]:
+      - link "Dashboard" [ref=f11e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f11e77]:
+        - generic [ref=f11e78]: Operations
+        - generic [ref=f11e79]:
+          - link "Applications" [ref=f11e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f11e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f11e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f11e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f11e105]:
+        - generic [ref=f11e106]: Administration
+        - generic [ref=f11e107]:
+          - link "Businesses" [active] [ref=f11e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Users & Roles" [ref=f11e114] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f11e121] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f11e130] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f11e136] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f11e142] [cursor=pointer]
+  - main [ref=f11e148]:
+    - generic [ref=f11e537]:
+      - generic "Businesses" [ref=f11e538]:
+        - generic [ref=f11e539]:
+          - heading "Businesses" [level=1] [ref=f11e540]
+          - generic [ref=f11e541]:
+            - generic [ref=f11e542]:
+              - generic [ref=f11e547]: Search
+              - textbox "Search" [ref=f11e548]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f11e550] [cursor=pointer]
+            - button "A admin@lgu.gov.ph Administrator" [ref=f11e556] [cursor=pointer]:
+              - generic [ref=f11e557]: A
+              - generic [ref=f11e561]:
+                - generic [ref=f11e562]: admin@lgu.gov.ph
+                - generic [ref=f11e563]: Administrator
+      - alert [ref=f11e568]:
+        - generic [ref=f11e573]: The application queue could not be loaded, so the figures on this page are not a picture of current work. This account does not hold the permission this action requires.
+      - generic [ref=f11e574]:
+        - generic [ref=f11e576]:
+          - generic [ref=f11e578]:
+            - paragraph [ref=f11e579]: Total Users
+            - paragraph [ref=f11e580]: "0"
+          - generic [ref=f11e581]: Distinct business owners in the real business directory
+        - generic [ref=f11e585]:
+          - generic [ref=f11e587]:
+            - paragraph [ref=f11e588]: Active Businesses
+            - paragraph [ref=f11e589]: "0"
+          - generic [ref=f11e590]:
+            - generic [ref=f11e591]: 0% of total businesses
+            - 'img "Active Businesses progress: 0 percent" [ref=f11e593]'
+        - generic [ref=f11e596]:
+          - generic [ref=f11e598]:
+            - paragraph [ref=f11e599]: Inactive Businesses
+            - paragraph [ref=f11e600]: "0"
+          - generic [ref=f11e601]:
+            - generic [ref=f11e602]: 0% of total businesses
+            - 'img "Inactive Businesses progress: 0 percent" [ref=f11e604]'
+        - generic [ref=f11e607]:
+          - generic [ref=f11e609]:
+            - paragraph [ref=f11e610]: Total Businesses
+            - paragraph [ref=f11e611]: "0"
+          - generic [ref=f11e612]:
+            - generic [ref=f11e613]: Registered in the real business directory
+            - 'img "Total Businesses progress: 100 percent" [ref=f11e615]'
+      - generic [ref=f11e617]:
+        - generic [ref=f11e618]:
+          - textbox "Search Here By Application ID, Applicant Name, or Location" [ref=f11e624]
+          - generic [ref=f11e625]:
+            - button [ref=f11e628] [cursor=pointer]
+            - button [ref=f11e632] [cursor=pointer]
+            - button [ref=f11e637] [cursor=pointer]
+        - note [ref=f11e640]:
+          - generic [ref=f11e645]: "Could not load the business directory: This account does not hold the permission this action requires. Only businesses added through \"Create New Business\" this session appear below."
+        - table [ref=f11e647]:
+          - rowgroup [ref=f11e648]:
+            - row [ref=f11e649]:
+              - columnheader [ref=f11e650]:
+                - checkbox "Select all businesses" [ref=f11e651]
+              - columnheader "Business ID" [ref=f11e652]
+              - columnheader "BUSINESS NAME" [ref=f11e653]
+              - columnheader "CATEGORY" [ref=f11e654]
+              - columnheader "CONTACT PERSON" [ref=f11e655]
+              - columnheader "DATE CREATED" [ref=f11e656]
+              - columnheader "User Count" [ref=f11e657]
+              - columnheader "STATUS" [ref=f11e658]
+              - columnheader "ACTION" [ref=f11e659]
+          - rowgroup [ref=f11e660]:
+            - row [ref=f11e661]:
+              - cell "No businesses match your search." [ref=f11e662]
+        - navigation "Pagination" [ref=f11e664]:
+          - generic [ref=f11e665]: Showing 0 of 0
+          - generic [ref=f11e666]:
+            - button "First page" [disabled] [ref=f11e667]
+            - button "Page 1" [ref=f11e672] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f11e673]
+      - generic [ref=f11e678]:
+        - navigation [ref=f11e679]:
+          - button [ref=f11e680] [cursor=pointer]
+          - button [ref=f11e685] [cursor=pointer]
+          - button [ref=f11e689] [cursor=pointer]
+        - generic [ref=f11e694]:
+          - generic [ref=f11e695]:
+            - heading "Businesses Growth" [level=2] [ref=f11e697]
+            - note [ref=f11e698]:
+              - generic [ref=f11e703]: Sample data for preview only — this deployment has no growth-analytics endpoint, so these figures (2,032 applications, 1,524 active users) do not reflect the real data shown elsewhere on this page.
+            - generic [ref=f11e707]:
+              - generic [ref=f11e708]: Jan
+              - generic [ref=f11e709]: Feb
+              - generic [ref=f11e710]: Mar
+              - generic [ref=f11e711]: Apr
+              - generic [ref=f11e712]: May
+              - generic [ref=f11e713]: Jun
+              - generic [ref=f11e714]: Jul
+              - generic [ref=f11e715]: Aug
+              - generic [ref=f11e716]: Sep
+              - generic [ref=f11e717]: Oct
+              - generic [ref=f11e718]: Nov
+              - generic [ref=f11e719]: Dec
+          - generic [ref=f11e720]:
+            - generic [ref=f11e722]:
+              - generic [ref=f11e724]:
+                - paragraph [ref=f11e725]: Applications Processed
+                - paragraph [ref=f11e726]: 2,032
+              - generic [ref=f11e728]:
+                - generic [ref=f11e729]: 12.5%
+                - generic [ref=f11e734]: Vs Previous 30 days
+            - generic [ref=f11e736]:
+              - generic [ref=f11e738]:
+                - paragraph [ref=f11e739]: Avg. Processing Time
+                - paragraph [ref=f11e740]: 3.6 days
+              - generic [ref=f11e742]:
+                - generic [ref=f11e743]: 8.3%
+                - generic [ref=f11e748]: Vs Previous 30 days
+            - generic [ref=f11e750]:
+              - generic [ref=f11e752]:
+                - paragraph [ref=f11e753]: Active Users
+                - paragraph [ref=f11e754]: 1,524
+              - generic [ref=f11e756]:
+                - generic [ref=f11e757]: 9.7%
+                - generic [ref=f11e762]: Vs Previous 30 days
+            - generic [ref=f11e764]:
+              - generic [ref=f11e766]:
+                - paragraph [ref=f11e767]: Storage Used
+                - paragraph [ref=f11e768]: 245 GB
+              - generic [ref=f11e770]:
+                - generic [ref=f11e771]: 15.2%
+                - generic [ref=f11e776]: Vs Previous 30 days

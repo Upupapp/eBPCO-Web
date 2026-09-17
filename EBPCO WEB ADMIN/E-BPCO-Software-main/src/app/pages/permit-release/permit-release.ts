@@ -26,6 +26,7 @@ import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
 import { QueueLoader } from '../../core/domain/queue-loader';
 import { PermitReleaseApi } from '../../core/api/permit-release.api';
 import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
+import { CapitalizeNameDirective } from '../../shared/utils/capitalize-name.directive';
 
 type PermitReleaseTab = 'release' | 'permit-types';
 
@@ -104,6 +105,7 @@ interface RingStat {
     FilterPanel,
     DocumentPreview,
     GeneratedPermitDocumentModal,
+    CapitalizeNameDirective,
   ],
   templateUrl: './permit-release.html',
   styleUrl: './permit-release.scss',

@@ -1,0 +1,133 @@
+- generic [ref=f40e3]:
+  - generic [ref=f40e4]:
+    - complementary [ref=f40e5]:
+      - generic [ref=f40e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f40e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f40e8]
+          - generic [ref=f40e9]: Collapse sidebar
+        - generic [ref=f40e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f40e11]:
+        - link "Home" [ref=f40e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f40e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f40e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f40e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f40e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f40e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f40e43] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f40e48] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f40e53] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f40e58] [cursor=pointer]
+    - generic [ref=f40e63]:
+      - link "View profile and settings" [ref=f40e65] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f40e66]: Stage FourteenD
+      - status [ref=f40e71]:
+        - strong [ref=f40e72]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f40e74]:
+        - heading "Fencing Permit" [level=1] [ref=f40e77]
+        - generic [ref=f40e78]:
+          - generic [ref=f40e79]:
+            - generic [ref=f40e80]: "1"
+            - text: Business & Type
+          - generic [ref=f40e82]:
+            - generic [ref=f40e83]: "2"
+            - text: Details
+          - generic [ref=f40e85]:
+            - generic [ref=f40e86]: "3"
+            - text: Documents
+          - generic [ref=f40e88]:
+            - generic [ref=f40e89]: "4"
+            - text: Review & Submit
+        - generic [ref=f40e116]:
+          - generic [ref=f40e117]: Required Documents
+          - paragraph [ref=f40e118]: "Accepted formats: PDF, JPG, JPEG, PNG."
+          - generic [ref=f40e119]:
+            - generic [ref=f40e120]:
+              - generic [ref=f40e121]:
+                - generic [ref=f40e122]: Required
+                - strong [ref=f40e123]: Land Title or Tax Declaration of the property
+              - generic [ref=f40e164]: stage14-test-doc.pdf
+            - generic [ref=f40e124]:
+              - button "Attach Land Title or Tax Declaration of the property" [ref=f40e125]
+              - generic [ref=f40e165]: or reuse
+              - combobox "or reuse" [ref=f40e166]:
+                - option "A document you've already uploaded…" [selected]
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+              - button "Remove" [ref=f40e167] [cursor=pointer]
+          - generic [ref=f40e126]:
+            - generic [ref=f40e128]:
+              - generic [ref=f40e129]: Optional
+              - strong [ref=f40e130]: Owner's Written Consent (if applicant is not the lot owner)
+            - generic [ref=f40e131]:
+              - button "Attach Owner's Written Consent (if applicant is not the lot owner)" [ref=f40e132]
+              - generic [ref=f40e168]: or reuse
+              - combobox "or reuse" [ref=f40e169]:
+                - option "A document you've already uploaded…" [selected]
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+          - generic [ref=f40e133]:
+            - generic [ref=f40e134]:
+              - generic [ref=f40e135]:
+                - generic [ref=f40e136]: Required
+                - strong [ref=f40e137]: Barangay Clearance
+              - generic [ref=f40e178]: stage14-test-doc.pdf
+            - generic [ref=f40e138]:
+              - button "Attach Barangay Clearance" [active] [ref=f40e139]
+              - generic [ref=f40e170]: or reuse
+              - combobox "or reuse" [ref=f40e171]:
+                - option "A document you've already uploaded…" [selected]
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+              - button "Remove" [ref=f40e179] [cursor=pointer]
+          - generic [ref=f40e140]:
+            - generic [ref=f40e142]:
+              - generic [ref=f40e143]: Required
+              - strong [ref=f40e144]: Locational Clearance / Zoning Certification
+            - generic [ref=f40e145]:
+              - button "Attach Locational Clearance / Zoning Certification" [ref=f40e146]
+              - generic [ref=f40e172]: or reuse
+              - combobox "or reuse" [ref=f40e173]:
+                - option "A document you've already uploaded…" [selected]
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+          - generic [ref=f40e147]:
+            - generic [ref=f40e149]:
+              - generic [ref=f40e150]: Required
+              - strong [ref=f40e151]: Valid Government-Issued ID of Applicant/Owner
+            - generic [ref=f40e152]:
+              - button "Attach Valid Government-Issued ID of Applicant/Owner" [ref=f40e153]
+              - generic [ref=f40e174]: or reuse
+              - combobox "or reuse" [ref=f40e175]:
+                - option "A document you've already uploaded…" [selected]
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+          - generic [ref=f40e154]:
+            - generic [ref=f40e156]:
+              - generic [ref=f40e157]: Required
+              - strong [ref=f40e158]: Fence Plan / Site Development Plan
+            - generic [ref=f40e159]:
+              - button "Attach Fence Plan / Site Development Plan" [ref=f40e160]
+              - generic [ref=f40e176]: or reuse
+              - combobox "or reuse" [ref=f40e177]:
+                - option "A document you've already uploaded…" [selected]
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+                - option "stage14-test-doc.pdf · uploaded Sep 16, 2026"
+          - generic [ref=f40e161]:
+            - button "Back" [ref=f40e162] [cursor=pointer]
+            - button "Continue" [ref=f40e163] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

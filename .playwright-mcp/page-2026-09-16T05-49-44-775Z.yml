@@ -1,0 +1,54 @@
+- generic [ref=f39e3]:
+  - generic [ref=f39e4]:
+    - complementary [ref=f39e5]:
+      - generic [ref=f39e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f39e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f39e8]
+          - generic [ref=f39e9]: Collapse sidebar
+        - generic [ref=f39e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f39e11]:
+        - link "Home" [ref=f39e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f39e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f39e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f39e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f39e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f39e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f39e43] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f39e48] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f39e53] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f39e58] [cursor=pointer]
+    - generic [ref=f39e63]:
+      - link "View profile and settings" [ref=f39e65] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f39e66]: Stage FourteenD
+      - status [ref=f39e71]:
+        - strong [ref=f39e72]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f39e411]:
+        - generic [ref=f39e412]:
+          - generic [ref=f39e413]:
+            - heading "Stage Fourteen Test Fencing Co. D" [level=1] [ref=f39e414]
+            - generic [ref=f39e415]: Retail · Reg. No. DTI-2026-000014D · Registered Jan 15, 2026
+          - link "Apply for Permit" [ref=f39e417] [cursor=pointer]:
+            - /url: /permits?businessId=e18f21b9-25da-433e-a4a4-35b05de1423b
+        - generic [ref=f39e418]:
+          - generic [ref=f39e419]: Business Address
+          - paragraph [ref=f39e420]: 45 Rizal St., Barangay Poblacion, Castilla, Sorsogon
+          - generic [ref=f39e421]: Active
+        - generic [ref=f39e422]:
+          - generic [ref=f39e423]: Applications for this Business
+          - generic [ref=f39e424]: No applications filed yet for this business.
+  - generic [ref=f39e425]:
+    - status [ref=f39e426]:
+      - generic [ref=f39e427]: Stage Fourteen Test Fencing Co. D registered with the Municipality.
+    - alert

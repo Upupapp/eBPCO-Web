@@ -1,0 +1,103 @@
+- generic [ref=f58e986]:
+  - complementary [ref=f58e988]:
+    - generic [ref=f58e989]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f58e991]
+      - generic [ref=f58e992]: E-BPCO
+    - navigation [ref=f58e993]:
+      - link "Dashboard" [ref=f58e996] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f58e1002]:
+        - generic [ref=f58e1003]: Operations
+        - generic [ref=f58e1004]:
+          - link "Applications" [ref=f58e1005] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f58e1011] [cursor=pointer]:
+            - /url: /evaluations
+      - generic [ref=f58e1016]:
+        - generic [ref=f58e1017]: Administration
+        - link "Archive" [ref=f58e1019] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f58e1025] [cursor=pointer]
+  - main [ref=f58e1031]:
+    - generic [ref=f58e1836]:
+      - generic "Evaluations" [ref=f58e1837]:
+        - generic [ref=f58e1838]:
+          - heading "Evaluations" [level=1] [ref=f58e1839]
+          - generic [ref=f58e1840]:
+            - generic [ref=f58e1841]:
+              - generic [ref=f58e1846]: Search
+              - textbox "Search" [ref=f58e1847]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f58e1849] [cursor=pointer]
+            - button "E evaluator@lgu.gov.ph Evaluator" [ref=f58e1855] [cursor=pointer]:
+              - generic [ref=f58e1856]: E
+              - generic [ref=f58e1860]:
+                - generic [ref=f58e1861]: evaluator@lgu.gov.ph
+                - generic [ref=f58e1862]: Evaluator
+      - generic [ref=f58e3374]:
+        - heading "Fire Safety Evaluation" [level=1] [ref=f58e3375]
+        - generic [ref=f58e3376]:
+          - button "Back" [ref=f58e3377] [cursor=pointer]
+          - button "More actions" [ref=f58e3379] [cursor=pointer]
+      - generic [ref=f58e3385]:
+        - generic [ref=f58e3387]:
+          - generic [ref=f58e3389]:
+            - paragraph [ref=f58e3390]: Total in Fire Safety Evaluation
+            - paragraph [ref=f58e3391]: "1"
+          - generic [ref=f58e3392]:
+            - generic [ref=f58e3393]: Across every status below — Revision Required · Under Review · Accepted
+            - 'img "3 categories: 0, 0, 1" [ref=f58e3395]'
+        - generic [ref=f58e3400]:
+          - generic [ref=f58e3402]:
+            - paragraph [ref=f58e3403]: Revision Required
+            - paragraph [ref=f58e3404]: "0"
+          - generic [ref=f58e3405]:
+            - generic [ref=f58e3406]: 0% of all applications
+            - 'img "Revision Required progress: 0 percent" [ref=f58e3408]'
+        - generic [ref=f58e3411]:
+          - generic [ref=f58e3413]:
+            - paragraph [ref=f58e3414]: Under Review
+            - paragraph [ref=f58e3415]: "0"
+          - generic [ref=f58e3416]:
+            - generic [ref=f58e3417]: 0% of all applications
+            - 'img "Under Review progress: 0 percent" [ref=f58e3419]'
+        - generic [ref=f58e3422]:
+          - generic [ref=f58e3424]:
+            - paragraph [ref=f58e3425]: Accepted
+            - paragraph [ref=f58e3426]: "1"
+          - generic [ref=f58e3427]:
+            - generic [ref=f58e3428]: 100% of all applications
+            - 'img "Accepted progress: 100 percent" [ref=f58e3430]'
+      - generic [ref=f58e3432]:
+        - button [ref=f58e3433] [cursor=pointer]
+        - button [ref=f58e3438] [cursor=pointer]
+        - button [ref=f58e3443] [cursor=pointer]
+      - generic [ref=f58e3448]:
+        - generic [ref=f58e3449]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Type" [ref=f58e3455]
+          - generic [ref=f58e3456]:
+            - button [ref=f58e3459] [cursor=pointer]
+            - button [ref=f58e3463] [cursor=pointer]
+        - table [ref=f58e3469]:
+          - rowgroup [ref=f58e3470]:
+            - row [ref=f58e3471]:
+              - columnheader [ref=f58e3472]:
+                - checkbox "Select all applications in this stage" [ref=f58e3473]
+              - columnheader "APPLICATION ID" [ref=f58e3474]
+              - columnheader "APPLICANT NAME" [ref=f58e3475]
+              - columnheader "MISSING DOCUMENTS" [ref=f58e3476]
+              - columnheader "TYPE" [ref=f58e3477]
+              - columnheader "REVIEWING DEPARTMENT" [ref=f58e3478]
+              - columnheader "DATE SUBMITTED" [ref=f58e3479]
+              - columnheader "ASSIGNED OFFICER" [ref=f58e3480]
+              - columnheader "STATUS" [ref=f58e3481]
+              - columnheader "ACTION" [ref=f58e3482]
+          - rowgroup [ref=f58e3483]:
+            - row [ref=f58e3484]:
+              - cell "No applications match your search." [ref=f58e3485]
+        - navigation "Pagination" [ref=f58e3487]:
+          - generic [ref=f58e3488]: Showing 0 of 0
+          - generic [ref=f58e3489]:
+            - button "First page" [disabled] [ref=f58e3490]
+            - button "Page 1" [ref=f58e3495] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f58e3496]

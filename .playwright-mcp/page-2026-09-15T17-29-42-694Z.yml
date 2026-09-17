@@ -1,0 +1,83 @@
+- generic [ref=f65e22]:
+  - generic [ref=f65e23]:
+    - complementary [ref=f65e24]:
+      - generic [ref=f65e25]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f65e26] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f65e27]
+          - generic [ref=f65e28]: Collapse sidebar
+        - generic [ref=f65e29]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f65e30]:
+        - link "Home" [ref=f65e31] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f65e36] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f65e43] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f65e48] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f65e54] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f65e58] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications 1" [ref=f65e62] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f65e66]: Notifications
+          - generic [ref=f65e67]: "1"
+        - link "Profile" [ref=f65e68] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f65e73] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f65e78] [cursor=pointer]
+    - generic [ref=f65e83]:
+      - link "View profile and settings" [ref=f65e85] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f65e86]: Test Citizen
+      - status [ref=f65e91]:
+        - strong [ref=f65e92]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f65e587]:
+        - heading "Fencing Permit" [level=1] [ref=f65e590]
+        - generic [ref=f65e591]:
+          - generic [ref=f65e592]:
+            - generic [ref=f65e593]: "1"
+            - text: Business & Type
+          - generic [ref=f65e595]:
+            - generic [ref=f65e596]: "2"
+            - text: Details
+          - generic [ref=f65e598]:
+            - generic [ref=f65e599]: "3"
+            - text: Documents
+          - generic [ref=f65e601]:
+            - generic [ref=f65e602]: "4"
+            - text: Review & Submit
+        - generic [ref=f65e699]:
+          - generic [ref=f65e700]: Review & Declaration
+          - table [ref=f65e701]:
+            - rowgroup [ref=f65e702]:
+              - row [ref=f65e703]:
+                - cell "Business" [ref=f65e704]
+                - cell "Test Citizen Hardware Store" [ref=f65e705]
+              - row [ref=f65e706]:
+                - cell "Permit Type" [ref=f65e707]
+                - cell "Fencing Permit" [ref=f65e708]
+              - row [ref=f65e709]:
+                - cell "Application Type" [ref=f65e710]
+                - cell "New" [ref=f65e711]
+              - row [ref=f65e712]:
+                - cell "Documents Attached" [ref=f65e713]
+                - cell "5 of 6" [ref=f65e714]
+          - separator [ref=f65e715]
+          - generic [ref=f65e716]:
+            - checkbox "I understand the application requirements and certify the information provided is true and correct." [ref=f65e717]
+            - text: I understand the application requirements and certify the information provided is true and correct.
+          - generic [ref=f65e718]:
+            - checkbox "I agree to the Terms & Conditions." [ref=f65e719]
+            - text: I agree to the Terms & Conditions.
+          - generic [ref=f65e720]:
+            - button "Back" [ref=f65e721] [cursor=pointer]
+            - button "Submit Application" [ref=f65e722] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

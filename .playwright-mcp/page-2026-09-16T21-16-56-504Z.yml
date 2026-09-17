@@ -1,0 +1,38 @@
+- generic [ref=f38e520]:
+  - generic [ref=f38e527]:
+    - img "Municipality of Castilla, Sorsogon seal" [ref=f38e531]
+    - paragraph [ref=f38e532]: Electronic Building Permit and Certificate of Occupancy
+    - paragraph [ref=f38e533]: Municipality of Castilla, Sorsogon
+  - generic [ref=f38e534]:
+    - generic [ref=f38e535]:
+      - generic [ref=f38e536]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f38e538]
+        - generic [ref=f38e539]: E-BPCO
+      - heading "Admin Portal" [level=1] [ref=f38e540]
+      - generic [ref=f38e541]:
+        - generic [ref=f38e542]: Enter Email Address
+        - textbox "Enter Email Address" [ref=f38e547]:
+          - /placeholder: Your email here
+          - text: releasing@lgu.gov.ph
+        - generic [ref=f38e548]: Enter Password
+        - generic [ref=f38e549]:
+          - textbox "Enter Password" [ref=f38e553]:
+            - /placeholder: Enter your password
+            - text: TxHS91YaZ8fb
+          - button "Show password" [ref=f38e554] [cursor=pointer]
+        - generic [ref=f38e559]:
+          - generic [ref=f38e560] [cursor=pointer]:
+            - checkbox "Remember me" [ref=f38e561]
+            - text: Remember me
+          - link "Forgot your password?" [ref=f38e562] [cursor=pointer]:
+            - /url: javascript:void(0)
+        - status [ref=f38e567]: Your password was accepted. Enter the six-digit code from your authenticator app.
+        - generic [ref=f38e568]: Authentication code
+        - textbox "Authentication code" [ref=f38e573]:
+          - /placeholder: "000000"
+        - button "Verify and sign in" [ref=f38e574] [cursor=pointer]
+      - paragraph [ref=f38e564]:
+        - text: Need an account?
+        - link "How to get one" [ref=f38e565] [cursor=pointer]:
+          - /url: /register
+    - paragraph [ref=f38e566]: © 2026 Municipality of Castilla, Sorsogon. All rights reserved.

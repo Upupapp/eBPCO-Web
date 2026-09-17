@@ -92,6 +92,12 @@ export type StaffWriteResult =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
 
+export type StaffCreateResult =
+  | { readonly kind: 'done'; readonly member: StaffMember; readonly nextStep: string }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 @Injectable({ providedIn: 'root' })
 export class StaffDirectoryApi {
   private readonly api = inject(ApiClient);
@@ -182,6 +188,31 @@ export class StaffDirectoryApi {
         'The forms were updated but the level was not, so this account now has the new '
         + `forms at its previous level. ${'message' in level ? level.message : ''}`.trim(),
     };
+  }
+
+  /**
+   * Creates a real staff account, without a password — the officer sets one
+   * through the account-recovery flow, which is exactly what the server's
+   * own `nextStep` (returned here, never re-worded) tells the caller. An
+   * account with no roles is a legitimate call (the server defaults `roles`
+   * to `[]`), created ahead of a posting being confirmed.
+   */
+  async create(email: string, roles: readonly string[]): Promise<StaffCreateResult> {
+    try {
+      const response = await this.api.post<StaffMember & { nextStep: string }>('/staff/users', {
+        email,
+        roles: [...roles],
+      });
+      const { nextStep, ...member } = response;
+      return { kind: 'done', member, nextStep };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        if (error.status === 403 || error.status === 409) return { kind: 'refused', message: error.message };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
   }
 
   /** Disable an account. It is preserved — see the note on delete above. */

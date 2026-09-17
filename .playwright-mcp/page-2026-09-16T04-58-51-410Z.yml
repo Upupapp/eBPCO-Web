@@ -1,0 +1,91 @@
+- generic [ref=f23e3]:
+  - generic [ref=f23e4]:
+    - complementary [ref=f23e5]:
+      - generic [ref=f23e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f23e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f23e8]
+          - generic [ref=f23e9]: Collapse sidebar
+        - generic [ref=f23e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f23e11]:
+        - link "Home" [ref=f23e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f23e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f23e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f23e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f23e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f23e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f23e43] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f23e48] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f23e53] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f23e58] [cursor=pointer]
+    - generic [ref=f23e63]:
+      - link "View profile and settings" [ref=f23e65] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f23e66]: Stage Fourteen Lifecycle
+      - status [ref=f23e71]:
+        - strong [ref=f23e72]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f23e74]:
+        - heading "Fencing Permit" [level=1] [ref=f23e77]
+        - generic [ref=f23e78]:
+          - generic [ref=f23e79]:
+            - generic [ref=f23e80]: "1"
+            - text: Business & Type
+          - generic [ref=f23e82]:
+            - generic [ref=f23e83]: "2"
+            - text: Details
+          - generic [ref=f23e85]:
+            - generic [ref=f23e86]: "3"
+            - text: Documents
+          - generic [ref=f23e88]:
+            - generic [ref=f23e89]: "4"
+            - text: Review & Submit
+        - generic [ref=f23e116]:
+          - generic [ref=f23e117]: Required Documents
+          - paragraph [ref=f23e118]: "Accepted formats: PDF, JPG, JPEG, PNG."
+          - generic [ref=f23e119]:
+            - generic [ref=f23e121]:
+              - generic [ref=f23e122]: Required
+              - strong [ref=f23e123]: Land Title or Tax Declaration of the property
+            - button "Attach Land Title or Tax Declaration of the property" [ref=f23e125]
+          - generic [ref=f23e126]:
+            - generic [ref=f23e128]:
+              - generic [ref=f23e129]: Optional
+              - strong [ref=f23e130]: Owner's Written Consent (if applicant is not the lot owner)
+            - button "Attach Owner's Written Consent (if applicant is not the lot owner)" [ref=f23e132]
+          - generic [ref=f23e133]:
+            - generic [ref=f23e135]:
+              - generic [ref=f23e136]: Required
+              - strong [ref=f23e137]: Barangay Clearance
+            - button "Attach Barangay Clearance" [ref=f23e139]
+          - generic [ref=f23e140]:
+            - generic [ref=f23e142]:
+              - generic [ref=f23e143]: Required
+              - strong [ref=f23e144]: Locational Clearance / Zoning Certification
+            - button "Attach Locational Clearance / Zoning Certification" [ref=f23e146]
+          - generic [ref=f23e147]:
+            - generic [ref=f23e149]:
+              - generic [ref=f23e150]: Required
+              - strong [ref=f23e151]: Valid Government-Issued ID of Applicant/Owner
+            - button "Attach Valid Government-Issued ID of Applicant/Owner" [ref=f23e153]
+          - generic [ref=f23e154]:
+            - generic [ref=f23e156]:
+              - generic [ref=f23e157]: Required
+              - strong [ref=f23e158]: Fence Plan / Site Development Plan
+            - button "Attach Fence Plan / Site Development Plan" [ref=f23e160]
+          - generic [ref=f23e161]:
+            - button "Back" [ref=f23e162] [cursor=pointer]
+            - button "Continue" [ref=f23e163] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

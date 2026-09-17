@@ -1,0 +1,106 @@
+- generic [ref=f61e3]:
+  - generic [ref=f61e4]:
+    - complementary [ref=f61e5]:
+      - generic [ref=f61e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f61e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f61e8]
+          - generic [ref=f61e9]: Collapse sidebar
+        - generic [ref=f61e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f61e11]:
+        - link "Home" [ref=f61e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f61e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f61e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f61e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f61e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f61e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications 7" [ref=f61e43] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f61e47]: Notifications
+          - generic [ref=f61e48]: "7"
+        - link "Profile" [ref=f61e49] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f61e54] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f61e59] [cursor=pointer]
+    - generic [ref=f61e64]:
+      - link "View profile and settings" [ref=f61e66] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f61e67]: Stage FourteenF
+      - status [ref=f61e72]:
+        - strong [ref=f61e73]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f61e103]:
+        - generic [ref=f61e104]:
+          - generic [ref=f61e105]:
+            - heading "Fencing Permit" [level=1] [ref=f61e106]
+            - generic [ref=f61e107]: E-BPCO-2026-000007 · · New
+          - generic [ref=f61e108]: Under Review
+        - generic [ref=f61e110]:
+          - generic [ref=f61e111]:
+            - strong [ref=f61e112]: Progress
+            - generic [ref=f61e113]: 29%
+          - paragraph [ref=f61e116]: Your application is under technical evaluation by the reviewing office.
+        - generic [ref=f61e118]:
+          - generic [ref=f61e119]: Your permit
+          - paragraph [ref=f61e120]: No permit has been issued for this application yet.
+          - generic [ref=f61e121]:
+            - strong [ref=f61e122]: Not yet ready to collect
+            - paragraph [ref=f61e123]: The Municipality has not arranged collection for this permit yet.
+        - generic [ref=f61e124]:
+          - generic [ref=f61e125]: Documents
+          - list [ref=f61e127]:
+            - listitem [ref=f61e128]:
+              - generic [ref=f61e129]:
+                - generic [ref=f61e130]: Land Title or Tax Declaration of the property
+                - generic [ref=f61e131]: Not yet reviewed
+              - generic [ref=f61e132]: stage14-test-doc.pdf
+              - button "Preview" [ref=f61e133] [cursor=pointer]
+            - listitem [ref=f61e134]:
+              - generic [ref=f61e135]:
+                - generic [ref=f61e136]: Barangay Clearance
+                - generic [ref=f61e137]: Not yet reviewed
+              - generic [ref=f61e138]: stage14-test-doc.pdf
+              - button "Preview" [ref=f61e139] [cursor=pointer]
+            - listitem [ref=f61e140]:
+              - generic [ref=f61e141]:
+                - generic [ref=f61e142]: Locational Clearance / Zoning Certification
+                - generic [ref=f61e143]: Not yet reviewed
+              - generic [ref=f61e144]: stage14-test-doc.pdf
+              - button "Preview" [ref=f61e145] [cursor=pointer]
+            - listitem [ref=f61e146]:
+              - generic [ref=f61e147]:
+                - generic [ref=f61e148]: Valid Government-Issued ID of Applicant/Owner
+                - generic [ref=f61e149]: Not yet reviewed
+              - generic [ref=f61e150]: stage14-test-doc.pdf
+              - button "Preview" [ref=f61e151] [cursor=pointer]
+            - listitem [ref=f61e152]:
+              - generic [ref=f61e153]:
+                - generic [ref=f61e154]: Fence Plan / Site Development Plan
+                - generic [ref=f61e155]: Not yet reviewed
+              - generic [ref=f61e156]: stage14-test-doc.pdf
+              - button "Preview" [ref=f61e157] [cursor=pointer]
+        - generic [ref=f61e158]:
+          - generic [ref=f61e159]: Status Timeline
+          - generic [ref=f61e160]:
+            - generic [ref=f61e161]: Sep 16, 2026, 02:58 PM
+            - generic [ref=f61e162]: Submitted
+          - generic [ref=f61e163]:
+            - generic [ref=f61e164]: Sep 16, 2026, 02:59 PM
+            - generic [ref=f61e165]: Received
+          - generic [ref=f61e166]:
+            - generic [ref=f61e167]: Sep 16, 2026, 02:59 PM
+            - generic [ref=f61e168]: Document Verification
+          - generic [ref=f61e169]:
+            - generic [ref=f61e170]: Sep 16, 2026, 03:00 PM
+            - generic [ref=f61e171]: Under Evaluation
+  - generic [ref=f61e172]:
+    - status [ref=f61e173]:
+      - generic [ref=f61e174]: Payment submitted to the Municipality — this settles your balance, pending verification.
+    - alert

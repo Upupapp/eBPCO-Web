@@ -1,0 +1,261 @@
+- generic [ref=f14e53]:
+  - complementary [ref=f14e55]:
+    - generic [ref=f14e56]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f14e58]
+      - generic [ref=f14e59]: E-BPCO
+    - navigation [ref=f14e60]:
+      - link "Dashboard" [ref=f14e63] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f14e69]:
+        - generic [ref=f14e70]: Operations
+        - generic [ref=f14e71]:
+          - link "Applications" [active] [ref=f14e72] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f14e78] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f14e83] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f14e90] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f14e97]:
+        - generic [ref=f14e98]: Administration
+        - generic [ref=f14e99]:
+          - link "Businesses" [ref=f14e100] [cursor=pointer]:
+            - /url: /businesses
+          - link "Users & Roles" [ref=f14e106] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f14e113] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f14e122] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f14e128] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f14e134] [cursor=pointer]
+  - main [ref=f14e140]:
+    - generic [ref=f14e1112]:
+      - generic "Applications" [ref=f14e1113]:
+        - generic [ref=f14e1114]:
+          - heading "Applications" [level=1] [ref=f14e1115]
+          - generic [ref=f14e1116]:
+            - generic [ref=f14e1117]:
+              - generic [ref=f14e1122]: Search
+              - textbox "Search" [ref=f14e1123]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f14e1125] [cursor=pointer]
+            - button "R records@lgu.gov.ph Administrator" [ref=f14e1131] [cursor=pointer]:
+              - generic [ref=f14e1132]: R
+              - generic [ref=f14e1136]:
+                - generic [ref=f14e1137]: records@lgu.gov.ph
+                - generic [ref=f14e1138]: Administrator
+      - note [ref=f14e1143]:
+        - generic [ref=f14e1148]: "You are assigned 1 form: Fencing Permit. Applications for other permit types are not shown here."
+      - generic [ref=f14e1149]:
+        - generic [ref=f14e1151]:
+          - generic [ref=f14e1153]:
+            - paragraph [ref=f14e1154]: Under Review
+            - paragraph [ref=f14e1155]: "6"
+          - generic [ref=f14e1156]:
+            - generic [ref=f14e1157]: 86% of all applications
+            - 'img "Under Review progress: 86 percent" [ref=f14e1159]'
+        - generic [ref=f14e1162]:
+          - generic [ref=f14e1164]:
+            - paragraph [ref=f14e1165]: Approved
+            - paragraph [ref=f14e1166]: "1"
+          - generic [ref=f14e1167]:
+            - generic [ref=f14e1168]: 14% of all applications
+            - 'img "Approved progress: 14 percent" [ref=f14e1170]'
+        - generic [ref=f14e1173]:
+          - generic [ref=f14e1175]:
+            - paragraph [ref=f14e1176]: Rejected
+            - paragraph [ref=f14e1177]: "0"
+          - generic [ref=f14e1178]:
+            - generic [ref=f14e1179]: 0% of all applications
+            - 'img "Rejected progress: 0 percent" [ref=f14e1181]'
+        - generic [ref=f14e1184]:
+          - generic [ref=f14e1186]:
+            - paragraph [ref=f14e1187]: Total Applications
+            - paragraph [ref=f14e1188]: "7"
+          - generic [ref=f14e1189]:
+            - generic [ref=f14e1190]: Under Review · Approved · Rejected
+            - 'img "3 categories: 6, 1, 0" [ref=f14e1192]'
+      - generic [ref=f14e1196]:
+        - generic [ref=f14e1197]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Location" [ref=f14e1203]
+          - generic [ref=f14e1204]:
+            - button [ref=f14e1207] [cursor=pointer]
+            - button [ref=f14e1211] [cursor=pointer]
+            - button [ref=f14e1216] [cursor=pointer]
+        - table [ref=f14e1220]:
+          - rowgroup [ref=f14e1221]:
+            - row [ref=f14e1222]:
+              - columnheader [ref=f14e1223]:
+                - checkbox "Select all applications" [ref=f14e1224]
+              - columnheader "APPLICATION ID" [ref=f14e1225]
+              - columnheader "APPLICANT NAME" [ref=f14e1226]
+              - columnheader "LOCATION" [ref=f14e1227]
+              - columnheader "TYPE" [ref=f14e1228]
+              - columnheader "DATE SUBMITTED" [ref=f14e1229]
+              - columnheader "ASSIGNED OFFICER" [ref=f14e1230]
+              - columnheader "STATUS" [ref=f14e1231]
+              - columnheader "ACTION" [ref=f14e1232]
+          - rowgroup [ref=f14e1233]:
+            - row [ref=f14e1234] [cursor=pointer]:
+              - cell [ref=f14e1235]:
+                - checkbox "Select application 710e7e61-5741-40b8-8a0b-2ceb09981bd2" [ref=f14e1236]
+              - cell "710e7e61-5741-40b8-8a0b-2ceb09981bd2 E-BPCO-2026-000007" [ref=f14e1237]:
+                - text: 710e7e61-5741-40b8-8a0b-2ceb09981bd2
+                - generic [ref=f14e1238]: E-BPCO-2026-000007
+              - cell "LM Liza Marasigan —" [ref=f14e1239]:
+                - generic [ref=f14e1240]:
+                  - generic [ref=f14e1241]: LM
+                  - generic [ref=f14e1243]:
+                    - generic "Liza Marasigan" [ref=f14e1244]
+                    - generic "—" [ref=f14e1245]
+              - cell "45 Mabini Street, Poblacion, Castilla" [ref=f14e1246]
+              - cell "Fencing Permit" [ref=f14e1247]
+              - cell "2026-09-16" [ref=f14e1248]
+              - cell "—" [ref=f14e1249]
+              - cell "Under Review" [ref=f14e1250]
+              - cell [ref=f14e1252]:
+                - generic [ref=f14e1253]:
+                  - button "View application 710e7e61-5741-40b8-8a0b-2ceb09981bd2" [ref=f14e1254]
+                  - button "Edit application 710e7e61-5741-40b8-8a0b-2ceb09981bd2" [ref=f14e1259]
+                  - button "Delete application 710e7e61-5741-40b8-8a0b-2ceb09981bd2" [ref=f14e1263]
+            - row [ref=f14e1268] [cursor=pointer]:
+              - cell [ref=f14e1269]:
+                - checkbox "Select application 97555355-07b3-41db-bd15-41c89ff5b8d6" [ref=f14e1270]
+              - cell "97555355-07b3-41db-bd15-41c89ff5b8d6 E-BPCO-2026-000006" [ref=f14e1271]:
+                - text: 97555355-07b3-41db-bd15-41c89ff5b8d6
+                - generic [ref=f14e1272]: E-BPCO-2026-000006
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f14e1273]:
+                - generic [ref=f14e1274]:
+                  - generic [ref=f14e1275]: MS
+                  - generic [ref=f14e1277]:
+                    - generic "Maria Santos" [ref=f14e1278]
+                    - generic "Santos Sari-Sari Store" [ref=f14e1279]
+              - cell "60 Rizal Street, Poblacion" [ref=f14e1280]
+              - cell "Fencing Permit" [ref=f14e1281]
+              - cell "2026-09-16" [ref=f14e1282]
+              - cell "—" [ref=f14e1283]
+              - cell "Approved" [ref=f14e1284]
+              - cell [ref=f14e1286]:
+                - generic [ref=f14e1287]:
+                  - button "View application 97555355-07b3-41db-bd15-41c89ff5b8d6" [ref=f14e1288]
+                  - button "Edit application 97555355-07b3-41db-bd15-41c89ff5b8d6" [ref=f14e1293]
+                  - button "Delete application 97555355-07b3-41db-bd15-41c89ff5b8d6" [ref=f14e1297]
+            - row [ref=f14e1302] [cursor=pointer]:
+              - cell [ref=f14e1303]:
+                - checkbox "Select application f5711e7e-0318-445b-9d64-3f5ea26b3969" [ref=f14e1304]
+              - cell "f5711e7e-0318-445b-9d64-3f5ea26b3969 E-BPCO-2026-000005" [ref=f14e1305]:
+                - text: f5711e7e-0318-445b-9d64-3f5ea26b3969
+                - generic [ref=f14e1306]: E-BPCO-2026-000005
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f14e1307]:
+                - generic [ref=f14e1308]:
+                  - generic [ref=f14e1309]: MS
+                  - generic [ref=f14e1311]:
+                    - generic "Maria Santos" [ref=f14e1312]
+                    - generic "Santos Sari-Sari Store" [ref=f14e1313]
+              - cell "50 Rizal Street, Poblacion" [ref=f14e1314]
+              - cell "Fencing Permit" [ref=f14e1315]
+              - cell "2026-09-16" [ref=f14e1316]
+              - cell "—" [ref=f14e1317]
+              - cell "Under Review" [ref=f14e1318]
+              - cell [ref=f14e1320]:
+                - generic [ref=f14e1321]:
+                  - button "View application f5711e7e-0318-445b-9d64-3f5ea26b3969" [ref=f14e1322]
+                  - button "Edit application f5711e7e-0318-445b-9d64-3f5ea26b3969" [ref=f14e1327]
+                  - button "Delete application f5711e7e-0318-445b-9d64-3f5ea26b3969" [ref=f14e1331]
+            - row [ref=f14e1336] [cursor=pointer]:
+              - cell [ref=f14e1337]:
+                - checkbox "Select application 1c328cbb-9541-424b-a9b3-0bd2d9f79a48" [ref=f14e1338]
+              - cell "1c328cbb-9541-424b-a9b3-0bd2d9f79a48 E-BPCO-2026-000004" [ref=f14e1339]:
+                - text: 1c328cbb-9541-424b-a9b3-0bd2d9f79a48
+                - generic [ref=f14e1340]: E-BPCO-2026-000004
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f14e1341]:
+                - generic [ref=f14e1342]:
+                  - generic [ref=f14e1343]: MS
+                  - generic [ref=f14e1345]:
+                    - generic "Maria Santos" [ref=f14e1346]
+                    - generic "Santos Sari-Sari Store" [ref=f14e1347]
+              - cell "40 Rizal Street, Poblacion" [ref=f14e1348]
+              - cell "Fencing Permit" [ref=f14e1349]
+              - cell "2026-09-16" [ref=f14e1350]
+              - cell "—" [ref=f14e1351]
+              - cell "Under Review" [ref=f14e1352]
+              - cell [ref=f14e1354]:
+                - generic [ref=f14e1355]:
+                  - button "View application 1c328cbb-9541-424b-a9b3-0bd2d9f79a48" [ref=f14e1356]
+                  - button "Edit application 1c328cbb-9541-424b-a9b3-0bd2d9f79a48" [ref=f14e1361]
+                  - button "Delete application 1c328cbb-9541-424b-a9b3-0bd2d9f79a48" [ref=f14e1365]
+            - row [ref=f14e1370] [cursor=pointer]:
+              - cell [ref=f14e1371]:
+                - checkbox "Select application aff44047-955b-484c-8628-e086ae587be2" [ref=f14e1372]
+              - cell "aff44047-955b-484c-8628-e086ae587be2 E-BPCO-2026-000003" [ref=f14e1373]:
+                - text: aff44047-955b-484c-8628-e086ae587be2
+                - generic [ref=f14e1374]: E-BPCO-2026-000003
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f14e1375]:
+                - generic [ref=f14e1376]:
+                  - generic [ref=f14e1377]: MS
+                  - generic [ref=f14e1379]:
+                    - generic "Maria Santos" [ref=f14e1380]
+                    - generic "Santos Sari-Sari Store" [ref=f14e1381]
+              - cell "30 Rizal Street, Poblacion" [ref=f14e1382]
+              - cell "Fencing Permit" [ref=f14e1383]
+              - cell "2026-09-16" [ref=f14e1384]
+              - cell "—" [ref=f14e1385]
+              - cell "Under Review" [ref=f14e1386]
+              - cell [ref=f14e1388]:
+                - generic [ref=f14e1389]:
+                  - button "View application aff44047-955b-484c-8628-e086ae587be2" [ref=f14e1390]
+                  - button "Edit application aff44047-955b-484c-8628-e086ae587be2" [ref=f14e1395]
+                  - button "Delete application aff44047-955b-484c-8628-e086ae587be2" [ref=f14e1399]
+            - row [ref=f14e1404] [cursor=pointer]:
+              - cell [ref=f14e1405]:
+                - checkbox "Select application 68a4b091-a924-435c-8afb-4f269660f154" [ref=f14e1406]
+              - cell "68a4b091-a924-435c-8afb-4f269660f154 E-BPCO-2026-000002" [ref=f14e1407]:
+                - text: 68a4b091-a924-435c-8afb-4f269660f154
+                - generic [ref=f14e1408]: E-BPCO-2026-000002
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f14e1409]:
+                - generic [ref=f14e1410]:
+                  - generic [ref=f14e1411]: MS
+                  - generic [ref=f14e1413]:
+                    - generic "Maria Santos" [ref=f14e1414]
+                    - generic "Santos Sari-Sari Store" [ref=f14e1415]
+              - cell "20 Rizal Street, Poblacion" [ref=f14e1416]
+              - cell "Fencing Permit" [ref=f14e1417]
+              - cell "2026-09-16" [ref=f14e1418]
+              - cell "—" [ref=f14e1419]
+              - cell "Under Review" [ref=f14e1420]
+              - cell [ref=f14e1422]:
+                - generic [ref=f14e1423]:
+                  - button "View application 68a4b091-a924-435c-8afb-4f269660f154" [ref=f14e1424]
+                  - button "Edit application 68a4b091-a924-435c-8afb-4f269660f154" [ref=f14e1429]
+                  - button "Delete application 68a4b091-a924-435c-8afb-4f269660f154" [ref=f14e1433]
+            - row [ref=f14e1438] [cursor=pointer]:
+              - cell [ref=f14e1439]:
+                - checkbox "Select application a9a12cc0-b2ab-4a77-bac7-e161c06f200d" [ref=f14e1440]
+              - cell "a9a12cc0-b2ab-4a77-bac7-e161c06f200d E-BPCO-2026-000001" [ref=f14e1441]:
+                - text: a9a12cc0-b2ab-4a77-bac7-e161c06f200d
+                - generic [ref=f14e1442]: E-BPCO-2026-000001
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f14e1443]:
+                - generic [ref=f14e1444]:
+                  - generic [ref=f14e1445]: MS
+                  - generic [ref=f14e1447]:
+                    - generic "Maria Santos" [ref=f14e1448]
+                    - generic "Santos Sari-Sari Store" [ref=f14e1449]
+              - cell "10 Rizal Street, Poblacion" [ref=f14e1450]
+              - cell "Fencing Permit" [ref=f14e1451]
+              - cell "2026-09-16" [ref=f14e1452]
+              - cell "—" [ref=f14e1453]
+              - cell "Under Review" [ref=f14e1454]
+              - cell [ref=f14e1456]:
+                - generic [ref=f14e1457]:
+                  - button "View application a9a12cc0-b2ab-4a77-bac7-e161c06f200d" [ref=f14e1458]
+                  - button "Edit application a9a12cc0-b2ab-4a77-bac7-e161c06f200d" [ref=f14e1463]
+                  - button "Delete application a9a12cc0-b2ab-4a77-bac7-e161c06f200d" [ref=f14e1467]
+        - navigation "Pagination" [ref=f14e1473]:
+          - generic [ref=f14e1474]: Showing 1-7 from 7
+          - generic [ref=f14e1475]:
+            - button "First page" [disabled] [ref=f14e1476]
+            - button "Page 1" [ref=f14e1481] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f14e1482]

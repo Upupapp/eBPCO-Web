@@ -1,0 +1,83 @@
+- generic [ref=f12e61]:
+  - complementary [ref=f12e63]:
+    - generic [ref=f12e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f12e66]
+      - generic [ref=f12e67]: E-BPCO
+    - navigation [ref=f12e68]:
+      - link "Dashboard" [ref=f12e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f12e77]:
+        - generic [ref=f12e78]: Operations
+        - generic [ref=f12e79]:
+          - link "Applications" [ref=f12e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [active] [ref=f12e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f12e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f12e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f12e105]:
+        - generic [ref=f12e106]: Administration
+        - generic [ref=f12e107]:
+          - link "Businesses" [ref=f12e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f12e114] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f12e120] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f12e127] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f12e136] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f12e142] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f12e148] [cursor=pointer]
+  - main [ref=f12e154]:
+    - generic [ref=f12e2255]:
+      - generic "Evaluations" [ref=f12e2256]:
+        - generic [ref=f12e2257]:
+          - heading "Evaluations" [level=1] [ref=f12e2258]
+          - generic [ref=f12e2259]:
+            - generic [ref=f12e2260]:
+              - generic [ref=f12e2265]: Search
+              - textbox "Search" [ref=f12e2266]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f12e2268] [cursor=pointer]
+            - button "S super@lgu.gov.ph Super Admin" [ref=f12e2274] [cursor=pointer]:
+              - generic [ref=f12e2275]: S
+              - generic [ref=f12e2279]:
+                - generic [ref=f12e2280]: super@lgu.gov.ph
+                - generic [ref=f12e2281]: Super Admin
+      - heading "List Of Evaluations" [level=2] [ref=f12e2285]
+      - generic [ref=f12e2286]:
+        - 'button "Initial Evaluation: 3 applications. Review and process building permit applications." [ref=f12e2287] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f12e2289]: "01"
+          - paragraph [ref=f12e2312]: "3"
+          - paragraph [ref=f12e2313]: Initial Evaluation
+          - paragraph [ref=f12e2314]: Review and process building permit applications.
+        - 'button "Zoning Evaluation: 1 applications. A local authority review for compliance with zoning and building regulations." [ref=f12e2315] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f12e2317]: "02"
+          - paragraph [ref=f12e2340]: "1"
+          - paragraph [ref=f12e2341]: Zoning Evaluation
+          - paragraph [ref=f12e2342]: A local authority review for compliance with zoning and building regulations.
+        - 'button "Fire Safety Evaluation: 0 applications. An assessment of a building''s compliance with fire safety standards." [ref=f12e2343] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f12e2345]: "03"
+          - paragraph [ref=f12e2371]: "0"
+          - paragraph [ref=f12e2372]: Fire Safety Evaluation
+          - paragraph [ref=f12e2373]: An assessment of a building's compliance with fire safety standards.
+        - 'button "OBO Evaluation: 0 applications. An OBO review for fire and building code compliance." [ref=f12e2374] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f12e2376]: "04"
+          - paragraph [ref=f12e2399]: "0"
+          - paragraph [ref=f12e2400]: OBO Evaluation
+          - paragraph [ref=f12e2401]: An OBO review for fire and building code compliance.
+        - 'button "Final Evaluation: 0 applications. A final sign-off confirming the application is ready for permit release." [ref=f12e2402] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f12e2404]: "05"
+          - paragraph [ref=f12e2430]: "0"
+          - paragraph [ref=f12e2431]: Final Evaluation
+          - paragraph [ref=f12e2432]: A final sign-off confirming the application is ready for permit release.
+        - 'button "Stage not recorded: 0 applications. Applications the server has not told this portal the evaluation stage for." [ref=f12e2433] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f12e2435]: "06"
+          - paragraph [ref=f12e2457]: "0"
+          - paragraph [ref=f12e2458]: Stage not recorded
+          - paragraph [ref=f12e2459]: Applications the server has not told this portal the evaluation stage for.

@@ -1,0 +1,85 @@
+- generic [ref=f54e22]:
+  - generic [ref=f54e23]:
+    - complementary [ref=f54e24]:
+      - generic [ref=f54e25]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f54e26] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f54e27]
+          - generic [ref=f54e28]: Collapse sidebar
+        - generic [ref=f54e29]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f54e30]:
+        - link "Home" [ref=f54e31] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f54e36] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f54e43] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f54e48] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f54e54] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f54e58] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications 1" [ref=f54e62] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f54e66]: Notifications
+          - generic [ref=f54e67]: "1"
+        - link "Profile" [ref=f54e68] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f54e73] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f54e78] [cursor=pointer]
+    - generic [ref=f54e83]:
+      - link "View profile and settings" [ref=f54e85] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f54e86]: Test Citizen
+      - status [ref=f54e91]:
+        - strong [ref=f54e92]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f54e576]:
+        - generic [ref=f54e578]:
+          - heading "New Business Permit Application" [level=1] [ref=f54e579]
+          - generic [ref=f54e580]: Generic application flow
+        - generic [ref=f54e581]:
+          - generic [ref=f54e582]:
+            - generic [ref=f54e583]: "1"
+            - text: Business & Type
+          - generic [ref=f54e585]:
+            - generic [ref=f54e586]: "2"
+            - text: Details
+          - generic [ref=f54e588]:
+            - generic [ref=f54e589]: "3"
+            - text: Documents
+          - generic [ref=f54e591]:
+            - generic [ref=f54e592]: "4"
+            - text: Review & Submit
+        - generic [ref=f54e658]:
+          - generic [ref=f54e659]: Review & Declaration
+          - table [ref=f54e660]:
+            - rowgroup [ref=f54e661]:
+              - row [ref=f54e662]:
+                - cell "Business" [ref=f54e663]
+                - cell "Test Citizen Hardware Store" [ref=f54e664]
+              - row [ref=f54e665]:
+                - cell "Permit Type" [ref=f54e666]
+                - cell "New Business Permit (Generic)" [ref=f54e667]
+              - row [ref=f54e668]:
+                - cell "Application Type" [ref=f54e669]
+                - cell "New" [ref=f54e670]
+              - row [ref=f54e671]:
+                - cell "Documents Attached" [ref=f54e672]
+                - cell "3 of 3" [ref=f54e673]
+          - separator [ref=f54e674]
+          - generic [ref=f54e675]:
+            - checkbox "I understand the application requirements and certify the information provided is true and correct." [checked] [ref=f54e676]
+            - text: I understand the application requirements and certify the information provided is true and correct.
+          - generic [ref=f54e677]:
+            - checkbox "I agree to the Terms & Conditions." [checked] [active] [ref=f54e678]
+            - text: I agree to the Terms & Conditions.
+          - generic [ref=f54e679]:
+            - button "Back" [ref=f54e680] [cursor=pointer]
+            - button "Submit Application" [ref=f54e681] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

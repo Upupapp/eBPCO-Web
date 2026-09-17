@@ -1,0 +1,26 @@
+- generic [ref=f43e5]:
+  - generic [ref=f43e12]:
+    - paragraph [ref=f43e13]: Electronic Building Permit and Certificate of Occupancy
+    - paragraph [ref=f43e14]: Municipality of Castilla, Sorsogon
+  - generic [ref=f43e15]:
+    - generic [ref=f43e16]:
+      - generic [ref=f43e17]: E-BPCO
+      - heading "Admin Portal" [level=1] [ref=f43e19]
+      - generic [ref=f43e20]:
+        - generic [ref=f43e21]: Enter Email Address
+        - textbox "Enter Email Address" [ref=f43e26]:
+          - /placeholder: Your email here
+        - generic [ref=f43e27]: Enter Password
+        - generic [ref=f43e28]:
+          - textbox "Enter Password" [ref=f43e32]:
+            - /placeholder: Enter your password
+          - button [ref=f43e33] [cursor=pointer]
+        - generic [ref=f43e34]:
+          - generic [ref=f43e35] [cursor=pointer]:
+            - checkbox "Remember me" [ref=f43e36]
+            - text: Remember me
+          - link "Forgot your password?" [ref=f43e37] [cursor=pointer]:
+            - /url: javascript:void(0)
+        - button [ref=f43e38] [cursor=pointer]
+      - paragraph [ref=f43e39]: Need an account? How to get one
+    - paragraph

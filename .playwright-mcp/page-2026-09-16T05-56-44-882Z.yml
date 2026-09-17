@@ -1,0 +1,141 @@
+- generic [ref=f42e1359]:
+  - complementary [ref=f42e1361]:
+    - generic [ref=f42e1362]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f42e1364]
+      - generic [ref=f42e1365]: E-BPCO
+    - navigation [ref=f42e1366]:
+      - link "Dashboard" [ref=f42e1369] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f42e1375]:
+        - generic [ref=f42e1376]: Operations
+        - generic [ref=f42e1377]:
+          - link "Applications" [ref=f42e1378] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f42e1384] [cursor=pointer]:
+            - /url: /evaluations
+      - generic [ref=f42e1389]:
+        - generic [ref=f42e1390]: Administration
+        - link "Archive" [ref=f42e1392] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f42e1398] [cursor=pointer]
+  - main [ref=f42e1404]:
+    - generic [ref=f42e2209]:
+      - generic "Evaluations" [ref=f42e2210]:
+        - generic [ref=f42e2211]:
+          - heading "Evaluations" [level=1] [ref=f42e2212]
+          - generic [ref=f42e2213]:
+            - generic [ref=f42e2214]:
+              - generic [ref=f42e2219]: Search
+              - textbox "Search" [ref=f42e2220]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f42e2222] [cursor=pointer]
+            - button "E evaluator@lgu.gov.ph Evaluator" [ref=f42e2228] [cursor=pointer]:
+              - generic [ref=f42e2229]: E
+              - generic [ref=f42e2233]:
+                - generic [ref=f42e2234]: evaluator@lgu.gov.ph
+                - generic [ref=f42e2235]: Evaluator
+      - generic [ref=f42e2397]:
+        - heading "Initial Evaluation" [level=1] [ref=f42e2398]
+        - generic [ref=f42e2399]:
+          - button "Back" [ref=f42e2400] [cursor=pointer]
+          - button "More actions" [ref=f42e2402] [cursor=pointer]
+      - generic [ref=f42e2408]:
+        - generic [ref=f42e2410]:
+          - generic [ref=f42e2412]:
+            - paragraph [ref=f42e2413]: Total in Initial Evaluation
+            - paragraph [ref=f42e2414]: "4"
+          - generic [ref=f42e2415]:
+            - generic [ref=f42e2416]: Across every status below — Revision Required · Under Review · Accepted
+            - 'img "3 categories: 1, 2, 1" [ref=f42e2418]'
+        - generic [ref=f42e2423]:
+          - generic [ref=f42e2425]:
+            - paragraph [ref=f42e2426]: Revision Required
+            - paragraph [ref=f42e2427]: "1"
+          - generic [ref=f42e2428]:
+            - generic [ref=f42e2429]: 25% of all applications
+            - 'img "Revision Required progress: 25 percent" [ref=f42e2431]'
+        - generic [ref=f42e2434]:
+          - generic [ref=f42e2436]:
+            - paragraph [ref=f42e2437]: Under Review
+            - paragraph [ref=f42e2438]: "2"
+          - generic [ref=f42e2439]:
+            - generic [ref=f42e2440]: 50% of all applications
+            - 'img "Under Review progress: 50 percent" [ref=f42e2442]'
+        - generic [ref=f42e2445]:
+          - generic [ref=f42e2447]:
+            - paragraph [ref=f42e2448]: Accepted
+            - paragraph [ref=f42e2449]: "1"
+          - generic [ref=f42e2450]:
+            - generic [ref=f42e2451]: 25% of all applications
+            - 'img "Accepted progress: 25 percent" [ref=f42e2453]'
+      - generic [ref=f42e2455]:
+        - button [ref=f42e2456] [cursor=pointer]
+        - button [ref=f42e2461] [cursor=pointer]
+        - button [ref=f42e2466] [cursor=pointer]
+      - generic [ref=f42e2471]:
+        - generic [ref=f42e2472]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Type" [ref=f42e2478]
+          - generic [ref=f42e2479]:
+            - button [ref=f42e2482] [cursor=pointer]
+            - button [ref=f42e2486] [cursor=pointer]
+        - table [ref=f42e2492]:
+          - rowgroup [ref=f42e2493]:
+            - row [ref=f42e2494]:
+              - columnheader [ref=f42e2495]:
+                - checkbox "Select all applications in this stage" [ref=f42e2496]
+              - columnheader "APPLICATION ID" [ref=f42e2497]
+              - columnheader "APPLICANT NAME" [ref=f42e2498]
+              - columnheader "MISSING DOCUMENTS" [ref=f42e2499]
+              - columnheader "TYPE" [ref=f42e2500]
+              - columnheader "REVIEWING DEPARTMENT" [ref=f42e2501]
+              - columnheader "DATE SUBMITTED" [ref=f42e2502]
+              - columnheader "ASSIGNED OFFICER" [ref=f42e2503]
+              - columnheader "STATUS" [ref=f42e2504]
+              - columnheader "ACTION" [ref=f42e2505]
+          - rowgroup [ref=f42e2506]:
+            - button "View evaluation for ff6049f7-d6f8-4a7b-b2c7-f33df9ad63b1, Maria Santos" [ref=f42e2507] [cursor=pointer]:
+              - cell [ref=f42e2508]:
+                - checkbox "Select ff6049f7-d6f8-4a7b-b2c7-f33df9ad63b1" [ref=f42e2509]
+              - cell "ff6049f7-d6f8-4a7b-b2c7-f33df9ad63b1" [ref=f42e2510]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f42e2511]:
+                - generic [ref=f42e2512]:
+                  - generic [ref=f42e2513]: MS
+                  - generic [ref=f42e2515]:
+                    - generic "Maria Santos" [ref=f42e2516]
+                    - generic "Santos Sari-Sari Store" [ref=f42e2517]
+              - cell "0" [ref=f42e2518]
+              - cell "Fencing Permit" [ref=f42e2519]
+              - cell "Office of the Municipal Engineer / Building Official" [ref=f42e2520]
+              - cell "2026-09-16" [ref=f42e2521]
+              - cell "—" [ref=f42e2522]
+              - cell "Under Review" [ref=f42e2523]
+              - cell [ref=f42e2525]:
+                - generic [ref=f42e2526]:
+                  - button "Review application ff6049f7-d6f8-4a7b-b2c7-f33df9ad63b1" [ref=f42e2527]: Review
+                  - button "More actions for application ff6049f7-d6f8-4a7b-b2c7-f33df9ad63b1" [ref=f42e2529]
+            - button "View evaluation for 069b67c0-cd20-43e4-8d13-3278a2446e84, Maria Santos" [ref=f42e2535] [cursor=pointer]:
+              - cell [ref=f42e2536]:
+                - checkbox "Select 069b67c0-cd20-43e4-8d13-3278a2446e84" [ref=f42e2537]
+              - cell "069b67c0-cd20-43e4-8d13-3278a2446e84" [ref=f42e2538]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=f42e2539]:
+                - generic [ref=f42e2540]:
+                  - generic [ref=f42e2541]: MS
+                  - generic [ref=f42e2543]:
+                    - generic "Maria Santos" [ref=f42e2544]
+                    - generic "Santos Sari-Sari Store" [ref=f42e2545]
+              - cell "0" [ref=f42e2546]
+              - cell "Fencing Permit" [ref=f42e2547]
+              - cell "Office of the Municipal Engineer / Building Official" [ref=f42e2548]
+              - cell "2026-09-16" [ref=f42e2549]
+              - cell "—" [ref=f42e2550]
+              - cell "Under Review" [ref=f42e2551]
+              - cell [ref=f42e2553]:
+                - generic [ref=f42e2554]:
+                  - button "Review application 069b67c0-cd20-43e4-8d13-3278a2446e84" [ref=f42e2555]: Review
+                  - button "More actions for application 069b67c0-cd20-43e4-8d13-3278a2446e84" [ref=f42e2557]
+        - navigation "Pagination" [ref=f42e2564]:
+          - generic [ref=f42e2565]: Showing 1-2 from 2
+          - generic [ref=f42e2566]:
+            - button "First page" [disabled] [ref=f42e2567]
+            - button "Page 1" [ref=f42e2572] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f42e2573]

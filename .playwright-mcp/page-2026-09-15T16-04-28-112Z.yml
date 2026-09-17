@@ -1,0 +1,21 @@
+- generic [ref=f4e5]:
+  - generic [ref=f4e6]:
+    - img "eBPCO" [ref=f4e7]
+    - heading "Log In" [level=2] [ref=f4e8]
+    - paragraph [ref=f4e9]: Sign in to your eBPCO account
+  - generic [ref=f4e10]:
+    - generic [ref=f4e11]: Email or Mobile Number
+    - textbox "Email or Mobile Number" [ref=f4e12]:
+      - /placeholder: you@example.com
+  - generic [ref=f4e13]:
+    - generic [ref=f4e14]: Password
+    - textbox "Password" [ref=f4e15]:
+      - /placeholder: ••••••••
+  - button "Log In" [ref=f4e16] [cursor=pointer]
+  - link "Forgot password?" [ref=f4e18] [cursor=pointer]:
+    - /url: /forgot-password
+  - separator [ref=f4e19]
+  - generic [ref=f4e20]:
+    - text: Don't have an account?
+    - link "Register" [ref=f4e21] [cursor=pointer]:
+      - /url: /register

@@ -1,0 +1,39 @@
+- generic [ref=f36e24]:
+  - generic [ref=f36e25]:
+    - heading "Create Your Account" [level=2] [ref=f36e26]
+    - paragraph [ref=f36e27]: Step 3 of 3
+  - generic [ref=f36e28]:
+    - generic [ref=f36e29]:
+      - generic [ref=f36e30]: "1"
+      - text: Personal
+    - generic [ref=f36e32]:
+      - generic [ref=f36e33]: "2"
+      - text: Contact
+    - generic [ref=f36e35]:
+      - generic [ref=f36e36]: "3"
+      - text: Security
+  - generic [ref=f36e91]:
+    - generic [ref=f36e92]: Password*
+    - textbox "Password*" [ref=f36e93]: purple kayak thunder orbit
+    - generic [ref=f36e94]: At least 12 characters. A longer phrase is easier to remember and harder to guess than a short one with symbols in it.
+  - generic [ref=f36e95]:
+    - generic [ref=f36e96]: Confirm Password*
+    - textbox "Confirm Password*" [ref=f36e97]: purple kayak thunder orbit
+  - generic [ref=f36e98]:
+    - checkbox "I agree to the Terms & Conditions" [checked] [ref=f36e99]
+    - text: I agree to the
+    - link "Terms & Conditions" [ref=f36e100] [cursor=pointer]:
+      - /url: /terms
+  - generic [ref=f36e101]:
+    - checkbox "I agree to the Privacy Policy" [checked] [active] [ref=f36e102]
+    - text: I agree to the
+    - link "Privacy Policy" [ref=f36e103] [cursor=pointer]:
+      - /url: /privacy
+  - generic [ref=f36e104]:
+    - button "Back" [ref=f36e105] [cursor=pointer]
+    - button "Create Account" [ref=f36e106] [cursor=pointer]
+  - separator [ref=f36e62]
+  - generic [ref=f36e63]:
+    - text: Already have an account?
+    - link "Log In" [ref=f36e64] [cursor=pointer]:
+      - /url: /login

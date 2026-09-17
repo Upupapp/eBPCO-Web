@@ -1,0 +1,160 @@
+- generic [ref=f2e2]:
+  - generic [ref=f2e53]:
+    - complementary [ref=f2e55]:
+      - generic [ref=f2e56]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f2e58]
+        - generic [ref=f2e59]: E-BPCO
+      - navigation [ref=f2e60]:
+        - link "Dashboard" [ref=f2e63] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f2e69]:
+          - generic [ref=f2e70]: Operations
+          - generic [ref=f2e71]:
+            - link "Applications" [ref=f2e72] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f2e78] [cursor=pointer]:
+              - /url: /evaluations
+        - generic [ref=f2e83]:
+          - generic [ref=f2e84]: Administration
+          - link "Archive" [ref=f2e86] [cursor=pointer]:
+            - /url: /archive
+      - button "Log Out" [ref=f2e92] [cursor=pointer]
+    - main [ref=f2e98]:
+      - generic [ref=f2e873]:
+        - generic "Evaluations" [ref=f2e874]:
+          - generic [ref=f2e875]:
+            - heading "Evaluations" [level=1] [ref=f2e876]
+            - generic [ref=f2e877]:
+              - generic [ref=f2e878]:
+                - generic [ref=f2e883]: Search
+                - textbox "Search" [ref=f2e884]:
+                  - /placeholder: Search here...
+              - button "Notifications" [ref=f2e886] [cursor=pointer]
+              - button "E evaluator@lgu.gov.ph Evaluator" [ref=f2e892] [cursor=pointer]:
+                - generic [ref=f2e893]: E
+                - generic [ref=f2e897]:
+                  - generic [ref=f2e898]: evaluator@lgu.gov.ph
+                  - generic [ref=f2e899]: Evaluator
+        - generic [ref=f2e903]:
+          - heading "710e7e61-5741-40b8-8a0b-2ceb09981bd2" [level=1] [ref=f2e904]
+          - generic [ref=f2e905]:
+            - generic [ref=f2e906]: Under Review
+            - button "Back to Under Review" [ref=f2e907] [cursor=pointer]
+        - generic [ref=f2e908]:
+          - generic [ref=f2e909]:
+            - generic [ref=f2e910]: LM
+            - generic [ref=f2e918]:
+              - heading "Liza Marasigan" [level=2] [ref=f2e919]
+              - generic [ref=f2e920]: Under Review
+              - generic [ref=f2e921]:
+                - generic [ref=f2e922]:
+                  - term [ref=f2e923]: "Business / Project :"
+                  - definition [ref=f2e924]: —
+                - generic [ref=f2e925]:
+                  - term [ref=f2e926]: "Type :"
+                  - definition [ref=f2e927]: Fencing Permit
+                - generic [ref=f2e928]:
+                  - term [ref=f2e929]: "Location :"
+                  - definition [ref=f2e930]: 45 Mabini Street, Poblacion, Castilla
+                - generic [ref=f2e931]:
+                  - term [ref=f2e932]: "Missing Documents :"
+                  - definition [ref=f2e933]: "5"
+                - generic [ref=f2e934]:
+                  - term [ref=f2e935]: "Reviewing Department :"
+                  - definition [ref=f2e936]: Office of the Municipal Engineer / Building Official
+            - generic [ref=f2e937]:
+              - generic [ref=f2e938]:
+                - strong [ref=f2e939]: 2026-09-16
+                - generic [ref=f2e940]: Date Submitted
+              - generic [ref=f2e941]:
+                - strong [ref=f2e942]: 710e7e61-5741-40b8-8a0b-2ceb09981bd2
+                - generic [ref=f2e943]: Application ID
+          - generic [ref=f2e944]:
+            - generic [ref=f2e945]:
+              - heading "Evaluation Summary" [level=2] [ref=f2e946]
+              - button [ref=f2e947] [cursor=pointer]
+            - heading "Evaluation Stage" [level=3] [ref=f2e952]
+            - list [ref=f2e953]:
+              - listitem [ref=f2e954]:
+                - generic [ref=f2e956]: Initial
+              - listitem [ref=f2e957]:
+                - generic [ref=f2e959]: Zoning
+              - listitem [ref=f2e960]:
+                - generic [ref=f2e962]: Fire Safety
+              - listitem [ref=f2e963]:
+                - generic [ref=f2e965]: OBO
+              - listitem [ref=f2e966]:
+                - generic [ref=f2e968]: Final Approval
+            - heading "Assigned Officer" [level=3] [ref=f2e969]
+            - generic [ref=f2e970]:
+              - generic [ref=f2e971]: —
+              - generic [ref=f2e973]:
+                - strong [ref=f2e974]: —
+                - text: Reviewing this evaluation
+            - heading "Documents" [level=3] [ref=f2e975]
+            - table [ref=f2e977]:
+              - rowgroup [ref=f2e978]:
+                - row [ref=f2e979]:
+                  - columnheader "Document" [ref=f2e980]
+                  - columnheader "Required" [ref=f2e981]
+                  - columnheader "Department" [ref=f2e982]
+                  - columnheader "Uploaded" [ref=f2e983]
+                  - columnheader "Status" [ref=f2e984]
+                  - columnheader [ref=f2e985]
+              - rowgroup [ref=f2e986]:
+                - row [ref=f2e987]:
+                  - cell "Land Title or Tax Declaration of the property" [ref=f2e988]
+                  - cell "Required" [ref=f2e989]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f2e990]
+                  - cell "—" [ref=f2e991]
+                  - cell "Missing" [ref=f2e992]
+                  - cell [ref=f2e994]
+                - row [ref=f2e995]:
+                  - cell "Owner's Written Consent (if applicant is not the lot owner)" [ref=f2e996]
+                  - cell "Optional" [ref=f2e997]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f2e998]
+                  - cell "—" [ref=f2e999]
+                  - cell "Missing" [ref=f2e1000]
+                  - cell [ref=f2e1002]
+                - row [ref=f2e1003]:
+                  - cell "Barangay Clearance" [ref=f2e1004]
+                  - cell "Required" [ref=f2e1005]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f2e1006]
+                  - cell "—" [ref=f2e1007]
+                  - cell "Missing" [ref=f2e1008]
+                  - cell [ref=f2e1010]
+                - row [ref=f2e1011]:
+                  - cell "Locational Clearance / Zoning Certification" [ref=f2e1012]
+                  - cell "Required" [ref=f2e1013]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f2e1014]
+                  - cell "—" [ref=f2e1015]
+                  - cell "Missing" [ref=f2e1016]
+                  - cell [ref=f2e1018]
+                - row [ref=f2e1019]:
+                  - cell "Valid Government-Issued ID of Applicant/Owner" [ref=f2e1020]
+                  - cell "Required" [ref=f2e1021]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f2e1022]
+                  - cell "—" [ref=f2e1023]
+                  - cell "Missing" [ref=f2e1024]
+                  - cell [ref=f2e1026]
+                - row [ref=f2e1027]:
+                  - cell "Fence Plan / Site Development Plan" [ref=f2e1028]
+                  - cell "Required" [ref=f2e1029]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f2e1030]
+                  - cell "—" [ref=f2e1031]
+                  - cell "Missing" [ref=f2e1032]
+                  - cell [ref=f2e1034]
+            - heading "Timeline" [level=3] [ref=f2e1035]
+            - list [ref=f2e1036]:
+              - listitem [ref=f2e1037]:
+                - paragraph [ref=f2e1039]: No activity recorded yet.
+            - heading "Actions" [level=3] [ref=f2e1040]
+            - generic [ref=f2e1041]:
+              - button [active] [ref=f2e1042] [cursor=pointer]
+              - generic [ref=f2e1047]: Remarks (required to return)
+              - textbox "Remarks (required to return)" [ref=f2e1048]:
+                - /placeholder: What needs to be revised?
+              - button [disabled] [ref=f2e1049]
+  - status [ref=f2e1054]:
+    - generic [ref=f2e1059]: Liza Marasigan's application advanced past Initial Evaluation.
+    - button "Dismiss" [ref=f2e1060] [cursor=pointer]: ✕

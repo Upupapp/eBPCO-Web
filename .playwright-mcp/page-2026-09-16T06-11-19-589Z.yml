@@ -1,0 +1,40 @@
+- generic [ref=f43e1071]:
+  - generic [ref=f43e1078]:
+    - img "Municipality of Castilla, Sorsogon seal" [ref=f43e1082]
+    - paragraph [ref=f43e1083]: Electronic Building Permit and Certificate of Occupancy
+    - paragraph [ref=f43e1084]: Municipality of Castilla, Sorsogon
+  - generic [ref=f43e1085]:
+    - generic [ref=f43e1086]:
+      - generic [ref=f43e1087]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f43e1089]
+        - generic [ref=f43e1090]: E-BPCO
+      - heading "Admin Portal" [level=1] [ref=f43e1091]
+      - generic [ref=f43e1092]:
+        - generic [ref=f43e1093]: Enter Email Address
+        - textbox "Enter Email Address" [ref=f43e1098]:
+          - /placeholder: Your email here
+          - text: cashier@lgu.gov.ph
+        - generic [ref=f43e1099]: Enter Password
+        - generic [ref=f43e1100]:
+          - textbox "Enter Password" [ref=f43e1104]:
+            - /placeholder: Enter your password
+            - text: rC3H6sjnbD_C
+          - button "Show password" [ref=f43e1105] [cursor=pointer]
+        - generic [ref=f43e1110]:
+          - generic [ref=f43e1111] [cursor=pointer]:
+            - checkbox "Remember me" [ref=f43e1112]
+            - text: Remember me
+          - link "Forgot your password?" [ref=f43e1113] [cursor=pointer]:
+            - /url: javascript:void(0)
+        - status [ref=f43e1118]: Your password was accepted. Enter the six-digit code from your authenticator app.
+        - generic [ref=f43e1119]: Authentication code
+        - textbox "Authentication code" [ref=f43e1124]:
+          - /placeholder: "000000"
+          - text: "223284"
+        - alert [ref=f43e1126]: That code wasn't accepted. Try the next one from your authenticator app.
+        - button "Verify and sign in" [ref=f43e1125] [cursor=pointer]
+      - paragraph [ref=f43e1115]:
+        - text: Need an account?
+        - link "How to get one" [ref=f43e1116] [cursor=pointer]:
+          - /url: /register
+    - paragraph [ref=f43e1117]: © 2026 Municipality of Castilla, Sorsogon. All rights reserved.

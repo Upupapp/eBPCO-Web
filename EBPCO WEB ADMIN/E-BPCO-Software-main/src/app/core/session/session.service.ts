@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { StaffRole } from './permissions';
 import { IdentityApi } from '../api/identity.api';
 import { TokenStore } from '../api/token-store';
@@ -29,20 +30,18 @@ export interface Session {
 }
 
 /**
- * MOCK session adapter. This prototype has no backend, so there is no
- * real authentication token or server-verified role — this service exists
- * purely so role/permission behavior comes from ONE place instead of a
- * hardcoded `"Admin"`/`"Super Admin"` string on individual pages or a
- * `email.includes('tenant')` branch in the login form. It is written so a
- * future real auth service can implement the same shape (`session`,
- * `isAuthenticated`, `role`, `signIn`, `signOut`) and every consumer below
- * (Topbar, Sidebar, the route guard, permission checks) keeps working
- * unchanged.
+ * The session adapter, against the real API.
  *
- * Do NOT treat this as production security: the "session" is an
- * in-memory signal any script on the page can overwrite, there is no
- * token, and it resets on reload — consistent with the rest of this
- * frontend-only mock (see ApplicationStore's own doc comment).
+ * `signIn` calls the real `IdentityApi`, the role comes from the server's
+ * own `/me` answer (never guessed from the email address or a hardcoded
+ * default), and the access/refresh tokens are real, held by `TokenStore`
+ * and proactively refreshed in the background (see `scheduleRefresh`
+ * below) — none of that is a mock. What stays true to the "one place"
+ * design this class started from: role/permission behavior still comes
+ * from here alone rather than a hardcoded `"Admin"`/`"Super Admin"` string
+ * scattered across pages, and every consumer below (Topbar, Sidebar, the
+ * route guard, permission checks) reads this same shape (`session`,
+ * `isAuthenticated`, `role`, `signIn`, `signOut`).
  */
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -53,16 +52,18 @@ export class SessionService {
   readonly role = computed<StaffRole | null>(() => this._session()?.role ?? null);
   readonly name = computed(() => this._session()?.name ?? '');
 
-  /**
-   * Every successful staff login enters with the same mock identity —
-   * there is no real credential check to derive a role from, so this
-   * always signs in as Super Admin (full access) rather than branching on
-   * anything in the email string. `setRole` below exists so the mock can
-   * still demonstrate role-scoped behavior (sidebar/guards) without a
-   * real per-account role store.
-   */
   private readonly identity = inject(IdentityApi);
   private readonly tokens = inject(TokenStore);
+  private readonly router = inject(Router);
+
+  // The access token is 15 minutes; this is what keeps a staff member signed
+  // in for as long as they're actually here instead of being timed out
+  // mid-shift. It refreshes itself in the background, well before expiry, so
+  // nothing the officer is doing ever races a token dying underneath it — see
+  // `IdentityApi.refresh()`'s comment for why this is proactive rather than
+  // reactive-on-401. Only an explicit "Log Out", or the refresh token itself
+  // finally being refused (30 days unused, or revoked), ends the session.
+  private refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Signs in against the API.
@@ -102,9 +103,11 @@ export class SessionService {
       scopes: me.scopes ?? null,
       assignedForms: me.permitTypes ?? null,
     });
+    this.scheduleRefresh();
   }
 
   async signOut(): Promise<void> {
+    this.clearRefreshTimer();
     await this.identity.signOut();
     this._session.set(null);
   }
@@ -121,6 +124,7 @@ export class SessionService {
    * after a reload happens to call `restore()`.
    */
   forceSignOut(): void {
+    this.clearRefreshTimer();
     this._session.set(null);
   }
 
@@ -130,10 +134,19 @@ export class SessionService {
    * Without this, refreshing the page signs the officer out even though the
    * token is still valid — which trains them to keep the tab open and defeats
    * the point of storing it at all.
+   *
+   * Spends the refresh token first (when one is stored) rather than trusting
+   * whatever access token survived the reload: the tab may have sat open past
+   * the 15-minute access-token TTL, and going straight to `/me` would 401 and
+   * read as an expired session even though the officer never left. Refreshing
+   * first also re-arms the proactive timer below with the real remaining time.
    */
   async restore(): Promise<void> {
     if (!this.tokens.hasSession() || this._session() !== null) return;
     try {
+      if (this.tokens.refreshToken() !== null) {
+        await this.identity.refresh();
+      }
       const me = await this.identity.me();
       const role = portalRoleFor(me.roles);
       if (me.kind !== 'staff' || role === null) {
@@ -149,6 +162,7 @@ export class SessionService {
         scopes: me.scopes ?? null,
         assignedForms: me.permitTypes ?? null,
       });
+      this.scheduleRefresh();
     } catch {
       // An expired or revoked token is not an error worth showing on load; the
       // guard will send them to sign in.
@@ -156,26 +170,75 @@ export class SessionService {
     }
   }
 
-  /** Mock-only: switches the current session's role in place, for demonstrating/testing role-scoped sidebar and route access without a real per-account role store. */
+  /**
+   * Arms the background refresh for whatever time is actually left on the
+   * access token, per `TokenStore.expiresInSeconds()`. Fires at 80% of the
+   * remaining life (capped to a 90-second-before-expiry floor) so it lands
+   * comfortably before the token dies even under a slow network, and
+   * reschedules itself from the fresh `expiresIn` each time it succeeds — so
+   * the session renews indefinitely while the tab stays open. No refresh
+   * token, or no recorded expiry (an older stored session), means nothing to
+   * schedule; the existing reactive 401 handling in `auth.interceptor.ts`
+   * remains the fallback for that case.
+   */
+  private scheduleRefresh(): void {
+    this.clearRefreshTimer();
+    if (this.tokens.refreshToken() === null) return;
+    const remaining = this.tokens.expiresInSeconds();
+    if (remaining === null) return;
+    const buffer = Math.min(90, Math.floor(remaining * 0.2));
+    const delaySeconds = Math.max(5, remaining - buffer);
+    this.refreshTimer = setTimeout(() => void this.performRefresh(), delaySeconds * 1000);
+  }
+
+  private clearRefreshTimer(): void {
+    if (this.refreshTimer !== null) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
+  }
+
+  /**
+   * The refresh timer's own callback. A failure here means the refresh token
+   * itself was refused — expired past its 30-day life, or revoked (e.g. an
+   * administrator forced a sign-out, or the family was revoked because a
+   * stale refresh token got replayed) — a genuine end of session, not a bug,
+   * so it ends the session the same way `auth.interceptor.ts` does on a 401.
+   */
+  private async performRefresh(): Promise<void> {
+    try {
+      await this.identity.refresh();
+      this.scheduleRefresh();
+    } catch {
+      this.tokens.clear();
+      this._session.set(null);
+      if (!this.router.url.startsWith('/login')) {
+        void this.router.navigate(['/login'], { queryParams: { reason: 'session-expired' } });
+      }
+    }
+  }
+
+  /** Test-only: overrides the current (real) session's role in place, so a spec can exercise role-scoped sidebar/route behavior for every role without signing in as ten different real accounts. Never called from production code — see the grep-checkable absence of any call site outside `*.spec.ts`. */
   setRole(role: StaffRole): void {
     const current = this._session();
     if (current) this._session.set({ ...current, role });
   }
 
   /**
-   * TEMPORARY DEV BYPASS — establishes a local Super Admin session without
-   * calling the API. Added so the portal can be exercised on a machine with
-   * no local backend running (see proxy.conf.json). Remove this and its call
-   * site in auth.guard.ts once a backend is available again.
+   * Offline escape hatch — establishes a local Super Admin session without
+   * calling the API, for exercising the portal on a machine with no backend
+   * reachable at all (see `auth.guard.ts`'s own doc comment on
+   * `DEV_BYPASS_ENABLED`, which gates whether this is ever called). Login
+   * itself is real; this exists specifically for the case where there is no
+   * server to sign in against.
    */
   devBypass(): void {
-    // QA-PASS ONLY: a real session survives a hard navigation (typing a URL,
-    // hitting refresh); this mock one normally resets to Super Admin every
-    // time because there is no persisted role behind it. Reading a role
-    // stashed in sessionStorage (set via `qaSetRoleAcrossReload`) lets the
-    // manual role/permission-matrix pass simulate "already signed in as
-    // Evaluator" surviving a direct URL entry. Remove alongside the rest of
-    // devBypass once a backend exists.
+    // A real session survives a hard navigation (typing a URL, hitting
+    // refresh); this bypass one normally resets to Super Admin every time
+    // because there is no persisted role behind it. Reading a role stashed
+    // in sessionStorage (set via `qaSetRoleAcrossReload`) lets a manual
+    // role/permission-matrix pass simulate "already signed in as Evaluator"
+    // surviving a direct URL entry, while offline.
     const qaRole = sessionStorage.getItem('qa-dev-bypass-role') as StaffRole | null;
     this._session.set({
       name: 'Dev Bypass (Super Admin)',

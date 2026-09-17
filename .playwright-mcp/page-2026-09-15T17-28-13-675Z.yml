@@ -1,0 +1,111 @@
+- generic [ref=f65e22]:
+  - generic [ref=f65e23]:
+    - complementary [ref=f65e24]:
+      - generic [ref=f65e25]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f65e26] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f65e27]
+          - generic [ref=f65e28]: Collapse sidebar
+        - generic [ref=f65e29]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f65e30]:
+        - link "Home" [ref=f65e31] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f65e36] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f65e43] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f65e48] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f65e54] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f65e58] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications 1" [ref=f65e62] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f65e66]: Notifications
+          - generic [ref=f65e67]: "1"
+        - link "Profile" [ref=f65e68] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f65e73] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f65e78] [cursor=pointer]
+    - generic [ref=f65e83]:
+      - link "View profile and settings" [ref=f65e85] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f65e86]: Test Citizen
+      - status [ref=f65e91]:
+        - strong [ref=f65e92]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - main [ref=f65e95]:
+        - generic [ref=f65e96]:
+          - generic [ref=f65e97]:
+            - heading "Welcome back, Test" [level=1] [ref=f65e98]:
+              - text: Welcome back, Test
+              - generic [aria-hidden] [ref=f65e99]: 👋
+            - paragraph [ref=f65e100]: Here's what's happening with your applications.
+          - generic [ref=f65e101]:
+            - link "Apply for Permit" [ref=f65e102] [cursor=pointer]:
+              - /url: /permits
+            - link "Register Business" [ref=f65e107] [cursor=pointer]:
+              - /url: /businesses/register
+        - generic [ref=f65e114]:
+          - generic [ref=f65e115]:
+            - generic [ref=f65e124]:
+              - generic [ref=f65e125]: My Businesses
+              - generic [ref=f65e126]: "0"
+            - link "View all businesses" [ref=f65e128] [cursor=pointer]:
+              - /url: /businesses
+          - generic [ref=f65e132]:
+            - generic [ref=f65e140]:
+              - generic [ref=f65e141]: Total Applications
+              - generic [ref=f65e142]: "2"
+            - generic [ref=f65e143]: This includes all statuses
+          - generic [ref=f65e148]:
+            - generic [ref=f65e155]:
+              - generic [ref=f65e156]: Awaiting Action
+              - generic [ref=f65e157]: "0"
+            - generic [ref=f65e158]: Needs your action
+          - generic [ref=f65e163]:
+            - generic [ref=f65e170]:
+              - generic [ref=f65e171]: Ready for Release
+              - generic [ref=f65e172]: "0"
+            - generic [ref=f65e173]: Ready to claim / view
+        - generic [ref=f65e178]:
+          - article [ref=f65e179]:
+            - generic [ref=f65e180]:
+              - heading "Active Applications" [level=2] [ref=f65e187]
+              - link "View all" [ref=f65e188] [cursor=pointer]:
+                - /url: /applications
+            - generic [ref=f65e192]:
+              - link "Business Permit E-BPCO-2026-000008 · Submitted on Sep 16, 2026 Submitted" [ref=f65e193] [cursor=pointer]:
+                - /url: /applications/4b811170-2719-4df8-8d17-a0420861d202
+                - generic [ref=f65e198]:
+                  - generic [ref=f65e199]: Business Permit
+                  - generic [ref=f65e200]: E-BPCO-2026-000008 ·
+                  - generic [ref=f65e201]: Submitted on Sep 16, 2026
+                - generic [ref=f65e202]: Submitted
+              - link "Business Permit E-BPCO-2026-000007 · Submitted on Sep 16, 2026 Rejected" [ref=f65e204] [cursor=pointer]:
+                - /url: /applications/021def26-9e07-42b1-b68a-c6012dd9674a
+                - generic [ref=f65e209]:
+                  - generic [ref=f65e210]: Business Permit
+                  - generic [ref=f65e211]: E-BPCO-2026-000007 ·
+                  - generic [ref=f65e212]: Submitted on Sep 16, 2026
+                - generic [ref=f65e213]: Rejected
+          - article [ref=f65e215]:
+            - generic [ref=f65e216]:
+              - heading "Recent Notifications" [level=2] [ref=f65e222]
+              - link "View all" [ref=f65e223] [cursor=pointer]:
+                - /url: /notifications
+            - generic [ref=f65e227]:
+              - generic [ref=f65e230]:
+                - generic [ref=f65e231]: "Reminder: keep your documents ready"
+                - generic [ref=f65e232]: Upload commonly required documents (valid ID, barangay clearance) to My Documents so they are ready for any application.
+                - generic [ref=f65e233]: Aug 21, 2026
+              - generic [ref=f65e236]:
+                - generic [ref=f65e237]: Welcome to eBPCO
+                - generic [ref=f65e238]: Manage your businesses, permit applications, and payments all in one place.
+                - generic [ref=f65e239]: Aug 20, 2026
+  - generic:
+    - generic:
+      - status
+      - alert

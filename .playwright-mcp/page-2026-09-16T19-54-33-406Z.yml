@@ -1,0 +1,25 @@
+- generic [ref=f1e22]:
+  - generic [ref=f1e23]:
+    - button "Open navigation" [ref=f1e24] [cursor=pointer]
+    - generic [ref=f1e28]:
+      - link "View profile and settings" [ref=f1e30] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f1e31]: Liza Marasigan
+      - generic [ref=f1e508]:
+        - generic [ref=f1e509]:
+          - generic [ref=f1e510]:
+            - heading "Marasigan Residence" [level=1] [ref=f1e511]
+            - generic [ref=f1e512]: Construction · Reg. No. DTI-2026-0451122 · Registered Sep 16, 2026
+          - link "Apply for Permit" [ref=f1e514] [cursor=pointer]:
+            - /url: /permits?businessId=25bb2fa1-dac4-4cc1-ac44-431a8e640dd9
+        - generic [ref=f1e515]:
+          - generic [ref=f1e516]: Business Address
+          - paragraph [ref=f1e517]: 45 Mabini Street, Barangay Poblacion, Castilla, Sorsogon
+          - generic [ref=f1e518]: Active
+        - generic [ref=f1e519]:
+          - generic [ref=f1e520]: Applications for this Business
+          - generic [ref=f1e521]: No applications filed yet for this business.
+  - generic [ref=f1e522]:
+    - status [ref=f1e523]:
+      - generic [ref=f1e524]: Marasigan Residence registered with the Municipality.
+    - alert

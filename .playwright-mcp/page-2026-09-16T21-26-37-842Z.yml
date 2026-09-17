@@ -1,0 +1,202 @@
+- generic [ref=f43e4]:
+  - complementary [ref=f43e6]:
+    - generic [ref=f43e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f43e9]
+      - generic [ref=f43e10]: E-BPCO
+    - navigation [ref=f43e11]:
+      - link "Dashboard" [ref=f43e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f43e20]:
+        - generic [ref=f43e21]: Operations
+        - link "Applications" [ref=f43e23] [cursor=pointer]:
+          - /url: /applications
+      - generic [ref=f43e29]:
+        - generic [ref=f43e30]: Administration
+        - link "Archive" [ref=f43e32] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f43e38] [cursor=pointer]
+  - main [ref=f43e44]:
+    - generic [ref=f43e45]:
+      - generic "Applications" [ref=f43e46]:
+        - generic [ref=f43e47]:
+          - heading "Applications" [level=1] [ref=f43e48]
+          - generic [ref=f43e49]:
+            - generic [ref=f43e50]:
+              - generic [ref=f43e55]: Search
+              - textbox "Search" [ref=f43e56]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f43e58] [cursor=pointer]
+            - button "O official@lgu.gov.ph Approving Officer" [ref=f43e64] [cursor=pointer]:
+              - generic [ref=f43e65]: O
+              - generic [ref=f43e69]:
+                - generic [ref=f43e70]: official@lgu.gov.ph
+                - generic [ref=f43e71]: Approving Officer
+      - generic [ref=f43e75]:
+        - heading "Application Details" [level=1] [ref=f43e76]
+        - generic [ref=f43e77]:
+          - button "Action" [ref=f43e79] [cursor=pointer]
+          - button "Evaluate" [ref=f43e80] [cursor=pointer]
+          - button "Back to List" [ref=f43e81] [cursor=pointer]
+          - button "More actions" [ref=f43e83] [cursor=pointer]
+      - generic [ref=f43e89]:
+        - generic [ref=f43e90]:
+          - generic [ref=f43e91]: MS
+          - generic [ref=f43e99]:
+            - heading "1c328cbb-9541-424b-a9b3-0bd2d9f79a48 - Maria Santos" [level=2] [ref=f43e100]
+            - generic [ref=f43e101]: Under Review
+            - generic [ref=f43e102]:
+              - generic [ref=f43e103]:
+                - term [ref=f43e104]: "Business / Project :"
+                - definition [ref=f43e105]: Santos Sari-Sari Store
+              - generic [ref=f43e106]:
+                - term [ref=f43e107]: "City :"
+                - definition [ref=f43e108]: 40 Rizal Street, Poblacion
+              - generic [ref=f43e109]:
+                - term [ref=f43e110]: "Region :"
+                - definition [ref=f43e111]: Region V (Bicol Region)
+              - generic [ref=f43e112]:
+                - term [ref=f43e113]: "Type :"
+                - definition [ref=f43e114]: Fencing Permit
+              - generic [ref=f43e115]:
+                - term [ref=f43e116]: "Email :"
+                - definition [ref=f43e117]:
+                  - text: maria@example.ph
+                  - generic [ref=f43e118]: Unverified
+              - generic [ref=f43e119]:
+                - term [ref=f43e120]: "Phone :"
+                - definition [ref=f43e121]:
+                  - text: "+639171234567"
+                  - generic [ref=f43e122]: Unverified
+              - generic [ref=f43e123]:
+                - term [ref=f43e124]: "Barangay :"
+                - definition [ref=f43e125]: 40 Rizal Street, Poblacion
+          - generic [ref=f43e126]:
+            - generic [ref=f43e127]:
+              - strong [ref=f43e128]: 2026-09-16
+              - generic [ref=f43e129]: Date Submitted
+            - generic [ref=f43e130]:
+              - strong [ref=f43e131]: —
+              - generic [ref=f43e132]: Assigned Officer
+          - button [ref=f43e133] [cursor=pointer]
+        - generic [ref=f43e137]:
+          - generic [ref=f43e138]:
+            - button "Timeline" [ref=f43e139] [cursor=pointer]
+            - button "Documents" [active] [ref=f43e140] [cursor=pointer]
+            - button "Permit Result" [ref=f43e141] [cursor=pointer]
+            - button "Comments" [ref=f43e142] [cursor=pointer]
+          - generic [ref=f43e143]:
+            - generic [ref=f43e231]:
+              - generic [ref=f43e232]:
+                - heading "Required Documents" [level=2] [ref=f43e233]
+                - paragraph [ref=f43e234]:
+                  - text: Checklist for Fencing Permit —
+                  - strong [ref=f43e235]: 5 required documents still missing
+              - button [ref=f43e237] [cursor=pointer]
+            - group [ref=f43e241]:
+              - generic "Requirement sources & verification status (4)" [ref=f43e242] [cursor=pointer]
+            - generic [ref=f43e243]:
+              - text: Remarks
+              - generic [ref=f43e244]: (required when rejecting or requesting revision)
+              - textbox "Reason shown to the applicant…" [ref=f43e245]
+            - table [ref=f43e247]:
+              - rowgroup [ref=f43e248]:
+                - row [ref=f43e249]:
+                  - columnheader [ref=f43e250]:
+                    - checkbox "Select all documents" [ref=f43e251]
+                  - columnheader "Document" [ref=f43e252]
+                  - columnheader "Required" [ref=f43e253]
+                  - columnheader "Reviewing Department" [ref=f43e254]
+                  - columnheader "Uploaded" [ref=f43e255]
+                  - columnheader "Status" [ref=f43e256]
+                  - columnheader [ref=f43e257]
+              - rowgroup [ref=f43e258]:
+                - row [ref=f43e259]:
+                  - cell [ref=f43e260]:
+                    - checkbox "Select Land Title or Tax Declaration of the property" [disabled] [ref=f43e261]
+                  - cell "Land Title or Tax Declaration of the property No file attached" [ref=f43e262]:
+                    - generic [ref=f43e270]:
+                      - generic [ref=f43e271]: Land Title or Tax Declaration of the property
+                      - generic [ref=f43e272]: No file attached
+                  - cell "Required" [ref=f43e273]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f43e275]
+                  - cell "—" [ref=f43e276]
+                  - cell "Missing" [ref=f43e277]
+                  - cell [ref=f43e279]:
+                    - generic "Only Records Officers and Super Admins can attach a document on a citizen's behalf." [ref=f43e280] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [disabled] [ref=f43e281]
+                - row [ref=f43e282]:
+                  - cell [ref=f43e283]:
+                    - checkbox "Select Owner's Written Consent (if applicant is not the lot owner)" [disabled] [ref=f43e284]
+                  - cell "Owner's Written Consent (if applicant is not the lot owner) No file attached" [ref=f43e285]:
+                    - generic [ref=f43e293]:
+                      - generic [ref=f43e294]: Owner's Written Consent (if applicant is not the lot owner)
+                      - generic [ref=f43e295]: No file attached
+                  - cell "Optional" [ref=f43e296]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f43e298]
+                  - cell "—" [ref=f43e299]
+                  - cell "Missing" [ref=f43e300]
+                  - cell [ref=f43e302]:
+                    - generic "Only Records Officers and Super Admins can attach a document on a citizen's behalf." [ref=f43e303] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [disabled] [ref=f43e304]
+                - row [ref=f43e305]:
+                  - cell [ref=f43e306]:
+                    - checkbox "Select Barangay Clearance" [disabled] [ref=f43e307]
+                  - cell "Barangay Clearance No file attached" [ref=f43e308]:
+                    - generic [ref=f43e316]:
+                      - generic [ref=f43e317]: Barangay Clearance
+                      - generic [ref=f43e318]: No file attached
+                  - cell "Required" [ref=f43e319]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f43e321]
+                  - cell "—" [ref=f43e322]
+                  - cell "Missing" [ref=f43e323]
+                  - cell [ref=f43e325]:
+                    - generic "Only Records Officers and Super Admins can attach a document on a citizen's behalf." [ref=f43e326] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [disabled] [ref=f43e327]
+                - row [ref=f43e328]:
+                  - cell [ref=f43e329]:
+                    - checkbox "Select Locational Clearance / Zoning Certification" [disabled] [ref=f43e330]
+                  - cell "Locational Clearance / Zoning Certification No file attached" [ref=f43e331]:
+                    - generic [ref=f43e339]:
+                      - generic [ref=f43e340]: Locational Clearance / Zoning Certification
+                      - generic [ref=f43e341]: No file attached
+                  - cell "Required" [ref=f43e342]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f43e344]
+                  - cell "—" [ref=f43e345]
+                  - cell "Missing" [ref=f43e346]
+                  - cell [ref=f43e348]:
+                    - generic "Only Records Officers and Super Admins can attach a document on a citizen's behalf." [ref=f43e349] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [disabled] [ref=f43e350]
+                - row [ref=f43e351]:
+                  - cell [ref=f43e352]:
+                    - checkbox "Select Valid Government-Issued ID of Applicant/Owner" [disabled] [ref=f43e353]
+                  - cell "Valid Government-Issued ID of Applicant/Owner No file attached" [ref=f43e354]:
+                    - generic [ref=f43e362]:
+                      - generic [ref=f43e363]: Valid Government-Issued ID of Applicant/Owner
+                      - generic [ref=f43e364]: No file attached
+                  - cell "Required" [ref=f43e365]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f43e367]
+                  - cell "—" [ref=f43e368]
+                  - cell "Missing" [ref=f43e369]
+                  - cell [ref=f43e371]:
+                    - generic "Only Records Officers and Super Admins can attach a document on a citizen's behalf." [ref=f43e372] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [disabled] [ref=f43e373]
+                - row [ref=f43e374]:
+                  - cell [ref=f43e375]:
+                    - checkbox "Select Fence Plan / Site Development Plan" [disabled] [ref=f43e376]
+                  - cell "Fence Plan / Site Development Plan No file attached" [ref=f43e377]:
+                    - generic [ref=f43e385]:
+                      - generic [ref=f43e386]: Fence Plan / Site Development Plan
+                      - generic [ref=f43e387]: No file attached
+                  - cell "Required" [ref=f43e388]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f43e390]
+                  - cell "—" [ref=f43e391]
+                  - cell "Missing" [ref=f43e392]
+                  - cell [ref=f43e394]:
+                    - generic "Only Records Officers and Super Admins can attach a document on a citizen's behalf." [ref=f43e395] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [disabled] [ref=f43e396]

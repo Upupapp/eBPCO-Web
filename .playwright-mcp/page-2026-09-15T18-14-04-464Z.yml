@@ -1,0 +1,9 @@
+- generic [ref=f94e5]:
+  - heading "Password Reset" [level=2] [ref=f94e6]
+  - paragraph [ref=f94e14]:
+    - text: If an account exists for
+    - strong [ref=f94e15]: michaela+stage11@lguids.com.ph
+    - text: ", we've sent a link to set a new password. It works once and expires in a few minutes."
+  - paragraph [ref=f94e16]: Didn't get it? Check your spam folder, or contact the Office of the Municipal Engineer — 09054818572.
+  - link "Back to Log In" [ref=f94e13] [cursor=pointer]:
+    - /url: /login

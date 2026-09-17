@@ -1,0 +1,11 @@
+[    1989ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=31969571:9127
+[    2277ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=31969571:9127
+[   39085ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/register:0
+[   39089ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/register:0
+[   50800ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:4201/auth/register:0
+[   95019ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:4201/register:0
+[   95020ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:4201/register:0
+[   99404ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=31969571:9127
+[  104882ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=31969571:9127
+[  126272ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/register:0
+[  126272ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/register:0

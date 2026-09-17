@@ -1,0 +1,77 @@
+- generic [ref=f40e3]:
+  - generic [ref=f40e4]:
+    - complementary [ref=f40e5]:
+      - generic [ref=f40e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f40e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f40e8]
+          - generic [ref=f40e9]: Collapse sidebar
+        - generic [ref=f40e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f40e11]:
+        - link "Home" [ref=f40e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f40e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f40e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [active] [ref=f40e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f40e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f40e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications 1" [ref=f40e43] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f40e47]: Notifications
+          - generic [ref=f40e48]: "1"
+        - link "Profile" [ref=f40e49] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f40e54] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f40e59] [cursor=pointer]
+    - generic [ref=f40e64]:
+      - link "View profile and settings" [ref=f40e66] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f40e67]: Test Citizen
+      - status [ref=f40e72]:
+        - strong [ref=f40e73]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f40e588]:
+        - generic [ref=f40e589]:
+          - generic [ref=f40e590]:
+            - heading "My Applications" [level=1] [ref=f40e591]
+            - generic [ref=f40e592]: Track and manage every permit application you've filed.
+          - link "+ New Application" [ref=f40e593] [cursor=pointer]:
+            - /url: /permits
+        - generic [ref=f40e594]:
+          - button "All" [ref=f40e595] [cursor=pointer]
+          - button "Draft" [ref=f40e596] [cursor=pointer]
+          - button "Submitted" [ref=f40e597] [cursor=pointer]
+          - button "Under Review" [ref=f40e598] [cursor=pointer]
+          - button "Payment Verification" [ref=f40e599] [cursor=pointer]
+          - button "Approved" [ref=f40e600] [cursor=pointer]
+          - button "Ready for Release" [ref=f40e601] [cursor=pointer]
+          - button "Rejected" [ref=f40e602] [cursor=pointer]
+        - table [ref=f40e604]:
+          - rowgroup [ref=f40e605]:
+            - row [ref=f40e606]:
+              - columnheader "Application No." [ref=f40e607]
+              - columnheader "Permit Type" [ref=f40e608]
+              - columnheader "Business" [ref=f40e609]
+              - columnheader "Status" [ref=f40e610]
+              - columnheader "Submitted" [ref=f40e611]
+              - columnheader [ref=f40e612]
+          - rowgroup [ref=f40e613]:
+            - row [ref=f40e614]:
+              - cell "E-BPCO-2026-000007" [ref=f40e615]
+              - cell "Business Permit" [ref=f40e616]
+              - cell [ref=f40e617]
+              - cell "Submitted" [ref=f40e618]
+              - cell "Sep 16, 2026" [ref=f40e621]
+              - cell [ref=f40e622]:
+                - link "View" [ref=f40e623] [cursor=pointer]:
+                  - /url: /applications/021def26-9e07-42b1-b68a-c6012dd9674a
+  - generic:
+    - generic:
+      - status
+      - alert

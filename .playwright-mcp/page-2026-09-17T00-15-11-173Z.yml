@@ -1,0 +1,112 @@
+- generic [ref=f7e22]:
+  - generic [ref=f7e23]:
+    - button "Open navigation" [ref=f7e24] [cursor=pointer]
+    - generic [ref=f7e28]:
+      - link "View profile and settings" [ref=f7e30] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f7e31]: Maria Santos
+      - main [ref=f7e38]:
+        - generic [ref=f7e39]:
+          - generic [ref=f7e40]:
+            - heading "Welcome back, Maria" [level=1] [ref=f7e41]:
+              - text: Welcome back, Maria
+              - generic [aria-hidden] [ref=f7e42]: 👋
+            - paragraph [ref=f7e43]: Here's what's happening with your applications.
+          - generic [ref=f7e44]:
+            - link "Apply for Permit" [ref=f7e45] [cursor=pointer]:
+              - /url: /permits
+            - link "Register Business" [ref=f7e50] [cursor=pointer]:
+              - /url: /businesses/register
+        - generic [ref=f7e57]:
+          - generic [ref=f7e58]:
+            - generic [ref=f7e67]:
+              - generic [ref=f7e68]: My Businesses
+              - generic [ref=f7e69]: "1"
+            - link "View all businesses" [ref=f7e71] [cursor=pointer]:
+              - /url: /businesses
+          - generic [ref=f7e75]:
+            - generic [ref=f7e83]:
+              - generic [ref=f7e84]: Total Applications
+              - generic [ref=f7e85]: "6"
+            - generic [ref=f7e86]: This includes all statuses
+          - generic [ref=f7e91]:
+            - generic [ref=f7e98]:
+              - generic [ref=f7e99]: Awaiting Action
+              - generic [ref=f7e100]: "1"
+            - generic [ref=f7e101]: Needs your action
+          - generic [ref=f7e106]:
+            - generic [ref=f7e113]:
+              - generic [ref=f7e114]: Ready for Release
+              - generic [ref=f7e115]: "0"
+            - generic [ref=f7e116]: Ready to claim / view
+        - generic [ref=f7e121]:
+          - article [ref=f7e122]:
+            - generic [ref=f7e123]:
+              - heading "Active Applications" [level=2] [ref=f7e130]
+              - link "View all" [ref=f7e131] [cursor=pointer]:
+                - /url: /applications
+            - generic [ref=f7e135]:
+              - link "Fencing Permit E-BPCO-2026-000001 · Santos Sari-Sari Store Submitted on Sep 16, 2026 Submitted" [ref=f7e136] [cursor=pointer]:
+                - /url: /applications/a9a12cc0-b2ab-4a77-bac7-e161c06f200d
+                - generic [ref=f7e144]:
+                  - generic [ref=f7e145]: Fencing Permit
+                  - generic [ref=f7e146]: E-BPCO-2026-000001 · Santos Sari-Sari Store
+                  - generic [ref=f7e147]: Submitted on Sep 16, 2026
+                - generic [ref=f7e148]: Submitted
+              - link "Fencing Permit E-BPCO-2026-000002 · Santos Sari-Sari Store Submitted on Sep 16, 2026 Rejected" [ref=f7e150] [cursor=pointer]:
+                - /url: /applications/68a4b091-a924-435c-8afb-4f269660f154
+                - generic [ref=f7e158]:
+                  - generic [ref=f7e159]: Fencing Permit
+                  - generic [ref=f7e160]: E-BPCO-2026-000002 · Santos Sari-Sari Store
+                  - generic [ref=f7e161]: Submitted on Sep 16, 2026
+                - generic [ref=f7e162]: Rejected
+              - link "Fencing Permit E-BPCO-2026-000006 · Santos Sari-Sari Store Submitted on Sep 16, 2026 Approved" [ref=f7e164] [cursor=pointer]:
+                - /url: /applications/97555355-07b3-41db-bd15-41c89ff5b8d6
+                - generic [ref=f7e172]:
+                  - generic [ref=f7e173]: Fencing Permit
+                  - generic [ref=f7e174]: E-BPCO-2026-000006 · Santos Sari-Sari Store
+                  - generic [ref=f7e175]: Submitted on Sep 16, 2026
+                - generic [ref=f7e176]: Approved
+              - link "Fencing Permit E-BPCO-2026-000005 · Santos Sari-Sari Store Submitted on Sep 16, 2026 Under Review" [ref=f7e178] [cursor=pointer]:
+                - /url: /applications/f5711e7e-0318-445b-9d64-3f5ea26b3969
+                - generic [ref=f7e186]:
+                  - generic [ref=f7e187]: Fencing Permit
+                  - generic [ref=f7e188]: E-BPCO-2026-000005 · Santos Sari-Sari Store
+                  - generic [ref=f7e189]: Submitted on Sep 16, 2026
+                - generic [ref=f7e190]: Under Review
+              - link "Fencing Permit E-BPCO-2026-000004 · Santos Sari-Sari Store Submitted on Sep 16, 2026 Under Review" [ref=f7e192] [cursor=pointer]:
+                - /url: /applications/1c328cbb-9541-424b-a9b3-0bd2d9f79a48
+                - generic [ref=f7e200]:
+                  - generic [ref=f7e201]: Fencing Permit
+                  - generic [ref=f7e202]: E-BPCO-2026-000004 · Santos Sari-Sari Store
+                  - generic [ref=f7e203]: Submitted on Sep 16, 2026
+                - generic [ref=f7e204]: Under Review
+              - link "Fencing Permit E-BPCO-2026-000003 · Santos Sari-Sari Store Submitted on Sep 16, 2026 Under Review" [ref=f7e206] [cursor=pointer]:
+                - /url: /applications/aff44047-955b-484c-8628-e086ae587be2
+                - generic [ref=f7e214]:
+                  - generic [ref=f7e215]: Fencing Permit
+                  - generic [ref=f7e216]: E-BPCO-2026-000003 · Santos Sari-Sari Store
+                  - generic [ref=f7e217]: Submitted on Sep 16, 2026
+                - generic [ref=f7e218]: Under Review
+          - article [ref=f7e220]:
+            - generic [ref=f7e221]:
+              - heading "Recent Notifications" [level=2] [ref=f7e227]
+              - link "View all" [ref=f7e228] [cursor=pointer]:
+                - /url: /notifications
+            - generic [ref=f7e232]:
+              - generic [ref=f7e235]:
+                - generic [ref=f7e236]: Received by the OBO
+                - generic [ref=f7e237]: The Office of the Building Official has received your application. Processing has started.
+                - generic [ref=f7e238]: Sep 17, 2026
+              - generic [ref=f7e241]:
+                - generic [ref=f7e242]: Application not approved
+                - generic [ref=f7e243]: Open the application to see the reason and what options you have.
+                - generic [ref=f7e244]: Sep 17, 2026
+              - generic [ref=f7e247]:
+                - generic [ref=f7e248]: Documents being checked
+                - generic [ref=f7e249]: Your documents are being checked for completeness.
+                - generic [ref=f7e250]: Sep 17, 2026
+  - generic:
+    - generic:
+      - status
+      - alert

@@ -1,0 +1,5 @@
+[     585ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:4201/me:0
+[     657ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=1b288bde:9127
+[     940ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/login?reason=session-expired:0
+[   44657ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/register:0
+[   44658ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/register:0

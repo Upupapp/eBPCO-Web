@@ -1,0 +1,77 @@
+- generic [ref=f100e3]:
+  - generic [ref=f100e4]:
+    - complementary [ref=f100e5]:
+      - generic [ref=f100e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f100e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f100e8]
+          - generic [ref=f100e9]: Collapse sidebar
+        - generic [ref=f100e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f100e11]:
+        - link "Home" [ref=f100e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f100e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f100e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f100e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f100e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f100e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f100e43] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f100e48] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f100e53] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f100e58] [cursor=pointer]
+    - generic [ref=f100e63]:
+      - link "View profile and settings" [ref=f100e65] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f100e66]: Stage Eleven
+      - status [ref=f100e71]:
+        - strong [ref=f100e72]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f100e185]:
+        - generic [ref=f100e187]:
+          - heading "Profile & Settings" [level=1] [ref=f100e188]
+          - generic [ref=f100e189]: Manage your account details, security, and preferences.
+        - generic [ref=f100e190]:
+          - generic [ref=f100e191]:
+            - generic [ref=f100e192]:
+              - generic [aria-hidden] [ref=f100e193]: SE
+              - generic "Change profile photo" [ref=f100e194] [cursor=pointer]:
+                - button "Change profile photo" [ref=f100e195]
+            - heading "Stage Eleven" [level=2] [ref=f100e199]
+            - generic [ref=f100e200]: michaela+stage11@lguids.com.ph
+            - separator [ref=f100e201]
+            - generic [ref=f100e202]:
+              - generic [ref=f100e203]: "Email: Unverified"
+              - generic [ref=f100e204]: "Mobile: Unverified"
+            - paragraph [ref=f100e205]: Verification is not available in this build and is not required for anything here.
+          - generic [ref=f100e206]:
+            - generic [ref=f100e207]:
+              - button "Edit Profile" [ref=f100e208] [cursor=pointer]
+              - button "Change Password" [ref=f100e209] [cursor=pointer]
+              - button "Notification Preferences" [ref=f100e210] [cursor=pointer]
+              - button "Your Data" [active] [ref=f100e211] [cursor=pointer]
+              - button "Legal" [ref=f100e212] [cursor=pointer]
+            - generic [ref=f100e251]:
+              - heading "Export Your Data" [level=4] [ref=f100e252]
+              - paragraph [ref=f100e253]: Request a copy of everything the Municipality holds about you — your profile, applications, documents, payments, and notifications. This is your right under the Data Privacy Act (RA 10173, §18).
+              - button "Request My Data" [ref=f100e254] [cursor=pointer]
+              - separator [ref=f100e255]
+              - heading "Delete Your Account" [level=4] [ref=f100e256]
+              - paragraph [ref=f100e257]:
+                - text: This permanently erases your account and profile, as far as the law allows — some records (like a filed permit application) must be kept for a legal retention period even after your account is deleted (RA 10173, §16(e)).
+                - strong [ref=f100e258]: This cannot be undone.
+              - generic [ref=f100e259]:
+                - generic [ref=f100e260]: Type DELETE to confirm
+                - textbox "Type DELETE to confirm" [ref=f100e261]
+              - button "Permanently Delete My Account" [ref=f100e262] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

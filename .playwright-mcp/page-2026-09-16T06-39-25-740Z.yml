@@ -1,0 +1,98 @@
+- generic [ref=f52e3]:
+  - generic [ref=f52e4]:
+    - complementary [ref=f52e5]:
+      - generic [ref=f52e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f52e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f52e8]
+          - generic [ref=f52e9]: Collapse sidebar
+        - generic [ref=f52e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f52e11]:
+        - link "Home" [ref=f52e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f52e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f52e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f52e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f52e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f52e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f52e43] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f52e48] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f52e53] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f52e58] [cursor=pointer]
+    - generic [ref=f52e63]:
+      - link "View profile and settings" [ref=f52e65] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f52e66]: Stage FourteenE
+      - status [ref=f52e71]:
+        - strong [ref=f52e72]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f52e211]:
+        - generic [ref=f52e212]:
+          - generic [ref=f52e213]:
+            - heading "Fencing Permit" [level=1] [ref=f52e214]
+            - generic [ref=f52e215]: E-BPCO-2026-000007 · · New
+          - generic [ref=f52e216]: Submitted
+        - generic [ref=f52e218]:
+          - generic [ref=f52e219]:
+            - strong [ref=f52e220]: Progress
+            - generic [ref=f52e221]: 7%
+          - paragraph [ref=f52e224]: Your application has been received and is queued for review.
+          - generic [ref=f52e225]:
+            - button "Withdraw Application" [ref=f52e226] [cursor=pointer]
+            - text: Allowed only before an Order of Payment has been issued.
+        - generic [ref=f52e228]:
+          - generic [ref=f52e229]: Your permit
+          - paragraph [ref=f52e230]: No permit has been issued for this application yet.
+          - generic [ref=f52e231]:
+            - strong [ref=f52e232]: Not yet ready to collect
+            - paragraph [ref=f52e233]: The Municipality has not arranged collection for this permit yet.
+        - generic [ref=f52e234]:
+          - generic [ref=f52e235]: Documents
+          - list [ref=f52e237]:
+            - listitem [ref=f52e238]:
+              - generic [ref=f52e239]:
+                - generic [ref=f52e240]: Land Title or Tax Declaration of the property
+                - generic [ref=f52e241]: Not yet reviewed
+              - generic [ref=f52e242]: stage14-test-doc.pdf
+              - button "Preview" [ref=f52e243] [cursor=pointer]
+            - listitem [ref=f52e244]:
+              - generic [ref=f52e245]:
+                - generic [ref=f52e246]: Barangay Clearance
+                - generic [ref=f52e247]: Not yet reviewed
+              - generic [ref=f52e248]: stage14-test-doc.pdf
+              - button "Preview" [ref=f52e249] [cursor=pointer]
+            - listitem [ref=f52e250]:
+              - generic [ref=f52e251]:
+                - generic [ref=f52e252]: Locational Clearance / Zoning Certification
+                - generic [ref=f52e253]: Not yet reviewed
+              - generic [ref=f52e254]: stage14-test-doc.pdf
+              - button "Preview" [ref=f52e255] [cursor=pointer]
+            - listitem [ref=f52e256]:
+              - generic [ref=f52e257]:
+                - generic [ref=f52e258]: Valid Government-Issued ID of Applicant/Owner
+                - generic [ref=f52e259]: Not yet reviewed
+              - generic [ref=f52e260]: stage14-test-doc.pdf
+              - button "Preview" [ref=f52e261] [cursor=pointer]
+            - listitem [ref=f52e262]:
+              - generic [ref=f52e263]:
+                - generic [ref=f52e264]: Fence Plan / Site Development Plan
+                - generic [ref=f52e265]: Not yet reviewed
+              - generic [ref=f52e266]: stage14-test-doc.pdf
+              - button "Preview" [ref=f52e267] [cursor=pointer]
+        - generic [ref=f52e268]:
+          - generic [ref=f52e269]: Status Timeline
+          - generic [ref=f52e270]:
+            - generic [ref=f52e271]: Sep 16, 2026, 02:39 PM
+            - generic [ref=f52e272]: Submitted
+  - generic [ref=f52e273]:
+    - status [ref=f52e274]:
+      - generic [ref=f52e275]: Application filed, with your attached documents.
+    - alert

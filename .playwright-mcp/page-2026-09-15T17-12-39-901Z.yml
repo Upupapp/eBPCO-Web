@@ -1,0 +1,76 @@
+- generic [ref=f54e22]:
+  - generic [ref=f54e23]:
+    - complementary [ref=f54e24]:
+      - generic [ref=f54e25]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f54e26] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f54e27]
+          - generic [ref=f54e28]: Collapse sidebar
+        - generic [ref=f54e29]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f54e30]:
+        - link "Home" [ref=f54e31] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f54e36] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f54e43] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f54e48] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f54e54] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f54e58] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications 1" [ref=f54e62] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f54e66]: Notifications
+          - generic [ref=f54e67]: "1"
+        - link "Profile" [ref=f54e68] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f54e73] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f54e78] [cursor=pointer]
+    - generic [ref=f54e83]:
+      - link "View profile and settings" [ref=f54e85] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f54e86]: Test Citizen
+      - status [ref=f54e91]:
+        - strong [ref=f54e92]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f54e230]:
+        - generic [ref=f54e232]:
+          - heading "Register a Business" [level=1] [ref=f54e233]
+          - generic [ref=f54e234]: Add a new business to your account.
+        - generic [ref=f54e235]:
+          - generic [ref=f54e236]:
+            - generic [ref=f54e237]: Business Name*
+            - textbox "Business Name*" [ref=f54e238]
+          - generic [ref=f54e239]:
+            - generic [ref=f54e240]: Business Category*
+            - combobox "Business Category*" [ref=f54e241]:
+              - option "Retail" [selected]
+              - option "Food Service"
+              - option "Services"
+              - option "Manufacturing"
+              - option "Wholesale"
+              - option "Other"
+          - generic [ref=f54e242]:
+            - generic [ref=f54e243]: House Number / Street*
+            - textbox "House Number / Street*" [ref=f54e244]
+          - generic [ref=f54e245]:
+            - generic [ref=f54e246]:
+              - generic [ref=f54e247]: Barangay*
+              - textbox "Barangay*" [ref=f54e248]
+            - generic [ref=f54e249]:
+              - generic [ref=f54e250]: City / Municipality*
+              - textbox "City / Municipality*" [ref=f54e251]
+          - generic [ref=f54e252]:
+            - generic [ref=f54e253]: Province*
+            - textbox "Province*" [ref=f54e254]
+          - generic [ref=f54e255]:
+            - link "Cancel" [ref=f54e256] [cursor=pointer]:
+              - /url: /businesses
+            - button "Register Business" [ref=f54e257] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

@@ -1,0 +1,76 @@
+- generic [ref=f57e3]:
+  - generic [ref=f57e4]:
+    - complementary [ref=f57e5]:
+      - generic [ref=f57e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f57e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f57e8]
+          - generic [ref=f57e9]: Collapse sidebar
+        - generic [ref=f57e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f57e11]:
+        - link "Home" [ref=f57e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f57e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f57e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f57e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f57e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f57e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f57e43] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f57e48] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f57e53] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f57e58] [cursor=pointer]
+    - generic [ref=f57e63]:
+      - link "View profile and settings" [ref=f57e65] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f57e66]: Stage FourteenF
+      - status [ref=f57e71]:
+        - strong [ref=f57e72]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f57e74]:
+        - heading "Fencing Permit" [level=1] [ref=f57e77]
+        - generic [ref=f57e78]:
+          - generic [ref=f57e79]:
+            - generic [ref=f57e80]: "1"
+            - text: Business & Type
+          - generic [ref=f57e82]:
+            - generic [ref=f57e83]: "2"
+            - text: Details
+          - generic [ref=f57e85]:
+            - generic [ref=f57e86]: "3"
+            - text: Documents
+          - generic [ref=f57e88]:
+            - generic [ref=f57e89]: "4"
+            - text: Review & Submit
+        - generic [ref=f57e98]:
+          - generic [ref=f57e99]: Project / Application Details
+          - generic [ref=f57e100]:
+            - generic [ref=f57e101]: Project / Business Address*
+            - textbox "Project / Business Address*" [ref=f57e102]:
+              - /placeholder: Street, Barangay, City
+          - generic [ref=f57e103]:
+            - generic [ref=f57e104]: Scope of Work / Purpose*
+            - textbox "Scope of Work / Purpose*" [ref=f57e105]:
+              - /placeholder: Briefly describe the work or purpose of this application
+          - generic [ref=f57e106]:
+            - generic [ref=f57e107]:
+              - generic [ref=f57e108]: Professional in Charge (if any)
+              - textbox "Professional in Charge (if any)" [ref=f57e109]:
+                - /placeholder: Engineer / Architect name
+            - generic [ref=f57e110]:
+              - generic [ref=f57e111]: PRC License No.
+              - textbox "PRC License No." [ref=f57e112]
+          - generic [ref=f57e113]:
+            - button "Back" [ref=f57e114] [cursor=pointer]
+            - button "Continue" [ref=f57e115] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

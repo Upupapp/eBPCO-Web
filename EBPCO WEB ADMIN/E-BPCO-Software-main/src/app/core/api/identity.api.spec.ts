@@ -96,6 +96,36 @@ describe('IdentityApi', () => {
     tokens.clear();
   });
 
+  describe('refresh', () => {
+    it('spends the stored refresh token and re-stores the rotated pair', async () => {
+      const tokens = TestBed.inject(TokenStore);
+      tokens.set({ accessToken: 'stale-token', refreshToken: 'first-refresh' });
+
+      const refreshed = api.refresh();
+      const req = http.expectOne('/auth/token/refresh');
+      expect(req.request.method).toBe('POST');
+      // The server rotates on every use — presenting a refresh token twice is
+      // treated as theft — so this must send exactly the one on file, never a
+      // stale or hand-picked one.
+      expect(req.request.body).toEqual({ refreshToken: 'first-refresh' });
+      req.flush({ accessToken: 'fresh-token', refreshToken: 'second-refresh', expiresIn: 900 });
+      await refreshed;
+
+      // The response's NEW refresh token must replace the one just spent —
+      // reusing the old one on the next refresh would read as a replay and
+      // revoke the whole session server-side.
+      expect(tokens.access()).toBe('fresh-token');
+      expect(tokens.refreshToken()).toBe('second-refresh');
+      tokens.clear();
+    });
+
+    it('refuses to call the endpoint with no refresh token on file', async () => {
+      TestBed.inject(TokenStore).clear();
+      await expect(api.refresh()).rejects.toThrow();
+      http.expectNone('/auth/token/refresh');
+    });
+  });
+
   it('requestPasswordReset posts the address and resolves on the server\'s 202', async () => {
     const started = api.requestPasswordReset('officer@lgu.gov.ph');
     const req = http.expectOne('/auth/password/forgot');

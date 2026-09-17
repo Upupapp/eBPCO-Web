@@ -1,0 +1,81 @@
+- generic [ref=f52e3]:
+  - generic [ref=f52e4]:
+    - complementary [ref=f52e5]:
+      - generic [ref=f52e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f52e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f52e8]
+          - generic [ref=f52e9]: Collapse sidebar
+        - generic [ref=f52e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f52e11]:
+        - link "Home" [ref=f52e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f52e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f52e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f52e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f52e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f52e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f52e43] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f52e48] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f52e53] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f52e58] [cursor=pointer]
+    - generic [ref=f52e63]:
+      - link "View profile and settings" [ref=f52e65] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f52e66]: Stage FourteenE
+      - status [ref=f52e71]:
+        - strong [ref=f52e72]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f52e74]:
+        - heading "Fencing Permit" [level=1] [ref=f52e77]
+        - generic [ref=f52e78]:
+          - generic [ref=f52e79]:
+            - generic [ref=f52e80]: "1"
+            - text: Business & Type
+          - generic [ref=f52e82]:
+            - generic [ref=f52e83]: "2"
+            - text: Details
+          - generic [ref=f52e85]:
+            - generic [ref=f52e86]: "3"
+            - text: Documents
+          - generic [ref=f52e88]:
+            - generic [ref=f52e89]: "4"
+            - text: Review & Submit
+        - generic [ref=f52e186]:
+          - generic [ref=f52e187]: Review & Declaration
+          - table [ref=f52e188]:
+            - rowgroup [ref=f52e189]:
+              - row [ref=f52e190]:
+                - cell "Business" [ref=f52e191]
+                - cell "Stage Fourteen Test Fencing Co. E" [ref=f52e192]
+              - row [ref=f52e193]:
+                - cell "Permit Type" [ref=f52e194]
+                - cell "Fencing Permit" [ref=f52e195]
+              - row [ref=f52e196]:
+                - cell "Application Type" [ref=f52e197]
+                - cell "New" [ref=f52e198]
+              - row [ref=f52e199]:
+                - cell "Documents Attached" [ref=f52e200]
+                - cell "5 of 6" [ref=f52e201]
+          - separator [ref=f52e202]
+          - generic [ref=f52e203]:
+            - checkbox "I understand the application requirements and certify the information provided is true and correct." [checked] [ref=f52e204]
+            - text: I understand the application requirements and certify the information provided is true and correct.
+          - generic [ref=f52e205]:
+            - checkbox "I agree to the Terms & Conditions." [checked] [active] [ref=f52e206]
+            - text: I agree to the Terms & Conditions.
+          - generic [ref=f52e207]:
+            - button "Back" [ref=f52e208] [cursor=pointer]
+            - button "Submit Application" [ref=f52e209] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

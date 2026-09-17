@@ -1,0 +1,83 @@
+- generic [ref=f39e3]:
+  - generic [ref=f39e4]:
+    - complementary [ref=f39e5]:
+      - generic [ref=f39e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f39e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f39e8]
+          - generic [ref=f39e9]: Collapse sidebar
+        - generic [ref=f39e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f39e11]:
+        - link "Home" [ref=f39e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f39e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f39e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f39e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f39e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f39e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f39e43] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f39e48] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f39e53] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f39e58] [cursor=pointer]
+    - generic [ref=f39e63]:
+      - link "View profile and settings" [ref=f39e65] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f39e66]: Stage FourteenD
+      - status [ref=f39e71]:
+        - strong [ref=f39e72]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f39e375]:
+        - generic [ref=f39e377]:
+          - heading "Register a Business" [level=1] [ref=f39e378]
+          - generic [ref=f39e379]: Add a new business to your account.
+        - generic [ref=f39e380]:
+          - generic [ref=f39e381]:
+            - generic [ref=f39e382]: Business Name*
+            - textbox "Business Name*" [ref=f39e383]
+          - generic [ref=f39e384]:
+            - generic [ref=f39e385]: Business Category*
+            - combobox "Business Category*" [ref=f39e386]:
+              - option "Retail" [selected]
+              - option "Food Service"
+              - option "Services"
+              - option "Manufacturing"
+              - option "Construction"
+              - option "Transport"
+              - option "Agriculture"
+              - option "Other"
+          - generic [ref=f39e387]:
+            - generic [ref=f39e388]: House Number / Street*
+            - textbox "House Number / Street*" [ref=f39e389]
+          - generic [ref=f39e390]:
+            - generic [ref=f39e391]:
+              - generic [ref=f39e392]: Barangay*
+              - textbox "Barangay*" [ref=f39e393]
+            - generic [ref=f39e394]:
+              - generic [ref=f39e395]: City / Municipality*
+              - textbox "City / Municipality*" [ref=f39e396]
+          - generic [ref=f39e397]:
+            - generic [ref=f39e398]: Province*
+            - textbox "Province*" [ref=f39e399]
+          - generic [ref=f39e400]:
+            - generic [ref=f39e401]:
+              - generic [ref=f39e402]: DTI / SEC / CDA Registration No.*
+              - textbox "DTI / SEC / CDA Registration No.*" [ref=f39e403]
+            - generic [ref=f39e404]:
+              - generic [ref=f39e405]: Date Registered*
+              - textbox "Date Registered*" [ref=f39e406]
+          - generic [ref=f39e407]:
+            - link "Cancel" [ref=f39e408] [cursor=pointer]:
+              - /url: /businesses
+            - button "Register Business" [ref=f39e409] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

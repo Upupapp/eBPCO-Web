@@ -1,0 +1,78 @@
+- generic [ref=f4e3]:
+  - generic [ref=f4e4]:
+    - button "Open navigation" [ref=f4e5] [cursor=pointer]
+    - generic [ref=f4e9]:
+      - link "View profile and settings" [ref=f4e11] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f4e12]: Liza Marasigan
+      - generic [ref=f4e163]:
+        - generic [ref=f4e164]:
+          - generic [ref=f4e165]:
+            - heading "Fencing Permit" [level=1] [ref=f4e166]
+            - generic [ref=f4e167]: E-BPCO-2026-000007 · · New
+          - generic [ref=f4e168]: Under Review
+        - generic [ref=f4e170]:
+          - generic [ref=f4e171]:
+            - strong [ref=f4e172]: Progress
+            - generic [ref=f4e173]: 29%
+          - paragraph [ref=f4e176]: Your application is under technical evaluation by the reviewing office.
+          - generic [ref=f4e177]:
+            - button "Withdraw Application" [ref=f4e178] [cursor=pointer]
+            - text: Allowed only before an Order of Payment has been issued.
+        - generic [ref=f4e180]:
+          - generic [ref=f4e181]: Your permit
+          - paragraph [ref=f4e182]: No permit has been issued for this application yet.
+          - generic [ref=f4e183]:
+            - strong [ref=f4e184]: Not yet ready to collect
+            - paragraph [ref=f4e185]: The Municipality has not arranged collection for this permit yet.
+        - generic [ref=f4e186]:
+          - generic [ref=f4e187]: Documents
+          - list [ref=f4e189]:
+            - listitem [ref=f4e190]:
+              - generic [ref=f4e191]:
+                - generic [ref=f4e192]: Land Title or Tax Declaration of the property
+                - generic [ref=f4e193]: Not yet reviewed
+              - generic [ref=f4e194]: test-document.pdf
+              - button "Preview" [ref=f4e195] [cursor=pointer]
+            - listitem [ref=f4e196]:
+              - generic [ref=f4e197]:
+                - generic [ref=f4e198]: Barangay Clearance
+                - generic [ref=f4e199]: Not yet reviewed
+              - generic [ref=f4e200]: test-document.pdf
+              - button "Preview" [ref=f4e201] [cursor=pointer]
+            - listitem [ref=f4e202]:
+              - generic [ref=f4e203]:
+                - generic [ref=f4e204]: Locational Clearance / Zoning Certification
+                - generic [ref=f4e205]: Not yet reviewed
+              - generic [ref=f4e206]: test-document.pdf
+              - button "Preview" [ref=f4e207] [cursor=pointer]
+            - listitem [ref=f4e208]:
+              - generic [ref=f4e209]:
+                - generic [ref=f4e210]: Valid Government-Issued ID of Applicant/Owner
+                - generic [ref=f4e211]: Not yet reviewed
+              - generic [ref=f4e212]: test-document.pdf
+              - button "Preview" [ref=f4e213] [cursor=pointer]
+            - listitem [ref=f4e214]:
+              - generic [ref=f4e215]:
+                - generic [ref=f4e216]: Fence Plan / Site Development Plan
+                - generic [ref=f4e217]: Not yet reviewed
+              - generic [ref=f4e218]: test-document.pdf
+              - button "Preview" [ref=f4e219] [cursor=pointer]
+        - generic [ref=f4e220]:
+          - generic [ref=f4e221]: Status Timeline
+          - generic [ref=f4e222]:
+            - generic [ref=f4e223]: Sep 17, 2026, 03:55 AM
+            - generic [ref=f4e224]: Submitted
+          - generic [ref=f4e225]:
+            - generic [ref=f4e226]: Sep 17, 2026, 03:57 AM
+            - generic [ref=f4e227]: Received
+          - generic [ref=f4e228]:
+            - generic [ref=f4e229]: Sep 17, 2026, 03:57 AM
+            - generic [ref=f4e230]: Document Verification
+          - generic [ref=f4e231]:
+            - generic [ref=f4e232]: Sep 17, 2026, 03:59 AM
+            - generic [ref=f4e233]: Under Evaluation
+  - generic:
+    - generic:
+      - status
+      - alert

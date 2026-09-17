@@ -1,0 +1,106 @@
+- generic [ref=f53e2]:
+  - generic [ref=f53e6059]:
+    - complementary [ref=f53e6061]:
+      - generic [ref=f53e6062]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f53e6064]
+        - generic [ref=f53e6065]: E-BPCO
+      - navigation [ref=f53e6066]:
+        - link "Dashboard" [ref=f53e6069] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f53e6075]:
+          - generic [ref=f53e6076]: Operations
+          - link "Payments" [ref=f53e6078] [cursor=pointer]:
+            - /url: /payments
+        - generic [ref=f53e6085]:
+          - generic [ref=f53e6086]: Administration
+          - link "Archive" [ref=f53e6088] [cursor=pointer]:
+            - /url: /archive
+      - button "Log Out" [ref=f53e6094] [cursor=pointer]
+    - main [ref=f53e6100]:
+      - generic [ref=f53e6680]:
+        - generic "Payments" [ref=f53e6681]:
+          - generic [ref=f53e6682]:
+            - heading "Payments" [level=1] [ref=f53e6683]
+            - generic [ref=f53e6684]:
+              - generic [ref=f53e6685]:
+                - generic [ref=f53e6690]: Search
+                - textbox "Search" [ref=f53e6691]:
+                  - /placeholder: Search here...
+              - button "Notifications" [ref=f53e6693] [cursor=pointer]
+              - button "C cashier@lgu.gov.ph Payment Officer" [ref=f53e6699] [cursor=pointer]:
+                - generic [ref=f53e6700]: C
+                - generic [ref=f53e6704]:
+                  - generic [ref=f53e6705]: cashier@lgu.gov.ph
+                  - generic [ref=f53e6706]: Payment Officer
+        - generic [ref=f53e6710]:
+          - generic [ref=f53e6711]:
+            - generic [ref=f53e6712]:
+              - heading "Payment Assessment" [level=1] [ref=f53e6713]
+              - paragraph [ref=f53e6714]: Stage FourteenE · — · Fencing Permit
+            - button "Back to Application" [ref=f53e6716] [cursor=pointer]
+          - generic [ref=f53e6717]:
+            - generic [ref=f53e6718]:
+              - heading "Assessment — Submitted" [level=2] [ref=f53e6719]
+              - generic [ref=f53e6720]: Fee schedule version 2026.1
+            - table [ref=f53e6722]:
+              - rowgroup [ref=f53e6723]:
+                - row [ref=f53e6724]:
+                  - columnheader "Line" [ref=f53e6725]
+                  - columnheader "Included" [ref=f53e6726]
+                  - columnheader "Schedule Says" [ref=f53e6727]
+                  - columnheader "Amount (₱)" [ref=f53e6728]
+                  - columnheader "Basis" [ref=f53e6729]
+                  - columnheader [ref=f53e6730]
+              - rowgroup [ref=f53e6731]:
+                - row [ref=f53e6732]:
+                  - cell "Filing Fee" [ref=f53e6733]
+                  - cell "Yes" [ref=f53e6734]
+                  - cell "₱500.00" [ref=f53e6735]
+                  - cell "₱500.00" [ref=f53e6736]
+                  - cell "City Ordinance 2026-004 s.3" [ref=f53e6737]
+                  - cell [ref=f53e6738]
+                - row [ref=f53e6739]:
+                  - cell "Processing Fee" [ref=f53e6740]
+                  - cell "Yes" [ref=f53e6741]
+                  - cell "₱1,200.00" [ref=f53e6742]
+                  - cell "₱1,200.00" [ref=f53e6743]
+                  - cell "City Ordinance 2026-004 s.3" [ref=f53e6744]
+                  - cell [ref=f53e6745]
+                - row [ref=f53e6746]:
+                  - cell "Architectural Fee" [ref=f53e6747]
+                  - cell "Yes" [ref=f53e6748]
+                  - cell "₱0.00" [ref=f53e6749]
+                  - cell "₱0.00" [ref=f53e6750]
+                  - cell "—" [ref=f53e6751]
+                  - cell [ref=f53e6752]
+                - row [ref=f53e6753]:
+                  - cell "Structural Fee" [ref=f53e6754]
+                  - cell "Yes" [ref=f53e6755]
+                  - cell "₱5,120.00" [ref=f53e6756]
+                  - cell "₱5,120.00" [ref=f53e6757]
+                  - cell "City Ordinance 2026-004 s.3" [ref=f53e6758]
+                  - cell [ref=f53e6759]
+                - row [ref=f53e6760]:
+                  - cell "Electrical Fee" [ref=f53e6761]
+                  - cell "Yes" [ref=f53e6762]
+                  - cell "₱0.00" [ref=f53e6763]
+                  - cell "₱0.00" [ref=f53e6764]
+                  - cell "—" [ref=f53e6765]
+                  - cell [ref=f53e6766]
+                - row [ref=f53e6767]:
+                  - cell "Other Fees" [ref=f53e6768]
+                  - cell "Yes" [ref=f53e6769]
+                  - cell "₱0.00" [ref=f53e6770]
+                  - cell "₱0.00" [ref=f53e6771]
+                  - cell "—" [ref=f53e6772]
+                  - cell [ref=f53e6773]
+              - rowgroup [ref=f53e6774]:
+                - row [ref=f53e6775]:
+                  - cell "Total" [ref=f53e6776]
+                  - cell "₱6,820.00" [ref=f53e6777]
+            - generic [ref=f53e6778]:
+              - button "Approve" [ref=f53e6779] [cursor=pointer]
+              - paragraph [ref=f53e6780]: A different officer from the one who drafted or submitted this must approve it — the server refuses a self-approval.
+  - status [ref=f53e6781]:
+    - generic [ref=f53e6786]: This account does not hold the permission this action requires.
+    - button "Dismiss" [ref=f53e6787] [cursor=pointer]: ✕

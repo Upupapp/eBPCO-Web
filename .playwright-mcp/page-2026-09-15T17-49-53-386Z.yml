@@ -1,0 +1,36 @@
+- generic [ref=f88e158]:
+  - banner [ref=f88e159]:
+    - link "Municipality of Castilla seal eBPCO Citizen Portal" [ref=f88e160] [cursor=pointer]:
+      - /url: /landing
+      - img "Municipality of Castilla seal" [ref=f88e161]
+      - generic [ref=f88e162]: eBPCO Citizen Portal
+    - navigation "Primary" [ref=f88e163]:
+      - link "How It Works" [ref=f88e164] [cursor=pointer]:
+        - /url: /how-it-works
+      - link "Log In" [ref=f88e165] [cursor=pointer]:
+        - /url: /login
+      - link "Register" [ref=f88e166] [cursor=pointer]:
+        - /url: /register
+  - main [ref=f88e168]:
+    - generic [ref=f88e169]:
+      - heading "Apply for permits from anywhere" [level=1] [ref=f88e170]:
+        - generic [ref=f88e171]: Apply for permits
+        - generic [ref=f88e172]: from anywhere
+      - paragraph [ref=f88e179]: Register your business, submit permit applications, upload requirements, pay assessed fees, and track every application — all in one place, in parity with the eBPCO mobile app.
+      - generic [ref=f88e180]:
+        - link "Get Started" [ref=f88e181] [cursor=pointer]:
+          - /url: /register
+        - link "I already have an account" [ref=f88e185] [cursor=pointer]:
+          - /url: /login
+      - link "See how the process works" [ref=f88e186] [cursor=pointer]:
+        - /url: /how-it-works
+    - region "Key features" [ref=f88e190]:
+      - article [ref=f88e191]:
+        - heading "Submit & Manage Requirements" [level=3] [ref=f88e197]
+        - paragraph [ref=f88e199]: Upload documents once and reuse them across applications with your personal document library.
+      - article [ref=f88e200]:
+        - heading "Track Your Application" [level=3] [ref=f88e207]
+        - paragraph [ref=f88e209]: Follow every step from submission to release with a clear status timeline.
+      - article [ref=f88e210]:
+        - heading "Pay Securely" [level=3] [ref=f88e215]
+        - paragraph [ref=f88e217]: View your Order of Payment and pay by bank transfer or onsite.

@@ -1,11 +1,15 @@
 import { RoleRow, UserRow } from './user-roles';
 
 // Deterministic linked-record generator for the Staff User workspace —
-// workload, security/session history, and audit activity, all derived from
-// the user's own row so a reload shows the same record instead of
-// reshuffling. This app has no backend/auth service, so Security is
-// explicitly a prototype/local simulation, never presented as real
-// enforcement (see role permission matrix below).
+// workload and audit activity, derived from the user's own row so a reload
+// shows the same record instead of reshuffling. The backend/auth service
+// itself is real (see SessionService), but it has no endpoint for a staff
+// member's workload assignments or a free-text activity feed, so these two
+// stay a local simulation — never presented as a real enforcement or audit
+// record. Live session history (device-independent: issued/expires/last-used
+// timestamps, no device or IP — the server tracks neither) is real, from
+// `StaffDirectoryApi.sessions()`, and does not come from this file; see
+// user-roles.ts's own comment on where `buildSessions` used to be called.
 
 export interface PermissionMatrixRow {
   module: string;

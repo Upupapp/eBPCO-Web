@@ -20,6 +20,7 @@ import {
 import { ToastService } from '../toast/toast.service';
 import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
 import { QueueLoader } from '../../core/domain/queue-loader';
+import { CapitalizeNameDirective } from '../utils/capitalize-name.directive';
 
 // Same barangay list the seed data and the Business Stages board's
 // filter draw from (application-seed.ts's LOCATIONS) — kept as its own
@@ -83,7 +84,7 @@ const STEPS: { key: Step; label: string }[] = [
  */
 @Component({
   selector: 'app-application-intake',
-  imports: [FormsModule, Icon],
+  imports: [FormsModule, Icon, CapitalizeNameDirective],
   templateUrl: './application-intake.html',
   styleUrl: './application-intake.scss',
 })

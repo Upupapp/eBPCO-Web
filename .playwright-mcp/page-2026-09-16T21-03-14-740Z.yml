@@ -1,0 +1,45 @@
+- generic [ref=f26e4]:
+  - complementary [ref=f26e6]:
+    - generic [ref=f26e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f26e9]
+      - generic [ref=f26e10]: E-BPCO
+    - navigation [ref=f26e11]:
+      - link "Dashboard" [ref=f26e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f26e20]:
+        - generic [ref=f26e21]: Operations
+        - generic [ref=f26e22]:
+          - link "Applications" [ref=f26e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Payments" [ref=f26e29] [cursor=pointer]:
+            - /url: /payments
+      - generic [ref=f26e36]:
+        - generic [ref=f26e37]: Administration
+        - link "Archive" [ref=f26e39] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f26e45] [cursor=pointer]
+  - main [ref=f26e51]:
+    - generic [ref=f26e239]:
+      - generic "Payments" [ref=f26e240]:
+        - generic [ref=f26e241]:
+          - heading "Payments" [level=1] [ref=f26e242]
+          - generic [ref=f26e243]:
+            - generic [ref=f26e244]:
+              - generic [ref=f26e249]: Search
+              - textbox "Search" [ref=f26e250]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f26e252] [cursor=pointer]
+            - button "A assessor@lgu.gov.ph Payment Officer" [ref=f26e258] [cursor=pointer]:
+              - generic [ref=f26e259]: A
+              - generic [ref=f26e263]:
+                - generic [ref=f26e264]: assessor@lgu.gov.ph
+                - generic [ref=f26e265]: Payment Officer
+      - generic [ref=f26e269]:
+        - generic [ref=f26e270]:
+          - generic [ref=f26e271]:
+            - heading "Payment Assessment" [level=1] [ref=f26e272]
+            - paragraph [ref=f26e273]: Liza Marasigan · — · Fencing Permit
+          - button "Back to Application" [ref=f26e275] [cursor=pointer]
+        - generic [ref=f26e276]:
+          - paragraph [ref=f26e277]: No assessment has been started for this application yet.
+          - button "Start Assessment" [ref=f26e278] [cursor=pointer]

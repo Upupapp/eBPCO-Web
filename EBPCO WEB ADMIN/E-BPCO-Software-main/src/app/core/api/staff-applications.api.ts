@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { ApiClient } from './api.client';
 import { ApiError } from './problem';
 import { ApplicationRecord, withProjectedFields } from '../domain/application.model';
+import { DocumentStatus } from '../domain/document.model';
 import {
   ApplicationLifecycleStatus,
   PermitReleaseStatus,
@@ -113,13 +114,56 @@ export interface ApplicationOrderOfPayment {
   readonly dueDate: string | null;
 }
 
-/** One row of the `timeline` array on `GET /staff/applications/:id` — the record's own transition history, written by the database trigger on every committed transition (never the security/audit log, which also records refused attempts). */
+/**
+ * One row of the `timeline` array on `GET /staff/applications/:id` — the
+ * record's own transition history, written by the database trigger on
+ * every committed transition (never the security/audit log, which also
+ * records refused attempts).
+ *
+ * `actorName` names the specific person, not just their office — real
+ * staff `full_name` where set, else the acting applicant's own name, else
+ * an email, else `null` for a transition with no recorded actor at all.
+ * Added alongside `office` rather than replacing it: they answer different
+ * questions ("who" vs. "which desk"), and Archive is the first screen to
+ * need the former.
+ */
 export interface ApplicationTimelineEvent {
   readonly fromStatus: string | null;
   readonly toStatus: string;
   readonly occurredAt: string;
   readonly office: string | null;
+  readonly actorName: string | null;
   readonly remarks: string | null;
+}
+
+/**
+ * One row of the `documents` array on `GET /staff/applications/:id`.
+ *
+ * `status` is the malware scanner's verdict on the bytes themselves
+ * ('Pending'/'Approved'/'Rejected'/'Missing') — NOT a staff decision.
+ * `reviewStatus` (migration 027) is the staff verdict, sharing this same
+ * portal's own `DocumentStatus` vocabulary by design (see that migration's
+ * own comment), `null` until an officer records one. Conflating the two is
+ * exactly the bug this type exists to prevent: the old code read `status`
+ * as though it meant "an officer accepted this," which no server-side
+ * concept had ever supported until this endpoint started sending it.
+ */
+export interface ApplicationDocumentRow {
+  readonly id: string;
+  readonly label: string;
+  readonly fileName: string;
+  readonly contentType: string;
+  readonly byteSize: number;
+  readonly status: string;
+  readonly scanCleared: boolean;
+  /** Which checklist entry this answers — `null` means not attributed (see migration 035). */
+  readonly requirementCode: string | null;
+  readonly reviewStatus: DocumentStatus | null;
+  readonly reviewRemark: string | null;
+  readonly expiresOn: string | null;
+  readonly certifiedOn: string | null;
+  readonly uploadedAt: string;
+  readonly reviewedAt: string | null;
 }
 
 export interface ApplicationDetail {
@@ -130,6 +174,7 @@ export interface ApplicationDetail {
   /** The applicant's real mobile number, from their account, or `null` when the account has none on file. */
   readonly applicantMobile: string | null;
   readonly timeline: readonly ApplicationTimelineEvent[];
+  readonly documents: readonly ApplicationDocumentRow[];
 }
 
 export type ApplicationDetailResult =
@@ -196,6 +241,31 @@ export type TransitionResult =
 
 export type ArchiveResult =
   | { readonly kind: 'done' }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
+/** `POST /staff/applications/:id/documents/:documentId/review` — migration 027's columns, staff-side. */
+export type DocumentReviewResult =
+  | { readonly kind: 'done' }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
+/** `POST /documents` — a first file for a still-Missing requirement, `documents:write` only (`records-officer`/`super-admin`). */
+export type DocumentAttachResult =
+  | { readonly kind: 'done'; readonly documentId: string }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
+/**
+ * `POST /staff/applications/:id/documents/:documentId/resubmit` — the
+ * staff-namespaced equivalent of the applicant's own resubmit route, for a
+ * walk-in citizen with no portal access. `documents:write` only.
+ */
+export type DocumentResubmitResult =
+  | { readonly kind: 'done'; readonly documentId: string }
   | { readonly kind: 'refused'; readonly message: string }
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
@@ -304,6 +374,95 @@ export class StaffApplicationsApi {
         if (error.status === 409) return { kind: 'refused', reason: 'illegal-transition', message: error.message };
         if (error.status === 422) return { kind: 'refused', reason: 'precondition-unmet', message: error.message };
         if (error.status === 412) return { kind: 'refused', reason: 'stale-version', message: error.message };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * `POST /staff/applications/:id/documents/:documentId/review` — a staff
+   * verdict on one document, writing the columns migration 027 added
+   * (separate from the malware scanner's own `status`). A reason (code or
+   * remark) is required when rejecting or requesting revision — enforced
+   * server-side too, but checked there for a clear refusal rather than a
+   * raw 422.
+   */
+  async reviewDocument(
+    applicationId: string,
+    documentId: string,
+    status: 'Under Review' | 'Accepted' | 'Rejected' | 'Revision Required',
+    remark?: string,
+  ): Promise<DocumentReviewResult> {
+    try {
+      await this.api.post<{ ok: true }>(
+        `/staff/applications/${encodeURIComponent(applicationId)}/documents/${encodeURIComponent(documentId)}/review`,
+        { status, ...(remark === undefined ? {} : { remark }) },
+        crypto.randomUUID(),
+      );
+      return { kind: 'done' };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 501) return { kind: 'unavailable' };
+        if (error.status === 404 || error.status === 422) {
+          return { kind: 'refused', message: error.message };
+        }
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * `POST /documents` — a first file for a still-Missing requirement.
+   * `documents:write` server-side, held by `records-officer`/`super-admin`
+   * only among staff roles — call sites gate the control itself on that
+   * scope rather than relying on the server's 403 to explain it after the
+   * fact.
+   */
+  async attachDocument(
+    applicationId: string, requirementCode: string, label: string,
+    fileName: string, contentBase64: string,
+  ): Promise<DocumentAttachResult> {
+    try {
+      const result = await this.api.post<{ documentId: string }>(
+        '/documents', { fileName, label, applicationId, requirementCode, contentBase64 },
+      );
+      return { kind: 'done', documentId: result.documentId };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 501) return { kind: 'unavailable' };
+        if (error.status === 403 || error.status === 404 || error.status === 422) {
+          return { kind: 'refused', message: error.message };
+        }
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * `POST /staff/applications/:id/documents/:documentId/resubmit` — the
+   * staff-namespaced resubmit for a walk-in citizen with no portal access.
+   * `documents:write` server-side, same gate as `attachDocument` above.
+   */
+  async resubmitDocument(
+    applicationId: string, documentId: string, label: string,
+    fileName: string, contentBase64: string,
+  ): Promise<DocumentResubmitResult> {
+    try {
+      const result = await this.api.post<{ documentId: string }>(
+        `/staff/applications/${encodeURIComponent(applicationId)}/documents/${encodeURIComponent(documentId)}/resubmit`,
+        { fileName, label, contentBase64 },
+        crypto.randomUUID(),
+      );
+      return { kind: 'done', documentId: result.documentId };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 501) return { kind: 'unavailable' };
+        if (error.status === 403 || error.status === 404 || error.status === 409) {
+          return { kind: 'refused', message: error.message };
+        }
         return { kind: 'failed', message: error.message };
       }
       throw error;

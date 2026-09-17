@@ -1,0 +1,43 @@
+- generic [ref=f1e22]:
+  - generic [ref=f1e23]:
+    - button "Open navigation" [ref=f1e24] [cursor=pointer]
+    - generic [ref=f1e28]:
+      - link "View profile and settings" [ref=f1e30] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f1e31]: Liza Marasigan
+      - generic [ref=f1e444]:
+        - heading "Fencing Permit" [level=1] [ref=f1e447]
+        - generic [ref=f1e448]:
+          - generic [ref=f1e449]:
+            - generic [ref=f1e450]: "1"
+            - text: Business & Type
+          - generic [ref=f1e452]:
+            - generic [ref=f1e453]: "2"
+            - text: Details
+          - generic [ref=f1e455]:
+            - generic [ref=f1e456]: "3"
+            - text: Documents
+          - generic [ref=f1e458]:
+            - generic [ref=f1e459]: "4"
+            - text: Review & Submit
+        - generic [ref=f1e460]:
+          - generic [ref=f1e461]:
+            - generic [ref=f1e462]: Business*
+            - combobox "Business*" [ref=f1e463]:
+              - option "Select a business" [disabled] [selected]
+            - generic [ref=f1e464]:
+              - text: No businesses yet —
+              - link "register one first" [ref=f1e465] [cursor=pointer]:
+                - /url: /businesses/register
+              - text: .
+          - generic [ref=f1e466]:
+            - generic [ref=f1e467]: Application Type*
+            - combobox "Application Type*" [ref=f1e468]:
+              - option "New Permit" [selected]
+              - option "Renewal"
+              - option "Amendment"
+          - button "Continue" [ref=f1e469] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

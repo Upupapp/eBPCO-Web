@@ -1,0 +1,179 @@
+- generic [ref=f15e53]:
+  - complementary [ref=f15e55]:
+    - generic [ref=f15e56]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f15e58]
+      - generic [ref=f15e59]: E-BPCO
+    - navigation [ref=f15e60]:
+      - link "Dashboard" [ref=f15e63] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f15e69]:
+        - generic [ref=f15e70]: Operations
+        - generic [ref=f15e71]:
+          - link "Applications" [ref=f15e72] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f15e78] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f15e83] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f15e90] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f15e97]:
+        - generic [ref=f15e98]: Administration
+        - generic [ref=f15e99]:
+          - link "Businesses" [ref=f15e100] [cursor=pointer]:
+            - /url: /businesses
+          - link "Users & Roles" [ref=f15e106] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f15e113] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f15e122] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f15e128] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f15e134] [cursor=pointer]
+  - main [ref=f15e140]:
+    - generic [ref=f15e1112]:
+      - generic "Applications" [ref=f15e1113]:
+        - generic [ref=f15e1114]:
+          - heading "Applications" [level=1] [ref=f15e1115]
+          - generic [ref=f15e1116]:
+            - generic [ref=f15e1117]:
+              - generic [ref=f15e1122]: Search
+              - textbox "Search" [ref=f15e1123]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f15e1125] [cursor=pointer]
+            - button "R records@lgu.gov.ph Administrator" [ref=f15e1131] [cursor=pointer]:
+              - generic [ref=f15e1132]: R
+              - generic [ref=f15e1136]:
+                - generic [ref=f15e1137]: records@lgu.gov.ph
+                - generic [ref=f15e1138]: Administrator
+      - generic [ref=f15e1142]:
+        - heading "Application Details" [level=1] [ref=f15e1143]
+        - generic [ref=f15e1144]:
+          - button "Action" [ref=f15e1146] [cursor=pointer]
+          - button "Evaluate" [ref=f15e1147] [cursor=pointer]
+          - button "Payment" [ref=f15e1148] [cursor=pointer]
+          - button "Back to List" [ref=f15e1149] [cursor=pointer]
+          - button "More actions" [ref=f15e1151] [cursor=pointer]
+      - generic [ref=f15e1157]:
+        - generic [ref=f15e1158]:
+          - generic [ref=f15e1159]: LM
+          - generic [ref=f15e1167]:
+            - heading "710e7e61-5741-40b8-8a0b-2ceb09981bd2 - Liza Marasigan" [level=2] [ref=f15e1168]
+            - generic [ref=f15e1169]: Under Review
+            - generic [ref=f15e1170]:
+              - generic [ref=f15e1171]:
+                - term [ref=f15e1172]: "Business / Project :"
+                - definition [ref=f15e1173]: —
+              - generic [ref=f15e1174]:
+                - term [ref=f15e1175]: "City :"
+                - definition [ref=f15e1176]: 45 Mabini Street, Poblacion, Castilla
+              - generic [ref=f15e1177]:
+                - term [ref=f15e1178]: "Region :"
+                - definition [ref=f15e1179]: Region V (Bicol Region)
+              - generic [ref=f15e1180]:
+                - term [ref=f15e1181]: "Type :"
+                - definition [ref=f15e1182]: Fencing Permit
+              - generic [ref=f15e1183]:
+                - term [ref=f15e1184]: "Email :"
+                - definition [ref=f15e1185]:
+                  - text: liza.marasigan@example.ph
+                  - generic [ref=f15e1186]: Unverified
+                  - button "Confirm" [ref=f15e1187] [cursor=pointer]
+                  - button "Mark Failed" [ref=f15e1188] [cursor=pointer]
+              - generic [ref=f15e1189]:
+                - term [ref=f15e1190]: "Phone :"
+                - definition [ref=f15e1191]:
+                  - text: "09171234567"
+                  - generic [ref=f15e1192]: Unverified
+                  - button "Confirm" [ref=f15e1193] [cursor=pointer]
+                  - button "Mark Failed" [ref=f15e1194] [cursor=pointer]
+              - generic [ref=f15e1195]:
+                - term [ref=f15e1196]: "Barangay :"
+                - definition [ref=f15e1197]: 45 Mabini Street, Poblacion, Castilla
+          - generic [ref=f15e1198]:
+            - generic [ref=f15e1199]:
+              - strong [ref=f15e1200]: 2026-09-16
+              - generic [ref=f15e1201]: Date Submitted
+            - generic [ref=f15e1202]:
+              - strong [ref=f15e1203]: —
+              - generic [ref=f15e1204]: Assigned Officer
+          - button [ref=f15e1205] [cursor=pointer]
+        - generic [ref=f15e1209]:
+          - generic [ref=f15e1210]:
+            - button "Timeline" [ref=f15e1211] [cursor=pointer]
+            - button "Documents" [ref=f15e1212] [cursor=pointer]
+            - button "Permit Result" [ref=f15e1213] [cursor=pointer]
+            - button "Comments" [ref=f15e1214] [cursor=pointer]
+          - generic [ref=f15e1215]:
+            - heading "Activity Summary" [level=2] [ref=f15e1216]
+            - paragraph [ref=f15e1217]:
+              - text: This Application Is Currently At
+              - strong [ref=f15e1218]: Under Evaluation
+            - heading "Lifecycle Progress" [level=3] [ref=f15e1219]
+            - list [ref=f15e1220]:
+              - listitem [ref=f15e1221]: Draft
+              - listitem [ref=f15e1222]: Submitted
+              - listitem [ref=f15e1223]: Received
+              - listitem [ref=f15e1224]: Document Verification
+              - listitem [ref=f15e1225]: Under Evaluation
+              - listitem [ref=f15e1226]: Assessed
+              - listitem [ref=f15e1227]: Payment Submitted
+              - listitem [ref=f15e1228]: Payment Under Verification
+              - listitem [ref=f15e1229]: Payment Verified
+              - listitem [ref=f15e1230]: For Approval
+              - listitem [ref=f15e1231]: Approved
+              - listitem [ref=f15e1232]: Permit Generated
+              - listitem [ref=f15e1233]: Ready for Release
+              - listitem [ref=f15e1234]: Released
+              - listitem [ref=f15e1235]: Completed
+            - heading "Quick Information :" [level=3] [ref=f15e1236]
+            - generic [ref=f15e1237]:
+              - list [ref=f15e1238]:
+                - listitem [ref=f15e1239]: "Assigned To: —"
+                - listitem [ref=f15e1240]: "Current Step: Under Evaluation"
+                - listitem [ref=f15e1241]: "Days In Current Step: 0 Days"
+              - generic [ref=f15e1242]: "Total Elapsed Time: 0 Days"
+            - heading "Audit Trail" [level=3] [ref=f15e1243]
+            - table [ref=f15e1245]:
+              - rowgroup [ref=f15e1246]:
+                - row [ref=f15e1247]:
+                  - columnheader "#" [ref=f15e1248]
+                  - columnheader "Timeline Event" [ref=f15e1249]
+                  - columnheader "Date" [ref=f15e1250]
+                  - columnheader "Time" [ref=f15e1251]
+                  - columnheader "Details" [ref=f15e1252]
+                  - columnheader "Action" [ref=f15e1253]
+              - rowgroup [ref=f15e1254]:
+                - row [ref=f15e1255]:
+                  - cell "04" [ref=f15e1256]
+                  - cell "Under Evaluation" [ref=f15e1257]
+                  - cell "9/17/2026" [ref=f15e1258]
+                  - cell "3:59:06 AM" [ref=f15e1259]
+                  - cell "From Document Verification" [ref=f15e1260]
+                  - cell [ref=f15e1261]:
+                    - button "Export Under Evaluation" [ref=f15e1262] [cursor=pointer]
+                - row [ref=f15e1267]:
+                  - cell "03" [ref=f15e1268]
+                  - cell "Document Verification" [ref=f15e1269]
+                  - cell "9/17/2026" [ref=f15e1270]
+                  - cell "3:57:35 AM" [ref=f15e1271]
+                  - cell "From Received" [ref=f15e1272]
+                  - cell [ref=f15e1273]:
+                    - button "Export Document Verification" [ref=f15e1274] [cursor=pointer]
+                - row [ref=f15e1279]:
+                  - cell "02" [ref=f15e1280]
+                  - cell "Received" [ref=f15e1281]
+                  - cell "9/17/2026" [ref=f15e1282]
+                  - cell "3:57:22 AM" [ref=f15e1283]
+                  - cell "From Submitted" [ref=f15e1284]
+                  - cell [ref=f15e1285]:
+                    - button "Export Received" [ref=f15e1286] [cursor=pointer]
+                - row [ref=f15e1291]:
+                  - cell "01" [ref=f15e1292]
+                  - cell "Submitted" [ref=f15e1293]
+                  - cell "9/17/2026" [ref=f15e1294]
+                  - cell "3:55:51 AM" [ref=f15e1295]
+                  - cell "Application filed" [ref=f15e1296]
+                  - cell [ref=f15e1297]:
+                    - button "Export Submitted" [ref=f15e1298] [cursor=pointer]

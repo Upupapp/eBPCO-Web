@@ -1,0 +1,84 @@
+- generic [ref=f8e22]:
+  - generic [ref=f8e23]:
+    - complementary [ref=f8e24]:
+      - generic [ref=f8e25]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f8e26] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f8e27]
+          - generic [ref=f8e28]: Collapse sidebar
+        - generic [ref=f8e29]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f8e30]:
+        - link "Home" [ref=f8e31] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f8e36] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f8e43] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f8e48] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f8e54] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f8e58] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f8e62] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f8e67] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f8e72] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f8e77] [cursor=pointer]
+    - generic [ref=f8e82]:
+      - link "View profile and settings" [ref=f8e84] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f8e85]: Juan Dela Cruz
+      - status [ref=f8e90]:
+        - strong [ref=f8e91]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - main [ref=f8e94]:
+        - generic [ref=f8e95]:
+          - generic [ref=f8e96]:
+            - heading "Welcome back, Juan" [level=1] [ref=f8e97]:
+              - text: Welcome back, Juan
+              - generic [aria-hidden] [ref=f8e98]: 👋
+            - paragraph [ref=f8e99]: Here's what's happening with your applications.
+          - generic [ref=f8e100]:
+            - link "Apply for Permit" [ref=f8e101] [cursor=pointer]:
+              - /url: /permits
+            - link "Register Business" [ref=f8e106] [cursor=pointer]:
+              - /url: /businesses/register
+        - generic [ref=f8e113]:
+          - generic [ref=f8e114]:
+            - generic [ref=f8e123]:
+              - generic [ref=f8e124]: My Businesses
+              - generic [ref=f8e125]: "0"
+            - link "View all businesses" [ref=f8e127] [cursor=pointer]:
+              - /url: /businesses
+          - generic [ref=f8e131]:
+            - generic [ref=f8e139]:
+              - generic [ref=f8e140]: Total Applications
+              - generic [ref=f8e141]: "0"
+            - generic [ref=f8e142]: This includes all statuses
+          - generic [ref=f8e147]:
+            - generic [ref=f8e154]:
+              - generic [ref=f8e155]: Awaiting Action
+              - generic [ref=f8e156]: "0"
+            - generic [ref=f8e157]: Needs your action
+          - generic [ref=f8e162]:
+            - generic [ref=f8e169]:
+              - generic [ref=f8e170]: Ready for Release
+              - generic [ref=f8e171]: "0"
+            - generic [ref=f8e172]: Ready to claim / view
+        - generic [ref=f8e177]:
+          - article [ref=f8e178]:
+            - heading "Active Applications" [level=2] [ref=f8e186]
+            - generic [ref=f8e187]:
+              - text: No applications yet.
+              - link "Start your first application." [ref=f8e188] [cursor=pointer]:
+                - /url: /permits
+          - article [ref=f8e189]:
+            - heading "Recent Notifications" [level=2] [ref=f8e196]
+            - generic [ref=f8e197]: No notifications yet.
+  - generic:
+    - generic:
+      - status
+      - alert

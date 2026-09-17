@@ -1,0 +1,5 @@
+[     289ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=1b288bde:9127
+[     501ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4201/applications/1c328cbb-9541-424b-a9b3-0bd2d9f79a48/permit:0
+[   11639ms] [ERROR] Failed to load resource: the server responded with a status of 409 (Conflict) @ http://localhost:4201/applications/1c328cbb-9541-424b-a9b3-0bd2d9f79a48/cancel:0
+[  108004ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=1b288bde:9127
+[  108236ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4201/applications/1c328cbb-9541-424b-a9b3-0bd2d9f79a48/permit:0

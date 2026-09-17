@@ -1,0 +1,436 @@
+- generic [ref=e61]:
+  - complementary [ref=e63]:
+    - generic [ref=e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=e66]
+      - generic [ref=e67]: E-BPCO
+    - navigation [ref=e68]:
+      - link "Dashboard" [ref=e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=e77]:
+        - generic [ref=e78]: Operations
+        - generic [ref=e79]:
+          - link "Applications" [ref=e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=e105]:
+        - generic [ref=e106]: Administration
+        - generic [ref=e107]:
+          - link "Businesses" [ref=e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=e114] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=e120] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=e127] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=e136] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=e142] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=e148] [cursor=pointer]
+  - main [ref=e154]:
+    - generic [ref=e155]:
+      - generic "Dashboard" [ref=e156]:
+        - generic [ref=e157]:
+          - heading "Dashboard" [level=1] [ref=e158]
+          - generic [ref=e159]:
+            - generic [ref=e160]:
+              - generic [ref=e165]: Search
+              - textbox "Search" [ref=e166]:
+                - /placeholder: Search Recent Applications by ID, Applicant, Business/Project, or Location
+            - button "Notifications" [ref=e168] [cursor=pointer]
+            - button "S super@lgu.gov.ph Super Admin" [ref=e174] [cursor=pointer]:
+              - generic [ref=e175]: S
+              - generic [ref=e179]:
+                - generic [ref=e180]: super@lgu.gov.ph
+                - generic [ref=e181]: Super Admin
+      - generic [ref=e185]:
+        - generic [ref=e187]:
+          - generic [ref=e189]:
+            - paragraph [ref=e190]: Total Applications
+            - paragraph [ref=e191]: "7"
+            - generic [ref=e192]:
+              - generic [ref=e193]: "+7"
+              - generic [ref=e198]: vs last month
+          - generic [ref=e199]: All Time
+        - generic [ref=e203]:
+          - generic [ref=e205]:
+            - paragraph [ref=e206]: Pending / Under Review
+            - paragraph [ref=e207]: "5"
+            - generic [ref=e208]:
+              - generic [ref=e209]: "+5"
+              - generic [ref=e214]: vs last month
+          - generic [ref=e215]: Submitted through Under Evaluation
+        - generic [ref=e219]:
+          - generic [ref=e221]:
+            - paragraph [ref=e222]: Payments Awaiting Verification
+            - paragraph [ref=e223]: "0"
+          - generic [ref=e224]: Submitted, not yet verified
+        - generic [ref=e228]:
+          - generic [ref=e230]:
+            - paragraph [ref=e231]: Approved
+            - paragraph [ref=e232]: "1"
+            - generic [ref=e233]:
+              - generic [ref=e234]: "+1"
+              - generic [ref=e239]: vs last month
+          - generic [ref=e240]: Approved through Completed
+        - generic [ref=e244]:
+          - generic [ref=e246]:
+            - paragraph [ref=e247]: Ready for Release
+            - paragraph [ref=e248]: "0"
+          - generic [ref=e249]: Permit generated, awaiting claim
+      - generic [ref=e253]:
+        - generic [ref=e254]:
+          - generic [ref=e255]:
+            - heading "Business Application Stages" [level=2] [ref=e256]
+            - paragraph [ref=e257]: Track businesses across each stage of the application process.
+          - generic [ref=e258]:
+            - generic [ref=e259]:
+              - button [ref=e261] [cursor=pointer]
+              - button [ref=e269] [cursor=pointer]
+              - button [ref=e277] [cursor=pointer]
+            - group "Board display mode" [ref=e284]:
+              - button [pressed] [ref=e285] [cursor=pointer]
+              - button [ref=e293] [cursor=pointer]
+        - generic [ref=e298]:
+          - generic [ref=e299]:
+            - generic [ref=e300]:
+              - generic [ref=e306]: Under Review
+              - generic [ref=e307]: "6"
+            - generic [ref=e309]:
+              - button "View application 710e7e61-5741-40b8-8a0b-2ceb09981bd2 for Liza Marasigan, —, Fencing Permit, draggable to another stage" [ref=e310]:
+                - generic [ref=e311]: Liza Marasigan
+                - generic [ref=e312]: —
+                - generic [ref=e313]: 710e7e61-5741-40b8-8a0b-2ceb09981bd2
+                - generic [ref=e314]: Fencing Permit
+              - button "View application f5711e7e-0318-445b-9d64-3f5ea26b3969 for Maria Santos, Santos Sari-Sari Store, Fencing Permit, draggable to another stage" [ref=e315]:
+                - generic [ref=e316]: Maria Santos
+                - generic [ref=e317]: Santos Sari-Sari Store
+                - generic [ref=e318]: f5711e7e-0318-445b-9d64-3f5ea26b3969
+                - generic [ref=e319]: Fencing Permit
+              - button "View application 1c328cbb-9541-424b-a9b3-0bd2d9f79a48 for Maria Santos, Santos Sari-Sari Store, Fencing Permit, draggable to another stage" [ref=e320]:
+                - generic [ref=e321]: Maria Santos
+                - generic [ref=e322]: Santos Sari-Sari Store
+                - generic [ref=e323]: 1c328cbb-9541-424b-a9b3-0bd2d9f79a48
+                - generic [ref=e324]: Fencing Permit
+              - button "View application aff44047-955b-484c-8628-e086ae587be2 for Maria Santos, Santos Sari-Sari Store, Fencing Permit, draggable to another stage" [ref=e325]:
+                - generic [ref=e326]: Maria Santos
+                - generic [ref=e327]: Santos Sari-Sari Store
+                - generic [ref=e328]: aff44047-955b-484c-8628-e086ae587be2
+                - generic [ref=e329]: Fencing Permit
+              - button "View application 68a4b091-a924-435c-8afb-4f269660f154 for Maria Santos, Santos Sari-Sari Store, Fencing Permit, draggable to another stage" [ref=e330]:
+                - generic [ref=e331]: Maria Santos
+                - generic [ref=e332]: Santos Sari-Sari Store
+                - generic [ref=e333]: 68a4b091-a924-435c-8afb-4f269660f154
+                - generic [ref=e334]: Fencing Permit
+              - button "View application a9a12cc0-b2ab-4a77-bac7-e161c06f200d for Maria Santos, Santos Sari-Sari Store, Fencing Permit, draggable to another stage" [ref=e335]:
+                - generic [ref=e336]: Maria Santos
+                - generic [ref=e337]: Santos Sari-Sari Store
+                - generic [ref=e338]: a9a12cc0-b2ab-4a77-bac7-e161c06f200d
+                - generic [ref=e339]: Fencing Permit
+            - button "View all 6" [ref=e340] [cursor=pointer]
+          - generic [ref=e349]:
+            - generic [ref=e350]:
+              - generic [ref=e356]: Approved
+              - generic [ref=e357]: "1"
+            - button "View application 97555355-07b3-41db-bd15-41c89ff5b8d6 for Maria Santos, Santos Sari-Sari Store, Fencing Permit, draggable to another stage" [ref=e360]:
+              - generic [ref=e361]: Maria Santos
+              - generic [ref=e362]: Santos Sari-Sari Store
+              - generic [ref=e363]: 97555355-07b3-41db-bd15-41c89ff5b8d6
+              - generic [ref=e364]: Fencing Permit
+            - button "View all 1" [ref=e365] [cursor=pointer]
+          - generic [ref=e374]:
+            - generic [ref=e375]:
+              - generic [ref=e382]: Rejected
+              - generic [ref=e383]: "0"
+            - paragraph [ref=e392]: No rejected applications for this period.
+      - generic [ref=e393]:
+        - generic [ref=e394]:
+          - generic [ref=e395]:
+            - heading "Over All Applications Queue" [level=2] [ref=e396]
+            - generic [ref=e397]:
+              - generic [ref=e398]: Under Review
+              - generic [ref=e400]: Approved
+              - generic [ref=e402]: Rejected
+          - button [ref=e409] [cursor=pointer]
+        - generic [ref=e415]:
+          - 'img "Building Permit – New Construction — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e416]':
+            - generic [ref=e417]: Building Permit – New Construction
+            - generic [ref=e419]: "0"
+          - 'img "Building Permit – Renovation / Alteration — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e420]':
+            - generic [ref=e421]: Building Permit – Renovation / Alteration
+            - generic [ref=e423]: "0"
+          - 'img "Building Permit – Addition / Extension — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e424]':
+            - generic [ref=e425]: Building Permit – Addition / Extension
+            - generic [ref=e427]: "0"
+          - 'img "Demolition Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e428]':
+            - generic [ref=e429]: Demolition Permit
+            - generic [ref=e431]: "0"
+          - 'img "Zoning / Locational Clearance — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e432]':
+            - generic [ref=e433]: Zoning / Locational Clearance
+            - generic [ref=e435]: "0"
+          - 'img "Architectural Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e436]':
+            - generic [ref=e437]: Architectural Permit
+            - generic [ref=e439]: "0"
+          - 'img "Civil / Structural Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e440]':
+            - generic [ref=e441]: Civil / Structural Permit
+            - generic [ref=e443]: "0"
+          - 'img "Electrical Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e444]':
+            - generic [ref=e445]: Electrical Permit
+            - generic [ref=e447]: "0"
+          - 'img "Mechanical Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e448]':
+            - generic [ref=e449]: Mechanical Permit
+            - generic [ref=e451]: "0"
+          - 'img "Sanitary Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e452]':
+            - generic [ref=e453]: Sanitary Permit
+            - generic [ref=e455]: "0"
+          - 'img "Plumbing Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e456]':
+            - generic [ref=e457]: Plumbing Permit
+            - generic [ref=e459]: "0"
+          - 'img "Electronics Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e460]':
+            - generic [ref=e461]: Electronics Permit
+            - generic [ref=e463]: "0"
+          - 'img "Interior Design Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e464]':
+            - generic [ref=e465]: Interior Design Permit
+            - generic [ref=e467]: "0"
+          - 'img "Fencing Permit — Under Review: 6 (86%) · Approved: 1 (14%) · Rejected: 0 (0%)" [ref=e468]':
+            - generic [ref=e469]: Fencing Permit
+            - generic [ref=e471]: "7"
+          - 'img "Sign Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e472]':
+            - generic [ref=e473]: Sign Permit
+            - generic [ref=e475]: "0"
+          - 'img "Excavation Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e476]':
+            - generic [ref=e477]: Excavation Permit
+            - generic [ref=e479]: "0"
+          - 'img "FSEC for Building Permit (BFP) — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e480]':
+            - generic [ref=e481]: FSEC for Building Permit (BFP)
+            - generic [ref=e483]: "0"
+          - 'img "Certificate of Occupancy — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e484]':
+            - generic [ref=e485]: Certificate of Occupancy
+            - generic [ref=e487]: "0"
+          - 'img "FSIC for Occupancy Permit (BFP) — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=e488]':
+            - generic [ref=e489]: FSIC for Occupancy Permit (BFP)
+            - generic [ref=e491]: "0"
+      - generic [ref=e492]:
+        - generic [ref=e493]:
+          - generic [ref=e494]:
+            - generic [ref=e495]:
+              - heading "Applications by Evaluation Stage" [level=2] [ref=e496]
+              - paragraph [ref=e497]: Active applications across the current review workflow
+            - generic [ref=e498]: Filter by evaluation result
+            - combobox "Filter by evaluation result" [ref=e499] [cursor=pointer]:
+              - option "All Results" [selected]
+              - option "Pending"
+              - option "Passed"
+              - option "Revision Required"
+              - option "Rejected"
+          - paragraph [ref=e500]:
+            - strong [ref=e501]: "0"
+            - text: applications currently in evaluation
+          - paragraph [ref=e506]: No applications match this filter.
+          - button [ref=e507] [cursor=pointer]
+        - generic [ref=e511]:
+          - generic [ref=e512]:
+            - heading "Overdue Review" [level=2] [ref=e513]
+            - button "View All" [ref=e514] [cursor=pointer]
+          - generic [ref=e515]:
+            - generic [ref=e516]: Low
+            - generic [ref=e518]: Medium
+            - generic [ref=e520]: High
+          - paragraph [ref=e523]: These applications carry no review progress, so overdue work cannot be identified from them.
+      - generic [ref=e524]:
+        - generic [ref=e525]:
+          - heading "Applications By Status" [level=2] [ref=e527]
+          - generic [ref=e528]:
+            - img "Distribution of 4 categories" [ref=e531]:
+              - generic [ref=e533]:
+                - 'img "For Evaluation: 2 (29%)" [ref=e534] [cursor=pointer]'
+                - 'img "Approved: 1 (14%)" [ref=e535] [cursor=pointer]'
+                - 'img "Return: 1 (14%)" [ref=e536] [cursor=pointer]'
+                - 'img "Pending: 3 (43%)" [ref=e537] [cursor=pointer]'
+              - generic: "7"
+              - generic: Total Applications
+            - list [ref=e538]:
+              - listitem [ref=e539]:
+                - generic [ref=e540]: For Evaluation
+                - generic [ref=e542]:
+                  - text: "2"
+                  - emphasis [ref=e543]: 29%
+              - listitem [ref=e544]:
+                - generic [ref=e545]: Approved
+                - generic [ref=e547]:
+                  - text: "1"
+                  - emphasis [ref=e548]: 14%
+              - listitem [ref=e549]:
+                - generic [ref=e550]: Return
+                - generic [ref=e552]:
+                  - text: "1"
+                  - emphasis [ref=e553]: 14%
+              - listitem [ref=e554]:
+                - generic [ref=e555]: Pending
+                - generic [ref=e557]:
+                  - text: "3"
+                  - emphasis [ref=e558]: 43%
+        - generic [ref=e559]:
+          - heading "Applications By Business" [level=2] [ref=e561]
+          - generic [ref=e562]:
+            - 'img "Santos Sari-Sari Store: 6" [ref=e563]':
+              - generic [ref=e564]: SS
+              - generic [ref=e566]: Santos Sari-Sari Store
+              - generic [ref=e568]: "6"
+            - 'img "—: 1" [ref=e569]':
+              - generic [ref=e570]: —
+              - generic [ref=e572]: —
+              - generic [ref=e574]: "1"
+          - navigation "Pagination" [ref=e576]:
+            - generic [ref=e577]: Showing 1-2 from 2
+            - generic [ref=e578]:
+              - button "First page" [disabled] [ref=e579]
+              - button "Page 1" [ref=e584] [cursor=pointer]: "1"
+              - button "Last page" [disabled] [ref=e585]
+      - generic [ref=e590]:
+        - heading "Application Overview" [level=2] [ref=e592]
+        - generic [ref=e593]:
+          - generic [ref=e594]:
+            - text: "New Application:"
+            - strong [ref=e596]: "1"
+          - generic [ref=e597]:
+            - text: "Approved Application:"
+            - strong [ref=e599]: "1"
+        - generic [ref=e601]:
+          - generic [ref=e602]:
+            - generic [ref=e603]: "400"
+            - generic [ref=e604]: "300"
+            - generic [ref=e605]: "200"
+            - generic [ref=e606]: "100"
+            - generic [ref=e607]: "0"
+          - generic [ref=e608]:
+            - 'img "Line chart: 2 series across 12 months" [ref=e609]'
+            - generic [ref=e614]:
+              - generic [ref=e615]: Jan
+              - generic [ref=e616]: Feb
+              - generic [ref=e617]: Mar
+              - generic [ref=e618]: Apr
+              - generic [ref=e619]: May
+              - generic [ref=e620]: Jun
+              - generic [ref=e621]: Jul
+              - generic [ref=e622]: Aug
+              - generic [ref=e623]: Sep
+              - generic [ref=e624]: Oct
+              - generic [ref=e625]: Nov
+              - generic [ref=e626]: Dec
+      - generic [ref=e627]:
+        - generic [ref=e628]:
+          - heading "Recent Applications" [level=2] [ref=e629]
+          - generic [ref=e630]:
+            - button [ref=e633] [cursor=pointer]
+            - button [ref=e637] [cursor=pointer]
+            - button "View All" [ref=e642] [cursor=pointer]
+        - table "Recent applications" [ref=e644]:
+          - rowgroup [ref=e645]:
+            - row [ref=e646]:
+              - columnheader "APPLICATION ID" [ref=e647]
+              - columnheader "APPLICANT NAME" [ref=e648]
+              - columnheader "LOCATION" [ref=e649]
+              - columnheader "TYPE" [ref=e650]
+              - columnheader "DATE SUBMITTED" [ref=e651]
+              - columnheader "ASSIGNED OFFICER" [ref=e652]
+              - columnheader "STATUS" [ref=e653]
+          - rowgroup [ref=e654]:
+            - button "View application 710e7e61-5741-40b8-8a0b-2ceb09981bd2 for Liza Marasigan" [ref=e655] [cursor=pointer]:
+              - cell "710e7e61-5741-40b8-8a0b-2ceb09981bd2" [ref=e656]
+              - cell "LM Liza Marasigan —" [ref=e657]:
+                - generic [ref=e658]:
+                  - generic [ref=e659]: LM
+                  - generic [ref=e661]:
+                    - generic "Liza Marasigan" [ref=e662]
+                    - generic "—" [ref=e663]
+              - cell "45 Mabini Street, Poblacion, Castilla" [ref=e664]
+              - cell "Fencing Permit" [ref=e665]
+              - cell "2026-09-16" [ref=e666]
+              - cell "—" [ref=e667]
+              - cell "Under Review" [ref=e668]
+            - button "View application 97555355-07b3-41db-bd15-41c89ff5b8d6 for Maria Santos" [ref=e670] [cursor=pointer]:
+              - cell "97555355-07b3-41db-bd15-41c89ff5b8d6" [ref=e671]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=e672]:
+                - generic [ref=e673]:
+                  - generic [ref=e674]: MS
+                  - generic [ref=e676]:
+                    - generic "Maria Santos" [ref=e677]
+                    - generic "Santos Sari-Sari Store" [ref=e678]
+              - cell "60 Rizal Street, Poblacion" [ref=e679]
+              - cell "Fencing Permit" [ref=e680]
+              - cell "2026-09-16" [ref=e681]
+              - cell "—" [ref=e682]
+              - cell "Approved" [ref=e683]
+            - button "View application f5711e7e-0318-445b-9d64-3f5ea26b3969 for Maria Santos" [ref=e685] [cursor=pointer]:
+              - cell "f5711e7e-0318-445b-9d64-3f5ea26b3969" [ref=e686]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=e687]:
+                - generic [ref=e688]:
+                  - generic [ref=e689]: MS
+                  - generic [ref=e691]:
+                    - generic "Maria Santos" [ref=e692]
+                    - generic "Santos Sari-Sari Store" [ref=e693]
+              - cell "50 Rizal Street, Poblacion" [ref=e694]
+              - cell "Fencing Permit" [ref=e695]
+              - cell "2026-09-16" [ref=e696]
+              - cell "—" [ref=e697]
+              - cell "Under Review" [ref=e698]
+            - button "View application 1c328cbb-9541-424b-a9b3-0bd2d9f79a48 for Maria Santos" [ref=e700] [cursor=pointer]:
+              - cell "1c328cbb-9541-424b-a9b3-0bd2d9f79a48" [ref=e701]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=e702]:
+                - generic [ref=e703]:
+                  - generic [ref=e704]: MS
+                  - generic [ref=e706]:
+                    - generic "Maria Santos" [ref=e707]
+                    - generic "Santos Sari-Sari Store" [ref=e708]
+              - cell "40 Rizal Street, Poblacion" [ref=e709]
+              - cell "Fencing Permit" [ref=e710]
+              - cell "2026-09-16" [ref=e711]
+              - cell "—" [ref=e712]
+              - cell "Under Review" [ref=e713]
+            - button "View application aff44047-955b-484c-8628-e086ae587be2 for Maria Santos" [ref=e715] [cursor=pointer]:
+              - cell "aff44047-955b-484c-8628-e086ae587be2" [ref=e716]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=e717]:
+                - generic [ref=e718]:
+                  - generic [ref=e719]: MS
+                  - generic [ref=e721]:
+                    - generic "Maria Santos" [ref=e722]
+                    - generic "Santos Sari-Sari Store" [ref=e723]
+              - cell "30 Rizal Street, Poblacion" [ref=e724]
+              - cell "Fencing Permit" [ref=e725]
+              - cell "2026-09-16" [ref=e726]
+              - cell "—" [ref=e727]
+              - cell "Under Review" [ref=e728]
+            - button "View application 68a4b091-a924-435c-8afb-4f269660f154 for Maria Santos" [ref=e730] [cursor=pointer]:
+              - cell "68a4b091-a924-435c-8afb-4f269660f154" [ref=e731]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=e732]:
+                - generic [ref=e733]:
+                  - generic [ref=e734]: MS
+                  - generic [ref=e736]:
+                    - generic "Maria Santos" [ref=e737]
+                    - generic "Santos Sari-Sari Store" [ref=e738]
+              - cell "20 Rizal Street, Poblacion" [ref=e739]
+              - cell "Fencing Permit" [ref=e740]
+              - cell "2026-09-16" [ref=e741]
+              - cell "—" [ref=e742]
+              - cell "Under Review" [ref=e743]
+            - button "View application a9a12cc0-b2ab-4a77-bac7-e161c06f200d for Maria Santos" [ref=e745] [cursor=pointer]:
+              - cell "a9a12cc0-b2ab-4a77-bac7-e161c06f200d" [ref=e746]
+              - cell "MS Maria Santos Santos Sari-Sari Store" [ref=e747]:
+                - generic [ref=e748]:
+                  - generic [ref=e749]: MS
+                  - generic [ref=e751]:
+                    - generic "Maria Santos" [ref=e752]
+                    - generic "Santos Sari-Sari Store" [ref=e753]
+              - cell "10 Rizal Street, Poblacion" [ref=e754]
+              - cell "Fencing Permit" [ref=e755]
+              - cell "2026-09-16" [ref=e756]
+              - cell "—" [ref=e757]
+              - cell "Under Review" [ref=e758]
+        - paragraph [ref=e760]: Showing 7 Applications

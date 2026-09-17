@@ -1,0 +1,197 @@
+- generic [ref=f12e61]:
+  - complementary [ref=f12e63]:
+    - generic [ref=f12e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f12e66]
+      - generic [ref=f12e67]: E-BPCO
+    - navigation [ref=f12e68]:
+      - link "Dashboard" [ref=f12e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f12e77]:
+        - generic [ref=f12e78]: Operations
+        - generic [ref=f12e79]:
+          - link "Applications" [ref=f12e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f12e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f12e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f12e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f12e105]:
+        - generic [ref=f12e106]: Administration
+        - generic [ref=f12e107]:
+          - link "Businesses" [active] [ref=f12e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f12e114] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f12e120] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f12e127] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f12e136] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f12e142] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f12e148] [cursor=pointer]
+  - main [ref=f12e154]:
+    - generic [ref=f12e765]:
+      - generic "Businesses" [ref=f12e766]:
+        - generic [ref=f12e767]:
+          - heading "Businesses" [level=1] [ref=f12e768]
+          - generic [ref=f12e769]:
+            - generic [ref=f12e770]:
+              - generic [ref=f12e775]: Search
+              - textbox "Search" [ref=f12e776]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f12e778] [cursor=pointer]
+            - button "S super@lgu.gov.ph Super Admin" [ref=f12e784] [cursor=pointer]:
+              - generic [ref=f12e785]: S
+              - generic [ref=f12e789]:
+                - generic [ref=f12e790]: super@lgu.gov.ph
+                - generic [ref=f12e791]: Super Admin
+      - generic [ref=f12e795]:
+        - generic [ref=f12e797]:
+          - generic [ref=f12e799]:
+            - paragraph [ref=f12e800]: Total Users
+            - paragraph [ref=f12e801]: "2"
+          - generic [ref=f12e802]: Distinct business owners in the real business directory
+        - generic [ref=f12e806]:
+          - generic [ref=f12e808]:
+            - paragraph [ref=f12e809]: Active Businesses
+            - paragraph [ref=f12e810]: "2"
+          - generic [ref=f12e811]:
+            - generic [ref=f12e812]: 100% of total businesses
+            - 'img "Active Businesses progress: 100 percent" [ref=f12e814]'
+        - generic [ref=f12e817]:
+          - generic [ref=f12e819]:
+            - paragraph [ref=f12e820]: Inactive Businesses
+            - paragraph [ref=f12e821]: "0"
+          - generic [ref=f12e822]:
+            - generic [ref=f12e823]: 0% of total businesses
+            - 'img "Inactive Businesses progress: 0 percent" [ref=f12e825]'
+        - generic [ref=f12e828]:
+          - generic [ref=f12e830]:
+            - paragraph [ref=f12e831]: Total Businesses
+            - paragraph [ref=f12e832]: "2"
+          - generic [ref=f12e833]:
+            - generic [ref=f12e834]: Registered in the real business directory
+            - 'img "Total Businesses progress: 100 percent" [ref=f12e836]'
+      - generic [ref=f12e838]:
+        - generic [ref=f12e839]:
+          - textbox "Search Here By Application ID, Applicant Name, or Location" [ref=f12e845]
+          - generic [ref=f12e846]:
+            - button [ref=f12e849] [cursor=pointer]
+            - button [ref=f12e853] [cursor=pointer]
+            - button [ref=f12e858] [cursor=pointer]
+        - table [ref=f12e862]:
+          - rowgroup [ref=f12e863]:
+            - row [ref=f12e864]:
+              - columnheader [ref=f12e865]:
+                - checkbox "Select all businesses" [ref=f12e866]
+              - columnheader "Business ID" [ref=f12e867]
+              - columnheader "BUSINESS NAME" [ref=f12e868]
+              - columnheader "CATEGORY" [ref=f12e869]
+              - columnheader "CONTACT PERSON" [ref=f12e870]
+              - columnheader "DATE CREATED" [ref=f12e871]
+              - columnheader "User Count" [ref=f12e872]
+              - columnheader "STATUS" [ref=f12e873]
+              - columnheader "ACTION" [ref=f12e874]
+          - rowgroup [ref=f12e875]:
+            - row [ref=f12e876] [cursor=pointer]:
+              - cell [ref=f12e877]:
+                - checkbox "Select Marasigan Residence" [ref=f12e878]
+              - cell "25bb2fa1-dac4-4cc1-ac44-431a8e640dd9" [ref=f12e879]
+              - cell "LM Marasigan Residence" [ref=f12e880]:
+                - generic [ref=f12e881]:
+                  - generic [ref=f12e882]: LM
+                  - text: Marasigan Residence
+              - cell "Construction" [ref=f12e884]
+              - cell "Liza Marasigan 09171234567" [ref=f12e885]:
+                - generic [ref=f12e886]:
+                  - generic [ref=f12e887]: Liza Marasigan
+                  - generic [ref=f12e888]: "09171234567"
+              - cell "2026-09-16" [ref=f12e889]
+              - cell "—" [ref=f12e890]
+              - cell "Active" [ref=f12e891]
+              - cell [ref=f12e893]:
+                - generic [ref=f12e894]:
+                  - button "View business" [ref=f12e895]
+                  - button "Hide business from this view" [ref=f12e900]
+            - row [ref=f12e906] [cursor=pointer]:
+              - cell [ref=f12e907]:
+                - checkbox "Select Santos Sari-Sari Store" [ref=f12e908]
+              - cell "5b182937-14ae-44ce-b2f9-b7b9d91a3159" [ref=f12e909]
+              - cell "MS Santos Sari-Sari Store" [ref=f12e910]:
+                - generic [ref=f12e911]:
+                  - generic [ref=f12e912]: MS
+                  - text: Santos Sari-Sari Store
+              - cell "Retail" [ref=f12e914]
+              - cell "Maria Santos +639171234567" [ref=f12e915]:
+                - generic [ref=f12e916]:
+                  - generic [ref=f12e917]: Maria Santos
+                  - generic [ref=f12e918]: "+639171234567"
+              - cell "2024-03-01" [ref=f12e919]
+              - cell "—" [ref=f12e920]
+              - cell "Active" [ref=f12e921]
+              - cell [ref=f12e923]:
+                - generic [ref=f12e924]:
+                  - button "View business" [ref=f12e925]
+                  - button "Hide business from this view" [ref=f12e930]
+        - navigation "Pagination" [ref=f12e937]:
+          - generic [ref=f12e938]: Showing 1-2 from 2
+          - generic [ref=f12e939]:
+            - button "First page" [disabled] [ref=f12e940]
+            - button "Page 1" [ref=f12e945] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f12e946]
+      - generic [ref=f12e951]:
+        - navigation [ref=f12e952]:
+          - button [ref=f12e953] [cursor=pointer]
+          - button [ref=f12e958] [cursor=pointer]
+          - button [ref=f12e962] [cursor=pointer]
+        - generic [ref=f12e967]:
+          - generic [ref=f12e968]:
+            - heading "Businesses Growth" [level=2] [ref=f12e970]
+            - note [ref=f12e971]:
+              - generic [ref=f12e976]: Sample data for preview only — this deployment has no growth-analytics endpoint, so these figures (2,032 applications, 1,524 active users) do not reflect the real data shown elsewhere on this page.
+            - generic [ref=f12e980]:
+              - generic [ref=f12e981]: Jan
+              - generic [ref=f12e982]: Feb
+              - generic [ref=f12e983]: Mar
+              - generic [ref=f12e984]: Apr
+              - generic [ref=f12e985]: May
+              - generic [ref=f12e986]: Jun
+              - generic [ref=f12e987]: Jul
+              - generic [ref=f12e988]: Aug
+              - generic [ref=f12e989]: Sep
+              - generic [ref=f12e990]: Oct
+              - generic [ref=f12e991]: Nov
+              - generic [ref=f12e992]: Dec
+          - generic [ref=f12e993]:
+            - generic [ref=f12e995]:
+              - generic [ref=f12e997]:
+                - paragraph [ref=f12e998]: Applications Processed
+                - paragraph [ref=f12e999]: 2,032
+              - generic [ref=f12e1001]:
+                - generic [ref=f12e1002]: 12.5%
+                - generic [ref=f12e1007]: Vs Previous 30 days
+            - generic [ref=f12e1009]:
+              - generic [ref=f12e1011]:
+                - paragraph [ref=f12e1012]: Avg. Processing Time
+                - paragraph [ref=f12e1013]: 3.6 days
+              - generic [ref=f12e1015]:
+                - generic [ref=f12e1016]: 8.3%
+                - generic [ref=f12e1021]: Vs Previous 30 days
+            - generic [ref=f12e1023]:
+              - generic [ref=f12e1025]:
+                - paragraph [ref=f12e1026]: Active Users
+                - paragraph [ref=f12e1027]: 1,524
+              - generic [ref=f12e1029]:
+                - generic [ref=f12e1030]: 9.7%
+                - generic [ref=f12e1035]: Vs Previous 30 days
+            - generic [ref=f12e1037]:
+              - generic [ref=f12e1039]:
+                - paragraph [ref=f12e1040]: Storage Used
+                - paragraph [ref=f12e1041]: 245 GB
+              - generic [ref=f12e1043]:
+                - generic [ref=f12e1044]: 15.2%
+                - generic [ref=f12e1049]: Vs Previous 30 days

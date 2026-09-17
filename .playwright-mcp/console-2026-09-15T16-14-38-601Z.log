@@ -1,0 +1,12 @@
+[     218ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=31969571:9127
+[     360ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/login:0
+[   13432ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/login:0
+[   25913ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:4201/auth/token:0
+[   80722ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=31969571:9127
+[   80924ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/login:0
+[   84671ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=31969571:9127
+[   84860ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/login:0
+[   96514ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=31969571:9127
+[   96687ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/login:0
+[  105902ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=31969571:9127
+[  106047ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4201/login:0

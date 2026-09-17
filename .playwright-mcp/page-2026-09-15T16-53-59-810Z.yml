@@ -1,0 +1,101 @@
+- generic [ref=f34e3]:
+  - generic [ref=f34e4]:
+    - complementary [ref=f34e5]:
+      - generic [ref=f34e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f34e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f34e8]
+          - generic [ref=f34e9]: Collapse sidebar
+        - generic [ref=f34e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f34e11]:
+        - link "Home" [ref=f34e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f34e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f34e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f34e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f34e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f34e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications 1" [ref=f34e43] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f34e47]: Notifications
+          - generic [ref=f34e48]: "1"
+        - link "Profile" [ref=f34e49] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f34e54] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f34e59] [cursor=pointer]
+    - generic [ref=f34e64]:
+      - link "View profile and settings" [ref=f34e66] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f34e67]: Test Citizen
+      - status [ref=f34e72]:
+        - strong [ref=f34e73]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f34e449]:
+        - generic [ref=f34e451]:
+          - heading "New Business Permit Application" [level=1] [ref=f34e452]
+          - generic [ref=f34e453]: Generic application flow
+        - generic [ref=f34e454]:
+          - generic [ref=f34e455]:
+            - generic [ref=f34e456]: "1"
+            - text: Business & Type
+          - generic [ref=f34e458]:
+            - generic [ref=f34e459]: "2"
+            - text: Details
+          - generic [ref=f34e461]:
+            - generic [ref=f34e462]: "3"
+            - text: Documents
+          - generic [ref=f34e464]:
+            - generic [ref=f34e465]: "4"
+            - text: Review & Submit
+        - generic [ref=f34e492]:
+          - generic [ref=f34e493]: Required Documents
+          - paragraph [ref=f34e494]: "Accepted formats: PDF, JPG, JPEG, PNG."
+          - generic [ref=f34e495]:
+            - generic [ref=f34e496]:
+              - generic [ref=f34e497]:
+                - generic [ref=f34e498]: Required
+                - strong [ref=f34e499]: Valid Government ID
+              - generic [ref=f34e519]: test-document.pdf
+            - generic [ref=f34e500]:
+              - button "Attach Valid Government ID" [active] [ref=f34e501]
+              - generic [ref=f34e520]: or reuse
+              - combobox "or reuse" [ref=f34e521]:
+                - option "A document you've already uploaded…" [selected]
+                - option "test-document.pdf · uploaded Sep 16, 2026"
+              - button "Remove" [ref=f34e522] [cursor=pointer]
+          - generic [ref=f34e502]:
+            - generic [ref=f34e503]:
+              - generic [ref=f34e504]:
+                - generic [ref=f34e505]: Required
+                - strong [ref=f34e506]: Barangay Clearance
+              - generic [ref=f34e527]: test-document.pdf
+            - generic [ref=f34e507]:
+              - button "Attach Barangay Clearance" [ref=f34e508]
+              - generic [ref=f34e523]: or reuse
+              - combobox "or reuse" [ref=f34e524]:
+                - option "A document you've already uploaded…"
+                - option "test-document.pdf · uploaded Sep 16, 2026" [selected]
+              - button "Remove" [ref=f34e528] [cursor=pointer]
+          - generic [ref=f34e509]:
+            - generic [ref=f34e511]:
+              - generic [ref=f34e512]: Required
+              - strong [ref=f34e513]: Proof of Business Address
+            - generic [ref=f34e514]:
+              - button "Attach Proof of Business Address" [ref=f34e515]
+              - generic [ref=f34e525]: or reuse
+              - combobox "or reuse" [ref=f34e526]:
+                - option "A document you've already uploaded…" [selected]
+                - option "test-document.pdf · uploaded Sep 16, 2026"
+          - generic [ref=f34e516]:
+            - button "Back" [ref=f34e517] [cursor=pointer]
+            - button "Continue" [ref=f34e518] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

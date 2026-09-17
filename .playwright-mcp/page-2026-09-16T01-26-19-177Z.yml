@@ -1,0 +1,36 @@
+- generic [ref=f100e269]:
+  - banner [ref=f100e270]:
+    - link "Municipality of Castilla seal eBPCO Citizen Portal" [ref=f100e271] [cursor=pointer]:
+      - /url: /landing
+      - img "Municipality of Castilla seal" [ref=f100e272]
+      - generic [ref=f100e273]: eBPCO Citizen Portal
+    - navigation "Primary" [ref=f100e274]:
+      - link "How It Works" [ref=f100e275] [cursor=pointer]:
+        - /url: /how-it-works
+      - link "Log In" [ref=f100e276] [cursor=pointer]:
+        - /url: /login
+      - link "Register" [ref=f100e277] [cursor=pointer]:
+        - /url: /register
+  - main [ref=f100e279]:
+    - generic [ref=f100e280]:
+      - heading "Apply for permits from anywhere" [level=1] [ref=f100e281]:
+        - generic [ref=f100e282]: Apply for permits
+        - generic [ref=f100e283]: from anywhere
+      - paragraph [ref=f100e290]: Register your business, submit permit applications, upload requirements, pay assessed fees, and track every application — all in one place, in parity with the eBPCO mobile app.
+      - generic [ref=f100e291]:
+        - link "Get Started" [ref=f100e292] [cursor=pointer]:
+          - /url: /register
+        - link "I already have an account" [ref=f100e296] [cursor=pointer]:
+          - /url: /login
+      - link "See how the process works" [ref=f100e297] [cursor=pointer]:
+        - /url: /how-it-works
+    - region "Key features" [ref=f100e301]:
+      - article [ref=f100e302]:
+        - heading "Submit & Manage Requirements" [level=3] [ref=f100e308]
+        - paragraph [ref=f100e310]: Upload documents once and reuse them across applications with your personal document library.
+      - article [ref=f100e311]:
+        - heading "Track Your Application" [level=3] [ref=f100e318]
+        - paragraph [ref=f100e320]: Follow every step from submission to release with a clear status timeline.
+      - article [ref=f100e321]:
+        - heading "Pay Securely" [level=3] [ref=f100e326]
+        - paragraph [ref=f100e328]: View your Order of Payment and pay by bank transfer or onsite.

@@ -1,0 +1,30 @@
+- generic [ref=f13e3]:
+  - generic [ref=f13e4]:
+    - button "Open navigation" [ref=f13e303] [cursor=pointer]
+    - generic [ref=f13e9]:
+      - link "View profile and settings" [ref=f13e11] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f13e12]: Liza Marasigan
+      - generic [ref=f13e306]:
+        - generic [ref=f13e308]:
+          - heading "Payments" [level=1] [ref=f13e309]
+          - generic [ref=f13e310]: Applications with an issued assessment or payment history.
+        - table [ref=f13e312]:
+          - rowgroup [ref=f13e313]:
+            - row [ref=f13e314]:
+              - columnheader "Application" [ref=f13e315]
+              - columnheader "Total" [ref=f13e316]
+              - columnheader "Status" [ref=f13e317]
+              - columnheader [ref=f13e318]
+          - rowgroup [ref=f13e319]:
+            - row [ref=f13e320]:
+              - cell "E-BPCO-2026-000007" [ref=f13e321]
+              - cell "₱6,820.00" [ref=f13e322]
+              - cell "Not Yet Available" [ref=f13e323]
+              - cell [ref=f13e325]:
+                - link "Pay Now" [ref=f13e326] [cursor=pointer]:
+                  - /url: /payments/710e7e61-5741-40b8-8a0b-2ceb09981bd2
+  - generic:
+    - generic:
+      - status
+      - alert

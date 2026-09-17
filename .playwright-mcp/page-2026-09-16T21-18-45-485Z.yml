@@ -1,0 +1,99 @@
+- generic [ref=f14e3]:
+  - generic [ref=f14e4]:
+    - button "Open navigation" [ref=f14e5] [cursor=pointer]
+    - generic [ref=f14e9]:
+      - link "View profile and settings" [ref=f14e11] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f14e12]: Liza Marasigan
+      - generic [ref=f14e138]:
+        - generic [ref=f14e139]:
+          - link "← Back to Application" [ref=f14e140] [cursor=pointer]:
+            - /url: /applications/710e7e61-5741-40b8-8a0b-2ceb09981bd2
+          - button "Print / Download" [ref=f14e141] [cursor=pointer]
+        - article [ref=f14e142]:
+          - generic [ref=f14e145]:
+            - generic [ref=f14e146]: Republic of the Philippines
+            - generic [ref=f14e147]: Province of Sorsogon
+            - strong [ref=f14e148]: Municipality of Castilla
+            - generic [ref=f14e149]: Office of the Building Official (OBO)
+          - heading "Fencing Permit" [level=1] [ref=f14e151]
+          - generic [ref=f14e152]:
+            - generic [ref=f14e153]:
+              - generic [ref=f14e154]: Permit No.
+              - generic [ref=f14e155]: FP-2026-000001
+            - generic [ref=f14e156]:
+              - generic [ref=f14e157]:
+                - text: "Application No.:"
+                - strong [ref=f14e158]: E-BPCO-2026-000007
+              - generic [ref=f14e159]:
+                - text: "Date Issued:"
+                - strong [ref=f14e160]: Sep 17, 2026
+              - generic [ref=f14e161]:
+                - text: "Valid Until:"
+                - strong [ref=f14e162]: No fixed expiry
+          - generic [ref=f14e163]:
+            - heading "Owner / Applicant" [level=2] [ref=f14e164]
+            - generic [ref=f14e165]:
+              - generic [ref=f14e166]:
+                - term [ref=f14e167]: Owner / Permittee Name
+                - definition [ref=f14e168]: Liza Marasigan
+              - generic [ref=f14e169]:
+                - term [ref=f14e170]: Business / Project
+                - definition [ref=f14e171]: Not provided
+              - generic [ref=f14e172]:
+                - term [ref=f14e173]: Contact Number
+                - definition [ref=f14e174]: "09171234567"
+              - generic [ref=f14e175]:
+                - term [ref=f14e176]: Address
+                - definition
+          - generic [ref=f14e177]:
+            - heading "Property" [level=2] [ref=f14e178]
+            - generic [ref=f14e179]:
+              - generic [ref=f14e180]:
+                - term [ref=f14e181]: Barangay
+                - definition [ref=f14e182]: Not on file
+              - generic [ref=f14e183]:
+                - term [ref=f14e184]: City / Municipality
+                - definition [ref=f14e185]: Not on file
+              - generic [ref=f14e186]:
+                - term [ref=f14e187]: Street / Location
+                - definition [ref=f14e188]: Not on file
+              - generic [ref=f14e189]:
+                - term [ref=f14e190]: Province
+                - definition [ref=f14e191]: Not on file
+          - generic [ref=f14e192]:
+            - heading "Project" [level=2] [ref=f14e193]
+            - generic [ref=f14e194]:
+              - generic [ref=f14e195]:
+                - term [ref=f14e196]: Transaction
+                - definition [ref=f14e197]: New
+              - generic [ref=f14e198]:
+                - term [ref=f14e199]: Date Applied
+                - definition [ref=f14e200]: Sep 17, 2026
+          - generic [ref=f14e201]:
+            - heading "Assessment / Payment" [level=2] [ref=f14e202]
+            - paragraph [ref=f14e203]: No assessment has been issued yet for this application.
+          - generic [ref=f14e204]:
+            - heading "Conditions" [level=2] [ref=f14e205]
+            - list [ref=f14e206]:
+              - listitem [ref=f14e207]: Fence height must not exceed 2 meters along the frontage.
+              - listitem [ref=f14e208]: Construction must be completed within 12 months of issuance.
+              - listitem [ref=f14e209]: Subject to inspection by the Office of the Municipal Engineer upon completion.
+          - generic [ref=f14e210]:
+            - heading "Validity" [level=2] [ref=f14e211]
+            - paragraph [ref=f14e212]: Valid for six (6) months from issuance.
+          - generic [ref=f14e213]:
+            - heading "Approval" [level=2] [ref=f14e214]
+            - generic [ref=f14e215]: Pending Authorized Signature
+            - generic [ref=f14e217]: Not on file
+            - generic [ref=f14e218]: Office of the Building Official (OBO)
+          - paragraph [ref=f14e764]: Scan to verify this document athttp://localhost:4201/verify/FP-2026-000001
+          - generic [ref=f14e765]:
+            - paragraph [ref=f14e766]: This is a system-generated document issued by the Municipality of Castilla, Sorsogon.
+            - paragraph [ref=f14e767]: Document Ref. 710e7e61-5741-40b8-8a0b-2ceb09981bd2 · Generated September 17, 2026 at 5:18 AM · Page 1 of 1
+        - link "View the blank reference application form (not your personalized permit)" [ref=f14e769] [cursor=pointer]:
+          - /url: assets/permit-forms/unified-application-form.pdf
+  - generic:
+    - generic:
+      - status
+      - alert

@@ -1,0 +1,68 @@
+- generic [ref=f23e3]:
+  - generic [ref=f23e4]:
+    - complementary [ref=f23e5]:
+      - generic [ref=f23e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f23e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f23e8]
+          - generic [ref=f23e9]: Collapse sidebar
+        - generic [ref=f23e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f23e11]:
+        - link "Home" [ref=f23e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f23e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f23e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f23e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f23e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f23e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f23e43] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f23e48] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f23e53] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f23e58] [cursor=pointer]
+    - generic [ref=f23e63]:
+      - link "View profile and settings" [ref=f23e65] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f23e66]: Stage Fourteen Lifecycle
+      - status [ref=f23e71]:
+        - strong [ref=f23e72]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f23e74]:
+        - heading "Fencing Permit" [level=1] [ref=f23e77]
+        - generic [ref=f23e78]:
+          - generic [ref=f23e79]:
+            - generic [ref=f23e80]: "1"
+            - text: Business & Type
+          - generic [ref=f23e82]:
+            - generic [ref=f23e83]: "2"
+            - text: Details
+          - generic [ref=f23e85]:
+            - generic [ref=f23e86]: "3"
+            - text: Documents
+          - generic [ref=f23e88]:
+            - generic [ref=f23e89]: "4"
+            - text: Review & Submit
+        - generic [ref=f23e90]:
+          - generic [ref=f23e91]:
+            - generic [ref=f23e92]: Business*
+            - combobox "Business*" [ref=f23e93]:
+              - option "Select a business" [disabled]
+              - option "Stage Fourteen Test Fencing Co." [selected]
+          - generic [ref=f23e94]:
+            - generic [ref=f23e95]: Application Type*
+            - combobox "Application Type*" [ref=f23e96]:
+              - option "New Permit" [selected]
+              - option "Renewal"
+              - option "Amendment"
+          - button "Continue" [ref=f23e97] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

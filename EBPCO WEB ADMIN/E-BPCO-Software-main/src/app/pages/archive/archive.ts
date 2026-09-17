@@ -1,10 +1,11 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 import { Topbar } from '../../shared/topbar/topbar';
+import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
 
 /**
  * Everything that was set aside, and why.
@@ -35,8 +36,25 @@ interface ArchivedRow {
   readonly remarks: string | null;
 }
 
+interface Attribution {
+  readonly archivedBy: string | null;
+  readonly archivedAt: string | null;
+  readonly remarks: string | null;
+}
+
+const NO_ATTRIBUTION: Attribution = { archivedBy: null, archivedAt: null, remarks: null };
+
 /** Terminal statuses. An application in any of these has left the working queue. */
 const ARCHIVED_STATUSES: readonly string[] = ['Cancelled', 'Rejected', 'Expired'];
+
+/** The server's raw ISO timestamp, in the form the table already shows for other dates. */
+function formatWhen(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString('en-PH', {
+    day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit',
+  });
+}
 
 @Component({
   selector: 'app-archive',
@@ -47,27 +65,91 @@ const ARCHIVED_STATUSES: readonly string[] = ['Cancelled', 'Rejected', 'Expired'
 export class Archive {
   private readonly store = inject(ApplicationStore);
   private readonly router = inject(Router);
+  private readonly applicationsApi = inject(StaffApplicationsApi);
 
-  protected readonly rows = computed<ArchivedRow[]>(() => {
-    const audit = this.store.auditEvents();
-    return this.store
+  /**
+   * `store.auditEvents()` is seed-only — `replaceApplications` wipes it to
+   * `[]` on every real load (see `ApplicationStore`'s own doc comment on
+   * `_businesses`/`_applicants` for the same pattern), so "Set aside by" and
+   * "Reason" were always blank on real data even though the record's own
+   * timeline (`GET /staff/applications/:id`, now carrying `actorName` — see
+   * `ApplicationTimelineEvent`'s own doc comment) genuinely has the answer.
+   * Fetched per archived row, once, and cached here rather than refetched on
+   * every `rows()` recomputation.
+   */
+  private readonly realAttribution = signal<ReadonlyMap<string, Attribution>>(new Map());
+  private readonly fetching = new Set<string>();
+
+  private readonly baseRows = computed<ApplicationRecord[]>(() =>
+    this.store
       .applications()
       .filter((a) => ARCHIVED_STATUSES.includes(a.lifecycleStatus))
-      .map((record) => {
-        // The most recent archiving entry for this application. Most recent
-        // rather than first: an application returned to the queue and set
-        // aside again should show the decision that currently stands.
-        const entry = audit
-          .filter((e) => e.applicationId === record.id && /archiv|cancel/i.test(e.action))
-          .sort((a, b) => b.timestampValue.getTime() - a.timestampValue.getTime())[0];
-        return {
-          record,
-          archivedBy: entry?.actor ?? null,
-          archivedAt: entry?.timestamp ?? null,
-          remarks: entry?.remarks ?? null,
-        };
-      })
-      .sort((a, b) => b.record.dateValue.getTime() - a.record.dateValue.getTime());
+      .sort((a, b) => b.dateValue.getTime() - a.dateValue.getTime()),
+  );
+
+  constructor() {
+    effect(() => {
+      const isSeed = this.store.isSeedData();
+      const ids = this.baseRows().map((r) => r.id);
+      if (!isSeed) untracked(() => this.loadRealAttribution(ids));
+    });
+  }
+
+  private async loadRealAttribution(ids: readonly string[]): Promise<void> {
+    const toFetch = ids.filter((id) => !this.realAttribution().has(id) && !this.fetching.has(id));
+    for (const id of toFetch) this.fetching.add(id);
+    await Promise.all(
+      toFetch.map(async (id) => {
+        const result = await this.applicationsApi.detail(id);
+        const attribution: Attribution = result.kind === 'ok'
+          ? this.attributionFromTimeline(result.detail.timeline)
+          : NO_ATTRIBUTION;
+        this.realAttribution.update((current) => new Map(current).set(id, attribution));
+        this.fetching.delete(id);
+      }),
+    );
+  }
+
+  private attributionFromTimeline(
+    timeline: ReadonlyArray<{ toStatus: string; occurredAt: string; actorName: string | null; remarks: string | null }>,
+  ): Attribution {
+    // The most recent archiving entry for this application. Most recent
+    // rather than first: an application returned to the queue and set aside
+    // again should show the decision that currently stands.
+    const entry = [...timeline]
+      .filter((e) => ARCHIVED_STATUSES.includes(e.toStatus))
+      .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())[0];
+    if (!entry) return NO_ATTRIBUTION;
+    return {
+      archivedBy: entry.actorName,
+      archivedAt: formatWhen(entry.occurredAt),
+      remarks: entry.remarks,
+    };
+  }
+
+  protected readonly rows = computed<ArchivedRow[]>(() => {
+    if (!this.store.isSeedData()) {
+      const attribution = this.realAttribution();
+      return this.baseRows().map((record) => ({
+        record,
+        ...(attribution.get(record.id) ?? NO_ATTRIBUTION),
+      }));
+    }
+    const audit = this.store.auditEvents();
+    return this.baseRows().map((record) => {
+      // The most recent archiving entry for this application. Most recent
+      // rather than first: an application returned to the queue and set
+      // aside again should show the decision that currently stands.
+      const entry = audit
+        .filter((e) => e.applicationId === record.id && /archiv|cancel/i.test(e.action))
+        .sort((a, b) => b.timestampValue.getTime() - a.timestampValue.getTime())[0];
+      return {
+        record,
+        archivedBy: entry?.actor ?? null,
+        archivedAt: entry?.timestamp ?? null,
+        remarks: entry?.remarks ?? null,
+      };
+    });
   });
 
   protected readonly count = computed(() => this.rows().length);

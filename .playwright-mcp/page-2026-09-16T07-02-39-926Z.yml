@@ -1,0 +1,121 @@
+- generic [ref=f58e986]:
+  - complementary [ref=f58e988]:
+    - generic [ref=f58e989]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f58e991]
+      - generic [ref=f58e992]: E-BPCO
+    - navigation [ref=f58e993]:
+      - link "Dashboard" [ref=f58e996] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f58e1002]:
+        - generic [ref=f58e1003]: Operations
+        - generic [ref=f58e1004]:
+          - link "Applications" [ref=f58e1005] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f58e1011] [cursor=pointer]:
+            - /url: /evaluations
+      - generic [ref=f58e1016]:
+        - generic [ref=f58e1017]: Administration
+        - link "Archive" [ref=f58e1019] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f58e1025] [cursor=pointer]
+  - main [ref=f58e1031]:
+    - generic [ref=f58e1836]:
+      - generic "Evaluations" [ref=f58e1837]:
+        - generic [ref=f58e1838]:
+          - heading "Evaluations" [level=1] [ref=f58e1839]
+          - generic [ref=f58e1840]:
+            - generic [ref=f58e1841]:
+              - generic [ref=f58e1846]: Search
+              - textbox "Search" [ref=f58e1847]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f58e1849] [cursor=pointer]
+            - button "E evaluator@lgu.gov.ph Evaluator" [ref=f58e1855] [cursor=pointer]:
+              - generic [ref=f58e1856]: E
+              - generic [ref=f58e1860]:
+                - generic [ref=f58e1861]: evaluator@lgu.gov.ph
+                - generic [ref=f58e1862]: Evaluator
+      - generic [ref=f58e3676]:
+        - heading "OBO Evaluation" [level=1] [ref=f58e3677]
+        - generic [ref=f58e3678]:
+          - button "Back" [ref=f58e3679] [cursor=pointer]
+          - button "More actions" [ref=f58e3681] [cursor=pointer]
+      - generic [ref=f58e3687]:
+        - generic [ref=f58e3689]:
+          - generic [ref=f58e3691]:
+            - paragraph [ref=f58e3692]: Total in OBO Evaluation
+            - paragraph [ref=f58e3693]: "1"
+          - generic [ref=f58e3694]:
+            - generic [ref=f58e3695]: Across every status below — Revision Required · Under Review · Accepted
+            - 'img "3 categories: 0, 1, 0" [ref=f58e3697]'
+        - generic [ref=f58e3702]:
+          - generic [ref=f58e3704]:
+            - paragraph [ref=f58e3705]: Revision Required
+            - paragraph [ref=f58e3706]: "0"
+          - generic [ref=f58e3707]:
+            - generic [ref=f58e3708]: 0% of all applications
+            - 'img "Revision Required progress: 0 percent" [ref=f58e3710]'
+        - generic [ref=f58e3713]:
+          - generic [ref=f58e3715]:
+            - paragraph [ref=f58e3716]: Under Review
+            - paragraph [ref=f58e3717]: "1"
+          - generic [ref=f58e3718]:
+            - generic [ref=f58e3719]: 100% of all applications
+            - 'img "Under Review progress: 100 percent" [ref=f58e3721]'
+        - generic [ref=f58e3724]:
+          - generic [ref=f58e3726]:
+            - paragraph [ref=f58e3727]: Accepted
+            - paragraph [ref=f58e3728]: "0"
+          - generic [ref=f58e3729]:
+            - generic [ref=f58e3730]: 0% of all applications
+            - 'img "Accepted progress: 0 percent" [ref=f58e3732]'
+      - generic [ref=f58e3734]:
+        - button [ref=f58e3735] [cursor=pointer]
+        - button [ref=f58e3740] [cursor=pointer]
+        - button [ref=f58e3745] [cursor=pointer]
+      - generic [ref=f58e3750]:
+        - generic [ref=f58e3751]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Type" [ref=f58e3757]
+          - generic [ref=f58e3758]:
+            - button [ref=f58e3761] [cursor=pointer]
+            - button [ref=f58e3765] [cursor=pointer]
+        - table [ref=f58e3771]:
+          - rowgroup [ref=f58e3772]:
+            - row [ref=f58e3773]:
+              - columnheader [ref=f58e3774]:
+                - checkbox "Select all applications in this stage" [ref=f58e3775]
+              - columnheader "APPLICATION ID" [ref=f58e3776]
+              - columnheader "APPLICANT NAME" [ref=f58e3777]
+              - columnheader "MISSING DOCUMENTS" [ref=f58e3778]
+              - columnheader "TYPE" [ref=f58e3779]
+              - columnheader "REVIEWING DEPARTMENT" [ref=f58e3780]
+              - columnheader "DATE SUBMITTED" [ref=f58e3781]
+              - columnheader "ASSIGNED OFFICER" [ref=f58e3782]
+              - columnheader "STATUS" [ref=f58e3783]
+              - columnheader "ACTION" [ref=f58e3784]
+          - rowgroup [ref=f58e3785]:
+            - button "View evaluation for b6143cd7-39e5-41da-999d-862c28be4751, Stage FourteenF" [ref=f58e3786] [cursor=pointer]:
+              - cell [ref=f58e3787]:
+                - checkbox "Select b6143cd7-39e5-41da-999d-862c28be4751" [ref=f58e3788]
+              - cell "b6143cd7-39e5-41da-999d-862c28be4751" [ref=f58e3789]
+              - cell "SF Stage FourteenF —" [ref=f58e3790]:
+                - generic [ref=f58e3791]:
+                  - generic [ref=f58e3792]: SF
+                  - generic [ref=f58e3794]:
+                    - generic "Stage FourteenF" [ref=f58e3795]
+                    - generic "—" [ref=f58e3796]
+              - cell "-5" [ref=f58e3797]
+              - cell "Fencing Permit" [ref=f58e3798]
+              - cell "Office of the Municipal Engineer / Building Official" [ref=f58e3799]
+              - cell "2026-09-16" [ref=f58e3800]
+              - cell "—" [ref=f58e3801]
+              - cell "Under Review" [ref=f58e3802]
+              - cell [ref=f58e3804]:
+                - generic [ref=f58e3805]:
+                  - button "Review application b6143cd7-39e5-41da-999d-862c28be4751" [ref=f58e3806]: Review
+                  - button "More actions for application b6143cd7-39e5-41da-999d-862c28be4751" [ref=f58e3808]
+        - navigation "Pagination" [ref=f58e3815]:
+          - generic [ref=f58e3816]: Showing 1-1 from 1
+          - generic [ref=f58e3817]:
+            - button "First page" [disabled] [ref=f58e3818]
+            - button "Page 1" [ref=f58e3823] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f58e3824]

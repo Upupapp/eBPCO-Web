@@ -1,0 +1,124 @@
+- generic [ref=f28e53]:
+  - complementary [ref=f28e55]:
+    - generic [ref=f28e56]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f28e58]
+      - generic [ref=f28e59]: E-BPCO
+    - navigation [ref=f28e60]:
+      - link "Dashboard" [ref=f28e63] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f28e69]:
+        - generic [ref=f28e70]: Operations
+        - generic [ref=f28e71]:
+          - link "Applications" [ref=f28e72] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f28e78] [cursor=pointer]:
+            - /url: /evaluations
+      - generic [ref=f28e83]:
+        - generic [ref=f28e84]: Administration
+        - link "Archive" [ref=f28e86] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f28e92] [cursor=pointer]
+  - main [ref=f28e98]:
+    - generic [ref=f28e693]:
+      - generic "Evaluations" [ref=f28e694]:
+        - generic [ref=f28e695]:
+          - heading "Evaluations" [level=1] [ref=f28e696]
+          - generic [ref=f28e697]:
+            - generic [ref=f28e698]:
+              - generic [ref=f28e703]: Search
+              - textbox "Search" [ref=f28e704]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f28e706] [cursor=pointer]
+            - button "E evaluator@lgu.gov.ph Evaluator" [ref=f28e712] [cursor=pointer]:
+              - generic [ref=f28e713]: E
+              - generic [ref=f28e717]:
+                - generic [ref=f28e718]: evaluator@lgu.gov.ph
+                - generic [ref=f28e719]: Evaluator
+      - generic [ref=f28e1533]:
+        - heading "Fire Safety Evaluation" [level=1] [ref=f28e1534]
+        - generic [ref=f28e1535]:
+          - button "Back" [ref=f28e1536] [cursor=pointer]
+          - button "More actions" [ref=f28e1538] [cursor=pointer]
+      - alert [ref=f28e1544]:
+        - generic [ref=f28e1549]: The Zoning stage has already been decided. Correcting it means a new evaluation cycle.
+        - button "Dismiss" [ref=f28e1550] [cursor=pointer]: ✕
+      - generic [ref=f28e1551]:
+        - generic [ref=f28e1553]:
+          - generic [ref=f28e1555]:
+            - paragraph [ref=f28e1556]: Total in Fire Safety Evaluation
+            - paragraph [ref=f28e1557]: "1"
+          - generic [ref=f28e1558]:
+            - generic [ref=f28e1559]: Across every status below — Revision Required · Under Review · Accepted
+            - 'img "3 categories: 0, 1, 0" [ref=f28e1561]'
+        - generic [ref=f28e1566]:
+          - generic [ref=f28e1568]:
+            - paragraph [ref=f28e1569]: Revision Required
+            - paragraph [ref=f28e1570]: "0"
+          - generic [ref=f28e1571]:
+            - generic [ref=f28e1572]: 0% of all applications
+            - 'img "Revision Required progress: 0 percent" [ref=f28e1574]'
+        - generic [ref=f28e1577]:
+          - generic [ref=f28e1579]:
+            - paragraph [ref=f28e1580]: Under Review
+            - paragraph [ref=f28e1581]: "1"
+          - generic [ref=f28e1582]:
+            - generic [ref=f28e1583]: 100% of all applications
+            - 'img "Under Review progress: 100 percent" [ref=f28e1585]'
+        - generic [ref=f28e1588]:
+          - generic [ref=f28e1590]:
+            - paragraph [ref=f28e1591]: Accepted
+            - paragraph [ref=f28e1592]: "0"
+          - generic [ref=f28e1593]:
+            - generic [ref=f28e1594]: 0% of all applications
+            - 'img "Accepted progress: 0 percent" [ref=f28e1596]'
+      - generic [ref=f28e1598]:
+        - button [ref=f28e1599] [cursor=pointer]
+        - button [ref=f28e1604] [cursor=pointer]
+        - button [ref=f28e1609] [cursor=pointer]
+      - generic [ref=f28e1614]:
+        - generic [ref=f28e1615]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Type" [ref=f28e1621]
+          - generic [ref=f28e1622]:
+            - button [ref=f28e1625] [cursor=pointer]
+            - button [ref=f28e1629] [cursor=pointer]
+        - table [ref=f28e1635]:
+          - rowgroup [ref=f28e1636]:
+            - row [ref=f28e1637]:
+              - columnheader [ref=f28e1638]:
+                - checkbox "Select all applications in this stage" [ref=f28e1639]
+              - columnheader "APPLICATION ID" [ref=f28e1640]
+              - columnheader "APPLICANT NAME" [ref=f28e1641]
+              - columnheader "MISSING DOCUMENTS" [ref=f28e1642]
+              - columnheader "TYPE" [ref=f28e1643]
+              - columnheader "REVIEWING DEPARTMENT" [ref=f28e1644]
+              - columnheader "DATE SUBMITTED" [ref=f28e1645]
+              - columnheader "ASSIGNED OFFICER" [ref=f28e1646]
+              - columnheader "STATUS" [ref=f28e1647]
+              - columnheader "ACTION" [ref=f28e1648]
+          - rowgroup [ref=f28e1649]:
+            - button "View evaluation for 1f3063e6-dbb9-4b2e-9179-993c45ea245f, Stage Fourteen Lifecycle" [ref=f28e1650] [cursor=pointer]:
+              - cell [ref=f28e1651]:
+                - checkbox "Select 1f3063e6-dbb9-4b2e-9179-993c45ea245f" [ref=f28e1652]
+              - cell "1f3063e6-dbb9-4b2e-9179-993c45ea245f" [ref=f28e1653]
+              - cell "SF Stage Fourteen Lifecycle —" [ref=f28e1654]:
+                - generic [ref=f28e1655]:
+                  - generic [ref=f28e1656]: SF
+                  - generic [ref=f28e1658]:
+                    - generic "Stage Fourteen Lifecycle" [ref=f28e1659]
+                    - generic "—" [ref=f28e1660]
+              - cell "0" [ref=f28e1661]
+              - cell "Fencing Permit" [ref=f28e1662]
+              - cell "Bureau of Fire Protection – Castilla Fire Station" [ref=f28e1663]
+              - cell "2026-09-16" [ref=f28e1664]
+              - cell "—" [ref=f28e1665]
+              - cell "Under Review" [ref=f28e1666]
+              - cell [ref=f28e1668]:
+                - generic [ref=f28e1669]:
+                  - button "Review application 1f3063e6-dbb9-4b2e-9179-993c45ea245f" [ref=f28e1670]: Review
+                  - button "More actions for application 1f3063e6-dbb9-4b2e-9179-993c45ea245f" [ref=f28e1672]
+        - navigation "Pagination" [ref=f28e1679]:
+          - generic [ref=f28e1680]: Showing 1-1 from 1
+          - generic [ref=f28e1681]:
+            - button "First page" [disabled] [ref=f28e1682]
+            - button "Page 1" [ref=f28e1687] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f28e1688]

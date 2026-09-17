@@ -1,0 +1,34 @@
+- generic [ref=f53e938]:
+  - generic [ref=f53e945]:
+    - img "Municipality of Castilla, Sorsogon seal" [ref=f53e949]
+    - paragraph [ref=f53e950]: Electronic Building Permit and Certificate of Occupancy
+    - paragraph [ref=f53e951]: Municipality of Castilla, Sorsogon
+  - generic [ref=f53e952]:
+    - generic [ref=f53e953]:
+      - generic [ref=f53e954]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f53e956]
+        - generic [ref=f53e957]: E-BPCO
+      - heading "Admin Portal" [level=1] [ref=f53e958]
+      - generic [ref=f53e959]:
+        - generic [ref=f53e960]: Enter Email Address
+        - textbox "Enter Email Address" [ref=f53e965]:
+          - /placeholder: Your email here
+          - text: michaela@lguids.com.ph
+        - generic [ref=f53e966]: Enter Password
+        - generic [ref=f53e967]:
+          - textbox "Enter Password" [ref=f53e971]:
+            - /placeholder: Enter your password
+            - text: thisismypassword
+          - button "Show password" [ref=f53e972] [cursor=pointer]
+        - generic [ref=f53e977]:
+          - generic [ref=f53e978] [cursor=pointer]:
+            - checkbox "Remember me" [ref=f53e979]
+            - text: Remember me
+          - link "Forgot your password?" [ref=f53e980] [cursor=pointer]:
+            - /url: javascript:void(0)
+        - button "Login Account" [ref=f53e981] [cursor=pointer]
+      - paragraph [ref=f53e982]:
+        - text: Need an account?
+        - link "How to get one" [ref=f53e983] [cursor=pointer]:
+          - /url: /register
+    - paragraph [ref=f53e984]: © 2026 Municipality of Castilla, Sorsogon. All rights reserved.

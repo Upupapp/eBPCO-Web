@@ -1,0 +1,573 @@
+- generic [ref=f15e53]:
+  - complementary [ref=f15e55]:
+    - generic [ref=f15e56]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f15e58]
+      - generic [ref=f15e59]: E-BPCO
+    - navigation [ref=f15e60]:
+      - link "Dashboard" [ref=f15e63] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f15e69]:
+        - generic [ref=f15e70]: Operations
+        - generic [ref=f15e71]:
+          - link "Applications" [ref=f15e72] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f15e78] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f15e83] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f15e90] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f15e97]:
+        - generic [ref=f15e98]: Administration
+        - generic [ref=f15e99]:
+          - link "Businesses" [ref=f15e100] [cursor=pointer]:
+            - /url: /businesses
+          - link "Users & Roles" [ref=f15e106] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f15e113] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f15e122] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f15e128] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f15e134] [cursor=pointer]
+  - main [ref=f15e140]:
+    - generic [ref=f15e141]:
+      - generic "Dashboard" [ref=f15e142]:
+        - generic [ref=f15e143]:
+          - heading "Dashboard" [level=1] [ref=f15e144]
+          - generic [ref=f15e145]:
+            - generic [ref=f15e146]:
+              - generic [ref=f15e151]: Search
+              - textbox "Search" [ref=f15e152]:
+                - /placeholder: Search Recent Applications by ID, Applicant, Business/Project, or Location
+            - button "Notifications" [ref=f15e154] [cursor=pointer]:
+              - generic [ref=f15e159]: "3"
+            - button "R records@lgu.gov.ph Administrator" [ref=f15e161] [cursor=pointer]:
+              - generic [ref=f15e162]: R
+              - generic [ref=f15e166]:
+                - generic [ref=f15e167]: records@lgu.gov.ph
+                - generic [ref=f15e168]: Administrator
+      - note [ref=f15e173]:
+        - generic [ref=f15e178]:
+          - text: These are
+          - strong [ref=f15e179]: sample applications
+          - text: ", not the office's real workload. Nothing on this page has been read from the server yet."
+      - generic [ref=f15e180]:
+        - generic [ref=f15e182]:
+          - generic [ref=f15e184]:
+            - paragraph [ref=f15e185]: Total Applications
+            - paragraph [ref=f15e186]: "69"
+            - generic [ref=f15e187]:
+              - generic [ref=f15e188]: "+42"
+              - generic [ref=f15e193]: vs last month
+          - generic [ref=f15e194]: All Time
+        - generic [ref=f15e198]:
+          - generic [ref=f15e200]:
+            - paragraph [ref=f15e201]: Pending / Under Review
+            - paragraph [ref=f15e202]: "11"
+            - generic [ref=f15e203]:
+              - generic [ref=f15e204]: "+9"
+              - generic [ref=f15e209]: vs last month
+          - generic [ref=f15e210]: Submitted through Under Evaluation
+        - generic [ref=f15e214]:
+          - generic [ref=f15e216]:
+            - paragraph [ref=f15e217]: Payments Awaiting Verification
+            - paragraph [ref=f15e218]: "8"
+            - generic [ref=f15e219]:
+              - generic [ref=f15e220]: "+5"
+              - generic [ref=f15e225]: vs last month
+          - generic [ref=f15e226]: Submitted, not yet verified
+        - generic [ref=f15e230]:
+          - generic [ref=f15e232]:
+            - paragraph [ref=f15e233]: Approved
+            - paragraph [ref=f15e234]: "32"
+            - generic [ref=f15e235]:
+              - generic [ref=f15e236]: "+13"
+              - generic [ref=f15e241]: vs last month
+          - generic [ref=f15e242]: Approved through Completed
+        - generic [ref=f15e246]:
+          - generic [ref=f15e248]:
+            - paragraph [ref=f15e249]: Ready for Release
+            - paragraph [ref=f15e250]: "4"
+            - generic [ref=f15e251]:
+              - generic [ref=f15e252]: "+3"
+              - generic [ref=f15e257]: vs last month
+          - generic [ref=f15e258]: Permit generated, awaiting claim
+      - generic [ref=f15e262]:
+        - generic [ref=f15e263]:
+          - generic [ref=f15e264]:
+            - heading "Business Application Stages" [level=2] [ref=f15e265]
+            - paragraph [ref=f15e266]: Track businesses across each stage of the application process.
+          - generic [ref=f15e267]:
+            - generic [ref=f15e268]:
+              - button [ref=f15e270] [cursor=pointer]
+              - button [ref=f15e278] [cursor=pointer]
+              - button [ref=f15e286] [cursor=pointer]
+            - group "Board display mode" [ref=f15e293]:
+              - button [pressed] [ref=f15e294] [cursor=pointer]
+              - button [ref=f15e302] [cursor=pointer]
+        - generic [ref=f15e307]:
+          - generic [ref=f15e308]:
+            - generic [ref=f15e309]:
+              - generic [ref=f15e315]: Under Review
+              - generic [ref=f15e316]: "31"
+            - generic [ref=f15e318]:
+              - button "View application E-BPCO-2026-000165 for Fe Simbulan, Simbulan Sari-Sari Store, Certificate of Occupancy, draggable to another stage" [ref=f15e319]:
+                - generic [ref=f15e320]: Fe Simbulan
+                - generic [ref=f15e321]: Simbulan Sari-Sari Store
+                - generic [ref=f15e322]: E-BPCO-2026-000165
+                - generic [ref=f15e323]: Certificate of Occupancy
+              - button "View application E-BPCO-2026-000155 for Axel Barrera, Barrera Internet Café, Building Permit – New Construction, draggable to another stage" [ref=f15e324]:
+                - generic [ref=f15e325]: Axel Barrera
+                - generic [ref=f15e326]: Barrera Internet Café
+                - generic [ref=f15e327]: E-BPCO-2026-000155
+                - generic [ref=f15e328]: Building Permit – New Construction
+              - button "View application E-BPCO-2026-000120 for Denise Martirez, Martirez Rice Mill, Excavation Permit, draggable to another stage" [ref=f15e329]:
+                - generic [ref=f15e330]: Denise Martirez
+                - generic [ref=f15e331]: Martirez Rice Mill
+                - generic [ref=f15e332]: E-BPCO-2026-000120
+                - generic [ref=f15e333]: Excavation Permit
+              - button "View application E-BPCO-2026-000122 for Anthony Villareal, Villareal Eatery, Building Permit – New Construction, draggable to another stage" [ref=f15e334]:
+                - generic [ref=f15e335]: Anthony Villareal
+                - generic [ref=f15e336]: Villareal Eatery
+                - generic [ref=f15e337]: E-BPCO-2026-000122
+                - generic [ref=f15e338]: Building Permit – New Construction
+              - button "View application E-BPCO-2026-000127 for Grace Fajota, Fajota Trading Corp., Electrical Permit, draggable to another stage" [ref=f15e339]:
+                - generic [ref=f15e340]: Grace Fajota
+                - generic [ref=f15e341]: Fajota Trading Corp.
+                - generic [ref=f15e342]: E-BPCO-2026-000127
+                - generic [ref=f15e343]: Electrical Permit
+              - button "View application E-BPCO-2026-000119 for Jaime Zaballero, Zaballero Auto Repair Shop, Mechanical Permit, draggable to another stage" [ref=f15e344]:
+                - generic [ref=f15e345]: Jaime Zaballero
+                - generic [ref=f15e346]: Zaballero Auto Repair Shop
+                - generic [ref=f15e347]: E-BPCO-2026-000119
+                - generic [ref=f15e348]: Mechanical Permit
+            - button "View all 31" [ref=f15e349] [cursor=pointer]
+          - generic [ref=f15e358]:
+            - generic [ref=f15e359]:
+              - generic [ref=f15e365]: Approved
+              - generic [ref=f15e366]: "32"
+            - generic [ref=f15e368]:
+              - button "View application E-BPCO-2026-000153 for Jake Nuñez, Nuñez Feeds & Agri Supply, Plumbing Permit, draggable to another stage" [ref=f15e369]:
+                - generic [ref=f15e370]: Jake Nuñez
+                - generic [ref=f15e371]: Nuñez Feeds & Agri Supply
+                - generic [ref=f15e372]: E-BPCO-2026-000153
+                - generic [ref=f15e373]: Plumbing Permit
+              - button "View application E-BPCO-2026-000125 for Corazon Bermudez, Bermudez Furniture Shop, Architectural Permit, draggable to another stage" [ref=f15e374]:
+                - generic [ref=f15e375]: Corazon Bermudez
+                - generic [ref=f15e376]: Bermudez Furniture Shop
+                - generic [ref=f15e377]: E-BPCO-2026-000125
+                - generic [ref=f15e378]: Architectural Permit
+              - button "View application E-BPCO-2026-000160 for Juan Bragais, Juan's Coffee Shop, Building Permit – Addition / Extension, draggable to another stage" [ref=f15e379]:
+                - generic [ref=f15e380]: Juan Bragais
+                - generic [ref=f15e381]: Juan's Coffee Shop
+                - generic [ref=f15e382]: E-BPCO-2026-000160
+                - generic [ref=f15e383]: Building Permit – Addition / Extension
+              - button "View application E-BPCO-2026-000151 for Jaime Zaballero, Zaballero Auto Repair Shop, Fencing Permit, draggable to another stage" [ref=f15e384]:
+                - generic [ref=f15e385]: Jaime Zaballero
+                - generic [ref=f15e386]: Zaballero Auto Repair Shop
+                - generic [ref=f15e387]: E-BPCO-2026-000151
+                - generic [ref=f15e388]: Fencing Permit
+              - button "View application E-BPCO-2026-000164 for Raul Villanueva, Villanueva Hardware & Construction Supply, Building Permit – New Construction, draggable to another stage" [ref=f15e389]:
+                - generic [ref=f15e390]: Raul Villanueva
+                - generic [ref=f15e391]: Villanueva Hardware & Construction Supply
+                - generic [ref=f15e392]: E-BPCO-2026-000164
+                - generic [ref=f15e393]: Building Permit – New Construction
+              - button "View application E-BPCO-2026-000138 for Anthony Villareal, Villareal Eatery, Building Permit – Renovation / Alteration, draggable to another stage" [ref=f15e394]:
+                - generic [ref=f15e395]: Anthony Villareal
+                - generic [ref=f15e396]: Villareal Eatery
+                - generic [ref=f15e397]: E-BPCO-2026-000138
+                - generic [ref=f15e398]: Building Permit – Renovation / Alteration
+            - button "View all 32" [ref=f15e399] [cursor=pointer]
+          - generic [ref=f15e408]:
+            - generic [ref=f15e409]:
+              - generic [ref=f15e416]: Rejected
+              - generic [ref=f15e417]: "6"
+            - generic [ref=f15e419]:
+              - button "View application E-BPCO-2026-000132 for Raul Villanueva, Villanueva Hardware & Construction Supply, Sanitary Permit, draggable to another stage" [ref=f15e420]:
+                - generic [ref=f15e421]: Raul Villanueva
+                - generic [ref=f15e422]: Villanueva Hardware & Construction Supply
+                - generic [ref=f15e423]: E-BPCO-2026-000132
+                - generic [ref=f15e424]: Sanitary Permit
+              - button "View application E-BPCO-2026-000148 for Raul Villanueva, Villanueva Hardware & Construction Supply, Building Permit – New Construction, draggable to another stage" [ref=f15e425]:
+                - generic [ref=f15e426]: Raul Villanueva
+                - generic [ref=f15e427]: Villanueva Hardware & Construction Supply
+                - generic [ref=f15e428]: E-BPCO-2026-000148
+                - generic [ref=f15e429]: Building Permit – New Construction
+              - button "View application E-BPCO-2026-000126 for Raul Villanueva, Salazar Water Refilling Station, Electrical Permit, draggable to another stage" [ref=f15e430]:
+                - generic [ref=f15e431]: Raul Villanueva
+                - generic [ref=f15e432]: Salazar Water Refilling Station
+                - generic [ref=f15e433]: E-BPCO-2026-000126
+                - generic [ref=f15e434]: Electrical Permit
+              - button "View application E-BPCO-2026-000162 for Grace Fajota, Delos Santos Tailoring, Fencing Permit, draggable to another stage" [ref=f15e435]:
+                - generic [ref=f15e436]: Grace Fajota
+                - generic [ref=f15e437]: Delos Santos Tailoring
+                - generic [ref=f15e438]: E-BPCO-2026-000162
+                - generic [ref=f15e439]: Fencing Permit
+              - button "View application E-BPCO-2026-000147 for Mark Aquino, Aquino Poultry Supply, FSIC for Occupancy Permit (BFP), draggable to another stage" [ref=f15e440]:
+                - generic [ref=f15e441]: Mark Aquino
+                - generic [ref=f15e442]: Aquino Poultry Supply
+                - generic [ref=f15e443]: E-BPCO-2026-000147
+                - generic [ref=f15e444]: FSIC for Occupancy Permit (BFP)
+              - button "View application E-BPCO-2026-000163 for Mark Aquino, Aquino Poultry Supply, Mechanical Permit, draggable to another stage" [ref=f15e445]:
+                - generic [ref=f15e446]: Mark Aquino
+                - generic [ref=f15e447]: Aquino Poultry Supply
+                - generic [ref=f15e448]: E-BPCO-2026-000163
+                - generic [ref=f15e449]: Mechanical Permit
+            - button "View all 6" [ref=f15e450] [cursor=pointer]
+      - generic [ref=f15e459]:
+        - generic [ref=f15e460]:
+          - generic [ref=f15e461]:
+            - heading "Over All Applications Queue" [level=2] [ref=f15e462]
+            - generic [ref=f15e463]:
+              - generic [ref=f15e464]: Under Review
+              - generic [ref=f15e466]: Approved
+              - generic [ref=f15e468]: Rejected
+          - button [ref=f15e475] [cursor=pointer]
+        - generic [ref=f15e481]:
+          - 'img "Building Permit – New Construction — Under Review: 3 (50%) · Approved: 2 (33%) · Rejected: 1 (17%)" [ref=f15e482]':
+            - generic [ref=f15e483]: Building Permit – New Construction
+            - generic [ref=f15e485]: "6"
+          - 'img "Building Permit – Renovation / Alteration — Under Review: 1 (25%) · Approved: 3 (75%) · Rejected: 0 (0%)" [ref=f15e486]':
+            - generic [ref=f15e487]: Building Permit – Renovation / Alteration
+            - generic [ref=f15e489]: "4"
+          - 'img "Building Permit – Addition / Extension — Under Review: 3 (60%) · Approved: 2 (40%) · Rejected: 0 (0%)" [ref=f15e490]':
+            - generic [ref=f15e491]: Building Permit – Addition / Extension
+            - generic [ref=f15e493]: "5"
+          - 'img "Demolition Permit — Under Review: 2 (67%) · Approved: 1 (33%) · Rejected: 0 (0%)" [ref=f15e494]':
+            - generic [ref=f15e495]: Demolition Permit
+            - generic [ref=f15e497]: "3"
+          - 'img "Zoning / Locational Clearance — Under Review: 1 (50%) · Approved: 1 (50%) · Rejected: 0 (0%)" [ref=f15e498]':
+            - generic [ref=f15e499]: Zoning / Locational Clearance
+            - generic [ref=f15e501]: "2"
+          - 'img "Architectural Permit — Under Review: 2 (50%) · Approved: 2 (50%) · Rejected: 0 (0%)" [ref=f15e502]':
+            - generic [ref=f15e503]: Architectural Permit
+            - generic [ref=f15e505]: "4"
+          - 'img "Civil / Structural Permit — Under Review: 1 (50%) · Approved: 1 (50%) · Rejected: 0 (0%)" [ref=f15e506]':
+            - generic [ref=f15e507]: Civil / Structural Permit
+            - generic [ref=f15e509]: "2"
+          - 'img "Electrical Permit — Under Review: 4 (67%) · Approved: 1 (17%) · Rejected: 1 (17%)" [ref=f15e510]':
+            - generic [ref=f15e511]: Electrical Permit
+            - generic [ref=f15e513]: "6"
+          - 'img "Mechanical Permit — Under Review: 3 (60%) · Approved: 1 (20%) · Rejected: 1 (20%)" [ref=f15e514]':
+            - generic [ref=f15e515]: Mechanical Permit
+            - generic [ref=f15e517]: "5"
+          - 'img "Sanitary Permit — Under Review: 0 (0%) · Approved: 1 (50%) · Rejected: 1 (50%)" [ref=f15e518]':
+            - generic [ref=f15e519]: Sanitary Permit
+            - generic [ref=f15e521]: "2"
+          - 'img "Plumbing Permit — Under Review: 1 (25%) · Approved: 3 (75%) · Rejected: 0 (0%)" [ref=f15e522]':
+            - generic [ref=f15e523]: Plumbing Permit
+            - generic [ref=f15e525]: "4"
+          - 'img "Electronics Permit — Under Review: 0 (0%) · Approved: 2 (100%) · Rejected: 0 (0%)" [ref=f15e526]':
+            - generic [ref=f15e527]: Electronics Permit
+            - generic [ref=f15e529]: "2"
+          - 'img "Interior Design Permit — Under Review: 0 (0%) · Approved: 1 (100%) · Rejected: 0 (0%)" [ref=f15e530]':
+            - generic [ref=f15e531]: Interior Design Permit
+            - generic [ref=f15e533]: "1"
+          - 'img "Fencing Permit — Under Review: 3 (43%) · Approved: 3 (43%) · Rejected: 1 (14%)" [ref=f15e534]':
+            - generic [ref=f15e535]: Fencing Permit
+            - generic [ref=f15e537]: "7"
+          - 'img "Sign Permit — Under Review: 2 (40%) · Approved: 3 (60%) · Rejected: 0 (0%)" [ref=f15e538]':
+            - generic [ref=f15e539]: Sign Permit
+            - generic [ref=f15e541]: "5"
+          - 'img "Excavation Permit — Under Review: 2 (67%) · Approved: 1 (33%) · Rejected: 0 (0%)" [ref=f15e542]':
+            - generic [ref=f15e543]: Excavation Permit
+            - generic [ref=f15e545]: "3"
+          - 'img "FSEC for Building Permit (BFP) — Under Review: 2 (67%) · Approved: 1 (33%) · Rejected: 0 (0%)" [ref=f15e546]':
+            - generic [ref=f15e547]: FSEC for Building Permit (BFP)
+            - generic [ref=f15e549]: "3"
+          - 'img "Certificate of Occupancy — Under Review: 1 (50%) · Approved: 1 (50%) · Rejected: 0 (0%)" [ref=f15e550]':
+            - generic [ref=f15e551]: Certificate of Occupancy
+            - generic [ref=f15e553]: "2"
+          - 'img "FSIC for Occupancy Permit (BFP) — Under Review: 0 (0%) · Approved: 2 (67%) · Rejected: 1 (33%)" [ref=f15e554]':
+            - generic [ref=f15e555]: FSIC for Occupancy Permit (BFP)
+            - generic [ref=f15e557]: "3"
+      - generic [ref=f15e558]:
+        - generic [ref=f15e559]:
+          - generic [ref=f15e560]:
+            - generic [ref=f15e561]:
+              - heading "Applications by Evaluation Stage" [level=2] [ref=f15e562]
+              - paragraph [ref=f15e563]: Active applications across the current review workflow
+            - generic [ref=f15e564]: Filter by evaluation result
+            - combobox "Filter by evaluation result" [ref=f15e565] [cursor=pointer]:
+              - option "All Results" [selected]
+              - option "Pending"
+              - option "Passed"
+              - option "Revision Required"
+              - option "Rejected"
+          - paragraph [ref=f15e566]:
+            - strong [ref=f15e567]: "293"
+            - text: applications currently in evaluation · 10 need attention
+          - list [ref=f15e568]:
+            - listitem [ref=f15e569]:
+              - 'button "Initial Evaluation: 69 applications, 24 percent of the current total" [ref=f15e570] [cursor=pointer]':
+                - generic [ref=f15e571]:
+                  - generic [ref=f15e572]: Initial Evaluation
+                  - generic [ref=f15e573]: 69 · 24%
+            - listitem [ref=f15e576]:
+              - 'button "Zoning Evaluation: 66 applications, 23 percent of the current total" [ref=f15e577] [cursor=pointer]':
+                - generic [ref=f15e578]:
+                  - generic [ref=f15e579]: Zoning Evaluation
+                  - generic [ref=f15e580]: 66 · 23%
+            - listitem [ref=f15e583]:
+              - 'button "Fire Safety Evaluation: 57 applications, 19 percent of the current total" [ref=f15e584] [cursor=pointer]':
+                - generic [ref=f15e585]:
+                  - generic [ref=f15e586]: Fire Safety Evaluation
+                  - generic [ref=f15e587]: 57 · 19%
+            - listitem [ref=f15e590]:
+              - 'button "OBO Review: 53 applications, 18 percent of the current total" [ref=f15e591] [cursor=pointer]':
+                - generic [ref=f15e592]:
+                  - generic [ref=f15e593]: OBO Review
+                  - generic [ref=f15e594]: 53 · 18%
+            - listitem [ref=f15e597]:
+              - 'button "Final Approval: 48 applications, 16 percent of the current total" [ref=f15e598] [cursor=pointer]':
+                - generic [ref=f15e599]:
+                  - generic [ref=f15e600]: Final Approval
+                  - generic [ref=f15e601]: 48 · 16%
+          - button [ref=f15e604] [cursor=pointer]
+        - generic [ref=f15e608]:
+          - generic [ref=f15e609]:
+            - heading "Overdue Review" [level=2] [ref=f15e610]
+            - button "View All" [ref=f15e611] [cursor=pointer]
+          - generic [ref=f15e612]:
+            - generic [ref=f15e613]: Low
+            - generic [ref=f15e615]: Medium
+            - generic [ref=f15e617]: High
+          - generic [ref=f15e619]:
+            - generic [ref=f15e622]:
+              - paragraph [ref=f15e623]: Liza Reyes's application is waiting in Initial evaluation for 55 days
+              - paragraph [ref=f15e624]: Reyes Pharmacy
+              - generic [ref=f15e625]:
+                - generic [ref=f15e626]: Submitted 23 Jul 2026
+                - button "Review now" [ref=f15e627] [cursor=pointer]
+            - generic [ref=f15e630]:
+              - paragraph [ref=f15e631]: Glenn Morales's application is waiting in Zoning evaluation for 22 days
+              - paragraph [ref=f15e632]: Morales General Merchandise
+              - generic [ref=f15e633]:
+                - generic [ref=f15e634]: Submitted 25 Aug 2026
+                - button "Review now" [ref=f15e635] [cursor=pointer]
+            - generic [ref=f15e638]:
+              - paragraph [ref=f15e639]: Denise Martirez's application is waiting in Zoning evaluation for 20 days
+              - paragraph [ref=f15e640]: Martirez Rice Mill
+              - generic [ref=f15e641]:
+                - generic [ref=f15e642]: Submitted 27 Aug 2026
+                - button "Review now" [ref=f15e643] [cursor=pointer]
+            - generic [ref=f15e646]:
+              - paragraph [ref=f15e647]: Mark Aquino's application is waiting in Zoning evaluation for 20 days
+              - paragraph [ref=f15e648]: Aquino Poultry Supply
+              - generic [ref=f15e649]:
+                - generic [ref=f15e650]: Submitted 27 Aug 2026
+                - button "Review now" [ref=f15e651] [cursor=pointer]
+            - generic [ref=f15e654]:
+              - paragraph [ref=f15e655]: Corazon Bermudez's application is waiting in Initial evaluation for 18 days
+              - paragraph [ref=f15e656]: Bermudez Furniture Shop
+              - generic [ref=f15e657]:
+                - generic [ref=f15e658]: Submitted 29 Aug 2026
+                - button "Review now" [ref=f15e659] [cursor=pointer]
+      - generic [ref=f15e660]:
+        - generic [ref=f15e661]:
+          - heading "Applications By Status" [level=2] [ref=f15e663]
+          - generic [ref=f15e664]:
+            - img "Distribution of 4 categories" [ref=f15e667]:
+              - generic [ref=f15e669]:
+                - 'img "For Evaluation: 7 (11%)" [ref=f15e670] [cursor=pointer]'
+                - 'img "Approved: 32 (51%)" [ref=f15e671] [cursor=pointer]'
+                - 'img "Return: 4 (6%)" [ref=f15e672] [cursor=pointer]'
+                - 'img "Pending: 20 (32%)" [ref=f15e673] [cursor=pointer]'
+              - generic: "63"
+              - generic: Total Applications
+            - list [ref=f15e674]:
+              - listitem [ref=f15e675]:
+                - generic [ref=f15e676]: For Evaluation
+                - generic [ref=f15e678]:
+                  - text: "7"
+                  - emphasis [ref=f15e679]: 11%
+              - listitem [ref=f15e680]:
+                - generic [ref=f15e681]: Approved
+                - generic [ref=f15e683]:
+                  - text: "32"
+                  - emphasis [ref=f15e684]: 51%
+              - listitem [ref=f15e685]:
+                - generic [ref=f15e686]: Return
+                - generic [ref=f15e688]:
+                  - text: "4"
+                  - emphasis [ref=f15e689]: 6%
+              - listitem [ref=f15e690]:
+                - generic [ref=f15e691]: Pending
+                - generic [ref=f15e693]:
+                  - text: "20"
+                  - emphasis [ref=f15e694]: 32%
+        - generic [ref=f15e695]:
+          - heading "Applications By Business" [level=2] [ref=f15e697]
+          - generic [ref=f15e698]:
+            - 'img "Simbulan Sari-Sari Store: 5" [ref=f15e699]':
+              - generic [ref=f15e700]: SS
+              - generic [ref=f15e702]: Simbulan Sari-Sari Store
+              - generic [ref=f15e704]: "5"
+            - 'img "Villanueva Hardware & Construction Supply: 5" [ref=f15e705]':
+              - generic [ref=f15e706]: VH
+              - generic [ref=f15e708]: Villanueva Hardware & Construction Supply
+              - generic [ref=f15e710]: "5"
+            - 'img "Martirez Rice Mill: 5" [ref=f15e711]':
+              - generic [ref=f15e712]: MR
+              - generic [ref=f15e714]: Martirez Rice Mill
+              - generic [ref=f15e716]: "5"
+            - 'img "Zaballero Auto Repair Shop: 5" [ref=f15e717]':
+              - generic [ref=f15e718]: ZA
+              - generic [ref=f15e720]: Zaballero Auto Repair Shop
+              - generic [ref=f15e722]: "5"
+            - 'img "Rodrigo Bakeshop: 5" [ref=f15e723]':
+              - generic [ref=f15e724]: RB
+              - generic [ref=f15e726]: Rodrigo Bakeshop
+              - generic [ref=f15e728]: "5"
+          - navigation "Pagination" [ref=f15e730]:
+            - generic [ref=f15e731]: Showing 1-5 from 16
+            - generic [ref=f15e732]:
+              - button "First page" [disabled] [ref=f15e733]
+              - button "Page 1" [ref=f15e738] [cursor=pointer]: "1"
+              - button "Page 2" [ref=f15e739] [cursor=pointer]: "2"
+              - button "Page 3" [ref=f15e740] [cursor=pointer]: "3"
+              - button "Page 4" [ref=f15e741] [cursor=pointer]: "4"
+              - button "Last page" [ref=f15e742] [cursor=pointer]
+      - generic [ref=f15e747]:
+        - heading "Application Overview" [level=2] [ref=f15e749]
+        - generic [ref=f15e750]:
+          - generic [ref=f15e751]:
+            - text: "New Application:"
+            - strong [ref=f15e753]: "2"
+          - generic [ref=f15e754]:
+            - text: "Approved Application:"
+            - strong [ref=f15e756]: "32"
+        - generic [ref=f15e758]:
+          - generic [ref=f15e759]:
+            - generic [ref=f15e760]: "400"
+            - generic [ref=f15e761]: "300"
+            - generic [ref=f15e762]: "200"
+            - generic [ref=f15e763]: "100"
+            - generic [ref=f15e764]: "0"
+          - generic [ref=f15e765]:
+            - 'img "Line chart: 2 series across 12 months" [ref=f15e766]'
+            - generic [ref=f15e771]:
+              - generic [ref=f15e772]: Jan
+              - generic [ref=f15e773]: Feb
+              - generic [ref=f15e774]: Mar
+              - generic [ref=f15e775]: Apr
+              - generic [ref=f15e776]: May
+              - generic [ref=f15e777]: Jun
+              - generic [ref=f15e778]: Jul
+              - generic [ref=f15e779]: Aug
+              - generic [ref=f15e780]: Sep
+              - generic [ref=f15e781]: Oct
+              - generic [ref=f15e782]: Nov
+              - generic [ref=f15e783]: Dec
+      - generic [ref=f15e784]:
+        - generic [ref=f15e785]:
+          - heading "Recent Applications" [level=2] [ref=f15e786]
+          - generic [ref=f15e787]:
+            - button [ref=f15e790] [cursor=pointer]
+            - button [ref=f15e794] [cursor=pointer]
+            - button "View All" [ref=f15e799] [cursor=pointer]
+        - table "Recent applications" [ref=f15e801]:
+          - rowgroup [ref=f15e802]:
+            - row [ref=f15e803]:
+              - columnheader "APPLICATION ID" [ref=f15e804]
+              - columnheader "APPLICANT NAME" [ref=f15e805]
+              - columnheader "LOCATION" [ref=f15e806]
+              - columnheader "TYPE" [ref=f15e807]
+              - columnheader "DATE SUBMITTED" [ref=f15e808]
+              - columnheader "ASSIGNED OFFICER" [ref=f15e809]
+              - columnheader "STATUS" [ref=f15e810]
+          - rowgroup [ref=f15e811]:
+            - button "View application E-BPCO-2026-000153 for Jake Nuñez" [ref=f15e812] [cursor=pointer]:
+              - cell "E-BPCO-2026-000153" [ref=f15e813]
+              - cell "JN Jake Nuñez Nuñez Feeds & Agri Supply" [ref=f15e814]:
+                - generic [ref=f15e815]:
+                  - generic [ref=f15e816]: JN
+                  - generic [ref=f15e818]:
+                    - generic "Jake Nuñez" [ref=f15e819]
+                    - generic "Nuñez Feeds & Agri Supply" [ref=f15e820]
+              - cell "Barangay Salvacion" [ref=f15e821]
+              - cell "Plumbing Permit" [ref=f15e822]
+              - cell "17 Sept 2026" [ref=f15e823]
+              - cell "Engr. Ricardo Buenaflor" [ref=f15e824]
+              - cell "Approved" [ref=f15e825]
+            - button "View application E-BPCO-2026-000125 for Corazon Bermudez" [ref=f15e827] [cursor=pointer]:
+              - cell "E-BPCO-2026-000125" [ref=f15e828]
+              - cell "CB Corazon Bermudez Bermudez Furniture Shop" [ref=f15e829]:
+                - generic [ref=f15e830]:
+                  - generic [ref=f15e831]: CB
+                  - generic [ref=f15e833]:
+                    - generic "Corazon Bermudez" [ref=f15e834]
+                    - generic "Bermudez Furniture Shop" [ref=f15e835]
+              - cell "Barangay Cogon" [ref=f15e836]
+              - cell "Architectural Permit" [ref=f15e837]
+              - cell "17 Sept 2026" [ref=f15e838]
+              - cell "Engr. Paolo Ventura" [ref=f15e839]
+              - cell "Approved" [ref=f15e840]
+            - button "View application E-BPCO-2026-000160 for Juan Bragais" [ref=f15e842] [cursor=pointer]:
+              - cell "E-BPCO-2026-000160" [ref=f15e843]
+              - cell "JB Juan Bragais Juan's Coffee Shop" [ref=f15e844]:
+                - generic [ref=f15e845]:
+                  - generic [ref=f15e846]: JB
+                  - generic [ref=f15e848]:
+                    - generic "Juan Bragais" [ref=f15e849]
+                    - generic "Juan's Coffee Shop" [ref=f15e850]
+              - cell "Barangay Salvacion" [ref=f15e851]
+              - cell "Building Permit – Addition / Extension" [ref=f15e852]
+              - cell "17 Sept 2026" [ref=f15e853]
+              - cell "Engr. Paolo Ventura" [ref=f15e854]
+              - cell "Approved" [ref=f15e855]
+            - button "View application E-BPCO-2026-000165 for Fe Simbulan" [ref=f15e857] [cursor=pointer]:
+              - cell "E-BPCO-2026-000165" [ref=f15e858]
+              - cell "FS Fe Simbulan Simbulan Sari-Sari Store" [ref=f15e859]:
+                - generic [ref=f15e860]:
+                  - generic [ref=f15e861]: FS
+                  - generic [ref=f15e863]:
+                    - generic "Fe Simbulan" [ref=f15e864]
+                    - generic "Simbulan Sari-Sari Store" [ref=f15e865]
+              - cell "Barangay Buenavista" [ref=f15e866]
+              - cell "Certificate of Occupancy" [ref=f15e867]
+              - cell "17 Sept 2026" [ref=f15e868]
+              - cell "Engr. Miriam Castañares" [ref=f15e869]
+              - cell "Under Review" [ref=f15e870]
+            - button "View application E-BPCO-2026-000132 for Raul Villanueva" [ref=f15e872] [cursor=pointer]:
+              - cell "E-BPCO-2026-000132" [ref=f15e873]
+              - cell "RV Raul Villanueva Villanueva Hardware & Construction Supply" [ref=f15e874]:
+                - generic [ref=f15e875]:
+                  - generic [ref=f15e876]: RV
+                  - generic [ref=f15e878]:
+                    - generic "Raul Villanueva" [ref=f15e879]
+                    - generic "Villanueva Hardware & Construction Supply" [ref=f15e880]
+              - cell "Barangay Poblacion" [ref=f15e881]
+              - cell "Sanitary Permit" [ref=f15e882]
+              - cell "17 Sept 2026" [ref=f15e883]
+              - cell "Engr. Ricardo Buenaflor" [ref=f15e884]
+              - cell "Rejected" [ref=f15e885]
+            - button "View application E-BPCO-2026-000155 for Axel Barrera" [ref=f15e887] [cursor=pointer]:
+              - cell "E-BPCO-2026-000155" [ref=f15e888]
+              - cell "AB Axel Barrera Barrera Internet Café" [ref=f15e889]:
+                - generic [ref=f15e890]:
+                  - generic [ref=f15e891]: AB
+                  - generic [ref=f15e893]:
+                    - generic "Axel Barrera" [ref=f15e894]
+                    - generic "Barrera Internet Café" [ref=f15e895]
+              - cell "Barangay Poblacion" [ref=f15e896]
+              - cell "Building Permit – New Construction" [ref=f15e897]
+              - cell "16 Sept 2026" [ref=f15e898]
+              - cell "Engr. Miriam Castañares" [ref=f15e899]
+              - cell "Under Review" [ref=f15e900]
+            - button "View application E-BPCO-2026-000120 for Denise Martirez" [ref=f15e902] [cursor=pointer]:
+              - cell "E-BPCO-2026-000120" [ref=f15e903]
+              - cell "DM Denise Martirez Martirez Rice Mill" [ref=f15e904]:
+                - generic [ref=f15e905]:
+                  - generic [ref=f15e906]: DM
+                  - generic [ref=f15e908]:
+                    - generic "Denise Martirez" [ref=f15e909]
+                    - generic "Martirez Rice Mill" [ref=f15e910]
+              - cell "Barangay Burabod" [ref=f15e911]
+              - cell "Excavation Permit" [ref=f15e912]
+              - cell "16 Sept 2026" [ref=f15e913]
+              - cell "Engr. Miriam Castañares" [ref=f15e914]
+              - cell "Under Review" [ref=f15e915]
+        - paragraph [ref=f15e917]: Showing 7 Applications

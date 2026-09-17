@@ -38,7 +38,7 @@
             <label for="business-category-filter">Category</label>
             <select id="business-category-filter" [(ngModel)]="categoryFilter">
               <option value="All">All Categories</option>
-              @for (opt of categoryOptions; track opt) {
+              @for (opt of categoryOptions(); track opt) {
                 <option [value]="opt">{{ opt }}</option>
               }
             </select>
@@ -63,14 +63,10 @@
       </div>
     </div>
 
-    @if (noBusinessDirectory()) {
+    @if (realListError(); as message) {
       <div class="prototype-disclaimer" role="note">
         <app-icon name="info" [size]="16" />
-        <span
-          >This deployment has no business-directory endpoint yet — the applications queue has real
-          businesses on it, but nothing here can list them independently. Only businesses added
-          through "Create New Business" this session appear below.</span
-        >
+        <span>{{ message }} Only businesses added through "Create New Business" this session appear below.</span>
       </div>
     }
 
@@ -564,6 +560,12 @@
         }
 
         @case ('applications') {
+          @if (realDetailError(); as message) {
+            <div class="prototype-disclaimer" role="note">
+              <app-icon name="info" [size]="16" />
+              <span>{{ message }}</span>
+            </div>
+          }
           @if (businessDetail(); as detail) {
             <div class="table-wrap">
               <table class="detail-table">
@@ -744,6 +746,7 @@
           type="text"
           placeholder="Enter Full Name"
           [(ngModel)]="newBusiness.contactName"
+          appCapitalizeName
         />
 
         <label for="contact-number" class="field-label">Contact Number</label>

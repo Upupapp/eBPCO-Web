@@ -1,0 +1,29 @@
+- generic [ref=f13e3]:
+  - generic [ref=f13e4]:
+    - button "Open navigation" [ref=f13e303] [cursor=pointer]
+    - generic [ref=f13e9]:
+      - link "View profile and settings" [ref=f13e11] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f13e12]: Liza Marasigan
+      - generic [ref=f13e328]:
+        - generic [ref=f13e330]:
+          - heading "Pay Assessment" [level=1] [ref=f13e331]
+          - generic [ref=f13e332]: E-BPCO-2026-000007 · Fencing Permit
+        - generic [ref=f13e333]:
+          - generic [ref=f13e334]:
+            - generic [ref=f13e335]: Total Assessment
+            - strong [ref=f13e336]: ₱6,820.00
+          - generic [ref=f13e337]:
+            - generic [ref=f13e338]: Balance Due
+            - strong [ref=f13e339]: ₱6,820.00
+        - generic [ref=f13e340]:
+          - generic [ref=f13e341]: Payment Method
+          - generic [ref=f13e342]:
+            - button "Bank Transfer" [ref=f13e343] [cursor=pointer]
+            - button "Onsite Payment" [active] [ref=f13e344] [cursor=pointer]
+          - paragraph [ref=f13e353]: Pay directly at the Office of the Municipal Engineer, Castilla Town Hall, Cumadcad, Castilla, Sorsogon. Bring a copy of your Order of Payment.
+          - button "Mark as Paid" [ref=f13e354] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

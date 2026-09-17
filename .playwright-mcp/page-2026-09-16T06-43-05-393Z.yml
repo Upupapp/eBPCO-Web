@@ -1,0 +1,110 @@
+- generic [ref=f53e2]:
+  - generic [ref=f53e986]:
+    - complementary [ref=f53e988]:
+      - generic [ref=f53e989]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f53e991]
+        - generic [ref=f53e992]: E-BPCO
+      - navigation [ref=f53e993]:
+        - link "Dashboard" [ref=f53e996] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f53e1002]:
+          - generic [ref=f53e1003]: Operations
+          - generic [ref=f53e1004]:
+            - link "Applications" [ref=f53e1005] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f53e1011] [cursor=pointer]:
+              - /url: /evaluations
+        - generic [ref=f53e1016]:
+          - generic [ref=f53e1017]: Administration
+          - link "Archive" [ref=f53e1019] [cursor=pointer]:
+            - /url: /archive
+      - button "Log Out" [ref=f53e1025] [cursor=pointer]
+    - main [ref=f53e1031]:
+      - generic [ref=f53e1836]:
+        - generic "Evaluations" [ref=f53e1837]:
+          - generic [ref=f53e1838]:
+            - heading "Evaluations" [level=1] [ref=f53e1839]
+            - generic [ref=f53e1840]:
+              - generic [ref=f53e1841]:
+                - generic [ref=f53e1846]: Search
+                - textbox "Search" [ref=f53e1847]:
+                  - /placeholder: Search here...
+              - button "Notifications" [ref=f53e1849] [cursor=pointer]
+              - button "E evaluator@lgu.gov.ph Evaluator" [ref=f53e1855] [cursor=pointer]:
+                - generic [ref=f53e1856]: E
+                - generic [ref=f53e1860]:
+                  - generic [ref=f53e1861]: evaluator@lgu.gov.ph
+                  - generic [ref=f53e1862]: Evaluator
+        - generic [ref=f53e2740]:
+          - heading "Zoning Evaluation" [level=1] [ref=f53e2741]
+          - generic [ref=f53e2742]:
+            - button "Back" [ref=f53e2743] [cursor=pointer]
+            - button "More actions" [ref=f53e2745] [cursor=pointer]
+        - alert [ref=f53e2751]:
+          - generic [ref=f53e2756]: The Zoning stage has already been decided. Correcting it means a new evaluation cycle.
+          - button "Dismiss" [ref=f53e2757] [cursor=pointer]: ✕
+        - generic [ref=f53e2758]:
+          - generic [ref=f53e2760]:
+            - generic [ref=f53e2762]:
+              - paragraph [ref=f53e2763]: Total in Zoning Evaluation
+              - paragraph [ref=f53e2764]: "1"
+            - generic [ref=f53e2765]:
+              - generic [ref=f53e2766]: Across every status below — Revision Required · Under Review · Accepted
+              - 'img "3 categories: 0, 0, 1" [ref=f53e2768]'
+          - generic [ref=f53e2773]:
+            - generic [ref=f53e2775]:
+              - paragraph [ref=f53e2776]: Revision Required
+              - paragraph [ref=f53e2777]: "0"
+            - generic [ref=f53e2778]:
+              - generic [ref=f53e2779]: 0% of all applications
+              - 'img "Revision Required progress: 0 percent" [ref=f53e2781]'
+          - generic [ref=f53e2784]:
+            - generic [ref=f53e2786]:
+              - paragraph [ref=f53e2787]: Under Review
+              - paragraph [ref=f53e2788]: "0"
+            - generic [ref=f53e2789]:
+              - generic [ref=f53e2790]: 0% of all applications
+              - 'img "Under Review progress: 0 percent" [ref=f53e2792]'
+          - generic [ref=f53e2795]:
+            - generic [ref=f53e2797]:
+              - paragraph [ref=f53e2798]: Accepted
+              - paragraph [ref=f53e2799]: "1"
+            - generic [ref=f53e2800]:
+              - generic [ref=f53e2801]: 100% of all applications
+              - 'img "Accepted progress: 100 percent" [ref=f53e2803]'
+        - generic [ref=f53e2805]:
+          - button [ref=f53e2806] [cursor=pointer]
+          - button [ref=f53e2811] [cursor=pointer]
+          - button [ref=f53e2816] [cursor=pointer]
+        - generic [ref=f53e2821]:
+          - generic [ref=f53e2822]:
+            - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Type" [ref=f53e2828]
+            - generic [ref=f53e2829]:
+              - button [ref=f53e2832] [cursor=pointer]
+              - button [ref=f53e2836] [cursor=pointer]
+          - table [ref=f53e2842]:
+            - rowgroup [ref=f53e2843]:
+              - row [ref=f53e2844]:
+                - columnheader [ref=f53e2845]:
+                  - checkbox "Select all applications in this stage" [ref=f53e2846]
+                - columnheader "APPLICATION ID" [ref=f53e2847]
+                - columnheader "APPLICANT NAME" [ref=f53e2848]
+                - columnheader "MISSING DOCUMENTS" [ref=f53e2849]
+                - columnheader "TYPE" [ref=f53e2850]
+                - columnheader "REVIEWING DEPARTMENT" [ref=f53e2851]
+                - columnheader "DATE SUBMITTED" [ref=f53e2852]
+                - columnheader "ASSIGNED OFFICER" [ref=f53e2853]
+                - columnheader "STATUS" [ref=f53e2854]
+                - columnheader "ACTION" [ref=f53e2855]
+            - rowgroup [ref=f53e2856]:
+              - row [ref=f53e2857]:
+                - cell "No applications match your search." [ref=f53e2858]
+          - navigation "Pagination" [ref=f53e2860]:
+            - generic [ref=f53e2861]: Showing 0 of 0
+            - generic [ref=f53e2862]:
+              - button "First page" [disabled] [ref=f53e2863]
+              - button "Page 1" [ref=f53e2868] [cursor=pointer]: "1"
+              - button "Last page" [disabled] [ref=f53e2869]
+  - status [ref=f53e2733]:
+    - generic [ref=f53e2738]: The Zoning stage has already been decided. Correcting it means a new evaluation cycle.
+    - button "Dismiss" [ref=f53e2739] [cursor=pointer]: ✕

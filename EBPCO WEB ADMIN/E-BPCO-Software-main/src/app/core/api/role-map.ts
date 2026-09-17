@@ -50,3 +50,30 @@ export function portalRoleFor(wireRoles: readonly string[] | undefined): StaffRo
 
   return BREADTH.find((role) => mapped.includes(role)) ?? null;
 }
+
+/**
+ * The real 10 `StaffRole` wire values, each with the backend's own
+ * per-role label (`PORTAL_ROLE_LABELS` in `identity/domain/account.ts`) —
+ * a SECOND copy of that table, for the same reason `BY_WIRE_NAME` above is
+ * one: it is not served anywhere yet. Deliberately NOT collapsed the way
+ * `BY_WIRE_NAME` is — that table exists to pick the one role a signed-in
+ * account's sidebar is built from, this one exists to let an administrator
+ * choose among the real roles the server actually grants when creating a
+ * new account, where collapsing `assessor`/`cashier` into one "Payment
+ * Officer" choice would make it impossible to grant just one of the two.
+ */
+export const WIRE_ROLE_LABELS: Readonly<Record<string, string>> = {
+  'receiving-officer': 'Receiving Officer',
+  'records-officer': 'Records Officer',
+  evaluator: 'Evaluator',
+  assessor: 'Assessor',
+  cashier: 'Cashier',
+  'building-official': 'Approving Officer',
+  'releasing-officer': 'Releasing Officer',
+  administrator: 'Administrator',
+  auditor: 'Auditor',
+  'super-admin': 'Super Admin',
+};
+
+/** The real wire role identifiers, in the order `WIRE_ROLE_LABELS` lists them. */
+export const ALL_WIRE_ROLES: readonly string[] = Object.keys(WIRE_ROLE_LABELS);

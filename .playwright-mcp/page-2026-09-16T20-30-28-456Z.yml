@@ -1,0 +1,216 @@
+- generic [ref=f20e4]:
+  - complementary [ref=f20e6]:
+    - generic [ref=f20e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f20e9]
+      - generic [ref=f20e10]: E-BPCO
+    - navigation [ref=f20e11]:
+      - link "Dashboard" [ref=f20e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f20e20]:
+        - generic [ref=f20e21]: Operations
+        - generic [ref=f20e22]:
+          - link "Applications" [ref=f20e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f20e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f20e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f20e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f20e48]:
+        - generic [ref=f20e49]: Administration
+        - generic [ref=f20e50]:
+          - link "Businesses" [ref=f20e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Users & Roles" [ref=f20e57] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f20e64] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f20e73] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f20e79] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f20e85] [cursor=pointer]
+  - main [ref=f20e91]:
+    - generic [ref=f20e702]:
+      - generic "Applications" [ref=f20e703]:
+        - generic [ref=f20e704]:
+          - heading "Applications" [level=1] [ref=f20e705]
+          - generic [ref=f20e706]:
+            - generic [ref=f20e707]:
+              - generic [ref=f20e712]: Search
+              - textbox "Search" [ref=f20e713]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f20e715] [cursor=pointer]
+            - button "R records@lgu.gov.ph Administrator" [ref=f20e721] [cursor=pointer]:
+              - generic [ref=f20e722]: R
+              - generic [ref=f20e726]:
+                - generic [ref=f20e727]: records@lgu.gov.ph
+                - generic [ref=f20e728]: Administrator
+      - generic [ref=f20e732]:
+        - heading "Application Details" [level=1] [ref=f20e733]
+        - generic [ref=f20e734]:
+          - button "Action" [ref=f20e736] [cursor=pointer]
+          - button "Evaluate" [ref=f20e737] [cursor=pointer]
+          - button "Payment" [ref=f20e738] [cursor=pointer]
+          - button "Back to List" [ref=f20e739] [cursor=pointer]
+          - button "More actions" [ref=f20e741] [cursor=pointer]
+      - generic [ref=f20e747]:
+        - generic [ref=f20e748]:
+          - generic [ref=f20e749]: LM
+          - generic [ref=f20e757]:
+            - heading "710e7e61-5741-40b8-8a0b-2ceb09981bd2 - Liza Marasigan" [level=2] [ref=f20e758]
+            - generic [ref=f20e759]: Under Review
+            - generic [ref=f20e760]:
+              - generic [ref=f20e761]:
+                - term [ref=f20e762]: "Business / Project :"
+                - definition [ref=f20e763]: —
+              - generic [ref=f20e764]:
+                - term [ref=f20e765]: "City :"
+                - definition [ref=f20e766]: 45 Mabini Street, Poblacion, Castilla
+              - generic [ref=f20e767]:
+                - term [ref=f20e768]: "Region :"
+                - definition [ref=f20e769]: Region V (Bicol Region)
+              - generic [ref=f20e770]:
+                - term [ref=f20e771]: "Type :"
+                - definition [ref=f20e772]: Fencing Permit
+              - generic [ref=f20e773]:
+                - term [ref=f20e774]: "Email :"
+                - definition [ref=f20e775]:
+                  - text: liza.marasigan@example.ph
+                  - generic [ref=f20e776]: Unverified
+                  - button "Confirm" [ref=f20e777] [cursor=pointer]
+                  - button "Mark Failed" [ref=f20e778] [cursor=pointer]
+              - generic [ref=f20e779]:
+                - term [ref=f20e780]: "Phone :"
+                - definition [ref=f20e781]:
+                  - text: "09171234567"
+                  - generic [ref=f20e782]: Unverified
+                  - button "Confirm" [ref=f20e783] [cursor=pointer]
+                  - button "Mark Failed" [ref=f20e784] [cursor=pointer]
+              - generic [ref=f20e785]:
+                - term [ref=f20e786]: "Barangay :"
+                - definition [ref=f20e787]: 45 Mabini Street, Poblacion, Castilla
+          - generic [ref=f20e788]:
+            - generic [ref=f20e789]:
+              - strong [ref=f20e790]: 2026-09-16
+              - generic [ref=f20e791]: Date Submitted
+            - generic [ref=f20e792]:
+              - strong [ref=f20e793]: —
+              - generic [ref=f20e794]: Assigned Officer
+          - button [ref=f20e795] [cursor=pointer]
+        - generic [ref=f20e799]:
+          - generic [ref=f20e800]:
+            - button "Timeline" [ref=f20e801] [cursor=pointer]
+            - button "Documents" [active] [ref=f20e802] [cursor=pointer]
+            - button "Permit Result" [ref=f20e803] [cursor=pointer]
+            - button "Comments" [ref=f20e804] [cursor=pointer]
+          - generic [ref=f20e805]:
+            - generic [ref=f20e893]:
+              - generic [ref=f20e894]:
+                - heading "Required Documents" [level=2] [ref=f20e895]
+                - paragraph [ref=f20e896]: Checklist for Fencing Permit — all required documents resolved
+              - button [ref=f20e898] [cursor=pointer]
+            - group [ref=f20e902]:
+              - generic "Requirement sources & verification status (4)" [ref=f20e903] [cursor=pointer]
+            - generic [ref=f20e904]:
+              - text: Remarks
+              - generic [ref=f20e905]: (required when rejecting or requesting revision)
+              - textbox "Reason shown to the applicant…" [ref=f20e906]
+            - table [ref=f20e908]:
+              - rowgroup [ref=f20e909]:
+                - row [ref=f20e910]:
+                  - columnheader [ref=f20e911]:
+                    - checkbox "Select all documents" [ref=f20e912]
+                  - columnheader "Document" [ref=f20e913]
+                  - columnheader "Required" [ref=f20e914]
+                  - columnheader "Reviewing Department" [ref=f20e915]
+                  - columnheader "Uploaded" [ref=f20e916]
+                  - columnheader "Status" [ref=f20e917]
+                  - columnheader [ref=f20e918]
+              - rowgroup [ref=f20e919]:
+                - row [ref=f20e920]:
+                  - cell [ref=f20e921]:
+                    - checkbox "Select Land Title or Tax Declaration of the property" [ref=f20e922]
+                  - cell "Land Title or Tax Declaration of the property test-document.pdf" [ref=f20e923]:
+                    - generic [ref=f20e931]:
+                      - generic [ref=f20e932]: Land Title or Tax Declaration of the property
+                      - generic [ref=f20e933]: test-document.pdf
+                  - cell "Required" [ref=f20e934]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f20e936]
+                  - cell "2026-09-16T19:55:14.496Z" [ref=f20e937]
+                  - cell "Uploaded" [ref=f20e938]
+                  - cell [ref=f20e940]:
+                    - button "Preview" [ref=f20e941] [cursor=pointer]
+                    - button "Mark Under Review" [ref=f20e942] [cursor=pointer]
+                - row [ref=f20e943]:
+                  - cell [ref=f20e944]:
+                    - checkbox "Select Owner's Written Consent (if applicant is not the lot owner)" [disabled] [ref=f20e945]
+                  - cell "Owner's Written Consent (if applicant is not the lot owner) No file attached" [ref=f20e946]:
+                    - generic [ref=f20e954]:
+                      - generic [ref=f20e955]: Owner's Written Consent (if applicant is not the lot owner)
+                      - generic [ref=f20e956]: No file attached
+                  - cell "Optional" [ref=f20e957]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f20e959]
+                  - cell "—" [ref=f20e960]
+                  - cell "Missing" [ref=f20e961]
+                  - cell [ref=f20e963]:
+                    - generic [ref=f20e964] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [ref=f20e965]
+                - row [ref=f20e966]:
+                  - cell [ref=f20e967]:
+                    - checkbox "Select Barangay Clearance" [ref=f20e968]
+                  - cell "Barangay Clearance test-document.pdf" [ref=f20e969]:
+                    - generic [ref=f20e977]:
+                      - generic [ref=f20e978]: Barangay Clearance
+                      - generic [ref=f20e979]: test-document.pdf
+                  - cell "Required" [ref=f20e980]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f20e982]
+                  - cell "2026-09-16T19:55:22.151Z" [ref=f20e983]
+                  - cell "Uploaded" [ref=f20e984]
+                  - cell [ref=f20e986]:
+                    - button "Preview" [ref=f20e987] [cursor=pointer]
+                    - button "Mark Under Review" [ref=f20e988] [cursor=pointer]
+                - row [ref=f20e989]:
+                  - cell [ref=f20e990]:
+                    - checkbox "Select Locational Clearance / Zoning Certification" [ref=f20e991]
+                  - cell "Locational Clearance / Zoning Certification test-document.pdf" [ref=f20e992]:
+                    - generic [ref=f20e1000]:
+                      - generic [ref=f20e1001]: Locational Clearance / Zoning Certification
+                      - generic [ref=f20e1002]: test-document.pdf
+                  - cell "Required" [ref=f20e1003]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f20e1005]
+                  - cell "2026-09-16T19:55:27.053Z" [ref=f20e1006]
+                  - cell "Uploaded" [ref=f20e1007]
+                  - cell [ref=f20e1009]:
+                    - button "Preview" [ref=f20e1010] [cursor=pointer]
+                    - button "Mark Under Review" [ref=f20e1011] [cursor=pointer]
+                - row [ref=f20e1012]:
+                  - cell [ref=f20e1013]:
+                    - checkbox "Select Valid Government-Issued ID of Applicant/Owner" [ref=f20e1014]
+                  - cell "Valid Government-Issued ID of Applicant/Owner test-document.pdf" [ref=f20e1015]:
+                    - generic [ref=f20e1023]:
+                      - generic [ref=f20e1024]: Valid Government-Issued ID of Applicant/Owner
+                      - generic [ref=f20e1025]: test-document.pdf
+                  - cell "Required" [ref=f20e1026]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f20e1028]
+                  - cell "2026-09-16T19:55:32.519Z" [ref=f20e1029]
+                  - cell "Uploaded" [ref=f20e1030]
+                  - cell [ref=f20e1032]:
+                    - button "Preview" [ref=f20e1033] [cursor=pointer]
+                    - button "Mark Under Review" [ref=f20e1034] [cursor=pointer]
+                - row [ref=f20e1035]:
+                  - cell [ref=f20e1036]:
+                    - checkbox "Select Fence Plan / Site Development Plan" [ref=f20e1037]
+                  - cell "Fence Plan / Site Development Plan test-document.pdf" [ref=f20e1038]:
+                    - generic [ref=f20e1046]:
+                      - generic [ref=f20e1047]: Fence Plan / Site Development Plan
+                      - generic [ref=f20e1048]: test-document.pdf
+                  - cell "Required" [ref=f20e1049]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f20e1051]
+                  - cell "2026-09-16T19:55:37.086Z" [ref=f20e1052]
+                  - cell "Uploaded" [ref=f20e1053]
+                  - cell [ref=f20e1055]:
+                    - button "Preview" [ref=f20e1056] [cursor=pointer]
+                    - button "Mark Under Review" [ref=f20e1057] [cursor=pointer]

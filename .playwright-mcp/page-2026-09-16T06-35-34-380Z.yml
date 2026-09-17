@@ -1,0 +1,46 @@
+- generic [ref=f49e24]:
+  - generic [ref=f49e25]:
+    - heading "Create Your Account" [level=2] [ref=f49e26]
+    - paragraph [ref=f49e27]: Step 2 of 3
+  - generic [ref=f49e28]:
+    - generic [ref=f49e29]:
+      - generic [ref=f49e30]: "1"
+      - text: Personal
+    - generic [ref=f49e32]:
+      - generic [ref=f49e33]: "2"
+      - text: Contact
+    - generic [ref=f49e35]:
+      - generic [ref=f49e36]: "3"
+      - text: Security
+  - generic [ref=f49e65]:
+    - generic [ref=f49e66]: Email Address*
+    - textbox "Email Address*" [ref=f49e67]
+  - generic [ref=f49e68]:
+    - generic [ref=f49e69]: Mobile Number*
+    - textbox "Mobile Number*" [ref=f49e70]:
+      - /placeholder: 09XXXXXXXXX
+  - generic [ref=f49e71]:
+    - generic [ref=f49e72]: House Number / Street*
+    - textbox "House Number / Street*" [ref=f49e73]
+  - generic [ref=f49e74]:
+    - generic [ref=f49e75]:
+      - generic [ref=f49e76]: Barangay*
+      - textbox "Barangay*" [ref=f49e77]
+    - generic [ref=f49e78]:
+      - generic [ref=f49e79]: City / Municipality*
+      - textbox "City / Municipality*" [ref=f49e80]
+  - generic [ref=f49e81]:
+    - generic [ref=f49e82]:
+      - generic [ref=f49e83]: Province*
+      - textbox "Province*" [ref=f49e84]
+    - generic [ref=f49e85]:
+      - generic [ref=f49e86]: Postal Code*
+      - textbox "Postal Code*" [ref=f49e87]
+  - generic [ref=f49e88]:
+    - button "Back" [ref=f49e89] [cursor=pointer]
+    - button "Continue" [ref=f49e90] [cursor=pointer]
+  - separator [ref=f49e62]
+  - generic [ref=f49e63]:
+    - text: Already have an account?
+    - link "Log In" [ref=f49e64] [cursor=pointer]:
+      - /url: /login

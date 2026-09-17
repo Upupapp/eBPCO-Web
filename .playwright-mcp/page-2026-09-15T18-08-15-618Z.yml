@@ -1,0 +1,15 @@
+- generic [ref=f90e5]:
+  - heading "Password Reset" [level=2] [ref=f90e6]
+  - paragraph [ref=f90e7]:
+    - strong [ref=f90e8]: Password reset is not available in this build.
+    - text: eBPCO cannot send email yet, so no reset link can reach you — and this portal will not pretend otherwise.
+  - paragraph [ref=f90e9]: "If you cannot sign in, contact the Office of the Municipal Engineer directly and they can help you with your application in person:"
+  - generic [ref=f90e10]:
+    - generic [ref=f90e11]:
+      - strong [ref=f90e12]: "MEO:"
+      - text: "09054818572"
+    - link "meocastilla@gmail.com" [ref=f90e14] [cursor=pointer]:
+      - /url: mailto:meocastilla@gmail.com
+    - generic [ref=f90e15]: Castilla Town Hall, Cumadcad, Castilla, Sorsogon
+  - link "Back to Log In" [ref=f90e17] [cursor=pointer]:
+    - /url: /login

@@ -1,0 +1,65 @@
+- generic [ref=f3e3]:
+  - generic [ref=f3e4]:
+    - button "Open navigation" [ref=f3e5] [cursor=pointer]
+    - generic [ref=f3e9]:
+      - link "View profile and settings" [ref=f3e11] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f3e12]: Stage Fourteen Lifecycle
+      - status [ref=f3e17]:
+        - strong [ref=f3e18]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f3e20]:
+        - heading "Fencing Permit" [level=1] [ref=f3e23]
+        - generic [ref=f3e24]:
+          - generic [ref=f3e25]:
+            - generic [ref=f3e26]: "1"
+            - text: Business & Type
+          - generic [ref=f3e28]:
+            - generic [ref=f3e29]: "2"
+            - text: Details
+          - generic [ref=f3e31]:
+            - generic [ref=f3e32]: "3"
+            - text: Documents
+          - generic [ref=f3e34]:
+            - generic [ref=f3e35]: "4"
+            - text: Review & Submit
+        - generic [ref=f3e62]:
+          - generic [ref=f3e63]: Required Documents
+          - paragraph [ref=f3e64]: "Accepted formats: PDF, JPG, JPEG, PNG."
+          - generic [ref=f3e65]:
+            - generic [ref=f3e67]:
+              - generic [ref=f3e68]: Required
+              - strong [ref=f3e69]: Land Title or Tax Declaration of the property
+            - button "Attach Land Title or Tax Declaration of the property" [ref=f3e71]
+          - generic [ref=f3e72]:
+            - generic [ref=f3e74]:
+              - generic [ref=f3e75]: Optional
+              - strong [ref=f3e76]: Owner's Written Consent (if applicant is not the lot owner)
+            - button "Attach Owner's Written Consent (if applicant is not the lot owner)" [ref=f3e78]
+          - generic [ref=f3e79]:
+            - generic [ref=f3e81]:
+              - generic [ref=f3e82]: Required
+              - strong [ref=f3e83]: Barangay Clearance
+            - button "Attach Barangay Clearance" [ref=f3e85]
+          - generic [ref=f3e86]:
+            - generic [ref=f3e88]:
+              - generic [ref=f3e89]: Required
+              - strong [ref=f3e90]: Locational Clearance / Zoning Certification
+            - button "Attach Locational Clearance / Zoning Certification" [ref=f3e92]
+          - generic [ref=f3e93]:
+            - generic [ref=f3e95]:
+              - generic [ref=f3e96]: Required
+              - strong [ref=f3e97]: Valid Government-Issued ID of Applicant/Owner
+            - button "Attach Valid Government-Issued ID of Applicant/Owner" [ref=f3e99]
+          - generic [ref=f3e100]:
+            - generic [ref=f3e102]:
+              - generic [ref=f3e103]: Required
+              - strong [ref=f3e104]: Fence Plan / Site Development Plan
+            - button "Attach Fence Plan / Site Development Plan" [ref=f3e106]
+          - generic [ref=f3e107]:
+            - button "Back" [ref=f3e108] [cursor=pointer]
+            - button "Continue" [ref=f3e109] [cursor=pointer]
+  - generic:
+    - generic:
+      - status
+      - alert

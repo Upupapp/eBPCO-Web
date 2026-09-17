@@ -1,0 +1,59 @@
+- generic [ref=f39e22]:
+  - generic [ref=f39e23]:
+    - complementary [ref=f39e24]:
+      - generic [ref=f39e25]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f39e26] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f39e27]
+          - generic [ref=f39e28]: Collapse sidebar
+        - generic [ref=f39e29]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f39e30]:
+        - link "Home" [ref=f39e31] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f39e36] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f39e43] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f39e48] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f39e54] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f39e58] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications 1" [ref=f39e62] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f39e66]: Notifications
+          - generic [ref=f39e67]: "1"
+        - link "Profile" [ref=f39e68] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f39e73] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f39e78] [cursor=pointer]
+    - generic [ref=f39e83]:
+      - link "View profile and settings" [ref=f39e85] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f39e86]: Test Citizen
+      - status [ref=f39e91]:
+        - strong [ref=f39e92]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f39e245]:
+        - generic [ref=f39e246]:
+          - generic [ref=f39e247]:
+            - heading "Test Citizen Hardware Store" [level=1] [ref=f39e248]
+            - generic [ref=f39e249]: Retail · Reg. No. REG-2026-101 · Registered Sep 16, 2026
+          - generic [ref=f39e250]:
+            - link "Edit Business" [ref=f39e251] [cursor=pointer]:
+              - /url: /businesses/biz-1001/edit
+            - link "Apply for Permit" [ref=f39e252] [cursor=pointer]:
+              - /url: /permits?businessId=biz-1001
+        - generic [ref=f39e253]:
+          - generic [ref=f39e254]: Business Address
+          - paragraph [ref=f39e255]: Purok 3, Barangay Poblacion, Castilla, Sorsogon
+          - generic [ref=f39e256]: Active
+        - generic [ref=f39e257]:
+          - generic [ref=f39e258]: Applications for this Business
+          - generic [ref=f39e259]: No applications filed yet for this business.
+  - generic [ref=f39e260]:
+    - status [ref=f39e261]:
+      - generic [ref=f39e262]: Test Citizen Hardware Store saved to this demo, not registered with the Municipality.
+    - alert

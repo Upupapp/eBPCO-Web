@@ -1,0 +1,160 @@
+- generic [ref=f42e2]:
+  - generic [ref=f42e1359]:
+    - complementary [ref=f42e1361]:
+      - generic [ref=f42e1362]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f42e1364]
+        - generic [ref=f42e1365]: E-BPCO
+      - navigation [ref=f42e1366]:
+        - link "Dashboard" [ref=f42e1369] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f42e1375]:
+          - generic [ref=f42e1376]: Operations
+          - generic [ref=f42e1377]:
+            - link "Applications" [ref=f42e1378] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f42e1384] [cursor=pointer]:
+              - /url: /evaluations
+        - generic [ref=f42e1389]:
+          - generic [ref=f42e1390]: Administration
+          - link "Archive" [ref=f42e1392] [cursor=pointer]:
+            - /url: /archive
+      - button "Log Out" [ref=f42e1398] [cursor=pointer]
+    - main [ref=f42e1404]:
+      - generic [ref=f42e3204]:
+        - generic "Evaluations" [ref=f42e3205]:
+          - generic [ref=f42e3206]:
+            - heading "Evaluations" [level=1] [ref=f42e3207]
+            - generic [ref=f42e3208]:
+              - generic [ref=f42e3209]:
+                - generic [ref=f42e3214]: Search
+                - textbox "Search" [ref=f42e3215]:
+                  - /placeholder: Search here...
+              - button "Notifications" [ref=f42e3217] [cursor=pointer]
+              - button "E evaluator@lgu.gov.ph Evaluator" [ref=f42e3223] [cursor=pointer]:
+                - generic [ref=f42e3224]: E
+                - generic [ref=f42e3228]:
+                  - generic [ref=f42e3229]: evaluator@lgu.gov.ph
+                  - generic [ref=f42e3230]: Evaluator
+        - generic [ref=f42e4851]:
+          - heading "279a2be6-fb86-4eb0-b35c-ea676960d393" [level=1] [ref=f42e4852]
+          - generic [ref=f42e4853]:
+            - generic [ref=f42e4854]: Under Review
+            - button "Back to Under Review" [ref=f42e4855] [cursor=pointer]
+        - generic [ref=f42e4856]:
+          - generic [ref=f42e4857]:
+            - generic [ref=f42e4858]: SF
+            - generic [ref=f42e4866]:
+              - heading "Stage FourteenD" [level=2] [ref=f42e4867]
+              - generic [ref=f42e4868]: Under Review
+              - generic [ref=f42e4869]:
+                - generic [ref=f42e4870]:
+                  - term [ref=f42e4871]: "Business / Project :"
+                  - definition [ref=f42e4872]: —
+                - generic [ref=f42e4873]:
+                  - term [ref=f42e4874]: "Type :"
+                  - definition [ref=f42e4875]: Fencing Permit
+                - generic [ref=f42e4876]:
+                  - term [ref=f42e4877]: "Location :"
+                  - definition [ref=f42e4878]: 45 Rizal St., Barangay Poblacion, Castilla, Sorsogon
+                - generic [ref=f42e4879]:
+                  - term [ref=f42e4880]: "Missing Documents :"
+                  - definition [ref=f42e4881]: "5"
+                - generic [ref=f42e4882]:
+                  - term [ref=f42e4883]: "Reviewing Department :"
+                  - definition [ref=f42e4884]: Office of the Municipal Engineer / Building Official
+            - generic [ref=f42e4885]:
+              - generic [ref=f42e4886]:
+                - strong [ref=f42e4887]: 2026-09-16
+                - generic [ref=f42e4888]: Date Submitted
+              - generic [ref=f42e4889]:
+                - strong [ref=f42e4890]: 279a2be6-fb86-4eb0-b35c-ea676960d393
+                - generic [ref=f42e4891]: Application ID
+          - generic [ref=f42e4892]:
+            - generic [ref=f42e4893]:
+              - heading "Evaluation Summary" [level=2] [ref=f42e4894]
+              - button [ref=f42e4895] [cursor=pointer]
+            - heading "Evaluation Stage" [level=3] [ref=f42e4907]
+            - list [ref=f42e4908]:
+              - listitem [ref=f42e4909]:
+                - generic [ref=f42e4911]: Initial
+              - listitem [ref=f42e4912]:
+                - generic [ref=f42e4914]: Zoning
+              - listitem [ref=f42e4915]:
+                - generic [ref=f42e4917]: Fire Safety
+              - listitem [ref=f42e4918]:
+                - generic [ref=f42e4920]: OBO
+              - listitem [ref=f42e4921]:
+                - generic [ref=f42e4923]: Final Approval
+            - heading "Assigned Officer" [level=3] [ref=f42e4924]
+            - generic [ref=f42e4925]:
+              - generic [ref=f42e4926]: —
+              - generic [ref=f42e4928]:
+                - strong [ref=f42e4929]: —
+                - text: Reviewing this evaluation
+            - heading "Documents" [level=3] [ref=f42e4930]
+            - table [ref=f42e4932]:
+              - rowgroup [ref=f42e4933]:
+                - row [ref=f42e4934]:
+                  - columnheader "Document" [ref=f42e4935]
+                  - columnheader "Required" [ref=f42e4936]
+                  - columnheader "Department" [ref=f42e4937]
+                  - columnheader "Uploaded" [ref=f42e4938]
+                  - columnheader "Status" [ref=f42e4939]
+                  - columnheader [ref=f42e4940]
+              - rowgroup [ref=f42e4941]:
+                - row [ref=f42e4942]:
+                  - cell "Land Title or Tax Declaration of the property" [ref=f42e4943]
+                  - cell "Required" [ref=f42e4944]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f42e4945]
+                  - cell "—" [ref=f42e4946]
+                  - cell "Missing" [ref=f42e4947]
+                  - cell [ref=f42e4949]
+                - row [ref=f42e4950]:
+                  - cell "Owner's Written Consent (if applicant is not the lot owner)" [ref=f42e4951]
+                  - cell "Optional" [ref=f42e4952]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f42e4953]
+                  - cell "—" [ref=f42e4954]
+                  - cell "Missing" [ref=f42e4955]
+                  - cell [ref=f42e4957]
+                - row [ref=f42e4958]:
+                  - cell "Barangay Clearance" [ref=f42e4959]
+                  - cell "Required" [ref=f42e4960]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f42e4961]
+                  - cell "—" [ref=f42e4962]
+                  - cell "Missing" [ref=f42e4963]
+                  - cell [ref=f42e4965]
+                - row [ref=f42e4966]:
+                  - cell "Locational Clearance / Zoning Certification" [ref=f42e4967]
+                  - cell "Required" [ref=f42e4968]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f42e4969]
+                  - cell "—" [ref=f42e4970]
+                  - cell "Missing" [ref=f42e4971]
+                  - cell [ref=f42e4973]
+                - row [ref=f42e4974]:
+                  - cell "Valid Government-Issued ID of Applicant/Owner" [ref=f42e4975]
+                  - cell "Required" [ref=f42e4976]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f42e4977]
+                  - cell "—" [ref=f42e4978]
+                  - cell "Missing" [ref=f42e4979]
+                  - cell [ref=f42e4981]
+                - row [ref=f42e4982]:
+                  - cell "Fence Plan / Site Development Plan" [ref=f42e4983]
+                  - cell "Required" [ref=f42e4984]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f42e4985]
+                  - cell "—" [ref=f42e4986]
+                  - cell "Missing" [ref=f42e4987]
+                  - cell [ref=f42e4989]
+            - heading "Timeline" [level=3] [ref=f42e4990]
+            - list [ref=f42e4991]:
+              - listitem [ref=f42e4992]:
+                - paragraph [ref=f42e4994]: No activity recorded yet.
+            - heading "Actions" [level=3] [ref=f42e4995]
+            - generic [ref=f42e4996]:
+              - button [active] [ref=f42e4997] [cursor=pointer]
+              - generic [ref=f42e5002]: Remarks (required to return)
+              - textbox "Remarks (required to return)" [ref=f42e5003]:
+                - /placeholder: What needs to be revised?
+              - button [disabled] [ref=f42e5004]
+  - status [ref=f42e5009]:
+    - generic [ref=f42e5014]: Stage FourteenD's application advanced past Final Evaluation.
+    - button "Dismiss" [ref=f42e5015] [cursor=pointer]: ✕

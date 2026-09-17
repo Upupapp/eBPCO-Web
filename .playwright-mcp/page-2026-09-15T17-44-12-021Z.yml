@@ -1,0 +1,100 @@
+- generic [ref=f80e3]:
+  - generic [ref=f80e4]:
+    - complementary [ref=f80e5]:
+      - generic [ref=f80e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f80e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f80e8]
+          - generic [ref=f80e9]: Collapse sidebar
+        - generic [ref=f80e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f80e11]:
+        - link "Home" [ref=f80e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f80e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f80e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f80e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f80e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f80e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f80e43] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f80e48] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f80e53] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f80e58] [cursor=pointer]
+    - generic [ref=f80e63]:
+      - link "View profile and settings" [ref=f80e65] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f80e66]: Test Citizen
+      - status [ref=f80e71]:
+        - strong [ref=f80e72]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f80e74]:
+        - generic [ref=f80e76]:
+          - heading "Profile & Settings" [level=1] [ref=f80e77]
+          - generic [ref=f80e78]: Manage your account details, security, and preferences.
+        - generic [ref=f80e79]:
+          - generic [ref=f80e80]:
+            - generic [ref=f80e81]:
+              - generic [aria-hidden] [ref=f80e82]: TC
+              - generic "Change profile photo" [ref=f80e83] [cursor=pointer]:
+                - button "Change profile photo" [ref=f80e84]
+            - heading "Test Citizen" [level=2] [ref=f80e88]
+            - generic [ref=f80e89]: michaela+testcitizen1@lguids.com.ph
+            - separator [ref=f80e90]
+            - generic [ref=f80e91]:
+              - generic [ref=f80e92]: "Email: Unverified"
+              - generic [ref=f80e93]: "Mobile: Unverified"
+            - paragraph [ref=f80e94]: Verification is not available in this build and is not required for anything here.
+          - generic [ref=f80e95]:
+            - generic [ref=f80e96]:
+              - button "Edit Profile" [ref=f80e97] [cursor=pointer]
+              - button "Change Password" [ref=f80e98] [cursor=pointer]
+              - button "Notification Preferences" [ref=f80e99] [cursor=pointer]
+              - button "Legal" [ref=f80e100] [cursor=pointer]
+            - generic [ref=f80e101]:
+              - generic [ref=f80e102]:
+                - generic [ref=f80e103]:
+                  - generic [ref=f80e104]: First Name
+                  - textbox "First Name" [ref=f80e105]: Test
+                - generic [ref=f80e106]:
+                  - generic [ref=f80e107]: Middle Name
+                  - textbox "Middle Name" [ref=f80e108]
+              - generic [ref=f80e109]:
+                - generic [ref=f80e110]:
+                  - generic [ref=f80e111]: Last Name
+                  - textbox "Last Name" [ref=f80e112]: Citizen
+                - generic [ref=f80e113]:
+                  - generic [ref=f80e114]: Email (read-only)
+                  - textbox "Email (read-only)" [disabled] [ref=f80e115]: michaela+testcitizen1@lguids.com.ph
+              - generic [ref=f80e116]:
+                - generic [ref=f80e117]:
+                  - generic [ref=f80e118]: Mobile Number
+                  - textbox "Mobile Number" [ref=f80e119]: "09171234567"
+                - generic [ref=f80e120]:
+                  - generic [ref=f80e121]: Address
+                  - textbox "Address" [ref=f80e122]: Purok 3
+              - generic [ref=f80e123]:
+                - generic [ref=f80e124]:
+                  - generic [ref=f80e125]: Barangay
+                  - textbox "Barangay" [ref=f80e126]: Poblacion
+                - generic [ref=f80e127]:
+                  - generic [ref=f80e128]: City / Municipality
+                  - textbox "City / Municipality" [ref=f80e129]: Castilla
+              - generic [ref=f80e130]:
+                - generic [ref=f80e131]:
+                  - generic [ref=f80e132]: Province
+                  - textbox "Province" [ref=f80e133]: Sorsogon
+                - generic [ref=f80e134]:
+                  - generic [ref=f80e135]: ZIP Code
+                  - textbox "ZIP Code" [ref=f80e136]: "4712"
+              - button "Save Changes" [active] [ref=f80e138] [cursor=pointer]
+  - generic [ref=f80e139]:
+    - status [ref=f80e140]:
+      - generic [ref=f80e141]: Sent to the Municipality.
+    - alert

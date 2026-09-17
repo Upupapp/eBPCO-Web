@@ -1,0 +1,56 @@
+- generic [ref=f12e61]:
+  - complementary [ref=f12e63]:
+    - generic [ref=f12e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f12e66]
+      - generic [ref=f12e67]: E-BPCO
+    - navigation [ref=f12e68]:
+      - link "Dashboard" [ref=f12e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f12e77]:
+        - generic [ref=f12e78]: Operations
+        - generic [ref=f12e79]:
+          - link "Applications" [ref=f12e80] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f12e86] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f12e91] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f12e98] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f12e105]:
+        - generic [ref=f12e106]: Administration
+        - generic [ref=f12e107]:
+          - link "Businesses" [ref=f12e108] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f12e114] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f12e120] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f12e127] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [active] [ref=f12e136] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f12e142] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f12e148] [cursor=pointer]
+  - main [ref=f12e154]:
+    - generic [ref=f12e1547]:
+      - generic "Archive" [ref=f12e1548]:
+        - generic [ref=f12e1549]:
+          - heading "Archive" [level=1] [ref=f12e1550]
+          - generic [ref=f12e1551]:
+            - generic [ref=f12e1552]:
+              - generic [ref=f12e1557]: Search
+              - textbox "Search" [ref=f12e1558]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f12e1560] [cursor=pointer]
+            - button "S super@lgu.gov.ph Super Admin" [ref=f12e1566] [cursor=pointer]:
+              - generic [ref=f12e1567]: S
+              - generic [ref=f12e1571]:
+                - generic [ref=f12e1572]: super@lgu.gov.ph
+                - generic [ref=f12e1573]: Super Admin
+      - generic [ref=f12e1577]:
+        - generic [ref=f12e1579]:
+          - heading "Archived applications" [level=2] [ref=f12e1580]
+          - paragraph [ref=f12e1581]: Nothing in eBPCO is deleted. Applications that were cancelled, rejected or allowed to expire are kept here with who set them aside and why. This list is read-only.
+        - paragraph [ref=f12e1582]: Nothing has been archived.

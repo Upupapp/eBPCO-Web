@@ -1,0 +1,153 @@
+- generic [ref=f35e53]:
+  - complementary [ref=f35e55]:
+    - generic [ref=f35e56]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f35e58]
+      - generic [ref=f35e59]: E-BPCO
+    - navigation [ref=f35e60]:
+      - link "Dashboard" [ref=f35e63] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f35e69]:
+        - generic [ref=f35e70]: Operations
+        - generic [ref=f35e71]:
+          - link "Applications" [ref=f35e72] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f35e78] [cursor=pointer]:
+            - /url: /evaluations
+      - generic [ref=f35e83]:
+        - generic [ref=f35e84]: Administration
+        - link "Archive" [ref=f35e86] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f35e92] [cursor=pointer]
+  - main [ref=f35e98]:
+    - generic [ref=f35e678]:
+      - generic "Applications" [ref=f35e679]:
+        - generic [ref=f35e680]:
+          - heading "Applications" [level=1] [ref=f35e681]
+          - generic [ref=f35e682]:
+            - generic [ref=f35e683]:
+              - generic [ref=f35e688]: Search
+              - textbox "Search" [ref=f35e689]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f35e691] [cursor=pointer]
+            - button "E evaluator@lgu.gov.ph Evaluator" [ref=f35e697] [cursor=pointer]:
+              - generic [ref=f35e698]: E
+              - generic [ref=f35e702]:
+                - generic [ref=f35e703]: evaluator@lgu.gov.ph
+                - generic [ref=f35e704]: Evaluator
+      - generic [ref=f35e708]:
+        - heading "Application Details" [level=1] [ref=f35e709]
+        - generic [ref=f35e710]:
+          - button "Action" [ref=f35e712] [cursor=pointer]
+          - button "Evaluate" [ref=f35e713] [cursor=pointer]
+          - button "Back to List" [ref=f35e714] [cursor=pointer]
+          - button "More actions" [ref=f35e716] [cursor=pointer]
+      - generic [ref=f35e722]:
+        - generic [ref=f35e723]:
+          - generic [ref=f35e724]: SF
+          - generic [ref=f35e732]:
+            - heading "070c40bb-9fed-486d-a9ff-3415120f59c2 - Stage Fourteen Lifecycle" [level=2] [ref=f35e733]
+            - generic [ref=f35e734]: Under Review
+            - generic [ref=f35e735]:
+              - generic [ref=f35e736]:
+                - term [ref=f35e737]: "Business / Project :"
+                - definition [ref=f35e738]: —
+              - generic [ref=f35e739]:
+                - term [ref=f35e740]: "City :"
+                - definition [ref=f35e741]: 45 Rizal St., Barangay Poblacion, Castilla, Sorsogon
+              - generic [ref=f35e742]:
+                - term [ref=f35e743]: "Region :"
+                - definition [ref=f35e744]: Region V (Bicol Region)
+              - generic [ref=f35e745]:
+                - term [ref=f35e746]: "Type :"
+                - definition [ref=f35e747]: Fencing Permit
+              - generic [ref=f35e748]:
+                - term [ref=f35e749]: "Email :"
+                - definition [ref=f35e750]:
+                  - text: michaela+stage14c@lguids.com.ph
+                  - generic [ref=f35e751]: Unverified
+              - generic [ref=f35e752]:
+                - term [ref=f35e753]: "Phone :"
+                - definition [ref=f35e754]:
+                  - text: "09171234567"
+                  - generic [ref=f35e755]: Unverified
+              - generic [ref=f35e756]:
+                - term [ref=f35e757]: "Barangay :"
+                - definition [ref=f35e758]: 45 Rizal St., Barangay Poblacion, Castilla, Sorsogon
+          - generic [ref=f35e759]:
+            - generic [ref=f35e760]:
+              - strong [ref=f35e761]: 2026-09-16
+              - generic [ref=f35e762]: Date Submitted
+            - generic [ref=f35e763]:
+              - strong [ref=f35e764]: —
+              - generic [ref=f35e765]: Assigned Officer
+          - button [ref=f35e766] [cursor=pointer]
+        - generic [ref=f35e770]:
+          - generic [ref=f35e771]:
+            - button "Timeline" [ref=f35e772] [cursor=pointer]
+            - button "Documents" [ref=f35e773] [cursor=pointer]
+            - button "Permit Result" [ref=f35e774] [cursor=pointer]
+            - button "Comments" [ref=f35e775] [cursor=pointer]
+          - generic [ref=f35e776]:
+            - heading "Activity Summary" [level=2] [ref=f35e777]
+            - paragraph [ref=f35e778]:
+              - text: This Application Is Currently At
+              - strong [ref=f35e779]: Document Verification
+            - heading "Lifecycle Progress" [level=3] [ref=f35e780]
+            - list [ref=f35e781]:
+              - listitem [ref=f35e782]: Draft
+              - listitem [ref=f35e783]: Submitted
+              - listitem [ref=f35e784]: Received
+              - listitem [ref=f35e785]: Document Verification
+              - listitem [ref=f35e786]: Under Evaluation
+              - listitem [ref=f35e787]: Assessed
+              - listitem [ref=f35e788]: Payment Submitted
+              - listitem [ref=f35e789]: Payment Under Verification
+              - listitem [ref=f35e790]: Payment Verified
+              - listitem [ref=f35e791]: For Approval
+              - listitem [ref=f35e792]: Approved
+              - listitem [ref=f35e793]: Permit Generated
+              - listitem [ref=f35e794]: Ready for Release
+              - listitem [ref=f35e795]: Released
+              - listitem [ref=f35e796]: Completed
+            - heading "Quick Information :" [level=3] [ref=f35e797]
+            - generic [ref=f35e798]:
+              - list [ref=f35e799]:
+                - listitem [ref=f35e800]: "Assigned To: —"
+                - listitem [ref=f35e801]: "Current Step: Document Verification"
+                - listitem [ref=f35e802]: "Days In Current Step: 0 Days"
+              - generic [ref=f35e803]: "Total Elapsed Time: 0 Days"
+            - heading "Audit Trail" [level=3] [ref=f35e804]
+            - table [ref=f35e806]:
+              - rowgroup [ref=f35e807]:
+                - row [ref=f35e808]:
+                  - columnheader "#" [ref=f35e809]
+                  - columnheader "Timeline Event" [ref=f35e810]
+                  - columnheader "Date" [ref=f35e811]
+                  - columnheader "Time" [ref=f35e812]
+                  - columnheader "Details" [ref=f35e813]
+                  - columnheader "Action" [ref=f35e814]
+              - rowgroup [ref=f35e815]:
+                - row [ref=f35e816]:
+                  - cell "03" [ref=f35e817]
+                  - cell "Document Verification" [ref=f35e818]
+                  - cell "9/16/2026" [ref=f35e819]
+                  - cell "1:24:33 PM" [ref=f35e820]
+                  - cell "From Received" [ref=f35e821]
+                  - cell [ref=f35e822]:
+                    - button "Export Document Verification" [ref=f35e823] [cursor=pointer]
+                - row [ref=f35e828]:
+                  - cell "02" [ref=f35e829]
+                  - cell "Received" [ref=f35e830]
+                  - cell "9/16/2026" [ref=f35e831]
+                  - cell "1:24:22 PM" [ref=f35e832]
+                  - cell "From Submitted" [ref=f35e833]
+                  - cell [ref=f35e834]:
+                    - button "Export Received" [ref=f35e835] [cursor=pointer]
+                - row [ref=f35e840]:
+                  - cell "01" [ref=f35e841]
+                  - cell "Submitted" [ref=f35e842]
+                  - cell "9/16/2026" [ref=f35e843]
+                  - cell "1:23:41 PM" [ref=f35e844]
+                  - cell "Application filed" [ref=f35e845]
+                  - cell [ref=f35e846]:
+                    - button "Export Submitted" [ref=f35e847] [cursor=pointer]

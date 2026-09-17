@@ -1,0 +1,91 @@
+- generic [ref=f62e61]:
+  - complementary [ref=f62e63]:
+    - generic [ref=f62e64]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f62e66]
+      - generic [ref=f62e67]: E-BPCO
+    - navigation [ref=f62e68]:
+      - link "Dashboard" [ref=f62e71] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f62e77]:
+        - generic [ref=f62e78]: Operations
+        - link "Payments" [ref=f62e80] [cursor=pointer]:
+          - /url: /payments
+      - generic [ref=f62e87]:
+        - generic [ref=f62e88]: Administration
+        - link "Archive" [ref=f62e90] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f62e96] [cursor=pointer]
+  - main [ref=f62e102]:
+    - generic [ref=f62e918]:
+      - generic "Payments" [ref=f62e919]:
+        - generic [ref=f62e920]:
+          - heading "Payments" [level=1] [ref=f62e921]
+          - generic [ref=f62e922]:
+            - generic [ref=f62e923]:
+              - generic [ref=f62e928]: Search
+              - textbox "Search" [ref=f62e929]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f62e931] [cursor=pointer]
+            - button "C cashier@lgu.gov.ph Payment Officer" [ref=f62e937] [cursor=pointer]:
+              - generic [ref=f62e938]: C
+              - generic [ref=f62e942]:
+                - generic [ref=f62e943]: cashier@lgu.gov.ph
+                - generic [ref=f62e944]: Payment Officer
+      - generic [ref=f62e948]:
+        - navigation [ref=f62e949]:
+          - button [ref=f62e950] [cursor=pointer]
+          - button [ref=f62e956] [cursor=pointer]
+        - generic [ref=f62e959]:
+          - textbox "Search by reference, applicant, or business/project" [ref=f62e965]
+          - generic [ref=f62e966]:
+            - combobox "Payment status filter" [ref=f62e967] [cursor=pointer]:
+              - option "Pending Verification" [selected]
+              - option "Paid"
+              - option "Not Yet Available"
+              - option "Overdue"
+            - button [ref=f62e968] [cursor=pointer]
+        - table [ref=f62e974]:
+          - rowgroup [ref=f62e975]:
+            - row [ref=f62e976]:
+              - columnheader "Application" [ref=f62e977]
+              - columnheader "Citizen" [ref=f62e978]
+              - columnheader "Business / Project" [ref=f62e979]
+              - columnheader "Reference" [ref=f62e980]
+              - columnheader "Method" [ref=f62e981]
+              - columnheader "Amount" [ref=f62e982]
+              - columnheader "Status" [ref=f62e983]
+              - columnheader "Submitted" [ref=f62e984]
+              - columnheader "Action" [ref=f62e985]
+          - rowgroup [ref=f62e986]:
+            - button [ref=f62e987] [cursor=pointer]:
+              - cell "E-BPCO-2026-000007" [ref=f62e988]
+              - cell "— —" [ref=f62e989]:
+                - generic [ref=f62e990]:
+                  - generic [ref=f62e991]: —
+                  - generic "—" [ref=f62e993]
+              - cell "Not provided" [ref=f62e994]
+              - cell "ONSITE-1789542514265" [ref=f62e996]
+              - cell "Onsite" [ref=f62e997]
+              - cell "₱6,820.00" [ref=f62e998]
+              - cell "Pending Verification" [ref=f62e999]
+              - cell "2026-09-16" [ref=f62e1001]
+              - cell [ref=f62e1002]:
+                - button "Verify" [active] [ref=f62e1003]
+                - button "Reject" [ref=f62e1004]
+        - navigation "Pagination" [ref=f62e1006]:
+          - generic [ref=f62e1007]: Showing 1-1 from 1
+          - generic [ref=f62e1008]:
+            - button "First page" [disabled] [ref=f62e1009]
+            - button "Page 1" [ref=f62e1014] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f62e1015]
+      - generic "Verify this payment?" [ref=f62e1020]:
+        - alertdialog [ref=f62e1022]:
+          - button "Close" [ref=f62e1023] [cursor=pointer]: ✕
+          - heading "Verify this payment?" [level=2] [ref=f62e1024]
+          - paragraph [ref=f62e1025]: Confirms ₱6,820.00 received via Onsite for E-BPCO-2026-000007.
+          - generic [ref=f62e1026]: Official Receipt Number
+          - textbox "Official Receipt Number" [ref=f62e1027]:
+            - /placeholder: e.g. OR-2026-000123
+          - generic [ref=f62e1028]:
+            - button "Cancel" [ref=f62e1029] [cursor=pointer]
+            - button "Verify" [ref=f62e1030] [cursor=pointer]

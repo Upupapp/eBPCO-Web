@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { SessionService } from './session.service';
 import { IdentityApi } from '../api/identity.api';
 import { FakeIdentityApi } from '../api/identity.api.fake';
@@ -9,6 +10,7 @@ describe('SessionService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [SessionService,
+      provideRouter([]),
       { provide: IdentityApi, useFactory: () => new FakeIdentityApi(TestBed.inject(TokenStore)) },
     ] });
     service = TestBed.inject(SessionService);
@@ -52,6 +54,7 @@ describe('SessionService', () => {
     TestBed.configureTestingModule({
       providers: [
         SessionService,
+        provideRouter([]),
         {
           provide: IdentityApi,
           useFactory: () => new FakeIdentityApi(TestBed.inject(TokenStore), ['chief-vibes-officer']),

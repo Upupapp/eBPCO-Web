@@ -281,6 +281,40 @@
   .modal-actions {
     margin-top: 0.4rem;
   }
+
+  .field-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $color-ink-500;
+  }
+
+  .field-hint {
+    margin: -0.5rem 0 0;
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: $color-ink-500;
+  }
+
+  .role-checklist {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  // Overrides the plain `label { flex-direction: column }` rule above —
+  // a checkbox and its text sit on one line, not stacked.
+  label.checkbox-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: $color-ink-700;
+
+    input[type='checkbox'] {
+      width: auto;
+    }
+  }
 }
 
 // ---- Payment Settings tab ---------------------------------------------

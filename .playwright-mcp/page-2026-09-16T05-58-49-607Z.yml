@@ -1,0 +1,68 @@
+- generic [ref=f42e1359]:
+  - complementary [ref=f42e1361]:
+    - generic [ref=f42e1362]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f42e1364]
+      - generic [ref=f42e1365]: E-BPCO
+    - navigation [ref=f42e1366]:
+      - link "Dashboard" [ref=f42e1369] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f42e1375]:
+        - generic [ref=f42e1376]: Operations
+        - generic [ref=f42e1377]:
+          - link "Applications" [ref=f42e1378] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f42e1384] [cursor=pointer]:
+            - /url: /evaluations
+      - generic [ref=f42e1389]:
+        - generic [ref=f42e1390]: Administration
+        - link "Archive" [ref=f42e1392] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f42e1398] [cursor=pointer]
+  - main [ref=f42e1404]:
+    - generic [ref=f42e3204]:
+      - generic "Evaluations" [ref=f42e3205]:
+        - generic [ref=f42e3206]:
+          - heading "Evaluations" [level=1] [ref=f42e3207]
+          - generic [ref=f42e3208]:
+            - generic [ref=f42e3209]:
+              - generic [ref=f42e3214]: Search
+              - textbox "Search" [ref=f42e3215]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f42e3217] [cursor=pointer]
+            - button "E evaluator@lgu.gov.ph Evaluator" [ref=f42e3223] [cursor=pointer]:
+              - generic [ref=f42e3224]: E
+              - generic [ref=f42e3228]:
+                - generic [ref=f42e3229]: evaluator@lgu.gov.ph
+                - generic [ref=f42e3230]: Evaluator
+      - heading "List Of Evaluations" [level=2] [ref=f42e3868]
+      - generic [ref=f42e3869]:
+        - 'button "Initial Evaluation: 3 applications. Review and process building permit applications." [ref=f42e3870] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f42e3872]: "01"
+          - paragraph [ref=f42e3895]: "3"
+          - paragraph [ref=f42e3896]: Initial Evaluation
+          - paragraph [ref=f42e3897]: Review and process building permit applications.
+        - 'button "Zoning Evaluation: 0 applications. A local authority review for compliance with zoning and building regulations." [ref=f42e3898] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f42e3900]: "02"
+          - paragraph [ref=f42e3923]: "0"
+          - paragraph [ref=f42e3924]: Zoning Evaluation
+          - paragraph [ref=f42e3925]: A local authority review for compliance with zoning and building regulations.
+        - 'button "Fire Safety Evaluation: 0 applications. An assessment of a building''s compliance with fire safety standards." [ref=f42e3926] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f42e3928]: "03"
+          - paragraph [ref=f42e3954]: "0"
+          - paragraph [ref=f42e3955]: Fire Safety Evaluation
+          - paragraph [ref=f42e3956]: An assessment of a building's compliance with fire safety standards.
+        - 'button "OBO Evaluation: 1 applications. An OBO review for fire and building code compliance." [ref=f42e3957] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f42e3959]: "04"
+          - paragraph [ref=f42e3982]: "1"
+          - paragraph [ref=f42e3983]: OBO Evaluation
+          - paragraph [ref=f42e3984]: An OBO review for fire and building code compliance.
+        - 'button "Final Evaluation: 0 applications. A final sign-off confirming the application is ready for permit release." [ref=f42e3985] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f42e3987]: "05"
+          - paragraph [ref=f42e4013]: "0"
+          - paragraph [ref=f42e4014]: Final Evaluation
+          - paragraph [ref=f42e4015]: A final sign-off confirming the application is ready for permit release.
+        - 'button "Stage not recorded: 0 applications. Applications the server has not told this portal the evaluation stage for." [ref=f42e4016] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f42e4018]: "06"
+          - paragraph [ref=f42e4040]: "0"
+          - paragraph [ref=f42e4041]: Stage not recorded
+          - paragraph [ref=f42e4042]: Applications the server has not told this portal the evaluation stage for.

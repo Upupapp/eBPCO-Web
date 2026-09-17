@@ -1,0 +1,68 @@
+- generic [ref=f40e3]:
+  - generic [ref=f40e4]:
+    - complementary [ref=f40e5]:
+      - generic [ref=f40e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f40e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f40e8]
+          - generic [ref=f40e9]: Collapse sidebar
+        - generic [ref=f40e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f40e11]:
+        - link "Home" [ref=f40e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f40e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f40e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f40e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f40e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f40e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications 1" [ref=f40e43] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f40e47]: Notifications
+          - generic [ref=f40e48]: "1"
+        - link "Profile" [ref=f40e49] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f40e54] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f40e59] [cursor=pointer]
+    - generic [ref=f40e64]:
+      - link "View profile and settings" [ref=f40e66] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f40e67]: Test Citizen
+      - status [ref=f40e72]:
+        - strong [ref=f40e73]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f40e625]:
+        - generic [ref=f40e626]:
+          - generic [ref=f40e627]:
+            - heading "Business Permit" [level=1] [ref=f40e628]
+            - generic [ref=f40e629]: E-BPCO-2026-000007 · · New
+          - generic [ref=f40e630]: Submitted
+        - generic [ref=f40e632]:
+          - generic [ref=f40e633]:
+            - strong [ref=f40e634]: Progress
+            - generic [ref=f40e635]: 7%
+          - paragraph [ref=f40e638]: Your application has been received and is queued for review.
+          - 'button "Demo: Simulate Office Update" [ref=f40e639] [cursor=pointer]'
+          - text: No backend exists yet — this simulates the reviewing office advancing your application.
+          - generic [ref=f40e640]:
+            - button "Withdraw Application" [ref=f40e641] [cursor=pointer]
+            - text: Allowed only before an Order of Payment has been issued.
+        - generic [ref=f40e643]:
+          - generic [ref=f40e644]: Your permit
+          - paragraph [ref=f40e645]: No permit has been issued for this application yet.
+          - generic [ref=f40e646]:
+            - strong [ref=f40e647]: Not yet ready to collect
+            - paragraph [ref=f40e648]: The Municipality has not arranged collection for this permit yet.
+        - generic [ref=f40e649]:
+          - generic [ref=f40e650]: Documents
+          - paragraph [ref=f40e652]: No documents attached.
+        - generic [ref=f40e653]: Status Timeline
+  - generic:
+    - generic:
+      - status
+      - alert

@@ -7,7 +7,9 @@ import { IdentityApi } from '../api/identity.api';
 import { FakeIdentityApi } from '../api/identity.api.fake';
 import { TokenStore } from '../api/token-store';
 
-function runGuard(url: string) {
+// `authGuard` is async now — it awaits `SessionService.restore()` before
+// deciding, so every call site here awaits it too.
+async function runGuard(url: string) {
   const state = { url } as RouterStateSnapshot;
   const route = {} as ActivatedRouteSnapshot;
   return TestBed.runInInjectionContext(() => authGuard(route, state));
@@ -36,7 +38,7 @@ describe('authGuard', () => {
     // against a seed file; not harmless against real applications.
     expect(session.isAuthenticated()).toBe(false);
 
-    const result = runGuard('/dashboard');
+    const result = await runGuard('/dashboard');
 
     expect(result instanceof UrlTree).toBe(true);
     expect((result as UrlTree).toString()).toBe('/login');
@@ -46,7 +48,7 @@ describe('authGuard', () => {
   it('allows an authenticated Super Admin into every module', async () => {
     await session.signIn('super@ebpco.gov.ph', 'correct-horse');
     for (const url of ['/dashboard', '/applications', '/evaluations', '/payments', '/permit-release', '/businesses', '/user-roles', '/workflow', '/system-logs']) {
-      const result = runGuard(url);
+      const result = await runGuard(url);
       expect(result).toBe(true);
     }
   });
@@ -55,9 +57,9 @@ describe('authGuard', () => {
     await session.signIn('cashier@ebpco.gov.ph', 'correct-horse');
     session.setRole('Payment Officer');
     // Payment Officer is authorized for /payments...
-    expect(runGuard('/payments')).toBe(true);
+    expect(await runGuard('/payments')).toBe(true);
     // ...but not for /user-roles, which only Super Admin/Administrator see.
-    const result = runGuard('/user-roles');
+    const result = await runGuard('/user-roles');
     expect(result instanceof UrlTree).toBe(true);
     expect((result as UrlTree).toString()).toBe('/dashboard');
   });
@@ -65,6 +67,27 @@ describe('authGuard', () => {
   it('allows every role into /dashboard regardless of their other permissions', async () => {
     await session.signIn('evaluator@ebpco.gov.ph', 'correct-horse');
     session.setRole('Evaluator');
-    expect(runGuard('/dashboard')).toBe(true);
+    expect(await runGuard('/dashboard')).toBe(true);
+  });
+
+  it('restores a real session from a stored token on a fresh page load, instead of redirecting a still-valid officer to /login', async () => {
+    // The exact regression this guard's own `restore()` call exists to
+    // prevent: `isAuthenticated()` reads the in-memory signal, which is
+    // always empty at the very start of a fresh page load (a reload, or a
+    // typed/bookmarked URL) even though a real, still-valid session sits in
+    // `sessionStorage`. A guard that redirects on that empty signal alone
+    // signs out an officer who never actually left.
+    await session.signIn('evaluator@ebpco.gov.ph', 'correct-horse');
+    session.setRole('Evaluator');
+    // Simulates the moment right after a reload: the token survives (it's
+    // real storage, not wiped), but nothing has repopulated the in-memory
+    // session signal yet.
+    session.forceSignOut();
+    expect(session.isAuthenticated()).toBe(false);
+
+    const result = await runGuard('/dashboard');
+
+    expect(result).toBe(true);
+    expect(session.isAuthenticated()).toBe(true);
   });
 });

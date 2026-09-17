@@ -1,0 +1,111 @@
+- generic [ref=f67e22]:
+  - generic [ref=f67e23]:
+    - complementary [ref=f67e24]:
+      - generic [ref=f67e25]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f67e26] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f67e27]
+          - generic [ref=f67e28]: Collapse sidebar
+        - generic [ref=f67e29]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f67e30]:
+        - link "Home" [ref=f67e31] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f67e36] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f67e43] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f67e48] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f67e54] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f67e58] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications 7" [ref=f67e62] [cursor=pointer]:
+          - /url: /notifications
+          - generic [ref=f67e66]: Notifications
+          - generic [ref=f67e67]: "7"
+        - link "Profile" [ref=f67e68] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f67e73] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f67e78] [cursor=pointer]
+    - generic [ref=f67e83]:
+      - link "View profile and settings" [ref=f67e85] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f67e86]: Stage FourteenF
+      - status [ref=f67e91]:
+        - strong [ref=f67e92]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - main [ref=f67e95]:
+        - generic [ref=f67e96]:
+          - generic [ref=f67e97]:
+            - heading "Welcome back, Stage" [level=1] [ref=f67e98]:
+              - text: Welcome back, Stage
+              - generic [aria-hidden] [ref=f67e99]: 👋
+            - paragraph [ref=f67e100]: Here's what's happening with your applications.
+          - generic [ref=f67e101]:
+            - link "Apply for Permit" [ref=f67e102] [cursor=pointer]:
+              - /url: /permits
+            - link "Register Business" [ref=f67e107] [cursor=pointer]:
+              - /url: /businesses/register
+        - generic [ref=f67e114]:
+          - generic [ref=f67e115]:
+            - generic [ref=f67e124]:
+              - generic [ref=f67e125]: My Businesses
+              - generic [ref=f67e126]: "1"
+            - link "View all businesses" [ref=f67e128] [cursor=pointer]:
+              - /url: /businesses
+          - generic [ref=f67e132]:
+            - generic [ref=f67e140]:
+              - generic [ref=f67e141]: Total Applications
+              - generic [ref=f67e142]: "1"
+            - generic [ref=f67e143]: This includes all statuses
+          - generic [ref=f67e148]:
+            - generic [ref=f67e155]:
+              - generic [ref=f67e156]: Awaiting Action
+              - generic [ref=f67e157]: "0"
+            - generic [ref=f67e158]: Needs your action
+          - generic [ref=f67e163]:
+            - generic [ref=f67e170]:
+              - generic [ref=f67e171]: Ready for Release
+              - generic [ref=f67e172]: "0"
+            - generic [ref=f67e173]: Ready to claim / view
+        - generic [ref=f67e178]:
+          - article [ref=f67e179]:
+            - generic [ref=f67e180]:
+              - heading "Active Applications" [level=2] [ref=f67e187]
+              - link "View all" [ref=f67e188] [cursor=pointer]:
+                - /url: /applications
+            - link "Fencing Permit E-BPCO-2026-000007 · Submitted on Sep 16, 2026 Under Review" [ref=f67e193] [cursor=pointer]:
+              - /url: /applications/b6143cd7-39e5-41da-999d-862c28be4751
+              - generic [ref=f67e201]:
+                - generic [ref=f67e202]: Fencing Permit
+                - generic [ref=f67e203]: E-BPCO-2026-000007 ·
+                - generic [ref=f67e204]: Submitted on Sep 16, 2026
+              - generic [ref=f67e205]: Under Review
+          - article [ref=f67e207]:
+            - generic [ref=f67e208]:
+              - heading "Recent Notifications" [level=2] [ref=f67e214]
+              - link "View all" [ref=f67e215] [cursor=pointer]:
+                - /url: /notifications
+            - generic [ref=f67e219]:
+              - generic [ref=f67e222]:
+                - generic [ref=f67e223]: Evaluation stage passed
+                - generic [ref=f67e224]: An evaluation stage has been completed successfully.
+                - generic [ref=f67e225]: Sep 16, 2026
+              - generic [ref=f67e228]:
+                - generic [ref=f67e229]: Evaluation stage passed
+                - generic [ref=f67e230]: An evaluation stage has been completed successfully.
+                - generic [ref=f67e231]: Sep 16, 2026
+              - generic [ref=f67e234]:
+                - generic [ref=f67e235]: Evaluation stage passed
+                - generic [ref=f67e236]: An evaluation stage has been completed successfully.
+                - generic [ref=f67e237]: Sep 16, 2026
+              - generic [ref=f67e240]:
+                - generic [ref=f67e241]: Evaluation stage passed
+                - generic [ref=f67e242]: An evaluation stage has been completed successfully.
+                - generic [ref=f67e243]: Sep 16, 2026
+  - generic:
+    - generic:
+      - status
+      - alert

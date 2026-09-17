@@ -56,7 +56,11 @@ export const NAV_MODULES: NavModule[] = [
     icon: 'user',
     path: '/applications',
     group: 'operations',
-    roles: ['Super Admin', 'Administrator', 'Evaluator', 'Approving Officer'],
+    // Payment Officer added alongside the 'Send to Approval' quick action
+    // (Payment Verified -> For Approval, `staff:verify-payment`) —
+    // without this, the officer who holds the only scope that can make
+    // that hop had no route to the page the action lives on at all.
+    roles: ['Super Admin', 'Administrator', 'Evaluator', 'Approving Officer', 'Payment Officer'],
   },
   {
     key: 'evaluations',

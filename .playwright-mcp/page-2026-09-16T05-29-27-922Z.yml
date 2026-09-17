@@ -1,0 +1,229 @@
+- generic [ref=f35e53]:
+  - complementary [ref=f35e55]:
+    - generic [ref=f35e56]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f35e58]
+      - generic [ref=f35e59]: E-BPCO
+    - navigation [ref=f35e60]:
+      - link "Dashboard" [ref=f35e63] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f35e69]:
+        - generic [ref=f35e70]: Operations
+        - generic [ref=f35e71]:
+          - link "Applications" [ref=f35e72] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f35e78] [cursor=pointer]:
+            - /url: /evaluations
+      - generic [ref=f35e83]:
+        - generic [ref=f35e84]: Administration
+        - link "Archive" [ref=f35e86] [cursor=pointer]:
+          - /url: /archive
+    - button "Log Out" [ref=f35e92] [cursor=pointer]
+  - main [ref=f35e98]:
+    - generic [ref=f35e678]:
+      - generic "Applications" [ref=f35e679]:
+        - generic [ref=f35e680]:
+          - heading "Applications" [level=1] [ref=f35e681]
+          - generic [ref=f35e682]:
+            - generic [ref=f35e683]:
+              - generic [ref=f35e688]: Search
+              - textbox "Search" [ref=f35e689]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f35e691] [cursor=pointer]
+            - button "E evaluator@lgu.gov.ph Evaluator" [ref=f35e697] [cursor=pointer]:
+              - generic [ref=f35e698]: E
+              - generic [ref=f35e702]:
+                - generic [ref=f35e703]: evaluator@lgu.gov.ph
+                - generic [ref=f35e704]: Evaluator
+      - generic [ref=f35e708]:
+        - heading "Application Details" [level=1] [ref=f35e709]
+        - generic [ref=f35e710]:
+          - button "Action" [ref=f35e712] [cursor=pointer]
+          - button "Evaluate" [ref=f35e713] [cursor=pointer]
+          - button "Back to List" [ref=f35e714] [cursor=pointer]
+          - button "More actions" [ref=f35e716] [cursor=pointer]
+      - alert [ref=f35e865]:
+        - generic [ref=f35e870]: The identity document on this application has not been verified yet.
+        - button "Dismiss" [ref=f35e871] [cursor=pointer]: ✕
+      - generic [ref=f35e722]:
+        - generic [ref=f35e723]:
+          - generic [ref=f35e724]: SF
+          - generic [ref=f35e732]:
+            - heading "070c40bb-9fed-486d-a9ff-3415120f59c2 - Stage Fourteen Lifecycle" [level=2] [ref=f35e733]
+            - generic [ref=f35e734]: Under Review
+            - generic [ref=f35e735]:
+              - generic [ref=f35e736]:
+                - term [ref=f35e737]: "Business / Project :"
+                - definition [ref=f35e738]: —
+              - generic [ref=f35e739]:
+                - term [ref=f35e740]: "City :"
+                - definition [ref=f35e741]: 45 Rizal St., Barangay Poblacion, Castilla, Sorsogon
+              - generic [ref=f35e742]:
+                - term [ref=f35e743]: "Region :"
+                - definition [ref=f35e744]: Region V (Bicol Region)
+              - generic [ref=f35e745]:
+                - term [ref=f35e746]: "Type :"
+                - definition [ref=f35e747]: Fencing Permit
+              - generic [ref=f35e748]:
+                - term [ref=f35e749]: "Email :"
+                - definition [ref=f35e750]:
+                  - text: michaela+stage14c@lguids.com.ph
+                  - generic [ref=f35e751]: Unverified
+              - generic [ref=f35e752]:
+                - term [ref=f35e753]: "Phone :"
+                - definition [ref=f35e754]:
+                  - text: "09171234567"
+                  - generic [ref=f35e755]: Unverified
+              - generic [ref=f35e756]:
+                - term [ref=f35e757]: "Barangay :"
+                - definition [ref=f35e758]: 45 Rizal St., Barangay Poblacion, Castilla, Sorsogon
+          - generic [ref=f35e759]:
+            - generic [ref=f35e760]:
+              - strong [ref=f35e761]: 2026-09-16
+              - generic [ref=f35e762]: Date Submitted
+            - generic [ref=f35e763]:
+              - strong [ref=f35e764]: —
+              - generic [ref=f35e765]: Assigned Officer
+          - button [ref=f35e766] [cursor=pointer]
+        - generic [ref=f35e770]:
+          - generic [ref=f35e771]:
+            - button "Timeline" [ref=f35e772] [cursor=pointer]
+            - button "Documents" [ref=f35e773] [cursor=pointer]
+            - button "Permit Result" [ref=f35e774] [cursor=pointer]
+            - button "Comments" [ref=f35e775] [cursor=pointer]
+          - generic [ref=f35e776]:
+            - generic [ref=f35e880]:
+              - generic [ref=f35e881]:
+                - heading "Required Documents" [level=2] [ref=f35e882]
+                - paragraph [ref=f35e883]:
+                  - text: Checklist for Fencing Permit —
+                  - strong [ref=f35e884]: 5 required documents still missing
+              - button [ref=f35e886] [cursor=pointer]
+            - group [ref=f35e890]:
+              - generic "Requirement sources & verification status (4)" [active] [ref=f35e891] [cursor=pointer]
+              - list [ref=f35e1046]:
+                - listitem [ref=f35e1047]:
+                  - generic [ref=f35e1048]: NATIONAL LAW VERIFIED
+                  - link "Presidential Decree No. 1096 — National Building Code of the Philippines (official text, DPWH)" [ref=f35e1049] [cursor=pointer]:
+                    - /url: https://www.dpwh.gov.ph/DPWH/files/nbc/PD.pdf
+                  - generic [ref=f35e1050]: Republic of the Philippines — national law, binds every LGU including Castilla · as of 1977-02-19
+                - listitem [ref=f35e1051]:
+                  - generic [ref=f35e1052]: NATIONAL LAW VERIFIED
+                  - link "Republic Act No. 9514 — Fire Code of the Philippines of 2008, Sec. 5(g) & 7(a) (Fire Safety Inspection Certificate is a prerequisite to any occupancy/operating permit)" [ref=f35e1053] [cursor=pointer]:
+                    - /url: https://lawphil.net/statutes/repacts/ra2008/ra_9514_2008.html
+                  - generic [ref=f35e1054]: Republic of the Philippines — national law, binds every LGU including Castilla · as of 2008-12-19
+                - listitem [ref=f35e1055]:
+                  - generic [ref=f35e1056]: SAMPLE REFERENCE ONLY
+                  - link "City of Puerto Princesa, Office of the City Building Official — \"Documentary Requirements for Building Permit Applications\" (structural reference only)" [ref=f35e1057] [cursor=pointer]:
+                    - /url: https://ocbo.puertoprincesa.ph/wp-content/uploads/2022/01/1.-Building-Permit-Checklist.pdf
+                  - generic [ref=f35e1058]: City of Puerto Princesa, Palawan — NOT the Municipality of Castilla; used only as a structural example of how a Unified Application/Ancillary Permit checklist under PD 1096 is laid out · as of 2022-01-01
+                - listitem [ref=f35e1059]:
+                  - generic [ref=f35e1060]: PENDING CASTILLA VERIFICATION
+                  - link "Municipality of Castilla, Sorsogon — official Citizen's Charter / OBO documentary checklist" [ref=f35e1061] [cursor=pointer]:
+                    - /url: https://www.castillasorsogon.gov.ph/
+                  - generic [ref=f35e1062]: Municipality of Castilla, Sorsogon · as of UNKNOWN — not accessible to automated research as of 2026-08-20; obtain directly from the Municipality of Castilla OBO before production use
+            - generic [ref=f35e892]:
+              - text: Remarks
+              - generic [ref=f35e893]: (required when rejecting or requesting revision)
+              - textbox "Reason shown to the applicant…" [ref=f35e894]
+            - table [ref=f35e896]:
+              - rowgroup [ref=f35e897]:
+                - row [ref=f35e898]:
+                  - columnheader [ref=f35e899]:
+                    - checkbox "Select all documents" [ref=f35e900]
+                  - columnheader "Document" [ref=f35e901]
+                  - columnheader "Required" [ref=f35e902]
+                  - columnheader "Reviewing Department" [ref=f35e903]
+                  - columnheader "Uploaded" [ref=f35e904]
+                  - columnheader "Status" [ref=f35e905]
+                  - columnheader [ref=f35e906]
+              - rowgroup [ref=f35e907]:
+                - row [ref=f35e908]:
+                  - cell [ref=f35e909]:
+                    - checkbox "Select Land Title or Tax Declaration of the property" [disabled] [ref=f35e910]
+                  - cell "Land Title or Tax Declaration of the property No file attached" [ref=f35e911]:
+                    - generic [ref=f35e919]:
+                      - generic [ref=f35e920]: Land Title or Tax Declaration of the property
+                      - generic [ref=f35e921]: No file attached
+                  - cell "Required" [ref=f35e922]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f35e924]
+                  - cell "—" [ref=f35e925]
+                  - cell "Missing" [ref=f35e926]
+                  - cell [ref=f35e928]:
+                    - generic [ref=f35e929] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [ref=f35e930]
+                - row [ref=f35e931]:
+                  - cell [ref=f35e932]:
+                    - checkbox "Select Owner's Written Consent (if applicant is not the lot owner)" [disabled] [ref=f35e933]
+                  - cell "Owner's Written Consent (if applicant is not the lot owner) No file attached" [ref=f35e934]:
+                    - generic [ref=f35e942]:
+                      - generic [ref=f35e943]: Owner's Written Consent (if applicant is not the lot owner)
+                      - generic [ref=f35e944]: No file attached
+                  - cell "Optional" [ref=f35e945]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f35e947]
+                  - cell "—" [ref=f35e948]
+                  - cell "Missing" [ref=f35e949]
+                  - cell [ref=f35e951]:
+                    - generic [ref=f35e952] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [ref=f35e953]
+                - row [ref=f35e954]:
+                  - cell [ref=f35e955]:
+                    - checkbox "Select Barangay Clearance" [disabled] [ref=f35e956]
+                  - cell "Barangay Clearance No file attached" [ref=f35e957]:
+                    - generic [ref=f35e965]:
+                      - generic [ref=f35e966]: Barangay Clearance
+                      - generic [ref=f35e967]: No file attached
+                  - cell "Required" [ref=f35e968]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f35e970]
+                  - cell "—" [ref=f35e971]
+                  - cell "Missing" [ref=f35e972]
+                  - cell [ref=f35e974]:
+                    - generic [ref=f35e975] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [ref=f35e976]
+                - row [ref=f35e977]:
+                  - cell [ref=f35e978]:
+                    - checkbox "Select Locational Clearance / Zoning Certification" [disabled] [ref=f35e979]
+                  - cell "Locational Clearance / Zoning Certification No file attached" [ref=f35e980]:
+                    - generic [ref=f35e988]:
+                      - generic [ref=f35e989]: Locational Clearance / Zoning Certification
+                      - generic [ref=f35e990]: No file attached
+                  - cell "Required" [ref=f35e991]
+                  - cell "Municipal Planning and Development Office (Zoning Section)" [ref=f35e993]
+                  - cell "—" [ref=f35e994]
+                  - cell "Missing" [ref=f35e995]
+                  - cell [ref=f35e997]:
+                    - generic [ref=f35e998] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [ref=f35e999]
+                - row [ref=f35e1000]:
+                  - cell [ref=f35e1001]:
+                    - checkbox "Select Valid Government-Issued ID of Applicant/Owner" [disabled] [ref=f35e1002]
+                  - cell "Valid Government-Issued ID of Applicant/Owner No file attached" [ref=f35e1003]:
+                    - generic [ref=f35e1011]:
+                      - generic [ref=f35e1012]: Valid Government-Issued ID of Applicant/Owner
+                      - generic [ref=f35e1013]: No file attached
+                  - cell "Required" [ref=f35e1014]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f35e1016]
+                  - cell "—" [ref=f35e1017]
+                  - cell "Missing" [ref=f35e1018]
+                  - cell [ref=f35e1020]:
+                    - generic [ref=f35e1021] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [ref=f35e1022]
+                - row [ref=f35e1023]:
+                  - cell [ref=f35e1024]:
+                    - checkbox "Select Fence Plan / Site Development Plan" [disabled] [ref=f35e1025]
+                  - cell "Fence Plan / Site Development Plan No file attached" [ref=f35e1026]:
+                    - generic [ref=f35e1034]:
+                      - generic [ref=f35e1035]: Fence Plan / Site Development Plan
+                      - generic [ref=f35e1036]: No file attached
+                  - cell "Required" [ref=f35e1037]
+                  - cell "Office of the Municipal Engineer / Building Official" [ref=f35e1039]
+                  - cell "—" [ref=f35e1040]
+                  - cell "Missing" [ref=f35e1041]
+                  - cell [ref=f35e1043]:
+                    - generic [ref=f35e1044] [cursor=pointer]:
+                      - text: Attach
+                      - button "Attach" [ref=f35e1045]

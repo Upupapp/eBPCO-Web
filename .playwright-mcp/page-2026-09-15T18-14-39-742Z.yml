@@ -1,0 +1,84 @@
+- generic [ref=f95e40]:
+  - generic [ref=f95e41]:
+    - complementary [ref=f95e42]:
+      - generic [ref=f95e43]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f95e44] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f95e45]
+          - generic [ref=f95e46]: Collapse sidebar
+        - generic [ref=f95e47]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f95e48]:
+        - link "Home" [ref=f95e49] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f95e54] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f95e61] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f95e66] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f95e72] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f95e76] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f95e80] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f95e85] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f95e90] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f95e95] [cursor=pointer]
+    - generic [ref=f95e100]:
+      - link "View profile and settings" [ref=f95e102] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f95e103]: Stage Eleven
+      - status [ref=f95e108]:
+        - strong [ref=f95e109]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - main [ref=f95e112]:
+        - generic [ref=f95e113]:
+          - generic [ref=f95e114]:
+            - heading "Welcome back, Stage" [level=1] [ref=f95e115]:
+              - text: Welcome back, Stage
+              - generic [aria-hidden] [ref=f95e116]: 👋
+            - paragraph [ref=f95e117]: Here's what's happening with your applications.
+          - generic [ref=f95e118]:
+            - link "Apply for Permit" [ref=f95e119] [cursor=pointer]:
+              - /url: /permits
+            - link "Register Business" [ref=f95e124] [cursor=pointer]:
+              - /url: /businesses/register
+        - generic [ref=f95e131]:
+          - generic [ref=f95e132]:
+            - generic [ref=f95e141]:
+              - generic [ref=f95e142]: My Businesses
+              - generic [ref=f95e143]: "0"
+            - link "View all businesses" [ref=f95e145] [cursor=pointer]:
+              - /url: /businesses
+          - generic [ref=f95e149]:
+            - generic [ref=f95e157]:
+              - generic [ref=f95e158]: Total Applications
+              - generic [ref=f95e159]: "0"
+            - generic [ref=f95e160]: This includes all statuses
+          - generic [ref=f95e165]:
+            - generic [ref=f95e172]:
+              - generic [ref=f95e173]: Awaiting Action
+              - generic [ref=f95e174]: "0"
+            - generic [ref=f95e175]: Needs your action
+          - generic [ref=f95e180]:
+            - generic [ref=f95e187]:
+              - generic [ref=f95e188]: Ready for Release
+              - generic [ref=f95e189]: "0"
+            - generic [ref=f95e190]: Ready to claim / view
+        - generic [ref=f95e195]:
+          - article [ref=f95e196]:
+            - heading "Active Applications" [level=2] [ref=f95e204]
+            - generic [ref=f95e205]:
+              - text: No applications yet.
+              - link "Start your first application." [ref=f95e206] [cursor=pointer]:
+                - /url: /permits
+          - article [ref=f95e207]:
+            - heading "Recent Notifications" [level=2] [ref=f95e214]
+            - generic [ref=f95e215]: No notifications yet.
+  - generic:
+    - generic:
+      - status
+      - alert

@@ -1,0 +1,96 @@
+- generic [ref=f95e40]:
+  - generic [ref=f95e41]:
+    - complementary [ref=f95e42]:
+      - generic [ref=f95e43]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f95e44] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f95e45]
+          - generic [ref=f95e46]: Collapse sidebar
+        - generic [ref=f95e47]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f95e48]:
+        - link "Home" [ref=f95e49] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f95e54] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f95e61] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f95e66] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f95e72] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f95e76] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f95e80] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f95e85] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f95e90] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f95e95] [cursor=pointer]
+    - generic [ref=f95e100]:
+      - link "View profile and settings" [ref=f95e102] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f95e103]: Stage Eleven
+      - status [ref=f95e108]:
+        - strong [ref=f95e109]: Account sign-up and sign-in are real.
+        - text: Your account is genuinely created and stored by the Municipality of Castilla. Everything else — applications, documents, payments and businesses — is still a demonstration and is kept in your browser only, erased when you close or refresh the page. Do not file a real permit application here — contact the Office of the Municipal Engineer on 09054818572.
+      - generic [ref=f95e709]:
+        - generic [ref=f95e710]:
+          - generic [ref=f95e711]:
+            - heading "Fencing Permit" [level=1] [ref=f95e712]
+            - generic [ref=f95e713]: E-BPCO-2026-000007 · · New
+          - generic [ref=f95e714]: Submitted
+        - generic [ref=f95e716]:
+          - generic [ref=f95e717]:
+            - strong [ref=f95e718]: Progress
+            - generic [ref=f95e719]: 7%
+          - paragraph [ref=f95e722]: Your application has been received and is queued for review.
+          - 'button "Demo: Simulate Office Update" [ref=f95e723] [cursor=pointer]'
+          - text: No backend exists yet — this simulates the reviewing office advancing your application.
+          - generic [ref=f95e724]:
+            - button "Withdraw Application" [ref=f95e725] [cursor=pointer]
+            - text: Allowed only before an Order of Payment has been issued.
+        - generic [ref=f95e727]:
+          - generic [ref=f95e728]: Your permit
+          - paragraph [ref=f95e729]: No permit has been issued for this application yet.
+          - generic [ref=f95e730]:
+            - strong [ref=f95e731]: Not yet ready to collect
+            - paragraph [ref=f95e732]: The Municipality has not arranged collection for this permit yet.
+        - generic [ref=f95e733]:
+          - generic [ref=f95e734]: Documents
+          - list [ref=f95e736]:
+            - listitem [ref=f95e737]:
+              - generic [ref=f95e738]:
+                - generic [ref=f95e739]: Barangay Clearance
+                - generic [ref=f95e740]: Not yet reviewed
+              - generic [ref=f95e741]: barangay-clearance-test.pdf
+              - button "Preview" [ref=f95e742] [cursor=pointer]
+            - listitem [ref=f95e743]:
+              - generic [ref=f95e744]:
+                - generic [ref=f95e745]: Land Title or Tax Declaration of the property
+                - generic [ref=f95e746]: Not yet reviewed
+              - generic [ref=f95e747]: barangay-clearance-test.pdf
+              - button "Preview" [ref=f95e748] [cursor=pointer]
+            - listitem [ref=f95e749]:
+              - generic [ref=f95e750]:
+                - generic [ref=f95e751]: Locational Clearance / Zoning Certification
+                - generic [ref=f95e752]: Not yet reviewed
+              - generic [ref=f95e753]: barangay-clearance-test.pdf
+              - button "Preview" [ref=f95e754] [cursor=pointer]
+            - listitem [ref=f95e755]:
+              - generic [ref=f95e756]:
+                - generic [ref=f95e757]: Valid Government-Issued ID of Applicant/Owner
+                - generic [ref=f95e758]: Not yet reviewed
+              - generic [ref=f95e759]: barangay-clearance-test.pdf
+              - button "Preview" [ref=f95e760] [cursor=pointer]
+            - listitem [ref=f95e761]:
+              - generic [ref=f95e762]:
+                - generic [ref=f95e763]: Fence Plan / Site Development Plan
+                - generic [ref=f95e764]: Not yet reviewed
+              - generic [ref=f95e765]: barangay-clearance-test.pdf
+              - button "Preview" [ref=f95e766] [cursor=pointer]
+        - generic [ref=f95e767]: Status Timeline
+  - generic [ref=f95e267]:
+    - status [ref=f95e268]:
+      - generic [ref=f95e769]: Application filed, with your attached documents.
+    - alert
