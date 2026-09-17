@@ -21,6 +21,12 @@
   # `dist/e-bpco` is NOT it — `dist/e-bpco/browser` holds index.html.
   publish = "dist/e-bpco/browser"
 
+  # `npm run build` now runs `write-runtime-config.mjs` first (see
+  # package.json) — it writes `public/config.js` from EBPCO_API_BASE_URL /
+  # EBPCO_USER_PORTAL_BASE_URL, which must be set as Netlify build
+  # environment variables (Site configuration → Environment variables) for a
+  # deploy that is meant to reach a real, separately-hosted API. Left unset,
+  # the build keeps shipping the same safe same-origin default it always has.
   command = "npm ci && npm run build"
 
   # ── Always build. Do not remove without reading this. ────────────────────
@@ -56,37 +62,29 @@
   # rather than ours.
   NODE_VERSION = "22"
 
-# ── API paths, BEFORE the catch-all. Order matters: Netlify takes the first
-# rule that matches, so these must precede `/*` or the catch-all swallows them.
+# ── There is a real API now, reached CROSS-ORIGIN, not through this file ──
 #
-# `API_BASE_URL` defaults to the empty string — same origin — and that is the
-# INTENDED shape: "a portal served behind the same gateway as the API". This
-# Netlify site is not that gateway and holds no API, so without these rules
-# `GET /me` returns the SPA shell with **200 text/html** to a caller expecting
-# JSON. Measured on the live site before adding them.
+# This site never proxies `/auth/*`, `/me`, `/staff/*` and so on to the API —
+# there is deliberately no redirect rule for any of them here. `ApiClient`
+# calls `API_BASE_URL` (from `public/config.js`, written at build time by
+# `write-runtime-config.mjs` from the EBPCO_API_BASE_URL Netlify build
+# variable — see the `command` comment under `[build]` above) directly, which
+# is an ABSOLUTE URL on the API's own origin once that variable is set, never
+# a same-origin path on this Netlify site. The API's own CORS policy
+# (`security.ts`, backend repo) is what allows this site's real deployed
+# origin to call it — that origin is exactly `PORTAL_BASE_URL` on the API
+# side, and the two have to be kept in agreement.
 #
-# A 404 is the honest answer: ApiClient turns a failing status into an ApiError
-# the pages already handle, whereas a 200 of HTML gets parsed as JSON and fails
-# as malformed data — which reads like a broken server, not an absent one.
+# This used to be a set of same-origin proxy redirects to `/index.html` with
+# `status = 404`, on the theory that a real API would eventually sit behind
+# this same gateway. That theory was never built: the redirects only ever
+# 404'd every API call, silently, in whichever deploy forgot they were there.
+# Removed rather than fixed forward, because the cross-origin + CORS path
+# above is what is actually real and tested today. A same-origin gateway
+# remains a legitimate choice (leave EBPCO_API_BASE_URL unset, and put a real
+# reverse proxy in front of both this site and the API) — it just is not what
+# this repository ships redirect rules for.
 #
-# If this site is ever put in front of a real API, replace these with proxy
-# rules (`to = "https://<api-host>/:splat"`, `status = 200`) rather than
-# deleting them — leaving no rule at all returns to the silent-200 behaviour.
-[[redirects]]
-  from = "/auth/*"
-  to = "/index.html"
-  status = 404
-
-[[redirects]]
-  from = "/me"
-  to = "/index.html"
-  status = 404
-
-[[redirects]]
-  from = "/staff/*"
-  to = "/index.html"
-  status = 404
-
 # Angular routes on the client. Without this every deep link — /login,
 # /applications, /evaluations — is a 404 on refresh or when opened directly,
 # because no file exists at that path. 200 rather than 301: the URL the officer
