@@ -306,7 +306,7 @@ export class StaffPaymentsApi {
 
   // ---- Cashier's queue / verify / undo / receipt / reject ----------------
 
-  /** `GET /staff/payments` — defaults to `Pending Verification`, the cashier's actual worklist. Pass `status` for the archive views. */
+  /** `GET /staff/payments` — returns every status by default. Pass `status` to narrow to the cashier's worklist or an archive view. */
   async queue(options: { status?: PaymentStatus; limit?: number } = {}): Promise<PaymentQueueResult> {
     try {
       const page = await this.api.get<{ items?: readonly PaymentQueueRow[] }>('/staff/payments', {
