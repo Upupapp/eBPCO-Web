@@ -652,7 +652,7 @@
                 <td>{{ r.label }}</td>
                 <td>{{ r.required ? 'Required' : 'Optional' }}</td>
                 <td>{{ r.departmentName }}</td>
-                <td>{{ r.doc?.uploadedAt ?? '—' }}</td>
+                <td>{{ formatDateTime(r.doc?.uploadedAt) }}</td>
                 <td>
                   <span
                     class="status-pill"
@@ -713,37 +713,47 @@
         officer tries the other two first, every time.
       -->
       <app-view-only-notice />
-      <div class="record-actions">
-        <button
-          type="button"
-          class="btn-primary"
-          [disabled]="!capabilities.canEdit()"
-          (click)="advanceStage(row)"
-        >
-          <app-icon name="check-circle" [size]="14" />
-          Advance Stage
-        </button>
-        <label class="revision-remarks-label" for="record-revision-remarks">
-          Remarks (required to return)
-        </label>
-        <input
-          id="record-revision-remarks"
-          type="text"
-          class="revision-remarks-input inline"
-          placeholder="What needs to be revised?"
-          [ngModel]="revisionRemarks()"
-          (ngModelChange)="revisionRemarks.set($event)"
-        />
-        <button
-          type="button"
-          class="btn-outline danger"
-          [disabled]="!revisionRemarks().trim()"
-          (click)="returnForRevision(row)"
-        >
-          <app-icon name="alert-triangle" [size]="14" />
-          Return for Revision
-        </button>
-      </div>
+      @if (row.isCurrentStage) {
+        <div class="record-actions">
+          @if (row.stage !== 'passed') {
+            <button
+              type="button"
+              class="btn-primary"
+              [disabled]="!capabilities.canEdit()"
+              [attr.title]="capabilities.canEdit() ? null : capabilities.viewOnlyReason()"
+              (click)="advanceStage(row)"
+            >
+              <app-icon name="check-circle" [size]="14" />
+              Advance Stage
+            </button>
+          }
+          @if (row.stage !== 'returned') {
+            <label class="revision-remarks-label" for="record-revision-remarks">
+              Remarks (required to return)
+            </label>
+            <input
+              id="record-revision-remarks"
+              type="text"
+              class="revision-remarks-input inline"
+              placeholder="What needs to be revised?"
+              [ngModel]="revisionRemarks()"
+              (ngModelChange)="revisionRemarks.set($event)"
+            />
+            <button
+              type="button"
+              class="btn-outline danger"
+              [disabled]="!capabilities.canEdit() || !revisionRemarks().trim()"
+              [attr.title]="capabilities.canEdit() ? null : capabilities.viewOnlyReason()"
+              (click)="returnForRevision(row)"
+            >
+              <app-icon name="alert-triangle" [size]="14" />
+              Return for Revision
+            </button>
+          }
+        </div>
+      } @else {
+        <p class="small muted">Already moved past this stage — no action to take here.</p>
+      }
     </div>
   </div>
 }

@@ -631,9 +631,9 @@
               <tbody>
                 @for (s of sessions(); track s.sessionId) {
                   <tr>
-                    <td>{{ s.issuedAt }}</td>
-                    <td class="muted">{{ s.lastUsedAt || 'Not used yet' }}</td>
-                    <td class="muted">{{ s.expiresAt }}</td>
+                    <td>{{ formatLastActive(s.issuedAt) }}</td>
+                    <td class="muted">{{ s.lastUsedAt ? formatLastActive(s.lastUsedAt) : 'Not used yet' }}</td>
+                    <td class="muted">{{ formatLastActive(s.expiresAt) }}</td>
                     <td>
                       <button
                         type="button"

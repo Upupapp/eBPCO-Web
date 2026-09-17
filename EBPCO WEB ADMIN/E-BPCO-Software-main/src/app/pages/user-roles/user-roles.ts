@@ -244,6 +244,7 @@ const ROLE_CATALOG: Omit<RoleRow, 'userCount'>[] = [
 })
 export class UserRoles implements OnInit {
   protected readonly capabilities = inject(Capabilities);
+  protected readonly formatLastActive = formatLastActive;
 
   private readonly session = inject(SessionService);
   private readonly toast = inject(ToastService);
