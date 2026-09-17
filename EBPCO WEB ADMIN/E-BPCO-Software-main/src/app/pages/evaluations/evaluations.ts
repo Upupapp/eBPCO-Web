@@ -61,10 +61,20 @@ interface RecordDocumentRow {
 interface RecordEvalStep {
   stage: EvaluationStage;
   result: 'Pending' | 'Passed' | 'Revision Required' | 'Rejected' | null;
-  /** "{evaluator}, {evaluatedAt}" (or just the evaluator name if no date) — precomputed here so the template never nests an `@if` inside an interpolation. */
+  /** When that stage was decided, formatted — the server names no evaluator on this row (`EvaluationDecision` carries no evaluator field), so there is no name to show here. */
   evaluatorLabel: string | null;
   isCurrent: boolean;
   isDone: boolean;
+}
+
+// The server sends raw ISO timestamps. Mirrors applications.ts's own
+// formatDateTime (no shared util between pages yet in this codebase).
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const when = new Date(iso);
+  if (Number.isNaN(when.getTime())) return iso;
+  return `${when.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })} · `
+    + when.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' });
 }
 
 type View = 'list' | 'detail' | 'record';
@@ -106,6 +116,7 @@ export class Evaluations implements OnInit {
    * always the one nobody opened.
    */
   protected readonly capabilities = inject(Capabilities);
+  protected readonly formatDateTime = formatDateTime;
 
   private readonly store = inject(ApplicationStore);
   private readonly evaluationsApi = inject(StaffEvaluationsApi);
@@ -331,33 +342,40 @@ export class Evaluations implements OnInit {
     () => this.recordDocumentRows().filter((r) => r.required && !r.doc).length,
   );
 
+  /**
+   * Read straight off `selectedRow().row` — the real `GET /staff/evaluations`
+   * row, already carrying every decision ever recorded for this application
+   * (`evaluations[]`) and the server's own next-stage pointer (`nextStage`).
+   *
+   * Previously read `ApplicationStore.getEvaluations(app.id)`: a seed-only
+   * demo collection that `replaceApplications()` always wipes to `[]` on a
+   * real queue load (same family of bug as `recordDocumentRows`'s own fix,
+   * see that computed's doc comment). So for every real application this
+   * always returned no records at all — no stage ever showed "— Passed", no
+   * stage was ever highlighted current, and the stepper looked frozen no
+   * matter what "Advance Stage"/"Return for Revision" actually did against
+   * the real backend. Confirmed live: the −6 Missing Documents count reported
+   * alongside this was a second, unrelated bug (the document-requirements
+   * catalog itself was never seeded — see migration 043) but this stepper
+   * would have stayed static even after that fix, since it was never reading
+   * the real evaluations at all.
+   */
   protected readonly recordEvaluationSteps = computed<RecordEvalStep[]>(() => {
-    const app = this.recordApplication();
-    if (!app) return [];
-    const records = this.store.getEvaluations(app.id);
-    // -1 when the stage is unknown, so no step is marked current rather than
-    // 'Initial' being marked current on no evidence.
-    const currentIdx =
-      app.evaluationStage === null ? -1 : EVALUATION_STAGE_ORDER.indexOf(app.evaluationStage);
-    return EVALUATION_STAGE_ORDER.map((stage, idx) => {
-      const stageRecords = records.filter((r) => r.stage === stage);
+    const row = this.selectedRow();
+    if (!row) return [];
+    const decisions = row.row.evaluations;
+    return EVALUATION_STAGE_ORDER.map((stage) => {
+      const stageDecisions = decisions.filter((d) => d.stage === stage);
       const latest =
-        stageRecords.length > 0
-          ? stageRecords.reduce((a, b) =>
-              (b.evaluatedAtValue?.getTime() ?? 0) > (a.evaluatedAtValue?.getTime() ?? 0) ? b : a,
-            )
+        stageDecisions.length > 0
+          ? stageDecisions.reduce((a, b) => ((b.evaluatedAt ?? '') > (a.evaluatedAt ?? '') ? b : a))
           : null;
-      const evaluatorLabel = latest
-        ? latest.evaluatedAt
-          ? `${latest.evaluator}, ${latest.evaluatedAt}`
-          : latest.evaluator
-        : null;
       return {
         stage,
-        result: latest?.result ?? null,
-        evaluatorLabel,
-        isCurrent: idx === currentIdx,
-        isDone: idx < currentIdx,
+        result: (latest?.result ?? null) as RecordEvalStep['result'],
+        evaluatorLabel: latest?.evaluatedAt ? formatDateTime(latest.evaluatedAt) : null,
+        isCurrent: stage === row.row.nextStage,
+        isDone: latest?.result === 'Passed',
       };
     });
   });

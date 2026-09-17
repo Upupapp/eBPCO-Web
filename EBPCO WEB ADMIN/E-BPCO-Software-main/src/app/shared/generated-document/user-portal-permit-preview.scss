@@ -82,7 +82,11 @@
   z-index: 5;
   overflow: hidden;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: clamp(2.6rem, 10vw, 5.5rem);
+  // Fits the full phrase on one line at a -30deg rotation — vw-scaled up to
+  // 5.5rem previously wrapped onto 3-4 ragged lines that this box's own
+  // overflow:hidden then clipped mid-word.
+  font-size: clamp(0.8rem, 3vw, 1.5rem);
+  white-space: nowrap;
   font-weight: 800;
   letter-spacing: 0.05em;
   color: rgba(150, 20, 20, 0.18);

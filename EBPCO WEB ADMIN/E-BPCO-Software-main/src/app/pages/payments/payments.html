@@ -82,7 +82,7 @@
                       <td>{{ formatPHP(p.amountCentavos) }}</td>
                       <td><span class="status-pill" [class]="statusClass(p.status)">{{ p.status }}</span></td>
                       <td>{{ p.officialReceiptNumber ?? '—' }}</td>
-                      <td>{{ p.submittedAt }}</td>
+                      <td>{{ formatDateTime(p.submittedAt) }}</td>
                       <td class="txn-actions-cell">
                         @if (p.status === 'Pending Verification' && canVerifyPayment()) {
                           <button type="button" class="pill-btn verify" (click)="openVerify(toQueueRow(p, appId))">Verify</button>
@@ -342,7 +342,7 @@
               <div><dt>Method:</dt><dd>{{ p.method }}</dd></div>
               <div><dt>Reference:</dt><dd>{{ p.referenceNumber }}</dd></div>
               <div><dt>Amount:</dt><dd>{{ formatPHP(p.amountCentavos) }}</dd></div>
-              <div><dt>Submitted:</dt><dd>{{ p.submittedAt }}</dd></div>
+              <div><dt>Submitted:</dt><dd>{{ formatDateTime(p.submittedAt) }}</dd></div>
               <div><dt>OR No.:</dt><dd>{{ p.officialReceiptNumber ?? 'Not yet verified' }}</dd></div>
             </dl>
 
