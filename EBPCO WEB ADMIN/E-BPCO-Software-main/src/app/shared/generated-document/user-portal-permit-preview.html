@@ -51,7 +51,7 @@
           </div>
           <div>
             <dt>Contact Number</dt>
-            <dd>{{ applicant()?.mobileNumber ?? 'Not on file' }}</dd>
+            <dd>{{ contactMobile() ?? 'Not on file' }}</dd>
           </div>
           <div>
             <dt>Address</dt>
@@ -129,7 +129,19 @@
 
       <section class="doc-generated-section">
         <h2>Conditions / Remarks</h2>
-        <p>{{ requirements()?.validityRules ?? 'Not yet available.' }}</p>
+        @if (permitConditions(); as conditions) {
+          @if (conditions.length > 0) {
+            <ol class="doc-generated-conditions">
+              @for (condition of conditions; track $index) {
+                <li>{{ condition }}</li>
+              }
+            </ol>
+          } @else {
+            <p>{{ requirements()?.validityRules ?? 'Not yet available.' }}</p>
+          }
+        } @else {
+          <p>{{ requirements()?.validityRules ?? 'Not yet available.' }}</p>
+        }
       </section>
 
       <section class="doc-generated-section doc-generated-signature">

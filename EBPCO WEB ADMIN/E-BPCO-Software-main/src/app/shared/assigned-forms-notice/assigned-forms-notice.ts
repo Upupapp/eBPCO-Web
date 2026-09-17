@@ -46,6 +46,11 @@ export class AssignedFormsNotice {
   protected readonly capabilities = inject(Capabilities);
 
   protected readonly message = computed(() => {
+    // Super Admin's role already implies every form; the notice exists to
+    // explain a queue narrower than "everything," which is never this
+    // account's situation. Display-only — the server still scopes the queue
+    // and still reports a real permitTypes list underneath this.
+    if (this.capabilities.isSuperAdmin()) return '';
     const forms = this.capabilities.assignedForms();
     if (forms === null) return '';
     if (forms.length === 0) {

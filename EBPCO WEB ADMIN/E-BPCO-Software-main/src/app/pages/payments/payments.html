@@ -39,7 +39,7 @@
           </div>
           <dl class="detail-fields">
             <div><dt>Fee Schedule Version:</dt><dd>{{ order.feeScheduleVersion }}</dd></div>
-            <div><dt>Assessed:</dt><dd>{{ order.assessedAt }}</dd></div>
+            <div><dt>Assessed:</dt><dd>{{ formatDateTime(order.assessedAt) }}</dd></div>
             <div><dt>Due Date:</dt><dd>{{ order.dueDate ?? '—' }}</dd></div>
           </dl>
           <div class="table-wrap">

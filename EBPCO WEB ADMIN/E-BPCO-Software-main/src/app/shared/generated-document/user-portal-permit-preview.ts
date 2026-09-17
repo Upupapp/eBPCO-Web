@@ -1,19 +1,45 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import qrcodegen from 'qrcode-generator';
 import { USER_PORTAL_BASE_URL } from '../../core/config/user-portal.config';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
-import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 import { formatPHP } from './doc-format';
 import { agencyHeaderFor, documentTitleFor } from './user-portal-document-helpers';
+import { ApplicationDetail, StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { FeeLine, FEE_LINES } from '../../core/api/staff-payments.api';
 
-type WatermarkText = 'DRAFT' | 'FOR REVIEW' | 'NOT VALID AS AN OFFICIAL PERMIT' | null;
+type WatermarkText = 'SAMPLE — NOT AN OFFICIAL PERMIT';
 
 interface QrCell {
   x: number;
   y: number;
+}
+
+const LINE_LABELS: Record<FeeLine, string> = {
+  filing: 'Filing Fee',
+  processing: 'Processing Fee',
+  architectural: 'Architectural Fee',
+  structural: 'Structural Fee',
+  electrical: 'Electrical Fee',
+  others: 'Other Fees',
+};
+
+/** The template's own view of an assessment — the minimal shape shared by a real Order of Payment and the local demo `Assessment` model, so `assessment()` can return either without either one leaking fields the other doesn't have. */
+interface PermitAssessmentLine {
+  readonly code: string;
+  readonly name: string;
+  readonly legalBasisTitle: string;
+  readonly authority: string;
+  readonly amountCentavos: number | null;
+}
+interface PermitAssessmentView {
+  readonly lineItems: readonly PermitAssessmentLine[];
+  readonly totalCentavos: number;
+  readonly balanceCentavos: number;
+  readonly opsNumber: string | null;
+  readonly status: string;
 }
 
 /**
@@ -34,12 +60,37 @@ interface QrCell {
 export class UserPortalPermitPreview {
   private readonly store = inject(ApplicationStore);
   private readonly assessmentStore = inject(AssessmentStore);
-  private readonly sessionCache = inject(PermitReleaseSessionCache);
   private readonly userPortalBaseUrl = inject(USER_PORTAL_BASE_URL);
+  private readonly applicationsApi = inject(StaffApplicationsApi);
 
   readonly applicationId = input.required<string>();
 
   protected readonly formatPHP = formatPHP;
+
+  // ---- Real backend data --------------------------------------------------
+  //
+  // `GET /staff/applications/:id` already returns `business` and `permit`
+  // (staff-queue.service.ts queries `generated_permits`/`businesses`
+  // directly) — this component just never fetched it, so it fell back to
+  // ApplicationStore's local demo records (always empty for a real
+  // application) and, for the permit specifically, to a same-session-only
+  // cache that went blank on refresh or in a second tab. That is why a
+  // permit generated moments earlier could read "Not yet assigned" again,
+  // and why a real business's own address read "Not on file".
+
+  private readonly detail = signal<ApplicationDetail | null>(null);
+
+  constructor() {
+    effect(() => {
+      const id = this.applicationId();
+      untracked(() => void this.loadDetail(id));
+    });
+  }
+
+  private async loadDetail(applicationId: string): Promise<void> {
+    const result = await this.applicationsApi.detail(applicationId);
+    this.detail.set(result.kind === 'ok' ? result.detail : null);
+  }
 
   protected readonly generatedOn = new Date().toLocaleString('en-PH', {
     year: 'numeric',
@@ -50,37 +101,82 @@ export class UserPortalPermitPreview {
   });
 
   protected readonly row = computed(() => this.store.getById(this.applicationId()));
+  /** Contact mobile number: real, from the applicant's account — `applicant()`'s own `mobileNumber` is a local-demo-only field that a real application never has. */
+  protected readonly contactMobile = computed(() => this.detail()?.applicantMobile ?? null);
   protected readonly applicant = computed(() => {
     const row = this.row();
     return row ? this.store.getApplicant(row.applicantId) : undefined;
   });
   protected readonly business = computed(() => {
+    const real = this.detail()?.business;
+    if (real) return real;
     const row = this.row();
     return row ? this.store.getBusiness(row.businessId) : undefined;
   });
-  // A real backend-generated permit lives in `PermitReleaseSessionCache`, not
-  // `ApplicationStore` — `replaceApplications()` deliberately empties the
-  // store's own `_permits` on every real server load (see its doc comment),
-  // so `store.getPermit()` alone always answers "no permit" for a real
-  // application even moments after this session generated one. The store
-  // fallback stays for the seed/demo dataset, where the cache never has
-  // anything and `store.getPermit()` is the only source there is.
   protected readonly permit = computed(() => {
-    const cached = this.sessionCache.permitFor(this.applicationId());
-    if (cached) {
+    const real = this.detail()?.permit;
+    if (real) {
       return {
-        permitNumber: cached.permitNumber,
-        issuedDate: cached.issuedDate,
+        permitNumber: real.permitNumber,
+        issuedDate: real.issuedDate,
         expiryDate: null as string | null,
         approvingOfficial: undefined as string | undefined,
         approvingOffice: undefined as string | undefined,
       };
     }
+    // Seed/demo fallback only — a real application's permit always comes
+    // from `detail().permit` above once `POST .../permit` has run.
     return this.store.getPermit(this.applicationId());
   });
-  protected readonly assessment = computed(() =>
-    this.assessmentStore.getActiveAssessment(this.applicationId()),
-  );
+  /** Whatever the approving officer typed into "Conditions" when generating this permit — real, per-permit text, never invented. `null`/empty falls back to the permit type's generic validity boilerplate in the template. */
+  protected readonly permitConditions = computed(() => this.detail()?.permit?.conditions ?? null);
+
+  protected readonly assessment = computed<PermitAssessmentView | null>(() => {
+    const order = this.detail()?.orderOfPayment;
+    if (order) {
+      const centavosByLine: Record<FeeLine, number> = {
+        filing: order.filingCentavos,
+        processing: order.processingCentavos,
+        architectural: order.architecturalCentavos,
+        structural: order.structuralCentavos,
+        electrical: order.electricalCentavos,
+        others: order.othersCentavos,
+      };
+      const lineItems = FEE_LINES
+        .filter((line) => centavosByLine[line] > 0)
+        .map((line) => ({
+          code: line as string,
+          name: LINE_LABELS[line],
+          legalBasisTitle: '',
+          authority: order.feeScheduleVersion,
+          amountCentavos: centavosByLine[line] as number | null,
+        }));
+      const settled = (this.detail()?.payments ?? []).some((p) => p.status === 'Paid');
+      return {
+        lineItems,
+        totalCentavos: order.totalCentavos,
+        balanceCentavos: settled ? 0 : order.totalCentavos,
+        opsNumber: order.number,
+        status: settled ? 'Paid' : 'Assessed',
+      };
+    }
+    // Seed/demo fallback only.
+    const demo = this.assessmentStore.getActiveAssessment(this.applicationId());
+    if (!demo) return null;
+    return {
+      lineItems: demo.lineItems.map((l) => ({
+        code: l.code,
+        name: l.name,
+        legalBasisTitle: l.legalBasisTitle,
+        authority: l.authority,
+        amountCentavos: l.amountCentavos,
+      })),
+      totalCentavos: demo.totalCentavos,
+      balanceCentavos: demo.balanceCentavos,
+      opsNumber: demo.opsNumber,
+      status: demo.status,
+    };
+  });
   protected readonly requirements = computed(() => {
     const row = this.row();
     return row ? requirementsFor(row.permitType) : null;
@@ -105,21 +201,17 @@ export class UserPortalPermitPreview {
     };
   });
 
+  // Owner decision: this system produces no real permits — there is no real
+  // LGU behind any of it — so every stage gets the SAME watermark rather
+  // than a "DRAFT" / "FOR REVIEW" progression that reads as if the document
+  // itself were becoming more real as it moves along. `cleared` still tracks
+  // whether a genuine permit record exists (it gates the QR code below), but
+  // the watermark text no longer varies with it.
   private readonly gate = computed(() => {
     const row = this.row();
-    if (!row) return { cleared: false, watermarkText: 'DRAFT' as WatermarkText };
-
-    // A real, store-issued permit record is the authoritative "this is
-    // genuinely issued" signal, matching the User Portal's own gate logic.
-    if (this.permit()) return { cleared: true, watermarkText: null as WatermarkText };
-
-    if (!this.store.canApprove(row.id)) {
-      return { cleared: false, watermarkText: 'DRAFT' as WatermarkText };
-    }
-    const paymentFinal = this.assessmentStore.canProcessPermit(row.id);
-    if (!paymentFinal) return { cleared: false, watermarkText: 'FOR REVIEW' as WatermarkText };
-
-    return { cleared: false, watermarkText: 'NOT VALID AS AN OFFICIAL PERMIT' as WatermarkText };
+    const watermarkText: WatermarkText = 'SAMPLE — NOT AN OFFICIAL PERMIT';
+    if (!row) return { cleared: false, watermarkText };
+    return { cleared: !!this.permit(), watermarkText };
   });
 
   protected readonly watermarkText = computed(() => this.gate().watermarkText);

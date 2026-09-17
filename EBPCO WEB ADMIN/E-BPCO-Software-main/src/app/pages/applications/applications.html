@@ -732,7 +732,7 @@
                         }}</span>
                       </td>
                       <td>{{ r.departmentName }}</td>
-                      <td>{{ r.doc?.uploadedAt ?? '—' }}</td>
+                      <td>{{ formatDateTime(r.doc?.uploadedAt) }}</td>
                       <td>
                         <span
                           class="status-pill"
@@ -875,7 +875,7 @@
                   <button
                     type="button"
                     class="btn-primary"
-                    (click)="openDocumentPreviewModal('permit')"
+                    (click)="openGeneratedPermitPreview()"
                   >
                     <app-icon name="file-check" [size]="14" />
                     Preview / Download {{ finalDocumentName() }}
@@ -1313,6 +1313,13 @@
     [applicationId]="row.id"
     [kind]="docPreviewKind()"
     (closed)="closeDocumentPreviewModal()"
+  />
+}
+
+@if (showGeneratedPermitPreview() && selectedRow(); as row) {
+  <app-generated-permit-document-modal
+    [applicationId]="row.id"
+    (closed)="closeGeneratedPermitPreview()"
   />
 }
 

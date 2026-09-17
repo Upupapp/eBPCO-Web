@@ -120,6 +120,18 @@ export class Capabilities {
   /** True when the server said this account is assigned no forms at all. */
   readonly hasNoForms = computed(() => this.assignedForms()?.length === 0);
 
+  /**
+   * True when signed in as Super Admin.
+   *
+   * Display-only, same caveat as `canEdit`: it decides whether the
+   * forms-allow-list notice is worth printing for an account whose role
+   * already implies "every form," not whether the account may act. The
+   * server still scopes the queue and still reports a real `permitTypes`
+   * list for this account (see `auth.controller.ts`) — nothing here changes
+   * what the API returns or enforces.
+   */
+  readonly isSuperAdmin = computed(() => this.session.role() === 'Super Admin');
+
   /** True when signed in and unable to edit — the state that needs explaining. */
   readonly isViewOnly = computed(() => this.session.session() !== null && !this.canEdit());
 

@@ -166,6 +166,28 @@ export interface ApplicationDocumentRow {
   readonly reviewedAt: string | null;
 }
 
+/** The `business` object on `GET /staff/applications/:id` — the linked Business's own record, not the application's denormalized `businessName`. */
+export interface ApplicationBusiness {
+  readonly id: string;
+  readonly name: string;
+  readonly category: string;
+  readonly street: string;
+  readonly barangay: string;
+  readonly city: string;
+  readonly province: string;
+  readonly registrationNumber: string;
+  readonly dateRegistered: string;
+  readonly status: string;
+}
+
+/** The `permit` object on `GET /staff/applications/:id` — `null` until `POST /staff/applications/:id/permit` has actually run. The server has no route to re-read `expiryDate`/`approvingOfficial`/`approvingOffice`: `generated_permits` never carried them. */
+export interface ApplicationGeneratedPermit {
+  readonly permitNumber: string;
+  readonly issuedDate: string;
+  readonly scope: string;
+  readonly conditions: readonly string[] | null;
+}
+
 export interface ApplicationDetail {
   readonly payments: readonly ApplicationPaymentRow[];
   readonly orderOfPayment: ApplicationOrderOfPayment | null;
@@ -173,6 +195,8 @@ export interface ApplicationDetail {
   readonly applicantEmail: string;
   /** The applicant's real mobile number, from their account, or `null` when the account has none on file. */
   readonly applicantMobile: string | null;
+  readonly business: ApplicationBusiness | null;
+  readonly permit: ApplicationGeneratedPermit | null;
   readonly timeline: readonly ApplicationTimelineEvent[];
   readonly documents: readonly ApplicationDocumentRow[];
 }

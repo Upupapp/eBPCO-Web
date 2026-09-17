@@ -611,6 +611,14 @@ h3 {
   flex-wrap: wrap;
 }
 
+// The Order-of-Payment summary card's fee table sits in a `.table-wrap`
+// (horizontal-scroll clipping, shared/_data-table.scss) with no bottom
+// margin of its own, and "Record Onsite Payment" is the very next sibling —
+// so the scrollbar sat flush against the button with no breathing room.
+.summary-card > .table-wrap + .btn-primary {
+  margin-top: 1.25rem;
+}
+
 .due-date-field {
   display: flex;
   flex-direction: column;

@@ -30,6 +30,7 @@ import {
   DocumentPreview,
   SampleDocumentKind,
 } from '../../shared/document-preview/document-preview';
+import { GeneratedPermitDocumentModal } from '../../shared/generated-document/generated-permit-document-modal';
 import {
   ApplicationDocument,
   DocumentStatus,
@@ -99,6 +100,17 @@ interface LifecycleStep {
   status: ApplicationLifecycleStatus;
   isPast: boolean;
   isCurrent: boolean;
+}
+
+// The server sends raw ISO timestamps (e.g. "2026-09-17T11:24:32.301Z"). The
+// Documents tab's "Uploaded" column rendered that directly, which reads like
+// a debug log rather than something written for an officer to read.
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const when = new Date(iso);
+  if (Number.isNaN(when.getTime())) return iso;
+  return `${when.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })} · `
+    + when.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' });
 }
 
 const STATUS_OPTIONS: AppStatus[] = ['Approved', 'Under Review', 'Rejected'];
@@ -183,6 +195,7 @@ const STATUS_ACTIONS: { label: string; target: ApplicationLifecycleStatus }[] = 
     ConfirmDialog,
     ApplicationIntake,
     DocumentPreview,
+    GeneratedPermitDocumentModal,
     OverlayModule,
   ],
   templateUrl: './applications.html',
@@ -198,6 +211,8 @@ export class Applications {
   private readonly applicationsApi = inject(StaffApplicationsApi);
   private readonly permitReleaseApi = inject(PermitReleaseApi);
   private readonly sessionCache = inject(PermitReleaseSessionCache);
+
+  protected formatDateTime = formatDateTime;
 
   /** Null until the first fetch resolves; a message when it fails. */
   protected readonly loadError = signal<string | null>(null);
@@ -842,6 +857,20 @@ export class Applications {
 
   protected readonly showDocPreview = signal(false);
   protected readonly docPreviewKind = signal<SampleDocumentKind>('permit');
+
+  // The real generated permit (with its own SAMPLE watermark), not the blank
+  // reference form above — same component the Permit Release page already
+  // uses for "Preview Permit", so "Preview / Download {finalDocumentName}"
+  // here shows the applicant's actual document instead of an empty template.
+  protected readonly showGeneratedPermitPreview = signal(false);
+
+  protected openGeneratedPermitPreview(): void {
+    this.showGeneratedPermitPreview.set(true);
+  }
+
+  protected closeGeneratedPermitPreview(): void {
+    this.showGeneratedPermitPreview.set(false);
+  }
 
   // ---- Contact verification (manual administrator confirmation only) ----
   // The only verification path this frontend-only mock can honestly

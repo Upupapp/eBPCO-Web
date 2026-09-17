@@ -24,6 +24,9 @@
         }
       } @else {
         <article class="doc-page">
+          @if (kind() === 'official-receipt') {
+            <div class="doc-page-watermark" aria-hidden="true">{{ receiptWatermarkText }}</div>
+          }
           @if (kind() === 'official-receipt' && hasOfficialReceipt()) {
             <div class="paid-stamp" aria-hidden="true">PAID</div>
           }
@@ -217,11 +220,11 @@
             }
 
             @case ('official-receipt') {
-              @if (focusedTransaction(); as txn) {
+              @if (focusedPayment(); as txn) {
                 <section>
                   @if (!hasOfficialReceipt()) {
                     <p class="doc-note doc-warning">
-                      No official OR number has been entered for this transaction yet — this is an
+                      No official OR number has been entered for this payment yet — this is an
                       internal acknowledgment of the payment recorded below, not an Official
                       Receipt. An authorized cashier must key in the real OR number from the receipt
                       book / e-receipting system before this document can read "Official Receipt".
@@ -234,14 +237,12 @@
                         hasOfficialReceipt() ? 'Official Receipt No.' : 'Internal Reference No.'
                       }}</span>
                       <span class="receipt-or-number">{{
-                        hasOfficialReceipt() ? txn.orNumber : txn.id
+                        hasOfficialReceipt() ? txn.officialReceiptNumber : txn.id
                       }}</span>
                     </div>
                     <div>
                       <span class="receipt-or-label">Date</span>
-                      <span class="receipt-or-number">{{
-                        hasOfficialReceipt() ? txn.orDate : txn.submittedAt
-                      }}</span>
+                      <span class="receipt-or-number">{{ formatDateTime(txn.verifiedAt ?? txn.submittedAt) }}</span>
                     </div>
                   </div>
 
@@ -256,20 +257,22 @@
                     </div>
                     <div>
                       <dt>Application No.</dt>
-                      <dd>{{ row.id }}</dd>
+                      <dd>{{ row.referenceNumber ?? row.id }}</dd>
                     </div>
                     <div>
                       <dt>Payer Reference</dt>
-                      <dd>{{ txn.transactionReference }}</dd>
+                      <dd>{{ txn.referenceNumber }}</dd>
                     </div>
                     <div>
                       <dt>Payment Method</dt>
                       <dd>{{ txn.method }}</dd>
                     </div>
-                    <div>
-                      <dt>Collecting Agency</dt>
-                      <dd>{{ txn.agency }}</dd>
-                    </div>
+                    @if (receiptOrder(); as order) {
+                      <div>
+                        <dt>Fee Schedule Version</dt>
+                        <dd>{{ order.feeScheduleVersion }}</dd>
+                      </div>
+                    }
                   </dl>
 
                   <h2>Particulars</h2>
@@ -277,34 +280,27 @@
                     <thead>
                       <tr>
                         <th>Particulars</th>
-                        <th>Authority</th>
                         <th>Amount</th>
                       </tr>
                     </thead>
                     <tbody>
-                      @for (line of feeLines(); track line.label) {
+                      @for (line of receiptFeeLines(); track line.label) {
                         <tr>
-                          <td>
-                            {{ line.label }}
-                            @if (line.requiresAssessorInput) {
-                              <span class="doc-flag">pending assessor input</span>
-                            }
-                          </td>
-                          <td>{{ line.legalBasisTitle }}</td>
+                          <td>{{ line.label }}</td>
                           <td>{{ line.amount }}</td>
                         </tr>
                       } @empty {
                         <tr>
-                          <td colspan="3" class="doc-note">
+                          <td colspan="2" class="doc-note">
                             No itemized assessment on file for this application — see the amount
                             received below.
                           </td>
                         </tr>
                       }
-                      @if (feeLines().length > 0) {
+                      @if (receiptFeeLines().length > 0) {
                         <tr class="doc-total">
-                          <td colspan="2">Total Assessed</td>
-                          <td>{{ totalDue() }}</td>
+                          <td>Total Assessed</td>
+                          <td>{{ receiptTotalDue() }}</td>
                         </tr>
                       }
                     </tbody>
@@ -318,30 +314,17 @@
                     <span class="receipt-in-words-label">Amount in Words</span>
                     <span class="receipt-in-words-value">{{ amountInWordsText() }} Only</span>
                   </p>
-                  @if (assessment()) {
-                    <div class="receipt-amount-row muted">
-                      <span>Outstanding Balance</span>
-                      <span>{{ balanceDue() }}</span>
-                    </div>
-                  }
 
                   <dl class="doc-fields receipt-meta">
                     <div>
                       <dt>Status</dt>
                       <dd>{{ txn.status }}</dd>
                     </div>
-                    <div>
-                      <dt>Recorded/Verified By</dt>
-                      <dd>{{ txn.verifiedBy ?? txn.recordedBy ?? row.officer }}</dd>
-                    </div>
                   </dl>
 
                   <div class="doc-signature">
                     <div class="doc-signature-line"></div>
-                    <span
-                      >{{ txn.verifiedBy ?? txn.recordedBy ?? row.officer }}<br />Collecting
-                      Officer</span
-                    >
+                    <span>Collecting Officer</span>
                   </div>
                 </section>
               } @else {

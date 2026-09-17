@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApplicationStore } from '../../core/domain/application-store';
@@ -6,6 +6,13 @@ import { AssessmentStore } from '../../core/domain/assessment-store';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 import { permitFormUrl, permitChecklistUrl } from '../../core/domain/permit-form-templates';
+import {
+  ApplicationDetail,
+  ApplicationOrderOfPayment,
+  ApplicationPaymentRow,
+  StaffApplicationsApi,
+} from '../../core/api/staff-applications.api';
+import { FeeLine, FEE_LINES } from '../../core/api/staff-payments.api';
 
 export type SampleDocumentKind =
   | 'application-form'
@@ -23,6 +30,23 @@ const KIND_TITLES: Record<SampleDocumentKind, string> = {
   permit: 'Permit / Clearance',
   'release-form': 'Release Form',
 };
+
+const RECEIPT_LINE_LABELS: Record<FeeLine, string> = {
+  filing: 'Filing Fee',
+  processing: 'Processing Fee',
+  architectural: 'Architectural Fee',
+  structural: 'Structural Fee',
+  electrical: 'Electrical Fee',
+  others: 'Other Fees',
+};
+
+function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const when = new Date(iso);
+  if (Number.isNaN(when.getTime())) return iso;
+  return `${when.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })} · `
+    + when.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' });
+}
 
 function formatPHP(centavos: number | null): string {
   if (centavos === null) return 'Requires assessor input';
@@ -77,16 +101,24 @@ function amountInWords(centavos: number): string {
 /**
  * Renders one printable document (application form, assessment, evaluation
  * notice, official receipt / payment acknowledgment, permit/clearance, or
- * release form), populated entirely from the real ApplicationStore/
- * AssessmentStore records for `applicationId` — never invented figures.
+ * release form).
  *
- * The 'official-receipt' kind is the one place the "never present a
- * placeholder OR number as an official receipt" rule is enforced: the
- * title and header both read "Payment Acknowledgment" unless the
- * transaction being shown actually carries a real, cashier-entered
- * `orNumber` (see AssessmentStore.attachOfficialReceipt) — an internally
- * generated transaction id is never substituted for one, and the PAID
- * stamp only ever renders once that real OR number is on file.
+ * Every kind but 'official-receipt' is populated from the local
+ * ApplicationStore/AssessmentStore records — never invented figures.
+ * 'official-receipt' is populated from the REAL backend
+ * (`StaffApplicationsApi.detail()`'s `payments`/`orderOfPayment`) instead:
+ * the local stores are a client-side demo engine that the real Payments
+ * page (`pages/payments/payments.ts`) never writes to, so a payment
+ * genuinely recorded through the real Record-Onsite-Payment/verify flow was
+ * invisible here — this screen said "no payment has been recorded yet" for
+ * a payment that plainly had been.
+ *
+ * The "never present a placeholder OR number as an official receipt" rule
+ * still holds: the title and header both read "Payment Acknowledgment"
+ * unless the payment being shown carries a real `officialReceiptNumber`
+ * (every Onsite payment gets one immediately; a verified bank-transfer
+ * payment gets one when the cashier verifies it) — and the PAID stamp only
+ * ever renders once that real OR number is on file.
  */
 @Component({
   selector: 'app-document-preview',
@@ -98,12 +130,74 @@ export class DocumentPreview {
   private readonly store = inject(ApplicationStore);
   private readonly assessmentStore = inject(AssessmentStore);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly applicationsApi = inject(StaffApplicationsApi);
 
   readonly applicationId = input.required<string>();
   readonly kind = input.required<SampleDocumentKind>();
-  /** Optional — when the caller already knows which transaction to show (e.g. the Transactions tab), pin the receipt view to that one rather than "the latest". */
+  /** Optional — when the caller already knows which payment to show (e.g. the Transactions tab), pin the receipt view to that one rather than "the latest". */
   readonly transactionId = input<string | null>(null);
   readonly closed = output<void>();
+
+  protected readonly formatDateTime = formatDateTime;
+
+  // Owner decision (same as the generated permit): this system produces no
+  // real receipts — there is no real LGU behind it — so this always shows,
+  // never gated on payment/verification status.
+  protected readonly receiptWatermarkText = 'SAMPLE — NOT AN OFFICIAL RECEIPT';
+
+  // ---- Real backend data, for the 'official-receipt' kind only -----------
+
+  private readonly detail = signal<ApplicationDetail | null>(null);
+
+  constructor() {
+    effect(() => {
+      const id = this.applicationId();
+      if (this.kind() !== 'official-receipt') return;
+      untracked(() => void this.loadDetail(id));
+    });
+  }
+
+  private async loadDetail(applicationId: string): Promise<void> {
+    const result = await this.applicationsApi.detail(applicationId);
+    this.detail.set(result.kind === 'ok' ? result.detail : null);
+  }
+
+  protected readonly receiptOrder = computed<ApplicationOrderOfPayment | null>(
+    () => this.detail()?.orderOfPayment ?? null,
+  );
+
+  protected readonly focusedPayment = computed<ApplicationPaymentRow | null>(() => {
+    const pinned = this.transactionId();
+    const rows = this.detail()?.payments ?? [];
+    if (pinned) return rows.find((p) => p.id === pinned) ?? null;
+    // Default to the latest Paid payment (a real payment acknowledgment/
+    // receipt only ever represents money actually confirmed received),
+    // falling back to the latest of any status so a still-pending
+    // bank-transfer submission can at least show what was submitted.
+    const paid = [...rows].reverse().find((p) => p.status === 'Paid');
+    return paid ?? rows[rows.length - 1] ?? null;
+  });
+
+  protected readonly receiptFeeLines = computed(() => {
+    const order = this.receiptOrder();
+    if (!order) return [];
+    const centavosByLine: Record<FeeLine, number> = {
+      filing: order.filingCentavos,
+      processing: order.processingCentavos,
+      architectural: order.architecturalCentavos,
+      structural: order.structuralCentavos,
+      electrical: order.electricalCentavos,
+      others: order.othersCentavos,
+    };
+    return FEE_LINES
+      .filter((line) => centavosByLine[line] > 0)
+      .map((line) => ({ label: RECEIPT_LINE_LABELS[line], amount: formatPHP(centavosByLine[line]) }));
+  });
+
+  protected readonly receiptTotalDue = computed(() => {
+    const order = this.receiptOrder();
+    return order ? formatPHP(order.totalCentavos) : 'Not yet assessed';
+  });
 
   protected readonly row = computed(() => this.store.getById(this.applicationId()));
   protected readonly applicant = computed(() => {
@@ -147,28 +241,12 @@ export class DocumentPreview {
     this.assessmentStore.getActiveAssessment(this.applicationId()),
   );
 
-  protected readonly transactions = computed(() =>
-    this.assessmentStore.getTransactionsForApplication(this.applicationId()),
-  );
-
-  protected readonly focusedTransaction = computed(() => {
-    const pinned = this.transactionId();
-    const txns = this.transactions();
-    if (pinned) return txns.find((t) => t.id === pinned) ?? null;
-    // Default to the latest Verified transaction (a real payment
-    // acknowledgment/receipt only ever represents money actually
-    // confirmed received), falling back to the latest of any status so a
-    // still-pending payment can at least show what was submitted.
-    const verified = [...txns].reverse().find((t) => t.status === 'Verified');
-    return verified ?? txns[txns.length - 1] ?? null;
-  });
-
-  /** True only once the focused transaction carries a real, cashier-entered OR number — see the module notice above. */
-  protected readonly hasOfficialReceipt = computed(() => !!this.focusedTransaction()?.orNumber);
+  /** True only once the focused payment carries a real, cashier-entered OR number — see the module notice above. */
+  protected readonly hasOfficialReceipt = computed(() => !!this.focusedPayment()?.officialReceiptNumber);
 
   protected readonly amountInWordsText = computed(() => {
-    const txn = this.focusedTransaction();
-    return txn ? amountInWords(txn.amountCentavos) : '';
+    const order = this.receiptOrder();
+    return order ? amountInWords(order.totalCentavos) : '';
   });
 
   protected readonly generatedOn = new Date().toLocaleString('en-PH', {

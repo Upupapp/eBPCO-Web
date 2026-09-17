@@ -18,6 +18,63 @@
   color: $color-danger;
 }
 
+// `.create-box`/`.create-form` mirror the identical pattern already used by
+// applications.scss/dashboard.scss/user-roles.scss/payments.scss for their
+// own modals — Prepare Release and Release Permit use the same class names
+// in the template but this file never defined them, so those two forms were
+// silently falling back to the base `.modal-box`'s centered text and
+// completely unstyled inputs/select/textarea. This restores the shared look.
+
+.create-box {
+  text-align: left;
+  max-width: 440px;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $color-ink-500;
+
+    .optional {
+      font-weight: 400;
+      color: $color-ink-200;
+    }
+  }
+
+  input,
+  select,
+  textarea {
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-sm;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: $color-ink-700;
+    font-family: inherit;
+    box-sizing: border-box;
+    width: 100%;
+    resize: vertical;
+
+    &:focus-visible {
+      outline: none;
+      border-color: $color-brand-600;
+    }
+  }
+
+  .modal-actions {
+    margin-top: 0.4rem;
+  }
+}
+
 @keyframes section-in {
   from {
     opacity: 0;
@@ -120,6 +177,31 @@
 
 .id-cell {
   font-weight: 700;
+}
+
+// `row.id` opens the detail view, so it has to be a real <button> for
+// keyboard/screen-reader users — but with no styling of its own it rendered
+// with the BROWSER'S DEFAULT button chrome (a bordered box), unlike every
+// other table's plain-text id cell (see applications.scss's own `.id-cell`).
+// Reset to that same look: same weight, same color, no border/background —
+// an underline on hover/focus is the only thing left to say it's clickable.
+.id-open {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-weight: 700;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
 }
 
 // Applicant (a person) and Business/Project (the permit's real owner —

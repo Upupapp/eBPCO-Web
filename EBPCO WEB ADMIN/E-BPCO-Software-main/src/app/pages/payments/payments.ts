@@ -47,6 +47,17 @@ function formatPHP(centavos: number | null): string {
   return `₱${(centavos / 100).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+// The server sends raw ISO timestamps (e.g. "2026-09-17T12:36:15.463Z").
+// Rendering that directly, as `order.assessedAt` used to, reads like a
+// debug log rather than something written for an officer to read.
+function formatDateTime(iso: string | null): string {
+  if (!iso) return '—';
+  const when = new Date(iso);
+  if (Number.isNaN(when.getTime())) return iso;
+  return `${when.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })} · `
+    + when.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' });
+}
+
 function statusClass(status: string): string {
   return status.toLowerCase().replace(/[\s_]+/g, '-');
 }
@@ -138,6 +149,7 @@ export class Payments {
   }
 
   protected formatPHP = formatPHP;
+  protected formatDateTime = formatDateTime;
   protected statusClass = statusClass;
   protected readonly feeLines = FEE_LINES;
   protected lineLabel(line: FeeLine): string {
@@ -512,8 +524,13 @@ export class Payments {
   // Payment Queue tab — GET /staff/payments (real bulk endpoint)
   // ============================================================
 
-  protected readonly queueStatusFilter = signal<PaymentStatus>('Pending Verification');
-  protected readonly queueStatusOptions: PaymentStatus[] = [
+  // Defaults to 'All', not 'Pending Verification': an officer landing here
+  // after recording an Onsite payment (already 'Paid', never passes through
+  // verification) found it simply missing, with nothing on screen to say the
+  // queue was filtered rather than empty.
+  protected readonly queueStatusFilter = signal<PaymentStatus | 'All'>('All');
+  protected readonly queueStatusOptions: (PaymentStatus | 'All')[] = [
+    'All',
     'Pending Verification',
     'Paid',
     'Not Yet Available',
@@ -533,7 +550,11 @@ export class Payments {
     this.queueUnavailable.set(false);
     this.queueError.set(null);
     try {
-      const result = await this.paymentsApi.queue({ status: this.queueStatusFilter(), limit: 100 });
+      const filter = this.queueStatusFilter();
+      const result = await this.paymentsApi.queue({
+        status: filter === 'All' ? undefined : filter,
+        limit: 100,
+      });
       if (result.kind === 'ok') {
         this.queueRows.set(result.rows);
         return;
