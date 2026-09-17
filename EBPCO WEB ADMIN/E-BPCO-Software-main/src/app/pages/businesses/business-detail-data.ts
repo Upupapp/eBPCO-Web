@@ -5,8 +5,9 @@
 // that same row, so every business's detail view is fully populated and
 // internally consistent without a second hand-authored dataset per business.
 
-import { PermitType } from '../../core/domain/permit.model';
+import { PermitType, isValidPermitType } from '../../core/domain/permit.model';
 import { ApplicationRecord } from '../../core/domain/application.model';
+import { coarseStatus, isValidLifecycleStatus } from '../../core/domain/status.model';
 
 export type PermitStatus = 'Approved' | 'Under Review' | 'Rejected';
 
@@ -106,6 +107,70 @@ export function buildBusinessDetail(
   ];
 
   // No payment endpoint exists for a business, so there is no figure to show.
+  const pendingPayments: string | null = null;
+
+  return {
+    permits,
+    documents,
+    users,
+    activity,
+    metrics: {
+      totalApplications: permits.length,
+      approvedPermits,
+      pendingPayments,
+      activeUsers: users.filter((u) => u.status === 'Active').length,
+    },
+  };
+}
+
+/**
+ * The same detail shape, built from a REAL `GET /staff/businesses/:id`
+ * response instead of the local seed store. Kept separate from
+ * `buildBusinessDetail` rather than coerced through it — the real route's
+ * `applications[]` carries `lifecycleStatus` (the full 19-value vocabulary)
+ * and a `referenceNumber`, not a full `ApplicationRecord`, and has no
+ * generated-permit-number column at all (the controller's own doc comment
+ * says so), so `permitNumber` stays `null` here the same way it already
+ * does on the seed path for an application with no local permit row —
+ * "Not yet issued" is this table's existing way of saying "not known to be
+ * issued", not a claim that release definitely hasn't happened.
+ */
+export function buildRealBusinessDetail(
+  row: { code: string; contactName: string; dateCreated: string },
+  applications: ReadonlyArray<{
+    referenceNumber: string;
+    permitType: string;
+    lifecycleStatus: string;
+    submittedAt: string | null;
+  }>,
+): BusinessDetail {
+  const permits: LinkedPermit[] = applications.map((a) => ({
+    applicationId: a.referenceNumber,
+    permitNumber: null,
+    type: isValidPermitType(a.permitType) ? a.permitType : null,
+    status: isValidLifecycleStatus(a.lifecycleStatus) ? coarseStatus(a.lifecycleStatus) : 'Under Review',
+    dateSubmitted: a.submittedAt ? new Date(a.submittedAt).toLocaleDateString() : 'Not yet submitted',
+  }));
+
+  const approvedPermits = permits.filter((p) => p.status === 'Approved').length;
+
+  // Same ruling as the seed path: no document data is held for a business.
+  const documents: BusinessDocument[] = [];
+
+  // The owner is the real linked applicant's own name, already resolved
+  // onto `row` by the caller — this endpoint has no separate staff-account
+  // list for a business, so "Owner" is the only real user there is.
+  const users: BusinessUser[] = [{ name: row.contactName, role: 'Owner', status: 'Active' }];
+
+  const activity: BusinessActivityItem[] = [
+    {
+      actor: row.contactName,
+      title: 'Account registered',
+      detail: `${row.code} was registered on the platform.`,
+      timeAgo: row.dateCreated,
+    },
+  ];
+
   const pendingPayments: string | null = null;
 
   return {

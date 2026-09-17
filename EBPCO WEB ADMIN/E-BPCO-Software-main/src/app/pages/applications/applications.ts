@@ -13,6 +13,7 @@ import { FilterPanel } from '../../shared/filter-panel/filter-panel';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { ToastService } from '../../shared/toast/toast.service';
 import { downloadCsv } from '../../shared/utils/export-csv';
+import { toBase64 } from '../../shared/utils/to-base64';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import {
@@ -52,12 +53,24 @@ import { PermitReleaseApi } from '../../core/api/permit-release.api';
 import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
 
 /** One row of the real per-application Documents tab — a required-but-not-yet-uploaded requirement has `doc: null` and renders as "Missing". */
+/**
+ * What one checklist row needs to render and act on, real or local-demo
+ * alike. `docId`/`isReal` tell `setDocStatus`/`markSelectedDocsAccepted`
+ * which API to call: `applicationsApi.reviewDocument` (migration 038) for a
+ * document that came from `realDetail()`, `store.setDocumentStatus` (local
+ * only) otherwise. `status` here is always the STAFF verdict a reader would
+ * mean by "document status" — for a real, not-yet-reviewed document that is
+ * 'Uploaded', never the malware scanner's own `status` field, which answers
+ * a different question (is this file safe to open) that this screen does
+ * not render at all.
+ */
 interface DocumentRow {
   requirementId: string;
   label: string;
   required: boolean;
   departmentName: string;
-  doc: ApplicationDocument | null;
+  doc: { id: string; fileName: string; status: DocumentStatus; remarks: string | null; uploadedAt: string } | null;
+  isReal: boolean;
 }
 
 type View = 'list' | 'detail' | 'info' | 'not-found';
@@ -111,7 +124,48 @@ const STATUS_ACTIONS: { label: string; target: ApplicationLifecycleStatus }[] = 
   { label: 'Mark Received', target: 'Received' },
   { label: 'Verify Documents', target: 'Document Verification' },
   { label: 'Send to Evaluation', target: 'Under Evaluation' },
+  // The real transition table (lifecycle.ts) requires this exact hop
+  // (`Under Evaluation -> Assessed`, `staff:assess`, preconditions
+  // `evaluations-complete` + `order-of-payment-issued`) before an applicant
+  // can even submit a payment — `Assessed -> Payment Submitted` only starts
+  // from `Assessed`. Neither passing every evaluation stage (evaluations.ts)
+  // nor issuing an Order of Payment (payments.ts) ever touches
+  // lifecycle_status itself, so without this entry an application could
+  // clear both and still have no legal way for the citizen to pay it, stuck
+  // at Under Evaluation permanently.
+  { label: 'Send to Assessed', target: 'Assessed' },
+  // Same gap, one hop earlier: `Payment Submitted -> Payment Under
+  // Verification -> Payment Verified` are each their own real transition
+  // (`staff:verify-payment`, lifecycle.ts), and verifying the payment
+  // itself (payments.ts's verifyPayment(), `POST /staff/payments/:id/verify`)
+  // only ever writes the `payments` row — same as every other hop on this
+  // page, it never touches lifecycle_status. Without these two entries an
+  // application whose payment had genuinely been verified by a cashier was
+  // stuck at Payment Submitted permanently, with 'Send to Approval' below
+  // never becoming legal (it only starts from Payment Verified).
+  { label: 'Send to Payment Verification', target: 'Payment Under Verification' },
+  { label: 'Mark Payment Verified', target: 'Payment Verified' },
+  // The real transition table requires this hop (Payment Verified -> For
+  // Approval, `staff:verify-payment`) before 'Approved' is even legal —
+  // verifying a payment (payments.ts's verifyPayment()) only ever writes
+  // the `payments` row, never the application's lifecycle_status. Without
+  // this entry there was no way to make that hop at all: every application
+  // that ever got its payment verified was stuck at Payment Verified
+  // permanently, one invisible step from a building official's "Mark
+  // Approved" ever becoming legal to click.
+  { label: 'Send to Approval', target: 'For Approval' },
   { label: 'Mark Approved', target: 'Approved' },
+  // The real transition table has TWO ways in (`Document Verification ->
+  // Revision Required` and `Under Evaluation -> Revision Required`, both
+  // `staff:evaluate`, both notifying the applicant) — `canTransition` below
+  // already resolves which one applies from the row's own status, same as
+  // every other entry here. Before this there was no way for staff to send
+  // an application back to the citizen for a fix at all from this menu:
+  // only a single DOCUMENT could be marked "Revision Required"
+  // (`setDocStatus`), never the application itself, so a genuinely
+  // incomplete application had no legal outcome except an outright
+  // rejection.
+  { label: 'Return for Revision', target: 'Revision Required' },
   { label: 'Mark Rejected', target: 'Rejected' },
 ];
 
@@ -238,10 +292,19 @@ export class Applications {
 
     effect(() => {
       const id = this.id();
-      // untracked: only re-run this when the route id itself changes, not
-      // on every unrelated store mutation elsewhere in the app (which
-      // would otherwise snap the user back out of Info/Evaluations
-      // sub-views any time another page edited some other row).
+      // Tracked (not inside the untracked() block below): a direct link or a
+      // hard reload straight onto /applications/:id constructs this page
+      // before QueueLoader's fetch (kicked off by AdminLayout, and again by
+      // this page's own `load()`) has resolved — the store below is still
+      // holding seed rows or nothing at all. Reading `loader.loaded()` here
+      // means this effect re-runs the moment the real queue lands, instead
+      // of judging the id against a store that hasn't been asked yet.
+      const queueReady = this.loader.loaded();
+      // untracked beyond that: only re-run this when the route id itself
+      // changes (or the queue finishes loading), not on every unrelated
+      // store mutation elsewhere in the app (which would otherwise snap the
+      // user back out of Info/Evaluations sub-views any time another page
+      // edited some other row).
       untracked(() => {
         this.realDetail.set(null);
         this.comments.set([]);
@@ -253,6 +316,12 @@ export class Applications {
         }
         const row = this.store.getById(id);
         if (!row) {
+          if (!queueReady) {
+            // Not "not found" yet — the queue simply hasn't answered. Leave
+            // the view as-is (the list branch's own loading spinner covers
+            // this) and let this effect re-fire once `queueReady` flips.
+            return;
+          }
           this.selectedRow.set(null);
           this.view.set('not-found');
           this.titleService.setTitle('Application not found — E-BPCO Admin');
@@ -385,8 +454,28 @@ export class Applications {
     if (!row) return [];
     return STATUS_ACTIONS.filter((a) => {
       if (!canTransition(row.lifecycleStatus, a.target)) return false;
+      if (a.target === 'Assessed') {
+        // Same scope as approving a fee assessment (`staff:assess`) — this
+        // is the same office, just a different action on it.
+        if (!role || !ACTION_PERMISSIONS.approveAssessment(role)) return false;
+      }
+      if (a.target === 'Payment Under Verification' || a.target === 'Payment Verified') {
+        // Same scope as verifying the payment itself and as the 'For
+        // Approval' hop right below — all three are `staff:verify-payment`.
+        if (!role || !ACTION_PERMISSIONS.verifyPayment(role)) return false;
+      }
+      if (a.target === 'For Approval') {
+        // Same scope as verifying the payment itself (`staff:verify-payment`
+        // — cashier's real backend scope) — this hop belongs to whoever just
+        // confirmed the money, not to the evaluator or the approving officer.
+        if (!role || !ACTION_PERMISSIONS.verifyPayment(role)) return false;
+      }
       if (a.target === 'Approved') {
-        if (!this.store.canApprove(row.id)) return false;
+        // Not `store.canApprove(row.id)` — that reads only the local
+        // ApplicationStore signal, which a real application's documents
+        // never populate. `approvalBlockingDocs` below is real-data-aware
+        // (built from `documentRows()`) and expresses the identical rule.
+        if (this.approvalBlockingDocs().length > 0) return false;
         if (!role || !ACTION_PERMISSIONS.approveApplication(role)) return false;
       }
       return true;
@@ -656,20 +745,21 @@ export class Applications {
     );
   });
 
+  /**
+   * Used to drive `ApplicationStore.assessFee()` — a local-only mock that
+   * never called the backend, shown as a SEPARATE quick action from the one
+   * below alongside a false "Fee assessment drafted" success toast. The real
+   * Assess Fee flow has always lived on the standalone Payments page's
+   * Assessment Workspace, already reachable from here via the real deep
+   * link `openPaymentAssessment()` — this button now just opens it, instead
+   * of a duplicate path an officer could not tell apart from the real one.
+   */
   protected assessFeeAction(): void {
-    const row = this.selectedRow();
-    if (!row || !this.canAssessFee()) {
+    if (!this.canAssessFee()) {
       this.toast.error("Can't assess a fee for this application in its current state.");
       return;
     }
-    const ok = this.store.assessFee(
-      row.id,
-      this.session.name() || 'Staff',
-      this.session.role() ?? 'Administrator',
-    );
-    if (ok) this.toast.success('Fee assessment drafted.');
-    else this.toast.error("Couldn't draft a fee assessment for this application.");
-    this.selectedRow.set(this.store.getById(row.id) ?? row);
+    this.openPaymentAssessment();
   }
 
   // ---- Generate permit (real staff:approve call, then the real transition) --
@@ -893,6 +983,14 @@ export class Applications {
       if (current && current.id === id) {
         const refreshed = this.store.getById(id);
         if (refreshed) this.selectedRow.set(refreshed);
+        // `realTimeline` (the Audit Trail table) reads `realDetail()`, not
+        // the queue row `loader.reload()` above already refreshed — without
+        // this, a transition made here (Mark Received, Send to Approval,
+        // Mark Rejected, ...) showed the new coarse status immediately but
+        // left the Audit Trail showing its pre-transition history until the
+        // next full page reload, exactly the stuck-view bug already fixed
+        // for the Evaluations/Documents views.
+        if (!this.store.isSeedData()) await this.refreshRealDetail(id);
       }
       return;
     }
@@ -1144,38 +1242,40 @@ export class Applications {
   }
 
   /**
-   * 'Rejected' requires a remark — `transitionStatus` refuses it without
-   * one. This used to silently fall back to reusing an unrelated field
-   * belonging to a different feature, which was usually empty or (worse)
-   * could hold a stale note left over from something else entirely — so a
-   * click here would either silently no-op, or silently attach the wrong
-   * remark. Now it opens a dedicated, required-field prompt instead.
+   * 'Rejected' and 'Revision Required' both need a real reason — the
+   * citizen reads it directly (Citizen Portal's own Status Timeline renders
+   * it against the entry), so a click here must not silently attach an
+   * empty or stale remark. This used to only cover 'Rejected'; the same
+   * prompt now also gates 'Revision Required', reusing the identical
+   * required-field flow rather than a second copy of it.
    */
   protected setStatus(target: ApplicationLifecycleStatus): void {
     const row = this.selectedRow();
     this.closeActionMenu();
     if (!row) return;
-    if (target === 'Rejected') {
-      this.quickRejectRemarks.set('');
-      this.quickRejectTarget.set(row);
+    if (target === 'Rejected' || target === 'Revision Required') {
+      this.quickReasonRemarks.set('');
+      this.quickReasonTarget.set({ row, target });
       return;
     }
     this.updateRowStatus(row.id, target);
   }
 
-  protected readonly quickRejectTarget = signal<AppRow | null>(null);
-  protected readonly quickRejectRemarks = signal('');
+  protected readonly quickReasonTarget = signal<{ row: AppRow; target: 'Rejected' | 'Revision Required' } | null>(
+    null,
+  );
+  protected readonly quickReasonRemarks = signal('');
 
-  protected confirmQuickReject(): void {
-    const row = this.quickRejectTarget();
-    const remarks = this.quickRejectRemarks().trim();
-    if (!row || !remarks) return;
-    this.updateRowStatus(row.id, 'Rejected', remarks);
-    this.quickRejectTarget.set(null);
+  protected confirmQuickReason(): void {
+    const current = this.quickReasonTarget();
+    const remarks = this.quickReasonRemarks().trim();
+    if (!current || !remarks) return;
+    this.updateRowStatus(current.row.id, current.target, remarks);
+    this.quickReasonTarget.set(null);
   }
 
-  protected cancelQuickReject(): void {
-    this.quickRejectTarget.set(null);
+  protected cancelQuickReason(): void {
+    this.quickReasonTarget.set(null);
   }
 
   /** Surfaces a `transitionStatus` refusal that survived past `availableStatusActions`' own filtering (e.g. a role/permission change or a document status edited in another tab between opening the menu and clicking it) — defense in depth, not the primary guard. */
@@ -1256,18 +1356,67 @@ export class Applications {
   }
 
   // ---- Documents tab ----------------------------------------------------
-  // Reads the REAL per-application document checklist (ApplicationStore +
-  // the permit type's own requirements-catalog entry) instead of the old
-  // module-shared mock DOCUMENTS array — every row here is a real
-  // ApplicationDocument, its required/optional flag and reviewing
-  // department come from requirements-catalog.ts, and a required
-  // requirement with no uploaded row yet shows up as a synthetic "Missing"
-  // row rather than silently not appearing.
+  // Prefers the REAL per-application documents from `realDetail()` (`GET
+  // /staff/applications/:id`'s own `documents[]`) the moment that call
+  // resolves; falls back to the local ApplicationStore for an application
+  // that has none (a local-demo row) or before the fetch lands. Before this,
+  // real documents were never read at all — `realDetail` was fetched and
+  // simply never consulted here, so every real application showed every
+  // required document as "Missing" regardless of what the citizen had
+  // actually uploaded, discovered live while walking one through Document
+  // Verification end to end.
+  //
+  // Matched by `requirementCode` first, then by `label`. A document this
+  // page's own "Attach" action creates (`attachDocumentFile` below) sends a
+  // real `requirementCode` (`r.requirementId`, the catalog's own id), so
+  // that stays the precise match for a staff-attached document. A real
+  // CITIZEN upload never carries one, though: `application-wizard.page.ts`'s
+  // `uploadReal()` (Citizen Portal) deliberately omits it — this portal's
+  // own requirements-catalog ids and the Admin Portal's published-checklist
+  // codes are two different, incompatible id schemes with no reconciliation,
+  // and sending a mismatched code gets a real server refusal the moment any
+  // office publishes a checklist, confirmed live. `label`, by contrast, is
+  // the same literal string on both sides (both catalogs originate it from
+  // the same source) and is what actually matches a citizen's own real
+  // upload — discovered live immediately after the `requirementCode`-only
+  // version shipped and still showed every citizen-uploaded document as
+  // "Missing".
+  //
+  // A real document's displayed `status` is the STAFF verdict
+  // (`reviewStatus`, migration 038) once one exists, else 'Uploaded' — never
+  // the malware scanner's own `status` field on the same row, which this
+  // screen does not render.
 
   protected readonly documentRows = computed<DocumentRow[]>(() => {
     const row = this.selectedRow();
     if (!row) return [];
     const requirements = requirementsFor(row.permitType).documents;
+    const real = this.realDetail()?.documents;
+    if (real) {
+      const byCode = new Map(
+        real.filter((d) => d.requirementCode !== null).map((d) => [d.requirementCode, d]),
+      );
+      const byLabel = new Map(real.map((d) => [d.label, d]));
+      return requirements.map((req): DocumentRow => {
+        const found = byCode.get(req.id) ?? byLabel.get(req.label);
+        return {
+          requirementId: req.id,
+          label: req.label,
+          required: req.required,
+          departmentName: departmentName(req.reviewingDepartmentId),
+          isReal: true,
+          doc: found
+            ? {
+                id: found.id,
+                fileName: found.fileName,
+                status: found.reviewStatus ?? 'Uploaded',
+                remarks: found.reviewRemark,
+                uploadedAt: found.uploadedAt,
+              }
+            : null,
+        };
+      });
+    }
     const stored = this.store.getDocuments(row.id);
     const byRequirement = new Map(stored.map((d) => [d.requirementId, d]));
     return requirements.map((req): DocumentRow => {
@@ -1277,7 +1426,8 @@ export class Applications {
         label: req.label,
         required: req.required,
         departmentName: departmentName(req.reviewingDepartmentId),
-        doc,
+        isReal: false,
+        doc: doc && { id: doc.id, fileName: doc.fileName, status: doc.status, remarks: doc.remarks, uploadedAt: doc.uploadedAt },
       };
     });
   });
@@ -1358,7 +1508,13 @@ export class Applications {
     this.closeDocActionMenu();
   }
 
-  protected markSelectedDocsAccepted(): void {
+  /** Re-fetches `realDetail` after a real write, so `documentRows` picks up the new `reviewStatus` — the same reload `setDocStatus`/`markSelectedDocsAccepted` need whenever they act on a real document. */
+  private async refreshRealDetail(applicationId: string): Promise<void> {
+    const result = await this.applicationsApi.detail(applicationId);
+    if (result.kind === 'ok') this.realDetail.set(result.detail);
+  }
+
+  protected async markSelectedDocsAccepted(): Promise<void> {
     const row = this.selectedRow();
     const ids = this.docSelectedIds();
     if (!row || ids.size === 0) {
@@ -1367,13 +1523,25 @@ export class Applications {
       return;
     }
     const actor = this.session.name() || 'Staff';
+    const rows = this.documentRows().filter((r) => r.doc && ids.has(r.requirementId));
+    if (rows.some((r) => r.isReal) && !this.canAttachDocuments()) {
+      this.toast.error('Only Records Officers and Super Admins can review a document on this application.');
+      this.closeDocActionMenu();
+      return;
+    }
     let count = 0;
-    for (const r of this.documentRows()) {
-      if (r.doc && ids.has(r.requirementId)) {
+    for (const r of rows) {
+      if (!r.doc) continue;
+      if (r.isReal) {
+        const result = await this.applicationsApi.reviewDocument(row.id, r.doc.id, 'Accepted');
+        if (result.kind === 'done') count++;
+        else this.toast.error(`Could not mark "${r.label}" Accepted: ${result.kind === 'refused' || result.kind === 'failed' ? result.message : 'not available'}.`);
+      } else {
         this.store.setDocumentStatus(row.id, r.doc.id, 'Accepted', actor);
         count++;
       }
     }
+    if (rows.some((r) => r.isReal)) await this.refreshRealDetail(row.id);
     this.toast.success(`${count} document${count === 1 ? '' : 's'} marked Accepted.`);
     this.docSelectedIds.set(new Set());
     this.closeDocActionMenu();
@@ -1381,7 +1549,7 @@ export class Applications {
 
   protected readonly docRemarksDraft = signal('');
 
-  protected setDocStatus(r: DocumentRow, status: DocumentStatus): void {
+  protected async setDocStatus(r: DocumentRow, status: DocumentStatus): Promise<void> {
     const row = this.selectedRow();
     if (!row || !r.doc) return;
     const actor = this.session.name() || 'Staff';
@@ -1393,17 +1561,75 @@ export class Applications {
       this.toast.error(`Add remarks before marking this document "${status}".`);
       return;
     }
-    this.store.setDocumentStatus(row.id, r.doc.id, status, actor, remarks);
+    if (r.isReal) {
+      if (status !== 'Under Review' && status !== 'Accepted' && status !== 'Rejected' && status !== 'Revision Required') {
+        this.toast.error(`"${status}" is not a real staff verdict — only Under Review, Accepted, Rejected, or Revision Required can be recorded.`);
+        return;
+      }
+      if (!this.canAttachDocuments()) {
+        this.toast.error('Only Records Officers and Super Admins can review a document on this application.');
+        return;
+      }
+      const result = await this.applicationsApi.reviewDocument(row.id, r.doc.id, status, remarks);
+      if (result.kind !== 'done') {
+        this.toast.error(`Could not mark "${r.label}" "${status}": ${result.kind === 'refused' || result.kind === 'failed' ? result.message : 'not available'}.`);
+        return;
+      }
+      await this.refreshRealDetail(row.id);
+    } else {
+      this.store.setDocumentStatus(row.id, r.doc.id, status, actor, remarks);
+    }
     this.toast.success(`"${r.label}" marked "${status}".`);
     this.docRemarksDraft.set('');
   }
 
-  /** Attaches a first file for a still-Missing required/optional document (no ApplicationDocument row exists yet). */
-  protected attachDocumentFile(r: DocumentRow, event: Event): void {
+  /**
+   * Whether this officer holds `documents:write` — the scope both
+   * `attachDocumentFile`/`resubmitDocumentFile` need server-side. Checked
+   * here so the control can be honestly disabled with an explanation for a
+   * role that does not hold it (evaluator, building-official,
+   * receiving-officer), rather than accepting a file and only then reporting
+   * a 403 the officer had no way to anticipate.
+   */
+  protected readonly canAttachDocuments = computed(() => {
+    const current = this.session.session();
+    if (!current) return false;
+    if (current.scopes !== null) return current.scopes.includes('documents:write');
+    // Silence, not denial (see Capabilities' own doc comment on this
+    // distinction) — fall back to the one portal role known to carry it.
+    return current.role === 'Super Admin' || current.role === 'Administrator';
+  });
+
+  /** Attaches a first file for a still-Missing required/optional document. Real (`POST /documents`) for a real application; local-only mock otherwise. */
+  protected async attachDocumentFile(r: DocumentRow, event: Event): Promise<void> {
     const row = this.selectedRow();
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!row || !file) return;
+
+    if (r.isReal) {
+      if (!this.canAttachDocuments()) {
+        this.toast.error('Only Records Officers and Super Admins can attach a document on a citizen\'s behalf.');
+        input.value = '';
+        return;
+      }
+      try {
+        const contentBase64 = await toBase64(file);
+        const result = await this.applicationsApi.attachDocument(row.id, r.requirementId, r.label, file.name, contentBase64);
+        if (result.kind === 'done') {
+          this.toast.success(`"${r.label}" attached as ${file.name}.`);
+          await this.refreshRealDetail(row.id);
+        } else {
+          this.toast.error(`Could not attach "${r.label}": ${result.kind === 'refused' || result.kind === 'failed' ? result.message : 'not available'}.`);
+        }
+      } catch {
+        this.toast.error(`Could not attach "${r.label}". Try again.`);
+      } finally {
+        input.value = '';
+      }
+      return;
+    }
+
     this.store.attachDocument(
       row.id,
       r.requirementId,
@@ -1415,12 +1641,43 @@ export class Applications {
     input.value = '';
   }
 
-  /** Resubmits over an existing Rejected/Revision Required/Expired document — the store appends the replaced file to `history` rather than discarding it. */
-  protected resubmitDocumentFile(r: DocumentRow, event: Event): void {
+  /**
+   * Resubmits over an existing Rejected/Revision Required/Expired document,
+   * for a walk-in citizen with no portal access. Real
+   * (`POST /staff/applications/:id/documents/:documentId/resubmit`) for a
+   * real application, via the staff-namespaced route added alongside the
+   * long-real applicant-only one; local-only mock otherwise (the store
+   * appends the replaced file to `history` rather than discarding it).
+   */
+  protected async resubmitDocumentFile(r: DocumentRow, event: Event): Promise<void> {
     const row = this.selectedRow();
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!row || !r.doc || !file) return;
+
+    if (r.isReal) {
+      if (!this.canAttachDocuments()) {
+        this.toast.error('Only Records Officers and Super Admins can resubmit a document on a citizen\'s behalf.');
+        input.value = '';
+        return;
+      }
+      try {
+        const contentBase64 = await toBase64(file);
+        const result = await this.applicationsApi.resubmitDocument(row.id, r.doc.id, r.label, file.name, contentBase64);
+        if (result.kind === 'done') {
+          this.toast.success(`"${r.label}" resubmitted as ${file.name}.`);
+          await this.refreshRealDetail(row.id);
+        } else {
+          this.toast.error(`Could not resubmit "${r.label}": ${result.kind === 'refused' || result.kind === 'failed' ? result.message : 'not available'}.`);
+        }
+      } catch {
+        this.toast.error(`Could not resubmit "${r.label}". Try again.`);
+      } finally {
+        input.value = '';
+      }
+      return;
+    }
+
     this.store.resubmitDocument(row.id, r.doc.id, file.name, this.session.name() || 'Staff');
     this.toast.success(`"${r.label}" resubmitted.`);
     input.value = '';

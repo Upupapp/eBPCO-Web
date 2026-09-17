@@ -1,7 +1,10 @@
-// Client-side CSV export — this app has no backend, so "Export"/"Save
-// Report"/"Download Receipt" buttons build a CSV in the browser and
-// trigger a download via a Blob + temporary <a>, rather than hitting an
-// endpoint that doesn't exist.
+// Client-side CSV export. The backend is real, but it has no CSV-export
+// endpoint for any of these tabular views (Applications, Businesses,
+// Payments, the staff directory...) — each is already fetched as real data
+// and rendered on screen, so "Export"/"Save Report"/"Download Receipt"
+// build a CSV from what the page already holds, in the browser, and trigger
+// a download via a Blob + temporary <a>, rather than a round trip to an
+// endpoint that doesn't exist for this.
 
 function toCsvCell(value: unknown): string {
   const str = value === null || value === undefined ? '' : String(value);

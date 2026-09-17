@@ -49,6 +49,7 @@
               [(ngModel)]="applicant.fullName"
               name="applicantFullName"
               placeholder="Juan Dela Cruz"
+              appCapitalizeName
             />
             @if (showStepErrors() && !applicant.fullName.trim()) {
               <span class="field-error">Applicant/user name is required.</span>
@@ -242,6 +243,7 @@
               [(ngModel)]="business.ownerOrRepresentative"
               name="bizOwner"
               [placeholder]="applicant.fullName"
+              appCapitalizeName
             />
             @if (showStepErrors() && !business.ownerOrRepresentative.trim()) {
               <span class="field-error">Owner or authorized representative is required.</span>
@@ -362,6 +364,7 @@
               type="text"
               [(ngModel)]="applicationInfo.assignedEvaluator"
               name="assignedEvaluator"
+              appCapitalizeName
             />
             <span class="not-stored">Not sent anywhere yet — the server does not track a named officer on an application.</span>
           </label>

@@ -9,7 +9,7 @@ import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { SessionService } from '../../core/session/session.service';
 import { StaffAccess, StaffDirectoryApi, StaffMember, StaffSession } from '../../core/api/staff-directory.api';
-import { portalRoleFor } from '../../core/api/role-map';
+import { ALL_WIRE_ROLES, WIRE_ROLE_LABELS, portalRoleFor } from '../../core/api/role-map';
 import { ALL_STAFF_ROLES } from '../../core/session/permissions';
 import { AccessLevel } from '../../core/api/access-request.api';
 import { Capabilities } from '../../core/session/capabilities';
@@ -103,30 +103,11 @@ const NAMES = [
   'Rodel Panti',
 ];
 
-const DEPARTMENTS = [
-  'Office of the Building Official',
-  'Zoning Administration',
-  'Bureau of Fire Protection Liaison',
-  'Treasury / Cashiering',
-  'Releasing Unit',
-  'City Administrator Office',
-];
-
 // The real 7-role portal vocabulary (see role-map.ts's BY_WIRE_NAME / BREADTH)
 // — not a separate, invented list. `row.role` (from `portalRoleFor`) only ever
 // takes one of these seven names, so a filter option outside this set can
 // never match a real row.
 const ROLE_ORDER = ALL_STAFF_ROLES;
-
-function emailFor(name: string): string {
-  const handle = name
-    .toLowerCase()
-    .replace(/^(engr\.|arch\.|ma\.)\s*/, '')
-    .replace(/[^a-z\s]/g, '')
-    .trim()
-    .replace(/\s+/g, '.');
-  return `${handle}@ebpco.gov.ph`;
-}
 
 /**
  * The server's raw ISO timestamp (`"2026-09-12T11:20:26.612Z"`), in a form
@@ -324,7 +305,6 @@ export class UserRoles implements OnInit {
   });
   protected readonly roleOptions = ROLE_ORDER;
   protected readonly statusOptions: UserStatus[] = ['Active', 'Inactive', 'Pending'];
-  protected readonly departments = DEPARTMENTS;
 
   // Every value here is derived from the same `users` list the table
   // below renders, so "Total Users" always equals the real row count
@@ -869,13 +849,34 @@ export class UserRoles implements OnInit {
     }
   }
 
-  // ---- Add user -----------------------------------------------------------
+  // ---- Add user -------------------------------------------------------
+  //
+  // Real, against `POST /staff/users` — this used to push a row straight
+  // into the local `users` signal with `id: ''`, telling the administrator
+  // in the same breath that it had been "added" and that "no account exists
+  // yet". The real route creates a real account (without a password — the
+  // officer sets one through account recovery, which is exactly what the
+  // server's own `nextStep` says). The role picker offers the real 10
+  // `StaffRole` wire values (`ALL_WIRE_ROLES`/`WIRE_ROLE_LABELS`), not this
+  // page's own collapsed 7-category display roles — `assessor` and `cashier`
+  // are separate real roles the server keeps apart on purpose (separation of
+  // duty between assessing a fee and confirming its payment), and collapsing
+  // them into one "Payment Officer" choice here would make it impossible to
+  // grant just one of the two. There is also no `name`/`department` field:
+  // the server has no name column for a staff account (`toUserRow` above
+  // already uses the email as the display name) and no department concept at
+  // all, so collecting either would be a field the server silently discards.
 
   protected readonly showAddUser = signal(false);
-  protected newUser = { name: '', email: '', role: ROLE_ORDER[0], department: DEPARTMENTS[0] };
+  protected readonly addUserWorking = signal(false);
+  protected newUser: { email: string; roles: string[] } = { email: '', roles: [] };
+  protected readonly wireRoleOptions = ALL_WIRE_ROLES;
+  protected wireRoleLabel(role: string): string {
+    return WIRE_ROLE_LABELS[role] ?? role;
+  }
 
   protected openAddUser(): void {
-    this.newUser = { name: '', email: '', role: ROLE_ORDER[0], department: DEPARTMENTS[0] };
+    this.newUser = { email: '', roles: [] };
     this.showAddUser.set(true);
   }
 
@@ -883,37 +884,40 @@ export class UserRoles implements OnInit {
     this.showAddUser.set(false);
   }
 
-  protected createUser(): void {
-    const name = this.newUser.name.trim();
-    if (!name) {
-      this.toast.error('Enter a name before adding this user.');
+  protected isNewUserRoleChecked(role: string): boolean {
+    return this.newUser.roles.includes(role);
+  }
+
+  protected toggleNewUserRole(role: string): void {
+    this.newUser.roles = this.isNewUserRoleChecked(role)
+      ? this.newUser.roles.filter((r) => r !== role)
+      : [...this.newUser.roles, role];
+  }
+
+  protected async createUser(): Promise<void> {
+    const email = this.newUser.email.trim();
+    if (!email) {
+      this.toast.error('Enter an email address before adding this user.');
       return;
     }
-    const email = this.newUser.email.trim() || emailFor(name);
-    if (this.users().some((u) => u.email.toLowerCase() === email.toLowerCase())) {
-      this.toast.error(`A user with the email "${email}" already exists.`);
-      return;
+    if (this.addUserWorking()) return;
+    this.addUserWorking.set(true);
+    try {
+      const result = await this.directory.create(email, this.newUser.roles);
+      if (result.kind === 'done') {
+        this.showAddUser.set(false);
+        this.toast.success(result.nextStep);
+        await this.loadDirectory();
+        return;
+      }
+      if (result.kind === 'unavailable') {
+        this.toast.error('This deployment cannot create staff accounts yet.');
+        return;
+      }
+      this.toast.error(result.message);
+    } finally {
+      this.addUserWorking.set(false);
     }
-    this.users.update((rows) => [
-      {
-        name,
-        // No server id: this row has not been saved anywhere. The empty
-        // string says so rather than a fabricated identifier that would look
-        // like a real account to every later read.
-        id: '',
-        level: 'view' as AccessLevel,
-        permitTypes: [],
-        serverRoles: [],
-        email,
-        role: this.newUser.role,
-        department: this.newUser.department,
-        status: 'Pending',
-        lastActive: 'Invited — not yet accepted',
-      },
-      ...rows,
-    ]);
-    this.showAddUser.set(false);
-    this.toast.success(`"${name}" added to this list only — no invitation has been sent and no account exists yet.`);
   }
 
   // ---- Role card actions ---------------------------------------------

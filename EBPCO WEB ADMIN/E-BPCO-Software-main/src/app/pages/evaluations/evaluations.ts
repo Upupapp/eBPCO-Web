@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
@@ -16,12 +16,13 @@ import { EVALUATION_STAGE_ORDER, EvaluationStage } from '../../core/domain/statu
 import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import { Applicant } from '../../core/domain/applicant.model';
-import { ApplicationDocument } from '../../core/domain/document.model';
+import { DocumentStatus } from '../../core/domain/document.model';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 import { Capabilities } from '../../core/session/capabilities';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
 import { StaffEvaluationsApi, EvaluationQueueRow } from '../../core/api/staff-evaluations.api';
+import { StaffApplicationsApi, ApplicationDocumentRow } from '../../core/api/staff-applications.api';
 import {
   buildEvalTypeCards,
   buildEvalRows,
@@ -34,13 +35,26 @@ import {
   EVAL_KEY_TO_APP_STAGE,
 } from './evaluations-data';
 
-/** One row of the record view's real Documents Checklist — read-only here (Accept/Reject stays an Applications-Documents-tab-only action). A required requirement with no uploaded row yet shows up as a synthetic "Missing" row rather than silently not appearing. */
+/**
+ * One row of the record view's real Documents Checklist — read-only here (Accept/Reject stays an
+ * Applications-Documents-tab-only action). A required requirement with no uploaded row yet shows
+ * up as a synthetic "Missing" row rather than silently not appearing.
+ *
+ * `doc` is deliberately a narrow shape (not `ApplicationDocument`, the seed-only store's own
+ * record type) — real documents come from `StaffApplicationsApi.detail()`'s `documents[]`
+ * (migration 035's `requirementCode`), not from `ApplicationStore.getDocuments()`, which
+ * `replaceApplications()` always wipes to `[]` on a real queue load (seed-only, matching
+ * `_businesses`/`_applicants`/`_auditEvents`). `status` here is always the STAFF verdict
+ * (`reviewStatus`, migration 038) once one exists, else 'Uploaded' — never the malware scanner's
+ * own `status` field on the same real row, which this screen does not render. See
+ * `recordDocumentRows` below, which mirrors `applications.ts`'s own `documentRows` real/seed split.
+ */
 interface RecordDocumentRow {
   requirementId: string;
   label: string;
   required: boolean;
   departmentName: string;
-  doc: ApplicationDocument | null;
+  doc: { fileName: string; status: DocumentStatus; uploadedAt: string } | null;
 }
 
 /** One step of the record view's real 5-stage evaluation stepper — `result`/`evaluatorLabel` are null until that stage has actually been evaluated at least once. */
@@ -95,6 +109,7 @@ export class Evaluations implements OnInit {
 
   private readonly store = inject(ApplicationStore);
   private readonly evaluationsApi = inject(StaffEvaluationsApi);
+  private readonly applicationsApi = inject(StaffApplicationsApi);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
@@ -220,10 +235,87 @@ export class Evaluations implements OnInit {
     return app ? (this.store.getApplicant(app.applicantId) ?? null) : null;
   });
 
+  /**
+   * The record view's real per-application documents (`GET
+   * /staff/applications/:id`'s own `documents[]`), fetched fresh for whichever
+   * application `openRecord`/the `?applicationId=` deep link put on screen.
+   *
+   * Mirrors `applications.ts`'s own `realDetail` fetch (see that file's
+   * Documents-tab doc comment) rather than reading
+   * `ApplicationStore.getDocuments()`, which `replaceApplications()` always
+   * wipes to `[]` on a real queue load — a real application's genuinely
+   * uploaded, scan-cleared documents were previously never read at all here,
+   * so every one of them showed as "Missing" regardless of what the citizen
+   * had actually uploaded (discovered live walking one through Document
+   * Verification -> Evaluations end to end).
+   *
+   * `null` while unfetched/loading, or permanently for a seed/local-demo
+   * application the real backend has never heard of (a 404/501 there
+   * resolves to 'unavailable' and this simply never gets set) — callers fall
+   * back to the seed-only `ApplicationStore` in that case, same as before.
+   */
+  protected readonly recordRealDocuments = signal<readonly ApplicationDocumentRow[] | null>(null);
+
+  private lastRecordDocAppId: string | null = null;
+  private readonly loadRecordDocuments = effect(() => {
+    const app = this.recordApplication();
+    const id = app?.id ?? null;
+    untracked(() => {
+      if (id === this.lastRecordDocAppId) return;
+      this.lastRecordDocAppId = id;
+      this.recordRealDocuments.set(null);
+      if (!id) return;
+      void this.applicationsApi.detail(id).then((result) => {
+        if (this.lastRecordDocAppId !== id) return; // moved to a different record before this resolved
+        if (result.kind === 'ok') this.recordRealDocuments.set([...result.detail.documents]);
+      });
+    });
+  });
+
   protected readonly recordDocumentRows = computed<RecordDocumentRow[]>(() => {
     const app = this.recordApplication();
     if (!app) return [];
     const requirements = requirementsFor(app.permitType).documents;
+    const real = this.recordRealDocuments();
+    if (real) {
+      // Joined primarily by `label`, not `requirementCode` — a genuine
+      // citizen upload (the Citizen Portal's `application-wizard.page.ts`
+      // `uploadReal()`) sends `requirementCode: null` ON PURPOSE (see that
+      // method's own comment): this portal's requirements-catalog ids and
+      // the Admin Portal's own published-checklist codes are two different,
+      // incompatible id schemes, and sending a mismatched code turns every
+      // real submission into a hard server refusal the moment any office
+      // publishes a checklist. So matching on `requirementCode` alone left
+      // every real citizen-uploaded document unmatched — `requirementCode`
+      // was `null` on every one of them — and every row still rendered as
+      // "Missing", confirmed live even after the fetch itself started
+      // working. `label` is what both sides actually share: the wizard
+      // sends the requirements-catalog's own `d.label` verbatim, the same
+      // string this portal's own `requirementsFor(...).documents[].label`
+      // holds, confirmed byte-identical live across every requirement
+      // checked. `requirementCode` is still tried FIRST and preferred when
+      // present — a staff-attached document (`StaffApplicationsApi.
+      // attachDocument`, which takes a real `requirementCode` param) does
+      // send a genuine matching one.
+      const byRequirementCode = new Map(
+        real
+          .filter((d): d is ApplicationDocumentRow & { requirementCode: string } => d.requirementCode !== null)
+          .map((d) => [d.requirementCode, d]),
+      );
+      const byLabel = new Map(real.map((d) => [d.label, d]));
+      return requirements.map((req) => {
+        const found = byRequirementCode.get(req.id) ?? byLabel.get(req.label);
+        return {
+          requirementId: req.id,
+          label: req.label,
+          required: req.required,
+          departmentName: departmentName(req.reviewingDepartmentId),
+          doc: found
+            ? { fileName: found.fileName, status: found.reviewStatus ?? 'Uploaded', uploadedAt: found.uploadedAt }
+            : null,
+        };
+      });
+    }
     const stored = this.store.getDocuments(app.id);
     const byRequirement = new Map(stored.map((d) => [d.requirementId, d]));
     return requirements.map((req) => ({
@@ -324,16 +416,22 @@ export class Evaluations implements OnInit {
     }
   });
 
-  private appliedApplicationIdParam = false;
-  private readonly applyApplicationIdParam = effect(() => {
-    const id = this.applicationId();
-    if (!id || this.appliedApplicationIdParam) return;
+  /**
+   * Locates which card (stage bucket) an application currently belongs under
+   * and its own fresh `EvalRow` snapshot, straight off the live
+   * `queueRows()` — the single lookup both `applyApplicationIdParam` (landing
+   * on the record view via the `?applicationId=` deep link) and
+   * `refreshRecordViewAfter` (re-landing on it after a real mutation) share,
+   * so the two can never disagree about where an application "is".
+   *
+   * Mirrors evaluations-data.ts's own bucketing: no next stage and no
+   * decisions yet means unrecorded; no next stage but a history of
+   * decisions means every stage has been passed, which the 'final' card's
+   * own Passed tab is where that application permanently lives.
+   */
+  private findRecordCardAndRow(id: string): { card: EvalTypeCard; row: EvalRow } | null {
     const queueRow = this.queueRows().find((r) => r.applicationId === id);
-    if (!queueRow) return;
-    // Mirrors evaluations-data.ts's own bucketing: no next stage and no
-    // decisions yet means unrecorded; no next stage but a history of
-    // decisions means every stage has been passed, which the 'final' card's
-    // own Passed tab is where that application permanently lives.
+    if (!queueRow) return null;
     const cardKey =
       queueRow.nextStage === null
         ? queueRow.evaluations.length === 0
@@ -343,12 +441,42 @@ export class Evaluations implements OnInit {
             ([, stage]) => stage === queueRow.nextStage,
           )?.[0];
     const card = cardKey && this.cards().find((c) => c.key === cardKey);
-    if (!card) return;
+    if (!card) return null;
     const row = buildEvalRows(this.queueRows(), card.key).find((r) => r.id === id);
-    if (!row) return;
+    return row ? { card, row } : null;
+  }
+
+  /**
+   * Re-syncs `selectedRow`/`selectedCard` to the application's REAL current
+   * stage after a successful `advanceStage`/`returnForRevision` — both
+   * derive which stage they submit from `selectedCard()`, and before this,
+   * neither ever refreshed it after their own `loadQueue()` reload. So the
+   * record view stayed pinned to whichever card the officer had originally
+   * opened: a first "Advance Stage" click correctly passed e.g. 'Initial',
+   * but `selectedCard`/`selectedRow` never moved on to 'Zoning', so a SECOND
+   * click resubmitted 'Initial' again — which a real backend correctly
+   * refuses with a 409 ("The Initial stage has already been decided"),
+   * discovered live clicking "Advance Stage" twice in a row on the same
+   * application. No-ops when the record view has since been navigated away
+   * from, or to a different application, in the meantime.
+   */
+  private refreshRecordViewAfter(applicationId: string): void {
+    if (this.view() !== 'record' || this.selectedRow()?.id !== applicationId) return;
+    const found = this.findRecordCardAndRow(applicationId);
+    if (!found) return;
+    this.selectedCard.set(found.card);
+    this.selectedRow.set(found.row);
+  }
+
+  private appliedApplicationIdParam = false;
+  private readonly applyApplicationIdParam = effect(() => {
+    const id = this.applicationId();
+    if (!id || this.appliedApplicationIdParam) return;
+    const found = this.findRecordCardAndRow(id);
+    if (!found) return;
     this.appliedApplicationIdParam = true;
-    this.selectedCard.set(card);
-    this.openRecord(row);
+    this.selectedCard.set(found.card);
+    this.openRecord(found.row);
   });
 
   selectStage(stage: Stage): void {
@@ -458,6 +586,10 @@ export class Evaluations implements OnInit {
     if (result.kind === 'done') {
       this.toast.success(`${row.applicant}'s application advanced past ${card.title}.`);
       await this.loadQueue();
+      // Re-sync selectedCard/selectedRow to the application's real new
+      // stage — see refreshRecordViewAfter's own doc comment for why this
+      // is required before the NEXT click, not merely a nice-to-have.
+      this.refreshRecordViewAfter(row.id);
     } else {
       this.actionError.set(result.message);
       this.toast.error(result.message);
@@ -483,6 +615,7 @@ export class Evaluations implements OnInit {
       this.revisionRemarks.set('');
       this.toast.success(`${row.applicant}'s application returned for revision.`);
       await this.loadQueue();
+      this.refreshRecordViewAfter(row.id);
     } else {
       this.actionError.set(result.message);
       this.toast.error(result.message);

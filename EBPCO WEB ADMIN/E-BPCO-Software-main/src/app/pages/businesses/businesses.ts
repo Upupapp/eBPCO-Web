@@ -1,4 +1,4 @@
-import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Topbar } from '../../shared/topbar/topbar';
@@ -10,12 +10,14 @@ import { Pagination } from '../../shared/pagination/pagination';
 import { FilterPanel } from '../../shared/filter-panel/filter-panel';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
-import { buildBusinessDetail } from './business-detail-data';
+import { buildBusinessDetail, buildRealBusinessDetail } from './business-detail-data';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { Business } from '../../core/domain/business.model';
 import { applicantFullName } from '../../core/domain/applicant.model';
 import { ToastService } from '../../shared/toast/toast.service';
 import { validateMobileNumber } from '../../shared/utils/validators';
+import { CapitalizeNameDirective } from '../../shared/utils/capitalize-name.directive';
+import { StaffBusinessesApi, StaffBusinessDetail, StaffBusinessRow } from '../../core/api/staff-businesses.api';
 
 type SubTab = 'analytics' | 'modules' | 'recent-activity';
 type ViewMode = 'list' | 'create' | 'detail';
@@ -32,14 +34,21 @@ interface RingStat {
   support: string;
 }
 
-// Mirrors E-BPCO Mobile's BusinessCategory enum exactly (business_model.dart).
+// Mirrors E-BPCO Mobile's BusinessCategory enum exactly (business_model.dart)
+// — still the vocabulary this page's own local seed data and "Create
+// Business" form use. A REAL business's category comes from the backend's
+// own wider `businessShape.category` enum instead (see `REAL_CATEGORY_OPTIONS`
+// below) — the two lists differ (real has Construction/Transport/Agriculture,
+// not Wholesale), so `BusinessRow.category` below is a plain `string`
+// rather than this narrower type, and the category filter's options switch
+// per data source rather than assuming one list covers both.
 type BusinessCategory =
   'Retail' | 'Food Service' | 'Services' | 'Manufacturing' | 'Wholesale' | 'Other';
 
 interface BusinessRow {
   id: string;
   code: string;
-  category: BusinessCategory;
+  category: string;
   city: string;
   contactName: string;
   contactPhone: string;
@@ -95,43 +104,67 @@ const GROWTH_POINTS: GrowthPoint[] = [
 @Component({
   selector: 'app-businesses',
   imports: [Topbar,
-    QueueLoadNotice, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, ConfirmDialog],
+    QueueLoadNotice, Icon, Avatar, KpiCard, Pagination, FormsModule, FilterPanel, ConfirmDialog,
+    CapitalizeNameDirective],
   templateUrl: './businesses.html',
   styleUrl: './businesses.scss',
 })
 export class Businesses {
   private readonly store = inject(ApplicationStore);
+  private readonly businessesApi = inject(StaffBusinessesApi);
 
-  /** No backend route lists businesses as their own directory (see `ringStats`/`businessRows`' own doc comments) — real applicant/business rows are always empty regardless of what the queue holds. */
-  protected readonly noBusinessDirectory = computed(() => !this.store.isSeedData());
+  /**
+   * `GET /staff/businesses` is real and this page now calls it (P-4b) — the
+   * rows below come straight from the server on real data, not the always-
+   * empty `store.businesses()`. `null` until the first fetch resolves.
+   */
+  private readonly realRows = signal<StaffBusinessRow[] | null>(null);
+  /** A message when the real fetch could not be completed — `null` on success, and while still loading. */
+  protected readonly realListError = signal<string | null>(null);
   private readonly toast = inject(ToastService);
 
-  constructor(private readonly router: Router) {}
+  constructor(private readonly router: Router) {
+    effect(() => {
+      const isSeed = this.store.isSeedData();
+      if (!isSeed) untracked(() => this.loadRealBusinesses());
+    });
+  }
+
+  private async loadRealBusinesses(): Promise<void> {
+    const result = await this.businessesApi.list();
+    if (result.kind === 'ok') {
+      this.realRows.set([...result.rows]);
+      this.realListError.set(null);
+    } else if (result.kind === 'unavailable') {
+      this.realRows.set([]);
+      this.realListError.set("This deployment's business directory endpoint isn't reachable.");
+    } else {
+      this.realRows.set([]);
+      this.realListError.set(`Could not load the business directory: ${result.message}`);
+    }
+  }
 
   protected readonly view = signal<ViewMode>('list');
   protected readonly activeSubTab = signal<SubTab>('analytics');
 
   /**
-   * `ApplicationStore._businesses`/`_applicants` are seed-only: real queue
-   * rows never populate them (the queue API sends `businessName`/`applicant`
-   * as plain strings, not a joinable id — see `staff-applications.api.ts`'s
-   * own doc comment on `businessId`/`applicantId`), and `replaceApplications`
-   * wipes both to `[]` on every real load. Once real data was wired in
-   * (Stage 2), this page's four KPI cards silently went to a flat, confident
-   * "0" — indistinguishable from a genuine "no businesses" fact — while a
-   * real business sat one page away on Applications. `store.businesses()`/
-   * `applicants()` are still the source on seed data (nothing wrong with
-   * them there); on real data this counts DISTINCT business/applicant names
-   * across the real queue instead — an honest, coarser number ("6 business
-   * names appear in the queue"), not the same claim ("6 registered
-   * businesses, this many active/inactive") the seed-backed version makes,
-   * which is why Active/Inactive read '—' rather than a fabricated split.
+   * `GET /staff/businesses` (P-4b) is the real source for these four cards
+   * now — `realRows()`, not the always-empty `ApplicationStore._businesses`
+   * (the queue API sends `businessName`/`applicant` as plain strings, not a
+   * joinable id, and `replaceApplications` wipes `_businesses`/`_applicants`
+   * to `[]` on every real load, which is why this branch used to fall back
+   * to a coarser "distinct names in the queue" count with Active/Inactive
+   * reading '—'). `store.businesses()`/`applicants()` are still the source
+   * on seed data.
    */
   protected readonly ringStats = computed<RingStat[]>(() => {
     if (!this.store.isSeedData()) {
-      const apps = this.store.applications();
-      const totalUsers = new Set(apps.map((a) => a.applicant)).size;
-      const totalBusinesses = new Set(apps.map((a) => a.businessName)).size;
+      const rows = this.realRows() ?? [];
+      const totalUsers = new Set(rows.map((r) => r.owner.applicantId)).size;
+      const active = rows.filter((r) => r.status === 'Active').length;
+      const inactive = rows.filter((r) => r.status === 'Inactive').length;
+      const total = rows.length;
+      const pctOfTotal = (n: number) => (total ? Math.round((n / total) * 100) : 0);
       return [
         {
           label: 'Total Users',
@@ -141,37 +174,37 @@ export class Businesses {
           illustration: 'users',
           pct: 100,
           isTotal: true,
-          support: 'Distinct applicants across the real applications queue',
+          support: 'Distinct business owners in the real business directory',
         },
         {
           label: 'Active Businesses',
-          value: '—',
+          value: active.toLocaleString(),
           icon: 'check-circle',
           tone: 'success',
           illustration: 'success',
-          pct: 0,
+          pct: pctOfTotal(active),
           isTotal: false,
-          support: 'Not tracked by this deployment',
+          support: `${pctOfTotal(active)}% of total businesses`,
         },
         {
           label: 'Inactive Businesses',
-          value: '—',
+          value: inactive.toLocaleString(),
           icon: 'building',
           tone: 'danger',
           illustration: 'critical',
-          pct: 0,
+          pct: pctOfTotal(inactive),
           isTotal: false,
-          support: 'Not tracked by this deployment',
+          support: `${pctOfTotal(inactive)}% of total businesses`,
         },
         {
           label: 'Total Businesses',
-          value: totalBusinesses.toLocaleString(),
+          value: total.toLocaleString(),
           icon: 'building',
           tone: 'violet',
           illustration: 'businesses',
-          pct: totalUsers ? Math.round((totalBusinesses / totalUsers) * 100) : 0,
+          pct: 100,
           isTotal: false,
-          support: 'Distinct business names across the real applications queue',
+          support: 'Registered in the real business directory',
         },
       ];
     }
@@ -259,14 +292,28 @@ export class Businesses {
     };
   }
 
+  /** The real equivalent of `toBusinessRow` — from a `GET /staff/businesses` row, never fabricated. `userCount` stays `null`: the real route has no such column either. */
+  private toRealBusinessRow(b: StaffBusinessRow): BusinessRow {
+    return {
+      id: b.id,
+      code: b.name,
+      category: b.category,
+      city: `Barangay ${b.barangay}`,
+      contactName: b.owner.name,
+      contactPhone: b.owner.mobileNumber ?? 'Not provided',
+      dateCreated: b.dateRegistered,
+      userCount: null,
+      status: b.status === 'Active' ? 'Active' : 'Inactive',
+    };
+  }
+
   /**
-   * `store.businesses()` is always `[]` on real data (see `ringStats`'s own
-   * doc comment) — this page has no backend business-directory route to
-   * fall back to, only businesses created through its own "+ Business"
-   * wizard this session (`locallyCreatedRows`, kept separate since they
-   * aren't real linkable Business records either — see createBusiness's
-   * documented limitation). `noBusinessDirectory` tells the template to say
-   * so rather than let an empty table read as "this LGU has no businesses".
+   * On real data, sourced from `realRows()` (P-4b's `GET /staff/businesses`
+   * fetch) rather than the always-empty `store.businesses()`. Businesses
+   * created through this page's own "+ Business" wizard this session
+   * (`locallyCreatedRows`, kept separate since they aren't real linkable
+   * Business records — see createBusiness's documented limitation) are
+   * still overlaid on top either way.
    */
   private readonly locallyCreatedRows = signal<BusinessRow[]>([]);
   /** Ids removed via confirmDelete — hides a store-backed row from this view rather than mutating shared store data no method exists to delete. */
@@ -274,18 +321,18 @@ export class Businesses {
 
   protected readonly businessRows = computed<BusinessRow[]>(() => {
     const hidden = this.hiddenIds();
-    return [
-      ...this.locallyCreatedRows(),
-      ...this.store.businesses().map((b) => this.toBusinessRow(b)),
-    ].filter((r) => !hidden.has(r.id));
+    const serverRows = this.store.isSeedData()
+      ? this.store.businesses().map((b) => this.toBusinessRow(b))
+      : (this.realRows() ?? []).map((b) => this.toRealBusinessRow(b));
+    return [...this.locallyCreatedRows(), ...serverRows].filter((r) => !hidden.has(r.id));
   });
   protected readonly page = signal(1);
   protected readonly pageSize = 10;
   protected readonly searchTerm = signal('');
 
-  protected readonly categoryFilter = signal<BusinessCategory | 'All'>('All');
+  protected readonly categoryFilter = signal<string>('All');
   protected readonly statusFilter = signal<'All' | 'Active' | 'Inactive'>('All');
-  protected readonly categoryOptions: BusinessCategory[] = [
+  private readonly SEED_CATEGORY_OPTIONS: BusinessCategory[] = [
     'Retail',
     'Food Service',
     'Services',
@@ -293,6 +340,22 @@ export class Businesses {
     'Wholesale',
     'Other',
   ];
+  // The backend's real `businessShape.category` enum (businesses.controller.ts)
+  // — wider than mobile's, and without "Wholesale".
+  private readonly REAL_CATEGORY_OPTIONS: readonly string[] = [
+    'Retail',
+    'Food Service',
+    'Services',
+    'Manufacturing',
+    'Construction',
+    'Transport',
+    'Agriculture',
+    'Other',
+  ];
+  /** The filter dropdown's options track which vocabulary the visible rows actually use, so every real category is reachable and no seed-only category is offered when it could never match. */
+  protected readonly categoryOptions = computed<readonly string[]>(() =>
+    this.store.isSeedData() ? this.SEED_CATEGORY_OPTIONS : this.REAL_CATEGORY_OPTIONS,
+  );
 
   protected readonly activeFilterCount = computed(
     () => (this.categoryFilter() === 'All' ? 0 : 1) + (this.statusFilter() === 'All' ? 0 : 1),
@@ -335,9 +398,38 @@ export class Businesses {
   protected readonly selectedBusiness = signal<BusinessRow | null>(null);
   protected readonly detailTab = signal<DetailTab>('overview');
 
+  /** `GET /staff/businesses/:id`'s own `applications[]` — fetched fresh by `openDetail` on real data, since the store carries no real Business↔application link (see `businessRows`' own doc comment). `null` until fetched, or for a locally-created row that has no real record at all. */
+  private readonly realDetail = signal<StaffBusinessDetail | null>(null);
+  protected readonly realDetailError = signal<string | null>(null);
+
+  private async loadRealDetail(businessId: string): Promise<void> {
+    const result = await this.businessesApi.detail(businessId);
+    if (result.kind === 'ok') {
+      this.realDetail.set(result.detail);
+      this.realDetailError.set(null);
+    } else if (result.kind === 'not-found') {
+      // A row created this session via "+ Business" has no real record —
+      // expected, not an error; the Applications/Documents/Users/Activity
+      // tabs simply stay empty for it.
+      this.realDetail.set(null);
+      this.realDetailError.set(null);
+    } else {
+      this.realDetail.set(null);
+      this.realDetailError.set(
+        result.kind === 'unavailable'
+          ? "This deployment's business detail endpoint isn't reachable."
+          : `Could not load this business's applications: ${result.message}`,
+      );
+    }
+  }
+
   protected readonly businessDetail = computed(() => {
     const row = this.selectedBusiness();
     if (!row) return null;
+    if (!this.store.isSeedData()) {
+      const detail = this.realDetail();
+      return buildRealBusinessDetail(row, detail?.applications ?? []);
+    }
     // The canonical join — never the applicant's name, never fabricated.
     // A business created via this page's own wizard (not a real
     // ApplicationStore Business) simply has no linked applications yet.
@@ -357,6 +449,11 @@ export class Businesses {
     this.selectedBusiness.set(row);
     this.detailTab.set('overview');
     this.view.set('detail');
+    if (!this.store.isSeedData()) {
+      this.realDetail.set(null);
+      this.realDetailError.set(null);
+      void this.loadRealDetail(row.id);
+    }
   }
 
   protected selectDetailTab(tab: DetailTab): void {

@@ -18,21 +18,33 @@ import { Injectable, computed, signal } from '@angular/core';
 
 const ACCESS = 'ebpco.access';
 const REFRESH = 'ebpco.refresh';
+const EXPIRES_AT = 'ebpco.expiresAt';
 
 @Injectable({ providedIn: 'root' })
 export class TokenStore {
   private readonly _access = signal<string | null>(read(ACCESS));
   private readonly _refresh = signal<string | null>(read(REFRESH));
+  // Epoch ms the access token actually expires, from the server's own
+  // `expiresIn` on whichever call last minted it (sign-in or a refresh) — so
+  // SessionService can schedule the next proactive refresh from real
+  // remaining time, including right after a reload, instead of only finding
+  // out the token died on the next 401.
+  private readonly _expiresAt = signal<number | null>(readNumber(EXPIRES_AT));
 
   readonly access = this._access.asReadonly();
   readonly hasSession = computed(() => this._access() !== null);
 
-  set(tokens: { accessToken: string; refreshToken?: string | null }): void {
+  set(tokens: { accessToken: string; refreshToken?: string | null; expiresIn?: number }): void {
     this._access.set(tokens.accessToken);
     write(ACCESS, tokens.accessToken);
     if (tokens.refreshToken !== undefined && tokens.refreshToken !== null) {
       this._refresh.set(tokens.refreshToken);
       write(REFRESH, tokens.refreshToken);
+    }
+    if (tokens.expiresIn !== undefined) {
+      const at = Date.now() + tokens.expiresIn * 1000;
+      this._expiresAt.set(at);
+      write(EXPIRES_AT, String(at));
     }
   }
 
@@ -40,11 +52,20 @@ export class TokenStore {
     return this._refresh();
   }
 
+  /** Seconds until the access token expires, or null when no expiry was ever recorded (a token stored before this field existed). */
+  expiresInSeconds(): number | null {
+    const at = this._expiresAt();
+    if (at === null) return null;
+    return Math.max(0, Math.round((at - Date.now()) / 1000));
+  }
+
   clear(): void {
     this._access.set(null);
     this._refresh.set(null);
+    this._expiresAt.set(null);
     write(ACCESS, null);
     write(REFRESH, null);
+    write(EXPIRES_AT, null);
   }
 }
 
@@ -60,6 +81,13 @@ function read(key: string): string | null {
   } catch {
     return null;
   }
+}
+
+function readNumber(key: string): number | null {
+  const raw = read(key);
+  if (raw === null) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
 }
 
 function write(key: string, value: string | null): void {

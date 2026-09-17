@@ -634,7 +634,13 @@
                       <app-icon name="download" [size]="14" />
                       Export {{ docSelectedIds().size > 0 ? 'Selected' : 'All' }}
                     </button>
-                    <button type="button" role="menuitem" (click)="markSelectedDocsAccepted()">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      [disabled]="!!realDetail() && !canAttachDocuments()"
+                      [title]="!!realDetail() && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
+                      (click)="markSelectedDocsAccepted()"
+                    >
                       <app-icon name="check-circle" [size]="14" />
                       Mark Selected Accepted
                     </button>
@@ -744,15 +750,24 @@
                             r.doc.status === 'Revision Required' ||
                             r.doc.status === 'Expired'
                           ) {
-                            <label class="resubmit-btn">
+                            <label
+                              class="resubmit-btn"
+                              [title]="r.isReal && !canAttachDocuments() ? 'Only Records Officers and Super Admins can resubmit a document on a citizen\'s behalf.' : ''"
+                            >
                               Resubmit
-                              <input type="file" (change)="resubmitDocumentFile(r, $event)" />
+                              <input
+                                type="file"
+                                [disabled]="r.isReal && !canAttachDocuments()"
+                                (change)="resubmitDocumentFile(r, $event)"
+                              />
                             </label>
                           }
                           @if (r.doc.status === 'Submitted' || r.doc.status === 'Uploaded') {
                             <button
                               type="button"
                               class="preview-btn"
+                              [disabled]="r.isReal && !canAttachDocuments()"
+                              [title]="r.isReal && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
                               (click)="setDocStatus(r, 'Under Review')"
                             >
                               Mark Under Review
@@ -762,6 +777,8 @@
                             <button
                               type="button"
                               class="preview-btn"
+                              [disabled]="r.isReal && !canAttachDocuments()"
+                              [title]="r.isReal && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
                               (click)="setDocStatus(r, 'Accepted')"
                             >
                               Accept
@@ -769,6 +786,8 @@
                             <button
                               type="button"
                               class="preview-btn danger-text"
+                              [disabled]="r.isReal && !canAttachDocuments()"
+                              [title]="r.isReal && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
                               (click)="setDocStatus(r, 'Revision Required')"
                             >
                               Request Revision
@@ -776,15 +795,24 @@
                             <button
                               type="button"
                               class="preview-btn danger-text"
+                              [disabled]="r.isReal && !canAttachDocuments()"
+                              [title]="r.isReal && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
                               (click)="setDocStatus(r, 'Rejected')"
                             >
                               Reject
                             </button>
                           }
                         } @else {
-                          <label class="resubmit-btn">
+                          <label
+                            class="resubmit-btn"
+                            [title]="r.isReal && !canAttachDocuments() ? 'Only Records Officers and Super Admins can attach a document on a citizen\'s behalf.' : ''"
+                          >
                             Attach
-                            <input type="file" (change)="attachDocumentFile(r, $event)" />
+                            <input
+                              type="file"
+                              [disabled]="r.isReal && !canAttachDocuments()"
+                              (change)="attachDocumentFile(r, $event)"
+                            />
                           </label>
                         }
                       </td>
@@ -1314,37 +1342,37 @@
   </div>
 }
 
-@if (quickRejectTarget(); as rejectRow) {
-  <div class="modal-backdrop" (click)="cancelQuickReject()">
+@if (quickReasonTarget(); as reason) {
+  <div class="modal-backdrop" (click)="cancelQuickReason()">
     <div class="modal-box create-box" (click)="$event.stopPropagation()" role="alertdialog" aria-modal="true">
-      <button type="button" class="modal-close" aria-label="Close" (click)="cancelQuickReject()">
+      <button type="button" class="modal-close" aria-label="Close" (click)="cancelQuickReason()">
         &#10005;
       </button>
-      <h2>Reject application?</h2>
+      <h2>{{ reason.target === 'Rejected' ? 'Reject application?' : 'Return for revision?' }}</h2>
       <p class="modal-hint">
-        {{ rejectRow.applicant }}'s application ({{ rejectRow.id }}) will move to Rejected.
+        {{ reason.row.applicant }}'s application ({{ reason.row.id }}) will move to {{ reason.target }}.
       </p>
-      <form class="create-form" (ngSubmit)="confirmQuickReject()">
+      <form class="create-form" (ngSubmit)="confirmQuickReason()">
         <label>
           Reason <span class="optional">(required)</span>
-          <textarea aria-label="Explain why this application is being rejected…"
+          <textarea [attr.aria-label]="reason.target === 'Rejected' ? 'Explain why this application is being rejected…' : 'Explain what the applicant needs to fix…'"
             rows="3"
             required
-            [value]="quickRejectRemarks()"
-            (input)="quickRejectRemarks.set($any($event.target).value)"
-            placeholder="Explain why this application is being rejected…"
+            [value]="quickReasonRemarks()"
+            (input)="quickReasonRemarks.set($any($event.target).value)"
+            [placeholder]="reason.target === 'Rejected' ? 'Explain why this application is being rejected…' : 'Explain what the applicant needs to fix…'"
           ></textarea>
         </label>
         <div class="modal-actions">
-          <button type="button" class="modal-btn neutral" (click)="cancelQuickReject()">
+          <button type="button" class="modal-btn neutral" (click)="cancelQuickReason()">
             Cancel
           </button>
           <button
             type="submit"
             class="modal-btn danger"
-            [disabled]="!quickRejectRemarks().trim()"
+            [disabled]="!quickReasonRemarks().trim()"
           >
-            Reject Application
+            {{ reason.target === 'Rejected' ? 'Reject Application' : 'Return for Revision' }}
           </button>
         </div>
       </form>

@@ -234,13 +234,15 @@ export class Payments {
   protected readonly workspacePayments = signal<readonly ApplicationPaymentRow[]>([]);
 
   /**
-   * The one in-progress (Draft/Submitted/Approved) assessment id this
-   * session knows about per application — kept only in memory, for exactly
-   * the reason explained on `StaffPaymentsApi.getAssessment`: the server has
-   * no "find the open assessment for this application" route. Reloading the
-   * page loses this; the officer would then see "no open assessment" even
-   * though one may still exist server-side (see `draftAssessment`'s
-   * `already-open` handling below).
+   * The one in-progress (Draft/Submitted/Approved) assessment id THIS
+   * session has drafted or touched, per application — an optimization only.
+   * `loadWorkspace` no longer depends on it to find an existing assessment
+   * (it now asks the server directly via `getOpenAssessment`, which is what
+   * lets a second officer — the normal case for approval, since the drafter
+   * may not approve their own work — find and act on an assessment they
+   * never personally opened). This map still exists so `startAssessment`'s
+   * `already-open` branch can immediately show what was just drafted in
+   * this same call without a second round trip.
    */
   private readonly knownAssessmentId = new Map<string, string>();
 
@@ -297,14 +299,12 @@ export class Payments {
         this.workspaceError.set(detail.message);
       }
 
-      const cachedId = this.knownAssessmentId.get(applicationId);
-      if (cachedId) {
-        const result = await this.paymentsApi.getAssessment(cachedId);
-        if (result.kind === 'ok' && result.assessment.status !== 'Issued' && result.assessment.status !== 'Withdrawn') {
-          this.setWorkspaceAssessment(result.assessment);
-        } else {
-          this.knownAssessmentId.delete(applicationId);
-        }
+      const open = await this.paymentsApi.getOpenAssessment(applicationId);
+      if (open.kind === 'ok' && open.assessment) {
+        this.knownAssessmentId.set(applicationId, open.assessment.id);
+        this.setWorkspaceAssessment(open.assessment);
+      } else {
+        this.knownAssessmentId.delete(applicationId);
       }
     } finally {
       this.workspaceLoading.set(false);
@@ -328,10 +328,18 @@ export class Payments {
         this.toast.success('Assessment drafted from the fee schedule in force today.');
         return;
       }
-      // `already-open` lands here too: this session has no record of that
-      // draft's id (a reload, or drafted from another tab/officer) — there
-      // is no server route to find it by applicationId, so the honest
-      // answer is the server's own refusal text, not a guess at the id.
+      // `already-open` lands here too — a race between this workspace's own
+      // load and someone else drafting one in between. Fetch and show the
+      // real one rather than leaving the officer looking at a toast and a
+      // "Start Assessment" button that would just fail the same way again.
+      if (result.kind === 'refused' && result.message.includes('already')) {
+        const open = await this.paymentsApi.getOpenAssessment(id);
+        if (open.kind === 'ok' && open.assessment) {
+          this.knownAssessmentId.set(id, open.assessment.id);
+          this.setWorkspaceAssessment(open.assessment);
+          return;
+        }
+      }
       this.toast.error(
         result.kind === 'unavailable' ? 'This deployment cannot draft assessments yet.' : result.message,
       );

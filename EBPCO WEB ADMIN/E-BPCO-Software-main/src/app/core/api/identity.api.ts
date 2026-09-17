@@ -64,12 +64,45 @@ export class IdentityApi {
       grantType: 'password',
       email, password, ...(totp === undefined ? {} : { totp }),
     });
-    this.tokens.set({ accessToken: issued.accessToken, refreshToken: issued.refreshToken ?? null });
+    this.tokens.set({
+      accessToken: issued.accessToken,
+      refreshToken: issued.refreshToken ?? null,
+      expiresIn: issued.expiresIn,
+    });
     return this.me();
   }
 
   me(): Promise<Me> {
     return this.api.get<Me>('/me');
+  }
+
+  /**
+   * Spends the stored refresh token for a new access token, before the old
+   * one expires — the proactive half of session-keeping (see
+   * `SessionService`'s refresh timer). The reactive alternative — refreshing
+   * only after a request 401s — was rejected: it would need to queue and
+   * replay in-flight requests, and getting that wrong risks something like
+   * `POST /staff/payments/:id/verify` being submitted twice. A background
+   * timer never touches an in-flight request, so it sidesteps that risk
+   * entirely.
+   *
+   * The server's refresh tokens are single-use and ROTATE on every call — the
+   * new one returned here must replace the stored one, which is why this
+   * always re-stores both tokens rather than just the access token. Presenting
+   * an already-spent refresh token reads as theft server-side and revokes the
+   * whole session, so this must never be called twice concurrently with the
+   * same stored token.
+   */
+  async refresh(): Promise<TokenResponse> {
+    const refreshToken = this.tokens.refreshToken();
+    if (refreshToken === null) throw new Error('No refresh token to spend.');
+    const issued = await this.api.post<TokenResponse>('/auth/token/refresh', { refreshToken });
+    this.tokens.set({
+      accessToken: issued.accessToken,
+      refreshToken: issued.refreshToken ?? null,
+      expiresIn: issued.expiresIn,
+    });
+    return issued;
   }
 
   async signOut(): Promise<void> {

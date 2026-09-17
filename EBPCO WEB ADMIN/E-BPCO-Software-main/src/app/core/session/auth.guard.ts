@@ -3,30 +3,42 @@ import { CanActivateFn, Router } from '@angular/router';
 import { SessionService } from './session.service';
 import { canAccessPath } from './permissions';
 
-// QA-PASS TOGGLE: false while testing the real /login and /register screens
-// (so the guard actually redirects there instead of skipping past them).
-// Set back to true afterward to restore the dev bypass.
+// Kept `false` in every normal run, including this one — login is real (see
+// SessionService) and this guard's job in that state is exactly what it
+// looks like below: redirect an unauthenticated visitor to /login. Flip to
+// `true` only as a LOCAL, offline convenience when no backend is reachable
+// at all (e.g. developing away from the LGU network) — it substitutes a
+// same-machine Super Admin session for a real sign-in so the rest of the
+// portal can still be exercised. Never enable this against a deployment
+// anyone else can reach; it bypasses authentication entirely.
 const DEV_BYPASS_ENABLED = false;
 
 /**
- * There's no real backend or credential check behind login (see
- * SessionService) — every successful sign-in produces the same mock Super
- * Admin identity regardless of what was typed. So rather than bouncing a
- * direct URL (e.g. typing /dashboard straight into the address bar, or
- * refreshing, which drops the in-memory session) back to /login, this
- * guard just establishes that same mock session on the fly and lets the
- * navigation continue. Role-based path protection still applies below —
- * this only removes the login *redirect*, not authorization.
+ * Redirects an unauthenticated visitor to `/login`, and enforces role-based
+ * path protection for one who is signed in (a real session, from the real
+ * `SessionService`/`IdentityApi` — see their own doc comments). The one
+ * exception is `DEV_BYPASS_ENABLED` above, an offline-only escape hatch that
+ * is off by default and stays off in every normal run.
+ *
+ * `SessionService.restore()` is awaited here, first, whenever the in-memory
+ * session is empty — which it always is on a fresh page load, since nothing
+ * else in this app's bootstrap (`app.config.ts` has no `APP_INITIALIZER` for
+ * it) ever calls `restore()`. Without this, `isAuthenticated()` read the
+ * in-memory signal before it had ever had a chance to be filled from the
+ * real token in `sessionStorage`, so this guard sent a genuinely still-
+ * signed-in officer to `/login` on every single refresh — the exact
+ * "logged out on reload" complaint `restore()` itself was written to
+ * prevent (see its own doc comment), just never wired to the one place a
+ * reload actually goes through.
  */
-export const authGuard: CanActivateFn = (_route, state) => {
+export const authGuard: CanActivateFn = async (_route, state) => {
   const session = inject(SessionService);
   const router = inject(Router);
 
-  // TEMPORARY DEV BYPASS: no backend is running locally right now, so real
-  // sign-in can't succeed. Auto-establish a mock Super Admin session instead
-  // of redirecting to /login (this used to be the guard's normal behavior —
-  // see git blame on this file — before a real backend existed). Remove this
-  // block and SessionService.devBypass once a backend is available again.
+  if (!session.isAuthenticated()) {
+    await session.restore();
+  }
+
   if (!session.isAuthenticated()) {
     if (DEV_BYPASS_ENABLED) {
       session.devBypass();

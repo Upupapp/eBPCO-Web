@@ -4,9 +4,11 @@
   <div class="prototype-disclaimer" role="note">
     <app-icon name="info" [size]="16" />
     <span>
-      This page is a UI prototype — creating a user or editing a role's permissions here does not
-      change real access control. The system's actual sign-in roles and action permissions are
-      defined in code (<code>core/session/permissions.ts</code>) and are not editable from here yet.
+      The staff directory above is real — creating, disabling and re-enabling an account, and
+      changing its access level and assigned forms, all reach the real server. Editing a role
+      card's own description and permission list further down this page does not: those stay
+      local to this browser session. The system's actual scope grants per role are defined in
+      code (<code>core/session/permissions.ts</code>) and are not editable from here.
     </span>
   </div>
 
@@ -695,37 +697,36 @@
       <h2>Add User</h2>
       <form class="create-form" (ngSubmit)="createUser()">
         <label>
-          Full Name
-          <input type="text" [(ngModel)]="newUser.name" name="userName" required />
-        </label>
-        <label>
           Email
-          <input aria-label="Auto-generated if left blank"
+          <input aria-label="Email address"
             type="email"
             [(ngModel)]="newUser.email"
             name="userEmail"
-            placeholder="Auto-generated if left blank"
+            placeholder="officer@ebpco.gov.ph"
+            required
           />
         </label>
-        <label>
-          Role
-          <select [(ngModel)]="newUser.role" name="userRole">
-            @for (role of roleOptions; track role) {
-              <option [value]="role">{{ role }}</option>
-            }
-          </select>
-        </label>
-        <label>
-          Department
-          <select [(ngModel)]="newUser.department" name="userDepartment">
-            @for (dept of departments; track dept) {
-              <option [value]="dept">{{ dept }}</option>
-            }
-          </select>
-        </label>
+        <span class="field-label">Roles</span>
+        <p class="field-hint">
+          An account with no roles yet is fine — created ahead of a posting being confirmed.
+        </p>
+        <div class="role-checklist">
+          @for (role of wireRoleOptions; track role) {
+            <label class="checkbox-row">
+              <input
+                type="checkbox"
+                [checked]="isNewUserRoleChecked(role)"
+                (change)="toggleNewUserRole(role)"
+              />
+              {{ wireRoleLabel(role) }}
+            </label>
+          }
+        </div>
         <div class="modal-actions">
           <button type="button" class="modal-btn neutral" (click)="cancelAddUser()">Cancel</button>
-          <button type="submit" class="modal-btn confirm">Invite User</button>
+          <button type="submit" class="modal-btn confirm" [disabled]="addUserWorking()">
+            {{ addUserWorking() ? 'Creating…' : 'Create Account' }}
+          </button>
         </div>
       </form>
     </div>

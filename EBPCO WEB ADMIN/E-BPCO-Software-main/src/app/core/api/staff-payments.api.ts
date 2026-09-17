@@ -70,6 +70,12 @@ export type AssessmentReadResult =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
 
+/** `assessment: null` is a normal answer (nothing open right now), distinct from `unavailable`/`failed`. */
+export type OpenAssessmentResult =
+  | { readonly kind: 'ok'; readonly assessment: Assessment | null }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 export type OrderResult =
   | { readonly kind: 'done'; readonly orderId: string; readonly number: string; readonly totalCentavos: number }
   | { readonly kind: 'refused'; readonly message: string }
@@ -137,10 +143,26 @@ export class StaffPaymentsApi {
     }
   }
 
-  /** `GET /staff/assessments/:id` — the one way to re-open a draft once its id is known; the server has no "find the open assessment for this application" route, so the id has to be kept client-side for the session. */
+  /** `GET /staff/assessments/:id` — re-opens a draft once its id is already known (e.g. from `draftAssessment`'s own response, within the session that opened it). For finding an application's open assessment WITHOUT already knowing its id — the normal case for the officer approving one someone else drafted — use `getOpenAssessment` instead. */
   async getAssessment(assessmentId: string): Promise<AssessmentReadResult> {
     try {
       const assessment = await this.api.get<Assessment>(`/staff/assessments/${encodeURIComponent(assessmentId)}`);
+      return { kind: 'ok', assessment };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /** `GET /staff/applications/:id/assessments/open` — the application's own in-progress (Draft/Submitted/Approved) assessment, if any, found by applicationId rather than the assessment's own id. Answers `{ kind: 'ok', assessment: null }` when nothing is open — that is a normal state, not a failure. */
+  async getOpenAssessment(applicationId: string): Promise<OpenAssessmentResult> {
+    try {
+      const assessment = await this.api.get<Assessment | null>(
+        `/staff/applications/${encodeURIComponent(applicationId)}/assessments/open`,
+      );
       return { kind: 'ok', assessment };
     } catch (error) {
       if (error instanceof ApiError) {

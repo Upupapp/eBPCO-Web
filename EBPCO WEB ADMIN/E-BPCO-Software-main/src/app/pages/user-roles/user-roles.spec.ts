@@ -435,4 +435,65 @@ describe('User directory', () => {
     expect(text).toContain('not a picture of who holds an account');
     expect(text).not.toContain('No users match your search');
   });
+
+  it('creates a real account via POST /staff/users, offering the real 10 wire roles rather than the collapsed 7-category list', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({ data: [member()] }),
+    );
+    const c = fixture.componentInstance as unknown as {
+      openAddUser(): void;
+      newUser: { email: string; roles: string[] };
+      wireRoleOptions: readonly string[];
+      toggleNewUserRole(role: string): void;
+      createUser(): Promise<void>;
+      showAddUser: { (): boolean };
+    };
+    c.openAddUser();
+    // The real 10 StaffRole values, including 'assessor' and 'cashier' kept
+    // separate — the portal's own display vocabulary collapses both into one
+    // "Payment Officer" and this picker deliberately does not.
+    expect(c.wireRoleOptions).toContain('assessor');
+    expect(c.wireRoleOptions).toContain('cashier');
+    expect(c.wireRoleOptions.length).toBe(10);
+
+    c.newUser.email = 'new.officer@castillasorsogon.gov.ph';
+    c.toggleNewUserRole('evaluator');
+    const pending = c.createUser();
+
+    const http = TestBed.inject(HttpTestingController);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const req = http.expectOne('/staff/users');
+    expect(req.request.body).toEqual({
+      email: 'new.officer@castillasorsogon.gov.ph',
+      roles: ['evaluator'],
+    });
+    req.flush({
+      id: 'USR-2',
+      email: 'new.officer@castillasorsogon.gov.ph',
+      roles: ['evaluator'],
+      status: 'Pending',
+      mfaRequired: false,
+      mfaEnrolled: false,
+      createdAt: '2026-09-16T00:00:00.000Z',
+      lastSignInAt: null,
+      nextStep: 'The officer must set a password through the account-recovery flow before they can sign in.',
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    http.expectOne('/staff/users').flush({
+      data: [member(), {
+        id: 'USR-2', email: 'new.officer@castillasorsogon.gov.ph', roles: ['evaluator'],
+        status: 'Pending', mfaRequired: false, mfaEnrolled: false,
+        createdAt: '2026-09-16T00:00:00.000Z', lastSignInAt: null,
+      }],
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    // `loadDirectory()` re-fetches access for every row in the fresh roster,
+    // in parallel — not only the one just created.
+    http.expectOne('/staff/users/USR-1/access').flush(access());
+    http.expectOne('/staff/users/USR-2/access').flush(access());
+    await pending;
+    fixture.detectChanges();
+
+    expect(c.showAddUser()).toBe(false);
+  });
 });

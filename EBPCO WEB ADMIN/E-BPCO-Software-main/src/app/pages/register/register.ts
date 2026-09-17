@@ -7,6 +7,7 @@ import { USER_PORTAL_BASE_URL } from '../../core/config/user-portal.config';
 import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
 import { AuthLayout } from '../../shared/auth-layout/auth-layout';
 import { DilgSeal } from '../../shared/dilg-seal/dilg-seal';
+import { CapitalizeNameDirective } from '../../shared/utils/capitalize-name.directive';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // The API's own rule, copied deliberately rather than loosened: a number this
@@ -53,7 +54,7 @@ const REQUIRED_FIELD_LABELS: Record<string, string> = {
  */
 @Component({
   selector: 'app-register',
-  imports: [FormsModule, RouterLink, AuthLayout, DilgSeal],
+  imports: [FormsModule, RouterLink, AuthLayout, DilgSeal, CapitalizeNameDirective],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })

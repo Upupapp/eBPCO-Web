@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 
 import { Capabilities } from './capabilities';
 import { SessionService, Session } from './session.service';
@@ -18,7 +19,12 @@ import { API_BASE_URL } from '../api/api.config';
 function withSession(session: Session | null): Capabilities {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
-    providers: [provideHttpClient(), provideHttpClientTesting(), { provide: API_BASE_URL, useValue: '' }],
+    providers: [
+      provideHttpClient(),
+      provideHttpClientTesting(),
+      provideRouter([]),
+      { provide: API_BASE_URL, useValue: '' },
+    ],
   });
   const service = TestBed.inject(SessionService);
   (service as unknown as { _session: { set(v: Session | null): void } })._session.set(session);
