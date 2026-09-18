@@ -22,7 +22,7 @@ import { departmentName } from '../../core/domain/department.model';
 import { Capabilities } from '../../core/session/capabilities';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
 import { StaffEvaluationsApi, EvaluationQueueRow } from '../../core/api/staff-evaluations.api';
-import { StaffApplicationsApi, ApplicationDocumentRow } from '../../core/api/staff-applications.api';
+import { StaffApplicationsApi, ApplicationDocumentRow, ApplicationTimelineEvent } from '../../core/api/staff-applications.api';
 import {
   buildEvalTypeCards,
   buildEvalRows,
@@ -266,6 +266,14 @@ export class Evaluations implements OnInit {
    * back to the seed-only `ApplicationStore` in that case, same as before.
    */
   protected readonly recordRealDocuments = signal<readonly ApplicationDocumentRow[] | null>(null);
+  // Same real fetch as `recordRealDocuments`, its `timeline[]` instead of
+  // `documents[]` — see `recordAuditTrail` below for why this exists at
+  // all: the Timeline tab used to read `ApplicationStore.getAuditTrail()`
+  // unconditionally, a seed-only collection `replaceApplications()` always
+  // wipes to `[]` on a real queue load, so on a real application this tab
+  // silently showed "No activity recorded yet." no matter how much real
+  // history the application actually had.
+  protected readonly recordRealTimeline = signal<readonly ApplicationTimelineEvent[] | null>(null);
 
   private lastRecordDocAppId: string | null = null;
   private readonly loadRecordDocuments = effect(() => {
@@ -275,10 +283,14 @@ export class Evaluations implements OnInit {
       if (id === this.lastRecordDocAppId) return;
       this.lastRecordDocAppId = id;
       this.recordRealDocuments.set(null);
+      this.recordRealTimeline.set(null);
       if (!id) return;
       void this.applicationsApi.detail(id).then((result) => {
         if (this.lastRecordDocAppId !== id) return; // moved to a different record before this resolved
-        if (result.kind === 'ok') this.recordRealDocuments.set([...result.detail.documents]);
+        if (result.kind === 'ok') {
+          this.recordRealDocuments.set([...result.detail.documents]);
+          this.recordRealTimeline.set([...result.detail.timeline]);
+        }
       });
     });
   });
@@ -380,9 +392,38 @@ export class Evaluations implements OnInit {
     });
   });
 
+  /**
+   * Real once fetched (see `recordRealTimeline` above); falls back to the
+   * seed-only `ApplicationStore.getAuditTrail()` only while unfetched or
+   * for a seed/local-demo application the real backend never heard of —
+   * mirrors `applications.ts`'s own `realTimeline` (same real/seed split,
+   * same field mapping), kept in this file's own pre-existing
+   * `{id, action, timestamp, actor, role, remarks}` shape rather than
+   * that file's `TimelineItem` so the template here needed no rewrite.
+   */
   protected readonly recordAuditTrail = computed(() => {
     const row = this.selectedRow();
-    return row ? this.store.getAuditTrail(row.id) : [];
+    if (!row) return [];
+    const real = this.recordRealTimeline();
+    if (real) {
+      return [...real]
+        .map((e, i) => {
+          const occurred = new Date(e.occurredAt);
+          const validDate = !Number.isNaN(occurred.getTime());
+          return {
+            id: `${row.id}-${i}`,
+            action: e.toStatus,
+            timestamp: validDate
+              ? `${occurred.toLocaleDateString()}, ${occurred.toLocaleTimeString()}`
+              : e.occurredAt,
+            actor: e.actorName ?? e.office ?? (e.fromStatus ? `From ${e.fromStatus}` : 'Application filed'),
+            role: '',
+            remarks: e.remarks,
+          };
+        })
+        .reverse();
+    }
+    return this.store.getAuditTrail(row.id);
   });
 
   // ---- Record view: document preview modal ------------------------------

@@ -191,15 +191,6 @@
       <button
         type="button"
         class="pill-tab"
-        [class.active]="activeSubTab() === 'modules'"
-        (click)="selectSubTab('modules')"
-      >
-        <app-icon name="plug" [size]="15" />
-        Modules
-      </button>
-      <button
-        type="button"
-        class="pill-tab"
         [class.active]="activeSubTab() === 'recent-activity'"
         (click)="selectSubTab('recent-activity')"
       >
@@ -214,15 +205,6 @@
           <div class="growth-card">
             <div class="card-head">
               <h2>Businesses Growth</h2>
-            </div>
-
-            <div class="prototype-disclaimer" role="note">
-              <app-icon name="info" [size]="16" />
-              <span
-                >Sample data for preview only — this deployment has no growth-analytics endpoint,
-                so this chart's monthly registration figures do not reflect the real data shown
-                elsewhere on this page.</span
-              >
             </div>
 
             <div
@@ -270,7 +252,7 @@
                   [style.left.%]="(hp.x / 1000) * 100"
                   [style.top.%]="(hp.tooltipY / 260) * 100"
                 >
-                  <strong>{{ hp.label }} 2024</strong>
+                  <strong>{{ hp.label }} {{ hp.year }}</strong>
                   <span><i></i>Registrations: +{{ hp.value }}</span>
                 </div>
               }
@@ -281,42 +263,6 @@
                 <span>{{ m.label }}</span>
               }
             </div>
-          </div>
-        </div>
-      }
-
-      @case ('modules') {
-        <div class="modules-card">
-          <div class="card-head">
-            <h2>Module Usage Across Businesses</h2>
-            <button type="button" class="btn-outline" (click)="openCatalog()">
-              Manage Catalog
-            </button>
-          </div>
-
-          @if (moduleUsageError(); as message) {
-            <div class="prototype-disclaimer" role="note">
-              <app-icon name="info" [size]="16" />
-              <span>{{ message }}</span>
-            </div>
-          }
-          <div class="module-list">
-            @for (m of moduleUsage(); track m.name) {
-              <div class="module-row">
-                <span class="module-name">{{ m.name }}</span>
-                <span class="module-count">{{ m.businessCount }} Businesses</span>
-                <div class="module-bar-col">
-                  <span class="module-bar-track">
-                    <span
-                      class="module-bar-fill"
-                      [style.width.%]="m.pct"
-                      [style.background]="m.color"
-                    ></span>
-                  </span>
-                  <span class="module-pct">{{ m.pct }}%</span>
-                </div>
-              </div>
-            }
           </div>
         </div>
       }
@@ -332,7 +278,7 @@
               </a>
             </div>
 
-            @for (item of recentActivity; track item.name + item.agoLabel) {
+            @for (item of recentActivity(); track item.name + item.agoLabel) {
               <div class="activity-row">
                 <span class="activity-dot" [style.background]="item.color"></span>
                 <div class="activity-body">
@@ -358,11 +304,11 @@
               <p class="field-error">{{ announcementError() }}</p>
             }
             @if (announcementSent()) {
-              <p class="field-success">Announcement broadcast to {{ announcementAudience() }}.</p>
+              <p class="field-success">Announcement broadcast to {{ announcementAudienceLabel() }}.</p>
             }
             <select aria-label="Announcement audience" class="filter-select full-width" [(ngModel)]="announcementAudience">
-              <option>All Businesses (150)</option>
-              <option>Active Businesses Only</option>
+              <option [ngValue]="'all'">All Businesses ({{ totalBusinessesCount() }})</option>
+              <option [ngValue]="'active'">Active Businesses Only</option>
             </select>
             <button type="button" class="btn-primary full-width" (click)="broadcastNotice()">
               Broadcast Notice
@@ -876,36 +822,6 @@
         </div>
       </div>
 
-    </div>
-  </div>
-}
-
-@if (showCatalog()) {
-  <div class="modal-backdrop" (click)="closeCatalog()">
-    <div class="modal-box catalog-box" (click)="$event.stopPropagation()">
-      <button type="button" class="modal-close" aria-label="Close" (click)="closeCatalog()">
-        &#10005;
-      </button>
-      <h2>Module Catalog</h2>
-      <p>Turn platform modules on or off for new and existing businesses.</p>
-      <ul class="catalog-list">
-        @for (m of moduleUsage; track m.name) {
-          <li>
-            <span>{{ m.name }}</span>
-            <label class="switch">
-              <input
-                type="checkbox"
-                [checked]="isModuleEnabled(m.name)"
-                (change)="toggleModule(m.name)"
-              />
-              <span class="switch-track"></span>
-            </label>
-          </li>
-        }
-      </ul>
-      <div class="modal-actions">
-        <button type="button" class="modal-btn confirm" (click)="closeCatalog()">Done</button>
-      </div>
     </div>
   </div>
 }

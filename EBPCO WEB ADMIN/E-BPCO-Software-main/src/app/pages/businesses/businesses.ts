@@ -18,10 +18,8 @@ import { ToastService } from '../../shared/toast/toast.service';
 import { validateMobileNumber } from '../../shared/utils/validators';
 import { CapitalizeNameDirective } from '../../shared/utils/capitalize-name.directive';
 import { StaffBusinessesApi, StaffBusinessDetail, StaffBusinessRow } from '../../core/api/staff-businesses.api';
-import { EvaluationQueueRow, StaffEvaluationsApi } from '../../core/api/staff-evaluations.api';
-import { EVALUATION_STAGE_ORDER, EvaluationStage } from '../../core/domain/status.model';
 
-type SubTab = 'analytics' | 'modules' | 'recent-activity';
+type SubTab = 'analytics' | 'recent-activity';
 type ViewMode = 'list' | 'create' | 'detail';
 type DetailTab = 'overview' | 'applications' | 'documents' | 'users' | 'activity';
 
@@ -60,28 +58,28 @@ interface BusinessRow {
   status: 'Active' | 'Inactive';
 }
 
-interface ModuleUsage {
-  name: string;
-  businessCount: number;
-  pct: number;
-  color: string;
-}
-
-/** The real 5-stage evaluation pipeline (`EVALUATION_STAGE_ORDER`), with the display name/color this page already used for each — no stage added, removed, or renamed. */
-const STAGE_MODULE_META: readonly { stage: EvaluationStage; name: string; color: string }[] = [
-  { stage: 'Initial', name: 'Initial Evaluation', color: '#7c3aed' },
-  { stage: 'Zoning', name: 'Zoning Evaluation', color: '#f59e0b' },
-  { stage: 'Fire Safety', name: 'Fire Safety Evaluation', color: '#2563eb' },
-  { stage: 'OBO', name: 'OBO Evaluation', color: '#16a34a' },
-  { stage: 'Final Approval', name: 'Final Evaluation', color: '#991b1b' },
-];
-
 interface ActivityItem {
   name: string;
   text: string;
   dateLabel: string;
   agoLabel: string;
   color: string;
+}
+
+function formatDateTime(value: Date): string {
+  return `${value.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })} - `
+    + value.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' });
+}
+
+function timeAgo(value: Date): string {
+  const seconds = Math.max(0, Math.floor((Date.now() - value.getTime()) / 1000));
+  if (seconds < 60) return 'Just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? '' : 's'} ago`;
 }
 
 function slugify(value: string): string {
@@ -94,23 +92,9 @@ function slugify(value: string): string {
 
 interface GrowthPoint {
   label: string;
+  year: number;
   value: number;
 }
-
-const GROWTH_POINTS: GrowthPoint[] = [
-  { label: 'Jan', value: 8 },
-  { label: 'Feb', value: 38 },
-  { label: 'Mar', value: 52 },
-  { label: 'Apr', value: 28 },
-  { label: 'May', value: 40 },
-  { label: 'Jun', value: 22 },
-  { label: 'Jul', value: 46 },
-  { label: 'Aug', value: 34 },
-  { label: 'Sep', value: 58 },
-  { label: 'Oct', value: 54 },
-  { label: 'Nov', value: 64 },
-  { label: 'Dec', value: 90 },
-];
 
 @Component({
   selector: 'app-businesses',
@@ -123,7 +107,6 @@ const GROWTH_POINTS: GrowthPoint[] = [
 export class Businesses {
   private readonly store = inject(ApplicationStore);
   private readonly businessesApi = inject(StaffBusinessesApi);
-  private readonly evaluationsApi = inject(StaffEvaluationsApi);
 
   /**
    * `GET /staff/businesses` is real and this page now calls it (P-4b) — the
@@ -133,13 +116,6 @@ export class Businesses {
   private readonly realRows = signal<StaffBusinessRow[] | null>(null);
   /** A message when the real fetch could not be completed — `null` on success, and while still loading. */
   protected readonly realListError = signal<string | null>(null);
-  /**
-   * `GET /staff/evaluations/queue` — the exact same real endpoint the
-   * Evaluations page itself reads (`evaluations.ts`) — feeds the Modules
-   * tab below. `null` until the first fetch resolves.
-   */
-  private readonly realEvaluationRows = signal<EvaluationQueueRow[] | null>(null);
-  protected readonly moduleUsageError = signal<string | null>(null);
   private readonly toast = inject(ToastService);
 
   constructor(private readonly router: Router) {
@@ -148,7 +124,6 @@ export class Businesses {
       if (!isSeed) {
         untracked(() => {
           void this.loadRealBusinesses();
-          void this.loadRealEvaluationQueue();
         });
       }
     });
@@ -165,20 +140,6 @@ export class Businesses {
     } else {
       this.realRows.set([]);
       this.realListError.set(`Could not load the business directory: ${result.message}`);
-    }
-  }
-
-  private async loadRealEvaluationQueue(): Promise<void> {
-    const result = await this.evaluationsApi.queue();
-    if (result.kind === 'ok') {
-      this.realEvaluationRows.set([...result.rows]);
-      this.moduleUsageError.set(null);
-    } else if (result.kind === 'unavailable') {
-      this.realEvaluationRows.set([]);
-      this.moduleUsageError.set("This deployment's evaluations queue endpoint isn't reachable.");
-    } else {
-      this.realEvaluationRows.set([]);
-      this.moduleUsageError.set(`Could not load module usage: ${result.message}`);
     }
   }
 
@@ -294,6 +255,16 @@ export class Businesses {
       },
     ];
   });
+
+  /**
+   * The real count behind the Communication Center's "All Businesses"
+   * audience option — that option used to say a hardcoded "(150)" that
+   * never changed and never agreed with the real "Total Businesses" ring
+   * stat sitting on the very same page.
+   */
+  protected readonly totalBusinessesCount = computed<number>(() =>
+    this.store.isSeedData() ? this.store.businesses().length : (this.realRows() ?? []).length,
+  );
 
   // A real Business's registration/contact fields — never a fabricated
   // dataset — with the owner's contact info joined through the real
@@ -624,90 +595,44 @@ export class Businesses {
   }
 
   /**
-   * Real counts, not sample data: each stage's `businessCount` is the number
-   * of DISTINCT businesses whose active application currently sits at that
-   * evaluation stage.
-   *
-   * `nextStage`/`evaluationStage` is the server's own "next step" field
-   * (`GET /staff/evaluations` for real data, `ApplicationStore.applications()`'s
-   * seed equivalent otherwise) — not re-derived from a decision history here,
-   * same discipline `evaluations-data.ts` already follows for the real
-   * Evaluations page these five stages come from.
-   *
-   * `pct` is each stage's share of the currently-active evaluation
-   * workload (businesses at ANY of the five stages) — a real, meaningful
-   * proportion, not an arbitrary fill level.
+   * The 4 most recently-touched applications, each tied to its real
+   * business — replaces a hardcoded list of 4 businesses with lorem-ipsum
+   * body text and a May 2028 date (this app's data otherwise never leaves
+   * 2026). `completedAt` (the server's own `application_transitions` audit
+   * log, `application.model.ts`) is preferred as "when" a finished
+   * application last moved; an in-progress one falls back to its real
+   * filing date, since there is no bulk per-application "last touched"
+   * timestamp available on this page without an N+1 fetch per row.
    */
-  protected readonly moduleUsage = computed<ModuleUsage[]>(() => {
-    const countsByStage: Record<EvaluationStage, number> = this.store.isSeedData()
-      ? this.stageBusinessCountsFromSeed()
-      : this.stageBusinessCountsFromRealQueue();
-
-    const counts = STAGE_MODULE_META.map((meta) => countsByStage[meta.stage]);
-    const totalActive = counts.reduce((sum, n) => sum + n, 0) || 1;
-    return STAGE_MODULE_META.map((meta, i) => ({
-      name: meta.name,
-      businessCount: counts[i],
-      pct: Math.round((counts[i] / totalActive) * 100),
-      color: meta.color,
-    }));
+  protected readonly recentActivity = computed<ActivityItem[]>(() => {
+    const apps = this.store.applications();
+    return apps
+      .map((a) => ({ app: a, at: a.completedAt ?? a.dateValue }))
+      .sort((x, y) => y.at.getTime() - x.at.getTime())
+      .slice(0, 4)
+      .map(({ app: a, at }) => ({
+        name: a.businessName,
+        text: a.completedAt
+          ? `${a.permitType ?? 'Application'} reached ${a.lifecycleStatus}.`
+          : `Filed a new ${a.permitType ?? 'permit'} application — currently ${a.lifecycleStatus}.`,
+        dateLabel: formatDateTime(at),
+        agoLabel: timeAgo(at),
+        color: '#a78bfa',
+      }));
   });
 
-  private stageBusinessCountsFromRealQueue(): Record<EvaluationStage, number> {
-    const rows = this.realEvaluationRows() ?? [];
-    return Object.fromEntries(
-      EVALUATION_STAGE_ORDER.map((stage) => [
-        stage,
-        new Set(
-          rows.filter((r) => r.nextStage === stage && r.businessId !== null).map((r) => r.businessId),
-        ).size,
-      ]),
-    ) as Record<EvaluationStage, number>;
-  }
-
-  private stageBusinessCountsFromSeed(): Record<EvaluationStage, number> {
-    const apps = this.store.applications();
-    return Object.fromEntries(
-      EVALUATION_STAGE_ORDER.map((stage) => [
-        stage,
-        new Set(apps.filter((a) => a.evaluationStage === stage).map((a) => a.businessId)).size,
-      ]),
-    ) as Record<EvaluationStage, number>;
-  }
-
-  protected readonly recentActivity: ActivityItem[] = [
-    {
-      name: 'Villanueva Hardware & Construction Supply',
-      text: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-      dateLabel: 'May 20, 2028 - 10:30 AM',
-      agoLabel: '3 hours ago',
-      color: '#a78bfa',
-    },
-    {
-      name: 'Simbulan Sari-Sari Store',
-      text: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-      dateLabel: 'May 20, 2028 - 8:30 AM',
-      agoLabel: '5 hours ago',
-      color: '#a78bfa',
-    },
-    {
-      name: 'Rodrigo Bakeshop',
-      text: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-      dateLabel: 'May 20, 2028 - 8:30 AM',
-      agoLabel: '5 hours ago',
-      color: '#a78bfa',
-    },
-    {
-      name: 'Zaballero Auto Repair Shop',
-      text: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-      dateLabel: 'May 20, 2028 - 7:30 AM',
-      agoLabel: '3 hours ago',
-      color: '#a78bfa',
-    },
-  ];
-
   protected readonly announcementText = signal('');
-  protected readonly announcementAudience = signal('All Businesses (150)');
+  // A stable key, not the display string itself — that string embeds
+  // `totalBusinessesCount()`, which changes as real data loads, and a
+  // `[(ngModel)]` bound directly to that text would silently show no
+  // option selected the moment the count it was initialized with stopped
+  // matching the option's current rendered text.
+  protected readonly announcementAudience = signal<'all' | 'active'>('all');
+  protected readonly announcementAudienceLabel = computed(() =>
+    this.announcementAudience() === 'all'
+      ? `All Businesses (${this.totalBusinessesCount()})`
+      : 'Active Businesses Only',
+  );
   protected readonly announcementError = signal('');
   protected readonly announcementSent = signal(false);
 
@@ -727,11 +652,44 @@ export class Businesses {
     this.announcementSent.set(false);
   }
 
-  protected readonly growthPoints = GROWTH_POINTS;
+  /**
+   * Real monthly registrations, from the same `businessRows()` every other
+   * widget on this page reads (real once `GET /staff/businesses` answers,
+   * seed otherwise — see that computed's own doc comment) — a rolling
+   * 12-month window ending this month, same shape as the Dashboard's own
+   * `overviewChart`. This used to be a hardcoded illustrative array with
+   * no connection to the real registrations shown everywhere else on this
+   * page; a business genuinely registered this month now genuinely shows
+   * up here.
+   */
+  protected readonly growthPoints = computed<GrowthPoint[]>(() => {
+    const rows = this.businessRows();
+    const now = new Date();
+    const months = Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
+      return { year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleDateString('en-US', { month: 'short' }) };
+    });
+    // A locally-created row not yet backed by a real record carries
+    // 'Just now' rather than a parseable date (see createBusiness) — it
+    // belongs in the current month's count, not silently dropped from the
+    // chart entirely.
+    const registeredOn = (row: BusinessRow): Date => {
+      const parsed = new Date(row.dateCreated);
+      return Number.isNaN(parsed.getTime()) ? now : parsed;
+    };
+    return months.map(({ year, month, label }) => ({
+      label,
+      year,
+      value: rows.filter((r) => {
+        const d = registeredOn(r);
+        return d.getFullYear() === year && d.getMonth() === month;
+      }).length,
+    }));
+  });
 
   protected readonly growthPath = computed(() => {
-    const pts = this.growthPoints;
-    const maxVal = 100;
+    const pts = this.growthPoints();
+    const maxVal = Math.max(...pts.map((p) => p.value), 1);
     const w = 1000;
     const h = 260;
     const stepX = w / (pts.length - 1);
@@ -743,8 +701,8 @@ export class Businesses {
   });
 
   protected readonly growthMarkers = computed(() => {
-    const pts = this.growthPoints;
-    const maxVal = 100;
+    const pts = this.growthPoints();
+    const maxVal = Math.max(...pts.map((p) => p.value), 1);
     const w = 1000;
     const h = 260;
     const stepX = w / (pts.length - 1);
@@ -752,6 +710,7 @@ export class Businesses {
       x: i * stepX,
       y: h - (p.value / maxVal) * h,
       label: p.label,
+      year: p.year,
     }));
   });
 
@@ -766,7 +725,7 @@ export class Businesses {
     // floor — otherwise a near-top point (a high growth value) floats the
     // tooltip up into the card header and behind the range filter.
     const tooltipY = Math.max(marker.y, 60);
-    return { ...marker, tooltipY, value: this.growthPoints[i].value };
+    return { ...marker, tooltipY, value: this.growthPoints()[i].value };
   });
 
   protected onGrowthPointerMove(event: MouseEvent): void {
@@ -775,7 +734,7 @@ export class Businesses {
     const rect = el.getBoundingClientRect();
     if (rect.width === 0) return;
     const ratio = (event.clientX - rect.left) / rect.width;
-    const n = this.growthPoints.length;
+    const n = this.growthPoints().length;
     const idx = Math.round(ratio * (n - 1));
     this.hoveredGrowthIndex.set(Math.min(Math.max(idx, 0), n - 1));
   }
@@ -809,39 +768,6 @@ export class Businesses {
 
   selectSubTab(tab: SubTab): void {
     this.activeSubTab.set(tab);
-  }
-
-  // ---- Modules catalog (Modules sub-tab) -------------------------------
-
-  protected readonly showCatalog = signal(false);
-  protected readonly enabledModules = signal<ReadonlySet<string>>(
-    new Set(this.moduleUsage.map((m) => m.name)),
-  );
-
-  protected isModuleEnabled(name: string): boolean {
-    return this.enabledModules().has(name);
-  }
-
-  protected toggleModule(name: string): void {
-    let nowEnabled = false;
-    this.enabledModules.update((current) => {
-      const next = new Set(current);
-      if (next.has(name)) next.delete(name);
-      else {
-        next.add(name);
-        nowEnabled = true;
-      }
-      return next;
-    });
-    this.toast.success(`"${name}" ${nowEnabled ? 'enabled' : 'disabled'} for businesses.`);
-  }
-
-  protected openCatalog(): void {
-    this.showCatalog.set(true);
-  }
-
-  protected closeCatalog(): void {
-    this.showCatalog.set(false);
   }
 
   // Recent Activity's own feed only ever holds these 4 seeded items —

@@ -52,7 +52,7 @@
       <div class="card-head">
         <div class="pending-heading">
           <h2>Applications by Evaluation Stage</h2>
-          <p class="panel-subtitle">Active applications across the current review workflow</p>
+          <p class="panel-subtitle">Evaluation activity per stage — filter to "Pending" for what's still awaiting a decision right now</p>
         </div>
         <label class="sr-only" for="stage-result-filter">Filter by evaluation result</label>
         <select id="stage-result-filter" class="filter-select" [(ngModel)]="stageResultFilter">
@@ -216,7 +216,7 @@
       <span><i style="background: #f59e0b"></i>Approved Application: <strong>{{ approvedApplicationCount() }}</strong></span>
     </div>
 
-    <app-area-chart />
+    <app-area-chart [series]="overviewChart().series" [xLabels]="overviewChart().xLabels" />
   </section>
 
   <section class="card recent-card">

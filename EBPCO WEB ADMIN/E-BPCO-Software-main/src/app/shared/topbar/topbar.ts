@@ -4,7 +4,28 @@ import { Icon } from '../icon/icon';
 import { Avatar } from '../avatar/avatar';
 import { SessionService } from '../../core/session/session.service';
 import { ApplicationStore } from '../../core/domain/application-store';
+import { AppNotification } from '../../core/domain/notification.model';
 import { Capabilities } from '../../core/session/capabilities';
+import { StaffNotificationsApi, StaffNotificationRow } from '../../core/api/staff-notifications.api';
+
+function formatDateTime(iso: string): string {
+  const when = new Date(iso);
+  if (Number.isNaN(when.getTime())) return iso;
+  return `${when.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })} · `
+    + when.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' });
+}
+
+function toAppNotification(row: StaffNotificationRow): AppNotification {
+  return {
+    id: row.id,
+    applicationId: row.applicationId,
+    title: row.title,
+    message: row.body,
+    createdAtValue: new Date(row.createdAt),
+    createdAt: formatDateTime(row.createdAt),
+    isRead: row.readAt !== null,
+  };
+}
 
 @Component({
   selector: 'app-topbar',
@@ -23,6 +44,7 @@ export class Topbar {
 
   private readonly session = inject(SessionService);
   private readonly store = inject(ApplicationStore);
+  private readonly notificationsApi = inject(StaffNotificationsApi);
 
   readonly title = input.required<string>();
   readonly logoutPath = input<string>('/login');
@@ -42,11 +64,30 @@ export class Topbar {
   readonly searchChange = output<string>();
 
   private readonly localSearch = signal('');
-  // Notifications are generated from real domain events (see
-  // ApplicationStore's seed) instead of a disconnected static array, so
-  // every `applicationId` here genuinely exists and clicking one opens a
-  // real record.
-  protected readonly notifications = this.store.notifications;
+  /**
+   * Real once fetched from `GET /staff/notifications` — this used to read
+   * `ApplicationStore.notifications` unconditionally, a seed-only
+   * collection `replaceApplications()` always wipes to `[]` on a real
+   * queue load and nothing ever repopulates, so on this deployment every
+   * officer's bell showed permanently empty (0 unread) no matter how many
+   * real notices — evaluation-stage-passed, order-of-payment-issued, etc.
+   * — the server had actually recorded for their account. A real
+   * `staff/notifications` endpoint already existed on the backend; nothing
+   * on this side had ever been wired to it.
+   */
+  private readonly realNotifications = signal<readonly StaffNotificationRow[] | null>(null);
+
+  constructor(private readonly router: Router) {
+    void this.notificationsApi.inbox().then((result) => {
+      if (result.kind === 'ok') this.realNotifications.set(result.notifications);
+    });
+  }
+
+  protected readonly notifications = computed<AppNotification[]>(() => {
+    const real = this.realNotifications();
+    if (real !== null) return real.map(toAppNotification);
+    return this.store.notifications();
+  });
   protected readonly notifPanelOpen = signal(false);
   protected readonly userMenuOpen = signal(false);
   // Narrow viewports only (see topbar.scss) — the search box itself is
@@ -54,8 +95,6 @@ export class Topbar {
   // `display: none` with nothing to reopen it, unlike the icon-triggered
   // collapse every other narrow-width control in this app already uses.
   protected readonly mobileSearchOpen = signal(false);
-
-  constructor(private readonly router: Router) {}
 
   protected currentSearch(): string {
     return this.searchTerm() || this.localSearch();
@@ -107,7 +146,18 @@ export class Topbar {
   }
 
   protected markAllRead(): void {
-    this.store.markAllNotificationsRead();
+    const real = this.realNotifications();
+    if (real === null) {
+      this.store.markAllNotificationsRead();
+      return;
+    }
+    const now = new Date().toISOString();
+    const unread = real.filter((n) => n.readAt === null);
+    // Optimistic: reflect "read" immediately rather than waiting on every
+    // call below, which — no bulk endpoint exists — is one request per
+    // unread notice.
+    this.realNotifications.set(real.map((n) => (n.readAt === null ? { ...n, readAt: now } : n)));
+    for (const n of unread) void this.notificationsApi.markRead(n.id);
   }
 
   /** The business/project a notification's application belongs to, or null when the notification isn't tied to a real application — resolved through the store's real businessId relationship, never the applicant's name. */
@@ -117,7 +167,14 @@ export class Topbar {
   }
 
   protected selectNotification(id: string, applicationId: string | null): void {
-    this.store.markNotificationRead(id);
+    const real = this.realNotifications();
+    if (real === null) {
+      this.store.markNotificationRead(id);
+    } else {
+      const now = new Date().toISOString();
+      this.realNotifications.set(real.map((n) => (n.id === id ? { ...n, readAt: now } : n)));
+      void this.notificationsApi.markRead(id);
+    }
     this.closeMenus();
     if (applicationId) {
       this.router.navigateByUrl(`/applications/${applicationId}`);

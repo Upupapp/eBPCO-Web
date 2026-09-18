@@ -1,4 +1,5 @@
-import { RoleRow, UserRow } from './user-roles';
+import { UserRow } from './user-roles';
+import { ACTION_PERMISSIONS, ALL_STAFF_ROLES, NAV_MODULES, StaffRole } from '../../core/session/permissions';
 
 // Deterministic linked-record generator for the Staff User workspace —
 // workload and audit activity, derived from the user's own row so a reload
@@ -48,21 +49,76 @@ function seedFrom(id: string): () => number {
   };
 }
 
-// Turns a role's own free-text permission labels into a real module ×
-// action grid — derived from data the role already carries rather than a
-// second, disconnected permission source.
-export function buildPermissionMatrix(role: RoleRow): PermissionMatrixRow[] {
-  return role.permissions.map((label) => {
-    const lower = label.toLowerCase();
-    const isAll = lower === 'all modules';
+// Per-module action gates beyond plain view access, keyed by the same
+// `NavModule.key` the sidebar/route guard already use — filled in only
+// where a real ACTION_PERMISSIONS check (mirrored server-side) exists for
+// that module. A module left out here has no action beyond view/export.
+const MODULE_ACTIONS: Partial<
+  Record<
+    string,
+    {
+      create?: (role: StaffRole) => boolean;
+      approve?: (role: StaffRole) => boolean;
+      verify?: (role: StaffRole) => boolean;
+      configure?: (role: StaffRole) => boolean;
+      exportable?: boolean;
+    }
+  >
+> = {
+  dashboard: { exportable: true },
+  applications: {
+    create: ACTION_PERMISSIONS.createApplication,
+    approve: ACTION_PERMISSIONS.approveApplication,
+    verify: ACTION_PERMISSIONS.verifyContact,
+    exportable: true,
+  },
+  evaluations: { approve: ACTION_PERMISSIONS.recordEvaluation, exportable: true },
+  payments: {
+    create: ACTION_PERMISSIONS.recordPayment,
+    approve: ACTION_PERMISSIONS.approveAssessment,
+    verify: ACTION_PERMISSIONS.verifyPayment,
+    configure: ACTION_PERMISSIONS.configurePayments,
+    exportable: true,
+  },
+  'permit-release': {
+    create: ACTION_PERMISSIONS.generatePermit,
+    approve: ACTION_PERMISSIONS.releasePermit,
+    configure: ACTION_PERMISSIONS.configureRequirements,
+    exportable: true,
+  },
+  businesses: { exportable: true },
+  // Both roles that can even see this module (Super Admin, Administrator)
+  // administer the roster with no further server-side split — there is no
+  // separate "can view but not edit users" tier.
+  'user-roles': { create: () => true, exportable: true },
+  'system-logs': { exportable: true },
+};
+
+/**
+ * The module × action grid a role actually holds, read straight from the
+ * SAME registries the sidebar and route guard enforce (`NAV_MODULES`,
+ * `ACTION_PERMISSIONS`) — not a regex over a role card's marketing copy.
+ * This used to map `role.permissions` (three free-text labels like "User
+ * Management") through pattern matching to guess at create/approve/verify;
+ * an Evaluator's card said "View Applications, Record Evaluations" and the
+ * regex read "Record Evaluations" as approving something, which is a guess
+ * about English wording, not a fact about what the account can do. Every
+ * cell below is either the real per-module role list or a real permission
+ * function also used to gate the button that performs the action.
+ */
+export function buildPermissionMatrix(role: StaffRole | null): PermissionMatrixRow[] {
+  if (role === null || !ALL_STAFF_ROLES.includes(role)) return [];
+  return NAV_MODULES.map((mod) => {
+    const view = mod.roles.includes(role);
+    const actions = MODULE_ACTIONS[mod.key] ?? {};
     return {
-      module: label,
-      view: isAll || true, // every listed permission implies at least view access to it
-      create: isAll || /management|settings/.test(lower),
-      approve: isAll || /evaluation|approval|release/.test(lower),
-      verify: isAll || /payment/.test(lower),
-      export: isAll || /report/.test(lower),
-      configure: isAll || /settings/.test(lower),
+      module: mod.label,
+      view,
+      create: view && (actions.create?.(role) ?? false),
+      approve: view && (actions.approve?.(role) ?? false),
+      verify: view && (actions.verify?.(role) ?? false),
+      export: view && (actions.exportable ?? false),
+      configure: view && (actions.configure?.(role) ?? false),
     };
   });
 }

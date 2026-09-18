@@ -135,7 +135,7 @@
                     </div>
                     <div>
                       <dt>Assessed By</dt>
-                      <dd>{{ asmt.assessorName }} ({{ asmt.assessorRole }})</dd>
+                      <dd>{{ asmt.assessorRole ? asmt.assessorName + ' (' + asmt.assessorRole + ')' : asmt.assessorName }}</dd>
                     </div>
                   </dl>
                   <table class="doc-table">

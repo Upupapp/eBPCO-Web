@@ -10,7 +10,7 @@ import { downloadCsv } from '../../shared/utils/export-csv';
 import { SessionService } from '../../core/session/session.service';
 import { StaffAccess, StaffDirectoryApi, StaffMember, StaffSession } from '../../core/api/staff-directory.api';
 import { ALL_WIRE_ROLES, WIRE_ROLE_LABELS, portalRoleFor } from '../../core/api/role-map';
-import { ALL_STAFF_ROLES } from '../../core/session/permissions';
+import { ALL_STAFF_ROLES, StaffRole } from '../../core/session/permissions';
 import { AccessLevel } from '../../core/api/access-request.api';
 import { Capabilities } from '../../core/session/capabilities';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
@@ -449,8 +449,9 @@ export class UserRoles implements OnInit {
   });
 
   protected readonly permissionMatrix = computed(() => {
-    const role = this.selectedUserRole();
-    return role ? buildPermissionMatrix(role) : [];
+    const row = this.selectedUser();
+    if (!row) return [];
+    return buildPermissionMatrix(ALL_STAFF_ROLES.includes(row.role as StaffRole) ? (row.role as StaffRole) : null);
   });
 
   protected readonly workload = computed(() => {
