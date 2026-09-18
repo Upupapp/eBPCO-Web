@@ -1,0 +1,121 @@
+- generic [ref=f3e4]:
+  - complementary [ref=f3e6]:
+    - generic [ref=f3e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f3e9]
+      - generic [ref=f3e10]: E-BPCO
+    - navigation [ref=f3e11]:
+      - link "Dashboard" [ref=f3e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f3e20]:
+        - generic [ref=f3e21]: Operations
+        - generic [ref=f3e22]:
+          - link "Applications" [ref=f3e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f3e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f3e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f3e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f3e48]:
+        - generic [ref=f3e49]: Administration
+        - generic [ref=f3e50]:
+          - link "Businesses" [ref=f3e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f3e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f3e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f3e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f3e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f3e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f3e91] [cursor=pointer]
+  - main [ref=f3e97]:
+    - generic [ref=f3e830]:
+      - generic "Payments" [ref=f3e831]:
+        - generic [ref=f3e832]:
+          - heading "Payments" [level=1] [ref=f3e833]
+          - generic [ref=f3e834]:
+            - generic [ref=f3e835]:
+              - generic [ref=f3e840]: Search
+              - textbox "Search" [ref=f3e841]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f3e843] [cursor=pointer]
+            - button "P paul@lguids.com.ph Super Admin" [ref=f3e849] [cursor=pointer]:
+              - generic [ref=f3e850]: P
+              - generic [ref=f3e854]:
+                - generic [ref=f3e855]: paul@lguids.com.ph
+                - generic [ref=f3e856]: Super Admin
+      - generic [ref=f3e860]:
+        - generic [ref=f3e861]:
+          - generic [ref=f3e862]:
+            - heading "Payment Assessment" [level=1] [ref=f3e863]
+            - paragraph [ref=f3e864]: Angela Cailing · El Cafe · Excavation Permit
+          - button "Back to Application" [ref=f3e866] [cursor=pointer]
+        - generic [ref=f3e867]:
+          - heading "Order of Payment OP-2026-000003" [level=2] [ref=f3e869]
+          - generic [ref=f3e870]:
+            - generic [ref=f3e871]:
+              - term [ref=f3e872]: "Fee Schedule Version:"
+              - definition [ref=f3e873]: "2026.1"
+            - generic [ref=f3e874]:
+              - term [ref=f3e875]: "Assessed:"
+              - definition [ref=f3e876]: Sep 18, 2026 · 7:17 PM
+            - generic [ref=f3e877]:
+              - term [ref=f3e878]: "Due Date:"
+              - definition [ref=f3e879]: —
+          - table [ref=f3e881]:
+            - rowgroup [ref=f3e882]:
+              - row [ref=f3e883]:
+                - columnheader "Line" [ref=f3e884]
+                - columnheader "Amount" [ref=f3e885]
+            - rowgroup [ref=f3e886]:
+              - row [ref=f3e887]:
+                - cell "Filing Fee" [ref=f3e888]
+                - cell "₱500.00" [ref=f3e889]
+              - row [ref=f3e890]:
+                - cell "Processing Fee" [ref=f3e891]
+                - cell "₱1,200.00" [ref=f3e892]
+              - row [ref=f3e893]:
+                - cell "Architectural Fee" [ref=f3e894]
+                - cell "₱0.00" [ref=f3e895]
+              - row [ref=f3e896]:
+                - cell "Structural Fee" [ref=f3e897]
+                - cell "₱0.00" [ref=f3e898]
+              - row [ref=f3e899]:
+                - cell "Electrical Fee" [ref=f3e900]
+                - cell "₱0.00" [ref=f3e901]
+              - row [ref=f3e902]:
+                - cell "Other Fees" [ref=f3e903]
+                - cell "₱0.00" [ref=f3e904]
+              - row [ref=f3e905]:
+                - cell "Total" [ref=f3e906]
+                - cell "₱1,700.00" [ref=f3e907]
+        - generic [ref=f3e908]:
+          - heading "Payments" [level=2] [ref=f3e910]
+          - table [ref=f3e912]:
+            - rowgroup [ref=f3e913]:
+              - row [ref=f3e914]:
+                - columnheader "Reference" [ref=f3e915]
+                - columnheader "Method" [ref=f3e916]
+                - columnheader "Amount" [ref=f3e917]
+                - columnheader "Status" [ref=f3e918]
+                - columnheader "OR No." [ref=f3e919]
+                - columnheader "Submitted" [ref=f3e920]
+                - columnheader "Action" [ref=f3e921]
+            - rowgroup [ref=f3e922]:
+              - row [ref=f3e923]:
+                - cell "765e4" [ref=f3e924]
+                - cell "Onsite" [ref=f3e925]
+                - cell "₱1,700.00" [ref=f3e926]
+                - cell "Paid" [ref=f3e927]
+                - cell "765e4" [ref=f3e929]
+                - cell "Sep 18, 2026 · 7:18 PM" [ref=f3e930]
+                - cell [ref=f3e931]:
+                  - button "Void" [ref=f3e932] [cursor=pointer]
+                  - button "Reverse" [ref=f3e933] [cursor=pointer]
+                  - button "Refund" [ref=f3e934] [cursor=pointer]
+                  - button "Correct OR No." [ref=f3e935] [cursor=pointer]

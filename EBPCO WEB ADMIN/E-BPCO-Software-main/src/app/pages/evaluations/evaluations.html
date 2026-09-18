@@ -690,7 +690,10 @@
                 <span class="timeline-feed-time">{{ event.timestamp }}</span>
               </div>
               <p class="timeline-feed-detail">
-                {{ event.actor }} ({{ event.role }})
+                {{ event.actor }}
+                @if (event.role) {
+                  ({{ event.role }})
+                }
                 @if (event.remarks) {
                   — {{ event.remarks }}
                 }

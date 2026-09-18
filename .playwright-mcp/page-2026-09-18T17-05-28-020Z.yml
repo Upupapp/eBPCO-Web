@@ -1,0 +1,360 @@
+- generic [ref=f3e4]:
+  - complementary [ref=f3e6]:
+    - generic [ref=f3e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f3e9]
+      - generic [ref=f3e10]: E-BPCO
+    - navigation [ref=f3e11]:
+      - link "Dashboard" [ref=f3e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f3e20]:
+        - generic [ref=f3e21]: Operations
+        - generic [ref=f3e22]:
+          - link "Applications" [ref=f3e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f3e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f3e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f3e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f3e48]:
+        - generic [ref=f3e49]: Administration
+        - generic [ref=f3e50]:
+          - link "Businesses" [ref=f3e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f3e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f3e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f3e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f3e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f3e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f3e91] [cursor=pointer]
+  - main [ref=f3e97]:
+    - generic [ref=f3e98]:
+      - generic "Dashboard" [ref=f3e99]:
+        - generic [ref=f3e100]:
+          - heading "Dashboard" [level=1] [ref=f3e101]
+          - generic [ref=f3e102]:
+            - generic [ref=f3e103]:
+              - generic [ref=f3e108]: Search
+              - textbox "Search" [ref=f3e109]:
+                - /placeholder: Search Recent Applications by ID, Applicant, Business/Project, or Location
+            - button "Notifications" [ref=f3e111] [cursor=pointer]
+            - button "P paul@lguids.com.ph Super Admin" [ref=f3e117] [cursor=pointer]:
+              - generic [ref=f3e118]: P
+              - generic [ref=f3e122]:
+                - generic [ref=f3e123]: paul@lguids.com.ph
+                - generic [ref=f3e124]: Super Admin
+      - generic [ref=f3e128]:
+        - generic [ref=f3e130]:
+          - generic [ref=f3e132]:
+            - paragraph [ref=f3e133]: Total Applications
+            - paragraph [ref=f3e134]: "3"
+            - generic [ref=f3e135]:
+              - generic [ref=f3e136]: "+3"
+              - generic [ref=f3e141]: vs last month
+          - generic [ref=f3e142]: All Time
+        - generic [ref=f3e146]:
+          - generic [ref=f3e148]:
+            - paragraph [ref=f3e149]: Pending / Under Review
+            - paragraph [ref=f3e150]: "0"
+          - generic [ref=f3e151]: Submitted through Under Evaluation
+        - generic [ref=f3e155]:
+          - generic [ref=f3e157]:
+            - paragraph [ref=f3e158]: Payments Awaiting Verification
+            - paragraph [ref=f3e159]: "0"
+          - generic [ref=f3e160]: Submitted, not yet verified
+        - generic [ref=f3e164]:
+          - generic [ref=f3e166]:
+            - paragraph [ref=f3e167]: Approved
+            - paragraph [ref=f3e168]: "3"
+            - generic [ref=f3e169]:
+              - generic [ref=f3e170]: "+3"
+              - generic [ref=f3e175]: vs last month
+          - generic [ref=f3e176]: Approved through Completed
+        - generic [ref=f3e180]:
+          - generic [ref=f3e182]:
+            - paragraph [ref=f3e183]: Ready for Release
+            - paragraph [ref=f3e184]: "0"
+          - generic [ref=f3e185]: Permit generated, awaiting claim
+      - generic [ref=f3e189]:
+        - generic [ref=f3e190]:
+          - generic [ref=f3e191]:
+            - heading "Business Application Stages" [level=2] [ref=f3e192]
+            - paragraph [ref=f3e193]: Track businesses across each stage of the application process.
+          - generic [ref=f3e194]:
+            - generic [ref=f3e195]:
+              - button [ref=f3e197] [cursor=pointer]
+              - button [ref=f3e205] [cursor=pointer]
+              - button [ref=f3e213] [cursor=pointer]
+            - group "Board display mode" [ref=f3e220]:
+              - button [pressed] [ref=f3e221] [cursor=pointer]
+              - button [ref=f3e229] [cursor=pointer]
+        - generic [ref=f3e234]:
+          - generic [ref=f3e235]:
+            - generic [ref=f3e236]:
+              - generic [ref=f3e242]: Under Review
+              - generic [ref=f3e243]: "0"
+            - paragraph [ref=f3e251]: No applications under review for this period.
+          - generic [ref=f3e252]:
+            - generic [ref=f3e253]:
+              - generic [ref=f3e259]: Approved
+              - generic [ref=f3e260]: "3"
+            - generic [ref=f3e262]:
+              - button "View application 8bab1dfe-bb42-4155-a6cd-928645576c6e for Angela Cailing, El Cafe, Excavation Permit, draggable to another stage" [ref=f3e263]:
+                - generic [ref=f3e264]: Angela Cailing
+                - generic [ref=f3e265]: El Cafe
+                - generic [ref=f3e266]: 8bab1dfe-bb42-4155-a6cd-928645576c6e
+                - generic [ref=f3e267]: Excavation Permit
+              - button "View application 559e8380-3177-4637-a2b1-827bda3dc468 for Angela Cailing, El Cafe, Architectural Permit, draggable to another stage" [ref=f3e268]:
+                - generic [ref=f3e269]: Angela Cailing
+                - generic [ref=f3e270]: El Cafe
+                - generic [ref=f3e271]: 559e8380-3177-4637-a2b1-827bda3dc468
+                - generic [ref=f3e272]: Architectural Permit
+              - button "View application a8dc0c50-1c06-4c05-a02e-45f1737979f5 for Ella Cailing, cafe, Architectural Permit, draggable to another stage" [ref=f3e273]:
+                - generic [ref=f3e274]: Ella Cailing
+                - generic [ref=f3e275]: cafe
+                - generic [ref=f3e276]: a8dc0c50-1c06-4c05-a02e-45f1737979f5
+                - generic [ref=f3e277]: Architectural Permit
+            - button "View all 3" [ref=f3e278] [cursor=pointer]
+          - generic [ref=f3e287]:
+            - generic [ref=f3e288]:
+              - generic [ref=f3e295]: Rejected
+              - generic [ref=f3e296]: "0"
+            - paragraph [ref=f3e305]: No rejected applications for this period.
+      - generic [ref=f3e306]:
+        - generic [ref=f3e307]:
+          - generic [ref=f3e308]:
+            - heading "Over All Applications Queue" [level=2] [ref=f3e309]
+            - generic [ref=f3e310]:
+              - generic [ref=f3e311]: Under Review
+              - generic [ref=f3e313]: Approved
+              - generic [ref=f3e315]: Rejected
+          - button [ref=f3e322] [cursor=pointer]
+        - generic [ref=f3e328]:
+          - 'img "Building Permit – New Construction — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e329]':
+            - generic [ref=f3e330]: Building Permit – New Construction
+            - generic [ref=f3e332]: "0"
+          - 'img "Building Permit – Renovation / Alteration — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e333]':
+            - generic [ref=f3e334]: Building Permit – Renovation / Alteration
+            - generic [ref=f3e336]: "0"
+          - 'img "Building Permit – Addition / Extension — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e337]':
+            - generic [ref=f3e338]: Building Permit – Addition / Extension
+            - generic [ref=f3e340]: "0"
+          - 'img "Demolition Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e341]':
+            - generic [ref=f3e342]: Demolition Permit
+            - generic [ref=f3e344]: "0"
+          - 'img "Zoning / Locational Clearance — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e345]':
+            - generic [ref=f3e346]: Zoning / Locational Clearance
+            - generic [ref=f3e348]: "0"
+          - 'img "Architectural Permit — Under Review: 0 (0%) · Approved: 2 (100%) · Rejected: 0 (0%)" [ref=f3e349]':
+            - generic [ref=f3e350]: Architectural Permit
+            - generic [ref=f3e353]: "2"
+          - 'img "Civil / Structural Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e354]':
+            - generic [ref=f3e355]: Civil / Structural Permit
+            - generic [ref=f3e357]: "0"
+          - 'img "Electrical Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e358]':
+            - generic [ref=f3e359]: Electrical Permit
+            - generic [ref=f3e361]: "0"
+          - 'img "Mechanical Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e362]':
+            - generic [ref=f3e363]: Mechanical Permit
+            - generic [ref=f3e365]: "0"
+          - 'img "Sanitary Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e366]':
+            - generic [ref=f3e367]: Sanitary Permit
+            - generic [ref=f3e369]: "0"
+          - 'img "Plumbing Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e370]':
+            - generic [ref=f3e371]: Plumbing Permit
+            - generic [ref=f3e373]: "0"
+          - 'img "Electronics Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e374]':
+            - generic [ref=f3e375]: Electronics Permit
+            - generic [ref=f3e377]: "0"
+          - 'img "Interior Design Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e378]':
+            - generic [ref=f3e379]: Interior Design Permit
+            - generic [ref=f3e381]: "0"
+          - 'img "Fencing Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e382]':
+            - generic [ref=f3e383]: Fencing Permit
+            - generic [ref=f3e385]: "0"
+          - 'img "Sign Permit — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e386]':
+            - generic [ref=f3e387]: Sign Permit
+            - generic [ref=f3e389]: "0"
+          - 'img "Excavation Permit — Under Review: 0 (0%) · Approved: 1 (100%) · Rejected: 0 (0%)" [ref=f3e390]':
+            - generic [ref=f3e391]: Excavation Permit
+            - generic [ref=f3e394]: "1"
+          - 'img "FSEC for Building Permit (BFP) — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e395]':
+            - generic [ref=f3e396]: FSEC for Building Permit (BFP)
+            - generic [ref=f3e398]: "0"
+          - 'img "Certificate of Occupancy — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e399]':
+            - generic [ref=f3e400]: Certificate of Occupancy
+            - generic [ref=f3e402]: "0"
+          - 'img "FSIC for Occupancy Permit (BFP) — Under Review: 0 (0%) · Approved: 0 (0%) · Rejected: 0 (0%)" [ref=f3e403]':
+            - generic [ref=f3e404]: FSIC for Occupancy Permit (BFP)
+            - generic [ref=f3e406]: "0"
+      - generic [ref=f3e407]:
+        - generic [ref=f3e408]:
+          - generic [ref=f3e409]:
+            - generic [ref=f3e410]:
+              - heading "Applications by Evaluation Stage" [level=2] [ref=f3e411]
+              - paragraph [ref=f3e412]: Evaluation activity per stage — filter to "Pending" for what's still awaiting a decision right now
+            - generic [ref=f3e413]: Filter by evaluation result
+            - combobox "Filter by evaluation result" [ref=f3e414] [cursor=pointer]:
+              - option "All Results"
+              - option "Pending" [selected]
+              - option "Passed"
+              - option "Revision Required"
+              - option "Rejected"
+          - paragraph [ref=f3e415]:
+            - strong [ref=f3e416]: "0"
+            - text: applications pending evaluation
+          - paragraph [ref=f3e421]: No applications match this filter.
+          - button [ref=f3e422] [cursor=pointer]
+        - generic [ref=f3e426]:
+          - generic [ref=f3e427]:
+            - heading "Overdue Review" [level=2] [ref=f3e428]
+            - button "View All" [ref=f3e429] [cursor=pointer]
+          - generic [ref=f3e430]:
+            - generic [ref=f3e431]: Low
+            - generic [ref=f3e433]: Medium
+            - generic [ref=f3e435]: High
+          - paragraph [ref=f3e438]: These applications carry no review progress, so overdue work cannot be identified from them.
+      - generic [ref=f3e439]:
+        - generic [ref=f3e440]:
+          - heading "Applications By Status" [level=2] [ref=f3e442]
+          - generic [ref=f3e443]:
+            - img "Distribution of 4 categories" [ref=f3e446]:
+              - generic [ref=f3e448]:
+                - 'img "For Evaluation: 0 (0%)" [ref=f3e449] [cursor=pointer]'
+                - 'img "Approved: 3 (100%)" [ref=f3e450] [cursor=pointer]'
+                - 'img "Return: 0 (0%)" [ref=f3e451] [cursor=pointer]'
+                - 'img "Pending: 0 (0%)" [ref=f3e452] [cursor=pointer]'
+              - generic: "3"
+              - generic: Total Applications
+            - list [ref=f3e453]:
+              - listitem [ref=f3e454]:
+                - generic [ref=f3e455]: For Evaluation
+                - generic [ref=f3e457]:
+                  - text: "0"
+                  - emphasis [ref=f3e458]: 0%
+              - listitem [ref=f3e459]:
+                - generic [ref=f3e460]: Approved
+                - generic [ref=f3e462]:
+                  - text: "3"
+                  - emphasis [ref=f3e463]: 100%
+              - listitem [ref=f3e464]:
+                - generic [ref=f3e465]: Return
+                - generic [ref=f3e467]:
+                  - text: "0"
+                  - emphasis [ref=f3e468]: 0%
+              - listitem [ref=f3e469]:
+                - generic [ref=f3e470]: Pending
+                - generic [ref=f3e472]:
+                  - text: "0"
+                  - emphasis [ref=f3e473]: 0%
+        - generic [ref=f3e474]:
+          - heading "Applications By Business" [level=2] [ref=f3e476]
+          - generic [ref=f3e477]:
+            - 'img "El Cafe: 2" [ref=f3e478]':
+              - generic [ref=f3e479]: EC
+              - generic [ref=f3e481]: El Cafe
+              - generic [ref=f3e484]: "2"
+            - 'img "cafe: 1" [ref=f3e485]':
+              - generic [ref=f3e486]: C
+              - generic [ref=f3e488]: cafe
+              - generic [ref=f3e491]: "1"
+          - navigation "Pagination" [ref=f3e493]:
+            - generic [ref=f3e494]: Showing 1-2 from 2
+            - generic [ref=f3e495]:
+              - button "First page" [disabled] [ref=f3e496]
+              - button "Page 1" [ref=f3e501] [cursor=pointer]: "1"
+              - button "Last page" [disabled] [ref=f3e502]
+      - generic [ref=f3e507]:
+        - heading "Application Overview" [level=2] [ref=f3e509]
+        - generic [ref=f3e510]:
+          - generic [ref=f3e511]:
+            - text: "New Application:"
+            - strong [ref=f3e513]: "0"
+          - generic [ref=f3e514]:
+            - text: "Approved Application:"
+            - strong [ref=f3e516]: "3"
+        - generic [ref=f3e518]:
+          - generic [ref=f3e519]:
+            - generic [ref=f3e520]: "3"
+            - generic [ref=f3e521]: "2"
+            - generic [ref=f3e522]: "1"
+            - generic [ref=f3e523]: "0"
+          - generic [ref=f3e524]:
+            - 'img "Line chart: 2 series across 12 months" [ref=f3e525]'
+            - generic [ref=f3e530]:
+              - generic [ref=f3e531]: Oct
+              - generic [ref=f3e532]: Nov
+              - generic [ref=f3e533]: Dec
+              - generic [ref=f3e534]: Jan
+              - generic [ref=f3e535]: Feb
+              - generic [ref=f3e536]: Mar
+              - generic [ref=f3e537]: Apr
+              - generic [ref=f3e538]: May
+              - generic [ref=f3e539]: Jun
+              - generic [ref=f3e540]: Jul
+              - generic [ref=f3e541]: Aug
+              - generic [ref=f3e542]: Sep
+      - generic [ref=f3e543]:
+        - generic [ref=f3e544]:
+          - heading "Recent Applications" [level=2] [ref=f3e545]
+          - generic [ref=f3e546]:
+            - button [ref=f3e549] [cursor=pointer]
+            - button [ref=f3e553] [cursor=pointer]
+            - button "View All" [ref=f3e558] [cursor=pointer]
+        - table "Recent applications" [ref=f3e560]:
+          - rowgroup [ref=f3e561]:
+            - row [ref=f3e562]:
+              - columnheader "APPLICATION ID" [ref=f3e563]
+              - columnheader "APPLICANT NAME" [ref=f3e564]
+              - columnheader "LOCATION" [ref=f3e565]
+              - columnheader "TYPE" [ref=f3e566]
+              - columnheader "DATE SUBMITTED" [ref=f3e567]
+              - columnheader "ASSIGNED OFFICER" [ref=f3e568]
+              - columnheader "STATUS" [ref=f3e569]
+          - rowgroup [ref=f3e570]:
+            - button "View application 8bab1dfe-bb42-4155-a6cd-928645576c6e for Angela Cailing" [ref=f3e571] [cursor=pointer]:
+              - cell "8bab1dfe-bb42-4155-a6cd-928645576c6e" [ref=f3e572]
+              - cell "AC Angela Cailing El Cafe" [ref=f3e573]:
+                - generic [ref=f3e574]:
+                  - generic [ref=f3e575]: AC
+                  - generic [ref=f3e577]:
+                    - generic "Angela Cailing" [ref=f3e578]
+                    - generic "El Cafe" [ref=f3e579]
+              - cell "ella" [ref=f3e580]
+              - cell "Excavation Permit" [ref=f3e581]
+              - cell "2026-09-18" [ref=f3e582]
+              - cell "—" [ref=f3e583]
+              - cell "Approved" [ref=f3e584]
+            - button "View application 559e8380-3177-4637-a2b1-827bda3dc468 for Angela Cailing" [ref=f3e586] [cursor=pointer]:
+              - cell "559e8380-3177-4637-a2b1-827bda3dc468" [ref=f3e587]
+              - cell "AC Angela Cailing El Cafe" [ref=f3e588]:
+                - generic [ref=f3e589]:
+                  - generic [ref=f3e590]: AC
+                  - generic [ref=f3e592]:
+                    - generic "Angela Cailing" [ref=f3e593]
+                    - generic "El Cafe" [ref=f3e594]
+              - cell "Purok Dos" [ref=f3e595]
+              - cell "Architectural Permit" [ref=f3e596]
+              - cell "2026-09-18" [ref=f3e597]
+              - cell "—" [ref=f3e598]
+              - cell "Approved" [ref=f3e599]
+            - button "View application a8dc0c50-1c06-4c05-a02e-45f1737979f5 for Ella Cailing" [ref=f3e601] [cursor=pointer]:
+              - cell "a8dc0c50-1c06-4c05-a02e-45f1737979f5" [ref=f3e602]
+              - cell "EC Ella Cailing cafe" [ref=f3e603]:
+                - generic [ref=f3e604]:
+                  - generic [ref=f3e605]: EC
+                  - generic [ref=f3e607]:
+                    - generic "Ella Cailing" [ref=f3e608]
+                    - generic "cafe" [ref=f3e609]
+              - cell "ella" [ref=f3e610]
+              - cell "Architectural Permit" [ref=f3e611]
+              - cell "2026-09-17" [ref=f3e612]
+              - cell "—" [ref=f3e613]
+              - cell "Approved" [ref=f3e614]
+        - paragraph [ref=f3e616]: Showing 3 Applications

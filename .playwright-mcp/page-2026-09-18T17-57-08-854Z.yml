@@ -1,0 +1,98 @@
+- generic [ref=f10e1]:
+  - generic [ref=f10e5]:
+    - generic [ref=f10e6]:
+      - heading "Create Your Account" [level=2] [ref=f10e7]
+      - paragraph [ref=f10e8]: Step 3 of 3
+    - generic [ref=f10e9]:
+      - generic [ref=f10e10]:
+        - generic [ref=f10e11]: "1"
+        - text: Personal
+      - generic [ref=f10e13]:
+        - generic [ref=f10e14]: "2"
+        - text: Contact
+      - generic [ref=f10e16]:
+        - generic [ref=f10e17]: "3"
+        - text: Security
+    - generic [ref=f10e72]:
+      - generic [ref=f10e73]: Password*
+      - generic [ref=f10e74]:
+        - textbox "Password*" [ref=f10e75]
+        - button "Show password" [ref=f10e76] [cursor=pointer]
+      - generic [ref=f10e81]: A longer phrase is easier to remember and harder to guess than a short one with symbols in it.
+      - list "Password requirements" [ref=f10e82]:
+        - listitem [ref=f10e83]:
+          - generic [aria-hidden] [ref=f10e84]: ✓
+          - text: At least 12 characters long
+        - listitem [ref=f10e85]:
+          - generic [aria-hidden] [ref=f10e86]: ✓
+          - text: Contains an uppercase letter
+        - listitem [ref=f10e87]:
+          - generic [aria-hidden] [ref=f10e88]: ✓
+          - text: Contains a lowercase letter
+        - listitem [ref=f10e89]:
+          - generic [aria-hidden] [ref=f10e90]: ✓
+          - text: Contains a number
+        - listitem [ref=f10e91]:
+          - generic [aria-hidden] [ref=f10e92]: ✓
+          - text: Contains punctuation
+        - listitem [ref=f10e93]:
+          - generic [aria-hidden] [ref=f10e94]: ✓
+          - text: Not a single character repeated (e.g. "aaaaaaaaaaaa")
+        - listitem [ref=f10e95]:
+          - generic [aria-hidden] [ref=f10e96]: ✓
+          - text: Not a simple sequence (e.g. "abcdefghijkl", "123456789012")
+        - listitem [ref=f10e97]:
+          - generic [aria-hidden] [ref=f10e98]: ✓
+          - text: Doesn’t contain your name, email, or the service name
+      - generic [ref=f10e99]: We also check it isn't a password already known from a real data breach — that part happens when you submit, not here in the browser.
+    - generic [ref=f10e100]:
+      - generic [ref=f10e101]: Confirm Password*
+      - generic [ref=f10e102]:
+        - textbox "Confirm Password*" [ref=f10e103]
+        - button "Show password" [ref=f10e104] [cursor=pointer]
+    - generic [ref=f10e109]:
+      - checkbox "I agree to the Terms & Conditions" [ref=f10e110]
+      - text: I agree to the
+      - button "Terms & Conditions" [ref=f10e111] [cursor=pointer]
+    - generic [ref=f10e112]:
+      - checkbox "I agree to the Privacy Policy" [ref=f10e113]
+      - text: I agree to the
+      - button "Privacy Policy" [active] [ref=f10e114] [cursor=pointer]
+    - generic [ref=f10e115]:
+      - button "Back" [ref=f10e116] [cursor=pointer]
+      - button "Create Account" [ref=f10e117] [cursor=pointer]
+    - separator [ref=f10e43]
+    - generic [ref=f10e44]:
+      - text: Already have an account?
+      - link "Log In" [ref=f10e45] [cursor=pointer]:
+        - /url: /login
+  - dialog "Privacy Policy" [ref=f10e128]:
+    - generic [ref=f10e129]:
+      - heading "Privacy Policy" [level=2] [ref=f10e130]
+      - button "Close" [ref=f10e131] [cursor=pointer]
+    - generic [ref=f10e134]:
+      - generic [ref=f10e135]:
+        - generic [ref=f10e136]: What eBPCO does with your data today
+        - paragraph [ref=f10e137]: Your account, applications, documents, payments and businesses are genuinely created, transmitted and stored by the Municipality of Castilla.
+        - paragraph [ref=f10e138]: A document you attach is stored in full, not recorded by name only, and is retained for as long as your application or the resulting permit requires it. A permit that has genuinely been issued can be viewed on this portal and, once released, printed with its real permit number and conditions.
+        - paragraph [ref=f10e139]: "One part remains unconnected: looking up a permit by number from the public, no-login verification page does not yet check this Municipality's real records. That page says so on its own."
+      - generic [ref=f10e140]:
+        - generic [ref=f10e141]: Who will control your data once eBPCO goes live
+        - paragraph [ref=f10e142]: The personal information controller is the Local Government Unit of Castilla, Sorsogon. The Municipality states on its own permit forms that "all information we collect through this form shall be kept confidential by the Local Government Unit of Castilla and shall be used solely for legal purposes as mandated by the Data Privacy Act and other relevant laws."
+        - paragraph [ref=f10e143]: You can reach the Office of the Municipal Engineer at 09054818572 or meocastilla@gmail.com, or in person at Castilla Town Hall, Cumadcad, Castilla, Sorsogon.
+      - generic [ref=f10e144]:
+        - generic [ref=f10e145]: What eBPCO will collect
+        - paragraph [ref=f10e146]: "To create an account: your first, middle and last name, date of birth, sex, civil status, nationality, email address, mobile number and full address including barangay, city, province and postal code."
+        - paragraph [ref=f10e147]: "To process a permit application: details of the project or establishment, and the documents each permit requires — which may include certified copies of land titles (OCT/TCT), deeds, survey plans, design plans, cost estimates, professional licences and a valid government ID."
+        - paragraph [ref=f10e148]: Your account password is required to sign in and is never shown to anyone at the Municipality.
+      - generic [ref=f10e149]:
+        - generic [ref=f10e150]: Why it is collected
+        - paragraph [ref=f10e151]: Solely to receive, evaluate, assess, approve and release the permits you apply for, and to contact you about those applications. Your data is not used for any other purpose, and it is never shared with another citizen's account.
+      - generic [ref=f10e152]:
+        - generic [ref=f10e153]: Your rights under the Data Privacy Act of 2012 (RA 10173)
+        - paragraph [ref=f10e154]: As a data subject you have the right to be informed, to object, to access your data, to correct it, to have it erased or blocked, to damages for a violation, and to data portability.
+        - paragraph [ref=f10e155]: You may exercise any of these rights by contacting the Municipality using the details above. If you believe your rights have been violated, you may complain to the National Privacy Commission.
+      - generic [ref=f10e156]:
+        - generic [ref=f10e157]: Not yet determined
+        - paragraph [ref=f10e158]: "Three things this notice cannot yet tell you, because the Municipality has not published them and eBPCO will not invent them: how long your data will be retained, who the Municipality's Data Protection Officer is, and exactly which offices your application will be shared with during evaluation."
+        - paragraph [ref=f10e159]: This section will be replaced with the Municipality's own answers once they are published. Your data is being collected and retained in the meantime — see the first section — under the general basis stated above (performance of a public task, PD 1096 permit issuance), not withheld until these specifics arrive.

@@ -8,7 +8,7 @@ import { Icon } from '../../shared/icon/icon';
 import { DonutChart, DonutSegment } from '../../shared/donut-chart/donut-chart';
 import { StackedBarChart } from '../../shared/stacked-bar-chart/stacked-bar-chart';
 import { BarList, BarListRow } from '../../shared/bar-list/bar-list';
-import { AreaChart } from '../../shared/area-chart/area-chart';
+import { AreaChart, AreaSeriesInput } from '../../shared/area-chart/area-chart';
 import { Avatar } from '../../shared/avatar/avatar';
 import { Pagination } from '../../shared/pagination/pagination';
 import { buildPermitQueueRows } from '../../shared/permit-queue/permit-queue';
@@ -24,6 +24,7 @@ import {
   EvaluationStage,
   coarseStatus,
 } from '../../core/domain/status.model';
+import { StaffEvaluationsApi, EvaluationQueueRow } from '../../core/api/staff-evaluations.api';
 
 interface StatCardData {
   icon: string;
@@ -129,8 +130,23 @@ const STAGE_TO_EVAL_KEY: Record<EvaluationStage, string> = {
 export class Dashboard {
   private readonly store = inject(ApplicationStore);
   private readonly toast = inject(ToastService);
+  private readonly evaluationsApi = inject(StaffEvaluationsApi);
 
-  constructor(private readonly router: Router) {}
+  /**
+   * The real evaluation queue, fetched independently of `ApplicationStore`
+   * — `store.evaluations()` (the "Evaluation Stage Breakdown" panel's old
+   * source, below) is seed-only and permanently `[]` once real application
+   * data loads (`replaceApplications()` wipes it and nothing ever
+   * repopulates it), so on a real deployment that panel silently showed
+   * every stage at 0/0% with no indication anything was wrong.
+   */
+  private readonly realEvaluationRows = signal<readonly EvaluationQueueRow[]>([]);
+
+  constructor(private readonly router: Router) {
+    void this.evaluationsApi.queue().then((result) => {
+      if (result.kind === 'ok') this.realEvaluationRows.set(result.rows);
+    });
+  }
 
   // Every KPI here is derived from the same ApplicationStore every other
   // page reads — no independently hand-picked totals, so this always
@@ -261,6 +277,48 @@ export class Dashboard {
     () => this.store.applications().filter((a) => coarseStatus(a.lifecycleStatus) === 'Approved').length,
   );
 
+  /**
+   * The "Application Overview" chart's real 12-month trend — this used to
+   * render with no `[series]`/`[xLabels]` bound at all, so `<app-area-chart>`
+   * silently fell back to its own hardcoded demo defaults (a "New
+   * Applications" line climbing to 74, an "Approved Applications" line
+   * climbing to 352) sitting directly under the real, honest legend counts
+   * above (`newApplicationCount`/`approvedApplicationCount`), with no
+   * disclosure that the chart itself was fake. "New" buckets by real
+   * submission month; "Approved" is, for each month's filed cohort, how
+   * many have SINCE reached the same coarse-Approved bucket the legend
+   * above uses — not "approved that month" (this app has no per-month
+   * approval-event history to bucket by), but a real, honestly-defined
+   * number, not an invented one.
+   */
+  protected readonly overviewChart = computed<{ series: AreaSeriesInput[]; xLabels: string[] }>(() => {
+    const apps = this.store.applications();
+    const now = new Date();
+    const months = Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
+      return { year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleDateString('en-US', { month: 'short' }) };
+    });
+    const inMonth = (a: ApplicationRecord, year: number, month: number) =>
+      a.dateValue.getFullYear() === year && a.dateValue.getMonth() === month;
+    return {
+      series: [
+        {
+          name: 'New Applications',
+          color: '#2563eb',
+          values: months.map(({ year, month }) => apps.filter((a) => inMonth(a, year, month)).length),
+        },
+        {
+          name: 'Approved Applications',
+          color: '#f59e0b',
+          values: months.map(({ year, month }) =>
+            apps.filter((a) => inMonth(a, year, month) && coarseStatus(a.lifecycleStatus) === 'Approved').length,
+          ),
+        },
+      ],
+      xLabels: months.map((m) => m.label),
+    };
+  });
+
   // Top businesses by application volume — real counts from the store,
   // not a hand-picked list.
   protected readonly businessRows = computed<BarListRow[]>(() => {
@@ -309,9 +367,37 @@ export class Dashboard {
   // HBarChart, which has no concept of per-row count/percentage labels or
   // per-row navigation and is scoped to this dashboard panel only (see
   // EvaluationStageRow below) so the shared component stays untouched.
+  /**
+   * One record per stage a real application has actually reached: every
+   * decision already recorded (Passed/Revision Required/Rejected), plus —
+   * for an application still mid-evaluation — exactly one `'Pending'`
+   * record for its real current stage (`row.nextStage`). Deliberately NOT
+   * one record per stage per application regardless of progress: an
+   * application still sitting at Initial has not "reached" Zoning/Fire
+   * Safety/OBO/Final Approval yet, and counting those as pending too would
+   * inflate this panel with stages nobody is actually waiting on.
+   */
+  private readonly stageResultRecords = computed<{ stage: EvaluationStage; result: 'Pending' | EvaluationResult }[]>(() => {
+    if (this.store.isSeedData()) {
+      return this.store.evaluations().map((r) => ({ stage: r.stage, result: r.result }));
+    }
+    const records: { stage: EvaluationStage; result: 'Pending' | EvaluationResult }[] = [];
+    for (const row of this.realEvaluationRows()) {
+      for (const decision of row.evaluations) {
+        if (decision.result === 'Passed' || decision.result === 'Revision Required' || decision.result === 'Rejected') {
+          records.push({ stage: decision.stage, result: decision.result });
+        }
+      }
+      if (row.nextStage !== null) {
+        records.push({ stage: row.nextStage, result: 'Pending' });
+      }
+    }
+    return records;
+  });
+
   protected readonly stageRows = computed<EvaluationStageRow[]>(() => {
     const filter = this.stageResultFilter();
-    const records = this.store.evaluations().filter((r) => filter === 'All' || r.result === filter);
+    const records = this.stageResultRecords().filter((r) => filter === 'All' || r.result === filter);
     const total = records.length;
     return EVALUATION_STAGE_ORDER.map((stage) => {
       const count = records.filter((r) => r.stage === stage).length;
@@ -333,8 +419,7 @@ export class Dashboard {
   // filter happens to be narrowed to something else (e.g. "Passed").
   protected readonly stageAttentionCount = computed(
     () =>
-      this.store
-        .evaluations()
+      this.stageResultRecords()
         .filter((r) => r.result === 'Revision Required' || r.result === 'Rejected').length,
   );
 
@@ -349,7 +434,15 @@ export class Dashboard {
       case 'Rejected':
         return 'evaluations rejected';
       default:
-        return 'applications currently in evaluation';
+        // NOT "applications" — the unfiltered total is every Passed/
+        // Revision-Required/Rejected/Pending DECISION across every stage
+        // (see stageResultRecords's own comment on why), so one already-
+        // fully-evaluated application contributes up to 5 records here.
+        // "15 applications currently in evaluation" read as a real
+        // operational backlog on a deployment where every application had
+        // already finished evaluation days ago — the true "how many are
+        // stuck right now" question is what the Pending filter answers.
+        return 'evaluation decisions recorded across all stages';
     }
   });
 

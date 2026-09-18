@@ -30,9 +30,20 @@ function catmullRomPath(points: { x: number; y: number }[]): string {
     const p2 = points[i + 1];
     const p3 = points[i + 2] ?? p2;
     const c1x = p1.x + (p2.x - p0.x) / 6;
-    const c1y = p1.y + (p2.y - p0.y) / 6;
+    let c1y = p1.y + (p2.y - p0.y) / 6;
     const c2x = p2.x - (p3.x - p1.x) / 6;
-    const c2y = p2.y - (p3.y - p1.y) / 6;
+    let c2y = p2.y - (p3.y - p1.y) / 6;
+    // Clamp each control point's y to this segment's own [p1.y, p2.y] range.
+    // An unclamped Catmull-Rom tangent overshoots past whichever endpoint is
+    // more extreme the moment a long flat run is followed by a sharp
+    // rise/fall (e.g. eleven months flat at 0 then a spike to 3) — the
+    // curve dips below zero on a month that was never actually negative.
+    // Clamping keeps the curve smooth for gentle runs and just flattens the
+    // overshoot on a sharp one.
+    const yLo = Math.min(p1.y, p2.y);
+    const yHi = Math.max(p1.y, p2.y);
+    c1y = Math.min(Math.max(c1y, yLo), yHi);
+    c2y = Math.min(Math.max(c2y, yLo), yHi);
     d += ` C${c1x},${c1y} ${c2x},${c2y} ${p2.x},${p2.y}`;
   }
   return d;

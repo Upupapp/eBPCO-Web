@@ -103,15 +103,16 @@ function amountInWords(centavos: number): string {
  * notice, official receipt / payment acknowledgment, permit/clearance, or
  * release form).
  *
- * Every kind but 'official-receipt' is populated from the local
- * ApplicationStore/AssessmentStore records — never invented figures.
- * 'official-receipt' is populated from the REAL backend
- * (`StaffApplicationsApi.detail()`'s `payments`/`orderOfPayment`) instead:
- * the local stores are a client-side demo engine that the real Payments
- * page (`pages/payments/payments.ts`) never writes to, so a payment
- * genuinely recorded through the real Record-Onsite-Payment/verify flow was
- * invisible here — this screen said "no payment has been recorded yet" for
- * a payment that plainly had been.
+ * 'application-form', 'evaluation-notice', 'permit', and 'release-form' are
+ * populated from the local ApplicationStore records — never invented
+ * figures. 'official-receipt' and 'assessment' are populated from the REAL
+ * backend (`StaffApplicationsApi.detail()`'s `payments`/`orderOfPayment`)
+ * instead, with `AssessmentStore` (a client-side demo engine the real
+ * Payments page, `pages/payments/payments.ts`, never writes to) kept only
+ * as a fallback for when no real Order of Payment exists yet: a payment or
+ * assessment genuinely recorded through the real flow used to be invisible
+ * here — this screen said "no payment has been recorded yet" / "no
+ * assessment has been drafted yet" for one that plainly had been.
  *
  * The "never present a placeholder OR number as an official receipt" rule
  * still holds: the title and header both read "Payment Acknowledgment"
@@ -237,9 +238,53 @@ export class DocumentPreview {
   });
   protected readonly release = computed(() => this.store.getRelease(this.applicationId()));
 
-  protected readonly assessment = computed(() =>
-    this.assessmentStore.getActiveAssessment(this.applicationId()),
-  );
+  /**
+   * The 'assessment' document kind ("Order of Payment / Assessment Form")
+   * used to read ONLY `assessmentStore` — the same client-side demo engine
+   * `receiptOrder` above was fixed to stop depending on (see the module
+   * notice), so this preview told an assessor "No assessment has been
+   * drafted yet" for an application that genuinely had a real, issued
+   * Order of Payment, visible on the Payments page itself. Real order
+   * first, same as `receiptOrder`; the demo store is a fallback for when
+   * no real order exists yet, never the other way around.
+   */
+  protected readonly assessment = computed(() => {
+    const order = this.receiptOrder();
+    if (order) {
+      const centavosByLine: Record<FeeLine, number> = {
+        filing: order.filingCentavos,
+        processing: order.processingCentavos,
+        architectural: order.architecturalCentavos,
+        structural: order.structuralCentavos,
+        electrical: order.electricalCentavos,
+        others: order.othersCentavos,
+      };
+      const paid = (this.detail()?.payments ?? []).some((p) => p.status === 'Paid');
+      return {
+        opsNumber: order.number as string | null,
+        status: (paid ? 'Paid' : 'Issued') as 'Paid' | 'Issued',
+        dueDate: order.dueDate,
+        // No assessor name/role is exposed by the real Order of Payment —
+        // '—' for genuinely unknown, never a guessed name.
+        assessorName: '—',
+        assessorRole: '',
+        lineItems: FEE_LINES
+          .filter((line) => centavosByLine[line] > 0)
+          .map((line) => ({
+            included: true,
+            name: RECEIPT_LINE_LABELS[line],
+            amountCentavos: centavosByLine[line] as number | null,
+            legalBasisTitle: order.feeScheduleVersion ? `LGU Fee Schedule ${order.feeScheduleVersion}` : '',
+            legalBasisUrl: '',
+            requiresAssessorInput: false,
+          })),
+        totalCentavos: order.totalCentavos,
+        balanceCentavos: paid ? 0 : order.totalCentavos,
+      };
+    }
+    // Seed/demo fallback only — no real Order of Payment exists yet.
+    return this.assessmentStore.getActiveAssessment(this.applicationId()) ?? null;
+  });
 
   /** True only once the focused payment carries a real, cashier-entered OR number — see the module notice above. */
   protected readonly hasOfficialReceipt = computed(() => !!this.focusedPayment()?.officialReceiptNumber);

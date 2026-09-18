@@ -1,0 +1,86 @@
+- generic [ref=f10e5]:
+  - generic [ref=f10e6]:
+    - heading "Create Your Account" [level=2] [ref=f10e7]
+    - paragraph [ref=f10e8]: Step 2 of 3
+  - generic [ref=f10e9]:
+    - generic [ref=f10e10]:
+      - generic [ref=f10e11]: "1"
+      - text: Personal
+    - generic [ref=f10e13]:
+      - generic [ref=f10e14]: "2"
+      - text: Contact
+    - generic [ref=f10e16]:
+      - generic [ref=f10e17]: "3"
+      - text: Security
+  - generic [ref=f10e46]:
+    - generic [ref=f10e47]: Email Address*
+    - textbox "Email Address*" [ref=f10e48]: test@example.com
+  - generic [ref=f10e49]:
+    - generic [ref=f10e50]: Mobile Number*
+    - textbox "Mobile Number*" [ref=f10e51]:
+      - /placeholder: 09XXXXXXXXX
+      - text: "09123456789"
+  - generic [ref=f10e52]:
+    - generic [ref=f10e53]: House Number / Street*
+    - textbox "House Number / Street*" [active] [ref=f10e54]: 123 Main St
+  - generic [ref=f10e55]:
+    - generic [ref=f10e56]:
+      - generic [ref=f10e57]: Barangay*
+      - combobox "Barangay*" [ref=f10e58]:
+        - option "Select" [disabled]
+        - option "Amomonting"
+        - option "Bagalayag"
+        - option "Bagong Sirang"
+        - option "Bonga"
+        - option "Buenavista"
+        - option "Burabod"
+        - option "Caburacan"
+        - option "Canjela"
+        - option "Cogon"
+        - option "Cumadcad"
+        - option "Dangcalan"
+        - option "Dinapa"
+        - option "La Union"
+        - option "Libtong"
+        - option "Loreto"
+        - option "Macalaya"
+        - option "Maracabac"
+        - option "Mayon"
+        - option "Maypangi"
+        - option "Milagrosa"
+        - option "Miluya"
+        - option "Monte Carmelo"
+        - option "Oras"
+        - option "Pandan"
+        - option "Poblacion" [selected]
+        - option "Quirapi"
+        - option "Saclayan"
+        - option "Salvacion"
+        - option "San Isidro"
+        - option "San Rafael"
+        - option "San Roque"
+        - option "San Vicente"
+        - option "Sogoy"
+        - option "Tomalaytay"
+    - generic [ref=f10e59]:
+      - generic [ref=f10e60]: City / Municipality*
+      - combobox "City / Municipality*" [ref=f10e61]:
+        - option "Castilla" [selected]
+  - generic [ref=f10e62]:
+    - generic [ref=f10e63]:
+      - generic [ref=f10e64]: Province*
+      - combobox "Province*" [ref=f10e65]:
+        - option "Sorsogon" [selected]
+    - generic [ref=f10e66]:
+      - generic [ref=f10e67]: Postal Code*
+      - textbox "Postal Code*" [ref=f10e68]:
+        - /placeholder: "0000"
+        - text: "4713"
+  - generic [ref=f10e69]:
+    - button "Back" [ref=f10e70] [cursor=pointer]
+    - button "Continue" [ref=f10e71] [cursor=pointer]
+  - separator [ref=f10e43]
+  - generic [ref=f10e44]:
+    - text: Already have an account?
+    - link "Log In" [ref=f10e45] [cursor=pointer]:
+      - /url: /login

@@ -524,23 +524,30 @@ h3 {
   li {
     padding: 0.3rem 0.7rem;
     border-radius: $radius-pill;
+    // Upcoming steps: a real (if muted) fill, not a near-white background —
+    // was $color-bg-subtle (#fafafc) with $color-ink-300 text on top, which
+    // read as barely-there outlined pills rather than a solid stepper.
     border: 1px solid $color-border-strong;
-    background: $color-bg-subtle;
-    color: $color-ink-300;
+    background: $color-border-strong;
+    color: $color-ink-500;
     font-size: 0.76rem;
     font-weight: 700;
     white-space: nowrap;
 
+    // Past and current steps: solid saturated fills with white text, the
+    // same treatment this codebase already uses for a genuinely solid pill
+    // elsewhere (shared/filter-panel/filter-panel.scss's `.filter-badge`)
+    // — not another pastel tint. This is what "not solid" was reporting.
     &.is-past {
-      background: $color-success-bg-soft;
+      background: $color-success;
       border-color: $color-success;
-      color: $color-success-strong;
+      color: $color-surface;
     }
 
     &.is-current {
-      background: $color-brand-100;
-      border-color: $color-brand-border;
-      color: $color-brand-600;
+      background: $color-brand-600;
+      border-color: $color-brand-600;
+      color: $color-surface;
     }
   }
 }

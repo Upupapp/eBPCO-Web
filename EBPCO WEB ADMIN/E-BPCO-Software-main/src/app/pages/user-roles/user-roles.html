@@ -604,11 +604,6 @@
                 <dd>{{ row.department }}</dd>
               </div>
             </dl>
-            <p class="role-desc">
-              Workload counts are derived from this account's assigned module ({{
-                selectedUserRole()?.name
-              }}) and reflect the same records visible from Applications, Evaluations, and Payments.
-            </p>
           }
         }
 
@@ -668,6 +663,10 @@
         }
 
         @case ('activity') {
+          <p class="empty-note">
+            Sample data for preview only — this deployment does not yet keep a real per-account
+            activity log.
+          </p>
           <ul class="timeline-feed">
             @for (item of userActivity(); track item.title) {
               <li class="timeline-feed-item">

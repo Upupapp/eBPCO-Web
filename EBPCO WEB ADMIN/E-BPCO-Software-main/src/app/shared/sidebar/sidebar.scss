@@ -12,13 +12,14 @@
   padding: 1.5rem 1.25rem;
   background: $color-surface;
   border-right: 1px solid $color-border;
-  // Safety net for a short viewport: Super Admin's full 11-item menu plus
-  // the logout button can be taller than the available height. Without
-  // this, that overflow had nowhere contained to go and bled out of the
-  // sidebar into the whole page, inflating the page's own scroll height —
-  // this way the SIDEBAR scrolls on its own when it must, and the rest of
-  // the app never does because of it.
-  overflow-y: auto;
+  // The sidebar itself no longer scrolls as one piece — see `.nav-sections`
+  // below. Scrolling the whole column (the old fix for Super Admin's full
+  // 11-item menu overflowing on a short viewport) took Log Out along with
+  // it, so on a short enough window it scrolled out of reach along with
+  // "System Logs" — exactly the "can't see all the buttons up to Log In
+  // [sic, Log Out]" complaint. `.brand` and `.logout-btn` are pinned by
+  // being outside the one region that scrolls now.
+  overflow: hidden;
 }
 
 .brand {
@@ -27,6 +28,7 @@
   gap: 0.65rem;
   margin-bottom: 2rem;
   padding-left: 0.25rem;
+  flex-shrink: 0;
 
   span {
     font-size: 1.25rem;
@@ -41,6 +43,30 @@
   display: flex;
   flex-direction: column;
   gap: 1.35rem;
+  // The one scrollable region: grows to fill whatever space `.brand` and
+  // `.logout-btn` leave, and only scrolls internally once its own content
+  // (item count varies by role — see permissions.ts's NAV_MODULES) is
+  // taller than that. `min-height: 0` is required for a flex child to be
+  // allowed to shrink below its content size at all; without it this
+  // never actually became the scroll container and the overflow kept
+  // landing on `.sidebar` instead.
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  // Explicit, not left to default to `auto` alongside overflow-y (the CSS
+  // spec computes an unset overflow-x to `auto` too the moment overflow-y
+  // isn't `visible`) — a nav item's icon/text has no business scrolling
+  // sideways, and that implicit auto was showing a horizontal scrollbar
+  // under the list the moment anything overflowed by even a pixel.
+  overflow-x: hidden;
+  // Same thin-scrollbar treatment already used elsewhere in this sidebar's
+  // own design language, kept local to this region now that it — not the
+  // whole sidebar — is what scrolls.
+  scrollbar-width: thin;
+  scrollbar-color: $color-border transparent;
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: $color-border; border-radius: 999px; }
 }
 
 .nav-section-label {
@@ -103,9 +129,9 @@
   // between "System Logs" and this button instead of at the bottom of the
   // sidebar, where empty space actually reads as normal.
   margin-top: 2rem;
-  // Paired with `.sidebar`'s `overflow-y: auto` above: on a short viewport
-  // where the nav list scrolls, this stops the button itself from being
-  // squashed by the column's own sizing rules.
+  // Now a plain flex sibling of `.nav-sections` (the scroll region), not a
+  // child inside it — this is what keeps it always visible, never inside
+  // the part that scrolls.
   flex-shrink: 0;
   display: flex;
   align-items: center;

@@ -242,6 +242,19 @@
   max-width: 220px;
 }
 
+// `DisplayStatus`'s third value — the class-binding in the template
+// slugifies it to `awaiting-preparation`, and nothing anywhere styled that
+// class, so it fell through to `.status-pill`'s bare shape with no
+// background/color at all and rendered as plain text next to the two
+// pills below it that DO have color. A distinct blue (not the same amber
+// as "ready-for-release") on purpose: this is the earlier, not-yet-
+// actionable stage, and giving it the same tone as "ready" would erase the
+// one distinction this column exists to show a releasing officer.
+.status-pill.awaiting-preparation {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
 .status-pill.ready-for-release {
   background: #fef3c7;
   color: #b45309;
