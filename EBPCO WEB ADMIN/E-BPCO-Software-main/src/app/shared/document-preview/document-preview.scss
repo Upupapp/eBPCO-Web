@@ -94,7 +94,17 @@
   font-style: italic;
 }
 
-.doc-page-watermark {
+.doc-page > .doc-page-watermark {
+  // Qualified with the parent, not just `.doc-page-watermark` alone: that
+  // selector and `.doc-page > *` two rules up are the same specificity, and
+  // in the compiled bundle the universal one was winning — pinning this to
+  // `position: relative` (its default, `top/right/bottom/left: 0` doing
+  // nothing) instead of `absolute`. `inset: 0` then had no containing block
+  // to stretch against, so the div sized itself to its own text — one line,
+  // ~680px wide at this font-size — instead of the full page, which is why
+  // rotating it swept upward past the page's own top edge. `.doc-page > `
+  // makes this selector strictly more specific than the universal rule, so
+  // it wins regardless of source order.
   position: absolute;
   inset: 0;
   display: flex;
@@ -120,13 +130,24 @@
   padding: 0 8%;
 }
 
-.paid-stamp {
+.doc-page > .paid-stamp {
+  // Qualified with the parent for the same reason `.doc-page-watermark`
+  // is above: `.doc-page > *` was winning the specificity tie and pinning
+  // this to `position: relative`, so `top`/`right` were never absolute
+  // offsets from the page's corner at all — they shifted the stamp down
+  // and left from wherever it fell in NORMAL FLOW, which (as the first
+  // element after the watermark div, before the header) was the very top
+  // of the page. That is what put a green box across "Municipality of
+  // Castilla" no matter how large `top` was set: the letterhead moved
+  // with it.
+  //
+  // Now genuinely absolute: 13rem clears the real, measured letterhead
+  // (header height ~5.5rem plus its own top offset, ~6.6rem from the
+  // page's content edge — confirmed via getBoundingClientRect on the live
+  // page) with a margin, landing the stamp beside "Official Receipt"
+  // instead of on top of the office's name.
   position: absolute;
-  // Below the letterhead (seal + three lines of text, ~5.5rem tall with its
-  // border), not overlapping it — `top: 1.6rem` sat inside the header's own
-  // vertical span, so the stamp cut across "Municipality of Castilla"
-  // instead of sitting in the clear space above the OR-number box.
-  top: 7rem;
+  top: 13rem;
   right: 1.9rem;
   z-index: 2;
   padding: 0.35rem 1.1rem;
