@@ -6,15 +6,24 @@ import { USER_PORTAL_BASE_URL } from '../../core/config/user-portal.config';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
 import { ApplicationRecord, withProjectedFields } from '../../core/domain/application.model';
+import { ApplicationDetailResult, StaffApplicationsApi } from '../../core/api/staff-applications.api';
 
 /**
  * The watermark gate.
  *
- * This is the control that decides whether a generated document declares itself
- * `NOT VALID AS AN OFFICIAL PERMIT`. It arrived with the feature and with no
- * test, which made it the least-covered safety-critical thing in the portal: a
- * wrong branch here either brands a genuine permit as invalid, or — far worse —
- * lets a document that is not a permit print without saying so.
+ * Originally the control that decided whether a generated document declared
+ * itself DRAFT / FOR REVIEW / NOT VALID AS AN OFFICIAL PERMIT depending on
+ * approval and payment state. An explicit owner decision (see
+ * `user-portal-permit-preview.ts`'s `gate` computed) replaced that
+ * progression: this system issues no real permits, so EVERY document gets
+ * the same 'SAMPLE — NOT AN OFFICIAL PERMIT' watermark regardless of state —
+ * a progression that got more confident as an application moved along would
+ * misrepresent a preview that is never going to become a real permit.
+ *
+ * What is still safety-critical, and still branches, is `cleared`: whether a
+ * genuine issued-permit record exists gates the QR/verification link. A
+ * citizen must never be handed a verification link for a permit that was
+ * never actually issued. That is what this file actually tests now.
  *
  * Stubbed stores rather than seed data, because the point is to pin each branch
  * exactly, including combinations the seed may not happen to contain.
@@ -48,8 +57,13 @@ const row = (): ApplicationRecord =>
     assessedAmountCentavos: null,
   });
 
+/** Never resolves 'ok' — these tests pin behavior purely off the stubbed `store`/`assessments`, same as before this fetch existed. */
+const NO_REAL_DETAIL = {
+  detail: (): Promise<ApplicationDetailResult> => Promise.resolve({ kind: 'unavailable' } as const),
+};
+
 /** @param permit a store-issued permit record, the authoritative "genuinely issued" signal. */
-function mount(opts: { permit?: unknown; canApprove: boolean; paymentFinal: boolean }) {
+function mount(opts: { permit?: unknown; canApprove: boolean; paymentFinal: boolean; baseUrl?: string }) {
   const store = {
     getById: () => row(),
     getApplicant: () => undefined,
@@ -70,7 +84,8 @@ function mount(opts: { permit?: unknown; canApprove: boolean; paymentFinal: bool
     providers: [
       { provide: ApplicationStore, useValue: store },
       { provide: AssessmentStore, useValue: assessments },
-      { provide: USER_PORTAL_BASE_URL, useValue: '' },
+      { provide: StaffApplicationsApi, useValue: NO_REAL_DETAIL },
+      { provide: USER_PORTAL_BASE_URL, useValue: opts.baseUrl ?? '' },
     ],
   });
   const fixture = TestBed.createComponent(Host);
@@ -79,46 +94,39 @@ function mount(opts: { permit?: unknown; canApprove: boolean; paymentFinal: bool
 }
 
 const BUDGET = 20_000;
+const WATERMARK = 'SAMPLE — NOT AN OFFICIAL PERMIT';
 
 describe('UserPortalPermitPreview — the watermark gate', () => {
-  it('an issued permit carries NO watermark', () => {
-    // A real store-issued permit record is the authoritative signal. Watermarking
-    // a genuine permit would make staff doubt a valid document.
-    const text = mount({ permit: { permitNumber: 'BP-2026-0001' }, canApprove: true, paymentFinal: true });
-    expect(text).not.toContain('DRAFT');
-    expect(text).not.toContain('FOR REVIEW');
-    expect(text).not.toContain('NOT VALID AS AN OFFICIAL PERMIT');
-  }, BUDGET);
-
-  it('says DRAFT when the application cannot even be approved', () => {
-    const text = mount({ canApprove: false, paymentFinal: false });
-    expect(text).toContain('DRAFT');
-  }, BUDGET);
-
-  it('says FOR REVIEW when approvable but payment is not final', () => {
-    const text = mount({ canApprove: true, paymentFinal: false });
-    expect(text).toContain('FOR REVIEW');
-    expect(text).not.toContain('NOT VALID AS AN OFFICIAL PERMIT');
-  }, BUDGET);
-
-  it('says NOT VALID AS AN OFFICIAL PERMIT when everything passes but no permit was issued', () => {
-    // The most dangerous state: it looks complete, and is not a permit. If this
-    // branch ever fell through to no watermark, a document that is not a permit
-    // would print as though it were one.
-    const text = mount({ canApprove: true, paymentFinal: true });
-    expect(text).toContain('NOT VALID AS AN OFFICIAL PERMIT');
-  }, BUDGET);
-
-  it('never leaves an unissued document unmarked, whatever the combination', () => {
+  it('shows the same SAMPLE watermark whatever the approval/payment state — this system issues no real permits', () => {
     for (const canApprove of [true, false]) {
       for (const paymentFinal of [true, false]) {
         const text = mount({ canApprove, paymentFinal });
-        const marked =
-          text.includes('DRAFT') ||
-          text.includes('FOR REVIEW') ||
-          text.includes('NOT VALID AS AN OFFICIAL PERMIT');
-        expect(marked).toBe(true);
+        expect(text).toContain(WATERMARK);
       }
     }
+  }, BUDGET);
+
+  it('shows the same SAMPLE watermark even once a real permit has genuinely been issued', () => {
+    // A progression that got more confident as an application moved along —
+    // the old DRAFT/FOR REVIEW/NOT VALID behavior — would misrepresent this
+    // preview as becoming a real permit. It never does.
+    const text = mount({ permit: { permitNumber: 'BP-2026-0001' }, canApprove: true, paymentFinal: true });
+    expect(text).toContain(WATERMARK);
+  }, BUDGET);
+
+  it('says the permit has not been issued when there is no real permit record', () => {
+    // The safety-critical branch now: a citizen must never be handed a
+    // verification link for a permit that was never actually issued.
+    const text = mount({ canApprove: true, paymentFinal: true, baseUrl: 'https://portal.castillasorsogon.gov.ph' });
+    expect(text).toContain('QR verification not yet available — this permit has not been issued.');
+    expect(text).not.toContain('/verify/');
+  }, BUDGET);
+
+  it('offers a real verification link once a real permit record exists and the User Portal address is configured', () => {
+    const text = mount({
+      permit: { permitNumber: 'BP-2026-0001' }, canApprove: true, paymentFinal: true,
+      baseUrl: 'https://portal.castillasorsogon.gov.ph',
+    });
+    expect(text).toContain('https://portal.castillasorsogon.gov.ph/verify/BP-2026-0001');
   }, BUDGET);
 });
