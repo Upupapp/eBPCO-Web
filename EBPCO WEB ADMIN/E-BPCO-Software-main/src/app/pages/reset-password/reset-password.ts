@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { AuthLayout } from '../../shared/auth-layout/auth-layout';
 import { DilgSeal } from '../../shared/dilg-seal/dilg-seal';
 import { IdentityApi } from '../../core/api/identity.api';
+import { firstPasswordRejectionMessage, passwordChecks } from '../../core/domain/password-policy';
 
 /**
  * Where the emailed "set your password" link lands.
@@ -38,6 +39,10 @@ export class ResetPassword {
   /** A blank or missing token means the link itself was malformed — nothing to submit against. */
   readonly hasToken = computed(() => (this.token() ?? '').trim().length > 0);
 
+  get passwordChecks(): { label: string; passed: boolean }[] {
+    return passwordChecks(this.password);
+  }
+
   togglePassword(): void {
     this.showPassword.update((value) => !value);
   }
@@ -54,10 +59,9 @@ export class ResetPassword {
       this.formError.set('Please fill in both fields.');
       return;
     }
-    if (this.password.length < 12) {
-      // The server's own floor (see `PasswordPolicy`), matched here so it is
-      // caught before a round trip rather than after one.
-      this.formError.set('Use at least 12 characters.');
+    const rejection = firstPasswordRejectionMessage(this.password);
+    if (rejection) {
+      this.formError.set(rejection);
       return;
     }
     if (this.password !== this.confirmPassword) {

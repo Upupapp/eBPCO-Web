@@ -220,8 +220,8 @@
               <app-icon name="info" [size]="16" />
               <span
                 >Sample data for preview only — this deployment has no growth-analytics endpoint,
-                so these figures (2,032 applications, 1,524 active users) do not reflect the real
-                data shown elsewhere on this page.</span
+                so this chart's monthly registration figures do not reflect the real data shown
+                elsewhere on this page.</span
               >
             </div>
 
@@ -282,20 +282,6 @@
               }
             </div>
           </div>
-
-          <div class="kpi-grid">
-            @for (m of metricTiles; track m.label) {
-              <app-kpi-card
-                [label]="m.label"
-                [value]="m.value"
-                [unit]="m.unit ?? ''"
-                [icon]="m.icon"
-                [tone]="m.tone"
-                [illustration]="m.illustration"
-                [trend]="m.trend"
-              />
-            }
-          </div>
         </div>
       }
 
@@ -308,8 +294,14 @@
             </button>
           </div>
 
+          @if (moduleUsageError(); as message) {
+            <div class="prototype-disclaimer" role="note">
+              <app-icon name="info" [size]="16" />
+              <span>{{ message }}</span>
+            </div>
+          }
           <div class="module-list">
-            @for (m of moduleUsage; track m.name) {
+            @for (m of moduleUsage(); track m.name) {
               <div class="module-row">
                 <span class="module-name">{{ m.name }}</span>
                 <span class="module-count">{{ m.businessCount }} Businesses</span>

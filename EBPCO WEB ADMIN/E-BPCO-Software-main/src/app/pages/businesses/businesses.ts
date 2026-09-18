@@ -5,7 +5,7 @@ import { Topbar } from '../../shared/topbar/topbar';
 import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 import { Icon } from '../../shared/icon/icon';
 import { Avatar } from '../../shared/avatar/avatar';
-import { KpiCard, KpiIllustration, KpiTone, KpiTrend } from '../../shared/kpi-card/kpi-card';
+import { KpiCard, KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-card';
 import { Pagination } from '../../shared/pagination/pagination';
 import { FilterPanel } from '../../shared/filter-panel/filter-panel';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
@@ -18,6 +18,8 @@ import { ToastService } from '../../shared/toast/toast.service';
 import { validateMobileNumber } from '../../shared/utils/validators';
 import { CapitalizeNameDirective } from '../../shared/utils/capitalize-name.directive';
 import { StaffBusinessesApi, StaffBusinessDetail, StaffBusinessRow } from '../../core/api/staff-businesses.api';
+import { EvaluationQueueRow, StaffEvaluationsApi } from '../../core/api/staff-evaluations.api';
+import { EVALUATION_STAGE_ORDER, EvaluationStage } from '../../core/domain/status.model';
 
 type SubTab = 'analytics' | 'modules' | 'recent-activity';
 type ViewMode = 'list' | 'create' | 'detail';
@@ -64,6 +66,15 @@ interface ModuleUsage {
   pct: number;
   color: string;
 }
+
+/** The real 5-stage evaluation pipeline (`EVALUATION_STAGE_ORDER`), with the display name/color this page already used for each — no stage added, removed, or renamed. */
+const STAGE_MODULE_META: readonly { stage: EvaluationStage; name: string; color: string }[] = [
+  { stage: 'Initial', name: 'Initial Evaluation', color: '#7c3aed' },
+  { stage: 'Zoning', name: 'Zoning Evaluation', color: '#f59e0b' },
+  { stage: 'Fire Safety', name: 'Fire Safety Evaluation', color: '#2563eb' },
+  { stage: 'OBO', name: 'OBO Evaluation', color: '#16a34a' },
+  { stage: 'Final Approval', name: 'Final Evaluation', color: '#991b1b' },
+];
 
 interface ActivityItem {
   name: string;
@@ -112,6 +123,7 @@ const GROWTH_POINTS: GrowthPoint[] = [
 export class Businesses {
   private readonly store = inject(ApplicationStore);
   private readonly businessesApi = inject(StaffBusinessesApi);
+  private readonly evaluationsApi = inject(StaffEvaluationsApi);
 
   /**
    * `GET /staff/businesses` is real and this page now calls it (P-4b) — the
@@ -121,12 +133,24 @@ export class Businesses {
   private readonly realRows = signal<StaffBusinessRow[] | null>(null);
   /** A message when the real fetch could not be completed — `null` on success, and while still loading. */
   protected readonly realListError = signal<string | null>(null);
+  /**
+   * `GET /staff/evaluations/queue` — the exact same real endpoint the
+   * Evaluations page itself reads (`evaluations.ts`) — feeds the Modules
+   * tab below. `null` until the first fetch resolves.
+   */
+  private readonly realEvaluationRows = signal<EvaluationQueueRow[] | null>(null);
+  protected readonly moduleUsageError = signal<string | null>(null);
   private readonly toast = inject(ToastService);
 
   constructor(private readonly router: Router) {
     effect(() => {
       const isSeed = this.store.isSeedData();
-      if (!isSeed) untracked(() => this.loadRealBusinesses());
+      if (!isSeed) {
+        untracked(() => {
+          void this.loadRealBusinesses();
+          void this.loadRealEvaluationQueue();
+        });
+      }
     });
   }
 
@@ -141,6 +165,20 @@ export class Businesses {
     } else {
       this.realRows.set([]);
       this.realListError.set(`Could not load the business directory: ${result.message}`);
+    }
+  }
+
+  private async loadRealEvaluationQueue(): Promise<void> {
+    const result = await this.evaluationsApi.queue();
+    if (result.kind === 'ok') {
+      this.realEvaluationRows.set([...result.rows]);
+      this.moduleUsageError.set(null);
+    } else if (result.kind === 'unavailable') {
+      this.realEvaluationRows.set([]);
+      this.moduleUsageError.set("This deployment's evaluations queue endpoint isn't reachable.");
+    } else {
+      this.realEvaluationRows.set([]);
+      this.moduleUsageError.set(`Could not load module usage: ${result.message}`);
     }
   }
 
@@ -585,13 +623,57 @@ export class Businesses {
     this.toast.success(`Exported ${row.code}.`);
   }
 
-  protected readonly moduleUsage: ModuleUsage[] = [
-    { name: 'Initial Evaluation', businessCount: 122, pct: 30, color: '#7c3aed' },
-    { name: 'Zoning Evaluation', businessCount: 122, pct: 50, color: '#f59e0b' },
-    { name: 'Fire Safety Evaluation', businessCount: 75, pct: 60, color: '#2563eb' },
-    { name: 'OBO Evaluation', businessCount: 32, pct: 80, color: '#16a34a' },
-    { name: 'Final Evaluation', businessCount: 22, pct: 30, color: '#991b1b' },
-  ];
+  /**
+   * Real counts, not sample data: each stage's `businessCount` is the number
+   * of DISTINCT businesses whose active application currently sits at that
+   * evaluation stage.
+   *
+   * `nextStage`/`evaluationStage` is the server's own "next step" field
+   * (`GET /staff/evaluations` for real data, `ApplicationStore.applications()`'s
+   * seed equivalent otherwise) — not re-derived from a decision history here,
+   * same discipline `evaluations-data.ts` already follows for the real
+   * Evaluations page these five stages come from.
+   *
+   * `pct` is each stage's share of the currently-active evaluation
+   * workload (businesses at ANY of the five stages) — a real, meaningful
+   * proportion, not an arbitrary fill level.
+   */
+  protected readonly moduleUsage = computed<ModuleUsage[]>(() => {
+    const countsByStage: Record<EvaluationStage, number> = this.store.isSeedData()
+      ? this.stageBusinessCountsFromSeed()
+      : this.stageBusinessCountsFromRealQueue();
+
+    const counts = STAGE_MODULE_META.map((meta) => countsByStage[meta.stage]);
+    const totalActive = counts.reduce((sum, n) => sum + n, 0) || 1;
+    return STAGE_MODULE_META.map((meta, i) => ({
+      name: meta.name,
+      businessCount: counts[i],
+      pct: Math.round((counts[i] / totalActive) * 100),
+      color: meta.color,
+    }));
+  });
+
+  private stageBusinessCountsFromRealQueue(): Record<EvaluationStage, number> {
+    const rows = this.realEvaluationRows() ?? [];
+    return Object.fromEntries(
+      EVALUATION_STAGE_ORDER.map((stage) => [
+        stage,
+        new Set(
+          rows.filter((r) => r.nextStage === stage && r.businessId !== null).map((r) => r.businessId),
+        ).size,
+      ]),
+    ) as Record<EvaluationStage, number>;
+  }
+
+  private stageBusinessCountsFromSeed(): Record<EvaluationStage, number> {
+    const apps = this.store.applications();
+    return Object.fromEntries(
+      EVALUATION_STAGE_ORDER.map((stage) => [
+        stage,
+        new Set(apps.filter((a) => a.evaluationStage === stage).map((a) => a.businessId)).size,
+      ]),
+    ) as Record<EvaluationStage, number>;
+  }
 
   protected readonly recentActivity: ActivityItem[] = [
     {
@@ -701,71 +783,6 @@ export class Businesses {
   protected onGrowthPointerLeave(): void {
     this.hoveredGrowthIndex.set(null);
   }
-
-  protected readonly metricTiles: {
-    label: string;
-    value: string;
-    unit?: string;
-    icon: string;
-    tone: KpiTone;
-    illustration: KpiIllustration;
-    trend: KpiTrend;
-  }[] = [
-    {
-      label: 'Applications Processed',
-      value: '2,032',
-      icon: 'logs',
-      tone: 'info',
-      illustration: 'applications',
-      trend: {
-        label: '12.5%',
-        direction: 'up',
-        sentiment: 'positive',
-        comparison: 'Vs Previous 30 days',
-      },
-    },
-    {
-      label: 'Avg. Processing Time',
-      value: '3.6',
-      unit: 'days',
-      icon: 'clock',
-      tone: 'neutral',
-      illustration: 'pending',
-      trend: {
-        label: '8.3%',
-        direction: 'down',
-        sentiment: 'positive',
-        comparison: 'Vs Previous 30 days',
-      },
-    },
-    {
-      label: 'Active Users',
-      value: '1,524',
-      icon: 'users',
-      tone: 'info',
-      illustration: 'users',
-      trend: {
-        label: '9.7%',
-        direction: 'up',
-        sentiment: 'positive',
-        comparison: 'Vs Previous 30 days',
-      },
-    },
-    {
-      label: 'Storage Used',
-      value: '245',
-      unit: 'GB',
-      icon: 'cloud',
-      tone: 'neutral',
-      illustration: 'totals',
-      trend: {
-        label: '15.2%',
-        direction: 'up',
-        sentiment: 'negative',
-        comparison: 'Vs Previous 30 days',
-      },
-    },
-  ];
 
   protected readonly newBusiness = {
     businessName: '',
