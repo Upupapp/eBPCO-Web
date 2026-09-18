@@ -1,0 +1,205 @@
+- generic [ref=f8e4]:
+  - complementary [ref=f8e6]:
+    - generic [ref=f8e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f8e9]
+      - generic [ref=f8e10]: E-BPCO
+    - navigation [ref=f8e11]:
+      - link "Dashboard" [ref=f8e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f8e20]:
+        - generic [ref=f8e21]: Operations
+        - generic [ref=f8e22]:
+          - link "Applications" [ref=f8e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f8e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f8e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f8e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f8e48]:
+        - generic [ref=f8e49]: Administration
+        - generic [ref=f8e50]:
+          - link "Businesses" [ref=f8e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f8e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f8e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f8e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f8e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f8e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f8e91] [cursor=pointer]
+  - main [ref=f8e97]:
+    - generic [ref=f8e98]:
+      - generic "Applications" [ref=f8e99]:
+        - generic [ref=f8e100]:
+          - heading "Applications" [level=1] [ref=f8e101]
+          - generic [ref=f8e102]:
+            - generic [ref=f8e103]:
+              - generic [ref=f8e108]: Search
+              - textbox "Search" [ref=f8e109]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f8e111] [cursor=pointer]
+            - button "P paul@lguids.com.ph Super Admin" [ref=f8e117] [cursor=pointer]:
+              - generic [ref=f8e118]: P
+              - generic [ref=f8e122]:
+                - generic [ref=f8e123]: paul@lguids.com.ph
+                - generic [ref=f8e124]: Super Admin
+      - generic [ref=f8e128]:
+        - heading "Application Details" [level=1] [ref=f8e129]
+        - generic [ref=f8e130]:
+          - button "Action" [ref=f8e132] [cursor=pointer]
+          - button "Evaluate" [ref=f8e133] [cursor=pointer]
+          - button "Payment" [ref=f8e134] [cursor=pointer]
+          - button "Back to List" [ref=f8e135] [cursor=pointer]
+          - button "More actions" [ref=f8e137] [cursor=pointer]
+      - generic [ref=f8e143]:
+        - generic [ref=f8e144]:
+          - generic [ref=f8e145]: AC
+          - generic [ref=f8e153]:
+            - heading "8bab1dfe-bb42-4155-a6cd-928645576c6e - Angela Cailing" [level=2] [ref=f8e154]
+            - generic [ref=f8e155]: Approved
+            - generic [ref=f8e156]:
+              - generic [ref=f8e157]:
+                - term [ref=f8e158]: "Business / Project :"
+                - definition [ref=f8e159]: El Cafe
+              - generic [ref=f8e160]:
+                - term [ref=f8e161]: "City :"
+                - definition [ref=f8e162]: ella
+              - generic [ref=f8e163]:
+                - term [ref=f8e164]: "Region :"
+                - definition [ref=f8e165]: Region V (Bicol Region)
+              - generic [ref=f8e166]:
+                - term [ref=f8e167]: "Type :"
+                - definition [ref=f8e168]: Excavation Permit
+              - generic [ref=f8e169]:
+                - term [ref=f8e170]: "Email :"
+                - definition [ref=f8e171]:
+                  - text: michaela@gmail.com
+                  - generic [ref=f8e172]: Unverified
+                  - button "Confirm" [ref=f8e173] [cursor=pointer]
+                  - button "Mark Failed" [ref=f8e174] [cursor=pointer]
+              - generic [ref=f8e175]:
+                - term [ref=f8e176]: "Phone :"
+                - definition [ref=f8e177]:
+                  - text: "09949500196"
+                  - generic [ref=f8e178]: Unverified
+                  - button "Confirm" [ref=f8e179] [cursor=pointer]
+                  - button "Mark Failed" [ref=f8e180] [cursor=pointer]
+              - generic [ref=f8e181]:
+                - term [ref=f8e182]: "Barangay :"
+                - definition [ref=f8e183]: ella
+          - generic [ref=f8e184]:
+            - generic [ref=f8e185]:
+              - strong [ref=f8e186]: 2026-09-18
+              - generic [ref=f8e187]: Date Submitted
+            - generic [ref=f8e188]:
+              - strong [ref=f8e189]: —
+              - generic [ref=f8e190]: Assigned Officer
+          - button [ref=f8e191] [cursor=pointer]
+        - generic [ref=f8e195]:
+          - generic [ref=f8e196]:
+            - button "Timeline" [ref=f8e197] [cursor=pointer]
+            - button "Documents" [ref=f8e198] [cursor=pointer]
+            - button "Permit Result" [ref=f8e199] [cursor=pointer]
+            - button "Comments" [ref=f8e200] [cursor=pointer]
+          - generic [ref=f8e201]:
+            - heading "Permit Result" [level=2] [ref=f8e401]
+            - generic [ref=f8e420]:
+              - generic [ref=f8e421]: Approved
+              - heading "Excavation Permit" [level=3] [ref=f8e422]
+              - generic [ref=f8e423]:
+                - generic [ref=f8e424]:
+                  - term [ref=f8e425]: Permit Number
+                  - definition [ref=f8e426]: EXP-2026-000001
+                - generic [ref=f8e427]:
+                  - term [ref=f8e428]: Issued
+                  - definition [ref=f8e429]: 2026-09-18T11:30:39.427Z
+                - generic [ref=f8e430]:
+                  - term [ref=f8e431]: Validity / Expiry
+                  - definition [ref=f8e432]: Not tracked by this deployment
+                - generic [ref=f8e433]:
+                  - term [ref=f8e434]: Approving Official
+                  - definition [ref=f8e435]: Not tracked by this deployment
+                - generic [ref=f8e436]:
+                  - term [ref=f8e437]: Approving Office
+                  - definition [ref=f8e438]: Not tracked by this deployment
+              - paragraph [ref=f8e439]: Ready for release — not yet claimed.
+              - generic [ref=f8e440]:
+                - button [ref=f8e441] [cursor=pointer]
+                - button [active] [ref=f8e447] [cursor=pointer]
+      - dialog "Official Receipt" [ref=f8e462]:
+        - generic [ref=f8e463]:
+          - generic [ref=f8e464]: Official Receipt
+          - generic [ref=f8e465]:
+            - button "Print / Download" [ref=f8e466] [cursor=pointer]
+            - button "Close" [ref=f8e467] [cursor=pointer]
+        - article [ref=f8e468]:
+          - generic [aria-hidden]: SAMPLE — NOT AN OFFICIAL RECEIPT
+          - generic [aria-hidden]: PAID
+          - generic [ref=f8e471]:
+            - generic [ref=f8e472]: Republic of the Philippines
+            - generic [ref=f8e473]: Province of Sorsogon
+            - strong [ref=f8e474]: Municipality of Castilla
+            - generic [ref=f8e475]: Electronic Building Permit and Certificate of Occupancy (eBPCO)
+          - heading "Official Receipt" [level=1] [ref=f8e476]
+          - generic [ref=f8e477]:
+            - generic [ref=f8e478]:
+              - generic [ref=f8e479]:
+                - generic [ref=f8e480]: Official Receipt No.
+                - generic [ref=f8e481]: "765e4"
+              - generic [ref=f8e482]:
+                - generic [ref=f8e483]: Date
+                - generic [ref=f8e484]: Sep 18, 2026 · 7:18 PM
+            - generic [ref=f8e485]:
+              - generic [ref=f8e486]:
+                - term [ref=f8e487]: Received From
+                - definition [ref=f8e488]: Angela Cailing
+              - generic [ref=f8e489]:
+                - term [ref=f8e490]: Enterprise / Organization (if applicable)
+                - definition [ref=f8e491]: El Cafe
+              - generic [ref=f8e492]:
+                - term [ref=f8e493]: Application No.
+                - definition [ref=f8e494]: E-BPCO-2026-000003
+              - generic [ref=f8e495]:
+                - term [ref=f8e496]: Payer Reference
+                - definition [ref=f8e497]: "765e4"
+              - generic [ref=f8e498]:
+                - term [ref=f8e499]: Payment Method
+                - definition [ref=f8e500]: Onsite
+              - generic [ref=f8e501]:
+                - term [ref=f8e502]: Fee Schedule Version
+                - definition [ref=f8e503]: "2026.1"
+            - heading "Particulars" [level=2] [ref=f8e504]
+            - table [ref=f8e505]:
+              - rowgroup [ref=f8e506]:
+                - row [ref=f8e507]:
+                  - columnheader "Particulars" [ref=f8e508]
+                  - columnheader "Amount" [ref=f8e509]
+              - rowgroup [ref=f8e510]:
+                - row [ref=f8e511]:
+                  - cell "Filing Fee" [ref=f8e512]
+                  - cell "₱500.00" [ref=f8e513]
+                - row [ref=f8e514]:
+                  - cell "Processing Fee" [ref=f8e515]
+                  - cell "₱1,200.00" [ref=f8e516]
+                - row [ref=f8e517]:
+                  - cell "Total Assessed" [ref=f8e518]
+                  - cell "₱1,700.00" [ref=f8e519]
+            - generic [ref=f8e520]:
+              - generic [ref=f8e521]: Amount Received (this payment)
+              - strong [ref=f8e522]: ₱1,700.00
+            - paragraph [ref=f8e523]:
+              - generic [ref=f8e524]: Amount in Words
+              - generic [ref=f8e525]: One Thousand Seven Hundred Pesos Only
+            - generic [ref=f8e527]:
+              - term [ref=f8e528]: Status
+              - definition [ref=f8e529]: Paid
+            - generic [ref=f8e530]: Collecting Officer
+          - generic [ref=f8e532]:
+            - paragraph [ref=f8e533]: This is a system-generated document issued by the Electronic Building Permit and Certificate of Occupancy (eBPCO).
+            - paragraph [ref=f8e534]: Document Ref. 8bab1dfe-bb42-4155-a6cd-928645576c6e · Generated September 18, 2026 at 7:30 PM

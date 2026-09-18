@@ -355,6 +355,25 @@ export class Applications {
           if (this.id() !== id) return; // navigated away before this resolved
           if (result.kind === 'ok') this.realDetail.set(result.detail);
         });
+        // `row` above can be stale: `this.store` is populated once by
+        // `AdminLayout`'s initial `ensureLoaded()` and never refetched again
+        // on its own, so a status change made anywhere else — a payment
+        // verified from the Payments page, a stage advanced from
+        // Evaluations — never reaches this row just by navigating back
+        // here. `realDetail`'s own timeline (`realTimeline`) already shows
+        // the true latest event because `applicationsApi.detail` above is a
+        // fresh per-application fetch; the "Activity Summary"/"Lifecycle
+        // Progress" section read `row.lifecycleStatus` instead, which is
+        // this queue row, not that fetch — confirmed live: the Audit Trail
+        // showed a fresh "Payment Verified" entry while "Currently At" and
+        // the stepper still said "Assessed" for the same application in the
+        // same render. `reload()` (not `ensureLoaded()`) forces the refetch
+        // this row needs to catch up.
+        void this.loader.reload().then(() => {
+          if (this.id() !== id) return; // navigated away before this resolved
+          const fresh = this.store.getById(id);
+          if (fresh) this.selectedRow.set(fresh);
+        });
       });
     });
   }
