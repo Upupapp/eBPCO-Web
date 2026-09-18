@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Topbar } from '../../shared/topbar/topbar';
@@ -117,7 +117,7 @@ interface RingStat {
   templateUrl: './permit-release.html',
   styleUrl: './permit-release.scss',
 })
-export class PermitRelease {
+export class PermitRelease implements OnInit {
   private readonly store = inject(ApplicationStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
@@ -128,6 +128,20 @@ export class PermitRelease {
   private readonly loader = inject(QueueLoader);
   private readonly permitReleaseApi = inject(PermitReleaseApi);
   private readonly sessionCache = inject(PermitReleaseSessionCache);
+
+  /**
+   * Forces a fresh queue on every visit rather than trusting whatever
+   * `AdminLayout`'s one-time `ensureLoaded()` already put in `store` — the
+   * same staleness bug as `applications.ts`'s detail view (see its own
+   * comment): an application moved into a release-eligible stage from the
+   * Applications, Evaluations or Payments page never reached this queue by
+   * navigating back here, only by a full reload or this page's own
+   * mutations (which already called `loader.reload()` on success, but
+   * never on simply opening the page).
+   */
+  ngOnInit(): void {
+    void this.loader.reload();
+  }
 
   protected readonly canRelease = computed(() => {
     const role = this.session.role();
