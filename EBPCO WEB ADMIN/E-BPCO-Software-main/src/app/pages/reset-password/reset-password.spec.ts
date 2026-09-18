@@ -48,9 +48,15 @@ describe('ResetPassword', () => {
 
   const MOUNT_BUDGET = 20_000;
 
+  // Composition-compliant (uppercase, lowercase, digit, punctuation, 12+
+  // chars) — see core/domain/password-policy.ts. A password missing any of
+  // those is now refused before match-checking or the API call even happen,
+  // which these tests are not about.
+  const VALID_PASSWORD = 'A-long-enough-passphrase-9!';
+
   const submitValid = (): Promise<void> => {
-    component.password = 'a-long-enough-passphrase';
-    component.confirmPassword = 'a-long-enough-passphrase';
+    component.password = VALID_PASSWORD;
+    component.confirmPassword = VALID_PASSWORD;
     return component.onSubmit({ invalid: false } as NgForm);
   };
 
@@ -66,8 +72,8 @@ describe('ResetPassword', () => {
     fixture.componentRef.setInput('token', 'a-real-token');
     fixture.detectChanges();
 
-    component.password = 'a-long-enough-passphrase';
-    component.confirmPassword = 'a-different-one-entirely';
+    component.password = VALID_PASSWORD;
+    component.confirmPassword = 'A-different-one-entirely-9!';
     await component.onSubmit({ invalid: false } as NgForm);
 
     expect(lastCall).toBeUndefined();
@@ -82,7 +88,7 @@ describe('ResetPassword', () => {
     await submitValid();
     fixture.detectChanges();
 
-    expect(lastCall).toEqual({ token: 'a-real-token', password: 'a-long-enough-passphrase' });
+    expect(lastCall).toEqual({ token: 'a-real-token', password: VALID_PASSWORD });
     expect(fixture.nativeElement.textContent).toContain('Password set');
   }, MOUNT_BUDGET);
 

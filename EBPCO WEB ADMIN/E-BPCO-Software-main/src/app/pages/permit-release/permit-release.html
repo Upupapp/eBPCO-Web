@@ -27,12 +27,14 @@
         <app-kpi-card
           [label]="stat.label"
           [value]="stat.value"
+          [unit]="stat.unit ?? ''"
           [icon]="stat.icon"
           [tone]="stat.tone"
           [illustration]="stat.illustration"
           [progress]="stat.isTotal ? null : stat.pct"
           [support]="stat.support ?? ''"
           [bars]="stat.bars ?? null"
+          [sparkline]="stat.sparkline ?? null"
         />
       }
     </section>

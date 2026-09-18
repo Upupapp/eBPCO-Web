@@ -57,6 +57,19 @@ export interface ApplicationRecord {
   dateSubmitted: string;
   /** Same moment as dateSubmitted, kept as a real Date for sorting/range filtering. */
   dateValue: Date;
+  /**
+   * When this application last reached Released, Completed, or Rejected — the
+   * server's own `completed_at` (`staff-queue.service.ts`), sourced from the
+   * real `application_transitions` audit log, not a client-side guess.
+   *
+   * Optional, not `| null`, because most places that build an `ApplicationRecord`
+   * (seed data, other tests) have no basis to say either way — `undefined`
+   * means "not known here," while `null` from a real queue row means "the
+   * server looked and this application genuinely hasn't reached one of those
+   * statuses yet." A caller measuring elapsed processing time treats both the
+   * same way: no completion to measure against.
+   */
+  completedAt?: Date | null;
   lifecycleStatus: ApplicationLifecycleStatus;
   /**
    * Where this application sits in its evaluation sequence, or `null` when the

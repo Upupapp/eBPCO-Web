@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
 import { UserPortalPermitPreview } from './user-portal-permit-preview';
 import { USER_PORTAL_BASE_URL } from '../../core/config/user-portal.config';
 import { ApplicationStore } from '../../core/domain/application-store';
-import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
+import { ApplicationDetailResult, StaffApplicationsApi } from '../../core/api/staff-applications.api';
 
 /**
  * The verification QR's link.
@@ -82,24 +82,41 @@ describe('UserPortalPermitPreview — the verification QR link', () => {
 describe('UserPortalPermitPreview — a real, backend-generated permit', () => {
   const MOUNT_BUDGET = 20_000;
 
-  it('shows the real permit number from the session cache, not "Not yet assigned"', async () => {
+  it('shows the real permit number from GET /staff/applications/:id, not "Not yet assigned"', async () => {
     // Reproduces PERMIT-013: `ApplicationStore.replaceApplications()`
     // deliberately empties `_permits` on every real server load (see its own
     // doc comment), so a real backend-generated permit was never findable via
-    // `store.getPermit()` at all — this preview showed a DRAFT placeholder for
-    // an application that had actually already been issued a real permit.
+    // `store.getPermit()` alone. The fix (see `permit`'s own doc comment on
+    // user-portal-permit-preview.ts) was fetching it from the real detail
+    // endpoint, which this test now mocks directly — a same-session-only
+    // cache used to stand in for that fetch and went blank on refresh or in
+    // a second tab, which was the whole bug.
+    const detail: ApplicationDetailResult = {
+      kind: 'ok',
+      detail: {
+        payments: [],
+        orderOfPayment: null,
+        applicantEmail: 'citizen@example.com',
+        applicantMobile: null,
+        business: null,
+        permit: { permitNumber: 'FP-2026-000001', issuedDate: '2026-09-14', scope: '', conditions: null },
+        timeline: [],
+        documents: [],
+      },
+    };
     TestBed.configureTestingModule({
       imports: [Host],
-      providers: [{ provide: USER_PORTAL_BASE_URL, useValue: '' }],
+      providers: [
+        { provide: USER_PORTAL_BASE_URL, useValue: '' },
+        { provide: StaffApplicationsApi, useValue: { detail: () => Promise.resolve(detail) } },
+      ],
     });
     const store = TestBed.inject(ApplicationStore);
-    const cache = TestBed.inject(PermitReleaseSessionCache);
     const applicationId = store.applications()[0].id;
     // Simulate a real server load: the store's own permit collection is gone,
-    // exactly as replaceApplications() leaves it — only the session cache
-    // knows about a permit generated this session.
+    // exactly as replaceApplications() leaves it — only the real detail
+    // fetch above knows about the issued permit.
     store.replaceApplications(store.applications());
-    cache.recordPermit(applicationId, { permitNumber: 'FP-2026-000001', issuedDate: '2026-09-14' });
 
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.id = applicationId;
@@ -110,6 +127,5 @@ describe('UserPortalPermitPreview — a real, backend-generated permit', () => {
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('FP-2026-000001');
     expect(text).not.toContain('Not yet assigned');
-    expect(text).not.toContain('DRAFT');
   }, MOUNT_BUDGET);
 });

@@ -161,8 +161,7 @@ h2 {
 /* Analytics */
 .analytics-layout {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
   align-items: start;
 }
 
@@ -662,7 +661,6 @@ h2 {
 }
 
 @media (max-width: 1100px) {
-  .analytics-layout,
   .activity-layout,
   .create-grid {
     grid-template-columns: 1fr;
