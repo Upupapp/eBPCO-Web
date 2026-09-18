@@ -75,6 +75,8 @@ interface QueueRow {
   readonly applicantName: string;
   readonly location: string | null;
   readonly submittedAt: string | null;
+  /** When this application last reached Released, Completed, or Rejected — see `ApplicationRecord.completedAt`. */
+  readonly completedAt?: string | null;
   readonly assessedAmountCentavos: number | null;
   readonly paymentVerified: boolean;
   /** Optimistic-concurrency token — threaded back as `expectedVersion` on a transition so a stale edit is refused rather than silently overwriting a decision made elsewhere in the meantime. */
@@ -562,6 +564,7 @@ function publishedPermitType(row: QueueRow): PermitType | null {
 
 function toRecord(row: QueueRow): ApplicationRecord {
   const submitted = row.submittedAt === null ? null : new Date(row.submittedAt);
+  const completed = row.completedAt === null || row.completedAt === undefined ? row.completedAt : new Date(row.completedAt);
   // The last cast at this boundary, replaced by a check rather than a nullable
   // field — and the difference from `permitType` is deliberate.
   //
@@ -604,6 +607,7 @@ function toRecord(row: QueueRow): ApplicationRecord {
     officer: NOT_SENT,
     dateSubmitted: submitted === null ? NOT_SENT : submitted.toISOString().slice(0, 10),
     dateValue: submitted ?? new Date(0),
+    completedAt: completed,
     lifecycleStatus,
     // The queue row carries neither. `null` says so; 'Initial' claimed a stage
     // this portal has no basis for, and put every server row in the wrong queue.

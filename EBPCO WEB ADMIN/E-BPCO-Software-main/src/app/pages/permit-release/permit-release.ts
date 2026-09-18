@@ -78,11 +78,16 @@ interface ReleaseRow {
   permitNumber: string;
   /** Optimistic-concurrency token threaded into every transition call in the generate/prepare/release chain. */
   version?: number;
+  /** Real submission timestamp — see `ApplicationRecord.dateValue`. Used only to measure Avg. Processing Time below. */
+  submittedAt: Date;
+  /** Real completion timestamp, or `undefined`/`null` when the server has none yet — see `ApplicationRecord.completedAt`. */
+  completedAt?: Date | null;
 }
 
 interface RingStat {
   label: string;
   value: string;
+  unit?: string;
   icon: string;
   tone: KpiTone;
   illustration: KpiIllustration;
@@ -90,6 +95,8 @@ interface RingStat {
   isTotal: boolean;
   support?: string;
   bars?: number[];
+  /** Real per-item values, oldest first — only ever the released rows' own actual processing durations. Never a fabricated trend. */
+  sparkline?: number[];
 }
 
 @Component({
@@ -402,6 +409,8 @@ export class PermitRelease {
           displayStatus: displayStatusFor(stage),
           permitNumber: cached?.permitNumber ?? seedPermit?.permitNumber ?? 'Not available in this session',
           version: app.version,
+          submittedAt: app.dateValue,
+          completedAt: app.completedAt,
         };
       });
   });
@@ -444,19 +453,49 @@ export class PermitRelease {
         isTotal: false,
         support: `${Math.round((released / total) * 100)}% of total release`,
       },
-      {
-        label: 'Total Release',
-        value: String(rows.length),
-        icon: 'file-check',
-        tone: 'info',
-        illustration: 'permit',
-        pct: 100,
-        isTotal: true,
-        support: 'Awaiting Preparation · Ready for Release · Released',
-        bars: [awaiting, ready, released],
-      },
+      this.avgProcessingTimeStat(rows),
     ];
   });
+
+  /**
+   * Real elapsed days from submission to release, per released row —
+   * `completedAt` is the server's own `application_transitions` timestamp
+   * (`staff-queue.service.ts`), not a client-side guess, so this is a real
+   * average and a real sparkline, not sample data standing in for one.
+   *
+   * A row missing `completedAt` (seed/demo data, or a real one the server
+   * genuinely has no transition record for) is left out of both the average
+   * and the count reported in `support` — never coerced to zero, which would
+   * silently understate the real figure.
+   */
+  private avgProcessingTimeStat(rows: readonly ReleaseRow[]): RingStat {
+    const processingDays = rows
+      .filter((r): r is ReleaseRow & { completedAt: Date } =>
+        r.displayStatus === 'Released' && r.completedAt instanceof Date)
+      .map((r) => (r.completedAt.getTime() - r.submittedAt.getTime()) / 86_400_000)
+      .filter((days) => days >= 0);
+
+    const average = processingDays.length > 0
+      ? processingDays.reduce((sum, d) => sum + d, 0) / processingDays.length
+      : null;
+
+    return {
+      label: 'Avg. Processing Time',
+      value: average === null ? '—' : average.toFixed(1),
+      unit: average === null ? '' : 'days',
+      icon: 'clock',
+      tone: 'info',
+      illustration: 'permit',
+      pct: 0,
+      isTotal: true,
+      support: processingDays.length > 0
+        ? `Submission to release, across ${processingDays.length} released permit${processingDays.length === 1 ? '' : 's'} with a recorded release date`
+        : 'No released permit here yet has a recorded release date to measure from',
+      // A sparkline needs 2+ points to read as a line rather than a single
+      // dot — kpi-card itself already refuses to render one below that.
+      sparkline: processingDays.length >= 2 ? processingDays : undefined,
+    };
+  }
 
   protected readonly page = signal(1);
   protected readonly pageSize = 10;
