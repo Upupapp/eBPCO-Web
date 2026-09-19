@@ -103,6 +103,7 @@ describe('UserPortalPermitPreview — a real, backend-generated permit', () => {
         permit: { permitNumber: 'FP-2026-000001', issuedDate: '2026-09-14', scope: '', conditions: null },
         timeline: [],
         documents: [],
+        evaluations: [],
       },
     };
     TestBed.configureTestingModule({

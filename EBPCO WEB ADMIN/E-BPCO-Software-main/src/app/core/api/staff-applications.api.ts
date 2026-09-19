@@ -215,6 +215,23 @@ export interface ApplicationDetail {
   readonly permit: ApplicationGeneratedPermit | null;
   readonly timeline: readonly ApplicationTimelineEvent[];
   readonly documents: readonly ApplicationDocumentRow[];
+  /**
+   * Every evaluation stage decided so far — the same real rows the
+   * Evaluations page's own `GET /staff/evaluations` reads
+   * (`EvaluationService.of()`), already sent here (`staff-queue.service.ts`'s
+   * `detail()`) but never declared on this client's shape until this field
+   * was added, so `canAssessFee()` had no way to know an evaluation was
+   * still incomplete and let the Assess Fee action show regardless.
+   */
+  readonly evaluations: readonly ApplicationEvaluation[];
+}
+
+export interface ApplicationEvaluation {
+  readonly id: string;
+  readonly stage: 'Initial' | 'Zoning' | 'Fire Safety' | 'OBO' | 'Final Approval';
+  readonly result: string;
+  readonly remarks: string | null;
+  readonly evaluatedAt: string | null;
 }
 
 export type ApplicationDetailResult =

@@ -909,22 +909,31 @@
               </div>
             } @else {
               <div class="permit-result-panel empty">
+                <app-icon name="file-check" [size]="30" />
                 <p>
                   No permit or clearance has been generated yet for this application. Its current
                   status is <strong>{{ detail.row.status }}</strong> ({{
                     detail.row.lifecycleStatus
                   }}).
                 </p>
-                @if (canAssessFee()) {
-                  <button type="button" class="btn-primary" (click)="assessFeeAction()">
-                    Assess Fee
-                  </button>
+                @if (detail.row.lifecycleStatus === 'Under Evaluation' && !evaluationsComplete()) {
+                  <p class="permit-result-hint">
+                    Not every evaluation stage has been completed. Finish evaluating this
+                    application on the Evaluations page before assessing a fee.
+                  </p>
                 }
-                @if (canGeneratePermit()) {
-                  <button type="button" class="btn-primary" (click)="openGeneratePermitModal()">
-                    Generate {{ finalDocumentName() }}
-                  </button>
-                }
+                <div class="permit-result-actions">
+                  @if (canAssessFee()) {
+                    <button type="button" class="btn-primary" (click)="assessFeeAction()">
+                      Assess Fee
+                    </button>
+                  }
+                  @if (canGeneratePermit()) {
+                    <button type="button" class="btn-primary" (click)="openGeneratePermitModal()">
+                      Generate {{ finalDocumentName() }}
+                    </button>
+                  }
+                </div>
               </div>
             }
           }

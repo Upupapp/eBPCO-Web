@@ -268,6 +268,7 @@ describe('Evaluations — record view is genuinely store-sourced (not the old Ap
         permit: null,
         timeline: [],
         documents,
+        evaluations: [],
       },
     };
   }

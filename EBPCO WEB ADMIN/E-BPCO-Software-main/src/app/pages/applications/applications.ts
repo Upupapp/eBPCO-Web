@@ -18,6 +18,7 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import {
   ApplicationLifecycleStatus,
+  EVALUATION_STAGE_ORDER,
   LIFECYCLE_SEQUENCE,
   canTransition,
   isTerminalStatus,
@@ -779,6 +780,21 @@ export class Applications {
     return row ? requirementsFor(row.permitType).finalDocument : '';
   });
 
+  /**
+   * `evaluationsComplete` guards against the exact live bug this was found
+   * from: Assess Fee showed (and could be clicked) while an application was
+   * still mid-evaluation, e.g. with Zoning still pending — a real fee quoted
+   * on an application that had not yet cleared what that fee was for.
+   * `AssessmentService.issue()` now refuses this server-side too (see the
+   * sibling ebpco-api commit); this is the same rule, shown before the
+   * click rather than only after it fails.
+   */
+  protected readonly evaluationsComplete = computed(() => {
+    const evaluations = this.realDetail()?.evaluations ?? [];
+    const passed = new Set(evaluations.filter((e) => e.result === 'Passed').map((e) => e.stage));
+    return EVALUATION_STAGE_ORDER.every((stage) => passed.has(stage));
+  });
+
   protected readonly canAssessFee = computed(() => {
     const row = this.selectedRow();
     const role = this.session.role();
@@ -787,7 +803,8 @@ export class Applications {
       !!role &&
       ACTION_PERMISSIONS.assessFee(role) &&
       row.lifecycleStatus === 'Under Evaluation' &&
-      row.assessedAmountCentavos === null
+      row.assessedAmountCentavos === null &&
+      this.evaluationsComplete()
     );
   });
 
