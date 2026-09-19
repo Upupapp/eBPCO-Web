@@ -29,9 +29,23 @@ function fillApplication(component: any, permitType: string): void {
   component.applicationInfo.dateReceived = new Date().toISOString().slice(0, 10);
 }
 
+/**
+ * Attaches a real `File` to every required document draft — mutating
+ * `doc.fileName` alone (as this used to) never reaches `submit()`'s upload
+ * loop, which reads `doc.file` and silently skips a draft that has none
+ * (see `application-intake.ts`'s own doc comment on `DocumentDraft.file`).
+ * Goes through the component's own `updateDocument`, the same write
+ * `onFileChosen` makes from a real `<input type="file">` change event, so
+ * this exercises the real code path rather than hand-assembling a draft
+ * shape the component itself never produces.
+ */
 function attachAllRequiredDocuments(component: any): void {
   for (const doc of component.documents()) {
-    if (doc.required) doc.fileName = `${doc.requirementId}.pdf`;
+    if (!doc.required) continue;
+    const file = new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], `${doc.requirementId}.pdf`, {
+      type: 'application/pdf',
+    });
+    component['updateDocument'](doc.requirementId, { fileName: file.name, file });
   }
 }
 
@@ -192,6 +206,7 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
   let component: any;
   let store: ApplicationStore;
   let fileOnBehalfCalls: FileOnBehalfInput[];
+  let attachDocumentCalls: { applicationId: string; requirementCode: string; label: string; fileName: string }[];
   let filedRecord: ApplicationRecord | null;
 
   function serverRecord(id: string, referenceNumber: string): ApplicationRecord {
@@ -219,6 +234,7 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
 
   function setup(fileOnBehalfResult: FileOnBehalfResult): void {
     fileOnBehalfCalls = [];
+    attachDocumentCalls = [];
     filedRecord = null;
     TestBed.configureTestingModule({
       imports: [ApplicationIntake],
@@ -229,6 +245,12 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
             fileOnBehalf: (input: FileOnBehalfInput) => {
               fileOnBehalfCalls.push(input);
               return Promise.resolve(fileOnBehalfResult);
+            },
+            attachDocument: (
+              applicationId: string, requirementCode: string, label: string, fileName: string,
+            ) => {
+              attachDocumentCalls.push({ applicationId, requirementCode, label, fileName });
+              return Promise.resolve({ kind: 'done', documentId: `DOC-${attachDocumentCalls.length}` });
             },
             page: () =>
               Promise.resolve({
@@ -287,15 +309,19 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
   });
 
   it('attaches every provided document to the reopened server record', async () => {
+    // Real `POST /documents` per file (`StaffApplicationsApi.attachDocument`),
+    // against the real filed application's id — not a local-only annotation
+    // on `store`, which this flow stopped writing to (see the doc comment on
+    // `application-intake.ts`'s own upload loop).
     setup({ kind: 'done', applicationId: 'APP-1', referenceNumber: 'E-BPCO-2026-000099', applicantId: 'APL-9' });
 
     await component.submit();
 
-    const docs = store.getDocuments('APP-1');
     const requiredCount = requirementsFor('Building Permit').documents.filter(
       (d) => d.required,
     ).length;
-    expect(docs.length).toBeGreaterThanOrEqual(requiredCount);
+    expect(attachDocumentCalls.length).toBeGreaterThanOrEqual(requiredCount);
+    for (const call of attachDocumentCalls) expect(call.applicationId).toBe('APP-1');
   });
 
   it('prevents a duplicate submission from filing a second time', async () => {
