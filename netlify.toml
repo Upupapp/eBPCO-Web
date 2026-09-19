@@ -23,10 +23,10 @@
 
   # `npm run build` now runs `write-runtime-config.mjs` first (see
   # package.json) — it writes `public/config.js` from EBPCO_API_BASE_URL /
-  # EBPCO_USER_PORTAL_BASE_URL, which must be set as Netlify build
-  # environment variables (Site configuration → Environment variables) for a
-  # deploy that is meant to reach a real, separately-hosted API. Left unset,
-  # the build keeps shipping the same safe same-origin default it always has.
+  # EBPCO_USER_PORTAL_BASE_URL, which are set in `[build.environment]` below.
+  # Left unset, the build ships a same-origin default — and that default is
+  # exactly why every deploy before 19 Sep 2026 showed "The request failed"
+  # on the login page (see the comment on EBPCO_API_BASE_URL below).
   command = "npm ci && npm run build"
 
   # ── Always build. Do not remove without reading this. ────────────────────
@@ -62,15 +62,47 @@
   # rather than ours.
   NODE_VERSION = "22"
 
+  # ── Where the API is ─────────────────────────────────────────────────────
+  #
+  # Until 19 Sep 2026 this was unset, so `public/config.js` shipped
+  # `EBPCO_API_BASE_URL = ""`, `ApiClient` posted the login to
+  # https://ebpcowebadmin.netlify.app/auth/token — this site's OWN origin —
+  # and Netlify answered with a 404 HTML page, which `toProblem` can only
+  # render as "The request failed". The API was never asked.
+  #
+  # Now it is the API's real origin: the Linode at 139.162.51.165, running the
+  # Compose stack in the backend repo's `apps/ebpco-api/deploy/`. The hostname
+  # is sslip.io wildcard DNS — the IP spelled with dashes — because the LGU has
+  # no domain for it yet; Let's Encrypt issues for it and Caddy on that host
+  # holds the certificate. When a real hostname exists, change it HERE, in
+  # `deploy/.env` (API_HOST) on the Linode, and in the citizen portal's
+  # netlify.toml — the three must agree.
+  #
+  # Kept in this file, not Netlify's UI, for the same reason the rest of this
+  # file exists: a value only in the UI is a value nobody can review, and the
+  # first symptom of it being wrong is the login page. Scheme + host, no
+  # trailing slash, no path.
+  #
+  # The API's CORS allowlist is PORTAL_BASE_URL on its side (security.ts), and
+  # it is set to this site's origin, https://ebpcowebadmin.netlify.app. If this
+  # site ever moves, that changes too, or every request fails in the browser
+  # console with a CORS error and nothing in the API's logs.
+  EBPCO_API_BASE_URL = "https://139-162-51-165.sslip.io"
+
+  # The citizen-facing User Portal — a different application, origin and
+  # repository. Only used to build the verification URL a permit's QR code
+  # encodes; empty means no QR is rendered, since a QR pointing at the wrong
+  # host is worse than none. Not derivable from the API's URL.
+  EBPCO_USER_PORTAL_BASE_URL = "https://fastidious-chimera-7a7a18.netlify.app"
+
 # ── There is a real API now, reached CROSS-ORIGIN, not through this file ──
 #
 # This site never proxies `/auth/*`, `/me`, `/staff/*` and so on to the API —
 # there is deliberately no redirect rule for any of them here. `ApiClient`
 # calls `API_BASE_URL` (from `public/config.js`, written at build time by
-# `write-runtime-config.mjs` from the EBPCO_API_BASE_URL Netlify build
-# variable — see the `command` comment under `[build]` above) directly, which
-# is an ABSOLUTE URL on the API's own origin once that variable is set, never
-# a same-origin path on this Netlify site. The API's own CORS policy
+# `write-runtime-config.mjs` from EBPCO_API_BASE_URL in `[build.environment]`
+# above) directly, which is an ABSOLUTE URL on the API's own origin, never a
+# same-origin path on this Netlify site. The API's own CORS policy
 # (`security.ts`, backend repo) is what allows this site's real deployed
 # origin to call it — that origin is exactly `PORTAL_BASE_URL` on the API
 # side, and the two have to be kept in agreement.
