@@ -29,6 +29,20 @@ X-Frame-Options/Referrer-Policy/Permissions-Policy for this staff-facing portal.
 Added to `netlify.toml`, with a new `scripts/check-security-headers.mjs` gate
 wired into `npm run verify` so a future edit can't silently weaken or remove one.
 
+**That CSP header then broke the production build, live, and went unnoticed
+until the owner asked for a localhost-vs-Netlify parity check.** Angular's
+production build (critical-CSS inlining, on by default) emits a deferred
+stylesheet `<link media="print" onload="this.media='all'">`, which the new
+`script-src 'self'` silently blocks — no build error, no failing gate, the
+stylesheet just never applies. This portal's own login page carried the
+identical defect (confirmed: same CSP violation in the console, stylesheet
+stuck at `media="print"`), masked only because enough of its styling
+happened to already be critical-inlined; the Citizen Portal's equivalent
+page was not so lucky and rendered fully unstyled live. Fixed by disabling
+`optimization.styles.inlineCritical`, with a new
+`scripts/check-csp-compatible-build.mjs` gate that reads the real build
+output for any inline `on*=` handler.
+
 **Topbar notification-bell fix, and the tests it left behind.** `topbar.ts`'s
 constructor now fetches the officer's real `GET /staff/notifications` (it used
 to read a store collection that a real queue load always wipes to `[]`, so the
