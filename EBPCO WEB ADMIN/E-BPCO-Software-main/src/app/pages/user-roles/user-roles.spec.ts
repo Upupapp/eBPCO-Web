@@ -67,6 +67,10 @@ async function mount(
   const fixture = TestBed.createComponent(UserRoles);
   fixture.detectChanges();
   const http = TestBed.inject(HttpTestingController);
+  // `<app-topbar>` fetches the officer's real notification inbox from its own
+  // constructor (topbar.ts) — unrelated to this page, but still a real request
+  // every mount makes, and `verify()` elsewhere fails on anything left unflushed.
+  http.expectOne((r) => r.url === '/staff/notifications').flush({ notifications: [], unread: 0 });
   respond(http);
   await new Promise((resolve) => setTimeout(resolve, 0));
   for (const req of http.match((r) => /^\/staff\/users\/[^/]+\/access$/.test(r.url))) {
