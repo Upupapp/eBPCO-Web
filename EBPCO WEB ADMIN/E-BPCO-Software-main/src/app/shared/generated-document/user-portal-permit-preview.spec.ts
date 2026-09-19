@@ -98,6 +98,7 @@ describe('UserPortalPermitPreview — a real, backend-generated permit', () => {
         orderOfPayment: null,
         applicantEmail: 'citizen@example.com',
         applicantMobile: null,
+        applicantAddress: { street: null, barangay: null, city: null, province: null, postalCode: null },
         business: null,
         permit: { permitNumber: 'FP-2026-000001', issuedDate: '2026-09-14', scope: '', conditions: null },
         timeline: [],

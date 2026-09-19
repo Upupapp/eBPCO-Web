@@ -706,6 +706,7 @@ export class Applications {
       this.store.getApplicant(row.applicantId),
       this.store.getBusiness(row.businessId),
       real ? { email: real.applicantEmail, mobile: real.applicantMobile } : undefined,
+      real?.applicantAddress,
     );
   });
 

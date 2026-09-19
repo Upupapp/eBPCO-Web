@@ -197,6 +197,20 @@ export interface ApplicationDetail {
   readonly applicantEmail: string;
   /** The applicant's real mobile number, from their account, or `null` when the account has none on file. */
   readonly applicantMobile: string | null;
+  /**
+   * Where to send correspondence about this application — the applicant's
+   * OWN address (migration 036, backend), distinct from `business`'s own
+   * address below (where the business operates) and from wherever the work
+   * itself is happening. Every field independently `null`: most applicants
+   * have never been asked.
+   */
+  readonly applicantAddress: {
+    readonly street: string | null;
+    readonly barangay: string | null;
+    readonly city: string | null;
+    readonly province: string | null;
+    readonly postalCode: string | null;
+  };
   readonly business: ApplicationBusiness | null;
   readonly permit: ApplicationGeneratedPermit | null;
   readonly timeline: readonly ApplicationTimelineEvent[];

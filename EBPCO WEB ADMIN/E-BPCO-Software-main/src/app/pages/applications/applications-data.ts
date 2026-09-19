@@ -184,11 +184,28 @@ export interface AppDetail {
 // one call away and a made-up value was shown instead. Priority is real API
 // data, then the local mock record, then an honest "not on file" rather
 // than ever inventing a value again.
+//
+// `barangay` had the identical defect until this same fix was extended to
+// it: it fell back to `row.location.replace(/^Barangay\s+/i, '')` — the
+// CONSTRUCTION SITE'S barangay, not the applicant's own — whenever the
+// local mock record did not resolve, which is every real application.
 export function buildDetailFor(
   row: AppRow,
   applicant?: Applicant,
   business?: Business,
   realContact?: { email: string; mobile: string | null },
+  /**
+   * The applicant's own real address (`GET /staff/applications/:id`'s
+   * `applicantAddress`, backend migration 036) — same priority as
+   * `realContact` above and for the same reason: `barangay` used to fall
+   * back to `row.location` (the CONSTRUCTION SITE, not where the applicant
+   * lives) whenever the local mock `Applicant` record did not resolve,
+   * which is every real, server-created application. That was a guess
+   * wearing a real-looking value, not a fallback — the exact defect this
+   * function's own doc comment already describes fixing for email/phone,
+   * left in place for this one field.
+   */
+  realAddress?: { barangay: string | null },
 ): AppDetail {
   const businessLabel = business?.name || row.businessName || 'Not provided';
   return {
@@ -200,7 +217,7 @@ export function buildDetailFor(
     lastUpdated: row.dateSubmitted,
     emailVerification: applicant?.emailVerification ?? unverifiedContact(),
     mobileVerification: applicant?.mobileVerification ?? unverifiedContact(),
-    barangay: applicant?.barangay ?? row.location.replace(/^Barangay\s+/i, ''),
+    barangay: realAddress?.barangay || applicant?.barangay || 'Not on file',
     meta: {
       dateSubmitted: row.dateSubmitted,
       applicationNumber: row.id,

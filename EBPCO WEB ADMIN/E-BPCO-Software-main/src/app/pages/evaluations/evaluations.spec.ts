@@ -263,6 +263,7 @@ describe('Evaluations — record view is genuinely store-sourced (not the old Ap
         orderOfPayment: null,
         applicantEmail: 'citizen@example.com',
         applicantMobile: null,
+        applicantAddress: { street: null, barangay: null, city: null, province: null, postalCode: null },
         business: null,
         permit: null,
         timeline: [],
