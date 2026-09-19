@@ -1,0 +1,11 @@
+- generic [active] [ref=f10e1]:
+  - generic [aria-hidden] [ref=f10e2]:
+    - banner [aria-hidden] [ref=f10e3]
+    - generic [ref=f10e13]:
+      - navigation [aria-hidden] [ref=f10e14]
+      - generic [ref=f10e26]:
+        - main [ref=f10e27]:
+          - progressbar [ref=f10e29]
+        - contentinfo [aria-hidden] [ref=f10e33]
+  - main [ref=f10e41]:
+    - progressbar [ref=f10e43]

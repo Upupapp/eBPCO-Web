@@ -1,0 +1,266 @@
+- generic [ref=f10e47]:
+  - link "Skip to main content" [ref=f10e48] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=f10e50]:
+    - generic [ref=f10e52]:
+      - link "Akamai - Cloud Manager" [ref=f10e54] [cursor=pointer]:
+        - /url: /linodes
+      - generic [ref=f10e73] [cursor=pointer]:
+        - combobox "Search Products, IP Addresses, Tags..." [ref=f10e74]
+        - generic "Toggle dropdown"
+    - generic [ref=f10e76]:
+      - button [ref=f10e79] [cursor=pointer]
+      - generic [ref=f10e83]:
+        - link "Help & Support" [ref=f10e85] [cursor=pointer]:
+          - /url: /support
+        - link "Linode Cloud Community (opens in new tab)" [ref=f10e92] [cursor=pointer]:
+          - /url: https://linode.com/community
+        - generic "Notifications" [ref=f10e103]:
+          - button [ref=f10e104] [cursor=pointer]
+      - generic [ref=f10e108]:
+        - button "M michaela-lguids" [ref=f10e111] [cursor=pointer]:
+          - generic:
+            - generic [ref=f10e112]: M
+            - generic [ref=f10e114]: michaela-lguids
+        - generic:
+          - generic "Switch Account":
+            - generic [aria-hidden]:
+              - dialog:
+                - generic:
+                  - banner:
+                    - generic: Switch Account
+                    - generic:
+                      - button
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: You don't have access to other accounts.
+                          - generic: You must be added to a delegation by an account administrator to have access to other accounts.
+                          - generic:
+                            - generic:
+                              - generic:
+                                - button "Close"
+  - generic [ref=f10e119]:
+    - navigation [ref=f10e120]:
+      - generic [ref=f10e121]:
+        - generic [ref=f10e122]:
+          - button "Compute" [expanded] [ref=f10e123] [cursor=pointer]
+          - list [ref=f10e133]:
+            - listitem [ref=f10e135]:
+              - link "Linodes" [ref=f10e136] [cursor=pointer]:
+                - /url: /linodes
+            - listitem [ref=f10e138]:
+              - link "Images" [ref=f10e139] [cursor=pointer]:
+                - /url: /images
+            - listitem [ref=f10e141]:
+              - link "Kubernetes" [ref=f10e142] [cursor=pointer]:
+                - /url: /kubernetes
+            - listitem [ref=f10e144]:
+              - link "StackScripts" [ref=f10e145] [cursor=pointer]:
+                - /url: /stackscripts
+            - listitem [ref=f10e147]:
+              - link "Placement Groups" [ref=f10e148] [cursor=pointer]:
+                - /url: /placement-groups
+            - listitem [ref=f10e150]:
+              - link "Quick Deploy Apps" [ref=f10e151] [cursor=pointer]:
+                - /url: /linodes/create/marketplace
+            - listitem [ref=f10e153]:
+              - link [ref=f10e154] [cursor=pointer]:
+                - /url: /cloud-marketplace/catalog
+                - text: Partner Referrals
+                - generic [ref=f10e155]:
+                  - text: beta
+                  - generic [ref=f10e156]: BETA
+        - generic [ref=f10e157]:
+          - button "Storage" [expanded] [ref=f10e158] [cursor=pointer]
+          - list [ref=f10e168]:
+            - listitem [ref=f10e170]:
+              - link "Object Storage" [ref=f10e171] [cursor=pointer]:
+                - /url: /object-storage
+            - listitem [ref=f10e173]:
+              - link "Volumes" [ref=f10e174] [cursor=pointer]:
+                - /url: /volumes
+        - generic [ref=f10e175]:
+          - button "Networking" [expanded] [ref=f10e176] [cursor=pointer]
+          - list [ref=f10e186]:
+            - listitem [ref=f10e188]:
+              - link "VPC" [ref=f10e189] [cursor=pointer]:
+                - /url: /vpcs
+            - listitem [ref=f10e191]:
+              - link "Firewalls" [ref=f10e192] [cursor=pointer]:
+                - /url: /firewalls
+            - listitem [ref=f10e194]:
+              - link "NodeBalancers" [ref=f10e195] [cursor=pointer]:
+                - /url: /nodebalancers
+            - listitem [ref=f10e197]:
+              - link [ref=f10e198] [cursor=pointer]:
+                - /url: /reserved-ips
+                - text: Reserved IPs
+                - generic [ref=f10e199]:
+                  - text: new
+                  - generic [ref=f10e200]: NEW
+            - listitem [ref=f10e202]:
+              - link "Domains" [ref=f10e203] [cursor=pointer]:
+                - /url: /domains
+        - generic [ref=f10e204]:
+          - button "Databases" [expanded] [ref=f10e205] [cursor=pointer]
+          - list [ref=f10e222]:
+            - listitem [ref=f10e224]:
+              - link "Databases" [ref=f10e225] [cursor=pointer]:
+                - /url: /databases
+        - generic [ref=f10e226]:
+          - button "Monitor" [expanded] [ref=f10e227] [cursor=pointer]
+          - list [ref=f10e237]:
+            - listitem [ref=f10e239]:
+              - link [ref=f10e240] [cursor=pointer]:
+                - /url: /metrics
+                - text: Metrics
+                - generic [ref=f10e241]:
+                  - text: new
+                  - generic [ref=f10e242]: NEW
+            - listitem [ref=f10e244]:
+              - link [ref=f10e245] [cursor=pointer]:
+                - /url: /alerts
+                - text: Alerts
+                - generic [ref=f10e246]:
+                  - text: new
+                  - generic [ref=f10e247]: NEW
+            - listitem [ref=f10e249]:
+              - link [ref=f10e250] [cursor=pointer]:
+                - /url: /logs/delivery
+                - text: Logs
+                - generic [ref=f10e251]:
+                  - text: new
+                  - generic [ref=f10e252]: NEW
+            - listitem [ref=f10e254]:
+              - link "Longview" [ref=f10e255] [cursor=pointer]:
+                - /url: /longview
+        - generic [ref=f10e256]:
+          - button "Administration" [expanded] [ref=f10e257] [cursor=pointer]
+          - list [ref=f10e268]:
+            - listitem [ref=f10e270]:
+              - link "Billing" [ref=f10e271] [cursor=pointer]:
+                - /url: /billing
+            - listitem [ref=f10e273]:
+              - link [ref=f10e274] [cursor=pointer]:
+                - /url: /iam
+                - text: Identity & Access
+                - generic [ref=f10e275]:
+                  - text: new
+                  - generic [ref=f10e276]: NEW
+            - listitem [ref=f10e278]:
+              - link "Quotas" [ref=f10e279] [cursor=pointer]:
+                - /url: /quotas
+            - listitem [ref=f10e281]:
+              - link "Login History" [ref=f10e282] [cursor=pointer]:
+                - /url: /login-history
+            - listitem [ref=f10e284]:
+              - link "Service Transfers" [ref=f10e285] [cursor=pointer]:
+                - /url: /service-transfers
+            - listitem [ref=f10e287]:
+              - link "Maintenance" [ref=f10e288] [cursor=pointer]:
+                - /url: /maintenance
+            - listitem [ref=f10e290]:
+              - link "Account Settings" [ref=f10e291] [cursor=pointer]:
+                - /url: /account-settings
+        - generic [ref=f10e292]:
+          - button "More" [expanded] [ref=f10e293] [cursor=pointer]
+          - list [ref=f10e303]:
+            - listitem [ref=f10e305]:
+              - link "Betas" [ref=f10e306] [cursor=pointer]:
+                - /url: /betas
+            - listitem [ref=f10e308]:
+              - link "Help & Support" [ref=f10e309] [cursor=pointer]:
+                - /url: /support
+      - generic "Pin side menu" [ref=f10e312]:
+        - button [ref=f10e313] [cursor=pointer]
+    - generic [ref=f10e318]:
+      - main [ref=f10e319]:
+        - generic [ref=f10e322]:
+          - tablist [ref=f10e323]:
+            - tab "Weblish" [selected] [ref=f10e324] [cursor=pointer]
+            - tab "Glish" [ref=f10e325] [cursor=pointer]
+          - tabpanel "Weblish" [ref=f10e327]:
+            - generic [ref=f10e330]:
+              - generic [ref=f10e331]:
+                - list:
+                  - listitem: Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+                  - listitem: applicable law.
+                  - listitem
+                  - listitem: root@localhost:~# ^Vmkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAA
+                  - listitem: AIAxkWGN39y8hXgpu+M0H9oJHlzhadJflIJ/AnOdl6fwZ claude-code-ebpco-deploy" >> ~/.ss
+                  - listitem: h/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+                  - listitem: "Command 'mkdir' not found, did you mean:"
+                  - listitem: command 'mkdir' from deb coreutils (9.4-3ubuntu6.2)
+                  - listitem: command 'hmkdir' from deb hfsutils (3.2.6-15build2)
+                  - listitem: command 'mmkdir' from deb mblaze (1.1-1)
+                  - listitem: "Try: apt install <deb name>"
+                  - listitem: root@localhost:~# mkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI
+                  - listitem: AxkWGN39y8hXgpu+M0H9oJHlzhadJflIJ/AnOdl6fwZ claude-code-ebpco-deploy" >> ~/.ssh/
+                  - listitem: authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+                  - listitem: root@localhost:~#
+                  - listitem: root@localhost:~# mkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI
+                  - listitem: AxkWGN39y8hXgpu+M0H9oJHlzhadJflIJ/AnOdl6fwZ claude-code-ebpco-deploy" >> ~/.ssh/
+                  - listitem: authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+                  - listitem: root@localhost:~#
+                  - listitem: root@localhost:~# mkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI
+                  - listitem: AxkWGN39y8hXgpu+M0H9oJHlzhadJflIJ/AnOdl6fwZ claude-code-ebpco-deploy" >> ~/.ssh/
+                  - listitem: authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+                  - listitem: root@localhost:~#
+                  - listitem: root@localhost:~# mkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI
+                  - listitem: AxkWGN39y8hXgpu+M0H9oJHlzhadJflIJ/AnOdl6fwZ claude-code-ebpco-deploy" >> ~/.ssh/
+                  - listitem: authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+                  - listitem: root@localhost:~#
+                  - listitem: root@localhost:~#
+                  - listitem: root@localhost:~#
+                  - listitem
+                  - listitem
+                  - listitem
+                  - listitem
+                  - listitem
+                  - listitem
+                  - listitem
+                  - listitem
+                  - listitem
+                  - listitem
+                  - listitem
+              - generic [ref=f10e334]:
+                - textbox "Terminal input" [active] [ref=f10e335]
+                - generic [aria-hidden] [ref=f10e336]:
+                  - generic [ref=f10e337]: Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+                  - generic [ref=f10e338]: applicable law.
+                  - generic [ref=f10e342]: root@localhost:~# ^Vmkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAA
+                  - generic [ref=f10e343]: AIAxkWGN39y8hXgpu+M0H9oJHlzhadJflIJ/AnOdl6fwZ claude-code-ebpco-deploy" >> ~/.ss
+                  - generic [ref=f10e345]: h/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+                  - generic [ref=f10e347]: "Command 'mkdir' not found, did you mean:"
+                  - generic [ref=f10e349]: command 'mkdir' from deb coreutils (9.4-3ubuntu6.2)
+                  - generic [ref=f10e351]: command 'hmkdir' from deb hfsutils (3.2.6-15build2)
+                  - generic [ref=f10e353]: command 'mmkdir' from deb mblaze (1.1-1)
+                  - generic [ref=f10e355]: "Try: apt install <deb name>"
+                  - generic [ref=f10e357]: root@localhost:~# mkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI
+                  - generic [ref=f10e359]: AxkWGN39y8hXgpu+M0H9oJHlzhadJflIJ/AnOdl6fwZ claude-code-ebpco-deploy" >> ~/.ssh/
+                  - generic [ref=f10e361]: authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+                  - generic [ref=f10e363]: root@localhost:~#
+                  - generic [ref=f10e365]: root@localhost:~# mkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI
+                  - generic [ref=f10e367]: AxkWGN39y8hXgpu+M0H9oJHlzhadJflIJ/AnOdl6fwZ claude-code-ebpco-deploy" >> ~/.ssh/
+                  - generic [ref=f10e369]: authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+                  - generic [ref=f10e371]: root@localhost:~#
+                  - generic [ref=f10e373]: root@localhost:~# mkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI
+                  - generic [ref=f10e375]: AxkWGN39y8hXgpu+M0H9oJHlzhadJflIJ/AnOdl6fwZ claude-code-ebpco-deploy" >> ~/.ssh/
+                  - generic [ref=f10e377]: authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+                  - generic [ref=f10e379]: root@localhost:~#
+                  - generic [ref=f10e381]: root@localhost:~# mkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI
+                  - generic [ref=f10e383]: AxkWGN39y8hXgpu+M0H9oJHlzhadJflIJ/AnOdl6fwZ claude-code-ebpco-deploy" >> ~/.ssh/
+                  - generic [ref=f10e385]: authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
+                  - generic [ref=f10e387]: root@localhost:~#
+                  - generic [ref=f10e389]: root@localhost:~#
+                  - generic [ref=f10e391]: root@localhost:~#
+                  - generic [ref=f10e393]: root@localhost:~#
+      - contentinfo [ref=f10e407]:
+        - generic [ref=f10e409]:
+          - link "API Reference" [ref=f10e410] [cursor=pointer]:
+            - /url: https://developers.linode.com/
+          - link "Suggest Improvements" [ref=f10e411] [cursor=pointer]:
+            - /url: https://www.akamai.com/cloud/feedback
+        - generic [ref=f10e412]: © 2026 Akamai Technologies, Inc. All Rights Reserved
