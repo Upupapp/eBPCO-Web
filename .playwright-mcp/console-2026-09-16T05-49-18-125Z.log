@@ -1,4 +1,0 @@
-[     323ms] [LOG] Angular is running in development mode. @ http://localhost:4201/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Information-Portal-Website/ebpco-user-portal/.angular/cache/22.1.5/ebpco-user-portal/vite/deps/core-BVHqwqJl.js?v=1b288bde:9127
-[     472ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4201/applications/new/documents:0
-[     474ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4201/applications/new/timeline:0
-[     482ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4201/applications/new/permit:0

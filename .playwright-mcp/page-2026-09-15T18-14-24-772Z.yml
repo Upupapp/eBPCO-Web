@@ -1,7 +1,0 @@
-- generic [ref=f95e5]:
-  - heading "Password Set" [level=2] [ref=f95e18]
-  - paragraph [ref=f95e19]: Your password has been set. You can now sign in with it.
-  - link "Log In" [ref=f95e20] [cursor=pointer]:
-    - /url: /login
-  - link "Back to Log In" [ref=f95e17] [cursor=pointer]:
-    - /url: /login

@@ -1,7 +1,0 @@
-- generic [ref=f3e90]:
-  - generic [ref=f3e91]: Account Created
-  - heading "Welcome to eBPCO" [level=2] [ref=f3e92]
-  - paragraph [ref=f3e93]: Your account has been created in this demonstration build. It exists in your browser only and is gone when you close or refresh the page.
-  - paragraph [ref=f3e94]: Email and mobile verification are not available yet, so your account shows as pending. That does not block anything in this build.
-  - link "Continue to Log In" [ref=f3e95] [cursor=pointer]:
-    - /url: /login

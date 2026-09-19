@@ -1,0 +1,9 @@
+# Playwright MCP's own debug output (console logs, page snapshots,
+# screenshots) from live-verification sessions during development. Not
+# build artefacts, not test fixtures -- session-local scratch that
+# accumulated at the repo root because nothing ignored it.
+.playwright-mcp/
+
+# System files
+.DS_Store
+Thumbs.db
