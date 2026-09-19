@@ -31,7 +31,11 @@ import { spawn } from 'node:child_process';
 
 const FAIL_ON = [/NG8113/];
 
-const child = spawn('npx', ['ng', 'build'], { shell: false });
+// `node_modules/@angular/cli/bin/ng.js` directly, not `npx ng` -- `npx` on
+// Windows is `npx.cmd`, a batch file `spawn(..., { shell: false })` cannot
+// execute (`Error: spawn npx ENOENT`). The same class of fix as the
+// backend's own `node_modules/jest/bin/jest.js` over `node_modules/.bin/jest`.
+const child = spawn(process.execPath, ['node_modules/@angular/cli/bin/ng.js', 'build'], { shell: false });
 let captured = '';
 
 for (const stream of [child.stdout, child.stderr]) {
