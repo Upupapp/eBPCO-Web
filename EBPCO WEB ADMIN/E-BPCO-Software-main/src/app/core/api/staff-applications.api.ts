@@ -292,6 +292,12 @@ export type DocumentReviewResult =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
 
+/** `GET /documents/:documentId/content` — a signed URL for the document's real bytes, `documents:read` (every staff role that can open an application). */
+export type DocumentContentResult =
+  | { readonly kind: 'ok'; readonly url: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 /** `POST /documents` — a first file for a still-Missing requirement, `documents:write` only (`records-officer`/`super-admin`). */
 export type DocumentAttachResult =
   | { readonly kind: 'done'; readonly documentId: string }
@@ -471,6 +477,30 @@ export class StaffApplicationsApi {
         if (error.status === 404 || error.status === 422) {
           return { kind: 'refused', message: error.message };
         }
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * `GET /documents/:documentId/content` — a signed URL (120s TTL) for the
+   * document's actual bytes. `documents:read`, held by every staff role that
+   * can open an application at all — this is the call the Documents tab's
+   * "Preview" action never made: it drew a fabricated placeholder sheet
+   * (hardcoded "Apr 14, 2021", a nonsense document number derived from the
+   * filename's length) for every citizen-uploaded document instead of
+   * showing the file itself.
+   */
+  async documentContent(documentId: string): Promise<DocumentContentResult> {
+    try {
+      const result = await this.api.get<{ url: string }>(
+        `/documents/${encodeURIComponent(documentId)}/content`,
+      );
+      return { kind: 'ok', url: result.url };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 501) return { kind: 'unavailable' };
         return { kind: 'failed', message: error.message };
       }
       throw error;

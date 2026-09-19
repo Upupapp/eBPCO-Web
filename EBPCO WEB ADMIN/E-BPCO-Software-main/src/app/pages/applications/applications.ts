@@ -2,7 +2,7 @@ import { Component, DestroyRef, computed, effect, inject, input, signal, untrack
 import { FormsModule } from '@angular/forms';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Router } from '@angular/router';
-import { Title } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl, Title } from '@angular/platform-browser';
 import { Topbar } from '../../shared/topbar/topbar';
 import { Icon } from '../../shared/icon/icon';
 import { Avatar } from '../../shared/avatar/avatar';
@@ -70,7 +70,8 @@ interface DocumentRow {
   label: string;
   required: boolean;
   departmentName: string;
-  doc: { id: string; fileName: string; status: DocumentStatus; remarks: string | null; uploadedAt: string } | null;
+  /** `contentType` is only ever known for a real (`isReal`) document — the local demo store never recorded one, since no local-demo document has real bytes to describe. */
+  doc: { id: string; fileName: string; status: DocumentStatus; remarks: string | null; uploadedAt: string; contentType?: string } | null;
   isReal: boolean;
 }
 
@@ -94,6 +95,17 @@ interface PreviewDoc {
   label: string;
   filename: string;
   status: string;
+  /**
+   * The citizen's actual file, once fetched from `GET
+   * /documents/:id/content`'s signed URL. `null` while a real document's
+   * content is still loading, and permanently `null` for a local-demo row,
+   * which never had real bytes behind it — the fabricated "sheet" preview
+   * remains the honest thing to show there, same reasoning as the User
+   * Portal's own `seeded` flag on its preview modal.
+   */
+  real: { objectUrl: string; safeUrl: SafeResourceUrl; contentType: string } | null;
+  /** True only while a real document's content is still being fetched. */
+  loading: boolean;
 }
 
 interface LifecycleStep {
@@ -209,6 +221,7 @@ export class Applications {
   private readonly toast = inject(ToastService);
   private readonly loader = inject(QueueLoader);
   private readonly applicationsApi = inject(StaffApplicationsApi);
+  private readonly sanitizer = inject(DomSanitizer);
   private readonly permitReleaseApi = inject(PermitReleaseApi);
   private readonly sessionCache = inject(PermitReleaseSessionCache);
 
@@ -1013,12 +1026,25 @@ export class Applications {
   }
 
   closeDocPreview(): void {
+    // Revoke the blob URL a real preview held — otherwise every "Preview"
+    // click on a real document leaks the file's bytes for the rest of the
+    // tab's life.
+    const objectUrl = this.previewItem()?.real?.objectUrl;
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
     this.previewItem.set(null);
   }
 
   protected downloadPreviewDoc(): void {
     const doc = this.previewItem();
     if (!doc) return;
+    if (doc.real) {
+      const a = document.createElement('a');
+      a.href = doc.real.objectUrl;
+      a.download = doc.filename;
+      a.click();
+      this.toast.success('Downloaded.');
+      return;
+    }
     downloadCsv(`document-${doc.label.replace(/\s+/g, '-').toLowerCase()}`, [
       { Document: doc.label, File: doc.filename, Status: doc.status },
     ]);
@@ -1470,6 +1496,7 @@ export class Applications {
                 status: found.reviewStatus ?? 'Uploaded',
                 remarks: found.reviewRemark,
                 uploadedAt: found.uploadedAt,
+                contentType: found.contentType,
               }
             : null,
         };
@@ -1741,9 +1768,56 @@ export class Applications {
     input.value = '';
   }
 
+  /**
+   * Opens the preview modal. For a real document, fetches the actual signed
+   * content (`GET /documents/:id/content`) and shows it, in place of the
+   * fabricated placeholder sheet this used to show for every uploaded
+   * document regardless of what it actually was (hardcoded "Apr 14, 2021",
+   * a document number derived from the filename's length). A local-demo row
+   * has no real bytes to fetch, so it keeps showing that same sheet.
+   */
+  /**
+   * Guards against a slow fetch for a PREVIOUS "Preview" click landing after
+   * the officer has already closed the modal or opened a different
+   * document's preview — incremented on every click; a fetch only applies
+   * its result if it is still the most recent one requested.
+   */
+  private previewToken = 0;
+
   protected previewDocumentRow(r: DocumentRow): void {
     if (!r.doc) return;
-    this.previewItem.set({ label: r.label, filename: r.doc.fileName, status: r.doc.status });
+    const token = ++this.previewToken;
+    this.previewItem.set({ label: r.label, filename: r.doc.fileName, status: r.doc.status, real: null, loading: r.isReal });
+    if (!r.isReal) return;
+    void this.loadRealDocPreview(token, r.doc.id, r.doc.contentType ?? 'application/octet-stream');
+  }
+
+  private async loadRealDocPreview(token: number, documentId: string, fallbackContentType: string): Promise<void> {
+    const content = await this.applicationsApi.documentContent(documentId);
+    if (content.kind !== 'ok') {
+      this.toast.error('Could not open this document. Try again.');
+      if (this.previewToken === token) this.previewItem.set(null);
+      return;
+    }
+    try {
+      const response = await fetch(content.url);
+      if (!response.ok) throw new Error(`fetch failed: ${response.status}`);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const contentType = blob.type || fallbackContentType;
+      if (this.previewToken !== token) {
+        // Superseded while the fetch was in flight — don't leak this blob's
+        // URL into a preview nothing will ever show or revoke.
+        URL.revokeObjectURL(objectUrl);
+        return;
+      }
+      this.previewItem.update((cur) => (cur
+        ? { ...cur, real: { objectUrl, safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl), contentType }, loading: false }
+        : cur));
+    } catch {
+      this.toast.error('Could not open this document. Try again.');
+      if (this.previewToken === token) this.previewItem.set(null);
+    }
   }
 
   // ---- Comments tab -------------------------------------------------------
