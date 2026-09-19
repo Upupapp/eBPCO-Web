@@ -17,6 +17,7 @@ import { applicantFullName } from '../../core/domain/applicant.model';
 import { ToastService } from '../../shared/toast/toast.service';
 import { validateEmail, validateMobileNumber } from '../../shared/utils/validators';
 import { CapitalizeNameDirective } from '../../shared/utils/capitalize-name.directive';
+import { CASTILLA_BARANGAYS } from '../../shared/application-intake/application-intake';
 import { StaffBusinessesApi, StaffBusinessDetail, StaffBusinessRow } from '../../core/api/staff-businesses.api';
 
 type SubTab = 'analytics' | 'recent-activity';
@@ -105,7 +106,7 @@ interface GrowthPoint {
   styleUrl: './businesses.scss',
 })
 export class Businesses {
-  private readonly store = inject(ApplicationStore);
+  protected readonly store = inject(ApplicationStore);
   private readonly businessesApi = inject(StaffBusinessesApi);
 
   /**
@@ -343,7 +344,7 @@ export class Businesses {
   ];
   // The backend's real `businessShape.category` enum (businesses.controller.ts)
   // — wider than mobile's, and without "Wholesale".
-  private readonly REAL_CATEGORY_OPTIONS: readonly string[] = [
+  protected readonly REAL_CATEGORY_OPTIONS: readonly string[] = [
     'Retail',
     'Food Service',
     'Services',
@@ -357,6 +358,9 @@ export class Businesses {
   protected readonly categoryOptions = computed<readonly string[]>(() =>
     this.store.isSeedData() ? this.SEED_CATEGORY_OPTIONS : this.REAL_CATEGORY_OPTIONS,
   );
+
+  /** For the real Edit Business form's Barangay dropdown — a business filed with eBPCO is always within Castilla, same reasoning as `application-intake.ts`'s own use of this list. */
+  protected readonly barangayOptions = CASTILLA_BARANGAYS;
 
   protected readonly activeFilterCount = computed(
     () => (this.categoryFilter() === 'All' ? 0 : 1) + (this.statusFilter() === 'All' ? 0 : 1),
@@ -399,8 +403,8 @@ export class Businesses {
   protected readonly selectedBusiness = signal<BusinessRow | null>(null);
   protected readonly detailTab = signal<DetailTab>('overview');
 
-  /** `GET /staff/businesses/:id`'s own `applications[]` — fetched fresh by `openDetail` on real data, since the store carries no real Business↔application link (see `businessRows`' own doc comment). `null` until fetched, or for a locally-created row that has no real record at all. */
-  private readonly realDetail = signal<StaffBusinessDetail | null>(null);
+  /** `GET /staff/businesses/:id`'s own `applications[]` — fetched fresh by `openDetail` on real data, since the store carries no real Business↔application link (see `businessRows`' own doc comment). `null` until fetched, or for a locally-created row that has no real record at all. Also the source for the real Edit form below — `BusinessRow` flattens barangay/city into one string and has no `street` at all, so the raw server shape is what the form actually needs. */
+  protected readonly realDetail = signal<StaffBusinessDetail | null>(null);
   protected readonly realDetailError = signal<string | null>(null);
 
   private async loadRealDetail(businessId: string): Promise<void> {
@@ -421,6 +425,83 @@ export class Businesses {
           ? "This deployment's business detail endpoint isn't reachable."
           : `Could not load this business's applications: ${result.message}`,
       );
+    }
+  }
+
+  // ---- Real edit — PATCH /staff/businesses/:id ---------------------------
+  // Until now nothing on either portal could correct a business already on
+  // file: no PATCH route existed anywhere, staff or citizen, and this page's
+  // own "Delete" was a documented, session-local fake (see confirmDelete's
+  // own doc comment below). Edit is real-data only — a seed/local-demo row
+  // has no server record to PATCH.
+
+  protected readonly editingBusiness = signal(false);
+  protected readonly editForm = signal<{
+    name: string; category: string; street: string; barangay: string; city: string; province: string;
+  } | null>(null);
+  protected readonly savingEdit = signal(false);
+  protected readonly editError = signal<string | null>(null);
+
+  protected startEditBusiness(): void {
+    const detail = this.realDetail();
+    if (!detail) return;
+    this.editForm.set({
+      name: detail.name, category: detail.category, street: detail.street,
+      barangay: detail.barangay, city: detail.city, province: detail.province,
+    });
+    this.editError.set(null);
+    this.editingBusiness.set(true);
+  }
+
+  protected cancelEditBusiness(): void {
+    this.editingBusiness.set(false);
+    this.editForm.set(null);
+    this.editError.set(null);
+  }
+
+  protected async saveEditBusiness(): Promise<void> {
+    const form = this.editForm();
+    const row = this.selectedBusiness();
+    if (!form || !row) return;
+    if (!form.name.trim() || !form.street.trim() || !form.barangay.trim() || !form.city.trim() || !form.province.trim()) {
+      this.editError.set('Please complete every required field.');
+      return;
+    }
+    this.savingEdit.set(true);
+    const result = await this.businessesApi.update(row.id, form);
+    this.savingEdit.set(false);
+    if (result.kind !== 'done') {
+      this.editError.set(result.kind === 'refused' || result.kind === 'failed' ? result.message : 'This deployment cannot accept a business edit right now.');
+      return;
+    }
+    this.editingBusiness.set(false);
+    this.editForm.set(null);
+    this.toast.success('Business details updated.');
+    await this.loadRealDetail(row.id);
+    await this.loadRealBusinesses();
+    // Keep the open detail row's own displayed fields (name/category/etc.)
+    // in step with what was just saved, without requiring a re-click.
+    this.selectedBusiness.set(this.toRealBusinessRow(result.row));
+  }
+
+  // ---- Real deactivate/reactivate — POST /staff/businesses/:id/(de|re)activate ----
+
+  protected readonly changingBusinessStatus = signal(false);
+
+  /** Reactivate is reversible and non-destructive, so it acts immediately — no confirm dialog, matching the Citizen Portal's own Deactivate/Reactivate UX (business-details.page.ts). Deactivate still goes through the existing confirm dialog below (requestDelete/confirmDelete) since it changes what an application against this business can do. */
+  protected async reactivateBusiness(row: BusinessRow): Promise<void> {
+    this.changingBusinessStatus.set(true);
+    const result = await this.businessesApi.reactivate(row.id);
+    this.changingBusinessStatus.set(false);
+    if (result.kind !== 'done') {
+      this.toast.error(result.kind === 'refused' || result.kind === 'failed' ? result.message : 'Could not reactivate this business.');
+      return;
+    }
+    this.toast.success('Business reactivated.');
+    await this.loadRealBusinesses();
+    if (this.selectedBusiness()?.id === row.id) {
+      this.selectedBusiness.set(this.toRealBusinessRow(result.row));
+      await this.loadRealDetail(row.id);
     }
   }
 
@@ -509,38 +590,85 @@ export class Businesses {
     this.deleteTarget.set(null);
   }
 
-  // Honest about the actual (session-local, non-persistent) effect —
-  // "removed from the platform" previously implied a real deletion, but
-  // this only hides the row from this view via a component-local signal;
-  // it isn't written back to ApplicationStore (no delete method exists
-  // there) and resets the moment this page is left and re-entered.
+  /**
+   * Real data: `POST /staff/businesses/:id/deactivate` — a real, persistent
+   * status change (never a hard delete: `applications.business_id` is `on
+   * delete restrict`, so the row survives regardless). Seed/local-demo data
+   * keeps the old session-local hide, honestly worded as such, since there
+   * is no server record behind it to change at all.
+   */
   protected readonly deleteDialogMessage = computed(() => {
     const target = this.deleteTarget();
+    if (this.store.isSeedData()) {
+      if (target === 'bulk') {
+        const n = this.selectedIds().size;
+        return `This will hide ${n} selected business${n === 1 ? '' : 's'} from this view for the rest of your visit (it isn't a permanent delete in this prototype).`;
+      }
+      if (target) {
+        return `This will hide ${target.code} (${target.id}) from this view for the rest of your visit (it isn't a permanent delete in this prototype).`;
+      }
+      return '';
+    }
     if (target === 'bulk') {
       const n = this.selectedIds().size;
-      return `This will hide ${n} selected business${n === 1 ? '' : 's'} from this view for the rest of your visit (it isn't a permanent delete in this prototype).`;
+      return `This will mark ${n} selected business${n === 1 ? '' : 'es'} Inactive. It stays on record and can be reactivated any time — this is not a delete. Refused for any business with an application still in progress.`;
     }
-    if (target)
-      return `This will hide ${target.code} (${target.id}) from this view for the rest of your visit (it isn't a permanent delete in this prototype).`;
+    if (target) {
+      return `This will mark ${target.code} Inactive. It stays on record and can be reactivated any time — this is not a delete. Refused if it has an application still in progress.`;
+    }
     return '';
   });
 
-  protected confirmDelete(): void {
+  protected async confirmDelete(): Promise<void> {
     const target = this.deleteTarget();
     if (!target) return;
     const idsToRemove = target === 'bulk' ? this.selectedIds() : new Set([target.id]);
-    this.hiddenIds.update((current) => new Set([...current, ...idsToRemove]));
+
+    if (this.store.isSeedData()) {
+      this.hiddenIds.update((current) => new Set([...current, ...idsToRemove]));
+      this.selectedIds.update((current) => {
+        const next = new Set(current);
+        for (const id of idsToRemove) next.delete(id);
+        return next;
+      });
+      this.deleteTarget.set(null);
+      this.toast.success(
+        idsToRemove.size === 1
+          ? 'Business hidden from this view.'
+          : `${idsToRemove.size} businesses hidden from this view.`,
+      );
+      return;
+    }
+
+    this.changingBusinessStatus.set(true);
+    const failed: string[] = [];
+    for (const id of idsToRemove) {
+      const result = await this.businessesApi.deactivate(id);
+      if (result.kind !== 'done') failed.push(id);
+    }
+    this.changingBusinessStatus.set(false);
+    await this.loadRealBusinesses();
+    if (this.selectedBusiness() && idsToRemove.has(this.selectedBusiness()!.id)) {
+      await this.loadRealDetail(this.selectedBusiness()!.id);
+      const refreshed = (this.realRows() ?? []).find((r) => r.id === this.selectedBusiness()!.id);
+      if (refreshed) this.selectedBusiness.set(this.toRealBusinessRow(refreshed));
+    }
     this.selectedIds.update((current) => {
       const next = new Set(current);
       for (const id of idsToRemove) next.delete(id);
       return next;
     });
     this.deleteTarget.set(null);
-    this.toast.success(
-      idsToRemove.size === 1
-        ? 'Business hidden from this view.'
-        : `${idsToRemove.size} businesses hidden from this view.`,
-    );
+
+    const succeeded = idsToRemove.size - failed.length;
+    if (failed.length > 0) {
+      this.toast.error(
+        `${succeeded > 0 ? `${succeeded} deactivated. ` : ''}${failed.length} could not be deactivated — `
+        + 'it may have an application still in progress.',
+      );
+    } else {
+      this.toast.success(succeeded === 1 ? 'Business deactivated.' : `${succeeded} businesses deactivated.`);
+    }
   }
 
   // ---- Export -----------------------------------------------------------

@@ -77,10 +77,10 @@
           <app-icon name="download" [size]="14" />
           Export
         </button>
-        <!-- Hides from this view; nothing is destroyed. See confirmDelete(). -->
+        <!-- Real data: deactivates for real (POST .../deactivate). Seed data: hides from this view only. See confirmDelete(). -->
         <button type="button" class="btn-outline danger" (click)="requestDeleteSelected()">
           <app-icon name="eye-off" [size]="14" />
-          Hide
+          {{ store.isSeedData() ? 'Hide' : 'Deactivate' }}
         </button>
       </div>
     }
@@ -150,14 +150,26 @@
                   >
                     <app-icon name="eye" [size]="14" />
                   </button>
-                  <button
-                    type="button"
-                    class="icon-btn del"
-                    aria-label="Hide business from this view"
-                    (click)="requestDelete(row)"
-                  >
-                    <app-icon name="eye-off" [size]="14" />
-                  </button>
+                  @if (row.status === 'Active') {
+                    <button
+                      type="button"
+                      class="icon-btn del"
+                      [attr.aria-label]="store.isSeedData() ? 'Hide business from this view' : 'Deactivate business'"
+                      (click)="requestDelete(row)"
+                    >
+                      <app-icon name="eye-off" [size]="14" />
+                    </button>
+                  } @else if (!store.isSeedData()) {
+                    <button
+                      type="button"
+                      class="icon-btn"
+                      aria-label="Reactivate business"
+                      [disabled]="changingBusinessStatus()"
+                      (click)="reactivateBusiness(row)"
+                    >
+                      <app-icon name="eye" [size]="14" />
+                    </button>
+                  }
                 </div>
               </td>
             </tr>
@@ -453,48 +465,123 @@
 
       @switch (detailTab()) {
         @case ('overview') {
-          <h3>Registration</h3>
-          <dl class="info-grid">
-            <div>
-              <dt>Business ID</dt>
-              <dd>{{ row.id }}</dd>
+          @if (!store.isSeedData()) {
+            <div class="detail-actions" style="display:flex; gap:8px; margin-bottom:12px;">
+              @if (!editingBusiness()) {
+                <button type="button" class="btn-outline" (click)="startEditBusiness()">
+                  <app-icon name="edit" [size]="14" />
+                  Edit Business
+                </button>
+              }
+              @if (row.status === 'Active') {
+                <button type="button" class="btn-outline danger" (click)="requestDelete(row)">
+                  <app-icon name="eye-off" [size]="14" />
+                  Deactivate
+                </button>
+              } @else {
+                <button
+                  type="button" class="btn-outline"
+                  [disabled]="changingBusinessStatus()"
+                  (click)="reactivateBusiness(row)"
+                >
+                  <app-icon name="eye" [size]="14" />
+                  {{ changingBusinessStatus() ? 'Reactivating…' : 'Reactivate' }}
+                </button>
+              }
             </div>
-            <div>
-              <dt>Business Name</dt>
-              <dd>{{ row.code }}</dd>
-            </div>
-            <div>
-              <dt>Category</dt>
-              <dd>{{ row.category }}</dd>
-            </div>
-            <div>
-              <dt>Registered</dt>
-              <dd>{{ row.dateCreated }}</dd>
-            </div>
-            <div>
-              <dt>Barangay</dt>
-              <dd>{{ row.city }}, Castilla</dd>
-            </div>
-            <div>
-              <dt>Province</dt>
-              <dd>Sorsogon, Region V</dd>
-            </div>
-            <div>
-            </div>
-            <div>
-              <dt>Account Status</dt>
-              <dd>{{ row.status }}</dd>
-            </div>
-          </dl>
+          }
 
-          <h3>Contact Person</h3>
-          <div class="officer-row">
-            <app-avatar [name]="row.contactName" [size]="34" />
-            <div>
-              <strong>{{ row.contactName }}</strong>
-              <span>{{ row.contactPhone }}</span>
+          @if (editingBusiness() && editForm(); as form) {
+            <h3>Edit Business</h3>
+            <div class="edit-business-form">
+              <div class="field">
+                <label for="edit-biz-name">Business Name<span class="required">*</span></label>
+                <input id="edit-biz-name" class="input" [(ngModel)]="form.name" />
+              </div>
+              <div class="field">
+                <label for="edit-biz-category">Business Category<span class="required">*</span></label>
+                <select id="edit-biz-category" class="input" [(ngModel)]="form.category">
+                  @for (c of REAL_CATEGORY_OPTIONS; track c) { <option [value]="c">{{ c }}</option> }
+                </select>
+              </div>
+              <div class="field">
+                <label for="edit-biz-street">House Number / Street<span class="required">*</span></label>
+                <input id="edit-biz-street" class="input" [(ngModel)]="form.street" />
+              </div>
+              <div class="form-row">
+                <div class="field">
+                  <label for="edit-biz-barangay">Barangay<span class="required">*</span></label>
+                  <select id="edit-biz-barangay" class="input" [(ngModel)]="form.barangay">
+                    @for (b of barangayOptions; track b) { <option [value]="b">{{ b }}</option> }
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="edit-biz-city">City / Municipality<span class="required">*</span></label>
+                  <select id="edit-biz-city" class="input" [(ngModel)]="form.city">
+                    <option value="Castilla">Castilla</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="edit-biz-province">Province<span class="required">*</span></label>
+                <select id="edit-biz-province" class="input" [(ngModel)]="form.province">
+                  <option value="Sorsogon">Sorsogon</option>
+                </select>
+              </div>
+
+              @if (editError(); as err) { <div class="field error">{{ err }}</div> }
+
+              <div style="display:flex; gap:10px; margin-top:8px;">
+                <button type="button" class="btn-secondary" [disabled]="savingEdit()" (click)="cancelEditBusiness()">Cancel</button>
+                <button type="button" class="btn-primary" [disabled]="savingEdit()" (click)="saveEditBusiness()">
+                  {{ savingEdit() ? 'Saving…' : 'Save Changes' }}
+                </button>
+              </div>
             </div>
-          </div>
+          } @else {
+            <h3>Registration</h3>
+            <dl class="info-grid">
+              <div>
+                <dt>Business ID</dt>
+                <dd>{{ row.id }}</dd>
+              </div>
+              <div>
+                <dt>Business Name</dt>
+                <dd>{{ row.code }}</dd>
+              </div>
+              <div>
+                <dt>Category</dt>
+                <dd>{{ row.category }}</dd>
+              </div>
+              <div>
+                <dt>Registered</dt>
+                <dd>{{ row.dateCreated }}</dd>
+              </div>
+              <div>
+                <dt>Barangay</dt>
+                <dd>{{ row.city }}, Castilla</dd>
+              </div>
+              <div>
+                <dt>Province</dt>
+                <dd>Sorsogon, Region V</dd>
+              </div>
+              <div>
+              </div>
+              <div>
+                <dt>Account Status</dt>
+                <dd>{{ row.status }}</dd>
+              </div>
+            </dl>
+
+            <h3>Contact Person</h3>
+            <div class="officer-row">
+              <app-avatar [name]="row.contactName" [size]="34" />
+              <div>
+                <strong>{{ row.contactName }}</strong>
+                <span>{{ row.contactPhone }}</span>
+              </div>
+            </div>
+          }
         }
 
         @case ('applications') {
@@ -798,9 +885,9 @@
 
 @if (deleteTarget()) {
   <app-confirm-dialog
-    title="Hide this business?"
+    [title]="store.isSeedData() ? 'Hide this business?' : 'Deactivate this business?'"
     [message]="deleteDialogMessage()"
-    confirmLabel="Hide"
+    [confirmLabel]="store.isSeedData() ? 'Hide' : 'Deactivate'"
     tone="danger"
     (confirmed)="confirmDelete()"
     (cancelled)="cancelDelete()"

@@ -86,6 +86,28 @@ export type CreateBusinessResult =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
 
+/** `PATCH /staff/businesses/:id` — the owner-editable fields only; never the registration number/date or status. */
+export interface UpdateBusinessInput {
+  name: string;
+  category: string;
+  street: string;
+  barangay: string;
+  city: string;
+  province: string;
+}
+
+export type UpdateBusinessResult =
+  | { readonly kind: 'done'; readonly row: StaffBusinessRow }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
+export type SetBusinessStatusResult =
+  | { readonly kind: 'done'; readonly row: StaffBusinessRow }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 @Injectable({ providedIn: 'root' })
 export class StaffBusinessesApi {
   private readonly api = inject(ApiClient);
@@ -143,6 +165,55 @@ export class StaffBusinessesApi {
         if (error.status === 409 || error.status === 422) {
           return { kind: 'refused', message: error.message };
         }
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /** `PATCH /staff/businesses/:id` — corrects a business's own details on the LGU's behalf, any business (not gated to one the caller owns). */
+  async update(businessId: string, input: UpdateBusinessInput): Promise<UpdateBusinessResult> {
+    try {
+      const row = await this.api.patch<StaffBusinessRow>(
+        `/staff/businesses/${encodeURIComponent(businessId)}`, input,
+      );
+      return { kind: 'done', row };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        if (error.status === 422) return { kind: 'refused', message: error.message };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * `POST /staff/businesses/:id/deactivate` — marks Inactive. Never a hard
+   * delete: `applications.business_id` is `on delete restrict`, so a
+   * business with any application on file can never be deleted from the
+   * database at all. Refused (422) while an application against it is
+   * still in progress.
+   */
+  async deactivate(businessId: string): Promise<SetBusinessStatusResult> {
+    return this.setStatus(businessId, 'deactivate');
+  }
+
+  /** Reverses `deactivate`. */
+  async reactivate(businessId: string): Promise<SetBusinessStatusResult> {
+    return this.setStatus(businessId, 'reactivate');
+  }
+
+  private async setStatus(businessId: string, action: 'deactivate' | 'reactivate'): Promise<SetBusinessStatusResult> {
+    try {
+      const row = await this.api.post<StaffBusinessRow>(
+        `/staff/businesses/${encodeURIComponent(businessId)}/${action}`,
+      );
+      return { kind: 'done', row };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        if (error.status === 422) return { kind: 'refused', message: error.message };
         return { kind: 'failed', message: error.message };
       }
       throw error;

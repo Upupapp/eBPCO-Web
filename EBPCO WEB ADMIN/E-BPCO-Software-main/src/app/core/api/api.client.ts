@@ -44,6 +44,10 @@ export class ApiClient {
     return this.send(() => firstValueFrom(this.http.put<T>(`${this.baseUrl}${path}`, body)));
   }
 
+  async patch<T>(path: string, body: unknown = {}): Promise<T> {
+    return this.send(() => firstValueFrom(this.http.patch<T>(`${this.baseUrl}${path}`, body)));
+  }
+
   /**
    * The one destructive verb this portal uses.
    *
