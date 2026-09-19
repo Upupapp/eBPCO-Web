@@ -5,12 +5,18 @@
     <title>E-BPCO Admin Portal</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- The Municipality of Castilla, Sorsogon seal — the same image every
-         other seal in this app uses (dilg-seal, splash, document previews).
-         Listed before the generic favicon.ico so browsers that support PNG
-         icons (all current ones) prefer this over the placeholder CLI icon. -->
-    <link rel="icon" type="image/png" href="/assets/logos/logo.png" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- The Municipality of Castilla, Sorsogon seal, as real icons: favicon.ico
+         (16/32/48) and the two PNGs are all generated from
+         assets/logos/logo.png — the same image every other seal in this app
+         uses. Until 19 Sep 2026 favicon.ico was still the Angular CLI's
+         placeholder, listed alongside the 603 KB seal PNG; a browser picks one
+         of several rel=icon links by its own rules and caches it per site, so
+         the tab showed the seal on one machine and the Angular logo on another
+         (the deployed site). One image in every slot leaves nothing to pick.
+         `?v=2` on the .ico defeats a cached copy of the old placeholder. -->
+    <link rel="icon" href="/favicon.ico?v=2" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <!--
       Runtime configuration, loaded BEFORE the application bundle so the
       injection-token factories see it when they first resolve. Plain JS with no
