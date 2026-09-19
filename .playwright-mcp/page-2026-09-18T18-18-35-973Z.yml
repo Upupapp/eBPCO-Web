@@ -1,0 +1,166 @@
+- generic [ref=f17e2]:
+  - generic [ref=f17e4]:
+    - complementary [ref=f17e6]:
+      - generic [ref=f17e7]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f17e9]
+        - generic [ref=f17e10]: E-BPCO
+      - navigation [ref=f17e11]:
+        - link "Dashboard" [ref=f17e14] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f17e20]:
+          - generic [ref=f17e21]: Operations
+          - generic [ref=f17e22]:
+            - link "Applications" [ref=f17e23] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f17e29] [cursor=pointer]:
+              - /url: /evaluations
+            - link "Payments" [ref=f17e34] [cursor=pointer]:
+              - /url: /payments
+            - link "Permit Release" [ref=f17e41] [cursor=pointer]:
+              - /url: /permit-release
+        - generic [ref=f17e48]:
+          - generic [ref=f17e49]: Administration
+          - generic [ref=f17e50]:
+            - link "Businesses" [ref=f17e51] [cursor=pointer]:
+              - /url: /businesses
+            - link "Access Requests" [ref=f17e57] [cursor=pointer]:
+              - /url: /access-requests
+            - link "Users & Roles" [ref=f17e63] [cursor=pointer]:
+              - /url: /user-roles
+            - link "Workflow" [ref=f17e70] [cursor=pointer]:
+              - /url: /workflow
+            - link "Archive" [ref=f17e79] [cursor=pointer]:
+              - /url: /archive
+            - link "System Logs" [ref=f17e85] [cursor=pointer]:
+              - /url: /system-logs
+      - button "Log Out" [ref=f17e91] [cursor=pointer]
+    - main [ref=f17e97]:
+      - generic [ref=f17e726]:
+        - generic "Applications" [ref=f17e727]:
+          - generic [ref=f17e728]:
+            - heading "Applications" [level=1] [ref=f17e729]
+            - generic [ref=f17e730]:
+              - generic [ref=f17e731]:
+                - generic [ref=f17e736]: Search
+                - textbox "Search" [ref=f17e737]:
+                  - /placeholder: Search here...
+              - button "Notifications" [ref=f17e739] [cursor=pointer]
+              - button "P paul@lguids.com.ph Super Admin" [ref=f17e745] [cursor=pointer]:
+                - generic [ref=f17e746]: P
+                - generic [ref=f17e750]:
+                  - generic [ref=f17e751]: paul@lguids.com.ph
+                  - generic [ref=f17e752]: Super Admin
+        - generic [ref=f17e756]:
+          - heading "Application Details" [level=1] [ref=f17e757]
+          - generic [ref=f17e758]:
+            - button "Action" [ref=f17e760] [cursor=pointer]
+            - button "Evaluate" [ref=f17e761] [cursor=pointer]
+            - button "Payment" [ref=f17e762] [cursor=pointer]
+            - button "Back to List" [ref=f17e763] [cursor=pointer]
+            - button "More actions" [ref=f17e765] [cursor=pointer]
+        - generic [ref=f17e771]:
+          - generic [ref=f17e772]:
+            - generic [ref=f17e773]: JT
+            - generic [ref=f17e781]:
+              - heading "c231f514-426f-4a6a-b8a8-d95a63d94b1f - Juan Test Dela Cruz" [level=2] [ref=f17e782]
+              - generic [ref=f17e783]: Under Review
+              - generic [ref=f17e784]:
+                - generic [ref=f17e785]:
+                  - term [ref=f17e786]: "Business / Project :"
+                  - definition [ref=f17e787]: Test Intake Store
+                - generic [ref=f17e788]:
+                  - term [ref=f17e789]: "City :"
+                  - definition [ref=f17e790]: Barangay Poblacion
+                - generic [ref=f17e791]:
+                  - term [ref=f17e792]: "Region :"
+                  - definition [ref=f17e793]: Region V (Bicol Region)
+                - generic [ref=f17e794]:
+                  - term [ref=f17e795]: "Type :"
+                  - definition [ref=f17e796]: Excavation Permit
+                - generic [ref=f17e797]:
+                  - term [ref=f17e798]: "Email :"
+                  - definition [ref=f17e799]:
+                    - text: juantest.intake@example.com
+                    - generic [ref=f17e800]: Unverified
+                    - button "Confirm" [ref=f17e801] [cursor=pointer]
+                    - button "Mark Failed" [ref=f17e802] [cursor=pointer]
+                - generic [ref=f17e803]:
+                  - term [ref=f17e804]: "Phone :"
+                  - definition [ref=f17e805]:
+                    - text: +63 917 123 4567
+                    - generic [ref=f17e806]: Unverified
+                    - button "Confirm" [ref=f17e807] [cursor=pointer]
+                    - button "Mark Failed" [ref=f17e808] [cursor=pointer]
+                - generic [ref=f17e809]:
+                  - term [ref=f17e810]: "Barangay :"
+                  - definition [ref=f17e811]: Poblacion
+            - generic [ref=f17e812]:
+              - generic [ref=f17e813]:
+                - strong [ref=f17e814]: 2026-09-18
+                - generic [ref=f17e815]: Date Submitted
+              - generic [ref=f17e816]:
+                - strong [ref=f17e817]: —
+                - generic [ref=f17e818]: Assigned Officer
+            - button [ref=f17e819] [cursor=pointer]
+          - generic [ref=f17e823]:
+            - generic [ref=f17e824]:
+              - button "Timeline" [ref=f17e825] [cursor=pointer]
+              - button "Documents" [ref=f17e826] [cursor=pointer]
+              - button "Permit Result" [ref=f17e827] [cursor=pointer]
+              - button "Comments" [ref=f17e828] [cursor=pointer]
+            - generic [ref=f17e829]:
+              - heading "Activity Summary" [level=2] [ref=f17e830]
+              - paragraph [ref=f17e831]:
+                - text: This Application Is Currently At
+                - strong [ref=f17e832]: Submitted
+              - heading "Lifecycle Progress" [level=3] [ref=f17e833]
+              - list [ref=f17e834]:
+                - listitem [ref=f17e835]: Draft
+                - listitem [ref=f17e836]: Submitted
+                - listitem [ref=f17e837]: Received
+                - listitem [ref=f17e838]: Document Verification
+                - listitem [ref=f17e839]: Under Evaluation
+                - listitem [ref=f17e840]: Assessed
+                - listitem [ref=f17e841]: Payment Submitted
+                - listitem [ref=f17e842]: Payment Under Verification
+                - listitem [ref=f17e843]: Payment Verified
+                - listitem [ref=f17e844]: For Approval
+                - listitem [ref=f17e845]: Approved
+                - listitem [ref=f17e846]: Permit Generated
+                - listitem [ref=f17e847]: Ready for Release
+                - listitem [ref=f17e848]: Released
+                - listitem [ref=f17e849]: Completed
+              - heading "Quick Information :" [level=3] [ref=f17e850]
+              - generic [ref=f17e851]:
+                - list [ref=f17e852]:
+                  - listitem [ref=f17e853]: "Assigned To: —"
+                  - listitem [ref=f17e854]: "Current Step: Submitted"
+                  - listitem [ref=f17e855]: "Days In Current Step: 0 Days"
+                - generic [ref=f17e856]: "Total Elapsed Time: 0 Days"
+              - heading "Audit Trail" [level=3] [ref=f17e857]
+              - table [ref=f17e859]:
+                - rowgroup [ref=f17e860]:
+                  - row [ref=f17e861]:
+                    - columnheader "#" [ref=f17e862]
+                    - columnheader "Timeline Event" [ref=f17e863]
+                    - columnheader "Date" [ref=f17e864]
+                    - columnheader "Time" [ref=f17e865]
+                    - columnheader "Details" [ref=f17e866]
+                    - columnheader "Action" [ref=f17e867]
+                - rowgroup [ref=f17e868]:
+                  - row [ref=f17e869]:
+                    - cell "01" [ref=f17e870]
+                    - cell "Submitted" [ref=f17e871]
+                    - cell "9/19/2026" [ref=f17e872]
+                    - cell "2:18:34 AM" [ref=f17e873]
+                    - cell "Application filed" [ref=f17e874]
+                    - cell [ref=f17e875]:
+                      - button "Export Submitted" [ref=f17e876] [cursor=pointer]
+  - generic [ref=f17e881]:
+    - generic:
+      - status [ref=f17e882]:
+        - generic [ref=f17e887]: "Application E-BPCO-2026-000004 filed, but 6 documents could not be attached: Land Title or Tax Declaration of the property, Barangay Clearance, Locational Clearance / Zoning Certification, Valid Government-Issued ID of Applicant/Owner, Excavation/Site Development Plan, PRC License and PTR of Engineer of Record. Attach them from the application's own Documents tab."
+        - button "Dismiss" [ref=f17e888] [cursor=pointer]: ✕
+      - status [ref=f17e889]:
+        - generic [ref=f17e894]: Application E-BPCO-2026-000004 filed for Test Intake Store.
+        - button "Dismiss" [ref=f17e895] [cursor=pointer]: ✕

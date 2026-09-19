@@ -1,0 +1,123 @@
+- generic [ref=f26e4]:
+  - complementary [ref=f26e6]:
+    - generic [ref=f26e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f26e9]
+      - generic [ref=f26e10]: E-BPCO
+    - navigation [ref=f26e11]:
+      - link "Dashboard" [ref=f26e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f26e20]:
+        - generic [ref=f26e21]: Operations
+        - generic [ref=f26e22]:
+          - link "Applications" [ref=f26e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f26e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f26e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f26e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f26e48]:
+        - generic [ref=f26e49]: Administration
+        - generic [ref=f26e50]:
+          - link "Businesses" [ref=f26e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f26e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f26e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f26e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f26e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f26e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f26e91] [cursor=pointer]
+  - main [ref=f26e97]:
+    - generic [ref=f26e98]:
+      - generic "Applications" [ref=f26e99]:
+        - generic [ref=f26e100]:
+          - heading "Applications" [level=1] [ref=f26e101]
+          - generic [ref=f26e102]:
+            - generic [ref=f26e103]:
+              - generic [ref=f26e108]: Search
+              - textbox "Search" [ref=f26e109]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f26e111] [cursor=pointer]
+            - button "P paul@lguids.com.ph Super Admin" [ref=f26e117] [cursor=pointer]:
+              - generic [ref=f26e118]: P
+              - generic [ref=f26e122]:
+                - generic [ref=f26e123]: paul@lguids.com.ph
+                - generic [ref=f26e124]: Super Admin
+      - generic [ref=f26e128]:
+        - heading "Application Details" [level=1] [ref=f26e129]
+        - generic [ref=f26e130]:
+          - button "Action" [ref=f26e132] [cursor=pointer]
+          - button "Evaluate" [ref=f26e133] [cursor=pointer]
+          - button "Payment" [ref=f26e134] [cursor=pointer]
+          - button "Back to List" [ref=f26e135] [cursor=pointer]
+          - button "More actions" [ref=f26e137] [cursor=pointer]
+      - generic [ref=f26e143]:
+        - generic [ref=f26e144]:
+          - generic [ref=f26e145]: JT
+          - generic [ref=f26e153]:
+            - heading "c231f514-426f-4a6a-b8a8-d95a63d94b1f - Juan Test Dela Cruz" [level=2] [ref=f26e154]
+            - generic [ref=f26e155]: Under Review
+            - generic [ref=f26e156]:
+              - generic [ref=f26e157]:
+                - term [ref=f26e158]: "Business / Project :"
+                - definition [ref=f26e159]: Test Intake Store
+              - generic [ref=f26e160]:
+                - term [ref=f26e161]: "City :"
+                - definition [ref=f26e162]: Barangay Poblacion
+              - generic [ref=f26e163]:
+                - term [ref=f26e164]: "Region :"
+                - definition [ref=f26e165]: Region V (Bicol Region)
+              - generic [ref=f26e166]:
+                - term [ref=f26e167]: "Type :"
+                - definition [ref=f26e168]: Excavation Permit
+              - generic [ref=f26e169]:
+                - term [ref=f26e170]: "Email :"
+                - definition [ref=f26e171]:
+                  - text: juantest.intake@example.com
+                  - generic [ref=f26e172]: Unverified
+                  - button "Confirm" [ref=f26e173] [cursor=pointer]
+                  - button "Mark Failed" [ref=f26e174] [cursor=pointer]
+              - generic [ref=f26e175]:
+                - term [ref=f26e176]: "Phone :"
+                - definition [ref=f26e177]:
+                  - text: +63 917 123 4567
+                  - generic [ref=f26e178]: Unverified
+                  - button "Confirm" [ref=f26e179] [cursor=pointer]
+                  - button "Mark Failed" [ref=f26e180] [cursor=pointer]
+              - generic [ref=f26e181]:
+                - term [ref=f26e182]: "Barangay :"
+                - definition [ref=f26e183]: Poblacion
+          - generic [ref=f26e184]:
+            - generic [ref=f26e185]:
+              - strong [ref=f26e186]: 2026-09-18
+              - generic [ref=f26e187]: Date Submitted
+            - generic [ref=f26e188]:
+              - strong [ref=f26e189]: —
+              - generic [ref=f26e190]: Assigned Officer
+          - button [ref=f26e191] [cursor=pointer]
+        - generic [ref=f26e195]:
+          - generic [ref=f26e196]:
+            - button "Timeline" [ref=f26e197] [cursor=pointer]
+            - button "Documents" [ref=f26e198] [cursor=pointer]
+            - button "Permit Result" [ref=f26e199] [cursor=pointer]
+            - button "Comments" [active] [ref=f26e200] [cursor=pointer]
+          - generic [ref=f26e201]:
+            - paragraph [ref=f26e253]: Internal staff notes on this application — never shown to the applicant.
+            - generic [ref=f26e254]:
+              - textbox "Post a new message" [ref=f26e255]
+              - button "Send" [ref=f26e256] [cursor=pointer]
+            - generic [ref=f26e258]:
+              - generic [ref=f26e259]: P
+              - generic [ref=f26e261]:
+                - generic [ref=f26e262]:
+                  - text: paul@lguids.com.ph
+                  - emphasis [ref=f26e263]: Sep 19, 2026 · 2:37 AM
+                - paragraph [ref=f26e264]: Verified applicant ID matches Land Title document.
+                - link "Reply" [ref=f26e266] [cursor=pointer]:
+                  - /url: javascript:void(0)

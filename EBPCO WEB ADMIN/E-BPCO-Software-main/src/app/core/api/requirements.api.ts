@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import { ApiClient } from './api.client';
 import { ApiError } from './problem';
+import { ApplicationAction } from '../domain/permit.model';
 
 /**
  * A permit type's required-document checklist — `requirements.controller.ts`
@@ -38,11 +39,19 @@ export type RequirementsWriteResult =
 export class RequirementsApi {
   private readonly api = inject(ApiClient);
 
-  /** `GET staff/config/requirements/:permitType` — scope `applications:read`. */
-  async get(permitType: string): Promise<RequirementsReadResult> {
+  /**
+   * `GET staff/config/requirements/:permitType` — scope `applications:read`.
+   *
+   * `applicationAction`, since backend migration 047: Building Permit's
+   * checklist now varies by New/Renewal/Amendment, and the server returns
+   * nothing for it without one (every other permit type ignores the param
+   * and answers the same either way).
+   */
+  async get(permitType: string, applicationAction?: ApplicationAction): Promise<RequirementsReadResult> {
     try {
+      const query = applicationAction === undefined ? '' : `?applicationAction=${encodeURIComponent(applicationAction)}`;
       const result = await this.api.get<{ documents: readonly RequirementDocumentDto[] }>(
-        `/staff/config/requirements/${encodeURIComponent(permitType)}`,
+        `/staff/config/requirements/${encodeURIComponent(permitType)}${query}`,
       );
       return { kind: 'ok', documents: result.documents ?? [] };
     } catch (error) {
@@ -54,14 +63,16 @@ export class RequirementsApi {
     }
   }
 
-  /** `PUT staff/config/requirements/:permitType` — scope `staff:administer` (Administrator/Super Admin only). Refused: unknown-permit-type (404), duplicate-code (422). */
+  /** `PUT staff/config/requirements/:permitType` — scope `staff:administer` (Administrator/Super Admin only). Refused: unknown-permit-type (404), duplicate-code (422). `applicationAction` replaces only that action's bucket — see `get`'s own doc comment. */
   async replace(
     permitType: string,
     documents: readonly RequirementDocumentDto[],
+    applicationAction?: ApplicationAction,
   ): Promise<RequirementsWriteResult> {
     try {
+      const query = applicationAction === undefined ? '' : `?applicationAction=${encodeURIComponent(applicationAction)}`;
       const result = await this.api.put<{ documents: readonly RequirementDocumentDto[] }>(
-        `/staff/config/requirements/${encodeURIComponent(permitType)}`,
+        `/staff/config/requirements/${encodeURIComponent(permitType)}${query}`,
         { documents },
       );
       return { kind: 'done', documents: result.documents ?? documents };

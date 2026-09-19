@@ -93,6 +93,9 @@
                           <button type="button" class="btn-outline" (click)="openAdjust(toQueueRow(p, appId), 'Reverse')">Reverse</button>
                           <button type="button" class="btn-outline" (click)="openAdjust(toQueueRow(p, appId), 'Refund')">Refund</button>
                         }
+                        @if (p.officialReceiptNumber) {
+                          <button type="button" class="link-btn" (click)="openReceipt(toQueueRow(p, appId))">View Receipt</button>
+                        }
                         @if (p.officialReceiptNumber && canVerifyPayment()) {
                           <button type="button" class="link-btn" (click)="openCorrectReceipt(toQueueRow(p, appId))">Correct OR No.</button>
                         }
@@ -355,6 +358,9 @@
                 <button type="button" class="btn-outline" (click)="openAdjust(p, 'Void')">Void</button>
                 <button type="button" class="btn-outline" (click)="openAdjust(p, 'Reverse')">Reverse</button>
                 <button type="button" class="btn-outline" (click)="openAdjust(p, 'Refund')">Refund</button>
+              }
+              @if (p.officialReceiptNumber) {
+                <button type="button" class="btn-outline" (click)="openReceipt(p)">View Receipt</button>
               }
               @if (p.officialReceiptNumber && canVerifyPayment()) {
                 <button type="button" class="btn-outline" (click)="openCorrectReceipt(p)">Correct OR No.</button>
@@ -691,6 +697,10 @@
     (confirmed)="confirmAdjust($event)"
     (cancelled)="cancelAdjust()"
   />
+}
+
+@if (receiptTarget(); as t) {
+  <app-payment-receipt-modal [payment]="t" (closed)="closeReceipt()" />
 }
 
 @if (correctReceiptTarget(); as t) {

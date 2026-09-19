@@ -53,7 +53,7 @@ const request = (over: Record<string, unknown> = {}) => ({
   email: 'ana.reyes@castillasorsogon.gov.ph',
   mobile: '09171234567',
   officePosition: 'Municipal Engineering Office — Evaluator',
-  permitTypes: ['Building Permit – New Construction'],
+  permitTypes: ['Building Permit'],
   requestedLevel: 'view',
   justification: 'Assigned to evaluate structural submissions.',
   raisedAt: new Date(Date.now() - 3 * 86_400_000).toISOString(),
@@ -79,7 +79,7 @@ describe('Access Requests', () => {
 
     expect(text).toContain('Engr. Ana Reyes');
     expect(text).toContain('View only');
-    expect(text).toContain('Building Permit – New Construction');
+    expect(text).toContain('Building Permit');
     expect(text).toContain('Waiting 3 days');
   });
 
@@ -179,7 +179,7 @@ describe('Access Requests', () => {
       confirmApprove(): Promise<void>; requests(): unknown[];
     };
     c.startApprove(c.requests()[0]);
-    c.toggleGrant('Building Permit – New Construction');
+    c.toggleGrant('Building Permit');
     await c.confirmApprove();
 
     TestBed.inject(HttpTestingController).verify();
@@ -207,7 +207,7 @@ describe('Access Requests', () => {
     // window would never close.
     expect(req.request.method).toBe('POST');
     expect(req.request.body.level).toBe('view-edit');
-    expect(req.request.body.permitTypes).toEqual(['Building Permit – New Construction']);
+    expect(req.request.body.permitTypes).toEqual(['Building Permit']);
     // `roles` is required by the server and non-empty. The portal used to send
     // only level and permitTypes, so every approval would have failed (F-30).
     expect(req.request.body.roles).toEqual(['evaluator']);

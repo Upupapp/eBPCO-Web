@@ -38,6 +38,7 @@ import {
   PaymentMethodConfig,
 } from '../../core/api/staff-fee-config.api';
 import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
+import { PaymentReceiptModal } from '../../shared/generated-document/payment-receipt-modal';
 
 type PaymentsTab = 'transactions' | 'fee-schedule' | 'configuration';
 type ConfigSubTab = 'payment-methods' | 'bank-information' | 'payroll';
@@ -114,6 +115,7 @@ interface PaymentRow {
     SlicePipe,
     ConfirmDialog,
     OverlayModule,
+    PaymentReceiptModal,
   ],
   templateUrl: './payments.html',
   styleUrl: './payments.scss',
@@ -722,6 +724,29 @@ export class Payments {
         result.kind === 'unavailable' ? 'This deployment cannot adjust payments yet.' : result.message,
       );
     }
+  }
+
+  /**
+   * A printable view of a real, verified payment — every field on it (OR
+   * number, reference, amount, method, payer, application) already lives on
+   * this same `PaymentQueueRow`, fetched from `GET /staff/payments`/
+   * `GET /staff/applications/:id`. Nothing here is generated or stored server
+   * side; it is a formatted read of the one real payment row, the same way
+   * `openCorrectReceipt` below opens a form over that row rather than a copy
+   * of it.
+   */
+  protected readonly receiptTarget = signal<PaymentQueueRow | null>(null);
+
+  protected openReceipt(payment: PaymentQueueRow): void {
+    this.receiptTarget.set(payment);
+  }
+
+  protected closeReceipt(): void {
+    this.receiptTarget.set(null);
+  }
+
+  protected printReceipt(): void {
+    window.print();
   }
 
   protected readonly correctReceiptTarget = signal<PaymentQueueRow | null>(null);

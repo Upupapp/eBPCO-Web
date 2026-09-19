@@ -1,0 +1,396 @@
+- generic [ref=f17e4]:
+  - complementary [ref=f17e6]:
+    - generic [ref=f17e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f17e9]
+      - generic [ref=f17e10]: E-BPCO
+    - navigation [ref=f17e11]:
+      - link "Dashboard" [ref=f17e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f17e20]:
+        - generic [ref=f17e21]: Operations
+        - generic [ref=f17e22]:
+          - link "Applications" [ref=f17e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f17e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f17e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f17e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f17e48]:
+        - generic [ref=f17e49]: Administration
+        - generic [ref=f17e50]:
+          - link "Businesses" [ref=f17e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f17e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f17e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f17e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f17e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f17e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f17e91] [cursor=pointer]
+  - main [ref=f17e97]:
+    - generic [ref=f17e98]:
+      - generic "Applications" [ref=f17e99]:
+        - generic [ref=f17e100]:
+          - heading "Applications" [level=1] [ref=f17e101]
+          - generic [ref=f17e102]:
+            - generic [ref=f17e103]:
+              - generic [ref=f17e108]: Search
+              - textbox "Search" [ref=f17e109]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f17e111] [cursor=pointer]
+            - button "P paul@lguids.com.ph Super Admin" [ref=f17e117] [cursor=pointer]:
+              - generic [ref=f17e118]: P
+              - generic [ref=f17e122]:
+                - generic [ref=f17e123]: paul@lguids.com.ph
+                - generic [ref=f17e124]: Super Admin
+      - generic [ref=f17e128]:
+        - generic [ref=f17e130]:
+          - generic [ref=f17e132]:
+            - paragraph [ref=f17e133]: Under Review
+            - paragraph [ref=f17e134]: "0"
+          - generic [ref=f17e135]:
+            - generic [ref=f17e136]: 0% of all applications
+            - 'img "Under Review progress: 0 percent" [ref=f17e138]'
+        - generic [ref=f17e141]:
+          - generic [ref=f17e143]:
+            - paragraph [ref=f17e144]: Approved
+            - paragraph [ref=f17e145]: "3"
+          - generic [ref=f17e146]:
+            - generic [ref=f17e147]: 100% of all applications
+            - 'img "Approved progress: 100 percent" [ref=f17e149]'
+        - generic [ref=f17e152]:
+          - generic [ref=f17e154]:
+            - paragraph [ref=f17e155]: Rejected
+            - paragraph [ref=f17e156]: "0"
+          - generic [ref=f17e157]:
+            - generic [ref=f17e158]: 0% of all applications
+            - 'img "Rejected progress: 0 percent" [ref=f17e160]'
+        - generic [ref=f17e163]:
+          - generic [ref=f17e165]:
+            - paragraph [ref=f17e166]: Total Applications
+            - paragraph [ref=f17e167]: "3"
+          - generic [ref=f17e168]:
+            - generic [ref=f17e169]: Under Review · Approved · Rejected
+            - 'img "3 categories: 0, 3, 0" [ref=f17e171]'
+      - generic [ref=f17e175]:
+        - generic [ref=f17e176]:
+          - textbox "Search Here By Application ID, Applicant Name, Business/Project, or Location" [ref=f17e182]
+          - generic [ref=f17e183]:
+            - button [ref=f17e186] [cursor=pointer]
+            - button [ref=f17e190] [cursor=pointer]
+            - button [ref=f17e195] [cursor=pointer]
+        - table [ref=f17e199]:
+          - rowgroup [ref=f17e200]:
+            - row [ref=f17e201]:
+              - columnheader [ref=f17e202]:
+                - checkbox "Select all applications" [ref=f17e203]
+              - columnheader "APPLICATION ID" [ref=f17e204]
+              - columnheader "APPLICANT NAME" [ref=f17e205]
+              - columnheader "LOCATION" [ref=f17e206]
+              - columnheader "TYPE" [ref=f17e207]
+              - columnheader "DATE SUBMITTED" [ref=f17e208]
+              - columnheader "ASSIGNED OFFICER" [ref=f17e209]
+              - columnheader "STATUS" [ref=f17e210]
+              - columnheader "ACTION" [ref=f17e211]
+          - rowgroup [ref=f17e212]:
+            - row [ref=f17e213] [cursor=pointer]:
+              - cell [ref=f17e214]:
+                - checkbox "Select application 8bab1dfe-bb42-4155-a6cd-928645576c6e" [ref=f17e215]
+              - cell "8bab1dfe-bb42-4155-a6cd-928645576c6e E-BPCO-2026-000003" [ref=f17e216]:
+                - text: 8bab1dfe-bb42-4155-a6cd-928645576c6e
+                - generic [ref=f17e217]: E-BPCO-2026-000003
+              - cell "AC Angela Cailing El Cafe" [ref=f17e218]:
+                - generic [ref=f17e219]:
+                  - generic [ref=f17e220]: AC
+                  - generic [ref=f17e222]:
+                    - generic "Angela Cailing" [ref=f17e223]
+                    - generic "El Cafe" [ref=f17e224]
+              - cell "ella" [ref=f17e225]
+              - cell "Excavation Permit" [ref=f17e226]
+              - cell "2026-09-18" [ref=f17e227]
+              - cell "—" [ref=f17e228]
+              - cell "Approved" [ref=f17e229]
+              - cell [ref=f17e231]:
+                - generic [ref=f17e232]:
+                  - button "View application 8bab1dfe-bb42-4155-a6cd-928645576c6e" [ref=f17e233]
+                  - button "Edit application 8bab1dfe-bb42-4155-a6cd-928645576c6e" [ref=f17e238]
+                  - button "Delete application 8bab1dfe-bb42-4155-a6cd-928645576c6e" [ref=f17e242]
+            - row [ref=f17e247] [cursor=pointer]:
+              - cell [ref=f17e248]:
+                - checkbox "Select application 559e8380-3177-4637-a2b1-827bda3dc468" [ref=f17e249]
+              - cell "559e8380-3177-4637-a2b1-827bda3dc468 E-BPCO-2026-000002" [ref=f17e250]:
+                - text: 559e8380-3177-4637-a2b1-827bda3dc468
+                - generic [ref=f17e251]: E-BPCO-2026-000002
+              - cell "AC Angela Cailing El Cafe" [ref=f17e252]:
+                - generic [ref=f17e253]:
+                  - generic [ref=f17e254]: AC
+                  - generic [ref=f17e256]:
+                    - generic "Angela Cailing" [ref=f17e257]
+                    - generic "El Cafe" [ref=f17e258]
+              - cell "Purok Dos" [ref=f17e259]
+              - cell "Architectural Permit" [ref=f17e260]
+              - cell "2026-09-18" [ref=f17e261]
+              - cell "—" [ref=f17e262]
+              - cell "Approved" [ref=f17e263]
+              - cell [ref=f17e265]:
+                - generic [ref=f17e266]:
+                  - button "View application 559e8380-3177-4637-a2b1-827bda3dc468" [ref=f17e267]
+                  - button "Edit application 559e8380-3177-4637-a2b1-827bda3dc468" [ref=f17e272]
+                  - button "Delete application 559e8380-3177-4637-a2b1-827bda3dc468" [ref=f17e276]
+            - row [ref=f17e281] [cursor=pointer]:
+              - cell [ref=f17e282]:
+                - checkbox "Select application a8dc0c50-1c06-4c05-a02e-45f1737979f5" [ref=f17e283]
+              - cell "a8dc0c50-1c06-4c05-a02e-45f1737979f5 E-BPCO-2026-000001" [ref=f17e284]:
+                - text: a8dc0c50-1c06-4c05-a02e-45f1737979f5
+                - generic [ref=f17e285]: E-BPCO-2026-000001
+              - cell "EC Ella Cailing cafe" [ref=f17e286]:
+                - generic [ref=f17e287]:
+                  - generic [ref=f17e288]: EC
+                  - generic [ref=f17e290]:
+                    - generic "Ella Cailing" [ref=f17e291]
+                    - generic "cafe" [ref=f17e292]
+              - cell "ella" [ref=f17e293]
+              - cell "Architectural Permit" [ref=f17e294]
+              - cell "2026-09-17" [ref=f17e295]
+              - cell "—" [ref=f17e296]
+              - cell "Approved" [ref=f17e297]
+              - cell [ref=f17e299]:
+                - generic [ref=f17e300]:
+                  - button "View application a8dc0c50-1c06-4c05-a02e-45f1737979f5" [ref=f17e301]
+                  - button "Edit application a8dc0c50-1c06-4c05-a02e-45f1737979f5" [ref=f17e306]
+                  - button "Delete application a8dc0c50-1c06-4c05-a02e-45f1737979f5" [ref=f17e310]
+        - navigation "Pagination" [ref=f17e316]:
+          - generic [ref=f17e317]: Showing 1-3 from 3
+          - generic [ref=f17e318]:
+            - button "First page" [disabled] [ref=f17e319]
+            - button "Page 1" [ref=f17e324] [cursor=pointer]: "1"
+            - button "Last page" [disabled] [ref=f17e325]
+      - dialog "New Application" [ref=f17e332]:
+        - button "Close" [ref=f17e333] [cursor=pointer]: ✕
+        - heading "New Application" [level=2] [ref=f17e334]
+        - paragraph [ref=f17e335]: Encode a walk-in or manually submitted application.
+        - tablist "Application form sections" [ref=f17e336]:
+          - tab "1 Applicant Information" [ref=f17e337] [cursor=pointer]:
+            - generic [ref=f17e338]: "1"
+            - text: Applicant Information
+          - tab "2 Business Information" [ref=f17e339] [cursor=pointer]:
+            - generic [ref=f17e340]: "2"
+            - text: Business Information
+          - tab "3 Application Information" [ref=f17e341] [cursor=pointer]:
+            - generic [ref=f17e342]: "3"
+            - text: Application Information
+          - tab "4 Document Attachments" [selected] [ref=f17e343] [cursor=pointer]:
+            - generic [ref=f17e344]: "4"
+            - text: Document Attachments
+          - tab "5 Review & Confirm" [ref=f17e345] [cursor=pointer]:
+            - generic [ref=f17e346]: "5"
+            - text: Review & Confirm
+        - paragraph [ref=f17e347]: "* Required field"
+        - generic [ref=f17e423]:
+          - generic [ref=f17e424]:
+            - generic [ref=f17e425]:
+              - generic [ref=f17e426]: Land Title or Tax Declaration of the property
+              - generic [ref=f17e427]: Required
+              - generic [ref=f17e428]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f17e429]:
+              - generic [ref=f17e430]:
+                - generic [ref=f17e431]:
+                  - text: File name
+                  - generic [ref=f17e432]: Sent to the Municipality when this application is filed.
+                - button "File name Sent to the Municipality when this application is filed. sidebar-fixed.png Remove file" [ref=f17e600]
+                - generic [ref=f17e601]:
+                  - text: sidebar-fixed.png
+                  - button "Remove file" [ref=f17e602] [cursor=pointer]: ✕
+              - generic [ref=f17e434]:
+                - generic [ref=f17e435]: Document Type
+                - textbox "Document Type" [ref=f17e436]: Land Title or Tax Declaration of the property
+              - generic [ref=f17e437]:
+                - generic [ref=f17e438]: Issuing Office
+                - textbox "Issuing Office" [ref=f17e439]:
+                  - /placeholder: Optional
+              - generic [ref=f17e440]:
+                - generic [ref=f17e441]: Issue Date
+                - textbox "Issue Date" [ref=f17e442]
+              - generic [ref=f17e443]:
+                - generic [ref=f17e444]: Expiry Date
+                - textbox "Expiry Date" [ref=f17e445]
+          - generic [ref=f17e446]:
+            - generic [ref=f17e447]:
+              - generic [ref=f17e448]: Owner's Written Consent (if applicant is not the lot owner)
+              - generic [ref=f17e449]: Optional
+              - generic [ref=f17e450]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f17e451]:
+              - generic [ref=f17e452]:
+                - generic [ref=f17e453]:
+                  - text: File name
+                  - generic [ref=f17e454]: Sent to the Municipality when this application is filed.
+                - button "File name Sent to the Municipality when this application is filed." [ref=f17e455]
+              - generic [ref=f17e456]:
+                - generic [ref=f17e457]: Document Type
+                - textbox "Document Type" [ref=f17e458]: Owner's Written Consent (if applicant is not the lot owner)
+              - generic [ref=f17e459]:
+                - generic [ref=f17e460]: Issuing Office
+                - textbox "Issuing Office" [ref=f17e461]:
+                  - /placeholder: Optional
+              - generic [ref=f17e462]:
+                - generic [ref=f17e463]: Issue Date
+                - textbox "Issue Date" [ref=f17e464]
+              - generic [ref=f17e465]:
+                - generic [ref=f17e466]: Expiry Date
+                - textbox "Expiry Date" [ref=f17e467]
+          - generic [ref=f17e468]:
+            - generic [ref=f17e469]:
+              - generic [ref=f17e470]: Barangay Clearance
+              - generic [ref=f17e471]: Required
+              - generic [ref=f17e472]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f17e473]:
+              - generic [ref=f17e474]:
+                - generic [ref=f17e475]:
+                  - text: File name
+                  - generic [ref=f17e476]: Sent to the Municipality when this application is filed.
+                - button "File name Sent to the Municipality when this application is filed. sidebar-fixed.png Remove file" [active] [ref=f17e603]
+                - generic [ref=f17e604]:
+                  - text: sidebar-fixed.png
+                  - button "Remove file" [ref=f17e605] [cursor=pointer]: ✕
+              - generic [ref=f17e478]:
+                - generic [ref=f17e479]: Document Type
+                - textbox "Document Type" [ref=f17e480]: Barangay Clearance
+              - generic [ref=f17e481]:
+                - generic [ref=f17e482]: Issuing Office
+                - textbox "Issuing Office" [ref=f17e483]:
+                  - /placeholder: Optional
+              - generic [ref=f17e484]:
+                - generic [ref=f17e485]: Issue Date
+                - textbox "Issue Date" [ref=f17e486]
+              - generic [ref=f17e487]:
+                - generic [ref=f17e488]: Expiry Date
+                - textbox "Expiry Date" [ref=f17e489]
+          - generic [ref=f17e490]:
+            - generic [ref=f17e491]:
+              - generic [ref=f17e492]: Locational Clearance / Zoning Certification
+              - generic [ref=f17e493]: Required
+              - generic [ref=f17e494]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f17e495]:
+              - generic [ref=f17e496]:
+                - generic [ref=f17e497]:
+                  - text: File name
+                  - generic [ref=f17e498]: Sent to the Municipality when this application is filed.
+                - button "File name Sent to the Municipality when this application is filed." [ref=f17e499]
+              - generic [ref=f17e500]:
+                - generic [ref=f17e501]: Document Type
+                - textbox "Document Type" [ref=f17e502]: Locational Clearance / Zoning Certification
+              - generic [ref=f17e503]:
+                - generic [ref=f17e504]: Issuing Office
+                - textbox "Issuing Office" [ref=f17e505]:
+                  - /placeholder: Optional
+              - generic [ref=f17e506]:
+                - generic [ref=f17e507]: Issue Date
+                - textbox "Issue Date" [ref=f17e508]
+              - generic [ref=f17e509]:
+                - generic [ref=f17e510]: Expiry Date
+                - textbox "Expiry Date" [ref=f17e511]
+          - generic [ref=f17e512]:
+            - generic [ref=f17e513]:
+              - generic [ref=f17e514]: Valid Government-Issued ID of Applicant/Owner
+              - generic [ref=f17e515]: Required
+              - generic [ref=f17e516]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f17e517]:
+              - generic [ref=f17e518]:
+                - generic [ref=f17e519]:
+                  - text: File name
+                  - generic [ref=f17e520]: Sent to the Municipality when this application is filed.
+                - button "File name Sent to the Municipality when this application is filed." [ref=f17e521]
+              - generic [ref=f17e522]:
+                - generic [ref=f17e523]: Document Type
+                - textbox "Document Type" [ref=f17e524]: Valid Government-Issued ID of Applicant/Owner
+              - generic [ref=f17e525]:
+                - generic [ref=f17e526]: Issuing Office
+                - textbox "Issuing Office" [ref=f17e527]:
+                  - /placeholder: Optional
+              - generic [ref=f17e528]:
+                - generic [ref=f17e529]: Issue Date
+                - textbox "Issue Date" [ref=f17e530]
+              - generic [ref=f17e531]:
+                - generic [ref=f17e532]: Expiry Date
+                - textbox "Expiry Date" [ref=f17e533]
+          - generic [ref=f17e534]:
+            - generic [ref=f17e535]:
+              - generic [ref=f17e536]: Excavation/Site Development Plan
+              - generic [ref=f17e537]: Required
+              - generic [ref=f17e538]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f17e539]:
+              - generic [ref=f17e540]:
+                - generic [ref=f17e541]:
+                  - text: File name
+                  - generic [ref=f17e542]: Sent to the Municipality when this application is filed.
+                - button "File name Sent to the Municipality when this application is filed." [ref=f17e543]
+              - generic [ref=f17e544]:
+                - generic [ref=f17e545]: Document Type
+                - textbox "Document Type" [ref=f17e546]: Excavation/Site Development Plan
+              - generic [ref=f17e547]:
+                - generic [ref=f17e548]: Issuing Office
+                - textbox "Issuing Office" [ref=f17e549]:
+                  - /placeholder: Optional
+              - generic [ref=f17e550]:
+                - generic [ref=f17e551]: Issue Date
+                - textbox "Issue Date" [ref=f17e552]
+              - generic [ref=f17e553]:
+                - generic [ref=f17e554]: Expiry Date
+                - textbox "Expiry Date" [ref=f17e555]
+          - generic [ref=f17e556]:
+            - generic [ref=f17e557]:
+              - generic [ref=f17e558]: Geotechnical/Soil Assessment (if excavation exceeds regulated depth)
+              - generic [ref=f17e559]: Optional
+              - generic [ref=f17e560]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f17e561]:
+              - generic [ref=f17e562]:
+                - generic [ref=f17e563]:
+                  - text: File name
+                  - generic [ref=f17e564]: Sent to the Municipality when this application is filed.
+                - button "File name Sent to the Municipality when this application is filed." [ref=f17e565]
+              - generic [ref=f17e566]:
+                - generic [ref=f17e567]: Document Type
+                - textbox "Document Type" [ref=f17e568]: Geotechnical/Soil Assessment (if excavation exceeds regulated depth)
+              - generic [ref=f17e569]:
+                - generic [ref=f17e570]: Issuing Office
+                - textbox "Issuing Office" [ref=f17e571]:
+                  - /placeholder: Optional
+              - generic [ref=f17e572]:
+                - generic [ref=f17e573]: Issue Date
+                - textbox "Issue Date" [ref=f17e574]
+              - generic [ref=f17e575]:
+                - generic [ref=f17e576]: Expiry Date
+                - textbox "Expiry Date" [ref=f17e577]
+          - generic [ref=f17e578]:
+            - generic [ref=f17e579]:
+              - generic [ref=f17e580]: PRC License and PTR of Engineer of Record
+              - generic [ref=f17e581]: Required
+              - generic [ref=f17e582]: Reviewed by Office of the Municipal Engineer / Building Official
+            - generic [ref=f17e583]:
+              - generic [ref=f17e584]:
+                - generic [ref=f17e585]:
+                  - text: File name
+                  - generic [ref=f17e586]: Sent to the Municipality when this application is filed.
+                - button "File name Sent to the Municipality when this application is filed." [ref=f17e587]
+              - generic [ref=f17e588]:
+                - generic [ref=f17e589]: Document Type
+                - textbox "Document Type" [ref=f17e590]: PRC License and PTR of Engineer of Record
+              - generic [ref=f17e591]:
+                - generic [ref=f17e592]: Issuing Office
+                - textbox "Issuing Office" [ref=f17e593]:
+                  - /placeholder: Optional
+              - generic [ref=f17e594]:
+                - generic [ref=f17e595]: Issue Date
+                - textbox "Issue Date" [ref=f17e596]
+              - generic [ref=f17e597]:
+                - generic [ref=f17e598]: Expiry Date
+                - textbox "Expiry Date" [ref=f17e599]
+        - generic [ref=f17e372]:
+          - button "Back" [ref=f17e400] [cursor=pointer]
+          - button "Next" [ref=f17e374] [cursor=pointer]

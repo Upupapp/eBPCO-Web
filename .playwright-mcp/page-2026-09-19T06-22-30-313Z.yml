@@ -1,0 +1,95 @@
+- generic [ref=f4e3]:
+  - generic [ref=f4e4]:
+    - complementary [ref=f4e5]:
+      - generic [ref=f4e6]:
+        - button "Municipality of Castilla seal Collapse sidebar" [expanded] [ref=f4e7] [cursor=pointer]:
+          - img "Municipality of Castilla seal" [ref=f4e8]
+          - generic [ref=f4e9]: Collapse sidebar
+        - generic [ref=f4e10]: eBPCO Citizen Portal
+      - navigation "Primary" [ref=f4e11]:
+        - link "Home" [ref=f4e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Businesses" [ref=f4e17] [cursor=pointer]:
+          - /url: /businesses
+        - link "Permit Services" [ref=f4e24] [cursor=pointer]:
+          - /url: /permits
+        - link "My Applications" [ref=f4e29] [cursor=pointer]:
+          - /url: /applications
+        - link "My Documents" [ref=f4e35] [cursor=pointer]:
+          - /url: /documents
+        - link "Payments" [ref=f4e39] [cursor=pointer]:
+          - /url: /payments
+        - link "Notifications" [ref=f4e43] [cursor=pointer]:
+          - /url: /notifications
+        - link "Profile" [ref=f4e48] [cursor=pointer]:
+          - /url: /profile
+        - link "Help & Support" [ref=f4e53] [cursor=pointer]:
+          - /url: /help
+      - separator
+      - button "Log Out" [ref=f4e58] [cursor=pointer]
+    - generic [ref=f4e63]:
+      - link "View profile and settings" [ref=f4e65] [cursor=pointer]:
+        - /url: /profile
+        - generic [ref=f4e66]: Playwright Tester
+      - generic [ref=f4e69]:
+        - generic [ref=f4e71]:
+          - heading "Profile & Settings" [level=1] [ref=f4e72]
+          - generic [ref=f4e73]: Manage your account details, security, and preferences.
+        - generic [ref=f4e74]:
+          - generic [ref=f4e75]:
+            - generic "Change profile photo" [ref=f4e77] [cursor=pointer]:
+              - button "Change profile photo" [ref=f4e78]
+            - heading "Playwright Tester" [level=2] [ref=f4e82]
+            - generic [ref=f4e83]: playwright.profile.test@example.ph
+            - button "Remove Photo" [ref=f4e84] [cursor=pointer]
+            - separator [ref=f4e85]
+            - generic [ref=f4e86]:
+              - generic [ref=f4e87]: "Email: Unverified"
+              - generic [ref=f4e88]: "Mobile: Unverified"
+            - paragraph [ref=f4e89]: Verification is not available in this build and is not required for anything here.
+          - generic [ref=f4e90]:
+            - generic [ref=f4e91]:
+              - button "Edit Profile" [ref=f4e92] [cursor=pointer]
+              - button "Change Password" [ref=f4e93] [cursor=pointer]
+              - button "Notification Preferences" [ref=f4e94] [cursor=pointer]
+              - button "Your Data" [ref=f4e95] [cursor=pointer]
+              - button "Legal" [ref=f4e96] [cursor=pointer]
+            - generic [ref=f4e150]:
+              - paragraph [ref=f4e151]: Off means the Municipality still records the notice in your feed, but does not send it.
+              - generic [ref=f4e152]:
+                - generic [ref=f4e153]:
+                  - checkbox "Application Updates" [checked] [ref=f4e154]
+                  - text: Application Updates
+                - generic [ref=f4e155]:
+                  - checkbox "Payments" [ref=f4e156]
+                  - text: Payments
+                - generic [ref=f4e157]:
+                  - checkbox "Permit Status" [checked] [ref=f4e158]
+                  - text: Permit Status
+                - generic [ref=f4e159]:
+                  - checkbox "Document Reminders" [checked] [ref=f4e160]
+                  - text: Document Reminders
+                - generic [ref=f4e161]:
+                  - checkbox "Appointments" [checked] [ref=f4e162]
+                  - text: Appointments
+                - generic [ref=f4e163]:
+                  - checkbox "Account" [checked] [ref=f4e164]
+                  - text: Account
+              - separator [ref=f4e165]
+              - heading "Quiet Hours" [level=4] [ref=f4e166]
+              - paragraph [ref=f4e167]: A window nothing is sent in, regardless of the categories above.
+              - generic [ref=f4e168]:
+                - checkbox "Enable quiet hours" [checked] [ref=f4e169]
+                - text: Enable quiet hours
+              - generic [ref=f4e170]:
+                - generic [ref=f4e171]:
+                  - generic [ref=f4e172]: From
+                  - textbox "From" [ref=f4e173]: 21:00
+                - generic [ref=f4e174]:
+                  - generic [ref=f4e175]: To
+                  - textbox "To" [ref=f4e176]: 07:00
+              - button "Save Preferences" [ref=f4e177] [cursor=pointer]
+  - generic [ref=f4e178]:
+    - status [ref=f4e179]:
+      - generic [ref=f4e180]: Notification preferences saved.
+    - alert

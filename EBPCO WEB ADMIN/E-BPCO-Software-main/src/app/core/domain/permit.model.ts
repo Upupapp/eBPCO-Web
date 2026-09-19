@@ -1,5 +1,5 @@
 // The single, fixed, complete list of permit types this system supports.
-// Exactly these 19 values, in exactly this order and wording — nothing
+// Exactly these values, in exactly this order and wording — nothing
 // more, nothing less. There is deliberately no domain/category grouping
 // on top of this list (no "Business Permit" vs "Construction Permit"
 // split, no aliases) — every surface that shows or accepts a permit type
@@ -8,10 +8,14 @@
 // exact array/union and nothing else. Do not add, rename, reorder, or
 // alias any entry without updating this file — every other reference to
 // a permit type in the codebase derives from here.
+//
+// Backend migration 047 (2026-09-19) consolidated what used to be three
+// entries here — 'Building Permit – New Construction', '– Renovation /
+// Alteration', '– Addition / Extension' — into one 'Building Permit'. What
+// documents it asks for now varies by `ApplicationAction` (below) instead of
+// by a permit-type name; see `requirements-catalog.ts`.
 export type PermitType =
-  | 'Building Permit – New Construction'
-  | 'Building Permit – Renovation / Alteration'
-  | 'Building Permit – Addition / Extension'
+  | 'Building Permit'
   | 'Demolition Permit'
   | 'Zoning / Locational Clearance'
   | 'Architectural Permit'
@@ -31,9 +35,7 @@ export type PermitType =
 
 /** The full list, in the exact required order — the one place this order is defined. */
 export const ALL_PERMIT_TYPES: PermitType[] = [
-  'Building Permit – New Construction',
-  'Building Permit – Renovation / Alteration',
-  'Building Permit – Addition / Extension',
+  'Building Permit',
   'Demolition Permit',
   'Zoning / Locational Clearance',
   'Architectural Permit',
@@ -54,7 +56,7 @@ export const ALL_PERMIT_TYPES: PermitType[] = [
 
 const ALL_PERMIT_TYPES_SET: ReadonlySet<string> = new Set(ALL_PERMIT_TYPES);
 
-/** Runtime validation guard — the one place a permit-type value from an untyped source (form input, URL param, imported data) is checked against the fixed list, so nothing outside these 16 exact strings can ever be accepted. */
+/** Runtime validation guard — the one place a permit-type value from an untyped source (form input, URL param, imported data) is checked against the fixed list, so nothing outside these 17 exact strings can ever be accepted. */
 export function isValidPermitType(value: string): value is PermitType {
   return ALL_PERMIT_TYPES_SET.has(value);
 }

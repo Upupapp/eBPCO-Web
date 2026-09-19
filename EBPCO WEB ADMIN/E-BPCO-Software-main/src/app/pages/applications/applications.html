@@ -931,9 +931,14 @@
 
           @case ('comments') {
             <p class="empty-note">
-              Notes here are local to this browser session and are not sent anywhere — there is no
-              backend endpoint yet to store or share them.
+              Internal staff notes on this application — never shown to the applicant.
             </p>
+            @if (commentsError(); as message) {
+              <div class="prototype-disclaimer" role="alert">
+                <app-icon name="alert-triangle" [size]="16" />
+                <span>Notes could not be read: {{ message }}</span>
+              </div>
+            }
             @if (replyTarget(); as target) {
               <div class="reply-banner">
                 Replying to <strong>{{ target.author }}</strong>
@@ -947,49 +952,25 @@
                 type="text"
                 placeholder="Post a new message"
                 [value]="newMessage()"
+                [disabled]="sendingComment()"
                 (input)="newMessage.set($any($event.target).value)"
                 (keydown.enter)="sendComment()"
               />
-              <button type="button" class="send-btn" (click)="sendComment()">Send</button>
-            </div>
-            <div class="toolbar-icons">
-              <app-icon name="user" [size]="16" />
-              <app-icon name="send" [size]="16" />
-              <app-icon name="camera" [size]="16" />
-              <app-icon name="smile" [size]="16" />
+              <button type="button" class="send-btn" [disabled]="sendingComment()" (click)="sendComment()">
+                {{ sendingComment() ? 'Sending…' : 'Send' }}
+              </button>
             </div>
 
             <div class="comment-list">
-              @for (c of comments(); track c.author + c.timeAgo) {
+              @for (c of comments(); track c.id) {
                 <div class="comment-row" [style.margin-left.px]="c.depth * 36">
                   <app-avatar [name]="c.author" [size]="32" />
                   <div class="comment-body">
                     <span class="comment-author"
                       >{{ c.author }}<em>{{ c.timeAgo }}</em></span
                     >
-                    @if (editingComment() === c) {
-                      <div class="comment-edit-row">
-                        <input aria-label="Field"
-                          type="text"
-                          [value]="editingText()"
-                          (input)="editingText.set($any($event.target).value)"
-                          (keydown.enter)="saveEdit()"
-                        />
-                        <button type="button" (click)="saveEdit()">Save</button>
-                        <button type="button" (click)="cancelEdit()">Cancel</button>
-                      </div>
-                    } @else {
-                      <p>{{ c.text }}</p>
-                    }
-                    @if (c.thumbnails) {
-                      <div class="comment-thumbs">
-                        @for (t of c.thumbnails; track t) {
-                          <span class="thumb" [style.background]="t"></span>
-                        }
-                      </div>
-                    }
+                    <p>{{ c.text }}</p>
                     <div class="comment-links">
-                      <a href="javascript:void(0)" (click)="startEdit(c)">Edit</a>
                       <a href="javascript:void(0)" (click)="startReply(c)">Reply</a>
                     </div>
                   </div>
@@ -998,13 +979,6 @@
                 <p class="empty-note">No notes yet on this application.</p>
               }
             </div>
-
-            @if (comments().length > 0) {
-              <button type="button" class="load-more" disabled title="No more comments to load">
-                <app-icon name="sparkles" [size]="14" />
-                All comments loaded
-              </button>
-            }
           }
         }
       </div>
@@ -1092,9 +1066,6 @@
       }
     </div>
     <div class="info-header-actions">
-      <button type="button" class="btn-outline" (click)="openNotify()">
-        <app-icon name="bell" [size]="15" />Send Notification
-      </button>
       <button type="button" class="btn-primary" (click)="startEditProfile()">
         <app-icon name="edit" [size]="15" />Edit Profile
       </button>
@@ -1321,32 +1292,6 @@
     [applicationId]="row.id"
     (closed)="closeGeneratedPermitPreview()"
   />
-}
-
-@if (showNotifyModal()) {
-  <div class="modal-backdrop" (click)="cancelNotify()">
-    <div class="modal-box create-box" (click)="$event.stopPropagation()">
-      <button type="button" class="modal-close" aria-label="Close" (click)="cancelNotify()">
-        &#10005;
-      </button>
-      <h2>Send Notification</h2>
-      <form class="create-form" (ngSubmit)="sendNotify()">
-        <label>
-          Message
-          <textarea aria-label="Message to the applicant…"
-            rows="4"
-            [value]="notifyMessage()"
-            (input)="notifyMessage.set($any($event.target).value)"
-            placeholder="Message to the applicant…"
-          ></textarea>
-        </label>
-        <div class="modal-actions">
-          <button type="button" class="modal-btn neutral" (click)="cancelNotify()">Cancel</button>
-          <button type="submit" class="modal-btn confirm">Send</button>
-        </div>
-      </form>
-    </div>
-  </div>
 }
 
 @if (quickReasonTarget(); as reason) {

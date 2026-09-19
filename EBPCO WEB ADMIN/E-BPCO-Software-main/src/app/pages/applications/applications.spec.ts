@@ -80,12 +80,12 @@ describe('Applications — a failed queue load is visible on the list', () => {
     const row = {
       id: 'SRV-1', referenceNumber: 'BP-2026-0042',
       businessId: '', businessName: '—', applicantId: '', applicant: 'Raul Villanueva',
-      location: 'Barangay Poblacion', permitType: 'Building Permit – New Construction',
+      location: 'Barangay Poblacion', permitType: 'Building Permit',
       applicationAction: 'New', officer: '—', dateSubmitted: '2026-08-01',
       dateValue: new Date('2026-08-01T00:00:00.000Z'), lifecycleStatus: 'Submitted',
       evaluationStage: 'Initial', evaluationResult: 'Pending',
       paymentStatus: 'Not Yet Available', permitReleaseStatus: 'Not Ready',
-      assessedAmountCentavos: null, type: 'Building Permit – New Construction',
+      assessedAmountCentavos: null, type: 'Building Permit',
       status: 'Under Review',
     };
     const fixture = mount(() => Promise.resolve({ rows: [row], nextCursor: null }));

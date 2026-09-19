@@ -315,6 +315,7 @@
               aria-required="true"
               [(ngModel)]="applicationInfo.applicationAction"
               name="applicationAction"
+              (ngModelChange)="onApplicationActionChange()"
             >
               @for (a of applicationActions; track a) {
                 <option [value]="a">{{ a }}</option>
@@ -415,8 +416,7 @@
                     <span class="field-label">
                       File name
                       <small class="not-stored">
-                        Recorded for the checklist. The file itself is not sent
-                        anywhere yet.
+                        Sent to the Municipality when this application is filed.
                       </small>
                     </span>
                     <input type="file" (change)="onFileChosen(doc, $event)" />
@@ -570,16 +570,8 @@
           </section>
           <section>
             <h3>Documents</h3>
-            <!--
-              Names, not files. This is the last screen an officer reads before
-              filing, and a green tick beside a filename said the document was
-              held. The portal has no upload path — a chosen file contributes
-              only its name (S-6) — so the tick is a statement about the
-              checklist, and the note below says which.
-            -->
             <p class="not-stored">
-              These are the file names recorded against the checklist. The
-              documents themselves are not sent anywhere yet.
+              Each file above is sent to the Municipality once this application is filed.
             </p>
             @if (documents().length === 0) {
               <p class="empty-note">No document checklist loaded.</p>

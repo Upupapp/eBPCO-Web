@@ -1,0 +1,144 @@
+- generic [ref=f33e4]:
+  - complementary [ref=f33e6]:
+    - generic [ref=f33e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f33e9]
+      - generic [ref=f33e10]: E-BPCO
+    - navigation [ref=f33e11]:
+      - link "Dashboard" [ref=f33e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f33e20]:
+        - generic [ref=f33e21]: Operations
+        - generic [ref=f33e22]:
+          - link "Applications" [ref=f33e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f33e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f33e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f33e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f33e48]:
+        - generic [ref=f33e49]: Administration
+        - generic [ref=f33e50]:
+          - link "Businesses" [ref=f33e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f33e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f33e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f33e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f33e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f33e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f33e91] [cursor=pointer]
+  - main [ref=f33e97]:
+    - generic [ref=f33e98]:
+      - generic "Businesses" [ref=f33e99]:
+        - generic [ref=f33e100]:
+          - heading "Businesses" [level=1] [ref=f33e101]
+          - generic [ref=f33e102]:
+            - generic [ref=f33e103]:
+              - generic [ref=f33e108]: Search
+              - textbox "Search" [ref=f33e109]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f33e111] [cursor=pointer]
+            - button "P paul@lguids.com.ph Super Admin" [ref=f33e117] [cursor=pointer]:
+              - generic [ref=f33e118]: P
+              - generic [ref=f33e122]:
+                - generic [ref=f33e123]: paul@lguids.com.ph
+                - generic [ref=f33e124]: Super Admin
+      - generic [ref=f33e406]:
+        - generic [ref=f33e407]:
+          - heading "Create Business" [level=1] [ref=f33e408]
+          - paragraph [ref=f33e409]: Register a new Business (citizen) in the System
+        - generic [ref=f33e410]:
+          - button "Back to List" [ref=f33e411] [cursor=pointer]
+          - button [ref=f33e412] [cursor=pointer]
+      - generic [ref=f33e415]:
+        - generic [ref=f33e416]:
+          - generic [ref=f33e417]:
+            - heading "Basic Information" [level=2] [ref=f33e418]
+            - generic [ref=f33e419]: Business Name
+            - textbox "Business Name" [ref=f33e420]:
+              - /placeholder: Enter Business Name
+            - generic [ref=f33e421]: Business Category
+            - combobox "Business Category" [ref=f33e422] [cursor=pointer]:
+              - option "Select Business Category" [selected]
+              - option "Retail"
+              - option "Food Service"
+              - option "Services"
+              - option "Manufacturing"
+              - option "Construction"
+              - option "Transport"
+              - option "Agriculture"
+              - option "Other"
+            - generic [ref=f33e423]: Business Address
+            - textbox "Business Address" [ref=f33e424]:
+              - /placeholder: House/Lot No., Street
+            - generic [ref=f33e425]: Registration Number
+            - textbox "Registration Number" [ref=f33e426]:
+              - /placeholder: DTI/SEC registration number, if any
+            - generic [ref=f33e427]: Date Registered
+            - textbox "Date Registered" [ref=f33e428]: 2026-09-18
+          - generic [ref=f33e429]:
+            - heading "Business Owner" [level=2] [ref=f33e430]
+            - generic [ref=f33e431]: Full Name
+            - textbox "Full Name" [ref=f33e432]:
+              - /placeholder: Enter Full Name
+            - generic [ref=f33e433]: Email Address
+            - textbox "Email Address" [ref=f33e434]:
+              - /placeholder: Enter Email Address
+            - generic [ref=f33e435]: Contact Number
+            - textbox "Contact Number" [ref=f33e436]:
+              - /placeholder: Enter Contact Number
+            - paragraph [ref=f33e437]: This person becomes the business's owner on record. If they have no account yet, one is created for them — they set a password through account recovery to sign in online.
+        - generic [ref=f33e439]:
+          - heading "Address Information" [level=2] [ref=f33e440]
+          - generic [ref=f33e441]: Region
+          - combobox "Region" [ref=f33e442] [cursor=pointer]:
+            - option "Region V (Bicol Region)" [selected]
+          - generic [ref=f33e443]: Province
+          - combobox "Province" [ref=f33e444] [cursor=pointer]:
+            - option "Sorsogon" [selected]
+          - generic [ref=f33e445]: City/Municipality
+          - combobox "City/Municipality" [ref=f33e446] [cursor=pointer]:
+            - option "Castilla" [selected]
+          - generic [ref=f33e447]: Barangay
+          - combobox "Barangay" [ref=f33e448] [cursor=pointer]:
+            - option "Select Barangay" [selected]
+            - option "Amomonting"
+            - option "Bagalayag"
+            - option "Bagong Sirang"
+            - option "Bonga"
+            - option "Buenavista"
+            - option "Burabod"
+            - option "Caburacan"
+            - option "Canjela"
+            - option "Cogon"
+            - option "Cumadcad"
+            - option "Dangcalan"
+            - option "Dinapa"
+            - option "La Union"
+            - option "Libtong"
+            - option "Loreto"
+            - option "Macalaya"
+            - option "Maracabac"
+            - option "Mayon"
+            - option "Maypangi"
+            - option "Milagrosa"
+            - option "Miluya"
+            - option "Monte Carmelo"
+            - option "Oras"
+            - option "Pandan"
+            - option "Poblacion"
+            - option "Quirapi"
+            - option "Saclayan"
+            - option "Salvacion"
+            - option "San Isidro"
+            - option "San Rafael"
+            - option "San Roque"
+            - option "San Vicente"
+            - option "Sogoy"
+            - option "Tomalaytay"

@@ -1,0 +1,127 @@
+- generic [ref=f1e4]:
+  - complementary [ref=f1e6]:
+    - generic [ref=f1e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f1e9]
+      - generic [ref=f1e10]: E-BPCO
+    - navigation [ref=f1e11]:
+      - link "Dashboard" [ref=f1e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f1e20]:
+        - generic [ref=f1e21]: Operations
+        - generic [ref=f1e22]:
+          - link "Applications" [ref=f1e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f1e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f1e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f1e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f1e48]:
+        - generic [ref=f1e49]: Administration
+        - generic [ref=f1e50]:
+          - link "Businesses" [ref=f1e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f1e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f1e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f1e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f1e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f1e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f1e91] [cursor=pointer]
+  - main [ref=f1e97]:
+    - generic [ref=f1e98]:
+      - generic "Payments" [ref=f1e99]:
+        - generic [ref=f1e100]:
+          - heading "Payments" [level=1] [ref=f1e101]
+          - generic [ref=f1e102]:
+            - generic [ref=f1e103]:
+              - generic [ref=f1e108]: Search
+              - textbox "Search" [ref=f1e109]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f1e111] [cursor=pointer]
+            - button "P paul@lguids.com.ph Super Admin" [ref=f1e117] [cursor=pointer]:
+              - generic [ref=f1e118]: P
+              - generic [ref=f1e122]:
+                - generic [ref=f1e123]: paul@lguids.com.ph
+                - generic [ref=f1e124]: Super Admin
+      - generic [ref=f1e128]:
+        - navigation [ref=f1e129]:
+          - button [ref=f1e130] [cursor=pointer]
+          - button [ref=f1e136] [cursor=pointer]
+          - button [ref=f1e139] [cursor=pointer]
+        - generic [ref=f1e233]:
+          - generic [ref=f1e234]:
+            - heading "Payment ONSITE-1789671729900" [level=1] [ref=f1e235]
+            - paragraph [ref=f1e236]: Ella Cailing · E-BPCO-2026-000001
+          - generic [ref=f1e237]:
+            - generic [ref=f1e238]: Paid
+            - button "View Application" [ref=f1e239] [cursor=pointer]
+            - button "Back to List" [ref=f1e240] [cursor=pointer]
+        - generic [ref=f1e242]:
+          - heading "Payment Detail" [level=2] [ref=f1e244]
+          - generic [ref=f1e245]:
+            - generic [ref=f1e246]:
+              - term [ref=f1e247]: "Application:"
+              - definition [ref=f1e248]: E-BPCO-2026-000001
+            - generic [ref=f1e249]:
+              - term [ref=f1e250]: "Method:"
+              - definition [ref=f1e251]: Onsite
+            - generic [ref=f1e252]:
+              - term [ref=f1e253]: "Reference:"
+              - definition [ref=f1e254]: ONSITE-1789671729900
+            - generic [ref=f1e255]:
+              - term [ref=f1e256]: "Amount:"
+              - definition [ref=f1e257]: ₱1,700.00
+            - generic [ref=f1e258]:
+              - term [ref=f1e259]: "Submitted:"
+              - definition [ref=f1e260]: Sep 18, 2026 · 3:02 AM
+            - generic [ref=f1e261]:
+              - term [ref=f1e262]: "OR No.:"
+              - definition [ref=f1e263]: sada
+          - generic [ref=f1e264]:
+            - button "Void" [ref=f1e265] [cursor=pointer]
+            - button "Reverse" [ref=f1e266] [cursor=pointer]
+            - button "Refund" [ref=f1e267] [cursor=pointer]
+            - button "View Receipt" [active] [ref=f1e268] [cursor=pointer]
+            - button "Correct OR No." [ref=f1e269] [cursor=pointer]
+      - dialog "Payment receipt" [ref=f1e272]:
+        - generic [ref=f1e273]:
+          - generic [ref=f1e274]: Receipt Preview
+          - generic [ref=f1e275]:
+            - button "Print / Download" [ref=f1e276] [cursor=pointer]
+            - button "Close" [ref=f1e277] [cursor=pointer]
+        - generic [ref=f1e279]:
+          - generic [ref=f1e280]:
+            - paragraph [ref=f1e281]: Municipality of Castilla, Sorsogon
+            - heading "Official Receipt" [level=1] [ref=f1e282]
+            - paragraph [ref=f1e283]: OR No. sada
+          - generic [ref=f1e284]:
+            - heading "Payment Detail" [level=2] [ref=f1e285]
+            - generic [ref=f1e286]:
+              - generic [ref=f1e287]:
+                - term [ref=f1e288]: Issued To
+                - definition [ref=f1e289]: Ella Cailing
+              - generic [ref=f1e290]:
+                - term [ref=f1e291]: Application
+                - definition [ref=f1e292]: E-BPCO-2026-000001
+              - generic [ref=f1e293]:
+                - term [ref=f1e294]: Payment Reference
+                - definition [ref=f1e295]: ONSITE-1789671729900
+              - generic [ref=f1e296]:
+                - term [ref=f1e297]: Method
+                - definition [ref=f1e298]: Onsite
+              - generic [ref=f1e299]:
+                - term [ref=f1e300]: Date
+                - definition [ref=f1e301]: Sep 18, 2026, 3:02 AM
+              - generic [ref=f1e302]:
+                - term [ref=f1e303]: Status
+                - definition [ref=f1e304]: Paid
+          - generic [ref=f1e305]:
+            - heading "Amount" [level=2] [ref=f1e306]
+            - paragraph [ref=f1e307]: ₱1,700.00
+          - paragraph [ref=f1e308]: This receipt reflects a real payment record on file for this application. It is not a substitute for a printed Official Receipt issued at the Municipal Treasurer's Office.

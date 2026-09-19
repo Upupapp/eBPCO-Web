@@ -2,6 +2,7 @@ import { ALL_PERMIT_TYPES, PermitType } from './permit.model';
 import {
   REQUIREMENTS_CATALOG,
   assertCatalogComplete,
+  documentsFor,
   requirementsFor,
 } from './requirements-catalog';
 
@@ -17,7 +18,7 @@ const NEW_BFP_ZONING_TYPES: PermitType[] = [
   'Zoning / Locational Clearance',
   'FSEC for Building Permit (BFP)',
   'FSIC for Occupancy Permit (BFP)',
-  'Building Permit – New Construction',
+  'Building Permit',
 ];
 const PUERTO_PRINCESA_REFERENCED_TYPES = ALL_PERMIT_TYPES.filter(
   (t) => !NEW_BFP_ZONING_TYPES.includes(t),
@@ -69,8 +70,8 @@ describe('Requirements catalog — per-entry shape', () => {
     }
   });
 
-  // Zoning/FSEC/FSIC/Building Permit – New Construction are the only 4
-  // entries built directly from an actual Castilla/BFP Castilla form
+  // Zoning/FSEC/FSIC/Building Permit are the only 4 entries built
+  // directly from an actual Castilla/BFP Castilla form
   // obtained and reviewed in full (see requirements-catalog.ts's
   // CASTILLA_OFFICIAL_FORM_VERIFIED sources) — every other entry stays
   // unverified/pending until Castilla's own office confirms it directly.
@@ -85,7 +86,7 @@ describe('Requirements catalog — per-entry shape', () => {
     }
   });
 
-  it('Zoning, FSEC, FSIC, and Building Permit – New Construction are marked verified — built directly from the actual Castilla/BFP Castilla forms on hand', () => {
+  it('Zoning, FSEC, FSIC, and Building Permit are marked verified — built directly from the actual Castilla/BFP Castilla forms on hand', () => {
     for (const type of CASTILLA_FORM_VERIFIED_TYPES) {
       expect(requirementsFor(type).verified).toBe(true);
     }
@@ -122,7 +123,7 @@ describe('Requirements catalog — per-entry shape', () => {
     }
   });
 
-  it('Zoning, FSEC, FSIC, and Building Permit – New Construction each carry a CASTILLA_OFFICIAL_FORM_VERIFIED source instead — the gap is closed, not just pending', () => {
+  it('Zoning, FSEC, FSIC, and Building Permit each carry a CASTILLA_OFFICIAL_FORM_VERIFIED source instead — the gap is closed, not just pending', () => {
     for (const type of CASTILLA_FORM_VERIFIED_TYPES) {
       const sources = requirementsFor(type).sources;
       expect(sources.some((s) => s.verificationStatus === 'CASTILLA_OFFICIAL_FORM_VERIFIED')).toBe(
@@ -169,11 +170,30 @@ describe('Requirements catalog — per-entry shape', () => {
   });
 });
 
-describe('Requirements catalog — Building Permit – Renovation / Alteration (mandatory sample type)', () => {
-  it('has a real, non-generic required form and final document', () => {
-    const renovation = requirementsFor('Building Permit – Renovation / Alteration');
-    expect(renovation.requiredForm.toLowerCase()).toContain('renovation');
-    expect(renovation.finalDocument.toLowerCase()).toContain('permit');
-    expect(renovation.validityMonths).toBeGreaterThan(0);
+describe('Requirements catalog — Building Permit varies by application action (047)', () => {
+  // Migration 047 consolidated 'Building Permit – New Construction',
+  // '– Renovation / Alteration', and '– Addition / Extension' into one
+  // 'Building Permit' entry; what used to distinguish those three names now
+  // distinguishes `documentsByAction`'s three buckets instead. requiredForm/
+  // finalDocument/validityMonths stay the SAME real, verified Unified
+  // Building Permit Form across all three — it is genuinely one physical
+  // form covering all three via its own Scope of Work checkboxes (see
+  // permit-form-templates.ts) — only the document checklist itself varies.
+  it("has a real, non-generic required form shared across every action, and a non-empty, distinct document set for each", () => {
+    const entry = requirementsFor('Building Permit');
+    expect(entry.requiredForm.toLowerCase()).toContain('building permit');
+    expect(entry.finalDocument.toLowerCase()).toContain('permit');
+    expect(entry.validityMonths).toBeGreaterThan(0);
+
+    const newDocs = documentsFor('Building Permit', 'New');
+    const renewalDocs = documentsFor('Building Permit', 'Renewal');
+    const amendmentDocs = documentsFor('Building Permit', 'Amendment');
+    for (const docs of [newDocs, renewalDocs, amendmentDocs]) {
+      expect(docs.length).toBeGreaterThan(0);
+      expect(docs.some((d) => d.required)).toBe(true);
+    }
+    expect(renewalDocs.map((d) => d.id).sort()).not.toEqual(newDocs.map((d) => d.id).sort());
+    expect(amendmentDocs.map((d) => d.id).sort()).not.toEqual(newDocs.map((d) => d.id).sort());
+    expect(renewalDocs.map((d) => d.id).sort()).not.toEqual(amendmentDocs.map((d) => d.id).sort());
   });
 });

@@ -1,0 +1,12 @@
+[     471ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943
+[    4726ms] [WARNING] NG0955: The provided track expression resulted in duplicated keys for a given collection. Adjust the tracking expression such that it uniquely identifies all the items in the collection. Duplicated keys were: 
+key "Sep 18, 2026, 7:18 PMsystem" at index "5" and "6", 
+key "Sep 18, 2026, 7:18 PMsystem" at index "6" and "7", 
+key "Sep 18, 2026, 7:18 PMsystem" at index "7" and "8", 
+key "Sep 18, 2026, 7:18 PMsystem" at index "8" and "9", 
+key "Sep 18, 2026, 7:19 PMsystem" at index "2" and "3", 
+key "Sep 18, 2026, 7:19 PMsystem" at index "3" and "4". Find more at https://v22.angular.dev/errors/NG0955 @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:17815
+[  374063ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943
+[  377233ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943
+[  388454ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943
+[  411641ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Ella/Documents/GitHub/eBPCO-Web/EBPCO%20WEB%20ADMIN/E-BPCO-Software-main/.angular/cache/22.0.6/e-bpco/vite/deps/chunk-UGLLDE2A.js?v=8a293d82:14943

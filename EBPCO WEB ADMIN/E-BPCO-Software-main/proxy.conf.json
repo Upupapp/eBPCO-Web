@@ -29,5 +29,6 @@
   ],
   "/auth": { "target": "http://139.162.51.165:3000", "secure": false, "changeOrigin": true },
   "/me": { "target": "http://139.162.51.165:3000", "secure": false, "changeOrigin": true },
-  "/staff": { "target": "http://139.162.51.165:3000", "secure": false, "changeOrigin": true }
+  "/staff": { "target": "http://139.162.51.165:3000", "secure": false, "changeOrigin": true },
+  "/documents": { "target": "http://139.162.51.165:3000", "secure": false, "changeOrigin": true }
 }

@@ -1,4 +1,4 @@
-import { PermitType, ALL_PERMIT_TYPES } from './permit.model';
+import { ApplicationAction, PermitType, ALL_PERMIT_TYPES } from './permit.model';
 import { EvaluationStage } from './status.model';
 
 // Per-application-type requirement definitions — the single source every
@@ -66,6 +66,15 @@ export interface ApplicationTypeRequirements {
   permitType: PermitType;
   requiredForm: string;
   documents: RequirementDocument[];
+  /**
+   * Present only where the checklist genuinely differs by application
+   * action — today just Building Permit, since backend migration 047
+   * consolidated its three former permit-type entries ('– New
+   * Construction' / '– Renovation / Alteration' / '– Addition / Extension')
+   * into one. `documents` above still holds a real, non-empty answer (the
+   * 'New' set) for any caller that reads only that field.
+   */
+  documentsByAction?: Partial<Record<ApplicationAction, RequirementDocument[]>>;
   responsibleDepartmentId: string;
   evaluationSequence: EvaluationSequenceStep[];
   paymentRequirements: string;
@@ -228,6 +237,8 @@ interface PermitSpec {
   extraDocs?: RequirementDocument[];
   /** When set, completely replaces the constructed document list (COMMON_DOCS + planDocs + professionalDoc + extraDocs) — used when a real official checklist doesn't match the generic template's assumptions closely enough to build from it. */
   documents?: RequirementDocument[];
+  /** See `ApplicationTypeRequirements.documentsByAction`'s own doc comment — only Building Permit sets this, since 047. */
+  documentsByAction?: Partial<Record<ApplicationAction, RequirementDocument[]>>;
   inspectionRequirements: string;
   validityMonths: number | null;
   validityRules: string;
@@ -285,6 +296,7 @@ function buildRequirements(spec: PermitSpec): ApplicationTypeRequirements {
     permitType: spec.permitType,
     requiredForm: spec.requiredForm,
     documents,
+    documentsByAction: spec.documentsByAction,
     responsibleDepartmentId: spec.responsibleDepartmentId ?? 'obo',
     evaluationSequence: EVAL_SEQUENCE,
     paymentRequirements: spec.paymentRequirements ?? DEFAULT_PAYMENT_REQUIREMENTS,
@@ -422,73 +434,51 @@ const BUILDING_PERMIT_NEW_CONSTRUCTION_DOCS: RequirementDocument[] = [
 
 // One entry per value in `ALL_PERMIT_TYPES` — same order, exact same
 // spelling, no extras.
+// 047 mapped New Construction -> 'New', Renovation/Alteration -> 'Renewal',
+// Addition/Extension -> 'Amendment' (the order the product owner gave the
+// three names in). These two build the Renewal/Amendment document sets that
+// used to be their own PERMIT_SPECS entries — same COMMON_DOCS + plan +
+// professional-doc shape `buildRequirements` would have produced, kept as
+// their own prefix ('building-permit-renovation-alteration' /
+// '-addition-extension') so their ids stay distinct from each other and
+// from the New-Construction set under the one merged 'Building Permit' spec.
+const BUILDING_PERMIT_RENEWAL_DOCS: RequirementDocument[] = [
+  ...COMMON_DOCS('building-permit-renovation-alteration'),
+  doc('renovation-plan', 'Renovation/Alteration Plans (signed and sealed)', true, 'obo'),
+  doc('renovation-existing-permit', 'Copy of Original Building Permit (if available)', false, 'obo'),
+  doc('renovation-bom', 'Bill of Materials and Specifications', true, 'obo'),
+  doc('renovation-prc', 'PRC License and PTR of Engineer/Architect of Record', true, 'obo'),
+];
+
+const BUILDING_PERMIT_AMENDMENT_DOCS: RequirementDocument[] = [
+  ...COMMON_DOCS('building-permit-addition-extension'),
+  doc('addition-plan', 'Addition / Extension Plans (signed and sealed)', true, 'obo'),
+  doc('addition-struct-plan', 'Structural Analysis for the added load (signed and sealed)', true, 'obo'),
+  doc('addition-bom', 'Bill of Materials and Specifications', true, 'obo'),
+  doc('addition-prc', 'PRC License and PTR of Engineer/Architect of Record', true, 'obo'),
+];
+
 const PERMIT_SPECS: PermitSpec[] = [
   {
-    permitType: 'Building Permit – New Construction',
+    permitType: 'Building Permit',
     requiredForm: 'Unified Building Permit Form',
     professionalDoc: null,
     planDocs: [],
     documents: BUILDING_PERMIT_NEW_CONSTRUCTION_DOCS,
+    documentsByAction: {
+      Renewal: BUILDING_PERMIT_RENEWAL_DOCS,
+      Amendment: BUILDING_PERMIT_AMENDMENT_DOCS,
+    },
     inspectionRequirements:
       'Site inspection prior to permit issuance; periodic inspections during construction; final inspection before Certificate of Occupancy.',
     validityMonths: 12,
     validityRules:
       'Valid for twelve (12) months from issuance; work must commence within one year or the permit lapses and must be renewed.',
-    finalDocument: 'Building Permit – New Construction',
+    finalDocument: 'Building Permit',
     sources: [SRC_CASTILLA_OME_CHECKLIST, SRC_PD1096],
     sourceNote:
-      "Documentary requirements transcribed directly from the Municipality of Castilla Office of the Municipal Engineer's own \"Building Permit Documentary Requirements\" checklist — see `sources`. Legal basis for the permit itself remains PD 1096 (National Building Code).",
+      "Documentary requirements transcribed directly from the Municipality of Castilla Office of the Municipal Engineer's own \"Building Permit Documentary Requirements\" checklist — see `sources`. Legal basis for the permit itself remains PD 1096 (National Building Code). The Renewal and Amendment document sets (`documentsByAction`) are what this entry's checklist used to be under its own now-retired permit-type names ('– Renovation / Alteration', '– Addition / Extension') before migration 047 consolidated them.",
     verified: true,
-  },
-  {
-    permitType: 'Building Permit – Renovation / Alteration',
-    requiredForm: 'Application for Building Permit (Renovation / Alteration)',
-    professionalDoc: doc(
-      'renovation-prc',
-      'PRC License and PTR of Engineer/Architect of Record',
-      true,
-      'obo',
-    ),
-    planDocs: [
-      doc('renovation-plan', 'Renovation/Alteration Plans (signed and sealed)', true, 'obo'),
-      doc(
-        'renovation-existing-permit',
-        'Copy of Original Building Permit (if available)',
-        false,
-        'obo',
-      ),
-      doc('renovation-bom', 'Bill of Materials and Specifications', true, 'obo'),
-    ],
-    inspectionRequirements:
-      'Site inspection to confirm scope matches submitted plans; final inspection upon completion.',
-    validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Building Permit – Renovation / Alteration',
-  },
-  {
-    permitType: 'Building Permit – Addition / Extension',
-    requiredForm: 'Application for Building Permit (Addition / Extension)',
-    professionalDoc: doc(
-      'addition-prc',
-      'PRC License and PTR of Engineer/Architect of Record',
-      true,
-      'obo',
-    ),
-    planDocs: [
-      doc('addition-plan', 'Addition / Extension Plans (signed and sealed)', true, 'obo'),
-      doc(
-        'addition-struct-plan',
-        'Structural Analysis for the added load (signed and sealed)',
-        true,
-        'obo',
-      ),
-      doc('addition-bom', 'Bill of Materials and Specifications', true, 'obo'),
-    ],
-    inspectionRequirements:
-      'Structural site inspection to verify the existing structure can carry the addition; final inspection upon completion.',
-    validityMonths: 12,
-    validityRules: 'Valid for twelve (12) months from issuance.',
-    finalDocument: 'Building Permit – Addition / Extension',
   },
   {
     permitType: 'Demolition Permit',
@@ -934,4 +924,18 @@ const UNKNOWN_PERMIT_REQUIREMENTS: ApplicationTypeRequirements = {
 export function requirementsFor(permitType: PermitType | null): ApplicationTypeRequirements {
   if (permitType === null) return UNKNOWN_PERMIT_REQUIREMENTS;
   return REQUIREMENTS_CATALOG[permitType] ?? UNKNOWN_PERMIT_REQUIREMENTS;
+}
+
+/**
+ * The checklist for one permit type AND ONE ACTION — falls back to the
+ * type's plain `documents` for a type that does not distinguish by action
+ * (everything but Building Permit today) or for an action with no override.
+ * Mirrors the citizen portal's own `documentsFor` in
+ * `requirements-catalog.ts`.
+ */
+export function documentsFor(
+  permitType: PermitType | null, applicationAction: ApplicationAction,
+): RequirementDocument[] {
+  const entry = requirementsFor(permitType);
+  return entry.documentsByAction?.[applicationAction] ?? entry.documents;
 }

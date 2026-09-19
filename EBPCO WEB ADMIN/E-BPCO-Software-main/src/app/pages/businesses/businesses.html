@@ -645,9 +645,9 @@
     </div>
     <div class="header-actions">
       <button type="button" class="btn-outline" (click)="backToList()">Back to List</button>
-      <button type="button" class="btn-primary" (click)="createBusiness()">
+      <button type="button" class="btn-primary" [disabled]="creatingBusiness()" (click)="createBusiness()">
         <app-icon name="plus" [size]="15" />
-        Create New Business
+        {{ creatingBusiness() ? 'Creating…' : 'Create New Business' }}
       </button>
     </div>
   </div>
@@ -671,13 +671,38 @@
           <option value="Food Service">Food Service</option>
           <option value="Services">Services</option>
           <option value="Manufacturing">Manufacturing</option>
-          <option value="Wholesale">Wholesale</option>
+          <option value="Construction">Construction</option>
+          <option value="Transport">Transport</option>
+          <option value="Agriculture">Agriculture</option>
           <option value="Other">Other</option>
         </select>
+
+        <label for="business-street" class="field-label">Business Address</label>
+        <input id="business-street"
+          class="text-input"
+          type="text"
+          placeholder="House/Lot No., Street"
+          [(ngModel)]="newBusiness.street"
+        />
+
+        <label for="business-reg-number" class="field-label">Registration Number</label>
+        <input id="business-reg-number"
+          class="text-input"
+          type="text"
+          placeholder="DTI/SEC registration number, if any"
+          [(ngModel)]="newBusiness.registrationNumber"
+        />
+
+        <label for="business-date-registered" class="field-label">Date Registered</label>
+        <input id="business-date-registered"
+          class="text-input"
+          type="date"
+          [(ngModel)]="newBusiness.dateRegistered"
+        />
       </div>
 
       <div class="card">
-        <h2>Contact Person</h2>
+        <h2>Business Owner</h2>
         <label for="full-name" class="field-label">Full Name</label>
         <input id="full-name"
           class="text-input"
@@ -687,6 +712,14 @@
           appCapitalizeName
         />
 
+        <label for="contact-email" class="field-label">Email Address</label>
+        <input id="contact-email"
+          class="text-input"
+          type="email"
+          placeholder="Enter Email Address"
+          [(ngModel)]="newBusiness.contactEmail"
+        />
+
         <label for="contact-number" class="field-label">Contact Number</label>
         <input id="contact-number"
           class="text-input"
@@ -694,28 +727,11 @@
           placeholder="Enter Contact Number"
           [(ngModel)]="newBusiness.contactPhone"
         />
-      </div>
 
-      <div class="card">
-        <h2>Initial Information</h2>
-        <span class="field-label">Enable Modules</span>
-
-        <label class="checkbox-row">
-          <input type="checkbox" [(ngModel)]="newBusiness.modules.initialEvaluation" />
-          Initial Evaluation
-        </label>
-        <label class="checkbox-row">
-          <input type="checkbox" [(ngModel)]="newBusiness.modules.zoningEvaluation" />
-          Zoning Evaluation
-        </label>
-        <label class="checkbox-row">
-          <input type="checkbox" [(ngModel)]="newBusiness.modules.fireSafetyEvaluation" />
-          Fire Safety Evaluation
-        </label>
-        <label class="checkbox-row">
-          <input type="checkbox" [(ngModel)]="newBusiness.modules.locationalClearance" />
-          Locational Clearance
-        </label>
+        <p class="field-hint">
+          This person becomes the business's owner on record. If they have no account yet, one is
+          created for them — they set a password through account recovery to sign in online.
+        </p>
       </div>
     </div>
 
@@ -776,52 +792,6 @@
           <option value="tomalaytay">Tomalaytay</option>
         </select>
       </div>
-
-      <div class="card">
-        <h2>Login Credentials</h2>
-        <label for="user-name" class="field-label">User Name</label>
-        <input id="user-name"
-          class="text-input"
-          type="text"
-          placeholder="Enter User Name"
-          [(ngModel)]="newBusiness.userName"
-        />
-
-        <label class="field-label">Password</label>
-        <div class="input-wrap">
-          <app-icon name="lock" [size]="16" class="input-icon" />
-          <input aria-label="Password"
-            [type]="showPassword() ? 'text' : 'password'"
-            placeholder="••••••••"
-            [(ngModel)]="newBusiness.password"
-          />
-          <button
-            type="button"
-            class="toggle-visibility"
-            (click)="showPassword.set(!showPassword())"
-          >
-            <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="17" />
-          </button>
-        </div>
-
-        <label class="field-label">Confirm Password</label>
-        <div class="input-wrap">
-          <app-icon name="lock" [size]="16" class="input-icon" />
-          <input aria-label="Confirm password"
-            [type]="showConfirmPassword() ? 'text' : 'password'"
-            placeholder="••••••••"
-            [(ngModel)]="newBusiness.confirmPassword"
-          />
-          <button
-            type="button"
-            class="toggle-visibility"
-            (click)="showConfirmPassword.set(!showConfirmPassword())"
-          >
-            <app-icon [name]="showConfirmPassword() ? 'eye-off' : 'eye'" [size]="17" />
-          </button>
-        </div>
-      </div>
-
     </div>
   </div>
 }

@@ -2,12 +2,11 @@ import { Component, computed, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Icon } from '../icon/icon';
 import { ApplicationStore } from '../../core/domain/application-store';
-import { SessionService } from '../../core/session/session.service';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import { Applicant } from '../../core/domain/applicant.model';
 import { BusinessCategory } from '../../core/domain/business.model';
 import { ALL_PERMIT_TYPES, ApplicationAction, PermitType } from '../../core/domain/permit.model';
-import { requirementsFor } from '../../core/domain/requirements-catalog';
+import { documentsFor, requirementsFor } from '../../core/domain/requirements-catalog';
 import { RequirementsConfigStore } from '../../core/domain/requirements-config-store';
 import { departmentById, departmentName } from '../../core/domain/department.model';
 import {
@@ -20,6 +19,7 @@ import {
 import { ToastService } from '../toast/toast.service';
 import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
 import { QueueLoader } from '../../core/domain/queue-loader';
+import { toBase64 } from '../utils/to-base64';
 import { CapitalizeNameDirective } from '../utils/capitalize-name.directive';
 
 // Same barangay list the seed data and the Business Stages board's
@@ -58,6 +58,8 @@ interface DocumentDraft {
   required: boolean;
   reviewingDepartmentId: string;
   fileName: string;
+  /** The real, picked File — kept alongside `fileName` so `submit()` has real bytes to send to `POST /documents`, not just the name `onFileChosen` used to keep alone. `null` until a file is chosen. */
+  file: File | null;
   documentType: string;
   issuingOffice: string;
   issueDate: string;
@@ -90,7 +92,6 @@ const STEPS: { key: Step; label: string }[] = [
 })
 export class ApplicationIntake {
   private readonly store = inject(ApplicationStore);
-  private readonly session = inject(SessionService);
   private readonly requirementsConfig = inject(RequirementsConfigStore);
   private readonly toast = inject(ToastService);
   private readonly applicationsApi = inject(StaffApplicationsApi);
@@ -169,34 +170,48 @@ export class ApplicationIntake {
     return departmentById(req.responsibleDepartmentId) ?? null;
   }
 
+  /**
+   * Re-run whenever the permit type OR the application action changes
+   * (`onApplicationActionChange` below just delegates here) — since backend
+   * migration 047, Building Permit's checklist varies by action, so a
+   * change to either input can change what step 4 should show.
+   */
   protected async onPermitTypeChange(): Promise<void> {
     const type = this.applicationInfo.permitType;
     if (!type) {
       this.documents.set([]);
       return;
     }
+    const action = this.applicationInfo.applicationAction;
     // Renders immediately from whatever the store already holds (the static
     // catalog seed, or an earlier session's live fetch), then refreshes once
-    // the live checklist for this type has actually loaded — Permit Release
-    // > Permit Types is the one place it can be edited server-side.
-    this.applyDocumentsFor(type);
-    await this.requirementsConfig.ensureLoaded(type);
-    if (this.applicationInfo.permitType === type) this.applyDocumentsFor(type);
+    // the live checklist for this type/action has actually loaded — Permit
+    // Release > Permit Types is the one place it can be edited server-side.
+    this.applyDocumentsFor(type, action);
+    await this.requirementsConfig.ensureLoaded(type, action);
+    if (this.applicationInfo.permitType === type && this.applicationInfo.applicationAction === action) {
+      this.applyDocumentsFor(type, action);
+    }
   }
 
-  private applyDocumentsFor(type: PermitType): void {
-    const live = this.requirementsConfig.documentsFor(type);
+  protected onApplicationActionChange(): void {
+    void this.onPermitTypeChange();
+  }
+
+  private applyDocumentsFor(type: PermitType, action: ApplicationAction): void {
+    const live = this.requirementsConfig.documentsFor(type, action);
     // A successful live fetch that came back empty means nobody has
-    // published a checklist for this type yet (see RequirementsConfigStore's
-    // own doc comment) — correct and honest on the editor that manages that
-    // checklist, but a brand-new application's intake step has no such
-    // context to offer; showing a step that is silently, unexplainedly blank
-    // between the tab strip and the Back/Next buttons reads as broken, not
-    // as "nothing required". Falling back to the office's static reference
-    // catalog here — the same one the per-application Documents tab already
-    // reads directly — keeps the step usable and honestly labelled instead.
+    // published a checklist for this type/action yet (see
+    // RequirementsConfigStore's own doc comment) — correct and honest on
+    // the editor that manages that checklist, but a brand-new application's
+    // intake step has no such context to offer; showing a step that is
+    // silently, unexplainedly blank between the tab strip and the
+    // Back/Next buttons reads as broken, not as "nothing required".
+    // Falling back to the office's static reference catalog here — the
+    // same one the per-application Documents tab already reads directly —
+    // keeps the step usable and honestly labelled instead.
     const usingFallback = live.length === 0;
-    const docs = usingFallback ? requirementsFor(type).documents : live;
+    const docs = usingFallback ? documentsFor(type, action) : live;
     this.documentsFallbackActive.set(usingFallback);
     this.documents.set(
       docs.map((d): DocumentDraft => ({
@@ -205,6 +220,7 @@ export class ApplicationIntake {
         required: d.required,
         reviewingDepartmentId: d.reviewingDepartmentId,
         fileName: '',
+        file: null,
         documentType: d.label,
         issuingOffice: '',
         issueDate: '',
@@ -231,11 +247,11 @@ export class ApplicationIntake {
   protected onFileChosen(doc: DocumentDraft, event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (file) this.updateDocument(doc.requirementId, { fileName: file.name });
+    if (file) this.updateDocument(doc.requirementId, { fileName: file.name, file });
   }
 
   protected clearFile(doc: DocumentDraft): void {
-    this.updateDocument(doc.requirementId, { fileName: '' });
+    this.updateDocument(doc.requirementId, { fileName: '', file: null });
   }
 
   protected onDocFieldChange(
@@ -431,23 +447,35 @@ export class ApplicationIntake {
         return;
       }
 
-      // Document attachment has no server-side counterpart yet (see the
-      // "not stored" note on the Document Attachments step) — this stays a
-      // local-only annotation layered on the real, now server-backed record.
-      const actor = this.session.name() || 'Staff';
+      // Real `POST /documents` per chosen file — the same real route/method
+      // (`StaffApplicationsApi.attachDocument`) `applications.ts`'s own
+      // `attachDocumentFile` already uses for an existing application. This
+      // used to call `store.attachDocument` — a local-only annotation on the
+      // record even though `onFileChosen` already held the real `File` the
+      // whole time — so a document a records officer picked during intake
+      // never actually reached the server; only its file NAME did.
+      const failedAttachments: string[] = [];
       for (const doc of this.documents()) {
-        if (!doc.fileName.trim()) continue;
-        this.store.attachDocument(
-          record.id,
-          doc.requirementId,
-          doc.documentType || doc.label,
-          doc.fileName.trim(),
-          actor,
-          {
-            issuingOffice: doc.issuingOffice.trim() || null,
-            issueDate: doc.issueDate || null,
-            expiryDate: doc.expiryDate || null,
-          },
+        if (!doc.file) continue;
+        try {
+          const contentBase64 = await toBase64(doc.file);
+          const attachResult = await this.applicationsApi.attachDocument(
+            record.id,
+            doc.requirementId,
+            doc.documentType || doc.label,
+            doc.file.name,
+            contentBase64,
+          );
+          if (attachResult.kind !== 'done') failedAttachments.push(doc.label);
+        } catch {
+          failedAttachments.push(doc.label);
+        }
+      }
+      if (failedAttachments.length > 0) {
+        this.toast.error(
+          `Application ${result.referenceNumber} filed, but ${failedAttachments.length} document`
+            + `${failedAttachments.length === 1 ? '' : 's'} could not be attached: ${failedAttachments.join(', ')}. `
+            + 'Attach them from the application\'s own Documents tab.',
         );
       }
 

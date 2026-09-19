@@ -1,0 +1,259 @@
+- generic [ref=f12e4]:
+  - complementary [ref=f12e6]:
+    - generic [ref=f12e7]:
+      - img "Municipality of Castilla, Sorsogon seal" [ref=f12e9]
+      - generic [ref=f12e10]: E-BPCO
+    - navigation [ref=f12e11]:
+      - link "Dashboard" [ref=f12e14] [cursor=pointer]:
+        - /url: /dashboard
+      - generic [ref=f12e20]:
+        - generic [ref=f12e21]: Operations
+        - generic [ref=f12e22]:
+          - link "Applications" [ref=f12e23] [cursor=pointer]:
+            - /url: /applications
+          - link "Evaluations" [ref=f12e29] [cursor=pointer]:
+            - /url: /evaluations
+          - link "Payments" [ref=f12e34] [cursor=pointer]:
+            - /url: /payments
+          - link "Permit Release" [ref=f12e41] [cursor=pointer]:
+            - /url: /permit-release
+      - generic [ref=f12e48]:
+        - generic [ref=f12e49]: Administration
+        - generic [ref=f12e50]:
+          - link "Businesses" [ref=f12e51] [cursor=pointer]:
+            - /url: /businesses
+          - link "Access Requests" [ref=f12e57] [cursor=pointer]:
+            - /url: /access-requests
+          - link "Users & Roles" [ref=f12e63] [cursor=pointer]:
+            - /url: /user-roles
+          - link "Workflow" [ref=f12e70] [cursor=pointer]:
+            - /url: /workflow
+          - link "Archive" [ref=f12e79] [cursor=pointer]:
+            - /url: /archive
+          - link "System Logs" [ref=f12e85] [cursor=pointer]:
+            - /url: /system-logs
+    - button "Log Out" [ref=f12e91] [cursor=pointer]
+  - main [ref=f12e97]:
+    - generic [ref=f12e98]:
+      - generic "System Logs" [ref=f12e99]:
+        - generic [ref=f12e100]:
+          - heading "System Logs" [level=1] [ref=f12e101]
+          - generic [ref=f12e102]:
+            - generic [ref=f12e103]:
+              - generic [ref=f12e108]: Search
+              - textbox "Search" [ref=f12e109]:
+                - /placeholder: Search here...
+            - button "Notifications" [ref=f12e111] [cursor=pointer]
+            - button "P paul@lguids.com.ph Super Admin" [ref=f12e117] [cursor=pointer]:
+              - generic [ref=f12e118]: P
+              - generic [ref=f12e122]:
+                - generic [ref=f12e123]: paul@lguids.com.ph
+                - generic [ref=f12e124]: Super Admin
+      - generic [ref=f12e128]:
+        - generic [ref=f12e130]:
+          - generic [ref=f12e132]:
+            - paragraph [ref=f12e133]: Total Logs (Today)
+            - paragraph [ref=f12e134]: "34"
+          - generic [ref=f12e135]: All access events today
+        - generic [ref=f12e139]:
+          - generic [ref=f12e141]:
+            - paragraph [ref=f12e142]: Successful Logins
+            - paragraph [ref=f12e143]: "0"
+          - generic [ref=f12e144]: 0% of today's logs
+        - generic [ref=f12e148]:
+          - generic [ref=f12e150]:
+            - paragraph [ref=f12e151]: Failed Logins
+            - paragraph [ref=f12e152]: "0"
+          - generic [ref=f12e153]: 0% of today's logs
+        - generic [ref=f12e157]:
+          - generic [ref=f12e159]:
+            - paragraph [ref=f12e160]: Blocked IPs
+            - paragraph [ref=f12e161]: "2"
+          - generic [ref=f12e162]: Distinct IPs, inactive sessions
+        - generic [ref=f12e166]:
+          - generic [ref=f12e168]:
+            - paragraph [ref=f12e169]: Active Sessions
+            - paragraph [ref=f12e170]: "16"
+          - generic [ref=f12e171]: Across All Tenants
+      - generic [ref=f12e174]:
+        - navigation [ref=f12e175]:
+          - button [ref=f12e176] [cursor=pointer]
+          - button [active] [ref=f12e181] [cursor=pointer]
+          - button [ref=f12e188] [cursor=pointer]
+          - button [ref=f12e193] [cursor=pointer]
+          - button [ref=f12e197] [cursor=pointer]
+        - note [ref=f12e202]:
+          - generic [ref=f12e207]: Live access events from the server's audit trail — real sign-ins, sign-outs, and refused sign-in attempts. Showing 34 entries.
+        - generic [ref=f12e208]:
+          - generic [ref=f12e209]: May 5, 2026 - May 6, 2026
+          - combobox "Filter by tenant" [ref=f12e214] [cursor=pointer]:
+            - option "All Tenants" [selected]
+            - option "Villanueva Hardware & Construction Supply"
+            - option "Simbulan Sari-Sari Store"
+            - option "Rodrigo Bakeshop"
+            - option "Zaballero Auto Repair Shop"
+            - option "Martirez Rice Mill"
+            - option "Nuñez Feeds & Agri Supply"
+            - option "Villareal Eatery"
+            - option "Barrera Internet Café"
+            - option "Morales General Merchandise"
+            - option "Bermudez Furniture Shop"
+            - option "Salazar Water Refilling Station"
+            - option "Fajota Trading Corp."
+          - combobox "Status filter" [ref=f12e215] [cursor=pointer]:
+            - option "All Statuses" [selected]
+            - option "Active"
+            - option "Inactive"
+          - combobox "Severity filter" [ref=f12e216] [cursor=pointer]:
+            - option "All Severity" [selected]
+            - option "Critical"
+            - option "Warning"
+            - option "Info"
+          - generic [ref=f12e217]:
+            - generic [ref=f12e218]: Live Stream
+            - switch "Live Stream" [checked] [ref=f12e219] [cursor=pointer]
+          - button [disabled] [ref=f12e221]
+          - button [ref=f12e225] [cursor=pointer]
+        - table [ref=f12e231]:
+          - rowgroup [ref=f12e232]:
+            - row [ref=f12e233]:
+              - columnheader "Time Stamp" [ref=f12e234]
+              - columnheader "Users" [ref=f12e235]
+              - columnheader "Tenant" [ref=f12e236]
+              - columnheader "Event" [ref=f12e237]
+              - columnheader "Status" [ref=f12e238]
+              - columnheader "IP Address" [ref=f12e239]
+              - columnheader "Device/Browser" [ref=f12e240]
+              - columnheader "Location" [ref=f12e241]
+              - columnheader "Session Duration" [ref=f12e242]
+              - columnheader "ACTION" [ref=f12e243]
+          - rowgroup [ref=f12e244]:
+            - row [ref=f12e245] [cursor=pointer]:
+              - cell "Sep 18, 2026, 7:21 PM" [ref=f12e246]
+              - cell "applicant" [ref=f12e247]
+              - cell "System" [ref=f12e248]
+              - cell "session.started" [ref=f12e249]
+              - cell "Active" [ref=f12e250]
+              - cell "136.158.40.44" [ref=f12e252]
+              - cell "—" [ref=f12e253]
+              - cell "—" [ref=f12e254]
+              - cell "—" [ref=f12e255]
+              - cell [ref=f12e257]:
+                - button "View" [ref=f12e259]
+            - row [ref=f12e264] [cursor=pointer]:
+              - cell "Sep 18, 2026, 7:20 PM" [ref=f12e265]
+              - cell "system" [ref=f12e266]
+              - cell "System" [ref=f12e267]
+              - cell "session.refused — denied" [ref=f12e268]
+              - cell "Inactive" [ref=f12e269]
+              - cell "136.158.40.44" [ref=f12e271]
+              - cell "—" [ref=f12e272]
+              - cell "—" [ref=f12e273]
+              - cell "—" [ref=f12e274]
+              - cell [ref=f12e276]:
+                - button "View" [ref=f12e278]
+            - row [ref=f12e283] [cursor=pointer]:
+              - cell "Sep 18, 2026, 7:19 PM" [ref=f12e284]
+              - cell "system" [ref=f12e285]
+              - cell "System" [ref=f12e286]
+              - cell "session.refused — denied" [ref=f12e287]
+              - cell "Inactive" [ref=f12e288]
+              - cell "136.158.40.44" [ref=f12e290]
+              - cell "—" [ref=f12e291]
+              - cell "—" [ref=f12e292]
+              - cell "—" [ref=f12e293]
+              - cell [ref=f12e295]:
+                - button "View" [ref=f12e297]
+            - row [ref=f12e302] [cursor=pointer]:
+              - cell "Sep 18, 2026, 7:19 PM" [ref=f12e303]
+              - cell "system" [ref=f12e304]
+              - cell "System" [ref=f12e305]
+              - cell "session.refused — denied" [ref=f12e306]
+              - cell "Inactive" [ref=f12e307]
+              - cell "136.158.40.44" [ref=f12e309]
+              - cell "—" [ref=f12e310]
+              - cell "—" [ref=f12e311]
+              - cell "—" [ref=f12e312]
+              - cell [ref=f12e314]:
+                - button "View" [ref=f12e316]
+            - row [ref=f12e321] [cursor=pointer]:
+              - cell "Sep 18, 2026, 7:19 PM" [ref=f12e322]
+              - cell "system" [ref=f12e323]
+              - cell "System" [ref=f12e324]
+              - cell "session.refused — denied" [ref=f12e325]
+              - cell "Inactive" [ref=f12e326]
+              - cell "136.158.40.44" [ref=f12e328]
+              - cell "—" [ref=f12e329]
+              - cell "—" [ref=f12e330]
+              - cell "—" [ref=f12e331]
+              - cell [ref=f12e333]:
+                - button "View" [ref=f12e335]
+            - row [ref=f12e340] [cursor=pointer]:
+              - cell "Sep 18, 2026, 7:18 PM" [ref=f12e341]
+              - cell "system" [ref=f12e342]
+              - cell "System" [ref=f12e343]
+              - cell "session.refused — denied" [ref=f12e344]
+              - cell "Inactive" [ref=f12e345]
+              - cell "136.158.40.44" [ref=f12e347]
+              - cell "—" [ref=f12e348]
+              - cell "—" [ref=f12e349]
+              - cell "—" [ref=f12e350]
+              - cell [ref=f12e352]:
+                - button "View" [ref=f12e354]
+            - row [ref=f12e359] [cursor=pointer]:
+              - cell "Sep 18, 2026, 7:18 PM" [ref=f12e360]
+              - cell "system" [ref=f12e361]
+              - cell "System" [ref=f12e362]
+              - cell "session.refused — denied" [ref=f12e363]
+              - cell "Inactive" [ref=f12e364]
+              - cell "136.158.40.44" [ref=f12e366]
+              - cell "—" [ref=f12e367]
+              - cell "—" [ref=f12e368]
+              - cell "—" [ref=f12e369]
+              - cell [ref=f12e371]:
+                - button "View" [ref=f12e373]
+            - row [ref=f12e378] [cursor=pointer]:
+              - cell "Sep 18, 2026, 7:18 PM" [ref=f12e379]
+              - cell "system" [ref=f12e380]
+              - cell "System" [ref=f12e381]
+              - cell "session.refused — denied" [ref=f12e382]
+              - cell "Inactive" [ref=f12e383]
+              - cell "136.158.40.44" [ref=f12e385]
+              - cell "—" [ref=f12e386]
+              - cell "—" [ref=f12e387]
+              - cell "—" [ref=f12e388]
+              - cell [ref=f12e390]:
+                - button "View" [ref=f12e392]
+            - row [ref=f12e397] [cursor=pointer]:
+              - cell "Sep 18, 2026, 7:18 PM" [ref=f12e398]
+              - cell "system" [ref=f12e399]
+              - cell "System" [ref=f12e400]
+              - cell "session.refused — denied" [ref=f12e401]
+              - cell "Inactive" [ref=f12e402]
+              - cell "136.158.40.44" [ref=f12e404]
+              - cell "—" [ref=f12e405]
+              - cell "—" [ref=f12e406]
+              - cell "—" [ref=f12e407]
+              - cell [ref=f12e409]:
+                - button "View" [ref=f12e411]
+            - row [ref=f12e416] [cursor=pointer]:
+              - cell "Sep 18, 2026, 7:18 PM" [ref=f12e417]
+              - cell "system" [ref=f12e418]
+              - cell "System" [ref=f12e419]
+              - cell "session.refused — denied" [ref=f12e420]
+              - cell "Inactive" [ref=f12e421]
+              - cell "136.158.40.44" [ref=f12e423]
+              - cell "—" [ref=f12e424]
+              - cell "—" [ref=f12e425]
+              - cell "—" [ref=f12e426]
+              - cell [ref=f12e428]:
+                - button "View" [ref=f12e430]
+        - navigation "Pagination" [ref=f12e436]:
+          - generic [ref=f12e437]: Showing 1-10 from 34
+          - generic [ref=f12e438]:
+            - button "First page" [disabled] [ref=f12e439]
+            - button "Page 1" [ref=f12e444] [cursor=pointer]: "1"
+            - button "Page 2" [ref=f12e445] [cursor=pointer]: "2"
+            - button "Page 3" [ref=f12e446] [cursor=pointer]: "3"
+            - button "Page 4" [ref=f12e447] [cursor=pointer]: "4"
+            - button "Last page" [ref=f12e448] [cursor=pointer]

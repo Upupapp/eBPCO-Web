@@ -44,7 +44,7 @@ const row = (): ApplicationRecord =>
     applicantId: 'APL-1',
     applicant: 'Raul Villanueva',
     location: 'Barangay Poblacion',
-    permitType: 'Building Permit – New Construction',
+    permitType: 'Building Permit',
     applicationAction: 'New',
     officer: 'Engr. Tester',
     dateSubmitted: '2026-08-01',

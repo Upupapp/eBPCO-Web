@@ -15,7 +15,7 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { Business } from '../../core/domain/business.model';
 import { applicantFullName } from '../../core/domain/applicant.model';
 import { ToastService } from '../../shared/toast/toast.service';
-import { validateMobileNumber } from '../../shared/utils/validators';
+import { validateEmail, validateMobileNumber } from '../../shared/utils/validators';
 import { CapitalizeNameDirective } from '../../shared/utils/capitalize-name.directive';
 import { StaffBusinessesApi, StaffBusinessDetail, StaffBusinessRow } from '../../core/api/staff-businesses.api';
 
@@ -316,24 +316,16 @@ export class Businesses {
     };
   }
 
-  /**
-   * On real data, sourced from `realRows()` (P-4b's `GET /staff/businesses`
-   * fetch) rather than the always-empty `store.businesses()`. Businesses
-   * created through this page's own "+ Business" wizard this session
-   * (`locallyCreatedRows`, kept separate since they aren't real linkable
-   * Business records — see createBusiness's documented limitation) are
-   * still overlaid on top either way.
-   */
-  private readonly locallyCreatedRows = signal<BusinessRow[]>([]);
   /** Ids removed via confirmDelete — hides a store-backed row from this view rather than mutating shared store data no method exists to delete. */
   private readonly hiddenIds = signal<ReadonlySet<string>>(new Set());
 
+  /** On real data, sourced from `realRows()` (`GET /staff/businesses`) rather than the always-empty `store.businesses()`. A business created through this page's own "+ Business" wizard is a real `POST /staff/businesses` row, so it appears here only after `loadRealBusinesses()` refetches — no local overlay needed. */
   protected readonly businessRows = computed<BusinessRow[]>(() => {
     const hidden = this.hiddenIds();
     const serverRows = this.store.isSeedData()
       ? this.store.businesses().map((b) => this.toBusinessRow(b))
       : (this.realRows() ?? []).map((b) => this.toRealBusinessRow(b));
-    return [...this.locallyCreatedRows(), ...serverRows].filter((r) => !hidden.has(r.id));
+    return serverRows.filter((r) => !hidden.has(r.id));
   });
   protected readonly page = signal(1);
   protected readonly pageSize = 10;
@@ -537,7 +529,6 @@ export class Businesses {
     const target = this.deleteTarget();
     if (!target) return;
     const idsToRemove = target === 'bulk' ? this.selectedIds() : new Set([target.id]);
-    this.locallyCreatedRows.update((rows) => rows.filter((row) => !idsToRemove.has(row.id)));
     this.hiddenIds.update((current) => new Set([...current, ...idsToRemove]));
     this.selectedIds.update((current) => {
       const next = new Set(current);
@@ -746,25 +737,19 @@ export class Businesses {
   protected readonly newBusiness = {
     businessName: '',
     type: '',
+    street: '',
+    registrationNumber: '',
+    dateRegistered: new Date().toISOString().slice(0, 10),
     contactName: '',
+    contactEmail: '',
     contactPhone: '',
     region: 'region-5',
     province: 'sorsogon',
     cityMunicipality: 'castilla',
     barangay: '',
-    userName: '',
-    password: '',
-    confirmPassword: '',
-    modules: {
-      initialEvaluation: false,
-      zoningEvaluation: false,
-      fireSafetyEvaluation: false,
-      locationalClearance: false,
-    },
   };
 
-  protected readonly showPassword = signal(false);
-  protected readonly showConfirmPassword = signal(false);
+  protected readonly creatingBusiness = signal(false);
 
   selectSubTab(tab: SubTab): void {
     this.activeSubTab.set(tab);
@@ -779,6 +764,18 @@ export class Businesses {
   }
 
   openCreate(): void {
+    // Reset every time: an owner's email left over from a previous
+    // registration this session would otherwise attach the next business to
+    // that SAME owner rather than a blank one, silently.
+    this.newBusiness.businessName = '';
+    this.newBusiness.type = '';
+    this.newBusiness.street = '';
+    this.newBusiness.registrationNumber = '';
+    this.newBusiness.dateRegistered = new Date().toISOString().slice(0, 10);
+    this.newBusiness.contactName = '';
+    this.newBusiness.contactEmail = '';
+    this.newBusiness.contactPhone = '';
+    this.newBusiness.barangay = '';
     this.view.set('create');
   }
 
@@ -787,70 +784,96 @@ export class Businesses {
   }
 
   /**
-   * Creates a new row for this page's own list — NOT a real
-   * `ApplicationStore` `Business` record, since this store is read-only
-   * from this page's perspective (there's no domain-layer "register a
-   * business" mutation yet, mirroring how the intake form is the one
-   * real place a Business gets created). Documented limitation: an
-   * application filed elsewhere would never link back to a business
-   * created here, since its id was never actually added to the store.
+   * `POST /staff/businesses` — a real registration, not a row pushed onto
+   * this page's own list. The server resolves the owner's account (creating
+   * one, with an unusable password — they claim it later through account
+   * recovery, same as `StaffApplicationsApi.fileOnBehalf`) and applicant
+   * record, then inserts the business under it, so a permit filed elsewhere
+   * against this business links back to it correctly.
    */
-  createBusiness(): void {
+  protected async createBusiness(): Promise<void> {
     const name = this.newBusiness.businessName.trim();
     if (!name) {
       this.toast.error('Enter a business name before creating this registration.');
       return;
     }
-    if (!this.newBusiness.password) {
-      this.toast.error('Set a password for this business account before creating it.');
+    if (!this.newBusiness.type) {
+      this.toast.error('Select a business category before creating this registration.');
       return;
     }
-    if (this.newBusiness.password !== this.newBusiness.confirmPassword) {
-      this.toast.error('Password and confirm password do not match.');
+    const street = this.newBusiness.street.trim();
+    if (!street) {
+      this.toast.error('Enter the business address before creating this registration.');
       return;
     }
-    // Optional (no `required` on the field, and an empty value already
-    // falls back to 'N/A' below) — but a NON-empty value should be a real
-    // Philippine mobile number, same rule and message the Applications
-    // intake wizard's conceptually identical field already enforces.
+    if (!this.newBusiness.barangay) {
+      this.toast.error('Select a barangay before creating this registration.');
+      return;
+    }
+    if (!this.newBusiness.dateRegistered) {
+      this.toast.error('Enter the date this business was registered.');
+      return;
+    }
+    const contactName = this.newBusiness.contactName.trim();
+    if (!contactName) {
+      this.toast.error('Enter the owner\'s full name before creating this registration.');
+      return;
+    }
+    const emailValidation = validateEmail(this.newBusiness.contactEmail);
+    if (!emailValidation.valid) {
+      this.toast.error(emailValidation.error ?? 'Enter a valid email address for the owner.');
+      return;
+    }
+    // Optional — but a NON-empty value should be a real Philippine mobile
+    // number, same rule and message the Applications intake wizard's
+    // conceptually identical field already enforces.
     const phoneValidation = validateMobileNumber(this.newBusiness.contactPhone, false);
     if (!phoneValidation.valid) {
       this.toast.error(phoneValidation.error ?? 'Enter a valid contact number.');
       return;
     }
-    const code = name.toUpperCase().replace(/\s+/g, '');
-    // `Math.max(...[])` on an empty (or all-non-numeric) list is `-Infinity`,
-    // which does not throw — it silently becomes part of the generated id
-    // string instead ("REG-2026--Infinity"). Businesses created in a fresh
-    // session always start from an empty `businessRows()` (no real
-    // business-directory endpoint exists yet — see this page's own banner),
-    // so this was not a rare edge case, it was the FIRST business created in
-    // every session.
-    const existingIds = this.businessRows()
-      .map((r) => parseInt(r.id.replace('REG-2026-', ''), 10))
-      .filter((n) => Number.isFinite(n));
-    const nextIdNum = (existingIds.length === 0 ? 0 : Math.max(...existingIds)) + 1;
+
+    const [firstName, ...rest] = contactName.split(/\s+/);
+    const lastName = rest.length ? rest.join(' ') : '';
     const barangayLabel = this.newBusiness.barangay
-      ? this.newBusiness.barangay.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-      : 'N/A';
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
 
-    this.locallyCreatedRows.update((rows) => [
-      {
-        id: `REG-2026-${nextIdNum.toString().padStart(6, '0')}`,
-        code: name,
-        category: (this.newBusiness.type as BusinessCategory) || 'Other',
-        city: barangayLabel === 'N/A' ? 'N/A' : `Barangay ${barangayLabel}`,
-        contactName: this.newBusiness.contactName.trim() || 'N/A',
-        contactPhone: phoneValidation.normalized || 'N/A',
-        dateCreated: 'Just now',
-        userCount: 1,
-        status: 'Active',
-      },
-      ...rows,
-    ]);
+    this.creatingBusiness.set(true);
+    try {
+      const result = await this.businessesApi.create({
+        owner: {
+          firstName,
+          lastName,
+          email: emailValidation.normalized,
+          mobileNumber: phoneValidation.normalized || undefined,
+        },
+        business: {
+          name,
+          category: this.newBusiness.type,
+          street,
+          barangay: barangayLabel,
+          city: 'Castilla',
+          province: 'Sorsogon',
+          registrationNumber: this.newBusiness.registrationNumber.trim() || 'PENDING',
+          dateRegistered: this.newBusiness.dateRegistered,
+        },
+      });
 
-    this.view.set('list');
-    this.page.set(1);
-    this.toast.success(`"${name}" added to this list only — it has not been registered yet.`);
+      if (result.kind === 'done') {
+        this.toast.success(
+          result.ownerNextStep ? `"${name}" registered. ${result.ownerNextStep}` : `"${name}" registered.`,
+        );
+        await this.loadRealBusinesses();
+        this.view.set('list');
+        this.page.set(1);
+      } else if (result.kind === 'unavailable') {
+        this.toast.error('Business registration is not available right now.');
+      } else {
+        this.toast.error(result.message);
+      }
+    } finally {
+      this.creatingBusiness.set(false);
+    }
   }
 }

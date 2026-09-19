@@ -49,7 +49,7 @@ function fillValid(fixture: ComponentFixture<Register>): void {
   c.mobileNumber = '09171234567';
   c.position = 'Municipal Engineering Office — Evaluator';
   c.justification = 'Assigned to evaluate structural submissions for the office.';
-  c.toggle('Building Permit – New Construction');
+  c.toggle('Building Permit');
   fixture.detectChanges();
 }
 
@@ -86,7 +86,7 @@ describe('Register — requesting an account', () => {
   it('offers every published permit type as a form, and no more', () => {
     const el: HTMLElement = mount().nativeElement;
 
-    expect(el.querySelectorAll('input[type="checkbox"]').length).toBe(19);
+    expect(el.querySelectorAll('input[type="checkbox"]').length).toBe(17);
   });
 
   it('sends nothing until the form is valid', () => {
@@ -138,7 +138,7 @@ describe('Register — requesting an account', () => {
       'email', 'fullName', 'justification', 'mobile', 'officePosition',
       'permitTypes', 'requestedLevel',
     ]);
-    expect(req.request.body.permitTypes).toEqual(['Building Permit – New Construction']);
+    expect(req.request.body.permitTypes).toEqual(['Building Permit']);
     expect(req.request.body.requestedLevel).toBe('view');
     // The password is not merely absent from the form — it is absent from the wire.
     expect(Object.keys(req.request.body)).not.toContain('password');

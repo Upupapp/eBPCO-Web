@@ -34,11 +34,9 @@ export const DEPARTMENTS: Department[] = [
     name: 'Office of the Municipal Engineer / Building Official',
     shortName: 'OBO',
     responsibility:
-      "Evaluates and issues the Building Permit and every ancillary/certificate permit under the National Building Code (PD 1096) — this office is responsible for sixteen of this system's nineteen permit types (all except Zoning/Locational Clearance and the BFP-issued FSEC/FSIC).",
+      "Evaluates and issues the Building Permit and every ancillary/certificate permit under the National Building Code (PD 1096) — this office is responsible for fourteen of this system's seventeen permit types (all except Zoning/Locational Clearance and the BFP-issued FSEC/FSIC).",
     formsHandled: [
-      'Building Permit – New Construction',
-      'Building Permit – Renovation / Alteration',
-      'Building Permit – Addition / Extension',
+      'Building Permit',
       'Demolition Permit',
       'Architectural Permit',
       'Civil / Structural Permit',

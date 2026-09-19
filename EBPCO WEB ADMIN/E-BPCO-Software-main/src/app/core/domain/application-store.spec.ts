@@ -4,7 +4,7 @@ import { ApplicationRecord, withProjectedFields } from './application.model';
 import { AssessmentStore } from './assessment-store';
 import { PaymentConfigStore } from './payment-config-store';
 import { ALL_PERMIT_TYPES } from './permit.model';
-import { requirementsFor } from './requirements-catalog';
+import { documentsFor, requirementsFor } from './requirements-catalog';
 import { UNRESOLVED_DOCUMENT_STATUSES } from './document.model';
 
 describe('ApplicationStore — data integrity', () => {
@@ -133,7 +133,7 @@ describe('ApplicationStore — getApplicationContext (business/project resolutio
         applicantId: applicant.id,
         applicant: 'Some Applicant Name',
         location: 'Barangay Poblacion',
-        permitType: 'Building Permit – New Construction',
+        permitType: 'Building Permit',
         applicationAction: 'New',
         officer: 'Test Officer',
         dateSubmitted: '01 Jan 2026',
@@ -160,7 +160,7 @@ describe('ApplicationStore — getApplicationContext (business/project resolutio
         applicantId: applicant.id,
         applicant: 'Some Applicant Name',
         location: 'Barangay Poblacion',
-        permitType: 'Building Permit – New Construction',
+        permitType: 'Building Permit',
         applicationAction: 'New',
         officer: 'Test Officer',
         dateSubmitted: '01 Jan 2026',
@@ -433,32 +433,41 @@ describe('ApplicationStore — seed-data validity', () => {
     }
   });
 
-  it('the guaranteed Renovation sample has a complete audit trail from submission through release', () => {
-    const renovation = store
+  it('the guaranteed Building Permit sample has a complete audit trail from submission through release', () => {
+    // Until migration 047 this showcase was found by its own permit-type
+    // name ('Building Permit – Renovation / Alteration'); the three
+    // sub-types are one 'Building Permit' entry now, and it is still the
+    // one showcase application-seed.ts forces through a revision loop.
+    const building = store
       .applications()
-      .find((a) => a.permitType === 'Building Permit – Renovation / Alteration' && a.lifecycleStatus === 'Completed')!;
-    expect(renovation).toBeTruthy();
-    expect(store.getPermit(renovation.id)).toBeTruthy();
-    expect(store.getRelease(renovation.id)).toBeTruthy();
-    expect(store.getTransactions(renovation.id).some((p) => p.status === 'Verified')).toBe(true);
-    const audit = store.getAuditTrail(renovation.id);
+      .find((a) => a.permitType === 'Building Permit' && a.lifecycleStatus === 'Completed')!;
+    expect(building).toBeTruthy();
+    expect(store.getPermit(building.id)).toBeTruthy();
+    expect(store.getRelease(building.id)).toBeTruthy();
+    expect(store.getTransactions(building.id).some((p) => p.status === 'Verified')).toBe(true);
+    const audit = store.getAuditTrail(building.id);
     expect(audit.length).toBeGreaterThan(3);
   });
 
-  it('the guaranteed Renovation sample demonstrates a real revision loop (not just a straight pass)', () => {
-    const renovation = store
+  it('the guaranteed Building Permit sample demonstrates a real revision loop (not just a straight pass)', () => {
+    const building = store
       .applications()
-      .find((a) => a.permitType === 'Building Permit – Renovation / Alteration' && a.lifecycleStatus === 'Completed')!;
-    const evaluations = store.getEvaluations(renovation.id);
+      .find((a) => a.permitType === 'Building Permit' && a.lifecycleStatus === 'Completed')!;
+    const evaluations = store.getEvaluations(building.id);
     expect(evaluations.some((e) => e.result === 'Revision Required')).toBe(true);
     // ...followed by an eventual Passed on the same stage, proving the loop resolved.
     const revisionStage = evaluations.find((e) => e.result === 'Revision Required')!.stage;
     expect(evaluations.some((e) => e.stage === revisionStage && e.result === 'Passed')).toBe(true);
   });
 
-  it("every seeded document belongs to a requirement genuinely listed for that application's permit type", () => {
+  it("every seeded document belongs to a requirement genuinely listed for that application's permit type/action", () => {
     for (const app of store.applications()) {
-      const validIds = new Set(requirementsFor(app.permitType).documents.map((d) => d.id));
+      // Building Permit's checklist varies by action since migration 047 —
+      // see application-seed.ts's own `requiredDocuments` and
+      // requirements-catalog.ts's `documentsByAction`.
+      const validIds = new Set(
+        documentsFor(app.permitType, app.applicationAction ?? 'New').map((d) => d.id),
+      );
       for (const doc of store.getDocuments(app.id)) {
         expect(validIds.has(doc.requirementId)).toBe(true);
       }
@@ -510,7 +519,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
         applicantId: `TEST-APL-${stamp}`,
         applicant: 'Test Applicant',
         location: 'Barangay Poblacion',
-        permitType: 'Building Permit – New Construction',
+        permitType: 'Building Permit',
         applicationAction: 'New',
         officer: 'Test Officer',
         dateSubmitted: '01 Jan 2026',
@@ -529,7 +538,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('attachDocument creates a new document tied to the right requirement, defaulting to Submitted', () => {
     const appId = freshApplication();
-    const requirement = requirementsFor('Building Permit – New Construction').documents[0];
+    const requirement = requirementsFor('Building Permit').documents[0];
     expect(store.getDocuments(appId).length).toBe(0);
     const created = store.attachDocument(
       appId,
@@ -544,7 +553,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('resubmitDocument replaces the file/status but preserves the prior version in history', () => {
     const appId = freshApplication();
-    const requirement = requirementsFor('Building Permit – New Construction').documents[0];
+    const requirement = requirementsFor('Building Permit').documents[0];
     const created = store.attachDocument(
       appId,
       requirement.id,
@@ -565,7 +574,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('attachDocument called again for the SAME requirement resubmits (via history) instead of creating a duplicate row', () => {
     const appId = freshApplication();
-    const requirement = requirementsFor('Building Permit – New Construction').documents[0];
+    const requirement = requirementsFor('Building Permit').documents[0];
     store.attachDocument(appId, requirement.id, requirement.label, 'first.pdf', 'Tester');
     store.attachDocument(appId, requirement.id, requirement.label, 'replacement.pdf', 'Tester');
     const docs = store.getDocuments(appId).filter((d) => d.requirementId === requirement.id);
@@ -576,7 +585,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('setDocumentStatus refuses Rejected/Revision Required without remarks', () => {
     const appId = freshApplication();
-    const requirement = requirementsFor('Building Permit – New Construction').documents[0];
+    const requirement = requirementsFor('Building Permit').documents[0];
     const created = store.attachDocument(
       appId,
       requirement.id,
@@ -597,7 +606,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('canApprove is false while even one required document remains unresolved', () => {
     const appId = freshApplication();
-    const requirements = requirementsFor('Building Permit – New Construction').documents.filter((d) => d.required);
+    const requirements = requirementsFor('Building Permit').documents.filter((d) => d.required);
     requirements.forEach((req, i) => {
       const doc = store.attachDocument(appId, req.id, req.label, `${req.id}.pdf`, 'Tester');
       if (i < requirements.length - 1)
@@ -609,7 +618,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('canApprove is true only once every required document is Accepted; optional documents never block it', () => {
     const appId = freshApplication();
-    const requirements = requirementsFor('Building Permit – New Construction').documents;
+    const requirements = requirementsFor('Building Permit').documents;
     for (const req of requirements) {
       const doc = store.attachDocument(appId, req.id, req.label, `${req.id}.pdf`, 'Tester');
       if (req.required) store.setDocumentStatus(appId, doc.id, 'Accepted', 'Evaluator');
@@ -632,7 +641,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
         applicantId: `TEST-APL-${stamp}`,
         applicant: 'Test Applicant',
         location: 'Barangay Poblacion',
-        permitType: 'Building Permit – New Construction',
+        permitType: 'Building Permit',
         applicationAction: 'New',
         officer: 'Test Officer',
         dateSubmitted: '01 Jan 2026',
@@ -659,7 +668,7 @@ describe('ApplicationStore — document lifecycle and approval blocking', () => 
 
   it('transitionStatus to Approved succeeds once every required document is Accepted', () => {
     const appId = applicationAtForApproval();
-    for (const req of requirementsFor('Building Permit – New Construction').documents.filter((d) => d.required)) {
+    for (const req of requirementsFor('Building Permit').documents.filter((d) => d.required)) {
       const doc = store.attachDocument(appId, req.id, req.label, `${req.id}.pdf`, 'Tester');
       store.setDocumentStatus(appId, doc.id, 'Accepted', 'Evaluator');
     }
@@ -1071,7 +1080,7 @@ describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
         applicantId: applicant.id,
         applicant: 'Maria Santos',
         location: 'Barangay Cogon',
-        permitType: 'Building Permit – Renovation / Alteration',
+        permitType: 'Building Permit',
         applicationAction: 'New',
         officer: actor,
         dateSubmitted: '01 Jan 2026',
@@ -1089,7 +1098,7 @@ describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
     expect(record.evaluationResult).toBe('Pending'); // honest starting state — nothing fabricated as complete
 
     // 5. Required documents are attached.
-    const requirements = requirementsFor('Building Permit – Renovation / Alteration').documents;
+    const requirements = requirementsFor('Building Permit').documents;
     for (const req of requirements) {
       store.attachDocument(record.id, req.id, req.label, `${req.id}.pdf`, actor);
     }
@@ -1131,7 +1140,7 @@ describe('ApplicationStore — complete end-to-end Renovation workflow', () => {
     // resolve every "Requires assessor input" line -> submit for approval
     // -> approve -> issue the Order of Payment -> record payment ->
     // verify that ONE transaction. `assessFee` only drafts (never
-    // fabricates a total) since Building Permit – Renovation / Alteration's building-formula line
+    // fabricates a total) since Building Permit's building-formula line
     // requires assessor input; the rest is driven directly against
     // AssessmentStore, exactly as the Payments > Assessments tab does.
     expect(store.getById(record.id)!.assessedAmountCentavos).toBeNull();
@@ -1230,7 +1239,7 @@ describe('ApplicationStore — the server answer replaces the seed', () => {
       applicantId: '',
       applicant: 'Server Applicant',
       location: '—',
-      permitType: 'Building Permit – New Construction',
+      permitType: 'Building Permit',
       applicationAction: 'New',
       officer: '—',
       dateSubmitted: '2026-08-01',

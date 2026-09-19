@@ -1,0 +1,248 @@
+- generic [ref=f33e2]:
+  - generic [ref=f33e4]:
+    - complementary [ref=f33e6]:
+      - generic [ref=f33e7]:
+        - img "Municipality of Castilla, Sorsogon seal" [ref=f33e9]
+        - generic [ref=f33e10]: E-BPCO
+      - navigation [ref=f33e11]:
+        - link "Dashboard" [ref=f33e14] [cursor=pointer]:
+          - /url: /dashboard
+        - generic [ref=f33e20]:
+          - generic [ref=f33e21]: Operations
+          - generic [ref=f33e22]:
+            - link "Applications" [ref=f33e23] [cursor=pointer]:
+              - /url: /applications
+            - link "Evaluations" [ref=f33e29] [cursor=pointer]:
+              - /url: /evaluations
+            - link "Payments" [ref=f33e34] [cursor=pointer]:
+              - /url: /payments
+            - link "Permit Release" [ref=f33e41] [cursor=pointer]:
+              - /url: /permit-release
+        - generic [ref=f33e48]:
+          - generic [ref=f33e49]: Administration
+          - generic [ref=f33e50]:
+            - link "Businesses" [ref=f33e51] [cursor=pointer]:
+              - /url: /businesses
+            - link "Access Requests" [ref=f33e57] [cursor=pointer]:
+              - /url: /access-requests
+            - link "Users & Roles" [ref=f33e63] [cursor=pointer]:
+              - /url: /user-roles
+            - link "Workflow" [ref=f33e70] [cursor=pointer]:
+              - /url: /workflow
+            - link "Archive" [ref=f33e79] [cursor=pointer]:
+              - /url: /archive
+            - link "System Logs" [ref=f33e85] [cursor=pointer]:
+              - /url: /system-logs
+      - button "Log Out" [ref=f33e91] [cursor=pointer]
+    - main [ref=f33e97]:
+      - generic [ref=f33e98]:
+        - generic "Businesses" [ref=f33e99]:
+          - generic [ref=f33e100]:
+            - heading "Businesses" [level=1] [ref=f33e101]
+            - generic [ref=f33e102]:
+              - generic [ref=f33e103]:
+                - generic [ref=f33e108]: Search
+                - textbox "Search" [ref=f33e109]:
+                  - /placeholder: Search here...
+              - button "Notifications" [ref=f33e111] [cursor=pointer]
+              - button "P paul@lguids.com.ph Super Admin" [ref=f33e117] [cursor=pointer]:
+                - generic [ref=f33e118]: P
+                - generic [ref=f33e122]:
+                  - generic [ref=f33e123]: paul@lguids.com.ph
+                  - generic [ref=f33e124]: Super Admin
+        - generic [ref=f33e449]:
+          - generic [ref=f33e451]:
+            - generic [ref=f33e453]:
+              - paragraph [ref=f33e454]: Total Users
+              - paragraph [ref=f33e455]: "5"
+            - generic [ref=f33e456]: Distinct business owners in the real business directory
+          - generic [ref=f33e460]:
+            - generic [ref=f33e462]:
+              - paragraph [ref=f33e463]: Active Businesses
+              - paragraph [ref=f33e464]: "6"
+            - generic [ref=f33e465]:
+              - generic [ref=f33e466]: 100% of total businesses
+              - 'img "Active Businesses progress: 100 percent" [ref=f33e468]'
+          - generic [ref=f33e471]:
+            - generic [ref=f33e473]:
+              - paragraph [ref=f33e474]: Inactive Businesses
+              - paragraph [ref=f33e475]: "0"
+            - generic [ref=f33e476]:
+              - generic [ref=f33e477]: 0% of total businesses
+              - 'img "Inactive Businesses progress: 0 percent" [ref=f33e479]'
+          - generic [ref=f33e482]:
+            - generic [ref=f33e484]:
+              - paragraph [ref=f33e485]: Total Businesses
+              - paragraph [ref=f33e486]: "6"
+            - generic [ref=f33e487]:
+              - generic [ref=f33e488]: Registered in the real business directory
+              - 'img "Total Businesses progress: 100 percent" [ref=f33e490]'
+        - generic [ref=f33e492]:
+          - generic [ref=f33e493]:
+            - textbox "Search Here By Application ID, Applicant Name, or Location" [ref=f33e499]
+            - generic [ref=f33e500]:
+              - button [ref=f33e503] [cursor=pointer]
+              - button [ref=f33e507] [cursor=pointer]
+              - button [ref=f33e512] [cursor=pointer]
+          - table [ref=f33e516]:
+            - rowgroup [ref=f33e517]:
+              - row [ref=f33e518]:
+                - columnheader [ref=f33e519]:
+                  - checkbox "Select all businesses" [ref=f33e520]
+                - columnheader "Business ID" [ref=f33e521]
+                - columnheader "BUSINESS NAME" [ref=f33e522]
+                - columnheader "CATEGORY" [ref=f33e523]
+                - columnheader "CONTACT PERSON" [ref=f33e524]
+                - columnheader "DATE CREATED" [ref=f33e525]
+                - columnheader "User Count" [ref=f33e526]
+                - columnheader "STATUS" [ref=f33e527]
+                - columnheader "ACTION" [ref=f33e528]
+            - rowgroup [ref=f33e529]:
+              - row [ref=f33e530] [cursor=pointer]:
+                - cell [ref=f33e531]:
+                  - checkbox "Select cafe" [ref=f33e532]
+                - cell "16d3bfc0-b450-435e-ae41-3e38da43a3a9" [ref=f33e533]
+                - cell "EC cafe" [ref=f33e534]:
+                  - generic [ref=f33e535]:
+                    - generic [ref=f33e536]: EC
+                    - text: cafe
+                - cell "Retail" [ref=f33e538]
+                - cell "Ella Cailing 09949500195" [ref=f33e539]:
+                  - generic [ref=f33e540]:
+                    - generic [ref=f33e541]: Ella Cailing
+                    - generic [ref=f33e542]: "09949500195"
+                - cell "2000-09-09" [ref=f33e543]
+                - cell "—" [ref=f33e544]
+                - cell "Active" [ref=f33e545]
+                - cell [ref=f33e547]:
+                  - generic [ref=f33e548]:
+                    - button "View business" [ref=f33e549]
+                    - button "Hide business from this view" [ref=f33e554]
+              - row [ref=f33e560] [cursor=pointer]:
+                - cell [ref=f33e561]:
+                  - checkbox "Select El Cafe" [ref=f33e562]
+                - cell "baea0ad4-cd34-4721-90a3-cef658b876b9" [ref=f33e563]
+                - cell "AC El Cafe" [ref=f33e564]:
+                  - generic [ref=f33e565]:
+                    - generic [ref=f33e566]: AC
+                    - text: El Cafe
+                - cell "Retail" [ref=f33e568]
+                - cell "Angela Cailing 09949500196" [ref=f33e569]:
+                  - generic [ref=f33e570]:
+                    - generic [ref=f33e571]: Angela Cailing
+                    - generic [ref=f33e572]: "09949500196"
+                - cell "2025-09-09" [ref=f33e573]
+                - cell "—" [ref=f33e574]
+                - cell "Active" [ref=f33e575]
+                - cell [ref=f33e577]:
+                  - generic [ref=f33e578]:
+                    - button "View business" [ref=f33e579]
+                    - button "Hide business from this view" [ref=f33e584]
+              - row [ref=f33e590] [cursor=pointer]:
+                - cell [ref=f33e591]:
+                  - checkbox "Select ella cafe" [ref=f33e592]
+                - cell "f86339a2-a65c-45c9-8caa-d8ea75510411" [ref=f33e593]
+                - cell "AC ella cafe" [ref=f33e594]:
+                  - generic [ref=f33e595]:
+                    - generic [ref=f33e596]: AC
+                    - text: ella cafe
+                - cell "Retail" [ref=f33e598]
+                - cell "Angela Cailing 09949500196" [ref=f33e599]:
+                  - generic [ref=f33e600]:
+                    - generic [ref=f33e601]: Angela Cailing
+                    - generic [ref=f33e602]: "09949500196"
+                - cell "2000-09-09" [ref=f33e603]
+                - cell "—" [ref=f33e604]
+                - cell "Active" [ref=f33e605]
+                - cell [ref=f33e607]:
+                  - generic [ref=f33e608]:
+                    - button "View business" [ref=f33e609]
+                    - button "Hide business from this view" [ref=f33e614]
+              - row [ref=f33e620] [cursor=pointer]:
+                - cell [ref=f33e621]:
+                  - checkbox "Select Kim shop" [ref=f33e622]
+                - cell "c30ed28a-a222-4af3-8eb6-becf5b13ccfc" [ref=f33e623]
+                - cell "KS Kim shop" [ref=f33e624]:
+                  - generic [ref=f33e625]:
+                    - generic [ref=f33e626]: KS
+                    - text: Kim shop
+                - cell "Retail" [ref=f33e628]
+                - cell "Kim Shaney 09123456789" [ref=f33e629]:
+                  - generic [ref=f33e630]:
+                    - generic [ref=f33e631]: Kim Shaney
+                    - generic [ref=f33e632]: "09123456789"
+                - cell "2026-09-18" [ref=f33e633]
+                - cell "—" [ref=f33e634]
+                - cell "Active" [ref=f33e635]
+                - cell [ref=f33e637]:
+                  - generic [ref=f33e638]:
+                    - button "View business" [ref=f33e639]
+                    - button "Hide business from this view" [ref=f33e644]
+              - row [ref=f33e650] [cursor=pointer]:
+                - cell [ref=f33e651]:
+                  - checkbox "Select Playwright Test Bakery" [ref=f33e652]
+                - cell "0dae47bc-6b52-412d-9531-22bd1ca49d21" [ref=f33e653]
+                - cell "PP Playwright Test Bakery" [ref=f33e654]:
+                  - generic [ref=f33e655]:
+                    - generic [ref=f33e656]: PP
+                    - text: Playwright Test Bakery
+                - cell "Food Service" [ref=f33e658]
+                - cell "Pedro Playwright Cruz +63 917 123 4567" [ref=f33e659]:
+                  - generic [ref=f33e660]:
+                    - generic [ref=f33e661]: Pedro Playwright Cruz
+                    - generic [ref=f33e662]: +63 917 123 4567
+                - cell "2026-09-18" [ref=f33e663]
+                - cell "—" [ref=f33e664]
+                - cell "Active" [ref=f33e665]
+                - cell [ref=f33e667]:
+                  - generic [ref=f33e668]:
+                    - button "View business" [ref=f33e669]
+                    - button "Hide business from this view" [ref=f33e674]
+              - row [ref=f33e680] [cursor=pointer]:
+                - cell [ref=f33e681]:
+                  - checkbox "Select Test Intake Store" [ref=f33e682]
+                - cell "bcaac787-94cd-4d4c-bba9-117137564359" [ref=f33e683]
+                - cell "JT Test Intake Store" [ref=f33e684]:
+                  - generic [ref=f33e685]:
+                    - generic [ref=f33e686]: JT
+                    - text: Test Intake Store
+                - cell "Retail" [ref=f33e688]
+                - cell "Juan Test Dela Cruz +63 917 123 4567" [ref=f33e689]:
+                  - generic [ref=f33e690]:
+                    - generic [ref=f33e691]: Juan Test Dela Cruz
+                    - generic [ref=f33e692]: +63 917 123 4567
+                - cell "2026-09-18" [ref=f33e693]
+                - cell "—" [ref=f33e694]
+                - cell "Active" [ref=f33e695]
+                - cell [ref=f33e697]:
+                  - generic [ref=f33e698]:
+                    - button "View business" [ref=f33e699]
+                    - button "Hide business from this view" [ref=f33e704]
+          - navigation "Pagination" [ref=f33e711]:
+            - generic [ref=f33e712]: Showing 1-6 from 6
+            - generic [ref=f33e713]:
+              - button "First page" [disabled] [ref=f33e714]
+              - button "Page 1" [ref=f33e719] [cursor=pointer]: "1"
+              - button "Last page" [disabled] [ref=f33e720]
+        - generic [ref=f33e725]:
+          - navigation [ref=f33e726]:
+            - button [ref=f33e727] [cursor=pointer]
+            - button [ref=f33e732] [cursor=pointer]
+          - generic [ref=f33e738]:
+            - heading "Businesses Growth" [level=2] [ref=f33e740]
+            - generic [ref=f33e744]:
+              - generic [ref=f33e745]: Oct
+              - generic [ref=f33e746]: Nov
+              - generic [ref=f33e747]: Dec
+              - generic [ref=f33e748]: Jan
+              - generic [ref=f33e749]: Feb
+              - generic [ref=f33e750]: Mar
+              - generic [ref=f33e751]: Apr
+              - generic [ref=f33e752]: May
+              - generic [ref=f33e753]: Jun
+              - generic [ref=f33e754]: Jul
+              - generic [ref=f33e755]: Aug
+              - generic [ref=f33e756]: Sep
+  - status [ref=f33e758]:
+    - generic [ref=f33e763]: "\"Playwright Test Bakery\" registered. The owner sets a password through account recovery before they can sign in online."
+    - button "Dismiss" [ref=f33e764] [cursor=pointer]: ✕

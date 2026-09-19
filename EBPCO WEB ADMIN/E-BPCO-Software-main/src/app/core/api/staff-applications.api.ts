@@ -296,6 +296,30 @@ export type DocumentResubmitResult =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
 
+/** One row of `GET/POST /staff/applications/:id/notes` — an internal, staff-only annotation, never shown to the applicant. */
+export interface ApplicationNote {
+  readonly id: string;
+  readonly applicationId: string;
+  readonly authorAccountId: string;
+  /** The server has no name column for a staff account — the email stands in, same convention `staff-directory.api.ts` uses. */
+  readonly authorEmail: string;
+  readonly parentNoteId: string | null;
+  readonly depth: 0 | 1 | 2;
+  readonly body: string;
+  readonly createdAt: string;
+}
+
+export type ListNotesResult =
+  | { readonly kind: 'ok'; readonly notes: readonly ApplicationNote[] }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
+export type AddNoteResult =
+  | { readonly kind: 'done'; readonly note: ApplicationNote }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 @Injectable({ providedIn: 'root' })
 export class StaffApplicationsApi {
   private readonly api = inject(ApiClient);
@@ -496,6 +520,43 @@ export class StaffApplicationsApi {
   }
 
   /**
+   * `GET /staff/applications/:id/notes` — internal staff notes, oldest first.
+   * `applications:read`, held by every staff role, same as `detail` above.
+   */
+  async listNotes(applicationId: string): Promise<ListNotesResult> {
+    try {
+      const result = await this.api.get<{ notes?: readonly ApplicationNote[] }>(
+        `/staff/applications/${encodeURIComponent(applicationId)}/notes`,
+      );
+      return { kind: 'ok', notes: result.notes ?? [] };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /** `POST /staff/applications/:id/notes` — a reply nests under `parentNoteId`; a top-level note passes `null`. */
+  async addNote(applicationId: string, body: string, parentNoteId: string | null): Promise<AddNoteResult> {
+    try {
+      const result = await this.api.post<{ note: ApplicationNote }>(
+        `/staff/applications/${encodeURIComponent(applicationId)}/notes`,
+        { body, parentNoteId },
+      );
+      return { kind: 'done', note: result.note };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 501) return { kind: 'unavailable' };
+        if (error.status === 404 || error.status === 422) return { kind: 'refused', message: error.message };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
    * `POST /staff/applications/archive` — moves one or more applications to
    * Cancelled. There is no delete on a filed application anywhere in this
    * system (see `ApplicationStore`'s own note); this is the only way one
@@ -537,11 +598,12 @@ function releaseStatusFor(status: ApplicationLifecycleStatus): PermitReleaseStat
  * The permit type as a name this portal's vocabulary contains — or `null`.
  *
  * **The wire and this union speak different vocabularies.** The service keys its
- * records on 17 short internal names (`'New Construction'`, `'Civil/Structural'`,
- * `'Fencing'`); `PermitType` holds the 19 published names a citizen reads
- * (`'Building Permit – New Construction'`, `'Civil / Structural Permit'`,
- * `'Fencing Permit'`). They are two vocabularies on purpose, not a mismatch to
- * repair here.
+ * records on short internal names (`'Civil/Structural'`, `'Fencing'`);
+ * `PermitType` holds the published names a citizen reads (`'Civil / Structural
+ * Permit'`, `'Fencing Permit'`, and — since backend migration 047 consolidated
+ * three separate Building Permit sub-type names into one — plain `'Building
+ * Permit'`). They are two vocabularies on purpose, not a mismatch to repair
+ * here.
  *
  * This used to be `row.permitType as PermitType`. The cast silenced the
  * compiler and put an internal key into a typed field, where

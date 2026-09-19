@@ -1,15 +1,15 @@
 import { ALL_PERMIT_TYPES } from './permit.model';
 import { FEE_RULES, feeMatrixFor, feeRulesForPermitType } from './fee-rule.model';
 
-describe('Fee rule catalog — all 19 permit mappings', () => {
-  it('every one of the 19 permit types has at least one REQUIRED fee line (the generic filing fee, at minimum)', () => {
+describe('Fee rule catalog — all 17 permit mappings', () => {
+  it('every one of the 17 permit types has at least one REQUIRED fee line (the generic filing fee, at minimum)', () => {
     for (const type of ALL_PERMIT_TYPES) {
       const entries = feeRulesForPermitType(type);
       expect(entries.some((e) => e.applicability === 'required')).toBe(true);
     }
   });
 
-  it('the filing fee applies to all 19 permit types, and only the filing fee is universal', () => {
+  it('the filing fee applies to all 17 permit types, and only the filing fee is universal', () => {
     const filingFee = FEE_RULES.find((r) => r.id === 'filing-fee')!;
     for (const type of ALL_PERMIT_TYPES) {
       expect(filingFee.applicability[type]).toBe('required');
@@ -28,17 +28,11 @@ describe('Fee rule catalog — all 19 permit mappings', () => {
 });
 
 describe('Fee rule catalog — official fee families per the task specification', () => {
-  it('Building Permit – New Construction, Addition/Extension, and Renovation/Alteration all require the building-permit-fee family', () => {
-    for (const type of [
-      'Building Permit – New Construction',
-      'Building Permit – Addition / Extension',
-      'Building Permit – Renovation / Alteration',
-    ] as const) {
-      const entries = feeRulesForPermitType(type);
-      expect(
-        entries.some((e) => e.rule.id === 'building-permit-fee' && e.applicability === 'required'),
-      ).toBe(true);
-    }
+  it('Building Permit requires the building-permit-fee family', () => {
+    const entries = feeRulesForPermitType('Building Permit');
+    expect(
+      entries.some((e) => e.rule.id === 'building-permit-fee' && e.applicability === 'required'),
+    ).toBe(true);
   });
 
   it('Electrical, Mechanical, Plumbing, Sanitary, and Electronics each require their own formula family', () => {
@@ -127,31 +121,19 @@ describe('Fee rule catalog — official fee families per the task specification'
     }
   });
 
-  it('Building Permit sub-types conditionally carry Line and Grade and Hotworks fees, per Box 6 — line items with no confirmed rate yet', () => {
-    for (const type of [
-      'Building Permit – New Construction',
-      'Building Permit – Addition / Extension',
-      'Building Permit – Renovation / Alteration',
-    ] as const) {
-      const entries = feeRulesForPermitType(type as (typeof ALL_PERMIT_TYPES)[number]);
-      const lineAndGrade = entries.find((e) => e.rule.id === 'line-and-grade-fee');
-      expect(lineAndGrade?.applicability).toBe('required');
-      const hotworks = entries.find((e) => e.rule.id === 'hotworks-fee');
-      expect(hotworks?.applicability).toBe('conditional');
-    }
+  it('Building Permit conditionally carries Line and Grade and Hotworks fees, per Box 6 — line items with no confirmed rate yet', () => {
+    const entries = feeRulesForPermitType('Building Permit');
+    const lineAndGrade = entries.find((e) => e.rule.id === 'line-and-grade-fee');
+    expect(lineAndGrade?.applicability).toBe('required');
+    const hotworks = entries.find((e) => e.rule.id === 'hotworks-fee');
+    expect(hotworks?.applicability).toBe('conditional');
   });
 
-  it('Building Permit sub-types require the Locational / Zoning of Land fee, per Box 6\'s "FOR ZONING (ZONING ADMINISTRATOR)" line', () => {
-    for (const type of [
-      'Building Permit – New Construction',
-      'Building Permit – Addition / Extension',
-      'Building Permit – Renovation / Alteration',
-    ] as const) {
-      const entries = feeRulesForPermitType(type as (typeof ALL_PERMIT_TYPES)[number]);
-      expect(entries.find((e) => e.rule.id === 'locational-zoning-fee')?.applicability).toBe(
-        'required',
-      );
-    }
+  it('Building Permit requires the Locational / Zoning of Land fee, per Box 6\'s "FOR ZONING (ZONING ADMINISTRATOR)" line', () => {
+    const entries = feeRulesForPermitType('Building Permit');
+    expect(entries.find((e) => e.rule.id === 'locational-zoning-fee')?.applicability).toBe(
+      'required',
+    );
   });
 
   it('Zoning / Locational Clearance itself requires the Locational / Zoning of Land fee — not just Building Permit filings referencing the same clearance', () => {
@@ -164,21 +146,15 @@ describe('Fee rule catalog — official fee families per the task specification'
     expect(requiredIds.sort()).toEqual(['filing-fee', 'locational-zoning-fee'].sort());
   });
 
-  it('Building Permit sub-types conditionally carry Fencing, Electronics, Surcharges, and Penalties, per Box 6\'s "FOR BUILDING / STRUCTURE (OBO)" list', () => {
-    for (const type of [
-      'Building Permit – New Construction',
-      'Building Permit – Addition / Extension',
-      'Building Permit – Renovation / Alteration',
-    ] as const) {
-      const entries = feeRulesForPermitType(type as (typeof ALL_PERMIT_TYPES)[number]);
-      for (const ruleId of [
-        'fencing-accessory-fee',
-        'electronics-permit-fee',
-        'surcharges-fee',
-        'penalties-fee',
-      ]) {
-        expect(entries.find((e) => e.rule.id === ruleId)?.applicability).toBe('conditional');
-      }
+  it('Building Permit conditionally carries Fencing, Electronics, Surcharges, and Penalties, per Box 6\'s "FOR BUILDING / STRUCTURE (OBO)" list', () => {
+    const entries = feeRulesForPermitType('Building Permit');
+    for (const ruleId of [
+      'fencing-accessory-fee',
+      'electronics-permit-fee',
+      'surcharges-fee',
+      'penalties-fee',
+    ]) {
+      expect(entries.find((e) => e.rule.id === ruleId)?.applicability).toBe('conditional');
     }
   });
 

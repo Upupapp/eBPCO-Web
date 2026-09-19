@@ -5,7 +5,7 @@ function makeRow(overrides: Partial<EvaluationQueueRow> = {}): EvaluationQueueRo
   return {
     applicationId: 'E-BPCO-2026-000001',
     referenceNumber: 'E-BPCO-2026-000001',
-    permitType: 'Building Permit – New Construction',
+    permitType: 'Building Permit',
     lifecycleStatus: 'Under Evaluation',
     applicantName: 'Raul Villanueva',
     businessId: 'BIZ-001',

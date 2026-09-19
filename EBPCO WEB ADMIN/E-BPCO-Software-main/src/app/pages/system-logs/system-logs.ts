@@ -484,6 +484,38 @@ export class SystemLogs {
     void this.loadActivityStream();
   }
 
+  /**
+   * The `access` stream, read for real — the third named stream
+   * `GET /staff/audit` exposes (`audit.controller.ts`'s `STREAMS =
+   * ['activity', 'access', 'security']`), same live/fallback pattern as
+   * `activityRows`/`securityRows`. This tab's table and KPI tiles used to
+   * read a completely separate, fixed-size, hardcoded-mock signal instead —
+   * a real, already-existing endpoint sitting unused while the page showed
+   * invented sign-ins next to two sibling tabs already reading real data.
+   */
+  protected readonly accessEntries = signal<readonly AuditEntry[]>([]);
+  protected readonly accessLive = signal(false);
+  protected readonly accessLoading = signal(false);
+  protected readonly accessError = signal<string | null>(null);
+
+  protected async loadAccessStream(): Promise<void> {
+    this.accessLoading.set(true);
+    this.accessError.set(null);
+    try {
+      const result = await this.audit.stream('access');
+      if (result.kind === 'ok') {
+        this.accessEntries.set(result.entries);
+        this.accessLive.set(true);
+        return;
+      }
+      this.accessEntries.set([]);
+      this.accessLive.set(false);
+      if (result.kind === 'failed') this.accessError.set(result.message);
+    } finally {
+      this.accessLoading.set(false);
+    }
+  }
+
   protected async loadSecurityStream(): Promise<void> {
     this.securityLoading.set(true);
     this.securityError.set(null);
@@ -851,8 +883,33 @@ export class SystemLogs {
       });
   });
 
-  private readonly accessRows = signal<AccessRow[]>(
-    BASE_ROWS.map((r, i) => ({
+  /**
+   * Prefers the real `GET /staff/audit?stream=access` entries
+   * (`accessEntries()`, populated by `loadAccessStream()` above) — same
+   * live/fallback pattern as `activityRows`/`securityRows`. `device`/
+   * `location`/`sessionDuration` are `'—'`: the real stream carries no such
+   * columns (see `AuditEntry`'s own doc comment), and this deployment does
+   * not invent them just to fill three more cells, the same discipline
+   * `securityRows` already applies to its own `environment` column.
+   */
+  protected readonly accessRows = computed<AccessRow[]>(() => {
+    if (this.accessLive()) {
+      return this.accessEntries()
+        .slice()
+        .sort((a, b) => b.sequence - a.sequence)
+        .map((e): AccessRow => ({
+          timestamp: formatLogTimestamp(e.occurredAt),
+          user: e.actorRole ?? 'system',
+          tenant: 'System',
+          event: e.outcome === 'denied' ? `${e.action} — denied` : e.action,
+          status: e.outcome === 'denied' ? 'Inactive' : 'Active',
+          ip: e.sourceAddress ?? '—',
+          device: '—',
+          location: '—',
+          sessionDuration: '—',
+        }));
+    }
+    return BASE_ROWS.map((r, i) => ({
       timestamp: timestampFor(i, r),
       user: r.name,
       tenant: r.city,
@@ -862,8 +919,8 @@ export class SystemLogs {
       device: DEVICES[i % DEVICES.length],
       location: r.city,
       sessionDuration: `${5 + (i % 50)}m`,
-    })),
-  );
+    }));
+  });
 
   private readonly errorRows = signal<ErrorRow[]>(
     BASE_ROWS.map((r, i) => ({
@@ -1043,10 +1100,11 @@ export class SystemLogs {
   selectTab(tab: LogTabKey): void {
     this.activeTab.set(tab);
     this.page.set(1);
-    // Activity and security are the two tabs with a real server stream
-    // behind them — re-fetch on every visit rather than only once at
+    // Activity, access, and security are the three tabs with a real server
+    // stream behind them — re-fetch on every visit rather than only once at
     // construction, the same as re-opening any other real queue.
     if (tab === 'activity') void this.loadActivityStream();
+    if (tab === 'access') void this.loadAccessStream();
     if (tab === 'security') void this.loadSecurityStream();
   }
 
