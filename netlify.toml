@@ -125,3 +125,31 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# ── Security headers ──────────────────────────────────────────────────────
+#
+# Nothing here before this: Netlify's own defaults ship none of these. This
+# is a staff-facing portal that handles real applicant PII behind a real
+# login, so the gap was not cosmetic.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # No external script/style/font host: this app is fully self-contained
+    # (checked against src/index.html — no third-party <script>/<link> tags).
+    # `style-src` keeps 'unsafe-inline' for Angular's per-component <style>
+    # tags, which this build (optimization disabled for "production" in
+    # angular.json) emits without a nonce or hash to pin them to instead.
+    # `connect-src` is 'self' plus the real API origin, since ApiClient calls
+    # it cross-origin (see EBPCO_API_BASE_URL above) — everything else this
+    # app talks to is itself.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://139-162-51-165.sslip.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    # A year, subdomains included. No `preload`: that is a one-way submission
+    # to browsers' built-in preload list and a human call, not a default.
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options = "nosniff"
+    # Belt-and-suspenders with frame-ancestors above, for browsers that only
+    # honour the older header.
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # No camera/mic/geolocation/USB anywhere in this app.
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), usb=()"
