@@ -32,7 +32,12 @@ async function mount(
   });
   const fixture = TestBed.createComponent(AccessRequests);
   fixture.detectChanges();
-  respond(TestBed.inject(HttpTestingController));
+  const http = TestBed.inject(HttpTestingController);
+  // `<app-topbar>` fetches the officer's real notification inbox from its own
+  // constructor (topbar.ts) — unrelated to this page, but still a real request
+  // every mount makes, and `verify()` below fails on anything left unflushed.
+  http.expectOne((r) => r.url === '/staff/notifications').flush({ notifications: [], unread: 0 });
+  respond(http);
   // `whenStable()` alone leaves the page on "Loading…": ngOnInit awaits the
   // API promise, and resolving the HttpTestingController request only queues
   // its continuation. Drain the task queue before asserting on rendered text.
