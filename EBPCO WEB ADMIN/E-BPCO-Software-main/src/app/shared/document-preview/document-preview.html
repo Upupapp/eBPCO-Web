@@ -27,9 +27,6 @@
           @if (kind() === 'official-receipt') {
             <div class="doc-page-watermark" aria-hidden="true">{{ receiptWatermarkText }}</div>
           }
-          @if (kind() === 'official-receipt' && hasOfficialReceipt()) {
-            <div class="paid-stamp" aria-hidden="true">PAID</div>
-          }
           <header class="doc-header">
             <img class="doc-seal" src="/assets/logos/logo.png" alt="" aria-hidden="true" />
             <div class="doc-letterhead">
@@ -40,7 +37,12 @@
             </div>
           </header>
 
-          <h1>{{ title() }}</h1>
+          <div class="doc-title-row">
+            <h1>{{ title() }}</h1>
+            @if (kind() === 'official-receipt' && hasOfficialReceipt()) {
+              <div class="paid-stamp" aria-hidden="true">PAID</div>
+            }
+          </div>
 
           @switch (kind()) {
             @case ('application-form') {

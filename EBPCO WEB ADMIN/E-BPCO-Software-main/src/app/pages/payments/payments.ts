@@ -38,7 +38,7 @@ import {
   PaymentMethodConfig,
 } from '../../core/api/staff-fee-config.api';
 import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
-import { PaymentReceiptModal } from '../../shared/generated-document/payment-receipt-modal';
+import { DocumentPreview } from '../../shared/document-preview/document-preview';
 
 type PaymentsTab = 'transactions' | 'fee-schedule' | 'configuration';
 type ConfigSubTab = 'payment-methods' | 'bank-information' | 'payroll';
@@ -115,7 +115,7 @@ interface PaymentRow {
     SlicePipe,
     ConfirmDialog,
     OverlayModule,
-    PaymentReceiptModal,
+    DocumentPreview,
   ],
   templateUrl: './payments.html',
   styleUrl: './payments.scss',

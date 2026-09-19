@@ -13,6 +13,16 @@
   width: 94%;
   max-height: 92vh;
   overflow-y: auto;
+  // Explicit, not left to default to `visible`: per spec, a `visible`
+  // overflow-x paired with a non-visible overflow-y (the `auto` above)
+  // computes to `auto` too, not `visible` — so this shell picked up a
+  // horizontal scrollbar the moment ANY descendant's intrinsic minimum
+  // width (a flex/grid cell's own content, none of which needs to be
+  // wider than this shell) exceeded it by even a few pixels. A print-style
+  // preview never needs to scroll sideways — its content is meant to fit
+  // the page width it's previewing, so this rules the axis out entirely
+  // rather than depending on every descendant getting sizing exactly right.
+  overflow-x: hidden;
   animation: modal-pop 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -37,6 +47,16 @@
 
 .doc-page {
   position: relative;
+  // Contains the watermark/stamp's own z-index (5 and 2 respectively) to
+  // INSIDE this element's stacking context. Without this, `position:
+  // relative` alone does not create one — a child's z-index is then
+  // compared directly against the sticky toolbar's (z-index: 2) in the
+  // SAME context as if they were siblings, and the watermark's higher
+  // z-index (5) won, painting diagonal text over the Print/Download
+  // button as the page scrolled underneath the sticky toolbar. Isolating
+  // here means nothing inside `.doc-page` can ever outrank the toolbar
+  // again, regardless of what z-index a future addition inside it uses.
+  isolation: isolate;
   background: $color-surface;
   margin: 1.5rem;
   padding: 2.5rem;
@@ -130,25 +150,37 @@
   padding: 0 8%;
 }
 
-.doc-page > .paid-stamp {
-  // Qualified with the parent for the same reason `.doc-page-watermark`
-  // is above: `.doc-page > *` was winning the specificity tie and pinning
-  // this to `position: relative`, so `top`/`right` were never absolute
-  // offsets from the page's corner at all — they shifted the stamp down
-  // and left from wherever it fell in NORMAL FLOW, which (as the first
-  // element after the watermark div, before the header) was the very top
-  // of the page. That is what put a green box across "Municipality of
-  // Castilla" no matter how large `top` was set: the letterhead moved
-  // with it.
+.doc-title-row {
+  // The stamp used to be positioned `absolute` against `.doc-page` itself,
+  // at a hand-measured, hardcoded `top: 13rem` meant to "clear the
+  // letterhead and land beside Official Receipt" — a fixed guess that only
+  // held for exactly the content height it was measured against. Any real
+  // variation above it (a two-line letterhead at a narrower width, a
+  // different watermark reflow) left the stamp floating wherever that
+  // guess landed, up to and overlapping the sticky toolbar above the page
+  // entirely — the bug this row exists to make structurally impossible.
   //
-  // Now genuinely absolute: 13rem clears the real, measured letterhead
-  // (header height ~5.5rem plus its own top offset, ~6.6rem from the
-  // page's content edge — confirmed via getBoundingClientRect on the live
-  // page) with a margin, landing the stamp beside "Official Receipt"
-  // instead of on top of the office's name.
+  // Wrapping the heading in its own `position: relative` row means the
+  // stamp's containing block IS the heading's own box, whatever height
+  // that turns out to be — it can only ever anchor beside THIS PAGE'S own
+  // "Official Receipt" text, never against the page as a whole.
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.doc-page h1 {
+  font-size: 1.3rem;
+  margin: 0 0 1.25rem;
+  color: $color-ink-900;
+  text-align: center;
+}
+
+.doc-title-row > .paid-stamp {
   position: absolute;
-  top: 13rem;
-  right: 1.9rem;
+  top: 50%;
+  right: 0.6rem;
+  transform: translateY(-50%) rotate(-8deg);
   z-index: 2;
   padding: 0.35rem 1.1rem;
   border: 3px solid $color-success;
@@ -157,17 +189,10 @@
   font-size: 1.15rem;
   font-weight: 900;
   letter-spacing: 0.12em;
-  transform: rotate(-8deg);
   opacity: 0.85;
   pointer-events: none;
   user-select: none;
-}
-
-.doc-page h1 {
-  font-size: 1.3rem;
-  margin: 0 0 1.25rem;
-  color: $color-ink-900;
-  text-align: center;
+  white-space: nowrap;
 }
 
 .doc-page h2 {
@@ -192,10 +217,21 @@
 
   dt {
     min-width: 140px;
+    flex-shrink: 0;
     color: $color-ink-300;
   }
 
   dd {
+    // A flex item's default intrinsic minimum width is its longest
+    // unbreakable run of content (`min-width: auto`) — a long reference
+    // number or id here would refuse to shrink to the grid column's
+    // actual width, which is what was pushing `.doc-shell` wider than the
+    // modal and forcing the horizontal scrollbar this rule exists to
+    // prevent. `min-width: 0` lets flexbox's own shrinking apply, and
+    // `overflow-wrap` gives a genuinely unbreakable value somewhere to
+    // wrap instead of overflowing regardless.
+    min-width: 0;
+    overflow-wrap: break-word;
     margin: 0;
     font-weight: 700;
     color: $color-ink-900;
@@ -204,6 +240,15 @@
 
 .doc-table {
   width: 100%;
+  // `table-layout: auto` (the default) sizes columns to fit content's
+  // PREFERRED width first and only shrinks them if it has to — a legal
+  // basis citation with no natural break point (a long title, a bare URL)
+  // could force a column, and so the whole table, wider than `width: 100%`
+  // actually allows. `fixed` makes the table respect its own width
+  // unconditionally and wrap cell content to fit instead — the same
+  // horizontal-overflow bug `.doc-shell`'s `overflow-x: hidden` guards
+  // against, fixed at its actual source rather than only papered over.
+  table-layout: fixed;
   border-collapse: collapse;
   margin-top: 0.75rem;
   font-size: 0.82rem;
@@ -213,6 +258,7 @@
     text-align: left;
     padding: 0.5rem 0.6rem;
     border-bottom: 1px solid $color-border;
+    overflow-wrap: break-word;
   }
 
   th {
