@@ -4,9 +4,7 @@ import { ALL_PERMIT_TYPES, PermitType, isValidPermitType } from './permit.model'
 // and order, nothing more. This test is the literal spec: if this array
 // and `ALL_PERMIT_TYPES` ever disagree, one of them is wrong.
 const EXPECTED_PERMIT_TYPES: PermitType[] = [
-  'Building Permit – New Construction',
-  'Building Permit – Renovation / Alteration',
-  'Building Permit – Addition / Extension',
+  'Building Permit',
   'Demolition Permit',
   'Zoning / Locational Clearance',
   'Architectural Permit',
@@ -26,12 +24,12 @@ const EXPECTED_PERMIT_TYPES: PermitType[] = [
 ];
 
 describe('Centralized permit-type list', () => {
-  it('is exactly the 19 required types, in exactly the required order', () => {
+  it('is exactly the 17 required types, in exactly the required order', () => {
     expect(ALL_PERMIT_TYPES).toEqual(EXPECTED_PERMIT_TYPES);
   });
 
-  it('has exactly 19 entries — no extras, no omissions', () => {
-    expect(ALL_PERMIT_TYPES.length).toBe(19);
+  it('has exactly 17 entries — no extras, no omissions', () => {
+    expect(ALL_PERMIT_TYPES.length).toBe(17);
   });
 
   it('has no duplicate values', () => {
@@ -68,8 +66,13 @@ describe('Centralized permit-type list', () => {
   });
 
   it('never includes a now-obsolete previous canonical name from before the 19-item catalog rework', () => {
+    // 'Building Permit' is NOT on this list. It was the obsolete pre-rework
+    // name once, but migration 047 (2026-09-19) made it canonical again —
+    // consolidating the three em-dash-suffixed sub-type names this rework
+    // introduced back into one plain 'Building Permit' entry, checklist now
+    // varying by application action instead of by permit-type name. Forbidding
+    // it here would forbid the current, correct value.
     for (const forbidden of [
-      'Building Permit',
       'Renovation Permit',
       'Addition / Extension Permit',
       'Sanitary / Plumbing Permit',
@@ -78,10 +81,20 @@ describe('Centralized permit-type list', () => {
       expect(ALL_PERMIT_TYPES as string[]).not.toContain(forbidden);
     }
   });
+
+  it('never includes a retired Building Permit sub-type name from before migration 047 consolidated them', () => {
+    for (const forbidden of [
+      'Building Permit – New Construction',
+      'Building Permit – Renovation / Alteration',
+      'Building Permit – Addition / Extension',
+    ]) {
+      expect(ALL_PERMIT_TYPES as string[]).not.toContain(forbidden);
+    }
+  });
 });
 
 describe('isValidPermitType — runtime validation guard', () => {
-  it('accepts every one of the 19 required values', () => {
+  it('accepts every one of the 17 required values', () => {
     for (const type of EXPECTED_PERMIT_TYPES) {
       expect(isValidPermitType(type)).toBe(true);
     }
@@ -93,7 +106,8 @@ describe('isValidPermitType — runtime validation guard', () => {
     expect(isValidPermitType('Renovation')).toBe(false); // missing " Permit" suffix
     expect(isValidPermitType('Renovation Permit')).toBe(false); // old canonical name, now obsolete
     expect(isValidPermitType('building permit')).toBe(false); // case-sensitive
-    expect(isValidPermitType('Building Permit – New Construction ')).toBe(false); // trailing space
+    expect(isValidPermitType('Building Permit ')).toBe(false); // trailing space
+    expect(isValidPermitType('Building Permit – New Construction')).toBe(false); // retired sub-type name (pre-047)
     expect(isValidPermitType('')).toBe(false);
   });
 });

@@ -59,6 +59,33 @@ export type StaffBusinessDetailResult =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
 
+/** `POST /staff/businesses` — registering a business at the counter, for an owner who may not yet have an account. */
+export interface CreateBusinessInput {
+  owner: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    mobileNumber?: string;
+  };
+  business: {
+    name: string;
+    category: string;
+    street: string;
+    barangay: string;
+    city: string;
+    province: string;
+    registrationNumber: string;
+    /** `YYYY-MM-DD` */
+    dateRegistered: string;
+  };
+}
+
+export type CreateBusinessResult =
+  | { readonly kind: 'done'; readonly businessId: string; readonly applicantId: string; readonly ownerNextStep: string | null }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 @Injectable({ providedIn: 'root' })
 export class StaffBusinessesApi {
   private readonly api = inject(ApiClient);
@@ -88,6 +115,34 @@ export class StaffBusinessesApi {
       if (error instanceof ApiError) {
         if (error.status === 404) return { kind: 'not-found' };
         if (error.status === 501) return { kind: 'unavailable' };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * The server creates the owner's account too, the same as
+   * `StaffApplicationsApi.fileOnBehalf` does for a walk-in applicant — with
+   * an unusable password; they set one later through account recovery.
+   */
+  async create(input: CreateBusinessInput): Promise<CreateBusinessResult> {
+    try {
+      const result = await this.api.post<{
+        businessId: string;
+        applicantId: string;
+        ownerNextStep: string | null;
+      }>('/staff/businesses', input, crypto.randomUUID());
+      return { kind: 'done', ...result };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        // 409 = the Idempotency-Key collided with a different request; 422 =
+        // the server's own registration service refused it (e.g. the owner's
+        // email belongs to an LGU staff account).
+        if (error.status === 409 || error.status === 422) {
+          return { kind: 'refused', message: error.message };
+        }
         return { kind: 'failed', message: error.message };
       }
       throw error;

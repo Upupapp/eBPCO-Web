@@ -11,19 +11,17 @@ import { PermitType } from './permit.model';
 // Work checkboxes — the same physical form serves all three), the real
 // MPDO Locational Clearance/Zoning Compliance form, and the real BFP
 // Castilla Fire Station FSEC and FSIC application forms. Not every one of
-// the 19 PermitType values has a matching source file (Architectural,
+// the PermitType values has a matching source file (Architectural,
 // Interior Design, Sign, Demolition, and Certificate of Occupancy still
 // use earlier non-Castilla-specific reference templates); where truly none
 // exists the value is left undefined rather than guessing at an unrelated
 // document.
 const PERMIT_FORM_FILES: Partial<Record<PermitType, string>> = {
   // Real Castilla Unified Application Form for Building Permit — one
-  // physical form, shared across all three Building Permit sub-types via
-  // its own Scope of Work checkboxes (New Construction / Renovation /
-  // Addition / etc.).
-  'Building Permit – New Construction': 'New-Construction.pdf',
-  'Building Permit – Renovation / Alteration': 'New-Construction.pdf',
-  'Building Permit – Addition / Extension': 'New-Construction.pdf',
+  // physical form for one published permit type (three separate names
+  // until migration 047 consolidated them), selected via its own Scope of
+  // Work checkboxes (New Construction / Renovation / Addition / etc.).
+  'Building Permit': 'New-Construction.pdf',
   'Architectural Permit': 'Architectural-Permit.pdf',
   'Civil / Structural Permit': 'Civil-Structural-Permit.pdf',
   'Demolition Permit': 'Demolition-Permit.pdf',
@@ -54,9 +52,7 @@ export function permitFormUrl(permitType: PermitType): string | null {
 // used as a supplementary "what you need" reference alongside (not
 // instead of) each type's own blank application form above.
 const PERMIT_CHECKLIST_TYPES: ReadonlySet<PermitType> = new Set<PermitType>([
-  'Building Permit – New Construction',
-  'Building Permit – Renovation / Alteration',
-  'Building Permit – Addition / Extension',
+  'Building Permit',
   'Certificate of Occupancy',
 ]);
 

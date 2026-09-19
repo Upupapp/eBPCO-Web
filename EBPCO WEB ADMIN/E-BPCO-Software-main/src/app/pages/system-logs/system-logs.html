@@ -65,6 +65,28 @@
           session's own locally-tracked actions, not the full record.</span
         >
       </div>
+    } @else if (activeTab() === 'access' && accessLoading()) {
+      <div class="prototype-disclaimer" role="status">
+        <app-icon name="info" [size]="16" />
+        <span>Reading the access audit trail…</span>
+      </div>
+    } @else if (activeTab() === 'access' && accessLive()) {
+      <div class="prototype-disclaimer" role="note">
+        <app-icon name="info" [size]="16" />
+        <span>
+          Live access events from the server's audit trail — real sign-ins, sign-outs, and
+          refused sign-in attempts. Showing
+          {{ accessEntries().length }} entr{{ accessEntries().length === 1 ? 'y' : 'ies' }}.
+        </span>
+      </div>
+    } @else if (activeTab() === 'access' && accessError()) {
+      <div class="prototype-disclaimer" role="alert">
+        <app-icon name="alert-triangle" [size]="16" />
+        <span>
+          The access audit trail could not be read, so what follows is sample data
+          and not a record of anything. {{ accessError() }}
+        </span>
+      </div>
     } @else if (activeTab() === 'security' && securityLoading()) {
       <div class="prototype-disclaimer" role="status">
         <app-icon name="info" [size]="16" />

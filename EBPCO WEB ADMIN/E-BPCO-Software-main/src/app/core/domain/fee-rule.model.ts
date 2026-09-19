@@ -266,9 +266,7 @@ export const FEE_RULES: FeeRule[] = [
     requiresAssessorInput: true,
     applicability: applicabilityFor(
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
       ['Architectural Permit', 'Civil / Structural Permit'],
     ),
@@ -302,9 +300,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       ['Electrical Permit'],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_DPWH_2016.url,
@@ -336,9 +332,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       ['Mechanical Permit'],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_DPWH_2016.url,
@@ -375,9 +369,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       ['Plumbing Permit'],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_DPWH_2016.url,
@@ -407,9 +399,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       ['Sanitary Permit'],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_DPWH_2016.url,
@@ -444,9 +434,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       ['Electronics Permit'],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_DPWH_2016.url,
@@ -512,9 +500,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       ['Fencing Permit'],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_DPWH_2016.url,
@@ -630,9 +616,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       ['Certificate of Occupancy', 'FSEC for Building Permit (BFP)', 'FSIC for Occupancy Permit (BFP)'],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_RA9514.url,
@@ -670,9 +654,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       ['Architectural Permit'],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
@@ -703,9 +685,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       ['Civil / Structural Permit'],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
@@ -736,9 +716,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       ['Interior Design Permit'],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
@@ -770,11 +748,7 @@ export const FEE_RULES: FeeRule[] = [
     minimumCentavos: null,
     maximumCentavos: null,
     requiresAssessorInput: true,
-    applicability: applicabilityFor([
-      'Building Permit – New Construction',
-      'Building Permit – Addition / Extension',
-      'Building Permit – Renovation / Alteration',
-    ]),
+    applicability: applicabilityFor(['Building Permit']),
     legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
     legalBasisTitle: SRC_CASTILLA_UNIFIED_FORM.title,
     verificationStatus: 'PENDING_LGU_VALIDATION',
@@ -811,9 +785,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       [],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
         'FSEC for Building Permit (BFP)',
         'FSIC for Occupancy Permit (BFP)',
       ],
@@ -856,12 +828,7 @@ export const FEE_RULES: FeeRule[] = [
     minimumCentavos: null,
     maximumCentavos: null,
     requiresAssessorInput: true,
-    applicability: applicabilityFor([
-      'Building Permit – New Construction',
-      'Building Permit – Addition / Extension',
-      'Building Permit – Renovation / Alteration',
-      'Zoning / Locational Clearance',
-    ]),
+    applicability: applicabilityFor(['Building Permit', 'Zoning / Locational Clearance']),
     legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
     legalBasisTitle: SRC_CASTILLA_UNIFIED_FORM.title,
     verificationStatus: 'PENDING_LGU_VALIDATION',
@@ -898,9 +865,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       [],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,
@@ -931,9 +896,7 @@ export const FEE_RULES: FeeRule[] = [
     applicability: applicabilityFor(
       [],
       [
-        'Building Permit – New Construction',
-        'Building Permit – Addition / Extension',
-        'Building Permit – Renovation / Alteration',
+        'Building Permit',
       ],
     ),
     legalBasisUrl: SRC_CASTILLA_UNIFIED_FORM.url,

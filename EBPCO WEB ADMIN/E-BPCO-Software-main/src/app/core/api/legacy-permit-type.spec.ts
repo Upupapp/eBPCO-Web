@@ -56,10 +56,12 @@ async function fetchOne(permitType: string) {
 }
 
 describe('A permit type the office does not publish', () => {
-  it('keeps the office vocabulary at nineteen', () => {
+  it('keeps the office vocabulary at seventeen', () => {
     // Asserted here too, because this file is the reason somebody would be
-    // tempted to add a twentieth.
-    expect(ALL_PERMIT_TYPES.length).toBe(19);
+    // tempted to add an eighteenth. (Seventeen, not the nineteen this test
+    // once asserted — migration 047 consolidated the three Building Permit
+    // sub-type names into one.)
+    expect(ALL_PERMIT_TYPES.length).toBe(17);
     expect(ALL_PERMIT_TYPES).not.toContain('Business Permit');
   });
 

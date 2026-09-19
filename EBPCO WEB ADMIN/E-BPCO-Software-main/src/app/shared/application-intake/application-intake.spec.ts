@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ApplicationIntake } from './application-intake';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord, withProjectedFields } from '../../core/domain/application.model';
-import { requirementsFor } from '../../core/domain/requirements-catalog';
+import { documentsFor, requirementsFor } from '../../core/domain/requirements-catalog';
 import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
 import { FileOnBehalfInput, FileOnBehalfResult, StaffApplicationsApi } from '../../core/api/staff-applications.api';
 
@@ -92,7 +92,7 @@ describe('ApplicationIntake — next() refuses to advance past an invalid step',
     component.next();
     fillBusiness(component);
     component.next();
-    fillApplication(component, 'Building Permit – New Construction');
+    fillApplication(component, 'Building Permit');
     component.next();
     component.next(); // no files attached yet — refused, stays on documents
     expect(component.currentStep()).toBe('documents');
@@ -111,38 +111,63 @@ describe('ApplicationIntake — dynamic document checklist', () => {
   });
 
   it("changing the permit type reloads the checklist to match that type's own requirements", () => {
-    component.applicationInfo.permitType = 'Building Permit – New Construction';
+    component.applicationInfo.permitType = 'Building Permit';
     component.onPermitTypeChange();
     const buildingDocs = component
       .documents()
       .map((d: any) => d.requirementId)
       .sort();
     expect(buildingDocs).toEqual(
-      requirementsFor('Building Permit – New Construction')
-        .documents.map((d) => d.id)
+      documentsFor('Building Permit', 'New')
+        .map((d) => d.id)
         .sort(),
     );
 
-    component.applicationInfo.permitType = 'Building Permit – Renovation / Alteration';
+    component.applicationInfo.permitType = 'Demolition Permit';
     component.onPermitTypeChange();
-    const renovationDocs = component
+    const demolitionDocs = component
       .documents()
       .map((d: any) => d.requirementId)
       .sort();
-    expect(renovationDocs).toEqual(
-      requirementsFor('Building Permit – Renovation / Alteration')
+    expect(demolitionDocs).toEqual(
+      requirementsFor('Demolition Permit')
         .documents.map((d) => d.id)
         .sort(),
     );
-    expect(renovationDocs).not.toEqual(buildingDocs);
+    expect(demolitionDocs).not.toEqual(buildingDocs);
   });
 
-  it('offers exactly the fixed 16-value permit-type list, in the required order, with no domain/category selection step', () => {
+  it(
+    'changing the TRANSACTION TYPE reloads the checklist too, for Building Permit — since migration 047 ' +
+      "consolidated its three former permit-type entries into one, its checklist now varies by " +
+      'New/Renewal/Amendment instead',
+    () => {
+      component.applicationInfo.permitType = 'Building Permit';
+      component.applicationInfo.applicationAction = 'New';
+      component.onPermitTypeChange();
+      const newDocs = component
+        .documents()
+        .map((d: any) => d.requirementId)
+        .sort();
+      expect(newDocs).toEqual(documentsFor('Building Permit', 'New').map((d) => d.id).sort());
+
+      component.applicationInfo.applicationAction = 'Renewal';
+      component.onApplicationActionChange();
+      const renewalDocs = component
+        .documents()
+        .map((d: any) => d.requirementId)
+        .sort();
+      expect(renewalDocs).toEqual(documentsFor('Building Permit', 'Renewal').map((d) => d.id).sort());
+      expect(renewalDocs).not.toEqual(newDocs);
+    },
+  );
+
+  it('offers exactly the fixed permit-type list, in the required order, with no domain/category selection step', () => {
     expect(component.permitTypeOptions).toEqual(ALL_PERMIT_TYPES);
   });
 
   it('clearing the permit type back to empty clears the checklist too', () => {
-    component.applicationInfo.permitType = 'Building Permit – New Construction';
+    component.applicationInfo.permitType = 'Building Permit';
     component.onPermitTypeChange();
     expect(component.documents().length).toBeGreaterThan(0);
     component.applicationInfo.permitType = '';
@@ -178,7 +203,7 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
       applicantId: 'APL-server-9',
       applicant: 'Juan Dela Cruz',
       location: 'Barangay ' + (component.barangays?.[0] ?? 'Poblacion'),
-      permitType: 'Building Permit – New Construction',
+      permitType: 'Building Permit',
       applicationAction: 'New',
       officer: '—',
       dateSubmitted: new Date().toISOString().slice(0, 10),
@@ -227,7 +252,7 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
     component.next();
     fillBusiness(component);
     component.next();
-    fillApplication(component, 'Building Permit – New Construction');
+    fillApplication(component, 'Building Permit');
     component.next();
     attachAllRequiredDocuments(component);
     component.next();
@@ -249,7 +274,7 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
     // request shape — not a locally-invented Applicant/Business/
     // ApplicationRecord trio.
     expect(fileOnBehalfCalls[0].business?.name).toBe('Dela Cruz Sari-Sari Store');
-    expect(fileOnBehalfCalls[0].permitType).toBe('Building Permit – New Construction');
+    expect(fileOnBehalfCalls[0].permitType).toBe('Building Permit');
 
     const record = store.getById('APP-1');
     expect(record).toBeTruthy();
@@ -267,7 +292,7 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
     await component.submit();
 
     const docs = store.getDocuments('APP-1');
-    const requiredCount = requirementsFor('Building Permit – New Construction').documents.filter(
+    const requiredCount = requirementsFor('Building Permit').documents.filter(
       (d) => d.required,
     ).length;
     expect(docs.length).toBeGreaterThanOrEqual(requiredCount);

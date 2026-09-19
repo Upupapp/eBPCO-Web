@@ -42,8 +42,8 @@ export interface ApplicationRecord {
    * The PUBLISHED permit name, or `null` when the portal cannot name it.
    *
    * The wire speaks a different vocabulary: the service keys records on short
-   * internal names ('New Construction'), while this union holds the published
-   * names a citizen reads ('Building Permit – New Construction'). The mapper
+   * internal names ('Civil/Structural'), while this union holds the published
+   * names a citizen reads ('Civil / Structural Permit'). The mapper
    * used to cast one into the other, which put a value the union does not
    * contain into this field — and `REQUIREMENTS_CATALOG[permitType]` then
    * returns `undefined` for it, which its callers dereference. A TypeError on
@@ -105,14 +105,14 @@ export interface ApplicationRecord {
    * does not publish.
    *
    * NOT a duplicate of `permitType`. They answer different questions:
-   * `permitType` is *"is this one of the office's nineteen?"* and is null when
-   * it is not; `filedAs` is *"what did the server call it?"* and is null only
-   * when the server said nothing.
+   * `permitType` is *"is this one of the office's own published types?"* and
+   * is null when it is not; `filedAs` is *"what did the server call it?"*
+   * and is null only when the server said nothing.
    *
-   * `Business Permit` is the case that forced this. It is a twentieth value on
+   * `Business Permit` is the case that forced this. It is one extra value on
    * the wire, the legacy flow still files against it, and the owner's ruling is
-   * that the office's nineteen published names stand — so it cannot join
-   * `PermitType` without contradicting the ruling, and the nineteen are
+   * that the office's published names stand — so it cannot join
+   * `PermitType` without contradicting the ruling, and the full list is
    * asserted in `permit.model.spec.ts` and used by the cross-repo parity gate.
    *
    * Until 2 Sep such rows rendered **"Not recorded"**, which was false: the type

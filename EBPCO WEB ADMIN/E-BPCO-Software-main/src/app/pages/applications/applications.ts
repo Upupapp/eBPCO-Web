@@ -355,6 +355,7 @@ export class Applications {
           if (this.id() !== id) return; // navigated away before this resolved
           if (result.kind === 'ok') this.realDetail.set(result.detail);
         });
+        void this.loadComments(id);
         // `row` above can be stale: `this.store` is populated once by
         // `AdminLayout`'s initial `ensureLoaded()` and never refetched again
         // on its own, so a status change made anywhere else — a payment
@@ -383,15 +384,36 @@ export class Applications {
   // independently hardcoded 10-row array.
   protected readonly rows = computed(() => this.store.applications());
   /**
-   * Local-only notes, per application — no backend endpoint exists to store
-   * or share these (see the tab's own honest notice). Starts empty and is
-   * reset to empty on every application change (see the `id()` effect); it
-   * used to be one signal seeded once with the shared mock `COMMENTS` array,
-   * so every application showed the exact same canned conversation —
-   * including a brand-new application seconds old, with a full "thread"
-   * already attached that could not possibly be its own.
+   * Real, from `GET /staff/applications/:id/notes` — an internal staff
+   * workspace, never shown to the applicant. Used to be one signal seeded
+   * once with the shared mock `COMMENTS` array (removed), so every
+   * application showed the exact same canned conversation, including a
+   * brand-new application seconds old with a full "thread" that could not
+   * possibly be its own; then a local-only mock nothing ever sent anywhere,
+   * so a note an officer left vanished the moment they reloaded and a
+   * second officer on the same file never saw it at all. Reset to empty on
+   * every application change (see the `id()` effect) and reloaded by
+   * `loadComments()`, fired from that same effect.
    */
   protected readonly comments = signal<CommentItem[]>([]);
+  protected readonly commentsError = signal<string | null>(null);
+
+  private async loadComments(applicationId: string): Promise<void> {
+    this.commentsError.set(null);
+    const result = await this.applicationsApi.listNotes(applicationId);
+    if (this.id() !== applicationId) return; // navigated away before this resolved
+    if (result.kind === 'ok') {
+      this.comments.set(result.notes.map((n) => ({
+        id: n.id,
+        author: n.authorEmail,
+        timeAgo: formatDateTime(n.createdAt),
+        text: n.body,
+        depth: n.depth,
+      })));
+      return;
+    }
+    if (result.kind === 'failed') this.commentsError.set(result.message);
+  }
   protected readonly timeline = TIMELINE;
   /**
    * The real position of the selected application within the "happy path"
@@ -1352,29 +1374,16 @@ export class Applications {
     this.closeMoreMenu();
   }
 
-  // ---- Info view: Send Notification + Edit Profile ---------------------
-
-  protected readonly showNotifyModal = signal(false);
-  protected readonly notifyMessage = signal('');
-
-  protected openNotify(): void {
-    this.notifyMessage.set('');
-    this.showNotifyModal.set(true);
-  }
-
-  protected cancelNotify(): void {
-    this.showNotifyModal.set(false);
-  }
-
-  protected sendNotify(): void {
-    const text = this.notifyMessage().trim();
-    if (!text) return;
-    this.comments.update((list) => [
-      ...list,
-      { author: 'System Notification', timeAgo: 'just now', text, depth: 0 },
-    ]);
-    this.showNotifyModal.set(false);
-  }
+  // ---- Info view: Edit Profile -------------------------------------------
+  //
+  // "Send Notification" used to live here too — a free-text message
+  // supposedly sent to the applicant, actually just appended to this same
+  // application's internal STAFF notes list. Doubly wrong: never delivered
+  // anywhere, and even as a local fake it was logged to the wrong audience.
+  // No real endpoint exists for a staff-authored free-text message to one
+  // applicant (the notification catalog is system-triggered only — see
+  // `staff-catalog.ts`'s own "no invented vocabulary" discipline), so this
+  // is removed rather than left fake.
 
   protected readonly editingProfile = signal(false);
   protected profileEditCity = '';
@@ -1737,10 +1746,14 @@ export class Applications {
   }
 
   // ---- Comments tab -------------------------------------------------------
+  //
+  // No edit action: `application_notes` is append-only, same "correction is a
+  // new entry, never a silent rewrite" discipline every other record in this
+  // system already follows (a transition, a payment adjustment...). A
+  // colleague who has already read a note deserves that same guarantee.
 
   protected readonly replyTarget = signal<CommentItem | null>(null);
-  protected readonly editingComment = signal<CommentItem | null>(null);
-  protected readonly editingText = signal('');
+  protected readonly sendingComment = signal(false);
 
   protected startReply(c: CommentItem): void {
     this.replyTarget.set(c);
@@ -1750,33 +1763,35 @@ export class Applications {
     this.replyTarget.set(null);
   }
 
-  protected startEdit(c: CommentItem): void {
-    this.editingComment.set(c);
-    this.editingText.set(c.text);
-  }
-
-  protected cancelEdit(): void {
-    this.editingComment.set(null);
-    this.editingText.set('');
-  }
-
-  protected saveEdit(): void {
-    const target = this.editingComment();
-    const text = this.editingText().trim();
-    if (!target || !text) return;
-    this.comments.update((list) => list.map((c) => (c === target ? { ...c, text } : c)));
-    this.cancelEdit();
-  }
-
-  protected sendComment(): void {
+  protected async sendComment(): Promise<void> {
     const text = this.newMessage().trim();
-    if (!text) return;
+    const id = this.id();
+    if (!text || !id || this.sendingComment()) return;
     const target = this.replyTarget();
-    const depth = target ? (Math.min(target.depth + 1, 2) as 0 | 1 | 2) : 0;
-    this.comments.update((list) => [
-      ...list,
-      { author: this.session.name() || 'You', timeAgo: 'just now', text, depth },
-    ]);
+    this.sendingComment.set(true);
+    try {
+      const result = await this.applicationsApi.addNote(id, text, target?.id ?? null);
+      if (result.kind !== 'done') {
+        this.toast.error(
+          result.kind === 'unavailable'
+            ? 'This deployment cannot save notes yet.'
+            : result.message,
+        );
+        return;
+      }
+      this.comments.update((list) => [
+        ...list,
+        {
+          id: result.note.id,
+          author: this.session.name() || 'You',
+          timeAgo: formatDateTime(result.note.createdAt),
+          text: result.note.body,
+          depth: result.note.depth,
+        },
+      ]);
+    } finally {
+      this.sendingComment.set(false);
+    }
     this.newMessage.set('');
     this.replyTarget.set(null);
   }

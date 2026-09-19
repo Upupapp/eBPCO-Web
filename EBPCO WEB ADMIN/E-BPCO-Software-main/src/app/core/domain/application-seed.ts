@@ -20,7 +20,7 @@ import { ApplicationDocument, DocumentHistoryEntry, DocumentStatus } from './doc
 import { EvaluationRecord } from './evaluation.model';
 import { AuditEvent } from './audit.model';
 import { AppNotification } from './notification.model';
-import { RequirementDocument, requirementsFor } from './requirements-catalog';
+import { RequirementDocument, documentsFor, requirementsFor } from './requirements-catalog';
 import { departmentName } from './department.model';
 
 // ---- Deterministic PRNG ----------------------------------------------------
@@ -80,14 +80,13 @@ const LOCATIONS = [
 
 // The centralized permit-type catalog (permit.model.ts) IS the "one
 // centralized list" this weighting reuses — no separate/duplicated type
-// list lives here, and every weight key is one of the exact 19 supported
-// values (no aliases). Weighted toward Building Permit – New Construction
-// and Building Permit – Renovation / Alteration as the highest real-world
-// volume, with the remaining ancillary/certificate types sharing the rest.
+// list lives here, and every weight key is one of the exact supported
+// values (no aliases). Weighted toward Building Permit as the highest
+// real-world volume (0.14 + 0.07 + 0.06 from its three former sub-type
+// weights, before migration 047 consolidated them into one entry), with
+// the remaining ancillary/certificate types sharing the rest.
 const PERMIT_WEIGHTS: [PermitType, number][] = [
-  ['Building Permit – New Construction', 0.14],
-  ['Building Permit – Renovation / Alteration', 0.07],
-  ['Building Permit – Addition / Extension', 0.06],
+  ['Building Permit', 0.27],
   ['Demolition Permit', 0.03],
   ['Zoning / Locational Clearance', 0.03],
   ['Architectural Permit', 0.05],
@@ -336,6 +335,10 @@ function buildApplicationBundle(
   const officer = OFFICERS[Math.floor(rand() * OFFICERS.length)];
   const applicationAction: ApplicationAction =
     APPLICATION_ACTIONS[Math.floor(rand() * APPLICATION_ACTIONS.length)];
+  // Building Permit's checklist varies by action since migration 047 (see
+  // requirements-catalog.ts's `documentsByAction`) — every other type
+  // answers the same regardless, so this stays correct for them too.
+  const requiredDocuments = documentsFor(permitType, applicationAction);
 
   const id = `E-BPCO-2026-${String(100 + index).padStart(6, '0')}`;
 
@@ -379,12 +382,12 @@ function buildApplicationBundle(
   // Documents — one per requirement in this permit type's own catalog
   // entry (see requirements-catalog.ts), never a generic rotating list —
   // status follows how far the application actually got.
-  requirements.documents.forEach((req, d) => {
+  requiredDocuments.forEach((req, d) => {
     let status: DocumentStatus =
       pos.evaluationStagesPassed >= 1 || lifecycleStatus === 'Rejected' ? 'Accepted' : 'Submitted';
     if (
       lifecycleStatus === 'Revision Required' &&
-      d === requirements.documents.length - 1 &&
+      d === requiredDocuments.length - 1 &&
       req.required
     ) {
       status = 'Revision Required';
@@ -719,14 +722,16 @@ export function buildSeed(referenceDate: Date = new Date()): SeedResult {
 
   // ---- Guaranteed showcase: one complete, fully-resolved sample per
   // permit type (satisfies "create a sample package for every application
-  // type"). The Renovation showcase specifically demonstrates a revision
-  // loop before final approval, per the "Required renovation example".
+  // type"). The Building Permit showcase specifically demonstrates a
+  // revision loop before final approval, per the "Required renovation
+  // example" (Renovation/Alteration was one of its three sub-types before
+  // migration 047 consolidated them into this one entry).
   for (const permitType of ALL_PERMIT_TYPES) {
     const business = businesses[cursor % businesses.length];
     const applicant = applicants.find((a) => a.id === business.ownerApplicantId)!;
     buildApplicationBundle(ctx, cursor, business, applicant, permitType, {
       forcedStatus: 'Completed',
-      forceRevisionLoop: permitType === 'Building Permit – Renovation / Alteration',
+      forceRevisionLoop: permitType === 'Building Permit',
       daysAgo: 20 + (cursor % 30),
     });
     cursor++;

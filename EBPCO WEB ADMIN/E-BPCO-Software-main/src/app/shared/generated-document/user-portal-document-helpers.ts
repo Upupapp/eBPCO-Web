@@ -39,11 +39,14 @@ export interface DocumentTitleInfo {
   subtitle: string | null;
 }
 
-/** Splits "Building Permit – New Construction" into a title + scope subtitle; every other permit type's full name is already a clean standalone title. */
+/**
+ * Every permit type's full name is a clean standalone title.
+ *
+ * Until migration 047 consolidated the three Building Permit sub-types,
+ * their names ("Building Permit – New Construction" and so on) carried an
+ * em dash this function split into a title + scope subtitle. No `PermitType`
+ * value contains one any more.
+ */
 export function documentTitleFor(permitType: PermitType): DocumentTitleInfo {
-  if (permitType.includes('–')) {
-    const [title, subtitle] = permitType.split('–').map((s) => s.trim());
-    return { title, subtitle: subtitle.toUpperCase() };
-  }
   return { title: permitType, subtitle: null };
 }

@@ -97,8 +97,8 @@ describe('StaffApplicationsApi', () => {
   });
 
   it('refuses an internal permit key rather than casting it into the union', async () => {
-    // The service keys records on 'New Construction'; PermitType holds the
-    // published 'Building Permit – New Construction'. A cast used to let the
+    // The service keys records on 'Civil/Structural'; PermitType holds the
+    // published 'Civil / Structural Permit'. A cast used to let the
     // key through, and REQUIREMENTS_CATALOG[key] is undefined — whose callers
     // dereference it. A TypeError on real data, not a silent miss.
     const record = await fetchOne({ permitType: 'Civil/Structural' });

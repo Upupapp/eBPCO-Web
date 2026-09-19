@@ -22,11 +22,11 @@ export interface DocumentItem {
 }
 
 export interface CommentItem {
+  id: string;
   author: string;
   timeAgo: string;
   text: string;
   depth: 0 | 1 | 2;
-  thumbnails?: string[];
 }
 
 export interface TimelineItem {
@@ -106,46 +106,6 @@ export const DOCUMENTS: DocumentItem[] = [
     filename: 'fire_requirements.pdf',
     uploadedDate: 'Sun-Apr 14, 2026',
     status: 'Missing',
-  },
-];
-
-export const COMMENTS: CommentItem[] = [
-  {
-    author: 'Engr. Ricardo Buenaflor',
-    timeAgo: 'about 2 minutes ago',
-    text: 'Initial Interview Done!',
-    depth: 0,
-    thumbnails: ['#8b5a2b', '#1f2430', '#7c3aed'],
-  },
-  {
-    author: 'Engr. Julius Bragais',
-    timeAgo: 'about 1 hour ago',
-    text: 'Wow impressive!',
-    depth: 0,
-  },
-  {
-    author: 'Engr. Ma. Teresa Arquero',
-    timeAgo: 'about 2 hours ago',
-    text: 'Wow, that is really nice.',
-    depth: 1,
-  },
-  {
-    author: 'Engr. Carlo Salvador',
-    timeAgo: 'about 3 hours ago',
-    text: 'Nice work, makes me think of The Money Pit.',
-    depth: 2,
-  },
-  {
-    author: 'Engr. Leonardo Ariola',
-    timeAgo: 'about 4 hours ago',
-    text: 'Some Documents Are Missing. Please upload a copy of Site Development',
-    depth: 0,
-  },
-  {
-    author: 'Applicant',
-    timeAgo: 'about 10 hours ago',
-    text: 'Uploaded the requested Documents.',
-    depth: 0,
   },
 ];
 

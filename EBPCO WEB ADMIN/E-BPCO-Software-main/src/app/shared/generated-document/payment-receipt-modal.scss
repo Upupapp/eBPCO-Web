@@ -1,0 +1,120 @@
+@use '../styles/tokens' as *;
+@use '../styles/modal';
+@use '../styles/_generated-document' as *;
+
+:host {
+  display: contents;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 30, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 100;
+  overflow-y: auto;
+  padding: 2rem 1rem;
+}
+
+.doc-modal-shell {
+  background: $color-bg-subtle;
+  border-radius: $radius-md;
+  width: 100%;
+  max-width: 640px;
+  overflow: hidden;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+}
+
+.doc-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  background: $color-surface;
+  border-bottom: 1px solid $color-border;
+  font-weight: 700;
+  color: $color-ink-900;
+}
+
+.doc-toolbar-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.doc-modal-scroll {
+  padding: 1.5rem;
+  max-height: 82vh;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.receipt-page {
+  width: 100%;
+  max-width: 480px;
+}
+
+.receipt-header {
+  text-align: center;
+  border-bottom: 1px solid $doc-border;
+  padding-bottom: 0.9rem;
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0.2rem 0;
+    font-size: 15pt;
+    letter-spacing: 0.03em;
+  }
+}
+
+.receipt-agency {
+  margin: 0;
+  font-family: $doc-font-sans;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $doc-muted;
+}
+
+.receipt-or-no {
+  margin: 0.2rem 0 0;
+  font-family: $doc-font-sans;
+  font-weight: 700;
+}
+
+.receipt-amount-section {
+  text-align: center;
+}
+
+.receipt-amount {
+  margin: 0;
+  font-size: 20pt;
+  font-weight: 700;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .modal-backdrop {
+    position: static;
+    background: none;
+    padding: 0;
+    display: block;
+  }
+
+  .doc-modal-shell {
+    max-width: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .doc-modal-scroll {
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+  }
+}
