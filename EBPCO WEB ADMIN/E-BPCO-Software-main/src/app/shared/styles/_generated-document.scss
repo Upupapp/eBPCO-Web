@@ -43,6 +43,20 @@ $doc-page-min-height: 297mm;
 .doc-generated-page {
   @include doc-page;
   border: 1px solid #d0d0d0;
+  // The watermark inside (`.doc-generated-watermark`, wherever a component
+  // defines it) is an `inset: 0` box rotated -30deg — even with its OWN
+  // `overflow: hidden`, a rotated rectangle's rendered bounding box is
+  // unavoidably wider than the box it started as (basic trig: a rotated
+  // W×H rectangle's bounding width is `W·cos + H·sin`, always ≥ W for any
+  // non-zero angle). `overflow: hidden` on the watermark itself clips its
+  // OWN content, not the fact that its rotated paint area extends past
+  // where it was laid out — that only ever gets clipped by something
+  // outside it. This is confirmed against the live page's own
+  // `getBoundingClientRect()`: the watermark measured ~1246px wide
+  // against this page's own 793.7px (210mm/A4) width. Without this, that
+  // extra width was exactly what was showing up as the whole modal's
+  // horizontal scrollbar.
+  overflow: hidden;
 
   @media print {
     border: none;

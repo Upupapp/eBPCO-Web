@@ -700,7 +700,17 @@
 }
 
 @if (receiptTarget(); as t) {
-  <app-payment-receipt-modal [payment]="t" (closed)="closeReceipt()" />
+  <!-- Same real, backend-fetched receipt view Permit Release's own "View
+       Receipt" uses (kind="official-receipt") — this used to be a separate,
+       plainer component that only ever showed what PaymentQueueRow itself
+       carried, and looked nothing like the richer preview the rest of the
+       portal already had for the same document. -->
+  <app-document-preview
+    [applicationId]="t.applicationId"
+    [transactionId]="t.id"
+    kind="official-receipt"
+    (closed)="closeReceipt()"
+  />
 }
 
 @if (correctReceiptTarget(); as t) {
