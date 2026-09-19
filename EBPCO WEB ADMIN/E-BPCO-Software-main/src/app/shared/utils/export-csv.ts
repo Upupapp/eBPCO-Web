@@ -6,8 +6,25 @@
 // a download via a Blob + temporary <a>, rather than a round trip to an
 // endpoint that doesn't exist for this.
 
-function toCsvCell(value: unknown): string {
-  const str = value === null || value === undefined ? '' : String(value);
+// Exported for its own direct test (export-csv.spec.ts) -- a pure,
+// deterministic function is the natural unit to test, rather than only
+// reachable indirectly through downloadCsv's Blob/DOM side effects.
+export function toCsvCell(value: unknown): string {
+  let str = value === null || value === undefined ? '' : String(value);
+
+  // OWASP CSV/formula injection: a cell beginning with =, +, - or @ (or a
+  // leading tab/CR) is read as a FORMULA by Excel, Sheets and LibreOffice
+  // when this file is opened -- not shown as the literal text it is. Several
+  // of these exports carry fields an applicant supplies themselves (business
+  // name, address, remarks on Applications/Businesses/Payments/evaluations),
+  // so this is reachable by anyone who can register a business, not just an
+  // officer typing into the app. A leading apostrophe is the standard
+  // spreadsheet escape that forces text interpretation; it is a formatting
+  // hint that never appears as visible content once opened.
+  if (/^[=+\-@\t\r]/.test(str)) {
+    str = `'${str}`;
+  }
+
   if (/[",\n]/.test(str)) {
     return `"${str.replace(/"/g, '""')}"`;
   }
