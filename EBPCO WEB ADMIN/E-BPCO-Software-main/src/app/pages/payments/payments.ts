@@ -158,11 +158,6 @@ export class Payments {
     return LINE_LABELS[line];
   }
 
-  /** What the fee schedule in force said this line should be, before any officer override — kept beside the officer-set `amountCentavos` on every line so "charged less than the ordinance prescribes" is answerable later (see StaffPaymentsApi's own doc comment). */
-  protected computedForLine(assessment: Assessment, line: FeeLine): number {
-    return assessment.lines.find((l) => l.line === line)?.computedCentavos ?? 0;
-  }
-
   // ---- Permissions ---------------------------------------------------------
 
   protected readonly canConfigurePayments = computed(() => {

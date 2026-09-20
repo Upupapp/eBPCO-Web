@@ -115,65 +115,48 @@
             <span class="muted-sub">Fee schedule version {{ assessment.feeScheduleVersion }}</span>
           </div>
 
-          <div class="table-wrap">
-            <table class="detail-table">
-              <thead>
-                <tr>
-                  <th>Line</th><th>Included</th><th>Schedule Says</th><th>Amount (₱)</th><th>Basis</th><th></th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (line of feeLines; track line) {
-                  @if (assessment.status === 'Draft' && canEditAssessment()) {
-                    <tr>
-                      <td>{{ lineLabel(line) }}</td>
-                      <td>
-                        <input type="checkbox" [(ngModel)]="lineDrafts[line].included" [attr.aria-label]="lineLabel(line) + ' included'" />
-                      </td>
-                      <td>{{ formatPHP(computedForLine(assessment, line)) }}</td>
-                      <td>
-                        <input
-                          type="number" min="0" step="0.01"
-                          [(ngModel)]="lineDrafts[line].amount"
-                          [attr.aria-label]="lineLabel(line) + ' amount in pesos'"
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          placeholder="Ordinance or issuance this rests on"
-                          [(ngModel)]="lineDrafts[line].basis"
-                          [attr.aria-label]="lineLabel(line) + ' basis'"
-                        />
-                      </td>
-                      <td>
-                        <button
-                          type="button" class="btn-outline" [disabled]="workspaceWorking()"
-                          (click)="saveLine(line)"
-                        >
-                          Save
-                        </button>
-                      </td>
-                    </tr>
-                  } @else {
-                    <tr>
-                      <td>{{ lineLabel(line) }}</td>
-                      <td>{{ lineDrafts[line].included ? 'Yes' : 'No' }}</td>
-                      <td>{{ formatPHP(computedForLine(assessment, line)) }}</td>
-                      <td>{{ formatPHP(+lineDrafts[line].amount * 100) }}</td>
-                      <td>{{ lineDrafts[line].basis || '—' }}</td>
-                      <td></td>
-                    </tr>
-                  }
-                }
-              </tbody>
-              <tfoot>
-                <tr class="strong-cell">
-                  <td colspan="3">Total</td>
-                  <td colspan="3">{{ formatPHP(assessment.totalCentavos) }}</td>
-                </tr>
-              </tfoot>
-            </table>
+          <div class="fee-lines">
+            @for (line of feeLines; track line) {
+              @if (assessment.status === 'Draft' && canEditAssessment()) {
+                <div class="fee-line">
+                  <label class="fee-line-name">
+                    <input type="checkbox" [(ngModel)]="lineDrafts[line].included" [attr.aria-label]="lineLabel(line) + ' included'" />
+                    {{ lineLabel(line) }}
+                  </label>
+                  <div class="fee-line-amount">
+                    <span class="peso-prefix" aria-hidden="true">₱</span>
+                    <input
+                      type="number" min="0" step="0.01"
+                      [(ngModel)]="lineDrafts[line].amount"
+                      [attr.aria-label]="lineLabel(line) + ' amount in pesos'"
+                    />
+                  </div>
+                  <input
+                    type="text" class="fee-line-basis"
+                    placeholder="Ordinance or issuance this rests on"
+                    [(ngModel)]="lineDrafts[line].basis"
+                    [attr.aria-label]="lineLabel(line) + ' basis'"
+                  />
+                  <button
+                    type="button" class="btn-outline" [disabled]="workspaceWorking()"
+                    (click)="saveLine(line)"
+                  >
+                    Save
+                  </button>
+                </div>
+              } @else {
+                <div class="fee-line fee-line--readonly">
+                  <span class="fee-line-name">{{ lineLabel(line) }}</span>
+                  <span class="fee-line-amount-value">{{ formatPHP(+lineDrafts[line].amount * 100) }}</span>
+                  <span class="fee-line-basis-value">{{ lineDrafts[line].basis || 'No basis on file' }}</span>
+                </div>
+              }
+            }
+          </div>
+
+          <div class="fee-total">
+            <span>Total</span>
+            <span>{{ formatPHP(assessment.totalCentavos) }}</span>
           </div>
 
           <div class="assessment-actions">

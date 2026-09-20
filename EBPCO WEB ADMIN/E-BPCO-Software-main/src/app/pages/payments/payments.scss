@@ -603,6 +603,137 @@ h3 {
   }
 }
 
+// ── Fee lines — replaces the old 6-column table (Line/Included/Schedule
+// Says/Amount/Basis/Save), which read as a cramped spreadsheet. "Schedule
+// Says" (the published fee schedule's own figure, kept only so "charged
+// less than the ordinance prescribes" was answerable later) is gone from
+// this view entirely — the number itself is still recorded on the
+// assessment either way, just not shown here (found live 2026-09-20).
+// Basis stays, and stays required (the server hard-rejects a non-zero
+// included line with no basis — RA 11032's transparency requirement), but
+// now reads as a quieter citation field under the amount rather than its
+// own full-width column.
+.fee-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.fee-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) 150px minmax(0, 1.5fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-bg-subtle;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fee-line-name {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $color-ink-900;
+
+  input[type='checkbox'] {
+    flex: 0 0 auto;
+  }
+}
+
+.fee-line-amount {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .peso-prefix {
+    position: absolute;
+    left: 0.75rem;
+    color: $color-ink-300;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-sm;
+    padding: 0.55rem 0.65rem 0.55rem 1.7rem;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: $color-ink-900;
+    background: $color-surface;
+
+    &:focus {
+      outline: none;
+      border-color: $color-info;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+    }
+  }
+}
+
+.fee-line-basis {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: $radius-sm;
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  font-size: 0.78rem;
+  color: $color-ink-400;
+  background: transparent;
+
+  &:hover {
+    border-color: $color-border-strong;
+  }
+  &:focus {
+    outline: none;
+    color: $color-ink-900;
+    background: $color-surface;
+    border-color: $color-info;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+  }
+  &::placeholder {
+    color: $color-ink-100;
+  }
+}
+
+.fee-line--readonly {
+  grid-template-columns: minmax(0, 1.3fr) 150px minmax(0, 1.5fr);
+  background: $color-surface;
+
+  .fee-line-amount-value {
+    font-weight: 700;
+    color: $color-ink-900;
+  }
+
+  .fee-line-basis-value {
+    font-size: 0.78rem;
+    color: $color-ink-300;
+  }
+}
+
+.fee-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.9rem;
+  padding: 0.9rem 1rem;
+  border-radius: $radius-md;
+  background: $color-bg-muted;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: $color-ink-900;
+}
+
 .assessment-actions {
   display: flex;
   align-items: center;
