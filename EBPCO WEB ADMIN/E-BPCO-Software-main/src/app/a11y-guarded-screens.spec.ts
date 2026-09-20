@@ -12,6 +12,7 @@ import { Evaluations } from './pages/evaluations/evaluations';
 import { Payments } from './pages/payments/payments';
 import { PermitRelease } from './pages/permit-release/permit-release';
 import { Businesses } from './pages/businesses/businesses';
+import { Citizens } from './pages/citizens/citizens';
 import { Archive } from './pages/archive/archive';
 import { AccessRequests } from './pages/access-requests/access-requests';
 import { UserRoles } from './pages/user-roles/user-roles';
@@ -57,6 +58,8 @@ const SCREENS: ReadonlyArray<{ route: string; component: unknown }> = [
   { route: 'payments', component: Payments },
   { route: 'permit-release', component: PermitRelease },
   { route: 'businesses', component: Businesses },
+  { route: 'citizens', component: Citizens },
+  { route: 'citizens/:id', component: Citizens },
   { route: 'archive', component: Archive },
   { route: 'access-requests', component: AccessRequests },
   { route: 'user-roles', component: UserRoles },

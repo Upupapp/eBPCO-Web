@@ -60,9 +60,19 @@ export class ApiClient {
    * applications, documents and payments are archived, and staff accounts are
    * disabled. DELETE exists for exactly one class of thing: a live session or a
    * registered device, neither of which is a record of anything that happened.
+   *
+   * `body`/`idempotencyKey` optional and both new (the Citizens module's own
+   * "Sign out all sessions", which — unlike `StaffDirectoryApi.revokeSession`,
+   * this portal's first and until-now only DELETE — needs a reason attached
+   * and is a real mutation worth replay protection). Angular's `HttpClient
+   * .delete` accepts a body only via the options object, which is why this
+   * cannot just be a third positional argument the way `post`'s is.
    */
-  async delete<T>(path: string): Promise<T> {
-    return this.send(() => firstValueFrom(this.http.delete<T>(`${this.baseUrl}${path}`)));
+  async delete<T>(path: string, body?: unknown, idempotencyKey?: string): Promise<T> {
+    return this.send(() => firstValueFrom(this.http.delete<T>(`${this.baseUrl}${path}`, {
+      ...(body === undefined ? {} : { body }),
+      headers: idempotencyKey === undefined ? {} : { 'idempotency-key': idempotencyKey },
+    })));
   }
 
   private async send<T>(call: () => Promise<T>): Promise<T> {

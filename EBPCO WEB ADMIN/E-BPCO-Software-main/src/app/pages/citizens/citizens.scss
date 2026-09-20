@@ -1,0 +1,117 @@
+@use '../../shared/styles/data-table';
+@use '../../shared/styles/kpi-grid';
+@use '../../shared/styles/detail-view';
+@use '../../shared/styles/menu-popover';
+@use '../../shared/styles/tokens' as *;
+
+:host {
+  display: block;
+}
+
+// Same visual treatment as `queue-load-notice.scss` (not reused directly:
+// that component reads `ApplicationStore`, which this page deliberately
+// never injects — see citizens.ts's own module comment).
+.load-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0 0 1.25rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: $radius-md;
+  background: rgba(217, 119, 6, 0.08);
+  color: #b45309;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.card {
+  background: $color-surface;
+  border-radius: $radius-xl;
+  padding: 1.5rem 1.6rem;
+  border: 1px solid $color-border;
+  margin-bottom: 1.5rem;
+}
+
+// ── Table toolbar (search + filters) — same shape as businesses.scss's own,
+// duplicated rather than shared because neither `_data-table.scss` nor any
+// other partial defines it yet (every page that has one currently repeats
+// it locally). ─────────────────────────────────────────────────────────
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: $color-bg-muted;
+  border-radius: $radius-md;
+  padding: 0.65rem 0.9rem;
+  color: $color-ink-200;
+
+  input {
+    border: none;
+    outline: none;
+    background: transparent;
+    flex: 1;
+    font-size: 0.86rem;
+    color: $color-ink-700;
+
+    &::placeholder {
+      color: $color-ink-100;
+    }
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.owner-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 700;
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.rectify-panel,
+.erase-panel {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid $color-border;
+
+  h3 {
+    margin: 0 0 0.4rem;
+    font-size: 0.95rem;
+  }
+}
+
+.erase-panel {
+  border-top: none;
+  padding-top: 0;
+
+  .field {
+    max-width: 420px;
+  }
+}
+
+.muted {
+  color: $color-ink-300;
+  font-size: 0.85rem;
+}

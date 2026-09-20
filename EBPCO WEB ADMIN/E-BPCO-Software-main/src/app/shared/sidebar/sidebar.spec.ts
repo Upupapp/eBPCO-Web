@@ -46,7 +46,8 @@ describe('Sidebar', () => {
     const labels = links.map((l) => l.label);
     expect(labels).toContain('Dashboard');
     expect(labels).toContain('Payments');
-    expect(labels).not.toContain('Users & Roles');
+    expect(labels).not.toContain('Staff & Roles');
+    expect(labels).not.toContain('Citizens');
     expect(labels).not.toContain('System Logs');
   });
 

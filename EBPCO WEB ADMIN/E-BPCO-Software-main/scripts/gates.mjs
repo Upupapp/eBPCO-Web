@@ -33,6 +33,9 @@
  *                tokens read `globalThis.EBPCO_*`, and an edit adding that
  *                script tag failed silently once: the build passed, config.js
  *                shipped, and nothing referenced it.
+ *   mock-import  the Citizens module (pages/citizens/) must never import a
+ *                seed/fake data source — that module has no mock path at
+ *                all, by owner ruling, unlike every other page here.
  *
  * Zero dependencies, on purpose: this runs anywhere `node` does, including a
  * tree that has not been `npm install`ed.
@@ -336,6 +339,32 @@ for (const file of ts) {
           `.${swatch} swatch is ${used}, but the chart draws ${key} edges in ${expected} — the legend describes a colour the chart no longer uses`,
         ]);
       }
+    }
+  }
+}
+
+// ── 10. The Citizens module must have no mock path ────────────────────────
+// Owner ruling for the Citizens module (Part B4): every value on the screen
+// comes from `StaffCitizensApi`, real HTTP, real database. No seed data, no
+// fabricated rows, no fake API standing in for the real one in the
+// production bundle. A page that imported `application-seed.ts`,
+// `identity.api.fake.ts`, or anything under `core/testing/` would compile
+// and ship a screen that lies about what the LGU's citizen register holds —
+// the exact class of defect `ApplicationStore.isSeedData()` exists to admit
+// to on every OTHER page, and the standard this module was built to instead
+// require rather than merely confess to.
+{
+  const FORBIDDEN = /from\s+['"].*(?:application-seed|identity\.api\.fake|\/core\/testing\/)[^'"]*['"]/;
+
+  for (const file of files.filter((f) => /pages[\\/]citizens[\\/]/.test(f) && !f.endsWith('.spec.ts'))) {
+    const src = read.get(file);
+    for (const m of src.matchAll(/^import[^\n]*$/gm)) {
+      if (!FORBIDDEN.test(m[0])) continue;
+      const line = src.slice(0, m.index).split('\n').length;
+      findings.push([
+        'mock-import', `${short(file)}:${line}`,
+        `Citizens module imports a mock/seed/fake source: "${m[0].trim().slice(0, 80)}" — this module must be real end to end`,
+      ]);
     }
   }
 }
