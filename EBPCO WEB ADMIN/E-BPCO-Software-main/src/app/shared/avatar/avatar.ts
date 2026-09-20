@@ -11,6 +11,8 @@ const PALETTE = ['#c81e2c', '#2563eb', '#059669', '#d97706', '#7c3aed', '#0891b2
 export class Avatar {
   readonly name = input.required<string>();
   readonly size = input<number>(36);
+  /** A real photo to show instead of initials — an object URL from `ApplicantPhotoService`. Initials remain the fallback while it is null. */
+  readonly photoUrl = input<string | null>(null);
 
   protected readonly initials = computed(() => {
     const parts = this.name().trim().split(/\s+/);

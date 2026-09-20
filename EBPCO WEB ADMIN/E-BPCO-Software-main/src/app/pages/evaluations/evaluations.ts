@@ -22,6 +22,7 @@ import { departmentName } from '../../core/domain/department.model';
 import { Capabilities } from '../../core/session/capabilities';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
 import { StaffEvaluationsApi, EvaluationQueueRow } from '../../core/api/staff-evaluations.api';
+import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 import { StaffApplicationsApi, ApplicationDocumentRow, ApplicationTimelineEvent } from '../../core/api/staff-applications.api';
 import {
   buildEvalTypeCards,
@@ -120,6 +121,7 @@ export class Evaluations implements OnInit {
 
   private readonly store = inject(ApplicationStore);
   private readonly evaluationsApi = inject(StaffEvaluationsApi);
+  protected readonly photos = inject(ApplicantPhotoService);
   private readonly applicationsApi = inject(StaffApplicationsApi);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);

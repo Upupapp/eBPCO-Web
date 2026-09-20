@@ -53,6 +53,7 @@ import { QueueLoader } from '../../core/domain/queue-loader';
 import { AssignedFormsNotice } from '../../shared/assigned-forms-notice/assigned-forms-notice';
 import { PermitReleaseApi } from '../../core/api/permit-release.api';
 import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
+import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 
 /** One row of the real per-application Documents tab — a required-but-not-yet-uploaded requirement has `doc: null` and renders as "Missing". */
 /**
@@ -209,6 +210,7 @@ export class Applications {
   private readonly sanitizer = inject(DomSanitizer);
   private readonly permitReleaseApi = inject(PermitReleaseApi);
   private readonly sessionCache = inject(PermitReleaseSessionCache);
+  protected readonly photos = inject(ApplicantPhotoService);
 
   protected formatDateTime = formatDateTime;
 
@@ -263,11 +265,6 @@ export class Applications {
     const role = this.session.role();
     return role ? ACTION_PERMISSIONS.createApplication(role) : false;
   });
-  protected readonly canVerifyContact = computed(() => {
-    const role = this.session.role();
-    return role ? ACTION_PERMISSIONS.verifyContact(role) : false;
-  });
-
   // Bound to the optional :id route segment (see app.routes.ts) via
   // withComponentInputBinding — this is the single source of truth for
   // which application is open. Every entry surface (this page's own
@@ -703,7 +700,9 @@ export class Applications {
       row,
       this.store.getApplicant(row.applicantId),
       this.store.getBusiness(row.businessId),
-      real ? { email: real.applicantEmail, mobile: real.applicantMobile } : undefined,
+      real
+        ? { email: real.applicantEmail, mobile: real.applicantMobile, emailVerifiedAt: real.applicantEmailVerifiedAt ?? null }
+        : undefined,
       real?.applicantAddress,
     );
   });
@@ -947,59 +946,6 @@ export class Applications {
 
   protected closeGeneratedPermitPreview(): void {
     this.showGeneratedPermitPreview.set(false);
-  }
-
-  // ---- Contact verification (manual administrator confirmation only) ----
-  // The only verification path this frontend-only mock can honestly
-  // perform — see ApplicationStore.setContactVerification's own doc
-  // comment. Never displays "email sent"/"OTP sent"; this is a plain
-  // administrator action with its own audit trail entry.
-  //
-  // Email only. The LGU verifies email throughout the system now, never
-  // mobile — the backend has a real OTP-based verification path for email
-  // (contact-verification.service.ts, plus the pre-registration one used at
-  // signup); there is still no SMS provider, so a mobile "Verified" state
-  // was never backed by anything a citizen could actually have done, real
-  // or manual-administrator alike.
-
-  protected verifyContact(
-    channel: 'email',
-    outcome: 'Verified' | 'Verification Failed',
-  ): void {
-    const row = this.selectedRow();
-    if (!row || !this.canVerifyContact()) {
-      this.toast.error("You don't have permission to verify this contact.");
-      return;
-    }
-    // On real data `row.applicantId` is always '' (the queue API sends the
-    // applicant's NAME, never a joinable id — see staff-applications.api.ts's
-    // own doc comment), so this local-only mutation can never find a
-    // matching Applicant record to update. Before this check, the return
-    // value was ignored and a "marked Verified" success toast fired
-    // unconditionally — an active false positive telling the officer their
-    // action landed when nothing changed, worse than the button silently
-    // doing nothing. There is still no backend route for this (see the
-    // gap list in the Stage 2 plan); this only makes that gap visible
-    // instead of hidden behind a fake success.
-    const ok = this.store.setContactVerification(
-      row.applicantId,
-      channel,
-      outcome,
-      'Manual Administrator Confirmation',
-      this.session.name() || 'Administrator',
-    );
-    if (!ok) {
-      this.toast.error(
-        'This deployment cannot verify contacts for this application — no local applicant '
-          + 'record is available to update, and there is no backend route for this yet.',
-      );
-      return;
-    }
-    this.toast.success(
-      `${channel === 'email' ? 'Email' : 'Mobile number'} marked "${outcome}".`,
-    );
-    // Force selectedDetail() to recompute against the freshly updated applicant record.
-    this.selectedRow.set({ ...row });
   }
 
   protected openDocumentPreviewModal(kind: SampleDocumentKind): void {
@@ -1818,10 +1764,10 @@ export class Applications {
     const token = ++this.previewToken;
     this.previewItem.set({ label: r.label, filename: r.doc.fileName, status: r.doc.status, real: null, loading: r.isReal });
     if (!r.isReal) return;
-    void this.loadRealDocPreview(token, r.doc.id, r.doc.contentType ?? 'application/octet-stream');
+    void this.loadRealDocPreview(token, r.doc.id);
   }
 
-  private async loadRealDocPreview(token: number, documentId: string, fallbackContentType: string): Promise<void> {
+  private async loadRealDocPreview(token: number, documentId: string): Promise<void> {
     const content = await this.applicationsApi.documentContent(documentId);
     if (content.kind !== 'ok') {
       this.toast.error('Could not open this document. Try again.');
@@ -1831,9 +1777,15 @@ export class Applications {
     try {
       const response = await fetch(content.url);
       if (!response.ok) throw new Error(`fetch failed: ${response.status}`);
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const contentType = blob.type || fallbackContentType;
+      // Typed from what the bytes ARE, never from what the upload said they
+      // were. A file named plan.pdf that is really HTML must not reach an
+      // <iframe> at a blob: URL on this origin — that is script execution as
+      // the signed-in officer. Sniffing the magic number and setting the
+      // Blob's type ourselves means the browser can only ever render it as
+      // that type; anything unrecognised is "use Download" (see template).
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const contentType = sniffContentType(bytes) ?? 'application/octet-stream';
+      const objectUrl = URL.createObjectURL(new Blob([bytes], { type: contentType }));
       if (this.previewToken !== token) {
         // Superseded while the fetch was in flight — don't leak this blob's
         // URL into a preview nothing will ever show or revoke.
@@ -1909,4 +1861,19 @@ export class Applications {
     this.toast.success('Exported.');
   }
 
+}
+
+/**
+ * The MIME type the first bytes prove, or `null` when they prove nothing the
+ * preview can show. PDF, PNG, JPEG, GIF, WebP — the formats citizens are
+ * allowed to upload. Deliberately not HTML/SVG/anything scriptable.
+ */
+function sniffContentType(bytes: Uint8Array): string | null {
+  const startsWith = (sig: number[], offset = 0): boolean => sig.every((b, i) => bytes[offset + i] === b);
+  if (startsWith([0x25, 0x50, 0x44, 0x46])) return 'application/pdf';                  // %PDF
+  if (startsWith([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return 'image/png';
+  if (startsWith([0xff, 0xd8, 0xff])) return 'image/jpeg';
+  if (startsWith([0x47, 0x49, 0x46, 0x38])) return 'image/gif';                          // GIF8
+  if (startsWith([0x52, 0x49, 0x46, 0x46]) && startsWith([0x57, 0x45, 0x42, 0x50], 8)) return 'image/webp';
+  return null;
 }

@@ -167,7 +167,7 @@
               </td>
               <td>
                 <div class="identity-cell">
-                  <app-avatar [name]="row.applicant" [size]="30" />
+                  <app-avatar [name]="row.applicant" [size]="30" [photoUrl]="photos.urlFor(row.id, row.applicantHasPhoto)()" />
                   <div class="identity-text">
                     <span class="identity-name" [title]="row.applicant">{{ row.applicant }}</span>
                     <span class="identity-business" [title]="row.businessName || 'Not provided'">{{
@@ -347,7 +347,7 @@
     <div class="applicant-card">
       <div class="banner">
         <app-icon name="image" [size]="26" />
-        <app-avatar [name]="detail.row.applicant" [size]="72" class="banner-avatar" />
+        <app-avatar [name]="detail.row.applicant" [size]="72" class="banner-avatar" [photoUrl]="photos.urlFor(detail.row.id, detail.row.applicantHasPhoto)()" />
       </div>
 
       <div class="applicant-info">
@@ -377,6 +377,14 @@
             <dt>Email :</dt>
             <dd>
               {{ detail.email }}
+              <!--
+                The account's own `email_verified_at` (GET /staff/applications/:id
+                → applicantEmailVerifiedAt): the citizen confirmed a code sent to
+                this address at sign-up, or has not. No Confirm / Mark Failed
+                here any more — those wrote to a local mock and could never
+                succeed on a real application; an officer cannot vouch for an
+                inbox they do not control.
+              -->
               @if (detail.emailVerification.status === 'Verified') {
                 <app-icon
                   name="check-circle"
@@ -386,27 +394,7 @@
                 />
                 <span class="sr-only">Verified</span>
               } @else {
-                <span
-                  class="verify-pill"
-                  [class]="detail.emailVerification.status.toLowerCase().replace(' ', '-')"
-                  >{{ detail.emailVerification.status }}</span
-                >
-              }
-              @if (canVerifyContact() && detail.emailVerification.status !== 'Verified') {
-                <button
-                  type="button"
-                  class="verify-action"
-                  (click)="verifyContact('email', 'Verified')"
-                >
-                  Confirm
-                </button>
-                <button
-                  type="button"
-                  class="verify-action danger"
-                  (click)="verifyContact('email', 'Verification Failed')"
-                >
-                  Mark Failed
-                </button>
+                <span class="verify-pill unverified">Unverified</span>
               }
             </dd>
           </div>
@@ -1032,7 +1020,7 @@
   </div>
 
   <div class="card info-header-card">
-    <app-avatar [name]="detail.row.applicant" [size]="64" />
+    <app-avatar [name]="detail.row.applicant" [size]="64" [photoUrl]="photos.urlFor(detail.row.id, detail.row.applicantHasPhoto)()" />
     <div class="info-header-text">
       <h2>{{ detail.row.id }} - {{ detail.row.applicant }}</h2>
       <p class="info-header-business">{{ detail.businessLabel }}</p>
@@ -1064,12 +1052,19 @@
         <p>{{ detail.email }}</p>
       }
     </div>
+    <!-- One column on the right: the caption, then the action beneath it, so
+         neither is pinned to the card's edge. The button is hidden while the
+         inline form is open — Save / Cancel are the only two ways out of an
+         edit, and a second "Edit Profile" beside them read as a third; it
+         returns when either of those closes the form. -->
     <div class="info-header-actions">
-      <button type="button" class="btn-primary" (click)="startEditProfile()">
-        <app-icon name="edit" [size]="15" />Edit Profile
-      </button>
+      <span class="last-updated">Last updated: {{ detail.lastUpdated }}</span>
+      @if (!editingProfile()) {
+        <button type="button" class="btn-primary" (click)="startEditProfile()">
+          <app-icon name="edit" [size]="15" />Edit Profile
+        </button>
+      }
     </div>
-    <span class="last-updated">Last updated: {{ detail.lastUpdated }}</span>
   </div>
 
   <div class="info-grid">
@@ -1232,7 +1227,16 @@
         <div class="doc-preview-loading">Loading the document…</div>
       } @else if (doc.real; as real) {
         @if (real.contentType.includes('pdf')) {
-          <iframe class="doc-preview-frame" [src]="real.safeUrl" [title]="'Preview of ' + doc.filename" sandbox></iframe>
+          <!--
+            No `sandbox`: Chrome's PDF viewer refuses to run in a sandboxed
+            iframe (every PDF showed a broken-document icon on the deployed
+            site, 2026-09-20). Safe without it because `loadRealDocPreview`
+            types the Blob from the bytes' own magic number, not from any
+            declared content type — this branch is only reached when the
+            bytes begin with %PDF and the Blob is `application/pdf`, which the
+            browser can only hand to the PDF viewer, never parse as HTML.
+          -->
+          <iframe class="doc-preview-frame" [src]="real.safeUrl" [title]="'Preview of ' + doc.filename"></iframe>
         } @else if (real.contentType.startsWith('image/')) {
           <img class="doc-preview-image" [src]="real.objectUrl" [alt]="'Preview of ' + doc.filename" />
         } @else {

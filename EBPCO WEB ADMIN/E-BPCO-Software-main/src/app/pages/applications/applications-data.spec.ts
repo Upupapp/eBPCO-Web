@@ -77,4 +77,39 @@ describe('buildDetailFor: the applicant\'s real address, not a guess from the si
 
     expect(detail.barangay).toBe('Salvacion');
   });
+
+  describe('email verification comes from the account, not the local mock', () => {
+    it('reads Verified from the server-supplied emailVerifiedAt', () => {
+      const detail = buildDetailFor(
+        row({}), undefined, undefined,
+        { email: 'liwayway@example.ph', mobile: '09171234599', emailVerifiedAt: '2026-09-20T04:21:05.000Z' },
+      );
+      expect(detail.emailVerification).toMatchObject({
+        status: 'Verified', method: 'Email Verification Link', verifiedAt: '2026-09-20T04:21:05.000Z', verifiedBy: null,
+      });
+    });
+
+    it('reads Unverified when the account has never confirmed the address — even if a mock record says otherwise', () => {
+      const mockApplicant: Applicant = {
+        id: 'APL-1', firstName: 'Raul', lastName: 'Villanueva',
+        email: 'raul@example.ph', mobileNumber: '09171234567', landlineNumber: null,
+        applicantType: null, addressLine: '', barangay: 'Salvacion',
+        emailVerification: {
+          status: 'Verified', method: 'Email Verification Link', verifiedBy: 'Administrator',
+          verifiedAtValue: new Date('2026-01-01T00:00:00.000Z'), verifiedAt: '2026-01-01T00:00:00.000Z',
+        },
+        mobileVerification: unverifiedContact(),
+      };
+      const detail = buildDetailFor(
+        row({}), mockApplicant, undefined,
+        { email: 'raul@example.ph', mobile: null, emailVerifiedAt: null },
+      );
+      expect(detail.emailVerification.status).toBe('Unverified');
+    });
+
+    it('carries no mobile verification at all — the LGU records mobile numbers and does not verify them', () => {
+      const detail = buildDetailFor(row({}), undefined, undefined, { email: 'x@example.ph', mobile: null, emailVerifiedAt: null });
+      expect('mobileVerification' in detail).toBe(false);
+    });
+  });
 });

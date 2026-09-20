@@ -5,5 +5,9 @@
   [style.background]="color()"
   [style.font-size.px]="size() * 0.4"
 >
-  {{ initials() }}
+  @if (photoUrl(); as url) {
+    <img class="avatar-photo" [src]="url" alt="" />
+  } @else {
+    {{ initials() }}
+  }
 </span>
