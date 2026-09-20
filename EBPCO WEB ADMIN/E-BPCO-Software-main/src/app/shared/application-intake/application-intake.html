@@ -105,6 +105,7 @@
                 aria-required="true"
                 [ngModel]="applicant.email"
                 (ngModelChange)="onEmailInput($event)"
+                (blur)="checkEmailAvailability()"
                 name="applicantEmail"
                 placeholder="Enter email address"
                 [disabled]="emailVerified()"
@@ -125,6 +126,13 @@
             </div>
             @if (showStepErrors() && !emailValidation().valid) {
               <span class="field-error">{{ emailValidation().error }}</span>
+            } @else if (emailTaken()) {
+              <span class="field-error"
+                >This email already belongs to an existing citizen account — it cannot be used for a new
+                filing. Check Citizens for the existing record, or use a different address.</span
+              >
+            } @else if (checkingEmailAvailability()) {
+              <span class="field-hint">Checking whether this email is already in use…</span>
             } @else if (showStepErrors() && emailNeedsVerification()) {
               <span class="field-error"
                 >Verify the applicant’s email with the 6-digit code before continuing.</span
@@ -184,10 +192,14 @@
               ></span
             >
             <input
+              #applicantMobileInput
               type="text"
+              inputmode="numeric"
+              maxlength="11"
               required
               aria-required="true"
-              [(ngModel)]="applicant.mobileNumber"
+              [ngModel]="applicant.mobileNumber"
+              (ngModelChange)="onMobileNumberInput($event, applicantMobileInput)"
               name="applicantMobile"
               [placeholder]="mobileExample"
             />
@@ -595,6 +607,7 @@
                     <input
                       type="date"
                       [required]="!!doc.file"
+                      [max]="maxDocumentDate"
                       [ngModel]="doc.issueDate"
                       (ngModelChange)="onDocFieldChange(doc, 'issueDate', $event)"
                       [name]="'docIssue-' + doc.requirementId"
@@ -611,6 +624,7 @@
                       type="date"
                       [required]="!!doc.file"
                       [min]="doc.issueDate || null"
+                      [max]="maxDocumentDate"
                       [ngModel]="doc.expiryDate"
                       (ngModelChange)="onDocFieldChange(doc, 'expiryDate', $event)"
                       [name]="'docExpiry-' + doc.requirementId"

@@ -18,6 +18,7 @@ import {
 } from '../utils/validators';
 import { ToastService } from '../toast/toast.service';
 import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { StaffCitizensApi } from '../../core/api/staff-citizens.api';
 import { IdentityApi } from '../../core/api/identity.api';
 import { QueueLoader } from '../../core/domain/queue-loader';
 import { toBase64 } from '../utils/to-base64';
@@ -99,6 +100,7 @@ export class ApplicationIntake {
   private readonly requirementsConfig = inject(RequirementsConfigStore);
   private readonly toast = inject(ToastService);
   private readonly applicationsApi = inject(StaffApplicationsApi);
+  private readonly citizensApi = inject(StaffCitizensApi);
   private readonly identity = inject(IdentityApi);
   private readonly loader = inject(QueueLoader);
 
@@ -121,6 +123,9 @@ export class ApplicationIntake {
 
   protected readonly mobileExample = MOBILE_FORMAT_EXAMPLE;
   protected readonly landlineExample = LANDLINE_FORMAT_EXAMPLE;
+
+  /** Belt-and-suspenders alongside hasSaneYear()'s own check below: a native `<input type="date">`'s year segment does not reliably stay capped at 4 digits while typing, so this bounds the picker itself rather than relying on it alone. */
+  protected readonly maxDocumentDate = `${new Date().getFullYear() + 50}-12-31`;
 
   private todayInput(): string {
     return new Date().toISOString().slice(0, 10);
@@ -212,9 +217,37 @@ export class ApplicationIntake {
   protected readonly verificationUnavailable = signal<string | null>(null);
   protected verificationCode = '';
 
+  // ---- Email availability (Step 1) -----------------------------------------
+  // Independent of emailVerified()/verificationUnavailable() above: those
+  // prove the officer's TYPED email reaches a real inbox, never whether an
+  // account already exists at it. The server's own account-creation step
+  // refuses a duplicate email, but that refusal used to only ever surface
+  // at Review & Confirm (the LAST step), sending the officer all the way
+  // back to Step 1 to fix it (found live 2026-09-20). Checked here instead,
+  // against the same real citizen directory the Citizens module lists from
+  // (StaffCitizensApi), the moment the officer leaves the field.
+  protected readonly checkingEmailAvailability = signal(false);
+  protected readonly emailTaken = signal(false);
+
+  protected async checkEmailAvailability(): Promise<void> {
+    const email = this.emailValidation();
+    if (!email.valid) return;
+    this.checkingEmailAvailability.set(true);
+    try {
+      const result = await this.citizensApi.list({ search: email.normalized, pageSize: 5 });
+      this.emailTaken.set(
+        result.kind === 'ok'
+          && result.rows.some((row) => row.email.toLowerCase() === email.normalized.toLowerCase()),
+      );
+    } finally {
+      this.checkingEmailAvailability.set(false);
+    }
+  }
+
   /** Editing the address after a code was sent or confirmed voids that state — the code belonged to the PREVIOUS address. */
   protected onEmailInput(value: string): void {
     this.applicant.email = value;
+    this.emailTaken.set(false);
     if (this.emailVerified() || this.codeSent() || this.verificationUnavailable()) {
       this.resetVerification();
     }
@@ -417,6 +450,28 @@ export class ApplicationIntake {
     this.updateDocument(doc.requirementId, { [field]: value });
   }
 
+  private static readonly MIN_DOCUMENT_YEAR = 1900;
+  private static readonly MAX_DOCUMENT_YEAR = new Date().getFullYear() + 50;
+
+  /**
+   * A native `<input type="date">`'s year segment does not reliably cap at
+   * 4 digits while typing — confirmed live 2026-09-20: "01/02/29252" and
+   * "01/03/29252" both went straight through as Issue/Expiry Date, since
+   * `documentIssue()` below only ever checked presence and ordering, never
+   * whether the date was one a real document could actually carry.
+   * Splitting on '-' (not a fixed character offset) is what actually
+   * catches a 5-digit year — `iso.slice(0, 4)` would have silently read
+   * "2925" off "29252-01-02" and called it fine.
+   */
+  private hasSaneYear(iso: string): boolean {
+    const [yearPart] = iso.split('-');
+    if (!yearPart || yearPart.length !== 4) return false;
+    const year = Number(yearPart);
+    return Number.isInteger(year)
+      && year >= ApplicationIntake.MIN_DOCUMENT_YEAR
+      && year <= ApplicationIntake.MAX_DOCUMENT_YEAR;
+  }
+
   /**
    * What is wrong with one attached document's own details, or `null`. The
    * dates are required once a file is attached — an officer used to be able
@@ -428,6 +483,8 @@ export class ApplicationIntake {
     if (!doc.issueDate && !doc.expiryDate) return 'Issue Date and Expiry Date are required.';
     if (!doc.issueDate) return 'Issue Date is required.';
     if (!doc.expiryDate) return 'Expiry Date is required.';
+    if (!this.hasSaneYear(doc.issueDate)) return 'Issue Date has an invalid year.';
+    if (!this.hasSaneYear(doc.expiryDate)) return 'Expiry Date has an invalid year.';
     if (doc.expiryDate < doc.issueDate) return 'Expiry Date cannot be earlier than the Issue Date.';
     return null;
   }
@@ -441,6 +498,27 @@ export class ApplicationIntake {
 
   protected mobileValidation() {
     return validateMobileNumber(this.applicant.mobileNumber);
+  }
+
+  /**
+   * Digits only, capped at 11 — the field used to accept anything typed
+   * (letters, unlimited length), leaving `mobileValidation()`'s error the
+   * only thing catching it, and only once the encoder tried to move on
+   * (found live 2026-09-20). `validateMobileNumber` still separately
+   * accepts a typed `+63`/spaces/hyphens and normalizes them, but a
+   * walk-in encoder almost always types the plain local 09XXXXXXXXX form,
+   * so narrowing what CAN be typed to that costs nothing real.
+   *
+   * `.value` is set directly, not left to `[ngModel]`'s own re-render —
+   * same reasoning as the citizen portal's own `onMobileNumberInput`
+   * (register.page.ts): a rejected keystroke that sanitizes back to the
+   * SAME string the model already held ('' -> '' typing a letter into an
+   * empty field) produces no bound-expression change for Angular to act
+   * on, so the field would keep showing what was typed, letters included.
+   */
+  protected onMobileNumberInput(value: string, input: HTMLInputElement): void {
+    this.applicant.mobileNumber = value.replace(/\D/g, '').slice(0, 11);
+    input.value = this.applicant.mobileNumber;
   }
 
   protected landlineValidation() {
@@ -457,7 +535,9 @@ export class ApplicationIntake {
       if (!this.applicant.firstName.trim()) errors.push('First name is required.');
       if (!this.applicant.lastName.trim()) errors.push('Last name is required.');
       if (!this.emailValidation().valid) errors.push(this.emailValidation().error!);
-      else if (this.emailNeedsVerification()) {
+      else if (this.emailTaken()) {
+        errors.push('This email already belongs to an existing citizen account.');
+      } else if (this.emailNeedsVerification()) {
         errors.push('Verify the applicant’s email address with the 6-digit code before continuing.');
       }
       if (!this.mobileValidation().valid) errors.push(this.mobileValidation().error!);
