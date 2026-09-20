@@ -8,6 +8,7 @@ import { DocumentStatus } from '../domain/document.model';
 import {
   ApplicationLifecycleStatus,
   PermitReleaseStatus,
+  isValidEvaluationStage,
   isValidLifecycleStatus,
 } from '../domain/status.model';
 import {
@@ -32,16 +33,21 @@ import {
  *                        be wrong the moment two businesses share one.
  *   officer              no counterpart at all. Nothing in the API assigns an
  *                        application to a named officer.
- *   evaluationStage      the detail endpoint carries evaluations; the queue
- *   evaluationResult     row does not.
+ *   evaluationResult     the detail endpoint carries the per-stage evaluation
+ *                        rows; the queue row does not, and has no single
+ *                        result to summarise across up to 5 of them.
  *
- * Where the type allows it these are filled with an explicit "unknown" (NOT_SENT)
- * rather than a plausible guess, and listed here so the gap is a recorded fact
- * rather than something a reader discovers from a blank column. `evaluationStage`
- * and `evaluationResult` are closed unions with no "unknown" member, so they
- * still take their first-step defaults — that IS a guess, and the honest fix is
- * a widened type or a queue row that carries them. Serving them is backend work:
- * either the queue row grows, or these columns come off the screen.
+ * `evaluationStage` USED to be on this list — the queue row was genuinely
+ * silent about it, so every row defaulted to a guessed 'Initial' and any
+ * screen that filtered by stage (the Dashboard's Business Stages Board)
+ * matched real rows almost never. `QUEUE_SQL`'s own evaluation_stage
+ * subquery closed that gap: the queue row now carries the same "first stage
+ * with no Passed row yet" value `EvaluationService.of()` computes for a
+ * single application, so this screen reads it instead of guessing.
+ *
+ * `evaluationResult` is still a closed union with no "unknown" member, so it
+ * still takes its first-step default — that IS a guess, and the honest fix
+ * is a widened type or a queue row that carries it too.
  *
  * Three fields ARE derivable and are derived rather than defaulted:
  *
@@ -84,6 +90,8 @@ interface QueueRow {
   readonly paymentVerified: boolean;
   /** Optimistic-concurrency token — threaded back as `expectedVersion` on a transition so a stale edit is refused rather than silently overwriting a decision made elsewhere in the meantime. */
   readonly version?: number;
+  /** The first of the 5 evaluation stages with no Passed row yet, or `null` once all 5 have passed. Absent from an older server; see this file's own doc comment above for the gap this closed. */
+  readonly evaluationStage?: string | null;
 }
 
 interface QueuePage {
@@ -886,9 +894,13 @@ function toRecord(row: QueueRow): ApplicationRecord {
     dateValue: submitted ?? new Date(0),
     completedAt: completed,
     lifecycleStatus,
-    // The queue row carries neither. `null` says so; 'Initial' claimed a stage
-    // this portal has no basis for, and put every server row in the wrong queue.
-    evaluationStage: null,
+    // Real value from QUEUE_SQL's own subquery where the server sends one and
+    // it's one of the 5 known stages; `null` (never a guessed 'Initial') for
+    // an older server or an unrecognised value, same as isValidPermitType.
+    evaluationStage:
+      row.evaluationStage != null && isValidEvaluationStage(row.evaluationStage)
+        ? row.evaluationStage
+        : null,
     evaluationResult: null,
     // Verified means paid, an assessed amount with no verification means it is
     // owed, and no assessment means there is nothing to pay yet.

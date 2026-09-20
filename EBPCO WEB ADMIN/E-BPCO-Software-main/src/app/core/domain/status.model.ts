@@ -189,6 +189,12 @@ export const EVALUATION_STAGE_ORDER: EvaluationStage[] = [
   'OBO',
   'Final Approval',
 ];
+const EVALUATION_STAGE_SET = new Set<string>(EVALUATION_STAGE_ORDER);
+
+/** The companion to `isValidPermitType`/`isValidApplicationAction`, for the same reason: the queue row's `evaluationStage` is an untyped wire value, and `as EvaluationStage` would let a value outside these 5 stages into a typed field. */
+export function isValidEvaluationStage(value: string): value is EvaluationStage {
+  return EVALUATION_STAGE_SET.has(value);
+}
 
 export type EvaluationResult = 'Pending' | 'Passed' | 'Revision Required' | 'Rejected';
 
