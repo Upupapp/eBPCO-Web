@@ -687,6 +687,15 @@ export class PermitRelease implements OnInit {
   protected readonly printTarget = signal<ReleaseRow | null>(null);
 
   printPermit(row?: ReleaseRow): void {
+    // The bulk toolbar button (no row) used to open an empty "Ready for
+    // Release batch — printed 0 records" summary whenever nothing was
+    // actually ready — a blank print dialog with nothing to explain it
+    // (found live 2026-09-20). A specific row's own Print always has
+    // exactly one target, so this only ever applies to the bulk case.
+    if (!row && this.rows().filter((r) => r.displayStatus === 'Ready for Release').length === 0) {
+      this.toast.error('No permits are ready for release right now.');
+      return;
+    }
     this.printTarget.set(row ?? null);
     this.showPrintModal.set(true);
   }
