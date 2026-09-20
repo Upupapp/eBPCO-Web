@@ -1762,10 +1762,10 @@ export class Applications {
     const token = ++this.previewToken;
     this.previewItem.set({ label: r.label, filename: r.doc.fileName, status: r.doc.status, real: null, loading: r.isReal });
     if (!r.isReal) return;
-    void this.loadRealDocPreview(token, r.doc.id, r.doc.contentType ?? 'application/octet-stream');
+    void this.loadRealDocPreview(token, r.doc.id);
   }
 
-  private async loadRealDocPreview(token: number, documentId: string, fallbackContentType: string): Promise<void> {
+  private async loadRealDocPreview(token: number, documentId: string): Promise<void> {
     const content = await this.applicationsApi.documentContent(documentId);
     if (content.kind !== 'ok') {
       this.toast.error('Could not open this document. Try again.');
@@ -1775,9 +1775,15 @@ export class Applications {
     try {
       const response = await fetch(content.url);
       if (!response.ok) throw new Error(`fetch failed: ${response.status}`);
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const contentType = blob.type || fallbackContentType;
+      // Typed from what the bytes ARE, never from what the upload said they
+      // were. A file named plan.pdf that is really HTML must not reach an
+      // <iframe> at a blob: URL on this origin — that is script execution as
+      // the signed-in officer. Sniffing the magic number and setting the
+      // Blob's type ourselves means the browser can only ever render it as
+      // that type; anything unrecognised is "use Download" (see template).
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const contentType = sniffContentType(bytes) ?? 'application/octet-stream';
+      const objectUrl = URL.createObjectURL(new Blob([bytes], { type: contentType }));
       if (this.previewToken !== token) {
         // Superseded while the fetch was in flight — don't leak this blob's
         // URL into a preview nothing will ever show or revoke.
@@ -1853,4 +1859,19 @@ export class Applications {
     this.toast.success('Exported.');
   }
 
+}
+
+/**
+ * The MIME type the first bytes prove, or `null` when they prove nothing the
+ * preview can show. PDF, PNG, JPEG, GIF, WebP — the formats citizens are
+ * allowed to upload. Deliberately not HTML/SVG/anything scriptable.
+ */
+function sniffContentType(bytes: Uint8Array): string | null {
+  const startsWith = (sig: number[], offset = 0): boolean => sig.every((b, i) => bytes[offset + i] === b);
+  if (startsWith([0x25, 0x50, 0x44, 0x46])) return 'application/pdf';                  // %PDF
+  if (startsWith([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return 'image/png';
+  if (startsWith([0xff, 0xd8, 0xff])) return 'image/jpeg';
+  if (startsWith([0x47, 0x49, 0x46, 0x38])) return 'image/gif';                          // GIF8
+  if (startsWith([0x52, 0x49, 0x46, 0x46]) && startsWith([0x57, 0x45, 0x42, 0x50], 8)) return 'image/webp';
+  return null;
 }

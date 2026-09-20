@@ -84,6 +84,29 @@ describe('Applications — previewing a real, citizen-uploaded document', () => 
     expect(preview!.real!.contentType).toBe('application/pdf');
   }, MOUNT_BUDGET);
 
+  it('types the preview from the bytes, not the label — HTML calling itself a PDF is not framed as one', async () => {
+    // The document row says application/pdf; the bytes are an HTML page. The
+    // preview frame has no sandbox (Chrome's PDF viewer will not run in one),
+    // so the ONLY thing keeping a mislabeled HTML file from executing as the
+    // signed-in officer is that the Blob is typed from its magic number. Here
+    // that yields nothing showable, so the template offers Download instead.
+    const bytes = new TextEncoder().encode('<!doctype html><script>alert(1)</script>');
+    const page = mount({
+      documentContent: () => Promise.resolve({ kind: 'ok', url: 'https://signed.example/land-title.pdf' }),
+    });
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () => new Response(bytes, { status: 200 })) as typeof fetch;
+    try {
+      (page as unknown as { previewDocumentRow(r: typeof realRow): void }).previewDocumentRow(realRow);
+      for (let i = 0; i < 6; i++) await Promise.resolve();
+      await new Promise((r) => setTimeout(r, 50));
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+    const preview = (page as unknown as { previewItem(): { real: { contentType: string } | null } | null }).previewItem();
+    expect(preview!.real!.contentType).toBe('application/octet-stream');
+  }, MOUNT_BUDGET);
+
   it('still shows the placeholder sheet for a local-demo document, which has no real bytes', async () => {
     const page = mount({});
     const demoRow = { ...realRow, isReal: false, doc: { ...realRow.doc, contentType: undefined } };

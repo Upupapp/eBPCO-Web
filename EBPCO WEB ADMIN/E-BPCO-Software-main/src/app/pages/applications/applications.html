@@ -1220,7 +1220,16 @@
         <div class="doc-preview-loading">Loading the document…</div>
       } @else if (doc.real; as real) {
         @if (real.contentType.includes('pdf')) {
-          <iframe class="doc-preview-frame" [src]="real.safeUrl" [title]="'Preview of ' + doc.filename" sandbox></iframe>
+          <!--
+            No `sandbox`: Chrome's PDF viewer refuses to run in a sandboxed
+            iframe (every PDF showed a broken-document icon on the deployed
+            site, 2026-09-20). Safe without it because `loadRealDocPreview`
+            types the Blob from the bytes' own magic number, not from any
+            declared content type — this branch is only reached when the
+            bytes begin with %PDF and the Blob is `application/pdf`, which the
+            browser can only hand to the PDF viewer, never parse as HTML.
+          -->
+          <iframe class="doc-preview-frame" [src]="real.safeUrl" [title]="'Preview of ' + doc.filename"></iframe>
         } @else if (real.contentType.startsWith('image/')) {
           <img class="doc-preview-image" [src]="real.objectUrl" [alt]="'Preview of ' + doc.filename" />
         } @else {
