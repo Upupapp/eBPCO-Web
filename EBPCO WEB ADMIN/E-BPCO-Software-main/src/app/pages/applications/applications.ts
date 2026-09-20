@@ -94,7 +94,6 @@ interface RingStat {
   pct: number;
   isTotal: boolean;
   support?: string;
-  bars?: number[];
 }
 
 interface PreviewDoc {
@@ -591,16 +590,6 @@ export class Applications {
     const rejected = rows.filter((r) => r.status === 'Rejected').length;
     return [
       {
-        label: 'Under Review',
-        value: String(under),
-        icon: 'clock',
-        tone: 'warning',
-        illustration: 'pending',
-        pct: Math.round((under / total) * 100),
-        isTotal: false,
-        support: `${Math.round((under / total) * 100)}% of all applications`,
-      },
-      {
         label: 'Approved',
         value: String(approved),
         icon: 'check-circle',
@@ -609,6 +598,16 @@ export class Applications {
         pct: Math.round((approved / total) * 100),
         isTotal: false,
         support: `${Math.round((approved / total) * 100)}% of all applications`,
+      },
+      {
+        label: 'Under Review',
+        value: String(under),
+        icon: 'clock',
+        tone: 'warning',
+        illustration: 'pending',
+        pct: Math.round((under / total) * 100),
+        isTotal: false,
+        support: `${Math.round((under / total) * 100)}% of all applications`,
       },
       {
         label: 'Rejected',
@@ -628,8 +627,12 @@ export class Applications {
         illustration: 'applications',
         pct: 100,
         isTotal: true,
-        support: 'Under Review · Approved · Rejected',
-        bars: [under, approved, rejected],
+        // No `bars` here on purpose: the 26px bar cluster read as an
+        // oversized, differently-shaped footer next to the other three
+        // cards' slim 6px progress tracks (found live 2026-09-20). Support
+        // text alone — same "Total" treatment Citizens/Businesses already
+        // use — keeps this card's footer the same size as its neighbours.
+        support: `${under} Under Review · ${approved} Approved · ${rejected} Rejected`,
       },
     ];
   });
