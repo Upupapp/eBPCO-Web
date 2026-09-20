@@ -75,6 +75,8 @@ const SESSION_REQUIRED = {
   '/payments': 'authGuard',
   '/permit-release': 'authGuard',
   '/businesses': 'authGuard',
+  '/citizens': 'authGuard',
+  '/citizens/:id': 'authGuard + needs a record to exist',
   '/archive': 'authGuard',
   '/access-requests': 'authGuard',
   '/user-roles': 'authGuard',
