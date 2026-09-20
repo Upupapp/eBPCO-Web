@@ -250,9 +250,10 @@ export class StaffDirectoryApi {
   /**
    * End one session.
    *
-   * The only DELETE this portal issues. A session is not a record of anything
-   * that happened — ending it removes an ability, not history, and the audit
-   * trail keeps its own entry either way.
+   * A session is not a record of anything that happened — ending it removes
+   * an ability, not history, and the audit trail keeps its own entry either
+   * way. (Was "the only DELETE this portal issues" until the Citizens
+   * module's own "Sign out all sessions" added a second.)
    */
   async revokeSession(userId: string, sessionId: string): Promise<StaffWriteResult> {
     try {
