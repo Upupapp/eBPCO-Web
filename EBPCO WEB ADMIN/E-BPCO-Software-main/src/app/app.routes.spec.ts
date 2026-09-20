@@ -11,6 +11,8 @@ const CANONICAL_PATHS = [
   'payments',
   'permit-release',
   'businesses',
+  'citizens',
+  'citizens/:id',
   'user-roles',
   'workflow',
   'system-logs',

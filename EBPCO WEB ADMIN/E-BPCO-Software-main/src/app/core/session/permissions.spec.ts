@@ -1,4 +1,4 @@
-import { ACTION_PERMISSIONS, ALL_STAFF_ROLES, StaffRole } from './permissions';
+import { ACTION_PERMISSIONS, ALL_STAFF_ROLES, NAV_MODULES, StaffRole, canAccessPath } from './permissions';
 
 function allowedRoles(fn: (role: StaffRole) => boolean): StaffRole[] {
   return ALL_STAFF_ROLES.filter(fn);
@@ -90,5 +90,45 @@ describe('ACTION_PERMISSIONS — permit generation and release (Stage 4)', () =>
       expect(ACTION_PERMISSIONS.generatePermit(role)).toBe(false);
       expect(ACTION_PERMISSIONS.releasePermit(role)).toBe(false);
     }
+  });
+});
+
+describe('the Citizens module', () => {
+  it('is registered immediately after Businesses in the sidebar order', () => {
+    const keys = NAV_MODULES.map((m) => m.key);
+    const businessesIndex = keys.indexOf('businesses');
+    expect(keys[businessesIndex + 1]).toBe('citizens');
+  });
+
+  it('is visible to Super Admin and Administrator, and to nobody else', () => {
+    const citizens = NAV_MODULES.find((m) => m.key === 'citizens')!;
+    expect(citizens.roles).toEqual(['Super Admin', 'Administrator']);
+  });
+
+  it('canAccessPath resolves /citizens/:id to the Citizens module, the same generalisation applications/:id already relies on', () => {
+    const someId = '3f6e6b1a-2222-4a11-9c3d-000000000001';
+    expect(canAccessPath('Administrator', `/citizens/${someId}`)).toBe(true);
+    expect(canAccessPath('Super Admin', `/citizens/${someId}`)).toBe(true);
+    expect(canAccessPath('Evaluator', `/citizens/${someId}`)).toBe(false);
+    expect(canAccessPath('Auditor', '/citizens')).toBe(false);
+  });
+
+  it('every citizen action is limited to Super Admin and Administrator', () => {
+    const actions = [
+      'citizen.signOutSessions', 'citizen.disable', 'citizen.enable',
+      'citizen.sendResetLink', 'citizen.rectify', 'citizen.erase',
+    ] as const;
+    for (const action of actions) {
+      const allowed = allowedRoles(ACTION_PERMISSIONS[action]);
+      expect(allowed).toEqual(['Super Admin', 'Administrator']);
+    }
+  });
+});
+
+describe('the renamed Staff & Roles module', () => {
+  it('kept its key and path so nothing that reads either breaks, and only changed its label', () => {
+    const mod = NAV_MODULES.find((m) => m.key === 'user-roles')!;
+    expect(mod.label).toBe('Staff & Roles');
+    expect(mod.path).toBe('/user-roles');
   });
 });
