@@ -108,6 +108,13 @@ export type SetBusinessStatusResult =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
 
+/** `POST /staff/businesses/announcements` — the Communication Center's real send. */
+export type BroadcastAnnouncementResult =
+  | { readonly kind: 'done'; readonly recipientCount: number }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 @Injectable({ providedIn: 'root' })
 export class StaffBusinessesApi {
   private readonly api = inject(ApiClient);
@@ -214,6 +221,28 @@ export class StaffBusinessesApi {
       if (error instanceof ApiError) {
         if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
         if (error.status === 422) return { kind: 'refused', message: error.message };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * The Communication Center's "Broadcast Notice" — a real notification row
+   * per business owner (`audience` scoping who), not a local-only UI state
+   * change. See the server's own doc comment (staff-businesses.controller.ts)
+   * for why this reuses the existing `account-update` notification type.
+   */
+  async broadcastAnnouncement(message: string, audience: 'all' | 'active'): Promise<BroadcastAnnouncementResult> {
+    try {
+      const result = await this.api.post<{ recipientCount: number }>(
+        '/staff/businesses/announcements', { message, audience },
+      );
+      return { kind: 'done', recipientCount: result.recipientCount };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        if (error.status === 422 || error.status === 400) return { kind: 'refused', message: error.message };
         return { kind: 'failed', message: error.message };
       }
       throw error;

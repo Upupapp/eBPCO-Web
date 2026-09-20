@@ -747,23 +747,47 @@ export class Businesses {
   // option selected the moment the count it was initialized with stopped
   // matching the option's current rendered text.
   protected readonly announcementAudience = signal<'all' | 'active'>('all');
-  protected readonly announcementAudienceLabel = computed(() =>
-    this.announcementAudience() === 'all'
-      ? `All Businesses (${this.totalBusinessesCount()})`
-      : 'Active Businesses Only',
-  );
   protected readonly announcementError = signal('');
   protected readonly announcementSent = signal(false);
+  protected readonly announcementSending = signal(false);
+  /** How many real notification rows the last successful broadcast created — shown next to announcementSent rather than assumed from totalBusinessesCount(), since 'active' scopes to fewer than "all". */
+  protected readonly announcementRecipientCount = signal(0);
 
-  broadcastNotice(): void {
-    if (!this.announcementText().trim()) {
+  /**
+   * A real `POST /staff/businesses/announcements` — one notification row per
+   * business owner, not a local-only signal flip. Found live 2026-09-20:
+   * this used to only clear the textarea and flip announcementSent, with
+   * nothing ever sent anywhere.
+   */
+  async broadcastNotice(): Promise<void> {
+    const message = this.announcementText().trim();
+    if (!message) {
       this.announcementError.set('Write an announcement before broadcasting.');
       this.announcementSent.set(false);
       return;
     }
     this.announcementError.set('');
-    this.announcementText.set('');
-    this.announcementSent.set(true);
+    this.announcementSent.set(false);
+    this.announcementSending.set(true);
+    try {
+      const result = await this.businessesApi.broadcastAnnouncement(message, this.announcementAudience());
+      if (result.kind === 'done') {
+        this.announcementText.set('');
+        this.announcementSent.set(true);
+        this.announcementRecipientCount.set(result.recipientCount);
+        this.toast.success(
+          `Announcement sent to ${result.recipientCount} business${result.recipientCount === 1 ? '' : 'es'}.`,
+        );
+        return;
+      }
+      const detail = result.kind === 'refused' || result.kind === 'failed'
+        ? result.message
+        : 'This deployment cannot send announcements yet.';
+      this.announcementError.set(detail);
+      this.toast.error(detail);
+    } finally {
+      this.announcementSending.set(false);
+    }
   }
 
   onAnnouncementChange(): void {

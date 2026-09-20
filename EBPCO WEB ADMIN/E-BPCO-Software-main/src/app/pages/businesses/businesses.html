@@ -316,14 +316,16 @@
               <p class="field-error">{{ announcementError() }}</p>
             }
             @if (announcementSent()) {
-              <p class="field-success">Announcement broadcast to {{ announcementAudienceLabel() }}.</p>
+              <p class="field-success">
+                Sent to {{ announcementRecipientCount() }} business{{ announcementRecipientCount() === 1 ? '' : 'es' }}.
+              </p>
             }
-            <select aria-label="Announcement audience" class="filter-select full-width" [(ngModel)]="announcementAudience">
+            <select aria-label="Announcement audience" class="filter-select full-width" [(ngModel)]="announcementAudience" (ngModelChange)="onAnnouncementChange()">
               <option [ngValue]="'all'">All Businesses ({{ totalBusinessesCount() }})</option>
               <option [ngValue]="'active'">Active Businesses Only</option>
             </select>
-            <button type="button" class="btn-primary full-width" (click)="broadcastNotice()">
-              Broadcast Notice
+            <button type="button" class="btn-primary full-width" [disabled]="announcementSending()" (click)="broadcastNotice()">
+              {{ announcementSending() ? 'Sending…' : 'Broadcast Notice' }}
             </button>
           </div>
         </div>
