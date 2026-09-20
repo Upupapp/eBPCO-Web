@@ -411,41 +411,16 @@
             </dd>
           </div>
           <div>
+            <!--
+              Phone carries no verification badge or action — the LGU only
+              verifies email throughout the system now, matching what the
+              real backend can actually check (contact-verification.service
+              .ts sends a real code for email; there is still no SMS
+              provider, so a mobile "Verified" badge here was never backed
+              by anything a citizen could have actually done.
+            -->
             <dt>Phone :</dt>
-            <dd>
-              {{ detail.phone }}
-              @if (detail.mobileVerification.status === 'Verified') {
-                <app-icon
-                  name="check-circle"
-                  [size]="15"
-                  class="verified-check"
-                  aria-hidden="true"
-                />
-                <span class="sr-only">Verified</span>
-              } @else {
-                <span
-                  class="verify-pill"
-                  [class]="detail.mobileVerification.status.toLowerCase().replace(' ', '-')"
-                  >{{ detail.mobileVerification.status }}</span
-                >
-              }
-              @if (canVerifyContact() && detail.mobileVerification.status !== 'Verified') {
-                <button
-                  type="button"
-                  class="verify-action"
-                  (click)="verifyContact('mobile', 'Verified')"
-                >
-                  Confirm
-                </button>
-                <button
-                  type="button"
-                  class="verify-action danger"
-                  (click)="verifyContact('mobile', 'Verification Failed')"
-                >
-                  Mark Failed
-                </button>
-              }
-            </dd>
+            <dd>{{ detail.phone }}</dd>
           </div>
           <div>
             <dt>Barangay :</dt>

@@ -947,9 +947,16 @@ export class Applications {
   // perform — see ApplicationStore.setContactVerification's own doc
   // comment. Never displays "email sent"/"OTP sent"; this is a plain
   // administrator action with its own audit trail entry.
+  //
+  // Email only. The LGU verifies email throughout the system now, never
+  // mobile — the backend has a real OTP-based verification path for email
+  // (contact-verification.service.ts, plus the pre-registration one used at
+  // signup); there is still no SMS provider, so a mobile "Verified" state
+  // was never backed by anything a citizen could actually have done, real
+  // or manual-administrator alike.
 
   protected verifyContact(
-    channel: 'email' | 'mobile',
+    channel: 'email',
     outcome: 'Verified' | 'Verification Failed',
   ): void {
     const row = this.selectedRow();
