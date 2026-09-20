@@ -145,8 +145,10 @@ export interface AppDetail {
   barangay: string;
   meta: {
     dateSubmitted: string;
-    /** The human reference number (E-BPCO-YYYY-NNNNNN). */
+    /** The human reference number (E-BPCO-YYYY-NNNNNN) — falls back to the id for a local-demo row that has none. */
     referenceNumber: string;
+    /** The record's own id, as the URL and the API know it. */
+    applicationId: string;
     currentStatus: AppStatus;
     /** The server's own 19-status lifecycle state, which `currentStatus` coarsens. */
     lifecycleStatus: string;
@@ -286,7 +288,8 @@ export function buildDetailFor(
     barangay: realAddress?.barangay || applicant?.barangay || 'Not on file',
     meta: {
       dateSubmitted: row.dateSubmitted,
-      referenceNumber: row.id,
+      referenceNumber: row.referenceNumber || row.id,
+      applicationId: row.id,
       currentStatus: row.status,
       lifecycleStatus: real?.lifecycleStatus ?? row.lifecycleStatus,
       permitType: row.permitType,
