@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
 import { ApiClient } from './api.client';
+import { API_BASE_URL } from './api.config';
 import { ApiError } from './problem';
 import { ApplicationRecord, withProjectedFields } from '../domain/application.model';
 import { DocumentStatus } from '../domain/document.model';
@@ -360,6 +361,7 @@ export type AddNoteResult =
 @Injectable({ providedIn: 'root' })
 export class StaffApplicationsApi {
   private readonly api = inject(ApiClient);
+  private readonly apiBaseUrl = inject(API_BASE_URL);
 
   async page(options: { limit?: number; cursor?: string; status?: string } = {}): Promise<{
     rows: ApplicationRecord[];
@@ -514,7 +516,17 @@ export class StaffApplicationsApi {
       const result = await this.api.get<{ url: string }>(
         `/documents/${encodeURIComponent(documentId)}/content`,
       );
-      return { kind: 'ok', url: result.url };
+      // The server signs a PATH — `/documents/content?key=…&sig=…` — to be
+      // redeemed on ITS origin (`signed-url.ts`, backend). Handed to `fetch`
+      // as-is, the browser resolves it against THIS site's origin instead:
+      // fine under `ng serve`, whose proxy forwards `/documents` to the API,
+      // but on the deployed portal that is Netlify, which answers every
+      // unknown path with index.html — so "Preview" got an HTML page back,
+      // reported its type as unshowable, and no uploaded file could ever be
+      // seen from the real site. Resolved here, once, against the same base
+      // every other call uses; an empty base (same-origin gateway) resolves
+      // against the page, which is what it always did.
+      return { kind: 'ok', url: new URL(result.url, this.apiBaseUrl || globalThis.location.origin).toString() };
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.status === 501) return { kind: 'unavailable' };

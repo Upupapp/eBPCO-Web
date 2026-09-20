@@ -28,8 +28,18 @@ export interface GeneratePermitInput {
   readonly conditions?: readonly string[];
 }
 
+/**
+ * `lifecycleStatus` on each `done` below: where the application stands after
+ * the act, because the server now makes the implied move itself (permit ->
+ * Permit Generated, preparation -> Ready for Release, release -> Released ->
+ * Completed; 2026-09-20). Absent from an older server, `null` if the move was
+ * refused — the caller falls back to making the hop then, and only then.
+ */
 export type GeneratePermitResult =
-  | { readonly kind: 'done'; readonly permitNumber: string; readonly issuedDate: string }
+  | {
+      readonly kind: 'done'; readonly permitNumber: string; readonly issuedDate: string;
+      readonly lifecycleStatus?: string | null;
+    }
   | { readonly kind: 'refused'; readonly message: string }
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
@@ -41,7 +51,7 @@ export interface PrepareReleaseInput {
 }
 
 export type PrepareReleaseResult =
-  | { readonly kind: 'done' }
+  | { readonly kind: 'done'; readonly lifecycleStatus?: string | null }
   | { readonly kind: 'refused'; readonly message: string }
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
@@ -52,7 +62,7 @@ export interface ReleasePermitInput {
 }
 
 export type ReleasePermitResult =
-  | { readonly kind: 'done'; readonly releasedAt: string }
+  | { readonly kind: 'done'; readonly releasedAt: string; readonly lifecycleStatus?: string | null }
   | { readonly kind: 'refused'; readonly message: string }
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
@@ -67,7 +77,7 @@ export class PermitReleaseApi {
     input: GeneratePermitInput,
   ): Promise<GeneratePermitResult> {
     try {
-      const result = await this.api.post<{ permitNumber: string; issuedDate: string }>(
+      const result = await this.api.post<{ permitNumber: string; issuedDate: string; lifecycleStatus?: string | null }>(
         `/staff/applications/${encodeURIComponent(applicationId)}/permit`,
         input,
       );
@@ -90,11 +100,11 @@ export class PermitReleaseApi {
     input: PrepareReleaseInput,
   ): Promise<PrepareReleaseResult> {
     try {
-      await this.api.post<{ prepared: true }>(
+      const result = await this.api.post<{ prepared: true; lifecycleStatus?: string | null }>(
         `/staff/applications/${encodeURIComponent(applicationId)}/release-preparation`,
         input,
       );
-      return { kind: 'done' };
+      return { kind: 'done', lifecycleStatus: result.lifecycleStatus };
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.status === 501) return { kind: 'unavailable' };
@@ -113,7 +123,7 @@ export class PermitReleaseApi {
     input: ReleasePermitInput,
   ): Promise<ReleasePermitResult> {
     try {
-      const result = await this.api.post<{ releasedAt: string }>(
+      const result = await this.api.post<{ releasedAt: string; lifecycleStatus?: string | null }>(
         `/staff/applications/${encodeURIComponent(applicationId)}/release`,
         input,
       );

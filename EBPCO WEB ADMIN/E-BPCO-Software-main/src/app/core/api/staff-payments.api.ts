@@ -77,7 +77,17 @@ export type OpenAssessmentResult =
   | { readonly kind: 'failed'; readonly message: string };
 
 export type OrderResult =
-  | { readonly kind: 'done'; readonly orderId: string; readonly number: string; readonly totalCentavos: number }
+  | {
+      readonly kind: 'done'; readonly orderId: string; readonly number: string; readonly totalCentavos: number;
+      /**
+       * Where the application stands after the Order was issued — `Assessed`
+       * when the server made that move itself (it does since 2026-09-20; the
+       * Order is what "Assessed" means). Absent from an older server, and
+       * `null` if the move was refused; either way the caller decides whether
+       * to make the hop itself.
+       */
+      readonly lifecycleStatus?: string | null;
+    }
   | { readonly kind: 'refused'; readonly message: string }
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
@@ -257,7 +267,9 @@ export class StaffPaymentsApi {
     options: { dueDate?: string } = {},
   ): Promise<OrderResult> {
     try {
-      const result = await this.api.post<{ orderId: string; number: string; totalCentavos: number }>(
+      const result = await this.api.post<{
+        orderId: string; number: string; totalCentavos: number; lifecycleStatus?: string | null;
+      }>(
         `/staff/applications/${encodeURIComponent(applicationId)}/order-of-payment`,
         options,
       );

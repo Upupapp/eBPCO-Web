@@ -643,7 +643,17 @@ export class Evaluations implements OnInit {
     this.actionError.set(null);
     const result = await this.evaluationsApi.record(row.id, { stage, result: 'Passed' });
     if (result.kind === 'done') {
-      this.toast.success(`${row.applicant}'s application advanced past ${card.title}.`);
+      // The fifth pass does NOT move the lifecycle — nothing legal follows
+      // Under Evaluation until an Order of Payment exists (`Under Evaluation
+      // -> Assessed` needs `evaluations-complete` AND `order-of-payment-
+      // issued`, lifecycle.ts). Issuing that Order is the next act and is
+      // what moves it, so say so here rather than let the officer look for
+      // a status change that is not owed yet.
+      this.toast.success(
+        result.evaluationsComplete
+          ? `All five stages passed for ${row.applicant}'s application. Next: assess the fee — it moves to Assessed once the Order of Payment is issued.`
+          : `${row.applicant}'s application advanced past ${card.title}.`,
+      );
       await this.loadQueue();
       // Re-sync selectedCard/selectedRow to the application's real new
       // stage — see refreshRecordViewAfter's own doc comment for why this

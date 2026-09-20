@@ -538,6 +538,21 @@
               <ul>
                 <li>Assigned To: {{ detail.row.officer }}</li>
                 <li>Current Step: {{ detail.row.lifecycleStatus }}</li>
+                @if (detail.row.lifecycleStatus === 'Under Evaluation') {
+                  <!-- The one status where "what is it waiting on" is not the
+                       status itself: five stages happen inside Under Evaluation,
+                       and passing the last one does NOT move the application —
+                       the Order of Payment does (lifecycle.ts: Under Evaluation
+                       -> Assessed needs evaluations-complete AND
+                       order-of-payment-issued). Said here so nobody reads a
+                       finished evaluation as a stuck application. -->
+                  <li>
+                    Evaluation: {{ evaluationStagesPassed() }} of {{ evaluationStageTotal }} stages passed
+                    @if (evaluationsComplete()) {
+                      — complete. Next: assess the fee (Permit Result tab); the application moves to Assessed when the Order of Payment is issued.
+                    }
+                  </li>
+                }
                 <li>Days In Current Step: {{ daysInCurrentStep() }} Days</li>
               </ul>
               <span class="elapsed">Total Elapsed Time: {{ totalElapsedDays() }} Days</span>

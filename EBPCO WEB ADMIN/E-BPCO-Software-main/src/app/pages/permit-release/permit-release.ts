@@ -718,17 +718,23 @@ export class PermitRelease implements OnInit {
         return;
       }
       this.sessionCache.recordPreparation(row.id, { claimLocation, officeHours, bringWithYou });
-      const transitionResult = await this.applicationsApi.transition(row.id, 'Ready for Release', {
-        expectedVersion: row.version,
-      });
-      if (transitionResult.kind !== 'done') {
-        const message =
-          transitionResult.kind === 'unavailable'
-            ? 'this deployment cannot update it yet.'
-            : transitionResult.message;
-        this.toast.error(`Release prepared, but the status update failed — ${message} Reload and try again.`);
-      } else {
+      // The server makes `Permit Generated -> Ready for Release` itself now
+      // and reports the status; the hop is a fallback for an older server or
+      // a refused move (no `expectedVersion`: the server's own move already
+      // advanced the version this row remembers).
+      if (result.lifecycleStatus === 'Ready for Release') {
         this.toast.success('Release prepared.');
+      } else {
+        const transitionResult = await this.applicationsApi.transition(row.id, 'Ready for Release');
+        if (transitionResult.kind !== 'done') {
+          const message =
+            transitionResult.kind === 'unavailable'
+              ? 'this deployment cannot update it yet.'
+              : transitionResult.message;
+          this.toast.error(`Release prepared, but the status update failed — ${message} Reload and try again.`);
+        } else {
+          this.toast.success('Release prepared.');
+        }
       }
       this.prepareReleaseTarget.set(null);
       await this.loader.reload();
@@ -789,29 +795,34 @@ export class PermitRelease implements OnInit {
         method: this.releaseMethod,
         releasedAt: result.releasedAt,
       });
-      const releasedTransition = await this.applicationsApi.transition(row.id, 'Released', {
-        expectedVersion: row.version,
-      });
-      if (releasedTransition.kind !== 'done') {
-        const message =
-          releasedTransition.kind === 'unavailable'
-            ? 'this deployment cannot update it yet.'
-            : releasedTransition.message;
-        this.toast.error(`Permit released to ${claimant}, but the status update failed — ${message} Reload and try again.`);
+      // The server carries the application `Ready for Release -> Released ->
+      // Completed` itself now and reports where it landed. Only when it did
+      // not (older server, or a refused move) does this page make the hops.
+      if (result.lifecycleStatus === 'Completed') {
+        this.toast.success(`Permit released to ${claimant}.`);
       } else {
-        const completedTransition = await this.applicationsApi.transition(row.id, 'Completed', {
-          expectedVersion: releasedTransition.version,
-        });
-        if (completedTransition.kind !== 'done') {
+        const releasedTransition = result.lifecycleStatus === 'Released'
+          ? ({ kind: 'done' } as const)
+          : await this.applicationsApi.transition(row.id, 'Released');
+        if (releasedTransition.kind !== 'done') {
           const message =
-            completedTransition.kind === 'unavailable'
+            releasedTransition.kind === 'unavailable'
               ? 'this deployment cannot update it yet.'
-              : completedTransition.message;
-          this.toast.error(
-            `Permit released to ${claimant}, but marking it Completed failed — ${message} Reload and try again.`,
-          );
+              : releasedTransition.message;
+          this.toast.error(`Permit released to ${claimant}, but the status update failed — ${message} Reload and try again.`);
         } else {
-          this.toast.success(`Permit released to ${claimant}.`);
+          const completedTransition = await this.applicationsApi.transition(row.id, 'Completed');
+          if (completedTransition.kind !== 'done') {
+            const message =
+              completedTransition.kind === 'unavailable'
+                ? 'this deployment cannot update it yet.'
+                : completedTransition.message;
+            this.toast.error(
+              `Permit released to ${claimant}, but marking it Completed failed — ${message} Reload and try again.`,
+            );
+          } else {
+            this.toast.success(`Permit released to ${claimant}.`);
+          }
         }
       }
       this.releaseTarget.set(null);

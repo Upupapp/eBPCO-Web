@@ -149,35 +149,19 @@ const STATUS_ACTIONS: { label: string; target: ApplicationLifecycleStatus }[] = 
   { label: 'Mark Received', target: 'Received' },
   { label: 'Verify Documents', target: 'Document Verification' },
   { label: 'Send to Evaluation', target: 'Under Evaluation' },
-  // The real transition table (lifecycle.ts) requires this exact hop
-  // (`Under Evaluation -> Assessed`, `staff:assess`, preconditions
-  // `evaluations-complete` + `order-of-payment-issued`) before an applicant
-  // can even submit a payment — `Assessed -> Payment Submitted` only starts
-  // from `Assessed`. Neither passing every evaluation stage (evaluations.ts)
-  // nor issuing an Order of Payment (payments.ts) ever touches
-  // lifecycle_status itself, so without this entry an application could
-  // clear both and still have no legal way for the citizen to pay it, stuck
-  // at Under Evaluation permanently.
+  // Since 2026-09-20 the server makes this hop itself when the Order of
+  // Payment is issued (`Under Evaluation -> Assessed` needs exactly
+  // `evaluations-complete` + `order-of-payment-issued`, and the Order IS the
+  // assessment). Kept as a fallback for the case where that follow-on was
+  // refused — `canTransition` only offers it while it is legal, so against
+  // an application the server already moved it simply does not appear.
   { label: 'Send to Assessed', target: 'Assessed' },
-  // Same gap, one hop earlier: `Payment Submitted -> Payment Under
-  // Verification -> Payment Verified` are each their own real transition
-  // (`staff:verify-payment`, lifecycle.ts), and verifying the payment
-  // itself (payments.ts's verifyPayment(), `POST /staff/payments/:id/verify`)
-  // only ever writes the `payments` row — same as every other hop on this
-  // page, it never touches lifecycle_status. Without these two entries an
-  // application whose payment had genuinely been verified by a cashier was
-  // stuck at Payment Submitted permanently, with 'Send to Approval' below
-  // never becoming legal (it only starts from Payment Verified).
+  // Verifying a payment (`POST /staff/payments/:id/verify`, or an onsite
+  // payment) now carries the application through Payment Under Verification
+  // and Payment Verified to For Approval on the server. These three stay as
+  // fallbacks for a refused follow-on, offered only while legal.
   { label: 'Send to Payment Verification', target: 'Payment Under Verification' },
   { label: 'Mark Payment Verified', target: 'Payment Verified' },
-  // The real transition table requires this hop (Payment Verified -> For
-  // Approval, `staff:verify-payment`) before 'Approved' is even legal —
-  // verifying a payment (payments.ts's verifyPayment()) only ever writes
-  // the `payments` row, never the application's lifecycle_status. Without
-  // this entry there was no way to make that hop at all: every application
-  // that ever got its payment verified was stuck at Payment Verified
-  // permanently, one invisible step from a building official's "Mark
-  // Approved" ever becoming legal to click.
   { label: 'Send to Approval', target: 'For Approval' },
   { label: 'Mark Approved', target: 'Approved' },
   // The real transition table has TWO ways in (`Document Verification ->
@@ -795,6 +779,13 @@ export class Applications {
     return EVALUATION_STAGE_ORDER.every((stage) => passed.has(stage));
   });
 
+  /** How many of the five stages have PASSED — the same count the server's `evaluations-complete` precondition is built on. */
+  protected readonly evaluationStagesPassed = computed(() => {
+    const evaluations = this.realDetail()?.evaluations ?? [];
+    return new Set(evaluations.filter((e) => e.result === 'Passed').map((e) => e.stage)).size;
+  });
+  protected readonly evaluationStageTotal = EVALUATION_STAGE_ORDER.length;
+
   protected readonly canAssessFee = computed(() => {
     const row = this.selectedRow();
     const role = this.session.role();
@@ -904,17 +895,24 @@ export class Applications {
         permitNumber: result.permitNumber,
         issuedDate: result.issuedDate,
       });
-      const transitionResult = await this.applicationsApi.transition(row.id, 'Permit Generated', {
-        expectedVersion: row.version,
-      });
-      if (transitionResult.kind !== 'done') {
-        this.toast.error(
-          `${this.finalDocumentName()} generated (${result.permitNumber}), but the status update failed — `
-            + `${transitionResult.kind === 'unavailable' ? 'this deployment cannot update it yet.' : transitionResult.message} `
-            + 'Reload and try again.',
-        );
-      } else {
+      // The server makes `Approved -> Permit Generated` itself now and says
+      // where the application stands; the hop below is a fallback for an
+      // older server (no status reported) or a refused move. No
+      // `expectedVersion` on the fallback: the server's own move, if it
+      // happened, already advanced the version this row remembers.
+      if (result.lifecycleStatus === 'Permit Generated') {
         this.toast.success(`${this.finalDocumentName()} generated.`);
+      } else {
+        const transitionResult = await this.applicationsApi.transition(row.id, 'Permit Generated');
+        if (transitionResult.kind !== 'done') {
+          this.toast.error(
+            `${this.finalDocumentName()} generated (${result.permitNumber}), but the status update failed — `
+              + `${transitionResult.kind === 'unavailable' ? 'this deployment cannot update it yet.' : transitionResult.message} `
+              + 'Reload and try again.',
+          );
+        } else {
+          this.toast.success(`${this.finalDocumentName()} generated.`);
+        }
       }
       this.showGeneratePermitModal.set(false);
       await this.loader.reload();

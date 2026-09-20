@@ -440,7 +440,24 @@ export class Payments {
     try {
       const result = await this.paymentsApi.issueOrderOfPayment(appId);
       if (result.kind === 'done') {
-        this.toast.success(`Order of Payment ${result.number} issued.`);
+        // The server makes `Under Evaluation -> Assessed` itself as part of
+        // issuing the Order (the Order is what "Assessed" means) and reports
+        // where the application now stands. Before this, nothing did: every
+        // stage passed, a real Order in force, and the application still
+        // read "Under Evaluation" everywhere until an officer found "Send to
+        // Assessed" in a menu — found live. The fallback below is for an
+        // older server that does not report a status, or a refused move;
+        // against the current server it never runs.
+        let status = result.lifecycleStatus ?? null;
+        if (status !== 'Assessed') {
+          const moved = await this.applicationsApi.transition(appId, 'Assessed');
+          if (moved.kind === 'done') status = moved.status;
+        }
+        this.toast.success(
+          status === 'Assessed'
+            ? `Order of Payment ${result.number} issued — the application is now Assessed and the applicant has been notified.`
+            : `Order of Payment ${result.number} issued, but the application could not be moved to Assessed. Check its status.`,
+        );
         this.knownAssessmentId.delete(appId);
         await this.loadWorkspace(appId);
         return;
