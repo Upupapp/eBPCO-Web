@@ -277,6 +277,24 @@
           <h2>Release Actions</h2>
         </div>
 
+        <!--
+          The result of the last act on THIS application, left in place until
+          dismissed or until another application is opened. The toast at the
+          top-right does fire (confirmed live), but it sits far from the modal
+          the officer was just looking at and is gone in four seconds — an
+          officer who looked down to check the form saw nothing change and
+          asked whether the preparation had happened at all.
+        -->
+        @if (actionNotice(); as notice) {
+          @if (notice.applicationId === row.id) {
+            <div class="release-action-notice" role="status">
+              <app-icon name="check-circle" [size]="16" />
+              <span>{{ notice.text }}</span>
+              <button type="button" class="release-action-notice-close" (click)="actionNotice.set(null)" aria-label="Dismiss">✕</button>
+            </div>
+          }
+        }
+
         <h3>Permit Status</h3>
         <p class="release-note">
           @if (row.permitStage === 'Permit Generated') {

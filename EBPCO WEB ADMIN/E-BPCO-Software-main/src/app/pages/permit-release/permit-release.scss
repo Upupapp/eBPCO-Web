@@ -175,6 +175,38 @@
   line-height: 1.5;
 }
 
+// The inline result of the last Prepare / Release act (see the template).
+.release-action-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  background: #ecfdf3;
+  border: 1px solid #a6e3bd;
+  color: #067647;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.45;
+
+  app-icon { flex-shrink: 0; margin-top: 0.1rem; }
+  span { flex: 1; }
+}
+
+.release-action-notice-close {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0.1rem 0.2rem;
+  opacity: 0.7;
+  &:hover { opacity: 1; }
+}
+
 .id-cell {
   font-weight: 700;
 }

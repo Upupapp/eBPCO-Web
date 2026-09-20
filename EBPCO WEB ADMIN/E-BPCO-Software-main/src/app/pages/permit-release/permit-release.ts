@@ -730,6 +730,9 @@ export class PermitRelease implements OnInit {
     this.prepareReleaseTarget.set(null);
   }
 
+  /** The last successful act on an application, shown inline in its Release Actions panel — see the template's own comment. */
+  protected readonly actionNotice = signal<{ applicationId: string; text: string } | null>(null);
+
   protected async confirmPrepareRelease(): Promise<void> {
     const row = this.prepareReleaseTarget();
     if (!row) return;
@@ -767,6 +770,10 @@ export class PermitRelease implements OnInit {
       // advanced the version this row remembers).
       if (result.lifecycleStatus === 'Ready for Release') {
         this.toast.success('Release prepared.');
+        this.actionNotice.set({
+          applicationId: row.id,
+          text: `Release prepared — claim at ${claimLocation}, ${officeHours}. The applicant has been notified and the permit is now Ready for Release.`,
+        });
       } else {
         const transitionResult = await this.applicationsApi.transition(row.id, 'Ready for Release');
         if (transitionResult.kind !== 'done') {
@@ -843,6 +850,10 @@ export class PermitRelease implements OnInit {
       // not (older server, or a refused move) does this page make the hops.
       if (result.lifecycleStatus === 'Completed') {
         this.toast.success(`Permit released to ${claimant}.`);
+        this.actionNotice.set({
+          applicationId: row.id,
+          text: `Permit released to ${claimant} (${this.releaseMethod}). The application is now Completed and the applicant has been notified.`,
+        });
       } else {
         const releasedTransition = result.lifecycleStatus === 'Released'
           ? ({ kind: 'done' } as const)
