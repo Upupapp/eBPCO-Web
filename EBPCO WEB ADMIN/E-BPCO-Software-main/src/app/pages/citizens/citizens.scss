@@ -84,34 +84,213 @@
   font-weight: 700;
 }
 
-.detail-actions {
+// ── Record card actions ─────────────────────────────────────────────────
+// The record card's footer partial (`.record-footer`) is a row of stat cells;
+// these are buttons, so they get their own block: padded like the card body,
+// stacked full-width, each one the same size.
+.record-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1rem 1.25rem 1.25rem;
+  border-top: 1px solid $color-border;
+
+  .btn-outline {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
-.rectify-panel,
-.erase-panel {
-  margin-top: 1.25rem;
+.btn-outline.danger {
+  border-color: $color-danger;
+  color: $color-danger;
+
+  &:hover {
+    background: $color-danger-bg-soft;
+    border-color: $color-danger;
+    color: $color-danger;
+  }
+}
+
+.btn-outline:disabled,
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+// ── Forms (Correct a Detail, Erase) ──────────────────────────────────────
+// The same field treatment the Businesses screen's own forms use, kept
+// local because no shared partial defines it yet.
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: $color-ink-500;
+
+  .required {
+    color: $color-danger;
+    margin-left: 0.1rem;
+  }
+}
+
+.text-input,
+.select-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid $color-border-strong;
+  border-radius: $radius-sm;
+  padding: 0.65rem 0.85rem;
+  font: inherit;
+  font-size: 0.88rem;
+  color: $color-ink-900;
+  background: $color-surface;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $color-info;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+  }
+
+  &::placeholder {
+    color: $color-ink-100;
+  }
+
+  &:disabled {
+    background: $color-bg-muted;
+    color: $color-ink-200;
+    cursor: not-allowed;
+  }
+}
+
+.select-input {
+  appearance: none;
+  padding-right: 2.4rem;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a7f8c' stroke-width='2'><path d='M5.5 8.5 12 15l6.5-6.5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 1rem;
+  margin: 1rem 0;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.rectify-panel {
+  margin-top: 1.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid $color-border;
 
   h3 {
-    margin: 0 0 0.4rem;
-    font-size: 0.95rem;
+    margin: 0 0 0.35rem;
+  }
+
+  > .muted {
+    margin: 0;
+    line-height: 1.5;
   }
 }
 
+// ── Erase: a danger zone, visibly set apart from the record ─────────────
 .erase-panel {
-  border-top: none;
-  padding-top: 0;
+  border-color: $color-brand-border;
+  background: $color-surface;
 
-  .field {
-    max-width: 420px;
+  .erase-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+
+    h3 {
+      margin: 0 0 0.35rem;
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: $color-danger;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .muted {
+      margin: 0;
+      line-height: 1.5;
+      max-width: 72ch;
+    }
+  }
+
+  .erase-icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: $color-danger-bg-soft;
+    color: $color-danger;
+  }
+
+  .erase-law {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: $color-danger-bg-soft;
+    color: $color-danger;
+  }
+
+  .erase-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.9rem;
+    margin-top: 1.1rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid $color-border;
+
+    .field {
+      flex: 1;
+      max-width: 460px;
+    }
+
+    @media (max-width: 720px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 }
 
 .muted {
   color: $color-ink-300;
   font-size: 0.85rem;
+}
+
+.timeline-feed-text {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: $color-ink-300;
 }
