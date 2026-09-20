@@ -301,8 +301,15 @@ h3 {
 
   h2 {
     font-size: 1.05rem;
-    margin-bottom: 0.6rem;
+    margin: 0 0 0.15rem;
   }
+}
+
+.applicant-reference {
+  margin: 0 0 0.6rem;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: $color-ink-300;
 }
 
 .info-list {
@@ -1115,9 +1122,7 @@ tr.missing-row {
 
   h2 {
     font-size: 1.2rem;
-    margin-bottom: 0.4rem;
-    display: inline-block;
-    margin-right: 0.6rem;
+    margin: 0;
   }
 
   p {
@@ -1129,6 +1134,66 @@ tr.missing-row {
   .info-header-business {
     font-weight: 700;
     color: $color-ink-700;
+  }
+}
+
+// The title used to be "9433ae6d-87a9-4e78-a296-... - Michaela Cailinf" —
+// a raw id concatenated straight into an <h2>, unreadable, and redundant
+// with the reference number this same record already shows further down
+// the page. Name and status read together on one line now; the id is
+// gone from view entirely (the reference number below is what a person
+// actually needs to identify the filing) — found live 2026-09-20.
+.info-header-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.3rem;
+}
+
+.info-header-reference {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+  color: $color-ink-300;
+}
+
+// Same label-over-value language .info-grid's own dt/dd already use
+// (small uppercase muted label, bold dark value) — laid out as a wrapping
+// row instead of a full grid, since this is a compact header caption, not
+// the page's main detail body. Replaces three unlabelled <p> tags that
+// read as an undifferentiated wall of text with no way to tell a mobile
+// number from an email at a glance.
+.info-header-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  margin: 0.7rem 0 0;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  dt {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: $color-ink-300;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $color-ink-700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 260px;
   }
 }
 

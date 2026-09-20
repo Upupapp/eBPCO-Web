@@ -350,7 +350,15 @@
       </div>
 
       <div class="applicant-info">
-        <h2>{{ detail.row.id }} - {{ detail.row.applicant }}</h2>
+        <!-- The raw id used to sit IN the name ("9433ae6d-... - Michaela
+             Cailinf") — unreadable, and redundant with the reference
+             number Application Info already shows. Name reads on its
+             own now; the reference number is the human identifier shown
+             beneath it (found live 2026-09-20). -->
+        <h2>{{ detail.row.applicant }}</h2>
+        @if (detail.meta.referenceNumber) {
+          <p class="applicant-reference">{{ detail.meta.referenceNumber }}</p>
+        }
         <span class="status-pill" [class]="detail.row.status.toLowerCase().replace(/\s+/g, '-')">{{
           detail.row.status
         }}</span>
@@ -1034,11 +1042,20 @@
   <div class="card info-header-card">
     <app-avatar [name]="detail.row.applicant" [size]="64" [photoUrl]="photos.urlFor(detail.row.id, detail.row.applicantHasPhoto)()" />
     <div class="info-header-text">
-      <h2>{{ detail.row.id }} - {{ detail.row.applicant }}</h2>
+      <div class="info-header-title-row">
+        <h2>{{ detail.row.applicant }}</h2>
+        <span class="status-pill" [class]="detail.row.status.toLowerCase().replace(/\s+/g, '-')">{{
+          detail.row.status
+        }}</span>
+      </div>
+      <!-- The raw id used to sit IN the name ("9433ae6d-... - Michaela Cailinf")
+           — unreadable, and redundant with the reference number this same
+           record already shows lower on the page (detail.meta.referenceNumber).
+           Shown here instead, human-first. -->
+      @if (detail.meta.referenceNumber) {
+        <p class="info-header-reference">{{ detail.meta.referenceNumber }}</p>
+      }
       <p class="info-header-business">{{ detail.businessLabel }}</p>
-      <span class="status-pill" [class]="detail.row.status.toLowerCase().replace(/\s+/g, '-')">{{
-        detail.row.status
-      }}</span>
       @if (editingProfile()) {
         <div class="profile-edit-row">
           <label>
@@ -1056,9 +1073,11 @@
           </div>
         </div>
       } @else {
-        <p>{{ detail.row.location }}</p>
-        <p>{{ detail.phone }}</p>
-        <p>{{ detail.email }}</p>
+        <dl class="info-header-contact">
+          <div><dt>Location</dt><dd>{{ detail.row.location || '—' }}</dd></div>
+          <div><dt>Mobile</dt><dd>{{ detail.phone || '—' }}</dd></div>
+          <div><dt>Email</dt><dd>{{ detail.email || '—' }}</dd></div>
+        </dl>
       }
     </div>
     <!-- One column on the right: the caption, then the action beneath it, so
