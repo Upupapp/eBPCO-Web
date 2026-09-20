@@ -215,6 +215,10 @@
 
 // ── Erase: a danger zone, visibly set apart from the record ─────────────
 .erase-panel {
+  // `.card` only ever gives itself a bottom margin, so the panel above
+  // (`.detail-grid`, no bottom margin of its own) sat flush against this
+  // one's top edge — found live 2026-09-20.
+  margin-top: 1.5rem;
   border-color: $color-brand-border;
   background: $color-surface;
 

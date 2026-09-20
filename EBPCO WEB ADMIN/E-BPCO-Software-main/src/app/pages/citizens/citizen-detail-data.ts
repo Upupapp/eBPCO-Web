@@ -31,6 +31,16 @@ const ACTIVITY_LABELS: Readonly<Record<string, string>> = {
   'citizen.erasure.requested': 'Erasure requested',
   'account.erased': 'Account erased',
   'authorisation.refused': 'An action was refused (insufficient permission)',
+  // `historyOf('account', citizenId)` (see citizen-directory.service.ts) pulls
+  // every security-log entry against this account, not just the citizen.*
+  // administrative ones above — a citizen signing in/out themselves shows up
+  // here too, and used to fall through to the raw action string (found live
+  // 2026-09-20, e.g. "session.started").
+  'session.started': 'Signed in',
+  'session.ended': 'Signed out',
+  'session.refused': 'Sign-in attempt refused',
+  'session.replay-detected': 'Suspicious sign-in activity detected — session revoked',
+  'mfa.failed': 'Entered the wrong two-factor code',
 };
 
 /** Falls back to the raw action name rather than hiding an entry this map has not caught up with. */
