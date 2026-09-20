@@ -232,3 +232,23 @@ input[type='password']::-ms-clear {
   line-height: 1.45;
   color: #7a5b00;
 }
+
+// window.print() (payments.ts, permit-release.ts, document-preview.ts,
+// generated-permit-document-modal.ts) prints the WHOLE page by default —
+// the sidebar and whatever page sits behind the modal, not just the
+// receipt/permit/summary the officer opened it for (found live 2026-09-20).
+// Each modal's own component-scoped @media print rules only reach inside
+// its own template (Angular view encapsulation) — they can never hide
+// .admin-sidebar or a sibling on the routed page underneath, both of which
+// live outside that component entirely. Global, unscoped, and keyed off
+// every print-triggering modal's own existing .modal-backdrop wrapper
+// (confirmed consistent across all four files above) rather than one path
+// per page.
+@media print {
+  body:has(.modal-backdrop) .admin-sidebar {
+    display: none !important;
+  }
+  body:has(.modal-backdrop) .admin-content > *:not(:has(.modal-backdrop)) {
+    display: none !important;
+  }
+}
