@@ -632,7 +632,10 @@ export class Applications {
         // cards' slim 6px progress tracks (found live 2026-09-20). Support
         // text alone — same "Total" treatment Citizens/Businesses already
         // use — keeps this card's footer the same size as its neighbours.
-        support: `${under} Under Review · ${approved} Approved · ${rejected} Rejected`,
+        // Kept short and fixed-length on purpose (not a live per-status
+        // breakdown): a longer string here is exactly what widened this
+        // card past its siblings before — see the .kpi-grid override above.
+        support: 'Every application on file',
       },
     ];
   });

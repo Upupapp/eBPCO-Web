@@ -4,6 +4,24 @@
 @use '../../shared/styles/menu-popover';
 @use '../../shared/styles/tokens' as *;
 
+// The shared `.kpi-grid > app-kpi-card` rule (`_kpi-grid.scss`) sizes each
+// card from a 235px flex-basis plus an equal share of the row's remaining
+// width — correct for pages whose cards carry roughly matching content, but
+// Total Applications' longer support line (its per-status breakdown, e.g.
+// "23 Under Review · 15 Approved · 4 Rejected") can out-grow its equal
+// share, widening that one card past its three siblings (found live
+// 2026-09-20). `flex-basis: 0` makes every card's share of the row purely
+// proportional to `flex-grow` — identical for all four — regardless of how
+// long any one card's content gets.
+.kpi-grid > app-kpi-card {
+  flex-basis: 0;
+  // Flexbox's default min-width: auto floors a card at its own content's
+  // min-content size before flex-basis/flex-grow ever get a say — without
+  // this override, that floor is exactly what let the longer support line
+  // above win back the extra width flex-basis: 0 was meant to remove.
+  min-width: 0;
+}
+
 @keyframes section-in {
   from {
     opacity: 0;
