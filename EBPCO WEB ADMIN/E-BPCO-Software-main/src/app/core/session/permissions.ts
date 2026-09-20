@@ -187,7 +187,7 @@ export const ACTION_PERMISSIONS = {
   /** The Applications detail page's "Mark Approved" quick action — same role tier as generatePermit, since approving and generating the permit are the same office's responsibility. Kept distinct from `recordEvaluation`'s own Final-Approval-stage "Approve" (Evaluators legitimately pass evaluation stages; this is the separate, later step of actually approving the application record). */
   approveApplication: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Approving Officer',
-  /** Manual administrator confirmation of an applicant's email/mobile — the only verification path this frontend-only mock can honestly perform (see setContactVerification in application-store.ts). */
+  /** Manual administrator confirmation of an applicant's email — the LGU verifies email only throughout the system, not mobile (see setContactVerification in application-store.ts). */
   verifyContact: (role: StaffRole): boolean => role === 'Super Admin' || role === 'Administrator',
   assessFee: (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator' || role === 'Evaluator',
