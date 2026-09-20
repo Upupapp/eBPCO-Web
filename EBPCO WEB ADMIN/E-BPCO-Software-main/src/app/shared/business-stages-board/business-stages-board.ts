@@ -15,6 +15,7 @@ import {
 import { ToastService } from '../toast/toast.service';
 import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
 import { QueueLoader } from '../../core/domain/queue-loader';
+import { CASTILLA_BARANGAYS } from '../../core/domain/castilla-barangays';
 
 type StageFilterKey = 'All' | EvaluationStage;
 
@@ -273,17 +274,17 @@ export class BusinessStagesBoard {
   );
 
   // ---- Barangay filter ----------------------------------------------------
-  // Options are generated FROM the available application data (never a
-  // hand-maintained list) — a barangay that has no applications right now
-  // simply doesn't appear as a filter option, so this can never offer a
-  // choice that would always show "no applications match".
+  // The real 34-barangay Castilla list (castilla-barangays.ts) — the same
+  // one the citizen portal's own sign-up/business registration offers.
+  // This used to derive its options FROM the local mock application data
+  // instead, which is how "Barangay Castilla" (the demo seed's own
+  // placeholder value, a CITY name standing in for a barangay it never
+  // bothered to invent) ended up as a real filter option — not a barangay
+  // an applicant could actually have (found live 2026-09-20).
   protected readonly barangayFilter = signal<'All' | string>('All');
   protected readonly barangayOpen = signal(false);
 
-  protected readonly barangayOptions = computed<string[]>(() => {
-    const set = new Set(this.allApplications().map((app) => barangayOf(app)));
-    return ['All', ...Array.from(set).sort((a, b) => a.localeCompare(b))];
-  });
+  protected readonly barangayOptions = computed<readonly string[]>(() => ['All', ...CASTILLA_BARANGAYS]);
 
   protected toggleBarangayMenu(): void {
     this.barangayOpen.update((open) => !open);
