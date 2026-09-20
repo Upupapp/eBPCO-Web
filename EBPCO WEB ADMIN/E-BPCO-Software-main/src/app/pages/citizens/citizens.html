@@ -22,7 +22,7 @@
       <app-kpi-card
         [label]="stat.label" [value]="stat.value" [icon]="stat.icon"
         [tone]="stat.tone" [illustration]="stat.illustration"
-        [progress]="stat.isTotal ? null : stat.pct" [support]="stat.support"
+        [progress]="stat.pct" [support]="stat.support"
       />
     }
   </section>
@@ -351,7 +351,7 @@
     <div class="card erase-panel">
       <div class="erase-head">
         <span class="erase-icon"><app-icon name="alert-triangle" [size]="18" /></span>
-        <div>
+        <div class="erase-body">
           <h3>Erase This Account <span class="erase-law">RA 10173 §16(e)</span></h3>
           <p class="muted">
             Removes the citizen's sign-in details, contact information and sessions. Permit

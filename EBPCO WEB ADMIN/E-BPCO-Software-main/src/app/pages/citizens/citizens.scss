@@ -227,6 +227,17 @@
     align-items: flex-start;
     gap: 0.9rem;
 
+    // Without this, the flex algorithm sizes the text column from its own
+    // hypothetical content estimate rather than the row's actual remaining
+    // width, so the paragraph wrapped early and left the rest of the card
+    // empty — a `.muted { max-width: 72ch }` here used to paper over the
+    // same symptom by capping it short instead of fixing why it wasn't
+    // filling the row (found live 2026-09-20).
+    .erase-body {
+      flex: 1;
+      min-width: 0;
+    }
+
     h3 {
       margin: 0 0 0.35rem;
       font-size: 0.98rem;
@@ -241,7 +252,6 @@
     .muted {
       margin: 0;
       line-height: 1.5;
-      max-width: 72ch;
     }
   }
 

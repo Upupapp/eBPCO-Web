@@ -44,7 +44,6 @@ interface KpiTile {
   tone: KpiTone;
   illustration: KpiIllustration;
   pct: number;
-  isTotal: boolean;
   support: string;
 }
 
@@ -131,7 +130,13 @@ export class Citizens {
   protected readonly total = signal(0);
   protected readonly metrics = signal<CitizenMetrics | null>(null);
 
-  /** Same treatment as businesses.ts's own `ringStats`: a support line and a percent-of-total bar on every tile but the headline total. */
+  /**
+   * Same treatment as businesses.ts's own `ringStats`: a support line and a
+   * percent-of-total bar on every tile, Total Citizens included — leaving
+   * its bar out (via `isTotal`, now removed) gave its footer band a
+   * shorter, differently-shaped band than its siblings, the same bug the
+   * Applications KPI row had (found live 2026-09-20).
+   */
   protected readonly kpiTiles = computed<readonly KpiTile[]>(() => {
     const m = this.metrics();
     if (!m) return [];
@@ -139,27 +144,27 @@ export class Citizens {
     return [
       {
         label: 'Total Citizens', value: m.total.toLocaleString(), icon: 'users',
-        tone: 'brand', illustration: 'users', pct: 100, isTotal: true,
+        tone: 'brand', illustration: 'users', pct: 100,
         support: 'Registered in the citizen register',
       },
       {
         label: 'Active', value: m.active.toLocaleString(), icon: 'check-circle',
-        tone: 'success', illustration: 'active', pct: pctOfTotal(m.active), isTotal: false,
+        tone: 'success', illustration: 'active', pct: pctOfTotal(m.active),
         support: `${pctOfTotal(m.active)}% of total citizens`,
       },
       {
         label: 'Disabled', value: m.disabled.toLocaleString(), icon: 'slash',
-        tone: 'danger', illustration: 'warning', pct: pctOfTotal(m.disabled), isTotal: false,
+        tone: 'danger', illustration: 'warning', pct: pctOfTotal(m.disabled),
         support: `${pctOfTotal(m.disabled)}% of total citizens`,
       },
       {
         label: 'Verified Email', value: m.emailVerified.toLocaleString(), icon: 'check',
-        tone: 'info', illustration: 'success', pct: pctOfTotal(m.emailVerified), isTotal: false,
+        tone: 'info', illustration: 'success', pct: pctOfTotal(m.emailVerified),
         support: `${pctOfTotal(m.emailVerified)}% of total citizens`,
       },
       {
         label: 'New This Month', value: m.newLast30Days.toLocaleString(), icon: 'user-check',
-        tone: 'violet', illustration: 'pending', pct: pctOfTotal(m.newLast30Days), isTotal: false,
+        tone: 'violet', illustration: 'pending', pct: pctOfTotal(m.newLast30Days),
         support: `${pctOfTotal(m.newLast30Days)}% of total citizens`,
       },
     ];
