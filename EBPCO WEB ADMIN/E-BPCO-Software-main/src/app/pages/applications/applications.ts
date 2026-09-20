@@ -739,6 +739,13 @@ export class Applications {
     if (!row) return null;
     const cached = this.sessionCache.permitFor(row.id);
     if (cached) return { permitNumber: cached.permitNumber, issuedDate: cached.issuedDate };
+    // The record itself: `GET /staff/applications/:id` carries the generated
+    // permit, so a permit another officer generated — or one generated before
+    // this page was reloaded — shows from the database rather than as "not
+    // available in this session" (found live 2026-09-20: FP-2026-000001 was
+    // in the database and this panel had lost it on reload).
+    const real = this.realDetail()?.permit;
+    if (real) return { permitNumber: real.permitNumber, issuedDate: real.issuedDate };
     if (!this.store.isSeedData()) return null;
     const seedPermit = this.store.getPermit(row.id);
     return seedPermit ? { ...seedPermit } : null;

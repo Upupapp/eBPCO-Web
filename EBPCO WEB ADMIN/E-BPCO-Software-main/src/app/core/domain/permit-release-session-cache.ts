@@ -3,21 +3,20 @@ import { Injectable, signal } from '@angular/core';
 import { ReleaseMethod } from './permit.model';
 
 /**
- * The honest answer to a real backend gap: there is no `GET` route anywhere
- * that reads back an already-generated permit's number, an already-prepared
- * release's claim location/office hours, or an already-completed release's
- * claimant/method — `staff-actions.controller.ts` only exposes the three
- * write routes, and `GET /staff/applications/:id` carries neither.
+ * Written for a backend gap that has since closed: originally no `GET` route
+ * read back a generated permit's number or a release's claim details, so
+ * this cache held ONLY what this browser session's own `PermitReleaseApi`
+ * calls had returned. `GET /staff/applications/:id` now carries `permit` and
+ * `release` (`staff-queue.service.ts`), and the Permit Release page fills
+ * this cache from them on load (`hydrateFromServer`) — so a permit another
+ * officer generated, or one generated before this page was opened, reads
+ * back from the record. The cache remains the one place the templates read;
+ * it is never wiped by `ApplicationStore.replaceApplications()`.
  *
- * This cache is populated ONLY by this browser session's own successful
- * `PermitReleaseApi` calls, and is never wiped by
- * `ApplicationStore.replaceApplications()` (unlike the old, fully-local
- * `ApplicationStore._permits`/`_releases`, which are). A row whose
- * `lifecycleStatus` implies a permit/preparation/release exists but the
- * cache holds nothing for it (a different officer's session, or state from
- * before this session started) should show an explicit "not available in
- * this session" line — see permit-release.ts/applications.ts — rather than
- * a blank or a fabricated value.
+ * A row whose `lifecycleStatus` implies a permit/preparation/release exists
+ * but for which neither this session nor the server supplied one still shows
+ * an explicit "not available in this session" line rather than a blank or a
+ * fabricated value.
  */
 
 export interface CachedPermit {

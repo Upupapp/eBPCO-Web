@@ -191,6 +191,22 @@ export interface ApplicationGeneratedPermit {
   readonly conditions: readonly string[] | null;
 }
 
+/**
+ * The `permit_releases` row, camelCased by the server (`staff-queue.service.ts`
+ * `detail()`): present from "Prepare Release" onward, with `claimantName`,
+ * `method` and `releasedAt` filled in only once the permit has actually been
+ * handed over. Every field independently nullable for that reason.
+ */
+export interface ApplicationReleaseRecord {
+  readonly status: string | null;
+  readonly method: 'Physical Claim' | 'Authorized Representative' | null;
+  readonly claimantName: string | null;
+  readonly releasedAt: string | null;
+  readonly claimLocation: string | null;
+  readonly officeHours: string | null;
+  readonly bringWithYou: readonly string[] | null;
+}
+
 export interface ApplicationDetail {
   readonly payments: readonly ApplicationPaymentRow[];
   readonly orderOfPayment: ApplicationOrderOfPayment | null;
@@ -214,6 +230,8 @@ export interface ApplicationDetail {
   };
   readonly business: ApplicationBusiness | null;
   readonly permit: ApplicationGeneratedPermit | null;
+  /** See `ApplicationReleaseRecord`. `null` until a release has been prepared; absent from an older server. */
+  readonly release?: ApplicationReleaseRecord | null;
   readonly timeline: readonly ApplicationTimelineEvent[];
   readonly documents: readonly ApplicationDocumentRow[];
   /**
