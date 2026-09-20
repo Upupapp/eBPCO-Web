@@ -18,12 +18,12 @@
   }
 
   <section class="kpi-grid">
-    @if (metrics(); as m) {
-      <app-kpi-card label="Total Citizens" [value]="m.total + ''" icon="users" tone="brand" illustration="users" />
-      <app-kpi-card label="Active" [value]="m.active + ''" icon="check-circle" tone="success" illustration="active" />
-      <app-kpi-card label="Disabled" [value]="m.disabled + ''" icon="slash" tone="danger" illustration="warning" />
-      <app-kpi-card label="Verified Email" [value]="m.emailVerified + ''" icon="check" tone="info" illustration="success" />
-      <app-kpi-card label="New This Month" [value]="m.newLast30Days + ''" icon="user-check" tone="violet" illustration="pending" />
+    @for (stat of kpiTiles(); track stat.label) {
+      <app-kpi-card
+        [label]="stat.label" [value]="stat.value" [icon]="stat.icon"
+        [tone]="stat.tone" [illustration]="stat.illustration"
+        [progress]="stat.isTotal ? null : stat.pct" [support]="stat.support"
+      />
     }
   </section>
 
@@ -176,7 +176,7 @@
       </div>
 
       @if (canActOnStatus() || canSignOutSessions() || canSendResetLink()) {
-        <div class="record-footer detail-actions">
+        <div class="record-actions">
           @if (row.status === 'active') {
             @if (canDisable()) {
               <button type="button" class="btn-outline danger" [disabled]="working()" (click)="disableTarget.set(row)">
@@ -246,23 +246,27 @@
               </p>
               <div class="form-row">
                 <div class="field">
-                  <label for="rectify-field">Field</label>
-                  <select id="rectify-field" [(ngModel)]="rectifyField">
-                    <option value="">Select a field</option>
+                  <label class="field-label" for="rectify-field">Field</label>
+                  <select id="rectify-field" class="select-input" [(ngModel)]="rectifyField">
+                    <option value="">Select a field…</option>
                     @for (f of rectifiableFields; track f.value) {
                       <option [value]="f.value">{{ f.label }}</option>
                     }
                   </select>
                 </div>
                 <div class="field">
-                  <label for="rectify-value">New value</label>
-                  <input id="rectify-value" class="input" [(ngModel)]="rectifyValue"
-                    [placeholder]="rectifyField() === 'middleName' ? 'Leave blank to clear' : ''" />
+                  <label class="field-label" for="rectify-value">New value</label>
+                  <input id="rectify-value" class="text-input" [(ngModel)]="rectifyValue"
+                    [disabled]="!rectifyField()"
+                    [placeholder]="!rectifyField() ? 'Choose a field first' : rectifyField() === 'middleName' ? 'Leave blank to clear' : 'Enter the corrected value'" />
                 </div>
               </div>
-              <button type="button" class="btn-primary" [disabled]="!rectifyValueValid() || working()" (click)="requestRectify()">
-                Save Correction
-              </button>
+              <div class="form-actions">
+                <button type="button" class="btn-primary" [disabled]="!rectifyValueValid() || working()" (click)="requestRectify()">
+                  <app-icon name="check" [size]="14" />
+                  Save Correction
+                </button>
+              </div>
             </div>
           }
         }
@@ -324,9 +328,14 @@
             <ul class="timeline-feed">
               @for (entry of row.auditEntries; track entry.sequence) {
                 <li class="timeline-feed-item">
-                  <strong>{{ activityLabel(entry) }}</strong>
-                  <span>{{ formatTimestamp(entry.occurredAt) }}</span>
-                  @if (entry.actorRole) { <span class="muted">by {{ entry.actorRole }}</span> }
+                  <span class="timeline-feed-icon"><app-icon name="clock" [size]="14" /></span>
+                  <div class="timeline-feed-body">
+                    <div class="timeline-feed-head">
+                      <span class="timeline-feed-title">{{ activityLabel(entry) }}</span>
+                      <span class="timeline-feed-time">{{ formatTimestamp(entry.occurredAt) }}</span>
+                    </div>
+                    @if (entry.actorRole) { <p class="timeline-feed-text">by {{ entry.actorRole }}</p> }
+                  </div>
                 </li>
               }
             </ul>
@@ -340,19 +349,27 @@
 
   @if (canErase()) {
     <div class="card erase-panel">
-      <h3>Erase This Account (RA 10173 §16(e))</h3>
-      <p class="muted">
-        Removes the citizen's sign-in details, contact information and sessions. Permit
-        applications, payments and the audit trail are kept, as the law requires — the
-        receipt will say exactly what and why.
-      </p>
-      <div class="field">
-        <label for="erase-reference">Request reference<span class="required">*</span></label>
-        <input id="erase-reference" class="input" [(ngModel)]="eraseReference" placeholder="e.g. walk-in log entry, ticket number" />
+      <div class="erase-head">
+        <span class="erase-icon"><app-icon name="alert-triangle" [size]="18" /></span>
+        <div>
+          <h3>Erase This Account <span class="erase-law">RA 10173 §16(e)</span></h3>
+          <p class="muted">
+            Removes the citizen's sign-in details, contact information and sessions. Permit
+            applications, payments and the audit trail are kept, as the law requires — the
+            receipt will say exactly what and why.
+          </p>
+        </div>
       </div>
-      <button type="button" class="btn-outline danger" [disabled]="!eraseReferenceValid() || working()" (click)="startErase()">
-        Erase Account
-      </button>
+      <div class="erase-form">
+        <div class="field">
+          <label class="field-label" for="erase-reference">Request reference <span class="required" aria-hidden="true">*</span></label>
+          <input id="erase-reference" class="text-input" [(ngModel)]="eraseReference" placeholder="e.g. walk-in log entry, ticket number" />
+        </div>
+        <button type="button" class="btn-outline danger" [disabled]="!eraseReferenceValid() || working()" (click)="startErase()">
+          <app-icon name="archive" [size]="14" />
+          Erase Account
+        </button>
+      </div>
     </div>
   }
 }
