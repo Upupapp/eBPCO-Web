@@ -37,7 +37,19 @@ $note-min-height: 132px;
   padding: 1.4rem 1.5rem 1.5rem;
   border: 1px solid $color-border;
   margin-bottom: 1.5rem;
-  animation: section-in 0.4s ease both;
+  // `both` held the "to" keyframe's `transform: translateY(0)` forever
+  // after the animation finished — a no-op visually (0px), but ANY
+  // transform other than `none` makes its element a new stacking
+  // context. That silently demoted this card's own z-index:20 dropdown
+  // (.filter-menu, Custom Range's date inputs) to painting under the
+  // "Over All Applications Queue" card immediately after it in the DOM —
+  // not clipped by any overflow, just painted over (found live
+  // 2026-09-20; same root cause legal-modal.component.ts's own doc
+  // comment already names for a different component). Dropping `both`
+  // costs nothing: the "to" keyframe's opacity/transform already equal
+  // this element's own resting styles, so there is nothing left to
+  // revert to once the animation ends.
+  animation: section-in 0.4s ease;
 }
 
 .drop-error-banner {
