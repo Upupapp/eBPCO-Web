@@ -142,7 +142,6 @@ export interface AppDetail {
   phone: string;
   lastUpdated: string;
   emailVerification: ContactVerification;
-  mobileVerification: ContactVerification;
   barangay: string;
   meta: { dateSubmitted: string; applicationNumber: string; currentStatus: AppStatus };
   project: {
@@ -193,7 +192,7 @@ export function buildDetailFor(
   row: AppRow,
   applicant?: Applicant,
   business?: Business,
-  realContact?: { email: string; mobile: string | null },
+  realContact?: { email: string; mobile: string | null; emailVerifiedAt?: string | null },
   /**
    * The applicant's own real address (`GET /staff/applications/:id`'s
    * `applicantAddress`, backend migration 036) — same priority as
@@ -215,8 +214,14 @@ export function buildDetailFor(
     email: realContact?.email || applicant?.email || 'Not on file',
     phone: realContact?.mobile || applicant?.mobileNumber || 'Not on file',
     lastUpdated: row.dateSubmitted,
-    emailVerification: applicant?.emailVerification ?? unverifiedContact(),
-    mobileVerification: applicant?.mobileVerification ?? unverifiedContact(),
+    // The account's own `email_verified_at` when the server supplied the
+    // contact; the local mock only for a local-demo row. No mobile
+    // counterpart: the LGU records mobile numbers and does not verify them.
+    emailVerification: realContact
+      ? (realContact.emailVerifiedAt
+        ? verifiedContact(realContact.emailVerifiedAt)
+        : unverifiedContact())
+      : (applicant?.emailVerification ?? unverifiedContact()),
     barangay: realAddress?.barangay || applicant?.barangay || 'Not on file',
     meta: {
       dateSubmitted: row.dateSubmitted,
@@ -251,5 +256,14 @@ export function buildDetailFor(
       relationship: 'Customer',
       ownershipType: 'Owned',
     },
+  };
+}
+
+/** The account confirmed a code sent to its email address at `verifiedAt`. `verifiedBy` is the citizen themself — no officer vouched for it. */
+function verifiedContact(verifiedAt: string): ContactVerification {
+  const when = new Date(verifiedAt);
+  return {
+    status: 'Verified', method: 'Email Verification Link', verifiedBy: null,
+    verifiedAtValue: Number.isNaN(when.getTime()) ? null : when, verifiedAt,
   };
 }

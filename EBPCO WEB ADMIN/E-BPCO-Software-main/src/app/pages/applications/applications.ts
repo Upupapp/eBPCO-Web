@@ -263,11 +263,6 @@ export class Applications {
     const role = this.session.role();
     return role ? ACTION_PERMISSIONS.createApplication(role) : false;
   });
-  protected readonly canVerifyContact = computed(() => {
-    const role = this.session.role();
-    return role ? ACTION_PERMISSIONS.verifyContact(role) : false;
-  });
-
   // Bound to the optional :id route segment (see app.routes.ts) via
   // withComponentInputBinding — this is the single source of truth for
   // which application is open. Every entry surface (this page's own
@@ -703,7 +698,9 @@ export class Applications {
       row,
       this.store.getApplicant(row.applicantId),
       this.store.getBusiness(row.businessId),
-      real ? { email: real.applicantEmail, mobile: real.applicantMobile } : undefined,
+      real
+        ? { email: real.applicantEmail, mobile: real.applicantMobile, emailVerifiedAt: real.applicantEmailVerifiedAt ?? null }
+        : undefined,
       real?.applicantAddress,
     );
   });
@@ -947,59 +944,6 @@ export class Applications {
 
   protected closeGeneratedPermitPreview(): void {
     this.showGeneratedPermitPreview.set(false);
-  }
-
-  // ---- Contact verification (manual administrator confirmation only) ----
-  // The only verification path this frontend-only mock can honestly
-  // perform — see ApplicationStore.setContactVerification's own doc
-  // comment. Never displays "email sent"/"OTP sent"; this is a plain
-  // administrator action with its own audit trail entry.
-  //
-  // Email only. The LGU verifies email throughout the system now, never
-  // mobile — the backend has a real OTP-based verification path for email
-  // (contact-verification.service.ts, plus the pre-registration one used at
-  // signup); there is still no SMS provider, so a mobile "Verified" state
-  // was never backed by anything a citizen could actually have done, real
-  // or manual-administrator alike.
-
-  protected verifyContact(
-    channel: 'email',
-    outcome: 'Verified' | 'Verification Failed',
-  ): void {
-    const row = this.selectedRow();
-    if (!row || !this.canVerifyContact()) {
-      this.toast.error("You don't have permission to verify this contact.");
-      return;
-    }
-    // On real data `row.applicantId` is always '' (the queue API sends the
-    // applicant's NAME, never a joinable id — see staff-applications.api.ts's
-    // own doc comment), so this local-only mutation can never find a
-    // matching Applicant record to update. Before this check, the return
-    // value was ignored and a "marked Verified" success toast fired
-    // unconditionally — an active false positive telling the officer their
-    // action landed when nothing changed, worse than the button silently
-    // doing nothing. There is still no backend route for this (see the
-    // gap list in the Stage 2 plan); this only makes that gap visible
-    // instead of hidden behind a fake success.
-    const ok = this.store.setContactVerification(
-      row.applicantId,
-      channel,
-      outcome,
-      'Manual Administrator Confirmation',
-      this.session.name() || 'Administrator',
-    );
-    if (!ok) {
-      this.toast.error(
-        'This deployment cannot verify contacts for this application — no local applicant '
-          + 'record is available to update, and there is no backend route for this yet.',
-      );
-      return;
-    }
-    this.toast.success(
-      `${channel === 'email' ? 'Email' : 'Mobile number'} marked "${outcome}".`,
-    );
-    // Force selectedDetail() to recompute against the freshly updated applicant record.
-    this.selectedRow.set({ ...row });
   }
 
   protected openDocumentPreviewModal(kind: SampleDocumentKind): void {

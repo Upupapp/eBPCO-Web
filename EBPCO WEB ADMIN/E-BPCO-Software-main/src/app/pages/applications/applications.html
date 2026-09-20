@@ -377,6 +377,14 @@
             <dt>Email :</dt>
             <dd>
               {{ detail.email }}
+              <!--
+                The account's own `email_verified_at` (GET /staff/applications/:id
+                → applicantEmailVerifiedAt): the citizen confirmed a code sent to
+                this address at sign-up, or has not. No Confirm / Mark Failed
+                here any more — those wrote to a local mock and could never
+                succeed on a real application; an officer cannot vouch for an
+                inbox they do not control.
+              -->
               @if (detail.emailVerification.status === 'Verified') {
                 <app-icon
                   name="check-circle"
@@ -386,27 +394,7 @@
                 />
                 <span class="sr-only">Verified</span>
               } @else {
-                <span
-                  class="verify-pill"
-                  [class]="detail.emailVerification.status.toLowerCase().replace(' ', '-')"
-                  >{{ detail.emailVerification.status }}</span
-                >
-              }
-              @if (canVerifyContact() && detail.emailVerification.status !== 'Verified') {
-                <button
-                  type="button"
-                  class="verify-action"
-                  (click)="verifyContact('email', 'Verified')"
-                >
-                  Confirm
-                </button>
-                <button
-                  type="button"
-                  class="verify-action danger"
-                  (click)="verifyContact('email', 'Verification Failed')"
-                >
-                  Mark Failed
-                </button>
+                <span class="verify-pill unverified">Unverified</span>
               }
             </dd>
           </div>

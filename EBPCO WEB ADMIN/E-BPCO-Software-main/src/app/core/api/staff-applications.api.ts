@@ -212,6 +212,15 @@ export interface ApplicationDetail {
   readonly orderOfPayment: ApplicationOrderOfPayment | null;
   /** The applicant's real email, from their account — never fabricated from the display name. */
   readonly applicantEmail: string;
+  /**
+   * When the applicant confirmed the code sent to that address (at sign-up,
+   * or later from their Profile), or `null` if they never have. The account's
+   * own answer — this page used to show a verification state from its local
+   * mock, with Confirm / Mark Failed buttons that wrote nowhere. Absent from
+   * an older server. Mobile numbers are recorded, never verified (no SMS
+   * provider, by decision), so there is no mobile counterpart.
+   */
+  readonly applicantEmailVerifiedAt?: string | null;
   /** The applicant's real mobile number, from their account, or `null` when the account has none on file. */
   readonly applicantMobile: string | null;
   /**
