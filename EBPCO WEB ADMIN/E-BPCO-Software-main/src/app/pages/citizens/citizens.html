@@ -1,0 +1,452 @@
+<app-topbar
+  title="Citizens"
+  [searchTerm]="searchTerm()"
+  (searchChange)="searchTerm.set($event); onSearchChange()"
+/>
+
+@if (!id()) {
+  @if (listUnavailable()) {
+    <div class="load-notice" role="alert">
+      <app-icon name="alert-triangle" [size]="16" />
+      <span>This deployment's citizen register endpoint isn't reachable.</span>
+    </div>
+  } @else if (listError(); as text) {
+    <div class="load-notice" role="alert">
+      <app-icon name="alert-triangle" [size]="16" />
+      <span>{{ text }}</span>
+    </div>
+  }
+
+  <section class="kpi-grid">
+    @if (metrics(); as m) {
+      <app-kpi-card label="Total Citizens" [value]="m.total + ''" icon="users" tone="brand" illustration="users" />
+      <app-kpi-card label="Active" [value]="m.active + ''" icon="check-circle" tone="success" illustration="active" />
+      <app-kpi-card label="Disabled" [value]="m.disabled + ''" icon="slash" tone="danger" illustration="warning" />
+      <app-kpi-card label="Verified Email" [value]="m.emailVerified + ''" icon="check" tone="info" illustration="success" />
+      <app-kpi-card label="New This Month" [value]="m.newLast30Days + ''" icon="user-check" tone="violet" illustration="pending" />
+    }
+  </section>
+
+  <section class="card table-card">
+    <div class="table-toolbar">
+      <div class="search-input">
+        <app-icon name="search" [size]="16" />
+        <input
+          aria-label="Search citizens by name, email or mobile number"
+          type="text"
+          placeholder="Search by name, email or mobile number"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+        />
+      </div>
+      <div class="toolbar-actions">
+        <app-filter-panel [activeCount]="activeFilterCount()" (clear)="clearFilters()">
+          <div class="filter-field">
+            <label for="citizen-status-filter">Status</label>
+            <select id="citizen-status-filter" [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="disabled">Disabled</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="citizen-verified-filter">Email verification</label>
+            <select id="citizen-verified-filter" [(ngModel)]="verifiedFilter" (ngModelChange)="applyFilters()">
+              <option value="">Verified or not</option>
+              <option value="verified">Verified</option>
+              <option value="unverified">Not verified</option>
+            </select>
+          </div>
+        </app-filter-panel>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Citizen</th>
+            <th>Email</th>
+            <th>Email Verified</th>
+            <th>Mobile Verified</th>
+            <th>Status</th>
+            <th>Registered</th>
+            <th>Businesses</th>
+            <th>Applications</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (listLoading()) {
+            <tr class="table-empty-row"><td colspan="9">Loading citizens…</td></tr>
+          } @else {
+            @for (row of rows(); track row.id) {
+              <tr class="row-clickable" (click)="openDetail(row)">
+                <td>
+                  <div class="owner-cell">
+                    <app-avatar [name]="row.firstName + ' ' + row.lastName" [size]="30" />
+                    <span>{{ row.firstName }} {{ row.lastName }}</span>
+                  </div>
+                </td>
+                <td>{{ row.email }}</td>
+                <td>{{ verifiedLabel(row.emailVerified) }}</td>
+                <td>{{ verifiedLabel(row.mobileVerified) }}</td>
+                <td><span class="status-pill" [class]="statusPillClass(row.status)">{{ row.status === 'active' ? 'Active' : 'Disabled' }}</span></td>
+                <td>{{ formatTimestamp(row.registeredAt) }}</td>
+                <td>{{ row.businessCount }}</td>
+                <td>{{ row.applicationCount }}</td>
+                <td (click)="$event.stopPropagation()">
+                  <div class="menu-wrap">
+                    <button
+                      type="button" class="icon-btn"
+                      [attr.aria-label]="'More actions for ' + row.firstName + ' ' + row.lastName"
+                      [attr.aria-expanded]="openMenuFor() === row.id"
+                      (click)="toggleRowMenu(row.id)"
+                    >
+                      <app-icon name="dots-vertical" [size]="16" />
+                    </button>
+                    @if (openMenuFor() === row.id) {
+                      <div class="menu-backdrop" (click)="closeRowMenu()"></div>
+                      <div class="menu-panel" role="menu">
+                        <button type="button" role="menuitem" (click)="openDetail(row)">
+                          <app-icon name="eye" [size]="14" />
+                          View
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr class="table-empty-row"><td colspan="9">No citizens match your search.</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination [totalItems]="total()" [pageSize]="pageSize" [(page)]="page" />
+  </section>
+} @else if (detailLoading()) {
+  <div class="load-notice" role="status">
+    <app-icon name="alert-triangle" [size]="16" />
+    <span>Loading citizen…</span>
+  </div>
+} @else if (detailNotFound()) {
+  <div class="load-notice" role="alert">
+    <app-icon name="alert-triangle" [size]="16" />
+    <span>No such citizen account.</span>
+  </div>
+  <button type="button" class="btn-outline" (click)="backToList()">Back to List</button>
+} @else if (detailUnavailable() || detailError(); as text) {
+  <div class="load-notice" role="alert">
+    <app-icon name="alert-triangle" [size]="16" />
+    <span>{{ detailUnavailable() ? "This deployment's citizen register endpoint isn't reachable." : text }}</span>
+  </div>
+  <button type="button" class="btn-outline" (click)="backToList()">Back to List</button>
+} @else if (detail(); as row) {
+  <app-view-only-notice />
+
+  <div class="detail-head">
+    <h1>{{ row.firstName }} {{ row.lastName }}</h1>
+    <div class="header-actions">
+      <span class="status-pill" [class]="statusPillClass(row.status)">{{ row.status === 'active' ? 'Active' : 'Disabled' }}</span>
+      <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div class="record-card">
+      <div class="record-banner">
+        <app-icon name="user" [size]="26" />
+        <app-avatar [name]="row.firstName + ' ' + row.lastName" [size]="72" class="banner-avatar" />
+      </div>
+
+      <div class="record-info">
+        <h2>{{ row.firstName }} {{ row.lastName }}</h2>
+        <span class="status-pill" [class]="statusPillClass(row.status)">{{ row.status === 'active' ? 'Active' : 'Disabled' }}</span>
+
+        <dl class="info-list">
+          <div><dt>Email:</dt><dd>{{ row.email }}</dd></div>
+          <div><dt>Mobile:</dt><dd>{{ row.mobileNumber ?? '—' }}</dd></div>
+          <div><dt>Registered:</dt><dd>{{ formatTimestamp(row.registeredAt) }}</dd></div>
+          @if (row.status === 'disabled') {
+            <div><dt>Disabled:</dt><dd>{{ row.disabledAt ? formatTimestamp(row.disabledAt) : '—' }}</dd></div>
+            <div><dt>Reason:</dt><dd>{{ row.disabledReason ?? '—' }}</dd></div>
+          }
+        </dl>
+      </div>
+
+      @if (canActOnStatus() || canSignOutSessions() || canSendResetLink()) {
+        <div class="record-footer detail-actions">
+          @if (row.status === 'active') {
+            @if (canDisable()) {
+              <button type="button" class="btn-outline danger" [disabled]="working()" (click)="disableTarget.set(row)">
+                <app-icon name="slash" [size]="14" />
+                Disable Account
+              </button>
+            }
+          } @else {
+            @if (canEnable()) {
+              <button type="button" class="btn-outline" [disabled]="working()" (click)="enableTarget.set(row)">
+                <app-icon name="check" [size]="14" />
+                Enable Account
+              </button>
+            }
+          }
+          @if (canSignOutSessions()) {
+            <button type="button" class="btn-outline" [disabled]="working()" (click)="revokeTarget.set(row)">
+              <app-icon name="logout" [size]="14" />
+              Sign Out All Sessions
+            </button>
+          }
+          @if (canSendResetLink()) {
+            <button type="button" class="btn-outline" [disabled]="working()" (click)="resetLinkTarget.set(row)">
+              <app-icon name="mail" [size]="14" />
+              Send Password-Reset Link
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="summary-card">
+      <div class="card-head">
+        <h2>Citizen Record</h2>
+      </div>
+
+      <nav class="detail-tabs">
+        <button type="button" class="detail-tab" [class.active]="detailTab() === 'profile'" (click)="selectDetailTab('profile')">Profile</button>
+        <button type="button" class="detail-tab" [class.active]="detailTab() === 'businesses-applications'" (click)="selectDetailTab('businesses-applications')">Businesses &amp; Applications</button>
+        <button type="button" class="detail-tab" [class.active]="detailTab() === 'sessions'" (click)="selectDetailTab('sessions')">Sessions</button>
+        <button type="button" class="detail-tab" [class.active]="detailTab() === 'activity'" (click)="selectDetailTab('activity')">Activity</button>
+      </nav>
+
+      @switch (detailTab()) {
+        @case ('profile') {
+          <dl class="info-grid with-dividers">
+            <div><dt>First Name</dt><dd>{{ row.firstName }}</dd></div>
+            <div><dt>Middle Name</dt><dd>{{ row.middleName ?? '—' }}</dd></div>
+            <div><dt>Last Name</dt><dd>{{ row.lastName }}</dd></div>
+            <div><dt>Date of Birth</dt><dd>{{ row.dateOfBirth ?? '—' }}</dd></div>
+            <div><dt>Sex</dt><dd>{{ row.sex ?? '—' }}</dd></div>
+            <div><dt>Civil Status</dt><dd>{{ row.civilStatus ?? '—' }}</dd></div>
+            <div><dt>Nationality</dt><dd>{{ row.nationality ?? '—' }}</dd></div>
+            <div><dt>Street</dt><dd>{{ row.street ?? '—' }}</dd></div>
+            <div><dt>Barangay</dt><dd>{{ row.barangay ?? '—' }}</dd></div>
+            <div><dt>City</dt><dd>{{ row.city ?? '—' }}</dd></div>
+            <div><dt>Province</dt><dd>{{ row.province ?? '—' }}</dd></div>
+            <div><dt>Postal Code</dt><dd>{{ row.postalCode ?? '—' }}</dd></div>
+          </dl>
+
+          @if (canRectify()) {
+            <div class="rectify-panel">
+              <h3>Correct a Detail</h3>
+              <p class="muted">
+                One field at a time, with a reason — never a free-edit form. The sign-in
+                email cannot be corrected here; it is not part of the permit record.
+              </p>
+              <div class="form-row">
+                <div class="field">
+                  <label for="rectify-field">Field</label>
+                  <select id="rectify-field" [(ngModel)]="rectifyField">
+                    <option value="">Select a field</option>
+                    @for (f of rectifiableFields; track f.value) {
+                      <option [value]="f.value">{{ f.label }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="rectify-value">New value</label>
+                  <input id="rectify-value" class="input" [(ngModel)]="rectifyValue"
+                    [placeholder]="rectifyField() === 'middleName' ? 'Leave blank to clear' : ''" />
+                </div>
+              </div>
+              <button type="button" class="btn-primary" [disabled]="!rectifyValueValid() || working()" (click)="requestRectify()">
+                Save Correction
+              </button>
+            </div>
+          }
+        }
+        @case ('businesses-applications') {
+          <h3>Businesses</h3>
+          @if (row.businesses.length > 0) {
+            <table class="detail-table">
+              <thead><tr><th>Name</th><th>Status</th></tr></thead>
+              <tbody>
+                @for (b of row.businesses; track b.id) {
+                  <!-- Not a link: the Businesses screen has no per-business
+                       detail URL today (its own detail view is an in-page
+                       toggle, not a route — see app.routes.ts), so there is
+                       nowhere real to point to yet. See /businesses itself
+                       for the full directory. -->
+                  <tr><td>{{ b.name }}</td><td>{{ b.status }}</td></tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="muted">No businesses on file.</p>
+          }
+
+          <h3>Applications</h3>
+          @if (row.applications.length > 0) {
+            <table class="detail-table">
+              <thead><tr><th>Reference</th><th>Permit Type</th><th>Status</th><th>Submitted</th></tr></thead>
+              <tbody>
+                @for (a of row.applications; track a.id) {
+                  <tr>
+                    <td><a [routerLink]="['/applications', a.id]">{{ a.referenceNumber }}</a></td>
+                    <td>{{ a.permitType }}</td>
+                    <td>{{ a.lifecycleStatus }}</td>
+                    <td>{{ a.submittedAt ? formatTimestamp(a.submittedAt) : '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="muted">No applications on file.</p>
+          }
+        }
+        @case ('sessions') {
+          @if (row.sessions.length > 0) {
+            <table class="detail-table">
+              <thead><tr><th>Started</th><th>Last Seen</th></tr></thead>
+              <tbody>
+                @for (s of row.sessions; track s.id) {
+                  <tr><td>{{ formatTimestamp(s.createdAt) }}</td><td>{{ s.lastSeenAt ? formatTimestamp(s.lastSeenAt) : '—' }}</td></tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="muted">No active sessions.</p>
+          }
+        }
+        @case ('activity') {
+          @if (row.auditEntries.length > 0) {
+            <ul class="timeline-feed">
+              @for (entry of row.auditEntries; track entry.sequence) {
+                <li class="timeline-feed-item">
+                  <strong>{{ activityLabel(entry) }}</strong>
+                  <span>{{ formatTimestamp(entry.occurredAt) }}</span>
+                  @if (entry.actorRole) { <span class="muted">by {{ entry.actorRole }}</span> }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="muted">No activity recorded yet.</p>
+          }
+        }
+      }
+    </div>
+  </div>
+
+  @if (canErase()) {
+    <div class="card erase-panel">
+      <h3>Erase This Account (RA 10173 §16(e))</h3>
+      <p class="muted">
+        Removes the citizen's sign-in details, contact information and sessions. Permit
+        applications, payments and the audit trail are kept, as the law requires — the
+        receipt will say exactly what and why.
+      </p>
+      <div class="field">
+        <label for="erase-reference">Request reference<span class="required">*</span></label>
+        <input id="erase-reference" class="input" [(ngModel)]="eraseReference" placeholder="e.g. walk-in log entry, ticket number" />
+      </div>
+      <button type="button" class="btn-outline danger" [disabled]="!eraseReferenceValid() || working()" (click)="startErase()">
+        Erase Account
+      </button>
+    </div>
+  }
+}
+
+@if (revokeTarget(); as target) {
+  <app-confirm-dialog
+    title="Sign out every session?"
+    [message]="target.firstName + ' ' + target.lastName + ' will be signed out on every device immediately.'"
+    confirmLabel="Sign Out All Sessions"
+    tone="danger"
+    reasonLabel="Why is this citizen being signed out?"
+    reasonPlaceholder="The citizen may ask, so say plainly."
+    [reasonMinLength]="5"
+    (confirmed)="confirmRevoke($event)"
+    (cancelled)="revokeTarget.set(null)"
+  />
+}
+
+@if (disableTarget(); as target) {
+  <app-confirm-dialog
+    title="Disable this account?"
+    [message]="target.firstName + ' ' + target.lastName + ' will lose access immediately. The account is kept, not deleted, and can be enabled again.'"
+    confirmLabel="Disable"
+    tone="danger"
+    reasonLabel="Why is this account being disabled?"
+    reasonPlaceholder="The citizen may ask, so say plainly."
+    [reasonMinLength]="5"
+    (confirmed)="confirmDisable($event)"
+    (cancelled)="disableTarget.set(null)"
+  />
+}
+
+@if (enableTarget(); as target) {
+  <app-confirm-dialog
+    title="Enable this account?"
+    [message]="target.firstName + ' ' + target.lastName + ' will regain the access it had before it was disabled.'"
+    confirmLabel="Enable"
+    reasonLabel="Why is this account being enabled?"
+    reasonPlaceholder="The citizen may ask, so say plainly."
+    [reasonMinLength]="5"
+    (confirmed)="confirmEnable($event)"
+    (cancelled)="enableTarget.set(null)"
+  />
+}
+
+@if (resetLinkTarget(); as target) {
+  <app-confirm-dialog
+    title="Send a password-reset link?"
+    [message]="'A link will be emailed to ' + target.email + '. Staff never see or set the password.'"
+    confirmLabel="Send Link"
+    reasonLabel="Why is this being sent?"
+    reasonPlaceholder="e.g. citizen forgot their password at the counter"
+    [reasonMinLength]="5"
+    (confirmed)="confirmResetLink($event)"
+    (cancelled)="resetLinkTarget.set(null)"
+  />
+}
+
+@if (rectifyConfirming()) {
+  <app-confirm-dialog
+    title="Save this correction?"
+    [message]="rectifyConfirmMessage()"
+    confirmLabel="Save Correction"
+    reasonLabel="Why is this being corrected?"
+    reasonPlaceholder="The citizen may ask, so say plainly."
+    [reasonMinLength]="5"
+    (confirmed)="confirmRectify($event)"
+    (cancelled)="cancelRectify()"
+  />
+}
+
+@if (eraseStep() === 1) {
+  <app-confirm-dialog
+    title="Erase this citizen's account?"
+    message="This removes the citizen's sign-in details, contact information and sessions. Permit applications, payments and the audit trail are kept, as the law requires. This cannot be undone."
+    confirmLabel="Continue"
+    tone="danger"
+    reasonLabel="Why is this citizen's account being erased?"
+    reasonPlaceholder="The citizen may ask, so say plainly."
+    [reasonMinLength]="5"
+    (confirmed)="onEraseStep1Confirmed($event)"
+    (cancelled)="cancelErase()"
+  />
+}
+
+@if (eraseStep() === 2) {
+  <app-confirm-dialog
+    title="Are you sure?"
+    message="This is the final confirmation. The citizen's sign-in details and sessions will be erased and cannot be recovered."
+    confirmLabel="Erase Account"
+    tone="danger"
+    (confirmed)="onEraseStep2Confirmed()"
+    (cancelled)="cancelErase()"
+  />
+}
