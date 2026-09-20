@@ -142,7 +142,16 @@
     # `connect-src` is 'self' plus the real API origin, since ApiClient calls
     # it cross-origin (see EBPCO_API_BASE_URL above) — everything else this
     # app talks to is itself.
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://139-162-51-165.sslip.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    # `blob:` in `img-src` and an explicit `frame-src` (which would otherwise
+    # inherit `default-src 'self'`): the Documents tab's Preview fetches the
+    # citizen's real file from the API (allowed by `connect-src`) and shows it
+    # from an object URL — an <img> for images, an <iframe> for PDFs. Without
+    # these two, the bytes arrived and the browser then refused to render them
+    # ("violates img-src 'self' data:"), found on the first live preview from
+    # this site on 2026-09-20. A blob: URL is same-origin memory this page
+    # created; it opens nothing to a third party. `object-src 'none'` stated
+    # explicitly since frames are now allowed and plugins never are.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; frame-src 'self' blob:; object-src 'none'; font-src 'self'; connect-src 'self' https://139-162-51-165.sslip.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     # A year, subdomains included. No `preload`: that is a one-way submission
     # to browsers' built-in preload list and a human call, not a default.
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
