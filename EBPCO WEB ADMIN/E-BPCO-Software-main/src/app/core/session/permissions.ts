@@ -96,6 +96,25 @@ export const NAV_MODULES: NavModule[] = [
     roles: ['Super Admin', 'Administrator'],
   },
   {
+    key: 'citizens',
+    label: 'Citizens',
+    icon: 'users',
+    path: '/citizens',
+    group: 'administration',
+    // Same two roles as Businesses, immediately after it — and NOT, despite
+    // the module brief's literal wording, a four-role list naming
+    // 'Receiving Officer'/'Records Officer' directly: this portal has no
+    // such `StaffRole` values at all. `role-map.ts`'s own `BY_WIRE_NAME`
+    // already collapses both backend roles (`receiving-officer`,
+    // `records-officer`, both of which hold the server's `citizens:read`
+    // scope) into 'Administrator' for every screen in this portal, so
+    // gating on 'Administrator' here reaches those officers exactly as
+    // asked — through the SAME collapse Businesses, Users & Roles and every
+    // other administration-group module already rely on, not a new one
+    // invented for this module alone. See CITIZENS-HANDOFF.md.
+    roles: ['Super Admin', 'Administrator'],
+  },
+  {
     key: 'access-requests',
     label: 'Access Requests',
     icon: 'user',
@@ -109,7 +128,11 @@ export const NAV_MODULES: NavModule[] = [
 
   {
     key: 'user-roles',
-    label: 'Users & Roles',
+    // Label only — 'Staff & Roles' now that Citizens exists as its own
+    // module and 'Users' would be ambiguous between the two. `key` and
+    // `path` are UNCHANGED ('user-roles'/'/user-roles') so nothing that
+    // reads either breaks.
+    label: 'Staff & Roles',
     icon: 'user-check',
     path: '/user-roles',
     group: 'administration',
@@ -208,5 +231,26 @@ export const ACTION_PERMISSIONS = {
   configurePayments: (role: StaffRole): boolean => role === 'Super Admin',
   /** Editing a permit type's required-document checklist (Permit Release > Permit Types). Anyone who can reach Permit Release may VIEW it; only these roles may add/edit/remove a document. */
   configureRequirements: (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator',
+
+  // ── Citizens module ──────────────────────────────────────────────────
+  //
+  // Every one of these matches the server's own `staff:administer` gate
+  // (`staff-citizens.controller.ts`) — no portal role short of that scope
+  // could make the call succeed even with the button shown, but hiding it
+  // is still correct UX ("hiding a link is not authorization" applies to
+  // buttons the same as routes): a role that cannot act should not be shown
+  // a control that will only ever come back refused.
+  'citizen.signOutSessions': (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator',
+  'citizen.disable': (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator',
+  'citizen.enable': (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator',
+  'citizen.sendResetLink': (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator',
+  'citizen.rectify': (role: StaffRole): boolean =>
+    role === 'Super Admin' || role === 'Administrator',
+  'citizen.erase': (role: StaffRole): boolean =>
     role === 'Super Admin' || role === 'Administrator',
 };

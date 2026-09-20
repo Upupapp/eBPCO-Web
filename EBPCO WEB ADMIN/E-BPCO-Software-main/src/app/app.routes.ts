@@ -75,6 +75,18 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/businesses/businesses').then((m) => m.Businesses),
       },
       {
+        path: 'citizens',
+        loadComponent: () => import('./pages/citizens/citizens').then((m) => m.Citizens),
+      },
+      {
+        // Same shape as `applications/:id` above: one component serving
+        // both the list and the detail workspace, reached by two route
+        // registrations rather than an in-page view toggle, so a citizen's
+        // detail screen is a stable, refreshable, linkable URL.
+        path: 'citizens/:id',
+        loadComponent: () => import('./pages/citizens/citizens').then((m) => m.Citizens),
+      },
+      {
         path: 'archive',
         loadComponent: () => import('./pages/archive/archive').then((m) => m.Archive),
       },
