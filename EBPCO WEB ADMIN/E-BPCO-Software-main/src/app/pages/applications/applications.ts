@@ -92,7 +92,6 @@ interface RingStat {
   tone: KpiTone;
   illustration: KpiIllustration;
   pct: number;
-  isTotal: boolean;
   support?: string;
 }
 
@@ -596,7 +595,6 @@ export class Applications {
         tone: 'success',
         illustration: 'success',
         pct: Math.round((approved / total) * 100),
-        isTotal: false,
         support: `${Math.round((approved / total) * 100)}% of all applications`,
       },
       {
@@ -606,7 +604,6 @@ export class Applications {
         tone: 'warning',
         illustration: 'pending',
         pct: Math.round((under / total) * 100),
-        isTotal: false,
         support: `${Math.round((under / total) * 100)}% of all applications`,
       },
       {
@@ -616,7 +613,6 @@ export class Applications {
         tone: 'danger',
         illustration: 'critical',
         pct: Math.round((rejected / total) * 100),
-        isTotal: false,
         support: `${Math.round((rejected / total) * 100)}% of all applications`,
       },
       {
@@ -625,16 +621,15 @@ export class Applications {
         icon: 'logs',
         tone: 'info',
         illustration: 'applications',
+        // A full bar, not a suppressed one: this card used to render with
+        // no progress bar at all (a bars cluster, then just support text),
+        // which left its footer band a different height than its three
+        // siblings' caption+bar footers (found live 2026-09-20). pct: 100
+        // reads naturally too — this card IS the whole 100%.
         pct: 100,
-        isTotal: true,
-        // No `bars` here on purpose: the 26px bar cluster read as an
-        // oversized, differently-shaped footer next to the other three
-        // cards' slim 6px progress tracks (found live 2026-09-20). Support
-        // text alone — same "Total" treatment Citizens/Businesses already
-        // use — keeps this card's footer the same size as its neighbours.
         // Kept short and fixed-length on purpose (not a live per-status
-        // breakdown): a longer string here is exactly what widened this
-        // card past its siblings before — see the .kpi-grid override above.
+        // breakdown): a longer string here is what widened this card past
+        // its siblings before — see the .kpi-grid override above.
         support: 'Every application on file',
       },
     ];
