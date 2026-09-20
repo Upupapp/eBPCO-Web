@@ -638,6 +638,16 @@ h3 {
   margin-top: 0.15rem;
 }
 
+// What the officer recorded off the face of the document at intake.
+.doc-provenance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.6rem;
+  margin-top: 0.15rem;
+  font-size: 0.74rem;
+  color: #6b7280;
+}
+
 .doc-remarks-field {
   display: flex;
   flex-direction: column;
@@ -1203,6 +1213,41 @@ tr.missing-row {
     font-family: inherit;
     resize: none;
   }
+}
+
+// A value the record does not hold, said so rather than left blank or filled
+// with a sample — read-only inputs styled to be visibly "no answer".
+.accordion-body {
+  .not-on-file {
+    color: #9a9ea8;
+    font-style: italic;
+  }
+
+  .input-with-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    input {
+      flex: 1;
+    }
+
+    .verify-pill {
+      margin-left: 0;
+    }
+  }
+
+  .not-on-file-note {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #7a7f8c;
+  }
+}
+
+.profile-edit-row label small {
+  font-weight: 400;
+  color: $color-ink-300;
+  font-size: 0.7rem;
 }
 
 /* Evaluations grid */

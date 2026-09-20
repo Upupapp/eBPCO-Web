@@ -38,21 +38,48 @@
         <div class="field-grid">
           <label class="field">
             <span class="field-label"
-              >Applicant/User Name&nbsp;<span class="field-label-required" aria-hidden="true"
-                >*</span
-              ></span
+              >First Name&nbsp;<span class="field-label-required" aria-hidden="true">*</span></span
             >
             <input
               type="text"
               required
               aria-required="true"
-              [(ngModel)]="applicant.fullName"
-              name="applicantFullName"
-              placeholder="Juan Dela Cruz"
+              [(ngModel)]="applicant.firstName"
+              name="applicantFirstName"
+              placeholder="Enter first name"
               appCapitalizeName
             />
-            @if (showStepErrors() && !applicant.fullName.trim()) {
-              <span class="field-error">Applicant/user name is required.</span>
+            @if (showStepErrors() && !applicant.firstName.trim()) {
+              <span class="field-error">First name is required.</span>
+            }
+          </label>
+          <label class="field">
+            <span class="field-label"
+              >Middle Name&nbsp;<span class="field-meta-inline">(if any)</span></span
+            >
+            <input
+              type="text"
+              [(ngModel)]="applicant.middleName"
+              name="applicantMiddleName"
+              placeholder="Enter middle name"
+              appCapitalizeName
+            />
+          </label>
+          <label class="field">
+            <span class="field-label"
+              >Last Name&nbsp;<span class="field-label-required" aria-hidden="true">*</span></span
+            >
+            <input
+              type="text"
+              required
+              aria-required="true"
+              [(ngModel)]="applicant.lastName"
+              name="applicantLastName"
+              placeholder="Enter last name"
+              appCapitalizeName
+            />
+            @if (showStepErrors() && !applicant.lastName.trim()) {
+              <span class="field-error">Last name is required.</span>
             }
           </label>
           <label class="field">
@@ -65,24 +92,91 @@
               }
             </select>
           </label>
-          <label class="field">
-            <span class="field-label"
-              >Email Address&nbsp;<span class="field-label-required" aria-hidden="true"
-                >*</span
-              ></span
+
+          <div class="field span-2 email-field">
+            <label class="field-label" for="intake-applicant-email"
+              >Email Address&nbsp;<span class="field-label-required" aria-hidden="true">*</span></label
             >
-            <input
-              type="email"
-              required
-              aria-required="true"
-              [(ngModel)]="applicant.email"
-              name="applicantEmail"
-              placeholder="juan.delacruz@gmail.com"
-            />
+            <div class="email-row">
+              <input
+                id="intake-applicant-email"
+                type="email"
+                required
+                aria-required="true"
+                [ngModel]="applicant.email"
+                (ngModelChange)="onEmailInput($event)"
+                name="applicantEmail"
+                placeholder="Enter email address"
+                [disabled]="emailVerified()"
+              />
+              @if (emailVerified()) {
+                <span class="verified-badge"><app-icon name="check-circle" [size]="14" /> Verified</span>
+                <button type="button" class="link-btn" (click)="changeEmail()">Change</button>
+              } @else {
+                <button
+                  type="button"
+                  class="modal-btn neutral verify-btn"
+                  [disabled]="sendingCode() || !applicant.email.trim()"
+                  (click)="sendVerificationCode()"
+                >
+                  {{ sendingCode() ? 'Sending…' : (codeSent() ? 'Resend Code' : 'Send Code') }}
+                </button>
+              }
+            </div>
             @if (showStepErrors() && !emailValidation().valid) {
               <span class="field-error">{{ emailValidation().error }}</span>
+            } @else if (showStepErrors() && emailNeedsVerification()) {
+              <span class="field-error"
+                >Verify the applicant’s email with the 6-digit code before continuing.</span
+              >
+            } @else if (!emailVerified() && !codeSent() && !verificationUnavailable()) {
+              <span class="field-hint"
+                >A 6-digit code is emailed to the applicant, the same way the citizen sign-up verifies an
+                address. The account this filing creates starts Verified once it is confirmed.</span
+              >
             }
-          </label>
+
+            @if (codeSent() && !emailVerified()) {
+              <div class="code-row">
+                <label class="field code-field">
+                  <span class="field-label"
+                    >6-digit code read back by the applicant&nbsp;<span
+                      class="field-label-required"
+                      aria-hidden="true"
+                      >*</span
+                    ></span
+                  >
+                  <input
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="6"
+                    autocomplete="one-time-code"
+                    [(ngModel)]="verificationCode"
+                    name="verificationCode"
+                    placeholder="123456"
+                  />
+                </label>
+                <button
+                  type="button"
+                  class="modal-btn confirm verify-btn"
+                  [disabled]="confirmingCode() || verificationCode.length !== 6"
+                  (click)="confirmVerificationCode()"
+                >
+                  {{ confirmingCode() ? 'Checking…' : 'Confirm Code' }}
+                </button>
+              </div>
+              @if (codeError()) {
+                <span class="field-error">{{ codeError() }}</span>
+              }
+              @if (codeNotice()) {
+                <span class="field-hint">{{ codeNotice() }}</span>
+              }
+            }
+            @if (verificationUnavailable()) {
+              <p class="verification-unavailable">{{ verificationUnavailable() }}</p>
+            }
+          </div>
+
           <label class="field">
             <span class="field-label"
               >Mobile Number&nbsp;<span class="field-label-required" aria-hidden="true"
@@ -100,7 +194,7 @@
             @if (showStepErrors() && !mobileValidation().valid) {
               <span class="field-error">{{ mobileValidation().error }}</span>
             } @else {
-              <span class="field-hint">Example: {{ mobileExample }}</span>
+              <span class="field-hint">Example: {{ mobileExample }}. Recorded, not verified — the LGU does not send SMS.</span>
             }
           </label>
           <label class="field">
@@ -127,14 +221,18 @@
               [(ngModel)]="applicant.barangay"
               name="applicantBarangay"
             >
+              <option value="" disabled>Select a barangay…</option>
               @for (b of barangays; track b) {
                 <option [value]="b">{{ b }}</option>
               }
             </select>
+            @if (showStepErrors() && !applicant.barangay) {
+              <span class="field-error">Barangay is required.</span>
+            }
           </label>
-          <label class="field span-2">
+          <label class="field">
             <span class="field-label"
-              >Address Details&nbsp;<span class="field-label-required" aria-hidden="true"
+              >House No. / Street / Purok&nbsp;<span class="field-label-required" aria-hidden="true"
                 >*</span
               ></span
             >
@@ -148,6 +246,8 @@
             />
             @if (showStepErrors() && !applicant.addressLine.trim()) {
               <span class="field-error">Address is required.</span>
+            } @else {
+              <span class="field-hint">Castilla, Sorsogon. Kept on the applicant’s own record.</span>
             }
           </label>
         </div>
@@ -167,6 +267,7 @@
               aria-required="true"
               [(ngModel)]="business.registeredName"
               name="bizName"
+              placeholder="Enter registered business name"
             />
             @if (showStepErrors() && !business.registeredName.trim()) {
               <span class="field-error">Registered business name is required.</span>
@@ -176,7 +277,12 @@
             <span class="field-label"
               >Trade Name&nbsp;<span class="field-meta-inline">(if applicable)</span></span
             >
-            <input type="text" [(ngModel)]="business.tradeName" name="bizTradeName" />
+            <input
+              type="text"
+              [(ngModel)]="business.tradeName"
+              name="bizTradeName"
+              placeholder="Enter trade name"
+            />
           </label>
           <label class="field">
             <span class="field-label"
@@ -195,7 +301,7 @@
               }
             </select>
           </label>
-          <label class="field span-2">
+          <label class="field">
             <span class="field-label"
               >Business Address&nbsp;<span class="field-label-required" aria-hidden="true"
                 >*</span
@@ -223,10 +329,14 @@
               [(ngModel)]="business.barangay"
               name="bizBarangay"
             >
+              <option value="" disabled>Select a barangay…</option>
               @for (b of barangays; track b) {
                 <option [value]="b">{{ b }}</option>
               }
             </select>
+            @if (showStepErrors() && !business.barangay) {
+              <span class="field-error">Business barangay is required.</span>
+            }
           </label>
           <label class="field">
             <span class="field-label"
@@ -242,7 +352,7 @@
               aria-required="true"
               [(ngModel)]="business.ownerOrRepresentative"
               name="bizOwner"
-              [placeholder]="applicant.fullName"
+              placeholder="Enter name"
               appCapitalizeName
             />
             @if (showStepErrors() && !business.ownerOrRepresentative.trim()) {
@@ -251,16 +361,23 @@
           </label>
           <label class="field">
             <span class="field-label"
-              >Registration / Reference Number&nbsp;<span class="field-meta-inline"
-                >(where applicable)</span
+              >Registration / Reference Number&nbsp;<span
+                class="field-label-required"
+                aria-hidden="true"
+                >*</span
               ></span
             >
             <input
               type="text"
+              required
+              aria-required="true"
               [(ngModel)]="business.registrationNumber"
               name="bizRegNumber"
-              placeholder="DTI/SEC/CDA number"
+              placeholder="DTI / SEC / CDA number"
             />
+            @if (showStepErrors() && !business.registrationNumber.trim()) {
+              <span class="field-error">Registration / reference number is required.</span>
+            }
           </label>
           <label class="field">
             <span class="field-label"
@@ -322,6 +439,31 @@
               }
             </select>
           </label>
+          @if (needsRelatedPermit()) {
+            <label class="field">
+              <span class="field-label"
+                >Permit Number Being
+                {{ applicationInfo.applicationAction === 'Renewal' ? 'Renewed' : 'Amended' }}&nbsp;<span
+                  class="field-label-required"
+                  aria-hidden="true"
+                  >*</span
+                ></span
+              >
+              <input
+                type="text"
+                required
+                aria-required="true"
+                [(ngModel)]="applicationInfo.relatedPermitNumber"
+                name="relatedPermitNumber"
+                placeholder="e.g. BP-2025-000123"
+              />
+              @if (showStepErrors() && !applicationInfo.relatedPermitNumber.trim()) {
+                <span class="field-error">The permit being {{ applicationInfo.applicationAction === 'Renewal' ? 'renewed' : 'amended' }} is required.</span>
+              } @else {
+                <span class="field-hint">Must be a permit already issued to this applicant.</span>
+              }
+            </label>
+          }
           <label class="field">
             <span class="field-label"
               >Date Received&nbsp;<span class="field-label-required" aria-hidden="true"
@@ -338,6 +480,11 @@
             @if (showStepErrors() && !applicationInfo.dateReceived) {
               <span class="field-error">Date received is required.</span>
             }
+          </label>
+          <label class="field">
+            <span class="field-label">Assigned Office</span>
+            <input type="text" [value]="responsibleDepartment()?.name ?? '—'" disabled />
+            <span class="field-hint">Set by the permit type’s checklist; not editable here.</span>
           </label>
           <label class="field span-2">
             <span class="field-label"
@@ -358,20 +505,6 @@
             @if (showStepErrors() && !applicationInfo.scopeDescription.trim()) {
               <span class="field-error">Description or scope of work is required.</span>
             }
-          </label>
-          <label class="field">
-            <span class="field-label">Assigned Evaluator</span>
-            <input
-              type="text"
-              [(ngModel)]="applicationInfo.assignedEvaluator"
-              name="assignedEvaluator"
-              appCapitalizeName
-            />
-            <span class="not-stored">Not sent anywhere yet — the server does not track a named officer on an application.</span>
-          </label>
-          <label class="field">
-            <span class="field-label">Assigned Office</span>
-            <input type="text" [value]="responsibleDepartment()?.name ?? '—'" disabled />
           </label>
         </div>
       }
@@ -397,7 +530,11 @@
           }
           <div class="doc-list">
             @for (doc of documents(); track doc.requirementId) {
-              <div class="doc-row" [class.attached]="doc.fileName">
+              <div
+                class="doc-row"
+                [class.attached]="doc.file"
+                [class.incomplete]="showStepErrors() && (documentIssue(doc) || (doc.required && !doc.file))"
+              >
                 <div class="doc-row-head">
                   <span class="doc-label">{{ doc.label }}</span>
                   <span
@@ -414,16 +551,16 @@
                 <div class="doc-row-fields">
                   <label class="file-field">
                     <span class="field-label">
-                      File name
+                      File
                       <small class="not-stored">
-                        Sent to the Municipality when this application is filed.
+                        Sent to the Municipality, with the details beside it, when this application is filed.
                       </small>
                     </span>
-                    <input type="file" (change)="onFileChosen(doc, $event)" />
+                    <input #fileInput type="file" (change)="onFileChosen(doc, $event)" />
                     @if (doc.fileName) {
                       <span class="file-chip"
                         >{{ doc.fileName }}
-                        <button type="button" (click)="clearFile(doc)" aria-label="Remove file">
+                        <button type="button" (click)="clearFile(doc, fileInput)" aria-label="Remove file">
                           &#10005;
                         </button>
                       </span>
@@ -445,28 +582,46 @@
                       [ngModel]="doc.issuingOffice"
                       (ngModelChange)="onDocFieldChange(doc, 'issuingOffice', $event)"
                       [name]="'docOffice-' + doc.requirementId"
-                      placeholder="Optional"
+                      placeholder="e.g. Barangay Hall, BFP, DTI"
                     />
                   </label>
                   <label class="field">
-                    <span class="field-label">Issue Date</span>
+                    <span class="field-label"
+                      >Issue Date
+                      @if (doc.file) {
+                        &nbsp;<span class="field-label-required" aria-hidden="true">*</span>
+                      }
+                    </span>
                     <input
                       type="date"
+                      [required]="!!doc.file"
                       [ngModel]="doc.issueDate"
                       (ngModelChange)="onDocFieldChange(doc, 'issueDate', $event)"
                       [name]="'docIssue-' + doc.requirementId"
                     />
                   </label>
                   <label class="field">
-                    <span class="field-label">Expiry Date</span>
+                    <span class="field-label"
+                      >Expiry Date
+                      @if (doc.file) {
+                        &nbsp;<span class="field-label-required" aria-hidden="true">*</span>
+                      }
+                    </span>
                     <input
                       type="date"
+                      [required]="!!doc.file"
+                      [min]="doc.issueDate || null"
                       [ngModel]="doc.expiryDate"
                       (ngModelChange)="onDocFieldChange(doc, 'expiryDate', $event)"
                       [name]="'docExpiry-' + doc.requirementId"
                     />
                   </label>
                 </div>
+                @if (showStepErrors() && documentIssue(doc)) {
+                  <span class="field-error doc-issue">{{ documentIssue(doc) }}</span>
+                } @else if (showStepErrors() && doc.required && !doc.file) {
+                  <span class="field-error doc-issue">A file is required for this document.</span>
+                }
               </div>
             }
           </div>
@@ -480,7 +635,7 @@
             <dl>
               <div>
                 <dt>Name</dt>
-                <dd>{{ applicant.fullName || '—' }}</dd>
+                <dd>{{ fullName() || '—' }}</dd>
               </div>
               <div>
                 <dt>Type</dt>
@@ -488,7 +643,14 @@
               </div>
               <div>
                 <dt>Email</dt>
-                <dd>{{ emailValidation().normalized || '—' }}</dd>
+                <dd>
+                  {{ emailValidation().normalized || '—' }}
+                  @if (emailVerified()) {
+                    <span class="review-badge ok">Verified</span>
+                  } @else {
+                    <span class="review-badge">Not verified</span>
+                  }
+                </dd>
               </div>
               <div>
                 <dt>Mobile</dt>
@@ -502,7 +664,7 @@
               }
               <div>
                 <dt>Address</dt>
-                <dd>{{ applicant.addressLine }}, Barangay {{ applicant.barangay }}</dd>
+                <dd>{{ applicant.addressLine }}, Barangay {{ applicant.barangay || '—' }}, Castilla, Sorsogon</dd>
               </div>
             </dl>
           </section>
@@ -525,18 +687,20 @@
               </div>
               <div>
                 <dt>Address</dt>
-                <dd>{{ business.addressLine }}, Barangay {{ business.barangay }}</dd>
+                <dd>{{ business.addressLine }}, Barangay {{ business.barangay || '—' }}, Castilla, Sorsogon</dd>
               </div>
               <div>
                 <dt>Owner/Representative</dt>
                 <dd>{{ business.ownerOrRepresentative || '—' }}</dd>
               </div>
-              @if (business.registrationNumber) {
-                <div>
-                  <dt>Registration No.</dt>
-                  <dd>{{ business.registrationNumber }}</dd>
-                </div>
-              }
+              <div>
+                <dt>Registration No.</dt>
+                <dd>{{ business.registrationNumber || '—' }}</dd>
+              </div>
+              <div>
+                <dt>Date Registered</dt>
+                <dd>{{ business.dateRegistered || '—' }}</dd>
+              </div>
             </dl>
           </section>
           <section>
@@ -550,13 +714,15 @@
                 <dt>Transaction</dt>
                 <dd>{{ applicationInfo.applicationAction }}</dd>
               </div>
+              @if (needsRelatedPermit()) {
+                <div>
+                  <dt>{{ applicationInfo.applicationAction === 'Renewal' ? 'Renews' : 'Amends' }}</dt>
+                  <dd>{{ applicationInfo.relatedPermitNumber || '—' }}</dd>
+                </div>
+              }
               <div>
                 <dt>Date Received</dt>
                 <dd>{{ applicationInfo.dateReceived }}</dd>
-              </div>
-              <div>
-                <dt>Assigned Evaluator</dt>
-                <dd>{{ applicationInfo.assignedEvaluator }}</dd>
               </div>
               <div>
                 <dt>Assigned Office</dt>
@@ -571,27 +737,39 @@
           <section>
             <h3>Documents</h3>
             <p class="not-stored">
-              Each file above is sent to the Municipality once this application is filed.
+              {{ attachedDocuments().length }} of {{ documents().length }} on the checklist attached. Each
+              file is sent to the Municipality, with its issuing office and dates, once this application
+              is filed.
             </p>
             @if (documents().length === 0) {
               <p class="empty-note">No document checklist loaded.</p>
             } @else {
               <ul class="review-doc-list">
                 @for (doc of documents(); track doc.requirementId) {
-                  <li [class.missing]="doc.required && !doc.fileName">
+                  <li [class.missing]="doc.required && !doc.file">
                     <app-icon
-                      [name]="doc.fileName ? 'check-circle' : 'alert-triangle'"
+                      [name]="doc.file ? 'check-circle' : 'alert-triangle'"
                       [size]="14"
                     />
-                    {{ doc.label }} <em>({{ doc.required ? 'Required' : 'Optional' }})</em> —
-                    {{ doc.fileName || 'No file named' }}
+                    <span>
+                      {{ doc.label }} <em>({{ doc.required ? 'Required' : 'Optional' }})</em> —
+                      @if (doc.file) {
+                        {{ doc.fileName }}
+                        <small>
+                          @if (doc.issuingOffice) { {{ doc.issuingOffice }} · }
+                          issued {{ doc.issueDate }}, expires {{ doc.expiryDate }}
+                        </small>
+                      } @else {
+                        No file attached
+                      }
+                    </span>
                   </li>
                 }
               </ul>
             }
           </section>
           @if (submitError()) {
-            <div class="step-error-banner">
+            <div class="step-error-banner span-2">
               <p>{{ submitError() }}</p>
             </div>
           }
@@ -601,7 +779,7 @@
 
     <div class="modal-actions intake-actions">
       @if (stepIndex() > 0) {
-        <button type="button" class="modal-btn neutral" (click)="back()">Back</button>
+        <button type="button" class="modal-btn neutral" [disabled]="submitting()" (click)="back()">Back</button>
       } @else {
         <button type="button" class="modal-btn neutral" (click)="cancel()">Cancel</button>
       }
@@ -614,7 +792,7 @@
           [disabled]="submitting()"
           (click)="submit()"
         >
-          {{ submitting() ? 'Creating…' : 'Create Application' }}
+          {{ submitting() ? 'Filing…' : 'File Application' }}
         </button>
       }
     </div>

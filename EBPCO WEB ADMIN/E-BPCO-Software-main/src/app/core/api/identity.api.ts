@@ -170,4 +170,65 @@ export class IdentityApi {
       throw error;
     }
   }
+
+  /**
+   * Send a 6-digit code to an address that has no account yet — the same
+   * `POST /auth/register/email/request` the citizen portal's own sign-up
+   * uses, spent by the server when the walk-in intake files the account
+   * (its `SubmissionService.fileOnBehalf`). Public on the server, so the
+   * officer's bearer token is neither needed nor a problem.
+   *
+   * `delivery` is the server's own honesty about what happened: `sent`,
+   * `not-sent` (no mail provider configured — the code exists, nobody has
+   * it), or `failed` (the provider refused just now). `too-soon` is the one
+   * refusal: a code went out under a minute ago.
+   */
+  async requestRegistrationEmailCode(email: string): Promise<EmailCodeRequestResult> {
+    try {
+      const result = await this.api.post<{ delivery: 'sent' | 'not-sent' | 'failed'; detail: string }>(
+        '/auth/register/email/request', { email },
+      );
+      return { kind: result.delivery, message: result.detail };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 409) return { kind: 'too-soon', message: error.message };
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * `POST /auth/register/email/confirm` — the code the applicant reads back
+   * at the counter. Every wrong answer (no outstanding code, expired, wrong
+   * digits, too many tries) is a 409 whose `detail` is written for the person
+   * at the screen, so it is passed through as `refused`.
+   */
+  async confirmRegistrationEmailCode(email: string, code: string): Promise<EmailCodeConfirmResult> {
+    try {
+      await this.api.post('/auth/register/email/confirm', { email, code });
+      return { kind: 'confirmed' };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 409 || error.status === 400) return { kind: 'refused', message: error.message };
+        if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
 }
+
+export type EmailCodeRequestResult =
+  | { readonly kind: 'sent'; readonly message: string }
+  | { readonly kind: 'not-sent'; readonly message: string }
+  | { readonly kind: 'too-soon'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
+export type EmailCodeConfirmResult =
+  | { readonly kind: 'confirmed' }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };

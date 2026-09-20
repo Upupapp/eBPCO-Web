@@ -698,6 +698,19 @@
                           <div>
                             <div class="doc-name">{{ r.label }}</div>
                             <div class="doc-file">{{ r.doc?.fileName ?? 'No file attached' }}</div>
+                            @if (r.doc?.issuingOffice || r.doc?.issuedOn || r.doc?.expiresOn) {
+                              <div class="doc-provenance">
+                                @if (r.doc?.issuingOffice) {
+                                  <span>Issued by {{ r.doc?.issuingOffice }}</span>
+                                }
+                                @if (r.doc?.issuedOn) {
+                                  <span>Issued {{ formatDate(r.doc?.issuedOn) }}</span>
+                                }
+                                @if (r.doc?.expiresOn) {
+                                  <span>Expires {{ formatDate(r.doc?.expiresOn) }}</span>
+                                }
+                              </div>
+                            }
                             @if (r.doc?.remarks) {
                               <div class="doc-remarks">{{ r.doc?.remarks }}</div>
                             }
@@ -1030,18 +1043,15 @@
       @if (editingProfile()) {
         <div class="profile-edit-row">
           <label>
-            Location
-            <input type="text" [(ngModel)]="profileEditCity" name="profileCity" />
-          </label>
-          <label>
-            Assigned Officer
-            <input type="text" [(ngModel)]="profileEditOfficer" name="profileOfficer" />
+            Project Location
+            <input type="text" [(ngModel)]="profileEditLocation" name="profileLocation" [disabled]="savingProfile()" />
+            <small>Saved on the application record — the applicant sees the same value.</small>
           </label>
           <div class="profile-edit-actions">
-            <button type="button" class="modal-btn confirm" (click)="saveEditProfile()">
-              Save
+            <button type="button" class="modal-btn confirm" [disabled]="savingProfile()" (click)="saveEditProfile()">
+              {{ savingProfile() ? 'Saving…' : 'Save' }}
             </button>
-            <button type="button" class="modal-btn neutral" (click)="cancelEditProfile()">
+            <button type="button" class="modal-btn neutral" [disabled]="savingProfile()" (click)="cancelEditProfile()">
               Cancel
             </button>
           </div>
@@ -1071,17 +1081,21 @@
     <div class="info-col">
       <div class="card accordion-card">
         <button type="button" class="accordion-head" (click)="toggleSection('meta')">
-          <h3>Application Meta Data</h3>
+          <h3>Application</h3>
           <app-icon [name]="openSection() === 'meta' ? 'chevron-up' : 'chevron-down'" [size]="16" />
         </button>
         @if (openSection() === 'meta') {
           <div class="accordion-body">
+            <label for="reference-number">Reference Number</label>
+            <input id="reference-number" type="text" disabled [value]="detail.meta.referenceNumber" />
             <label for="date-submitted">Date Submitted</label>
             <input id="date-submitted" type="text" disabled [value]="detail.meta.dateSubmitted" />
-            <label for="application-number">Application Number</label>
-            <input id="application-number" type="text" disabled [value]="detail.meta.applicationNumber" />
+            <label for="permit-type">Permit Type</label>
+            <input id="permit-type" type="text" disabled [value]="detail.meta.permitType ?? 'Not on file'" />
+            <label for="transaction-type">Transaction Type</label>
+            <input id="transaction-type" type="text" disabled [value]="detail.meta.applicationAction" />
             <label for="current-status">Current Status</label>
-            <input id="current-status" type="text" disabled [value]="detail.meta.currentStatus" />
+            <input id="current-status" type="text" disabled [value]="detail.meta.lifecycleStatus" />
           </div>
         }
       </div>
@@ -1098,42 +1112,46 @@
           <div class="accordion-body">
             <label for="project-location">Project Location</label>
             <textarea id="project-location" disabled rows="2">{{ detail.project.location }}</textarea>
-            <label for="lot-area">Lot Area</label>
-            <input id="lot-area" type="text" disabled [value]="detail.project.lotArea" />
-            <label for="floor-area">Floor Area</label>
-            <input id="floor-area" type="text" disabled [value]="detail.project.floorArea" />
-            <label for="number-of-floors">Number Of Floors</label>
-            <input id="number-of-floors" type="text" disabled [value]="detail.project.floors" />
-            <label for="project-type">Project Type</label>
-            <select id="project-type" disabled>
-              <option>{{ detail.project.projectType }}</option>
-            </select>
+            <label for="scope-of-work">Scope of Work</label>
+            <textarea id="scope-of-work" disabled rows="3" [class.not-on-file]="!detail.project.scopeOfWork">{{ detail.project.scopeOfWork ?? 'Not on file' }}</textarea>
+            <label for="professional-in-charge">Professional in Charge</label>
+            <input id="professional-in-charge" type="text" disabled [class.not-on-file]="!detail.project.professionalName" [value]="detail.project.professionalName ?? 'Not on file'" />
+            <label for="prc-number">PRC License No.</label>
+            <input id="prc-number" type="text" disabled [class.not-on-file]="!detail.project.prcNumber" [value]="detail.project.prcNumber ?? 'Not on file'" />
+            @if (detail.project.dateReceived) {
+              <label for="date-received">Date Received at Counter</label>
+              <input id="date-received" type="text" disabled [value]="detail.project.dateReceived" />
+            }
           </div>
         }
       </div>
 
       <div class="card accordion-card">
-        <button type="button" class="accordion-head" (click)="toggleSection('type')">
-          <h3>Application Type</h3>
-          <app-icon [name]="openSection() === 'type' ? 'chevron-up' : 'chevron-down'" [size]="16" />
+        <button type="button" class="accordion-head" (click)="toggleSection('filing')">
+          <h3>Filing</h3>
+          <app-icon [name]="openSection() === 'filing' ? 'chevron-up' : 'chevron-down'" [size]="16" />
         </button>
-        @if (openSection() === 'type') {
+        @if (openSection() === 'filing') {
           <div class="accordion-body">
-            <label for="type">Type</label>
-            <select id="type" disabled>
-              <option>{{ detail.applicationType.type }}</option>
-            </select>
-            <label for="if-company">If Company:</label>
-            <input id="if-company"
+            <label for="filed-by">Filed</label>
+            <input
+              id="filed-by"
               type="text"
               disabled
-              [value]="detail.applicationType.ifCompany"
-              placeholder="Not provided"
+              [value]="
+                detail.filing.filedAtCounter === true
+                  ? 'By an officer at the counter, for the applicant'
+                  : detail.filing.filedAtCounter === false
+                    ? 'By the applicant, online'
+                    : 'By the applicant, online (or before this was recorded)'
+              "
             />
-            <label for="authorized-representative">Authorized Representative</label>
-            <input id="authorized-representative" type="text" disabled placeholder="Select" />
-            <label for="business-permit">Business Permit</label>
-            <input id="business-permit" type="text" disabled placeholder="Select" />
+            <label for="applicant-type">Applicant Type</label>
+            <input id="applicant-type" type="text" disabled [class.not-on-file]="!detail.filing.applicantType" [value]="detail.filing.applicantType ?? 'Not on file'" />
+            <label for="owner-representative">Owner / Authorized Representative</label>
+            <input id="owner-representative" type="text" disabled [class.not-on-file]="!detail.filing.ownerOrRepresentative" [value]="detail.filing.ownerOrRepresentative ?? 'Not on file'" />
+            <label for="landline-number">Landline</label>
+            <input id="landline-number" type="text" disabled [class.not-on-file]="!detail.filing.landlineNumber" [value]="detail.filing.landlineNumber ?? 'Not on file'" />
           </div>
         }
       </div>
@@ -1141,63 +1159,74 @@
 
     <div class="info-col">
       <div class="card accordion-card">
-        <button type="button" class="accordion-head" (click)="toggleSection('govid')">
-          <h3>Government Identification</h3>
+        <button type="button" class="accordion-head" (click)="toggleSection('applicant')">
+          <h3>Applicant</h3>
           <app-icon
-            [name]="openSection() === 'govid' ? 'chevron-up' : 'chevron-down'"
+            [name]="openSection() === 'applicant' ? 'chevron-up' : 'chevron-down'"
             [size]="16"
           />
         </button>
-        @if (openSection() === 'govid') {
+        @if (openSection() === 'applicant') {
           <div class="accordion-body">
-            <label for="id-type">ID Type</label>
-            <input id="id-type" type="text" disabled [value]="detail.govId.idType" />
-            <label for="contact-number">Contact Number</label>
-            <input id="contact-number" type="text" disabled [value]="detail.govId.contactNumber" />
-            <label for="tin">TIN</label>
-            <input id="tin" type="text" disabled [value]="detail.govId.tin" />
+            <label for="applicant-name">Name</label>
+            <input id="applicant-name" type="text" disabled [value]="detail.row.applicant" />
+            <label for="applicant-email">Email</label>
+            <div class="input-with-badge">
+              <input id="applicant-email" type="text" disabled [value]="detail.email" />
+              <span
+                class="verify-pill"
+                [class.verified]="detail.emailVerification.status === 'Verified'"
+                >{{ detail.emailVerification.status === 'Verified' ? 'Verified' : 'Unverified' }}</span
+              >
+            </div>
+            <label for="applicant-mobile">Mobile</label>
+            <input id="applicant-mobile" type="text" disabled [value]="detail.phone" />
+            <label for="applicant-street">House No. / Street</label>
+            <input id="applicant-street" type="text" disabled [class.not-on-file]="!detail.applicantAddress.street" [value]="detail.applicantAddress.street ?? 'Not on file'" />
+            <label for="applicant-barangay">Barangay</label>
+            <input id="applicant-barangay" type="text" disabled [class.not-on-file]="!detail.applicantAddress.barangay" [value]="detail.applicantAddress.barangay ?? 'Not on file'" />
+            <label for="applicant-city">City / Municipality, Province</label>
+            <input
+              id="applicant-city"
+              type="text"
+              disabled
+              [class.not-on-file]="!detail.applicantAddress.city && !detail.applicantAddress.province"
+              [value]="applicantCityProvince(detail)"
+            />
+            <label for="applicant-postal">Postal Code</label>
+            <input id="applicant-postal" type="text" disabled [class.not-on-file]="!detail.applicantAddress.postalCode" [value]="detail.applicantAddress.postalCode ?? 'Not on file'" />
           </div>
         }
       </div>
 
       <div class="card accordion-card">
-        <button type="button" class="accordion-head" (click)="toggleSection('professional')">
-          <h3>Professional Involved</h3>
+        <button type="button" class="accordion-head" (click)="toggleSection('business')">
+          <h3>Business Information</h3>
           <app-icon
-            [name]="openSection() === 'professional' ? 'chevron-up' : 'chevron-down'"
+            [name]="openSection() === 'business' ? 'chevron-up' : 'chevron-down'"
             [size]="16"
           />
         </button>
-        @if (openSection() === 'professional') {
+        @if (openSection() === 'business') {
           <div class="accordion-body">
-            <label for="architect">Architect</label>
-            <input id="architect" type="text" disabled placeholder="Name" />
-            <label for="civil-engineer">Civil Engineer</label>
-            <input id="civil-engineer" type="text" disabled placeholder="Name" />
-            <label for="electrical-engineer">Electrical Engineer</label>
-            <input id="electrical-engineer" type="text" disabled placeholder="Name" />
-          </div>
-        }
-      </div>
-
-      <div class="card accordion-card">
-        <button type="button" class="accordion-head" (click)="toggleSection('ownership')">
-          <h3>Ownership Information</h3>
-          <app-icon
-            [name]="openSection() === 'ownership' ? 'chevron-up' : 'chevron-down'"
-            [size]="16"
-          />
-        </button>
-        @if (openSection() === 'ownership') {
-          <div class="accordion-body">
-            <label for="lot-owner-name">Lot Owner Name</label>
-            <input id="lot-owner-name" type="text" disabled [value]="detail.ownership.lotOwnerName" />
-            <label for="relationship-to-applicant">Relationship to Applicant</label>
-            <input id="relationship-to-applicant" type="text" disabled [value]="detail.ownership.relationship" />
-            <label for="ownership-type">Ownership Type</label>
-            <select id="ownership-type" disabled>
-              <option>{{ detail.ownership.ownershipType }}</option>
-            </select>
+            @if (detail.business; as biz) {
+              <label for="business-name">Registered Name</label>
+              <input id="business-name" type="text" disabled [value]="biz.name" />
+              <label for="business-trade-name">Trade Name</label>
+              <input id="business-trade-name" type="text" disabled [class.not-on-file]="!biz.tradeName" [value]="biz.tradeName ?? 'Not on file'" />
+              <label for="business-category">Category</label>
+              <input id="business-category" type="text" disabled [value]="biz.category" />
+              <label for="business-address">Business Address</label>
+              <textarea id="business-address" disabled rows="2">{{ biz.street }}, Barangay {{ biz.barangay }}, {{ biz.city }}, {{ biz.province }}</textarea>
+              <label for="business-registration">Registration / Reference No.</label>
+              <input id="business-registration" type="text" disabled [value]="biz.registrationNumber" />
+              <label for="business-date-registered">Date Registered</label>
+              <input id="business-date-registered" type="text" disabled [value]="biz.dateRegistered" />
+              <label for="business-status">Status</label>
+              <input id="business-status" type="text" disabled [value]="biz.status" />
+            } @else {
+              <p class="not-on-file-note">No business is linked to this application.</p>
+            }
           </div>
         }
       </div>

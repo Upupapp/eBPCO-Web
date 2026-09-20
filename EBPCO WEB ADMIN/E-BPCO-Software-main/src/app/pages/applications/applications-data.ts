@@ -143,25 +143,67 @@ export interface AppDetail {
   lastUpdated: string;
   emailVerification: ContactVerification;
   barangay: string;
-  meta: { dateSubmitted: string; applicationNumber: string; currentStatus: AppStatus };
+  meta: {
+    dateSubmitted: string;
+    /** The human reference number (E-BPCO-YYYY-NNNNNN). */
+    referenceNumber: string;
+    currentStatus: AppStatus;
+    /** The server's own 19-status lifecycle state, which `currentStatus` coarsens. */
+    lifecycleStatus: string;
+    /** `null` when the portal could not name the permit type. */
+    permitType: string | null;
+    applicationAction: string;
+  };
+  /**
+   * What the application says about the work — the site, and the answers
+   * filed on its `form`. Every field is `null` when the record does not hold
+   * it; the template renders that as "Not on file", never as a sample value.
+   * This section used to be a lot area, a floor area and a floor count that
+   * no route had ever sent — "150 sqm" on every application in the system.
+   */
   project: {
     location: string;
-    lotArea: string;
-    floorArea: string;
-    floors: string;
-    /** `null` when the portal could not name the permit type. */
-    projectType: string | null;
+    scopeOfWork: string | null;
+    professionalName: string | null;
+    prcNumber: string | null;
+    dateReceived: string | null;
   };
-  applicationType: {
-    type: string;
-    ifCompany: string;
-    authorizedRep: string;
-    /** `null` when the portal could not name the permit type. */
-    businessPermit: string | null;
+  /** How, and by whom, it was filed. `filedAtCounter` is `null` when the record predates the flag. */
+  filing: {
+    applicantType: string | null;
+    ownerOrRepresentative: string | null;
+    landlineNumber: string | null;
+    filedAtCounter: boolean | null;
   };
-  govId: { idType: string; contactNumber: string; tin: string };
-  professional: { architect: string; civilEngineer: string; electricalEngineer: string };
-  ownership: { lotOwnerName: string; relationship: string; ownershipType: string };
+  /** The applicant's own address on their record (migration 036). Null fields have never been given. */
+  applicantAddress: {
+    street: string | null;
+    barangay: string | null;
+    city: string | null;
+    province: string | null;
+    postalCode: string | null;
+  };
+  /** The linked Business's real record, or `null` when the application has none linked. */
+  business: {
+    name: string;
+    tradeName: string | null;
+    category: string;
+    street: string;
+    barangay: string;
+    city: string;
+    province: string;
+    registrationNumber: string;
+    dateRegistered: string;
+    status: string;
+  } | null;
+}
+
+/** A `form` answer as a trimmed string, or `null` when absent, empty, or not a string. */
+function formText(form: Readonly<Record<string, unknown>> | undefined, key: string): string | null {
+  const value = form?.[key];
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 // `applicant` (the real linked Applicant record) is optional only so this
@@ -205,8 +247,27 @@ export function buildDetailFor(
    * left in place for this one field.
    */
   realAddress?: { barangay: string | null },
+  /**
+   * The rest of `GET /staff/applications/:id` this view reads: the filed
+   * `form`, the applicant's full address, and the linked Business's own row.
+   * Absent for a local-demo row, whose sections then read "Not on file".
+   */
+  real?: {
+    form?: Readonly<Record<string, unknown>>;
+    lifecycleStatus?: string;
+    applicantAddress?: {
+      street: string | null; barangay: string | null; city: string | null;
+      province: string | null; postalCode: string | null;
+    };
+    business?: {
+      name: string; category: string; street: string; barangay: string; city: string;
+      province: string; registrationNumber: string; dateRegistered: string; status: string;
+    } | null;
+  },
 ): AppDetail {
-  const businessLabel = business?.name || row.businessName || 'Not provided';
+  const businessLabel = real?.business?.name || business?.name || row.businessName || 'Not provided';
+  const form = real?.form;
+  const filedAtCounter = form?.['filedAtCounter'];
   return {
     row,
     businessLabel,
@@ -225,37 +286,42 @@ export function buildDetailFor(
     barangay: realAddress?.barangay || applicant?.barangay || 'Not on file',
     meta: {
       dateSubmitted: row.dateSubmitted,
-      applicationNumber: row.id,
+      referenceNumber: row.id,
       currentStatus: row.status,
+      lifecycleStatus: real?.lifecycleStatus ?? row.lifecycleStatus,
+      permitType: row.permitType,
+      applicationAction: row.applicationAction ?? 'New',
     },
     project: {
-      location: `78 Sampaguita Street, ${row.location}, Castilla, Sorsogon, 4703 Philippines`,
-      lotArea: '150 sqm',
-      floorArea: '85 sqm',
-      floors: '2',
-      projectType: row.type,
+      location: row.location,
+      scopeOfWork: formText(form, 'scopeOfWork'),
+      professionalName: formText(form, 'professionalName'),
+      prcNumber: formText(form, 'prcNumber'),
+      dateReceived: formText(form, 'dateReceived'),
     },
-    applicationType: {
-      type: applicant?.applicantType ?? 'Individual',
-      ifCompany: businessLabel,
-      authorizedRep: '',
-      businessPermit: row.permitType,
+    filing: {
+      applicantType: formText(form, 'applicantType') ?? applicant?.applicantType ?? null,
+      ownerOrRepresentative: formText(form, 'ownerOrRepresentative'),
+      landlineNumber: formText(form, 'landlineNumber'),
+      filedAtCounter: typeof filedAtCounter === 'boolean' ? filedAtCounter : null,
     },
-    govId: {
-      idType: 'National ID',
-      contactNumber: '+63 918 765 4321',
-      tin: '123-1242302-4234',
+    applicantAddress: {
+      street: real?.applicantAddress?.street ?? null,
+      barangay: real?.applicantAddress?.barangay ?? applicant?.barangay ?? null,
+      city: real?.applicantAddress?.city ?? null,
+      province: real?.applicantAddress?.province ?? null,
+      postalCode: real?.applicantAddress?.postalCode ?? null,
     },
-    professional: {
-      architect: '',
-      civilEngineer: '',
-      electricalEngineer: '',
-    },
-    ownership: {
-      lotOwnerName: 'Juan Dela Cruz',
-      relationship: 'Customer',
-      ownershipType: 'Owned',
-    },
+    business: real?.business
+      ? { ...real.business, tradeName: formText(form, 'tradeName') }
+      : business
+        ? {
+            name: business.name, tradeName: null, category: business.category, street: business.street,
+            barangay: business.barangay, city: business.city, province: business.province,
+            registrationNumber: business.registrationNumber, dateRegistered: business.dateRegistered,
+            status: business.status,
+          }
+        : null,
   };
 }
 

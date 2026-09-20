@@ -167,6 +167,10 @@ export interface ApplicationDocumentRow {
   readonly reviewRemark: string | null;
   readonly expiresOn: string | null;
   readonly certifiedOn: string | null;
+  /** Issue date as printed on the document (`YYYY-MM-DD`, server migration 051) — `null` means not recorded. Absent from an older server. */
+  readonly issuedOn?: string | null;
+  /** Which office issued it, as the uploader described it. `null` means not recorded. Absent from an older server. */
+  readonly issuingOffice?: string | null;
   readonly uploadedAt: string;
   readonly reviewedAt: string | null;
 }
@@ -210,6 +214,8 @@ export interface ApplicationReleaseRecord {
 }
 
 export interface ApplicationDetail {
+  /** The same queue row `GET /staff/applications` lists — the record's own current lifecycle status and particulars. */
+  readonly summary?: QueueRow;
   readonly payments: readonly ApplicationPaymentRow[];
   readonly orderOfPayment: ApplicationOrderOfPayment | null;
   /** The applicant's real email, from their account — never fabricated from the display name. */
@@ -240,6 +246,15 @@ export interface ApplicationDetail {
     readonly postalCode: string | null;
   };
   readonly business: ApplicationBusiness | null;
+  /**
+   * The free-form answers filed with the application (`applications.form`):
+   * the citizen wizard's `scopeOfWork` / `professionalName` / `prcNumber`,
+   * or the counter intake's `scopeOfWork` / `applicantType` /
+   * `ownerOrRepresentative` / `landlineNumber` / `tradeName` /
+   * `dateReceived` / `filedAtCounter`. Empty for an application filed with
+   * none; absent from an older server.
+   */
+  readonly form?: Readonly<Record<string, unknown>>;
   readonly permit: ApplicationGeneratedPermit | null;
   /** See `ApplicationReleaseRecord`. `null` until a release has been prepared; absent from an older server. */
   readonly release?: ApplicationReleaseRecord | null;
@@ -276,9 +291,14 @@ export const NOT_SENT = '—';
 export interface FileOnBehalfInput {
   applicant: {
     firstName: string;
+    /** Kept on a new applicant record, as the citizen sign-up keeps it. */
+    middleName?: string;
     lastName: string;
     email: string;
     mobileNumber?: string;
+    /** The applicant's OWN address — kept on a new applicant record; the server leaves a returning applicant's alone. */
+    street?: string;
+    barangay?: string;
   };
   /** Give exactly one of `business`/`businessId` — a new business, or an existing one this same applicant already owns. */
   business?: {
@@ -297,10 +317,31 @@ export interface FileOnBehalfInput {
   applicationAction: ApplicationAction;
   renewsPermitNumber?: string | null;
   location?: string;
+  /** Free-form answers kept on the application (`applications.form`), the same place the citizen wizard puts its scope of work. */
+  form?: Record<string, unknown>;
 }
 
+export type ApplicationEditResult =
+  | { readonly kind: 'done'; readonly changed: readonly string[] }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 export type FileOnBehalfResult =
-  | { readonly kind: 'done'; readonly applicationId: string; readonly referenceNumber: string; readonly applicantId: string }
+  | {
+      readonly kind: 'done'; readonly applicationId: string; readonly referenceNumber: string; readonly applicantId: string;
+      /** The address already had an account (same name — see `name-mismatch`), and the filing went under it. Absent from an older server. */
+      readonly returningApplicant?: boolean;
+      /** Whether the address is confirmed — by the code just read back at the counter, or before. Absent from an older server. */
+      readonly emailVerified?: boolean;
+    }
+  /**
+   * The address is registered to a DIFFERENT person. Nothing was filed:
+   * the officer has to decide whether the email or the name is wrong, so
+   * this is kept apart from the general `refused` an intake screen can
+   * only display.
+   */
+  | { readonly kind: 'name-mismatch'; readonly message: string }
   | { readonly kind: 'refused'; readonly message: string }
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
@@ -344,6 +385,17 @@ export type DocumentContentResult =
   | { readonly kind: 'ok'; readonly url: string }
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
+
+/**
+ * What the document says about its own origin — the office that issued it and
+ * the dates printed on it (`YYYY-MM-DD`). The server keeps them with the
+ * document (its migration 051) and shows them back on the staff detail view.
+ */
+export interface DocumentProvenance {
+  readonly issuingOffice?: string;
+  readonly issuedOn?: string;
+  readonly expiresOn?: string;
+}
 
 /** `POST /documents` — a first file for a still-Missing requirement, `documents:write` only (`records-officer`/`super-admin`). */
 export type DocumentAttachResult =
@@ -440,16 +492,53 @@ export class StaffApplicationsApi {
         applicationId: string;
         referenceNumber: string;
         applicantId: string;
+        returningApplicant?: boolean;
+        emailVerified?: boolean;
       }>('/staff/applications', input, crypto.randomUUID());
       return { kind: 'done', ...result };
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
+        // 409 with this title = the address belongs to somebody else (the
+        // server names them in `detail`). Told apart from the other 409 —
+        // an Idempotency-Key collision — by the title, which is the only
+        // thing that differs on the wire.
+        if (error.status === 409 && /different applicant/i.test(error.problem.title)) {
+          return { kind: 'name-mismatch', message: error.message };
+        }
         // 409 = the Idempotency-Key collided with a different request; 422 =
         // the server's own SubmissionService refused the filing itself
         // (e.g. staff filing under their own address, a business that isn't
         // this applicant's). Both are answers this screen can act on.
         if (error.status === 409 || error.status === 422) {
+          return { kind: 'refused', message: error.message };
+        }
+        return { kind: 'failed', message: error.message };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * `PATCH /staff/applications/:id` — the record's own editable particulars
+   * (`applications:write`). The server refuses once a permit has been
+   * generated, once the application is terminal, and — for the fields an
+   * order of payment was computed from — once one has been assessed; each
+   * refusal comes back as a sentence written for the officer.
+   */
+  async edit(
+    applicationId: string,
+    patch: { location?: string | null; form?: Record<string, unknown> },
+  ): Promise<ApplicationEditResult> {
+    try {
+      const result = await this.api.patch<{ changed: string[] }>(
+        `/staff/applications/${encodeURIComponent(applicationId)}`, patch,
+      );
+      return { kind: 'done', changed: result.changed };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 501) return { kind: 'unavailable' };
+        if (error.status === 404 || error.status === 422 || error.status === 403) {
           return { kind: 'refused', message: error.message };
         }
         return { kind: 'failed', message: error.message };
@@ -589,10 +678,19 @@ export class StaffApplicationsApi {
   async attachDocument(
     applicationId: string, requirementCode: string, label: string,
     fileName: string, contentBase64: string,
+    provenance: DocumentProvenance = {},
   ): Promise<DocumentAttachResult> {
     try {
       const result = await this.api.post<{ documentId: string }>(
-        '/documents', { fileName, label, applicationId, requirementCode, contentBase64 },
+        '/documents', {
+          fileName, label, applicationId, requirementCode, contentBase64,
+          // Omitted rather than sent null when the officer left them blank, so
+          // an older server's strict body schema is not tripped by keys it
+          // does not know.
+          ...(provenance.issuingOffice ? { issuingOffice: provenance.issuingOffice } : {}),
+          ...(provenance.issuedOn ? { issuedOn: provenance.issuedOn } : {}),
+          ...(provenance.expiresOn ? { expiresOn: provenance.expiresOn } : {}),
+        },
       );
       return { kind: 'done', documentId: result.documentId };
     } catch (error) {

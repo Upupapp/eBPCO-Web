@@ -4,14 +4,24 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord, withProjectedFields } from '../../core/domain/application.model';
 import { documentsFor, requirementsFor } from '../../core/domain/requirements-catalog';
 import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
-import { FileOnBehalfInput, FileOnBehalfResult, StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import {
+  DocumentProvenance, FileOnBehalfInput, FileOnBehalfResult, StaffApplicationsApi,
+} from '../../core/api/staff-applications.api';
+import { CASTILLA_BARANGAYS } from '../../core/domain/castilla-barangays';
 
-function fillApplicant(component: any): void {
-  component.applicant.fullName = 'Juan Dela Cruz';
+/**
+ * Fills Step 1 the way an officer would, INCLUDING the email code: the step
+ * refuses to advance until the address is verified (or the LGU cannot send a
+ * code at all), so a test that skips it never gets past the first screen.
+ */
+function fillApplicant(component: any, verified = true): void {
+  component.applicant.firstName = 'Juan';
+  component.applicant.lastName = 'Dela Cruz';
   component.applicant.email = 'juan.delacruz@gmail.com';
   component.applicant.mobileNumber = '09171234567';
   component.applicant.addressLine = 'Purok 1, Rizal Street';
   component.applicant.barangay = component.barangays[0];
+  if (verified) component.emailVerified.set(true);
 }
 
 function fillBusiness(component: any): void {
@@ -19,6 +29,7 @@ function fillBusiness(component: any): void {
   component.business.addressLine = '123 Rizal Street';
   component.business.barangay = component.barangays[0];
   component.business.ownerOrRepresentative = 'Juan Dela Cruz';
+  component.business.registrationNumber = 'DTI-2026-0001';
   component.business.dateRegistered = new Date().toISOString().slice(0, 10);
 }
 
@@ -39,13 +50,16 @@ function fillApplication(component: any, permitType: string): void {
  * this exercises the real code path rather than hand-assembling a draft
  * shape the component itself never produces.
  */
-function attachAllRequiredDocuments(component: any): void {
+function attachAllRequiredDocuments(component: any, withDates = true): void {
   for (const doc of component.documents()) {
     if (!doc.required) continue;
     const file = new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], `${doc.requirementId}.pdf`, {
       type: 'application/pdf',
     });
-    component['updateDocument'](doc.requirementId, { fileName: file.name, file });
+    component['updateDocument'](doc.requirementId, {
+      fileName: file.name, file,
+      ...(withDates ? { issuingOffice: 'Barangay Hall', issueDate: '2026-08-01', expiryDate: '2027-08-01' } : {}),
+    });
   }
 }
 
@@ -85,9 +99,68 @@ describe('ApplicationIntake — next() refuses to advance past an invalid step',
     fillApplicant(component);
     component.applicant.email = 'not-an-email';
     component.next();
-    expect(component.applicant.fullName).toBe('Juan Dela Cruz');
+    expect(component.applicant.firstName).toBe('Juan');
+    expect(component.applicant.lastName).toBe('Dela Cruz');
     expect(component.applicant.email).toBe('not-an-email');
     expect(component.applicant.mobileNumber).toBe('09171234567');
+  });
+
+  it('does not leave Applicant until the email is verified with the code — the same gate as the citizen sign-up', () => {
+    fillApplicant(component, false);
+    component.next();
+    expect(component.stepIndex()).toBe(0);
+    expect(component.currentStepErrors().some((e: string) => /verify/i.test(e))).toBe(true);
+
+    component.emailVerified.set(true);
+    component.next();
+    expect(component.stepIndex()).toBe(1);
+  });
+
+  it('lets the officer continue unverified only when the LGU could not send a code at all, and says so', () => {
+    fillApplicant(component, false);
+    component.verificationUnavailable.set('No mail provider is configured.');
+    component.next();
+    expect(component.stepIndex()).toBe(1);
+  });
+
+  it('voids a verified email the moment the address is edited — the code belonged to the old address', () => {
+    fillApplicant(component);
+    expect(component.emailVerified()).toBe(true);
+    component.onEmailInput('someone.else@gmail.com');
+    expect(component.emailVerified()).toBe(false);
+    expect(component.codeSent()).toBe(false);
+  });
+
+  it('offers every one of Castilla\u2019s 34 barangays, the same list the citizen sign-up offers, with none pre-selected', () => {
+    expect(component.barangays).toEqual(CASTILLA_BARANGAYS);
+    expect(component.barangays.length).toBe(34);
+    expect(component.applicant.barangay).toBe('');
+    expect(component.business.barangay).toBe('');
+  });
+
+  it('requires the registration number instead of inventing "PENDING"', () => {
+    fillApplicant(component);
+    component.next();
+    fillBusiness(component);
+    component.business.registrationNumber = '';
+    component.next();
+    expect(component.stepIndex()).toBe(1);
+    expect(component.currentStepErrors().some((e: string) => /registration/i.test(e))).toBe(true);
+  });
+
+  it('requires the permit number for a Renewal, which the server would otherwise refuse', () => {
+    fillApplicant(component);
+    component.next();
+    fillBusiness(component);
+    component.next();
+    fillApplication(component, 'Building Permit');
+    component.applicationInfo.applicationAction = 'Renewal';
+    component.onApplicationActionChange();
+    component.next();
+    expect(component.currentStep()).toBe('application');
+    component.applicationInfo.relatedPermitNumber = 'BP-2025-000123';
+    component.next();
+    expect(component.currentStep()).toBe('documents');
   });
 
   it('advances only as far as each step passes its own validation', () => {
@@ -111,6 +184,42 @@ describe('ApplicationIntake — next() refuses to advance past an invalid step',
     component.next(); // no files attached yet — refused, stays on documents
     expect(component.currentStep()).toBe('documents');
     expect(component.allStepsValid()).toBe(false);
+  });
+
+  it('does not reach Review while an attached document has no Issue Date / Expiry Date', () => {
+    // Found live: both dates blank and the form went straight through.
+    fillApplicant(component);
+    component.next();
+    fillBusiness(component);
+    component.next();
+    fillApplication(component, 'Building Permit');
+    component.next();
+    attachAllRequiredDocuments(component, false);
+    component.next();
+    expect(component.currentStep()).toBe('documents');
+    expect(component.currentStepErrors().some((e: string) => /issue date and expiry date/i.test(e))).toBe(true);
+
+    for (const doc of component.documents()) {
+      if (doc.file) component['updateDocument'](doc.requirementId, { issueDate: '2026-08-01', expiryDate: '2027-08-01' });
+    }
+    component.next();
+    expect(component.currentStep()).toBe('review');
+  });
+
+  it('refuses an expiry earlier than the issue date', () => {
+    fillApplicant(component);
+    component.next();
+    fillBusiness(component);
+    component.next();
+    fillApplication(component, 'Building Permit');
+    component.next();
+    attachAllRequiredDocuments(component);
+    const first = component.documents().find((d: any) => d.file);
+    component['updateDocument'](first.requirementId, { issueDate: '2026-08-01', expiryDate: '2026-07-01' });
+    expect(component.documentIssue(component.documents().find((d: any) => d.requirementId === first.requirementId)))
+      .toMatch(/earlier than/i);
+    component.next();
+    expect(component.currentStep()).toBe('documents');
   });
 });
 
@@ -206,7 +315,9 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
   let component: any;
   let store: ApplicationStore;
   let fileOnBehalfCalls: FileOnBehalfInput[];
-  let attachDocumentCalls: { applicationId: string; requirementCode: string; label: string; fileName: string }[];
+  let attachDocumentCalls: {
+    applicationId: string; requirementCode: string; label: string; fileName: string; provenance?: DocumentProvenance;
+  }[];
   let filedRecord: ApplicationRecord | null;
 
   function serverRecord(id: string, referenceNumber: string): ApplicationRecord {
@@ -248,8 +359,9 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
             },
             attachDocument: (
               applicationId: string, requirementCode: string, label: string, fileName: string,
+              _contentBase64: string, provenance?: DocumentProvenance,
             ) => {
-              attachDocumentCalls.push({ applicationId, requirementCode, label, fileName });
+              attachDocumentCalls.push({ applicationId, requirementCode, label, fileName, provenance });
               return Promise.resolve({ kind: 'done', documentId: `DOC-${attachDocumentCalls.length}` });
             },
             page: () =>
@@ -297,6 +409,15 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
     // ApplicationRecord trio.
     expect(fileOnBehalfCalls[0].business?.name).toBe('Dela Cruz Sari-Sari Store');
     expect(fileOnBehalfCalls[0].permitType).toBe('Building Permit');
+    // Everything the form asked for goes somewhere real: the applicant's own
+    // address on their record, the rest on the application's form.
+    expect(fileOnBehalfCalls[0].applicant).toMatchObject({
+      firstName: 'Juan', lastName: 'Dela Cruz', street: 'Purok 1, Rizal Street', barangay: CASTILLA_BARANGAYS[0],
+    });
+    expect(fileOnBehalfCalls[0].business?.registrationNumber).toBe('DTI-2026-0001');
+    expect(fileOnBehalfCalls[0].form).toMatchObject({
+      scopeOfWork: 'General merchandise retail.', ownerOrRepresentative: 'Juan Dela Cruz', applicantType: 'Individual',
+    });
 
     const record = store.getById('APP-1');
     expect(record).toBeTruthy();
@@ -321,7 +442,22 @@ describe('ApplicationIntake — filing goes through the real backend', () => {
       (d) => d.required,
     ).length;
     expect(attachDocumentCalls.length).toBeGreaterThanOrEqual(requiredCount);
-    for (const call of attachDocumentCalls) expect(call.applicationId).toBe('APP-1');
+    for (const call of attachDocumentCalls) {
+      expect(call.applicationId).toBe('APP-1');
+      // The issuing office and dates typed beside each file travel with it —
+      // they used to be collected and dropped.
+      expect(call.provenance).toEqual({ issuingOffice: 'Barangay Hall', issuedOn: '2026-08-01', expiresOn: '2027-08-01' });
+    }
+  });
+
+  it('sends the officer back to Applicant, with the server\u2019s own sentence, when the address belongs to someone else', async () => {
+    setup({ kind: 'name-mismatch', message: 'juan.delacruz@gmail.com is already registered to John Doe.' });
+
+    await component.submit();
+
+    expect(component.currentStep()).toBe('applicant');
+    expect(component.submitError()).toContain('registered to John Doe');
+    expect(store.applications().find((a: ApplicationRecord) => a.id === 'APP-1')).toBeUndefined();
   });
 
   it('prevents a duplicate submission from filing a second time', async () => {

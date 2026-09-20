@@ -73,13 +73,17 @@ interface DocumentRow {
   required: boolean;
   departmentName: string;
   /** `contentType` is only ever known for a real (`isReal`) document — the local demo store never recorded one, since no local-demo document has real bytes to describe. */
-  doc: { id: string; fileName: string; status: DocumentStatus; remarks: string | null; uploadedAt: string; contentType?: string } | null;
+  doc: {
+    id: string; fileName: string; status: DocumentStatus; remarks: string | null; uploadedAt: string; contentType?: string;
+    /** Provenance the officer recorded at intake (server migration 051) — each `null` when not recorded. Only ever known for a real document. */
+    issuingOffice?: string | null; issuedOn?: string | null; expiresOn?: string | null;
+  } | null;
   isReal: boolean;
 }
 
 type View = 'list' | 'detail' | 'info' | 'not-found';
 type DetailTab = 'timeline' | 'documents' | 'permit' | 'comments';
-type InfoSection = 'meta' | 'project' | 'type' | 'govid' | 'professional' | 'ownership';
+type InfoSection = 'meta' | 'project' | 'filing' | 'applicant' | 'business';
 
 interface RingStat {
   label: string;
@@ -125,6 +129,19 @@ function formatDateTime(iso: string | null | undefined): string {
   if (Number.isNaN(when.getTime())) return iso;
   return `${when.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })} · `
     + when.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' });
+}
+
+/**
+ * A calendar date the server sends as `YYYY-MM-DD` (a document's issue or
+ * expiry date, as printed on it). Parsed as a local date on purpose: `new
+ * Date('2026-08-01')` is midnight UTC, which in Manila is already the 1st but
+ * west of Greenwich would print as 31 July.
+ */
+function formatDate(ymd: string | null | undefined): string {
+  if (!ymd) return '—';
+  const [y, m, d] = ymd.split('-').map(Number);
+  if (!y || !m || !d) return ymd;
+  return new Date(y, m - 1, d).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 const STATUS_OPTIONS: AppStatus[] = ['Approved', 'Under Review', 'Rejected'];
@@ -213,6 +230,7 @@ export class Applications {
   protected readonly photos = inject(ApplicantPhotoService);
 
   protected formatDateTime = formatDateTime;
+  protected formatDate = formatDate;
 
   /** Null until the first fetch resolves; a message when it fails. */
   protected readonly loadError = signal<string | null>(null);
@@ -704,6 +722,14 @@ export class Applications {
         ? { email: real.applicantEmail, mobile: real.applicantMobile, emailVerifiedAt: real.applicantEmailVerifiedAt ?? null }
         : undefined,
       real?.applicantAddress,
+      real
+        ? {
+            form: real.form,
+            lifecycleStatus: real.summary?.lifecycleStatus,
+            applicantAddress: real.applicantAddress,
+            business: real.business,
+          }
+        : undefined,
     );
   });
 
@@ -1388,14 +1414,21 @@ export class Applications {
   // is removed rather than left fake.
 
   protected readonly editingProfile = signal(false);
-  protected profileEditCity = '';
-  protected profileEditOfficer = '';
+  /** "City, Province" from whichever of the two the applicant's record holds; "Not on file" when neither. */
+  protected applicantCityProvince(detail: AppDetail): string {
+    const parts = [detail.applicantAddress.city, detail.applicantAddress.province].filter(
+      (part): part is string => !!part,
+    );
+    return parts.length > 0 ? parts.join(', ') : 'Not on file';
+  }
+
+  protected profileEditLocation = '';
+  protected readonly savingProfile = signal(false);
 
   protected startEditProfile(): void {
     const row = this.selectedRow();
     if (!row) return;
-    this.profileEditCity = row.location;
-    this.profileEditOfficer = row.officer;
+    this.profileEditLocation = row.location;
     this.editingProfile.set(true);
   }
 
@@ -1403,15 +1436,53 @@ export class Applications {
     this.editingProfile.set(false);
   }
 
-  protected saveEditProfile(): void {
+  /**
+   * The one particular this card lets an officer change is the project
+   * location, and it changes on the RECORD: `PATCH /staff/applications/:id`
+   * (`StaffApplicationsApi.edit`), which is what the applicant's own portal
+   * and every other officer read back. This used to write to the local
+   * store only — and offered an "Assigned Officer" box beside it that no
+   * server concept exists for, so whatever was typed there was shown here
+   * and nowhere else.
+   */
+  protected async saveEditProfile(): Promise<void> {
     const row = this.selectedRow();
-    if (!row) return;
-    const location = this.profileEditCity.trim() || row.location;
-    const officer = this.profileEditOfficer.trim() || row.officer;
-    this.store.updateFields(row.id, { location, officer });
-    this.selectedRow.set({ ...row, location, officer });
-    this.editingProfile.set(false);
-    this.toast.success('Profile updated.');
+    if (!row || this.savingProfile()) return;
+    const location = this.profileEditLocation.trim();
+    if (!location) {
+      this.toast.error('Enter the project location.');
+      return;
+    }
+    if (location === row.location) {
+      this.editingProfile.set(false);
+      return;
+    }
+    if (!this.realDetail()) {
+      // A local-demo row has no server record to change.
+      this.store.updateFields(row.id, { location });
+      this.selectedRow.set({ ...row, location });
+      this.editingProfile.set(false);
+      this.toast.success('Location updated.');
+      return;
+    }
+    this.savingProfile.set(true);
+    try {
+      const result = await this.applicationsApi.edit(row.id, { location });
+      if (result.kind !== 'done') {
+        const message = result.kind === 'unavailable'
+          ? 'This deployment does not allow editing an application yet.'
+          : result.message;
+        this.toast.error(message);
+        return;
+      }
+      this.store.updateFields(row.id, { location });
+      this.selectedRow.set({ ...row, location });
+      this.editingProfile.set(false);
+      this.toast.success('Project location updated on the record.');
+      await this.refreshRealDetail(row.id);
+    } finally {
+      this.savingProfile.set(false);
+    }
   }
 
   // ---- Documents tab ----------------------------------------------------
@@ -1472,6 +1543,9 @@ export class Applications {
                 remarks: found.reviewRemark,
                 uploadedAt: found.uploadedAt,
                 contentType: found.contentType,
+                issuingOffice: found.issuingOffice ?? null,
+                issuedOn: found.issuedOn ?? null,
+                expiresOn: found.expiresOn ?? null,
               }
             : null,
         };

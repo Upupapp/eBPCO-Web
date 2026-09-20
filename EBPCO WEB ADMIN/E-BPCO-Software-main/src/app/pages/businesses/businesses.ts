@@ -17,7 +17,7 @@ import { applicantFullName } from '../../core/domain/applicant.model';
 import { ToastService } from '../../shared/toast/toast.service';
 import { validateEmail, validateMobileNumber } from '../../shared/utils/validators';
 import { CapitalizeNameDirective } from '../../shared/utils/capitalize-name.directive';
-import { CASTILLA_BARANGAYS } from '../../shared/application-intake/application-intake';
+import { CASTILLA_BARANGAYS } from '../../core/domain/castilla-barangays';
 import { StaffBusinessesApi, StaffBusinessDetail, StaffBusinessRow } from '../../core/api/staff-businesses.api';
 
 type SubTab = 'analytics' | 'recent-activity';

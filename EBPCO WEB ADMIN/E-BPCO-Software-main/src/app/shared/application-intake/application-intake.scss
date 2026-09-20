@@ -374,6 +374,137 @@
   }
 }
 
+// ---- Email verification (Step 1) -----------------------------------------
+
+.email-field {
+  gap: 0.35rem;
+}
+
+.email-row,
+.code-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+
+  input {
+    flex: 1;
+  }
+}
+
+.code-row {
+  margin-top: 0.5rem;
+
+  .code-field {
+    flex: 1;
+  }
+
+  input {
+    letter-spacing: 0.25em;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.verify-btn {
+  // The modal buttons are sized for the footer; beside an input they need the
+  // input's own height and no extra width.
+  padding: 0.55rem 0.9rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  align-self: center;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: $color-success-bg;
+  color: $color-success-strong;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.link-btn {
+  align-self: center;
+  border: none;
+  background: none;
+  color: $color-brand-600;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.verification-unavailable {
+  margin: 0.2rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border-radius: $radius-sm;
+  background: $color-warning-bg-soft;
+  border: 1px solid $color-warning-bg;
+  color: $color-warning;
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+
+// ---- Documents (Step 4) ---------------------------------------------------
+
+.doc-row.incomplete {
+  border-color: $color-brand-border;
+  background: $color-danger-bg-soft;
+}
+
+.doc-issue {
+  display: block;
+  margin-top: 0.4rem;
+}
+
+// ---- Review (Step 5) ------------------------------------------------------
+
+.review-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: $color-bg-muted;
+  color: $color-ink-400;
+  font-size: 0.68rem;
+  font-weight: 700;
+  vertical-align: middle;
+
+  &.ok {
+    background: $color-success-bg;
+    color: $color-success-strong;
+  }
+}
+
+.review-doc-list li {
+  align-items: flex-start;
+
+  app-icon {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  small {
+    display: block;
+    color: $color-ink-300;
+    font-size: 0.72rem;
+  }
+}
+
+.review-grid .step-error-banner.span-2 {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
 .intake-actions {
   justify-content: flex-end;
   border-top: 1px solid $color-border;

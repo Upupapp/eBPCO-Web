@@ -4,7 +4,7 @@ import { Icon } from '../icon/icon';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import { Applicant } from '../../core/domain/applicant.model';
-import { BusinessCategory } from '../../core/domain/business.model';
+import { CASTILLA_BARANGAYS } from '../../core/domain/castilla-barangays';
 import { ALL_PERMIT_TYPES, ApplicationAction, PermitType } from '../../core/domain/permit.model';
 import { documentsFor, requirementsFor } from '../../core/domain/requirements-catalog';
 import { RequirementsConfigStore } from '../../core/domain/requirements-config-store';
@@ -18,31 +18,25 @@ import {
 } from '../utils/validators';
 import { ToastService } from '../toast/toast.service';
 import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { IdentityApi } from '../../core/api/identity.api';
 import { QueueLoader } from '../../core/domain/queue-loader';
 import { toBase64 } from '../utils/to-base64';
 import { CapitalizeNameDirective } from '../utils/capitalize-name.directive';
 
-// Same barangay list the seed data and the Business Stages board's
-// filter draw from (application-seed.ts's LOCATIONS) — kept as its own
-// small constant here since importing the seed module (which also builds
-// the full mock dataset) into a form component would be the wrong
-// direction of dependency.
-export const CASTILLA_BARANGAYS = [
-  'Poblacion',
-  'Buenavista',
-  'Cogon',
-  'Bonga',
-  'Burabod',
-  'Salvacion',
-  'San Isidro',
-];
-
-const BUSINESS_CATEGORIES: BusinessCategory[] = [
+/**
+ * The server's own `business.category` vocabulary for a staff filing
+ * (`staff-applications.controller.ts` `onBehalfShape`). Not the mobile app's
+ * six-value list this used to offer: that one had "Wholesale", which the
+ * route refuses with a 400, and lacked the three the route accepts.
+ */
+const BUSINESS_CATEGORIES: readonly string[] = [
   'Retail',
   'Food Service',
   'Services',
   'Manufacturing',
-  'Wholesale',
+  'Construction',
+  'Transport',
+  'Agriculture',
   'Other',
 ];
 const APPLICANT_TYPES: NonNullable<Applicant['applicantType']>[] = [
@@ -75,6 +69,8 @@ const STEPS: { key: Step; label: string }[] = [
   { key: 'review', label: 'Review & Confirm' },
 ];
 
+const SIX_DIGITS = /^\d{6}$/;
+
 /**
  * Full walk-in/manually-submitted application intake — replaces the old
  * 4-field "New Application" modal. Organized into the sections the
@@ -83,6 +79,14 @@ const STEPS: { key: Step; label: string }[] = [
  * every other module reads, and driven by the centralized permit-type
  * and requirements catalogs so its document checklist is never a second,
  * independently-maintained list.
+ *
+ * Everything this form asks for is sent and kept: the applicant's name and
+ * own address on their applicant record, the extra answers (applicant type,
+ * landline, trade name, owner, scope, date received) in the application's
+ * `form`, and each attachment's issuing office and dates with the document.
+ * A field that is collected and then dropped is a field that lies to the
+ * officer filling it in — that is what the earlier version did with the
+ * address and the document dates.
  */
 @Component({
   selector: 'app-application-intake',
@@ -95,6 +99,7 @@ export class ApplicationIntake {
   private readonly requirementsConfig = inject(RequirementsConfigStore);
   private readonly toast = inject(ToastService);
   private readonly applicationsApi = inject(StaffApplicationsApi);
+  private readonly identity = inject(IdentityApi);
   private readonly loader = inject(QueueLoader);
 
   readonly cancelled = output<void>();
@@ -121,14 +126,21 @@ export class ApplicationIntake {
     return new Date().toISOString().slice(0, 10);
   }
 
+  // Name split the same way the citizen sign-up collects it (first / middle /
+  // last), because that is how the server keeps it — the single "full name"
+  // box this used to have was split on the first space, so "Maria Clara
+  // Dela Cruz" became first name "Maria", last name "Clara Dela Cruz".
   protected applicant = {
-    fullName: '',
+    firstName: '',
+    middleName: '',
+    lastName: '',
     applicantType: 'Individual' as Applicant['applicantType'],
     email: '',
     mobileNumber: '',
     landlineNumber: '',
     addressLine: '',
-    barangay: this.barangays[0],
+    // No default: a barangay silently pre-selected is a barangay silently wrong.
+    barangay: '',
   };
 
   protected business = {
@@ -136,7 +148,7 @@ export class ApplicationIntake {
     tradeName: '',
     category: BUSINESS_CATEGORIES[0],
     addressLine: '',
-    barangay: this.barangays[0],
+    barangay: '',
     ownerOrRepresentative: '',
     registrationNumber: '',
     dateRegistered: this.todayInput(),
@@ -145,9 +157,10 @@ export class ApplicationIntake {
   protected applicationInfo = {
     permitType: '' as PermitType | '',
     applicationAction: 'New' as ApplicationAction,
+    /** The permit being renewed or amended — the server refuses a Renewal that names none. */
+    relatedPermitNumber: '',
     scopeDescription: '',
     dateReceived: this.todayInput(),
-    assignedEvaluator: 'Engr. Ricardo Buenaflor',
   };
 
   // `applicant`/`business`/`applicationInfo` above are plain mutable
@@ -169,6 +182,136 @@ export class ApplicationIntake {
     const req = requirementsFor(this.applicationInfo.permitType);
     return departmentById(req.responsibleDepartmentId) ?? null;
   }
+
+  protected fullName(): string {
+    return [this.applicant.firstName, this.applicant.middleName, this.applicant.lastName]
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  // ---- Email verification (Step 1, before an account exists) --------------
+  // The same real 6-digit code the citizen portal's own sign-up sends and
+  // checks (`/auth/register/email/request` + `/confirm`); the server spends
+  // the confirmed proof when this filing creates the applicant's account, so
+  // the account starts Verified instead of Unverified-forever.
+
+  protected readonly emailVerified = signal(false);
+  protected readonly codeSent = signal(false);
+  protected readonly sendingCode = signal(false);
+  protected readonly confirmingCode = signal(false);
+  protected readonly codeError = signal<string | null>(null);
+  /** A non-error status line under the code field — "code sent", not a failure. */
+  protected readonly codeNotice = signal<string | null>(null);
+  /**
+   * Set only when the LGU could not send a code at all (no mail provider, or
+   * a real one that just failed). It is what lets Next work without a
+   * confirmed code, and it says so on screen — the account is then filed
+   * Unverified, and the applicant can verify from their own Profile later.
+   */
+  protected readonly verificationUnavailable = signal<string | null>(null);
+  protected verificationCode = '';
+
+  /** Editing the address after a code was sent or confirmed voids that state — the code belonged to the PREVIOUS address. */
+  protected onEmailInput(value: string): void {
+    this.applicant.email = value;
+    if (this.emailVerified() || this.codeSent() || this.verificationUnavailable()) {
+      this.resetVerification();
+    }
+  }
+
+  protected changeEmail(): void {
+    this.resetVerification();
+  }
+
+  private resetVerification(): void {
+    this.emailVerified.set(false);
+    this.codeSent.set(false);
+    this.verificationCode = '';
+    this.codeError.set(null);
+    this.codeNotice.set(null);
+    this.verificationUnavailable.set(null);
+  }
+
+  protected async sendVerificationCode(): Promise<void> {
+    const email = this.emailValidation();
+    if (!email.valid) {
+      this.attempted.update((set) => new Set(set).add('applicant'));
+      return;
+    }
+    this.codeError.set(null);
+    this.codeNotice.set(null);
+    this.sendingCode.set(true);
+    try {
+      const result = await this.identity.requestRegistrationEmailCode(email.normalized);
+      switch (result.kind) {
+        case 'sent':
+          this.codeSent.set(true);
+          this.verificationUnavailable.set(null);
+          this.codeNotice.set(`A 6-digit code was sent to ${email.normalized}. Ask the applicant to read it back; it expires in a few minutes.`);
+          break;
+        case 'too-soon':
+          // A live code from moments ago is still good — keep that entry open
+          // rather than treating this as a failure.
+          this.codeSent.set(true);
+          this.codeNotice.set(result.message);
+          break;
+        case 'unavailable':
+          this.codeSent.set(false);
+          this.verificationUnavailable.set(
+            'This deployment cannot send verification codes yet. You can continue; the account will be filed '
+              + 'Unverified and the applicant can verify this email from their own Profile later.',
+          );
+          break;
+        default:
+          // 'not-sent' (no provider configured) or 'failed' (a real one that
+          // just failed) — the officer must not be unable to file a walk-in
+          // because of an LGU infrastructure problem.
+          this.codeSent.set(false);
+          this.verificationUnavailable.set(
+            `${result.message} You can continue; the account will be filed Unverified and the applicant `
+              + 'can verify this email from their own Profile later.',
+          );
+      }
+    } catch {
+      this.verificationUnavailable.set(
+        'Could not reach the Municipality’s system to send a code. You can continue; the account will be '
+          + 'filed Unverified and the applicant can verify this email from their own Profile later.',
+      );
+    } finally {
+      this.sendingCode.set(false);
+    }
+  }
+
+  protected async confirmVerificationCode(): Promise<void> {
+    if (!SIX_DIGITS.test(this.verificationCode)) {
+      this.codeError.set('Enter the 6-digit code exactly as sent.');
+      return;
+    }
+    this.codeError.set(null);
+    this.codeNotice.set(null);
+    this.confirmingCode.set(true);
+    try {
+      const result = await this.identity.confirmRegistrationEmailCode(
+        this.emailValidation().normalized, this.verificationCode,
+      );
+      if (result.kind === 'confirmed') {
+        this.emailVerified.set(true);
+        this.codeSent.set(false);
+        this.verificationCode = '';
+      } else if (result.kind === 'unavailable') {
+        this.codeError.set('This deployment cannot check verification codes yet.');
+      } else {
+        this.codeError.set(result.message);
+      }
+    } catch {
+      this.codeError.set('Could not reach the Municipality’s system to check the code. Try again.');
+    } finally {
+      this.confirmingCode.set(false);
+    }
+  }
+
+  // ---- Document checklist ----------------------------------------------
 
   /**
    * Re-run whenever the permit type OR the application action changes
@@ -195,7 +338,12 @@ export class ApplicationIntake {
   }
 
   protected onApplicationActionChange(): void {
+    if (this.applicationInfo.applicationAction === 'New') this.applicationInfo.relatedPermitNumber = '';
     void this.onPermitTypeChange();
+  }
+
+  protected needsRelatedPermit(): boolean {
+    return this.applicationInfo.applicationAction !== 'New';
   }
 
   private applyDocumentsFor(type: PermitType, action: ApplicationAction): void {
@@ -213,8 +361,12 @@ export class ApplicationIntake {
     const usingFallback = live.length === 0;
     const docs = usingFallback ? documentsFor(type, action) : live;
     this.documentsFallbackActive.set(usingFallback);
+    // Keep what the officer already filled in for a requirement that is still
+    // on the list — switching Transaction Type and back must not wipe the
+    // files they attached.
+    const previous = new Map(this.documents().map((d) => [d.requirementId, d]));
     this.documents.set(
-      docs.map((d): DocumentDraft => ({
+      docs.map((d): DocumentDraft => previous.get(d.id) ?? {
         requirementId: d.id,
         label: d.label,
         required: d.required,
@@ -225,7 +377,7 @@ export class ApplicationIntake {
         issuingOffice: '',
         issueDate: '',
         expiryDate: '',
-      })),
+      }),
     );
   }
 
@@ -250,8 +402,11 @@ export class ApplicationIntake {
     if (file) this.updateDocument(doc.requirementId, { fileName: file.name, file });
   }
 
-  protected clearFile(doc: DocumentDraft): void {
+  protected clearFile(doc: DocumentDraft, input?: HTMLInputElement): void {
     this.updateDocument(doc.requirementId, { fileName: '', file: null });
+    // The native control still shows the old name otherwise, and choosing the
+    // same file again would not fire `change`.
+    if (input) input.value = '';
   }
 
   protected onDocFieldChange(
@@ -260,6 +415,21 @@ export class ApplicationIntake {
     value: string,
   ): void {
     this.updateDocument(doc.requirementId, { [field]: value });
+  }
+
+  /**
+   * What is wrong with one attached document's own details, or `null`. The
+   * dates are required once a file is attached — an officer used to be able
+   * to leave both blank and the form went straight through — and the expiry
+   * cannot precede the issue (the server refuses that too, as a 400).
+   */
+  protected documentIssue(doc: DocumentDraft): string | null {
+    if (!doc.file) return null;
+    if (!doc.issueDate && !doc.expiryDate) return 'Issue Date and Expiry Date are required.';
+    if (!doc.issueDate) return 'Issue Date is required.';
+    if (!doc.expiryDate) return 'Expiry Date is required.';
+    if (doc.expiryDate < doc.issueDate) return 'Expiry Date cannot be earlier than the Issue Date.';
+    return null;
   }
 
   // ---- Validation ---------------------------------------------------------
@@ -277,31 +447,52 @@ export class ApplicationIntake {
     return validateLandlineNumber(this.applicant.landlineNumber, false);
   }
 
+  protected emailNeedsVerification(): boolean {
+    return this.emailValidation().valid && !this.emailVerified() && !this.verificationUnavailable();
+  }
+
   private stepErrors(step: Step): string[] {
     const errors: string[] = [];
     if (step === 'applicant') {
-      if (!this.applicant.fullName.trim()) errors.push('Applicant/user name is required.');
+      if (!this.applicant.firstName.trim()) errors.push('First name is required.');
+      if (!this.applicant.lastName.trim()) errors.push('Last name is required.');
       if (!this.emailValidation().valid) errors.push(this.emailValidation().error!);
+      else if (this.emailNeedsVerification()) {
+        errors.push('Verify the applicant’s email address with the 6-digit code before continuing.');
+      }
       if (!this.mobileValidation().valid) errors.push(this.mobileValidation().error!);
       if (!this.landlineValidation().valid) errors.push(this.landlineValidation().error!);
+      if (!this.applicant.barangay) errors.push('Barangay is required.');
       if (!this.applicant.addressLine.trim()) errors.push('Address is required.');
     } else if (step === 'business') {
       if (!this.business.registeredName.trim())
         errors.push('Registered business name is required.');
       if (!this.business.addressLine.trim()) errors.push('Business address is required.');
+      if (!this.business.barangay) errors.push('Business barangay is required.');
       if (!this.business.ownerOrRepresentative.trim())
         errors.push('Owner or authorized representative is required.');
+      if (!this.business.registrationNumber.trim())
+        errors.push('Registration / reference number is required.');
       if (!this.business.dateRegistered) errors.push('Date registered is required.');
     } else if (step === 'application') {
       if (!this.applicationInfo.permitType) errors.push('Permit type is required.');
+      if (this.needsRelatedPermit() && !this.applicationInfo.relatedPermitNumber.trim()) {
+        errors.push(`The permit number being ${this.applicationInfo.applicationAction === 'Renewal' ? 'renewed' : 'amended'} is required.`);
+      }
       if (!this.applicationInfo.scopeDescription.trim())
         errors.push('Description or scope of work is required.');
       if (!this.applicationInfo.dateReceived) errors.push('Date received is required.');
     } else if (step === 'documents') {
-      const missing = this.documents().filter((d) => d.required && !d.fileName.trim());
+      const missing = this.documents().filter((d) => d.required && !d.file);
       if (missing.length > 0) {
         errors.push(
           `${missing.length} required document${missing.length === 1 ? '' : 's'} still need${missing.length === 1 ? 's' : ''} a file: ${missing.map((d) => d.label).join(', ')}.`,
+        );
+      }
+      const incomplete = this.documents().filter((d) => this.documentIssue(d) !== null);
+      if (incomplete.length > 0) {
+        errors.push(
+          `Fill in the Issue Date and Expiry Date for: ${incomplete.map((d) => d.label).join(', ')}.`,
         );
       }
     }
@@ -365,6 +556,11 @@ export class ApplicationIntake {
     return this.steps.every((s) => s.key === 'review' || this.stepErrors(s.key).length === 0);
   }
 
+  /** The attachments that will actually be sent — the Review step counts these, not the checklist. */
+  protected attachedDocuments(): DocumentDraft[] {
+    return this.documents().filter((d) => d.file !== null);
+  }
+
   // ---- Submission -----------------------------------------------------
 
   // Guards against a double-click / double-Enter firing `submit()` twice
@@ -398,15 +594,15 @@ export class ApplicationIntake {
 
     this.submitting.set(true);
     try {
-      const [firstName, ...rest] = this.applicant.fullName.trim().split(/\s+/);
-      const lastName = rest.length ? rest.join(' ') : '';
-
       const result = await this.applicationsApi.fileOnBehalf({
         applicant: {
-          firstName,
-          lastName,
+          firstName: this.applicant.firstName.trim(),
+          middleName: this.applicant.middleName.trim() || undefined,
+          lastName: this.applicant.lastName.trim(),
           email: this.emailValidation().normalized,
           mobileNumber: this.mobileValidation().normalized || undefined,
+          street: this.applicant.addressLine.trim(),
+          barangay: this.applicant.barangay,
         },
         business: {
           name: this.business.registeredName.trim(),
@@ -415,14 +611,36 @@ export class ApplicationIntake {
           barangay: this.business.barangay,
           city: 'Castilla',
           province: 'Sorsogon',
-          registrationNumber: this.business.registrationNumber.trim() || 'PENDING',
+          registrationNumber: this.business.registrationNumber.trim(),
           dateRegistered: this.business.dateRegistered,
         },
         permitType,
         applicationAction: this.applicationInfo.applicationAction,
-        location: `Barangay ${this.business.barangay}`,
+        renewsPermitNumber: this.needsRelatedPermit() ? this.applicationInfo.relatedPermitNumber.trim() : null,
+        location: `${this.business.addressLine.trim()}, Barangay ${this.business.barangay}, Castilla, Sorsogon`,
+        // The answers that have no column of their own, kept on the
+        // application's `form` the same way the citizen wizard keeps its
+        // scope of work — so the detail page reads them back from the record.
+        form: {
+          scopeOfWork: this.applicationInfo.scopeDescription.trim(),
+          applicantType: this.applicant.applicantType,
+          landlineNumber: this.landlineValidation().normalized || null,
+          tradeName: this.business.tradeName.trim() || null,
+          ownerOrRepresentative: this.business.ownerOrRepresentative.trim(),
+          dateReceived: this.applicationInfo.dateReceived,
+          filedAtCounter: true,
+        },
       });
 
+      if (result.kind === 'name-mismatch') {
+        // Nothing was filed. Send the officer back to the applicant step with
+        // the server's own sentence, which names who the address belongs to.
+        this.stepIndex.set(0);
+        this.attempted.update((set) => new Set(set).add('applicant'));
+        this.submitError.set(result.message);
+        this.toast.error(result.message);
+        return;
+      }
       if (result.kind !== 'done') {
         const message =
           result.kind === 'unavailable'
@@ -449,22 +667,24 @@ export class ApplicationIntake {
 
       // Real `POST /documents` per chosen file — the same real route/method
       // (`StaffApplicationsApi.attachDocument`) `applications.ts`'s own
-      // `attachDocumentFile` already uses for an existing application. This
-      // used to call `store.attachDocument` — a local-only annotation on the
-      // record even though `onFileChosen` already held the real `File` the
-      // whole time — so a document a records officer picked during intake
-      // never actually reached the server; only its file NAME did.
+      // `attachDocumentFile` already uses for an existing application, now
+      // carrying the issuing office and dates the officer typed beside it.
       const failedAttachments: string[] = [];
-      for (const doc of this.documents()) {
+      for (const doc of this.attachedDocuments()) {
         if (!doc.file) continue;
         try {
           const contentBase64 = await toBase64(doc.file);
           const attachResult = await this.applicationsApi.attachDocument(
             record.id,
             doc.requirementId,
-            doc.documentType || doc.label,
+            doc.documentType.trim() || doc.label,
             doc.file.name,
             contentBase64,
+            {
+              issuingOffice: doc.issuingOffice.trim() || undefined,
+              issuedOn: doc.issueDate || undefined,
+              expiresOn: doc.expiryDate || undefined,
+            },
           );
           if (attachResult.kind !== 'done') failedAttachments.push(doc.label);
         } catch {
@@ -479,7 +699,14 @@ export class ApplicationIntake {
         );
       }
 
-      this.toast.success(`Application ${result.referenceNumber} filed for ${this.business.registeredName.trim()}.`);
+      const who = this.fullName();
+      const under = result.returningApplicant
+        ? ` under ${who}’s existing account`
+        : ` — a new account for ${who}`;
+      const verified = result.emailVerified === undefined
+        ? ''
+        : result.emailVerified ? ' (email verified)' : ' (email not yet verified)';
+      this.toast.success(`Application ${result.referenceNumber} filed${under}${verified}.`);
       this.created.emit(this.store.getById(record.id) ?? record);
     } finally {
       this.submitting.set(false);
