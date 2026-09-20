@@ -22,6 +22,11 @@ export class ApiClient {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
 
+  /** `GET` for bytes rather than JSON — an applicant's photo, shown from an object URL because an `<img src>` cannot carry the bearer token. */
+  async getBlob(path: string): Promise<Blob> {
+    return this.send(() => firstValueFrom(this.http.get(`${this.baseUrl}${path}`, { responseType: 'blob' })));
+  }
+
   async get<T>(path: string, query: Record<string, string | number | undefined> = {}): Promise<T> {
     let params = new HttpParams();
     for (const [key, value] of Object.entries(query)) {

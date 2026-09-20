@@ -41,6 +41,7 @@ export interface EvalTypeCard {
 export interface EvalRow {
   id: string;
   applicant: string;
+  applicantHasPhoto?: boolean;
   businessId: string;
   businessName: string;
   /** `requiredDocumentCount - attachedDocumentCount` — the server does not link an uploaded document to the requirement it satisfies, so this is a count, not a per-document checklist. */
@@ -181,6 +182,7 @@ export function buildEvalRows(rows: EvaluationQueueRow[], stageKey: EvalTypeKey)
     return {
       id: r.applicationId,
       applicant: r.applicantName,
+      applicantHasPhoto: r.applicantHasPhoto === true,
       businessId: r.businessId ?? '',
       businessName: r.businessName ?? '—',
       missingDocuments: r.requiredDocumentCount - r.attachedDocumentCount,

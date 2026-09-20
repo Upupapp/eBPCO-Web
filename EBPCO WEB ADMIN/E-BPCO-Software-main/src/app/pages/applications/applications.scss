@@ -1106,16 +1106,19 @@ tr.missing-row {
 
 .info-header-actions {
   display: flex;
-  gap: 0.7rem;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.6rem;
   align-self: flex-start;
 }
 
+// In the flow of the actions column, not absolutely pinned to the card's
+// corner — it used to sit touching the border, which read as misplaced
+// rather than as a caption.
 .last-updated {
-  position: absolute;
-  top: 0;
-  right: 0;
   font-size: 0.78rem;
   color: #9297a3;
+  white-space: nowrap;
 }
 
 .info-grid {

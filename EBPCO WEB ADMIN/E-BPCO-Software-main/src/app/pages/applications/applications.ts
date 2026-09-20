@@ -53,6 +53,7 @@ import { QueueLoader } from '../../core/domain/queue-loader';
 import { AssignedFormsNotice } from '../../shared/assigned-forms-notice/assigned-forms-notice';
 import { PermitReleaseApi } from '../../core/api/permit-release.api';
 import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
+import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 
 /** One row of the real per-application Documents tab — a required-but-not-yet-uploaded requirement has `doc: null` and renders as "Missing". */
 /**
@@ -209,6 +210,7 @@ export class Applications {
   private readonly sanitizer = inject(DomSanitizer);
   private readonly permitReleaseApi = inject(PermitReleaseApi);
   private readonly sessionCache = inject(PermitReleaseSessionCache);
+  protected readonly photos = inject(ApplicantPhotoService);
 
   protected formatDateTime = formatDateTime;
 

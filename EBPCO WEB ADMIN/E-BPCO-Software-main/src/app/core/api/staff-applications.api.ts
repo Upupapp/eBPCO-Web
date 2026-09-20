@@ -74,6 +74,8 @@ interface QueueRow {
   readonly lifecycleStatus: string;
   readonly businessName: string | null;
   readonly applicantName: string;
+  /** Whether the applicant's account has a profile photo on file — the flag, never the bytes. Absent from an older server. */
+  readonly applicantHasPhoto?: boolean;
   readonly location: string | null;
   readonly submittedAt: string | null;
   /** When this application last reached Released, Completed, or Rejected — see `ApplicationRecord.completedAt`. */
@@ -538,6 +540,20 @@ export class StaffApplicationsApi {
    * filename's length) for every citizen-uploaded document instead of
    * showing the file itself.
    */
+  /**
+   * `GET /staff/applications/:id/applicant-photo` — the applicant's own
+   * profile photo, as bytes. `null` for 404 (no photo, or not visible to this
+   * officer — the server does not distinguish) and for any other failure:
+   * an avatar falls back to initials, it never blocks a screen.
+   */
+  async applicantPhoto(applicationId: string): Promise<Blob | null> {
+    try {
+      return await this.api.getBlob(`/staff/applications/${encodeURIComponent(applicationId)}/applicant-photo`);
+    } catch {
+      return null;
+    }
+  }
+
   async documentContent(documentId: string): Promise<DocumentContentResult> {
     try {
       const result = await this.api.get<{ url: string }>(
@@ -756,6 +772,7 @@ function toRecord(row: QueueRow): ApplicationRecord {
     businessName: row.businessName ?? NOT_SENT,
     applicantId: '',
     applicant: row.applicantName,
+    applicantHasPhoto: row.applicantHasPhoto === true,
     location: row.location ?? NOT_SENT,
     permitType: publishedPermitType(row),
     // What the server called it, verbatim — including `Business Permit`, a

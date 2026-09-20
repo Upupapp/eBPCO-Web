@@ -139,7 +139,7 @@
               </td>
                 <td>
                   <div class="identity-cell">
-                    <app-avatar [name]="row.applicant" [size]="30" />
+                    <app-avatar [name]="row.applicant" [size]="30" [photoUrl]="photos.urlFor(row.id, row.applicantHasPhoto)()" />
                     <div class="identity-text">
                       <span class="identity-name" [title]="row.applicant">{{ row.applicant }}</span>
                       <span
@@ -223,7 +223,7 @@
       <div class="record-card">
         <div class="record-banner">
           <app-icon name="image" [size]="26" />
-          <app-avatar [name]="row.applicant" [size]="72" class="banner-avatar" />
+          <app-avatar [name]="row.applicant" [size]="72" class="banner-avatar" [photoUrl]="photos.urlFor(row.id, row.applicantHasPhoto)()" />
         </div>
 
         <div class="record-info">

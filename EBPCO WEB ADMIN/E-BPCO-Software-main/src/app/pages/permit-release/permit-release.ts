@@ -26,6 +26,7 @@ import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
 import { QueueLoader } from '../../core/domain/queue-loader';
 import { PermitReleaseApi } from '../../core/api/permit-release.api';
 import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
+import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 import { CapitalizeNameDirective } from '../../shared/utils/capitalize-name.directive';
 
 type PermitReleaseTab = 'release' | 'permit-types';
@@ -65,6 +66,7 @@ const RELEASE_QUEUE_STAGES: ReadonlySet<ApplicationLifecycleStatus> = new Set([
 interface ReleaseRow {
   id: string;
   applicant: string;
+  applicantHasPhoto?: boolean;
   /** Canonical relationship — see ApplicationStore.getApplicationContext. Never derived from `applicant`; one applicant can own multiple businesses. */
   businessId: string;
   businessName: string;
@@ -128,6 +130,7 @@ export class PermitRelease implements OnInit {
   private readonly loader = inject(QueueLoader);
   private readonly permitReleaseApi = inject(PermitReleaseApi);
   private readonly sessionCache = inject(PermitReleaseSessionCache);
+  protected readonly photos = inject(ApplicantPhotoService);
 
   /**
    * Forces a fresh queue on every visit rather than trusting whatever
@@ -452,6 +455,7 @@ export class PermitRelease implements OnInit {
         return {
           id: app.id,
           applicant: app.applicant,
+          applicantHasPhoto: app.applicantHasPhoto,
           businessId: app.businessId,
           businessName: app.businessName,
           city: app.location,

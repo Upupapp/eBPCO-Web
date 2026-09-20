@@ -37,6 +37,8 @@ export interface ApplicationRecord {
   businessName: string;
   applicantId: string;
   applicant: string;
+  /** From the server's queue row: whether the applicant's account has a profile photo. Undefined on local-demo rows. */
+  applicantHasPhoto?: boolean;
   location: string;
   /**
    * The PUBLISHED permit name, or `null` when the portal cannot name it.

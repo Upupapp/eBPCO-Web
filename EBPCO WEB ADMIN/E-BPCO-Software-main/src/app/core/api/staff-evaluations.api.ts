@@ -34,6 +34,8 @@ export interface EvaluationQueueRow {
   readonly permitType: string;
   readonly lifecycleStatus: string;
   readonly applicantName: string;
+  /** Whether the applicant's account has a profile photo — see `QueueRow.applicantHasPhoto`. */
+  readonly applicantHasPhoto?: boolean;
   readonly businessId: string | null;
   readonly businessName: string | null;
   readonly submittedAt: string | null;
