@@ -159,6 +159,7 @@ tbody tr.row-clickable {
   &.inactive,
   &.missing,
   &.expired,
+  &.cancelled,
   &.critical {
     background: $color-danger-bg;
     color: $color-danger;

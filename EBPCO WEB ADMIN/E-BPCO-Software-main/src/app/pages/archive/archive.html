@@ -3,80 +3,102 @@
 <section class="archive-page">
   <app-queue-load-notice />
 
-  <div class="page-head">
-    <div>
-      <h2>Archived applications</h2>
-      <p class="page-sub">
-        Nothing in eBPCO is deleted. Applications that were cancelled, rejected
-        or allowed to expire are kept here with who set them aside and why.
-        This list is read-only.
-      </p>
-    </div>
+  <div class="archive-banner">
+    <span class="archive-banner-icon"><app-icon name="archive" [size]="18" /></span>
+    <p>
+      Nothing in eBPCO is deleted. Applications that were cancelled, rejected or
+      allowed to expire are kept here with who set them aside and why. This
+      list is read-only.
+    </p>
   </div>
 
   @if (emptyAndKnown()) {
-    <p class="state-note">Nothing has been archived.</p>
+    <section class="card table-card">
+      <div class="empty-state">
+        <app-icon name="archive" [size]="30" />
+        <p>Nothing has been archived.</p>
+      </div>
+    </section>
   } @else if (count() > 0) {
-    <p class="count-line">
-      {{ count() }} archived application{{ count() === 1 ? '' : 's' }}.
-    </p>
+    <section class="card table-card">
+      <div class="card-head">
+        <h2>Archived applications</h2>
+        <span class="count-pill">{{ count() }} application{{ count() === 1 ? '' : 's' }}</span>
+      </div>
 
-    <div class="table-wrap">
-      <table class="archive-table">
-        <thead>
-          <tr>
-            <th scope="col">Application</th>
-            <th scope="col">Citizen</th>
-            <th scope="col">Permit type</th>
-            <th scope="col">Status</th>
-            <th scope="col">Set aside by</th>
-            <th scope="col">Reason</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of rows(); track row.record.id) {
-            <tr class="row-clickable" tabindex="0" role="button" (click)="open(row)">
-              <td>{{ row.record.id }}</td>
-              <td>{{ row.record.applicant }}</td>
-              <td>
-                @if (row.record.permitType) {
-                  {{ row.record.permitType }}
-                } @else if (row.record.filedAs) {
-                  <!--
-                    Filed as something this office does not publish — the legacy
-                    `Business Permit`. Saying "Not recorded" was false: the type
-                    was recorded, the portal just does not publish that name.
-                  -->
-                  {{ row.record.filedAs }}
-                  <span class="not-published">not an office permit</span>
-                } @else {
-                  <span class="muted">Not recorded</span>
-                }
-              </td>
-              <td><span class="status">{{ row.record.lifecycleStatus }}</span></td>
-              <td>
-                @if (row.archivedBy) {
-                  {{ row.archivedBy }}
-                  <span class="when">{{ row.archivedAt }}</span>
-                } @else {
-                  <span class="muted">Not recorded</span>
-                }
-              </td>
-              <td>
-                @if (row.remarks) {
-                  {{ row.remarks }}
-                } @else {
-                  <!--
-                    Archives made before remarks were required. Saying so is
-                    better than a blank cell, which reads as "no reason needed".
-                  -->
-                  <span class="muted">No reason was recorded</span>
-                }
-              </td>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Application</th>
+              <th scope="col">Citizen</th>
+              <th scope="col">Permit type</th>
+              <th scope="col">Status</th>
+              <th scope="col">Set aside by</th>
+              <th scope="col">Reason</th>
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.record.id) {
+              <tr class="row-clickable" tabindex="0" role="button" (click)="open(row)">
+                <td class="id-cell">
+                  {{ row.record.id }}
+                  @if (row.record.referenceNumber; as reference) {
+                    <span class="id-reference">{{ reference }}</span>
+                  }
+                </td>
+                <td>
+                  <div class="owner-cell">
+                    <app-avatar [name]="row.record.applicant" [size]="30" />
+                    <span>{{ row.record.applicant }}</span>
+                  </div>
+                </td>
+                <td>
+                  @if (row.record.permitType) {
+                    {{ row.record.permitType }}
+                  } @else if (row.record.filedAs) {
+                    <!--
+                      Filed as something this office does not publish — the legacy
+                      `Business Permit`. Saying "Not recorded" was false: the type
+                      was recorded, the portal just does not publish that name.
+                    -->
+                    {{ row.record.filedAs }}
+                    <span class="not-published">not an office permit</span>
+                  } @else {
+                    <span class="muted">Not recorded</span>
+                  }
+                </td>
+                <td>
+                  <span
+                    class="status-pill"
+                    [class]="row.record.lifecycleStatus.toLowerCase().replace(/\s+/g, '-')"
+                    >{{ row.record.lifecycleStatus }}</span
+                  >
+                </td>
+                <td>
+                  @if (row.archivedBy) {
+                    <span class="who-name">{{ row.archivedBy }}</span>
+                    <span class="when">{{ row.archivedAt }}</span>
+                  } @else {
+                    <span class="muted">Not recorded</span>
+                  }
+                </td>
+                <td class="reason-cell">
+                  @if (row.remarks) {
+                    {{ row.remarks }}
+                  } @else {
+                    <!--
+                      Archives made before remarks were required. Saying so is
+                      better than a blank cell, which reads as "no reason needed".
+                    -->
+                    <span class="muted">No reason was recorded</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
   }
 </section>

@@ -6,6 +6,8 @@ import { ApplicationRecord } from '../../core/domain/application.model';
 import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 import { Topbar } from '../../shared/topbar/topbar';
 import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { Avatar } from '../../shared/avatar/avatar';
+import { Icon } from '../../shared/icon/icon';
 
 /**
  * Everything that was set aside, and why.
@@ -58,7 +60,7 @@ function formatWhen(value: string): string {
 
 @Component({
   selector: 'app-archive',
-  imports: [QueueLoadNotice, Topbar],
+  imports: [QueueLoadNotice, Topbar, Avatar, Icon],
   templateUrl: './archive.html',
   styleUrl: './archive.scss',
 })
