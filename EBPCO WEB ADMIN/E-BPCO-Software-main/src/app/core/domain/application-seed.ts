@@ -319,6 +319,20 @@ function buildApplicationBundle(
     forcedStatus?: ApplicationLifecycleStatus;
     forceRevisionLoop?: boolean;
     daysAgo?: number;
+    /**
+     * Pins `applicationAction` instead of drawing it from `rand()`. Needed
+     * for the guaranteed showcase pass below: `documentsFor()`'s returned
+     * list length varies by action (Building Permit's most of all, since
+     * migration 047), and this bundle's own `rand()` draws downstream
+     * (line ~395's per-document Rejected/Missing rolls) vary WITH it — a
+     * showcase whose action is itself random silently reseeds every rand()
+     * call after it, application-wide, the moment the requirements
+     * catalog's document COUNT changes for any permit type/action, which
+     * is exactly what broke "the guaranteed Building Permit sample
+     * demonstrates a real revision loop" the moment 053 added one document
+     * to Building Permit's Renewal/Amendment checklists.
+     */
+    forcedApplicationAction?: ApplicationAction;
   } = {},
 ): ApplicationRecord {
   const { rand, referenceDate } = ctx;
@@ -334,7 +348,7 @@ function buildApplicationBundle(
   const pos = derivePipelinePosition(lifecycleStatus);
   const officer = OFFICERS[Math.floor(rand() * OFFICERS.length)];
   const applicationAction: ApplicationAction =
-    APPLICATION_ACTIONS[Math.floor(rand() * APPLICATION_ACTIONS.length)];
+    opts.forcedApplicationAction ?? APPLICATION_ACTIONS[Math.floor(rand() * APPLICATION_ACTIONS.length)];
   // Building Permit's checklist varies by action since migration 047 (see
   // requirements-catalog.ts's `documentsByAction`) — every other type
   // answers the same regardless, so this stays correct for them too.
@@ -733,6 +747,10 @@ export function buildSeed(referenceDate: Date = new Date()): SeedResult {
       forcedStatus: 'Completed',
       forceRevisionLoop: permitType === 'Building Permit',
       daysAgo: 20 + (cursor % 30),
+      // Pinned rather than left to rand() — see forcedApplicationAction's own
+      // doc comment. 'Renewal' matches this showcase's own documented intent
+      // (the Renovation/Alteration sub-type migration 047 folded into it).
+      forcedApplicationAction: permitType === 'Building Permit' ? 'Renewal' : undefined,
     });
     cursor++;
   }

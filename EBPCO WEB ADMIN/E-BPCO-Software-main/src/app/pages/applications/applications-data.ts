@@ -155,6 +155,10 @@ export interface AppDetail {
     /** `null` when the portal could not name the permit type. */
     permitType: string | null;
     applicationAction: string;
+    /** Verified against a real eBPCO-issued permit — `null` for New, and also null on the unverified claim path. See `priorPermitClaim`. */
+    renewsPermitNumber: string | null;
+    /** Self-reported, never verified — a permit the applicant says predates eBPCO. Mutually exclusive with `renewsPermitNumber`. */
+    priorPermitClaim: string | null;
   };
   /**
    * What the application says about the work — the site, and the answers
@@ -294,6 +298,8 @@ export function buildDetailFor(
       lifecycleStatus: real?.lifecycleStatus ?? row.lifecycleStatus,
       permitType: row.permitType,
       applicationAction: row.applicationAction ?? 'New',
+      renewsPermitNumber: row.renewsPermitNumber ?? null,
+      priorPermitClaim: row.priorPermitClaim ?? null,
     },
     project: {
       location: row.location,

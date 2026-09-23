@@ -442,10 +442,15 @@ const BUILDING_PERMIT_NEW_CONSTRUCTION_DOCS: RequirementDocument[] = [
 // their own prefix ('building-permit-renovation-alteration' /
 // '-addition-extension') so their ids stay distinct from each other and
 // from the New-Construction set under the one merged 'Building Permit' spec.
+// `prior-permit-proof`'s id and wording match the backend's own seed (053)
+// exactly, on both these lists — the intake form's `isRequired()` override
+// keys on this literal id to make it required specifically on the claim
+// path (eBPCO has no matching permit on file for this applicant), the same
+// as the live, staff-published checklist already does.
 const BUILDING_PERMIT_RENEWAL_DOCS: RequirementDocument[] = [
   ...COMMON_DOCS('building-permit-renovation-alteration'),
   doc('renovation-plan', 'Renovation/Alteration Plans (signed and sealed)', true, 'obo'),
-  doc('renovation-existing-permit', 'Copy of Original Building Permit (if available)', false, 'obo'),
+  doc('prior-permit-proof', 'Copy of your existing/prior permit', false, 'obo'),
   doc('renovation-bom', 'Bill of Materials and Specifications', true, 'obo'),
   doc('renovation-prc', 'PRC License and PTR of Engineer/Architect of Record', true, 'obo'),
 ];
@@ -453,6 +458,7 @@ const BUILDING_PERMIT_RENEWAL_DOCS: RequirementDocument[] = [
 const BUILDING_PERMIT_AMENDMENT_DOCS: RequirementDocument[] = [
   ...COMMON_DOCS('building-permit-addition-extension'),
   doc('addition-plan', 'Addition / Extension Plans (signed and sealed)', true, 'obo'),
+  doc('prior-permit-proof', 'Copy of your existing/prior permit', false, 'obo'),
   doc('addition-struct-plan', 'Structural Analysis for the added load (signed and sealed)', true, 'obo'),
   doc('addition-bom', 'Bill of Materials and Specifications', true, 'obo'),
   doc('addition-prc', 'PRC License and PTR of Engineer/Architect of Record', true, 'obo'),

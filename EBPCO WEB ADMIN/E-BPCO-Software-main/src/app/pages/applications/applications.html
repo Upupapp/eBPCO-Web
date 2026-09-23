@@ -1114,6 +1114,17 @@
             <input id="permit-type" type="text" disabled [value]="detail.meta.permitType ?? 'Not on file'" />
             <label for="transaction-type">Transaction Type</label>
             <input id="transaction-type" type="text" disabled [value]="detail.meta.applicationAction" />
+            @if (detail.meta.applicationAction !== 'New' && detail.meta.renewsPermitNumber) {
+              <label for="renews-permit">Renews Permit</label>
+              <input id="renews-permit" type="text" disabled [value]="detail.meta.renewsPermitNumber" />
+            }
+            @if (detail.meta.applicationAction !== 'New' && detail.meta.priorPermitClaim) {
+              <label for="prior-permit-claim" class="prior-permit-claim-label">
+                Claimed Prior Permit
+                <span class="not-published">not on file in eBPCO — unverified</span>
+              </label>
+              <input id="prior-permit-claim" type="text" disabled [value]="detail.meta.priorPermitClaim" />
+            }
             <label for="current-status">Current Status</label>
             <input id="current-status" type="text" disabled [value]="detail.meta.lifecycleStatus" />
           </div>

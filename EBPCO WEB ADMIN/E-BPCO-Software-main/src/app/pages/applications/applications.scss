@@ -1306,6 +1306,27 @@ tr.missing-row {
     font-style: italic;
   }
 
+  // The claimed-prior-permit field is a distinct, unverified fact — flagged
+  // right on its own label rather than buried in a tooltip, so it reads the
+  // same way whether an officer opens this section or skims it.
+  .prior-permit-claim-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .prior-permit-claim-label .not-published {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 0.15rem 0.5rem;
+    border-radius: $radius-pill;
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+
   .input-with-badge {
     display: flex;
     align-items: center;

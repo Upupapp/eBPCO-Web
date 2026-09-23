@@ -92,6 +92,10 @@ interface QueueRow {
   readonly version?: number;
   /** The first of the 5 evaluation stages with no Passed row yet, or `null` once all 5 have passed. Absent from an older server; see this file's own doc comment above for the gap this closed. */
   readonly evaluationStage?: string | null;
+  /** The permit a Renewal/Amendment names, verified against a real eBPCO-issued permit. `null` for New, and also null on the unverified path — see `priorPermitClaim`. Absent from an older server (053). */
+  readonly renewsPermitNumber?: string | null;
+  /** The permit a Renewal/Amendment names, self-reported and never verified, for a permit predating eBPCO. Absent from an older server (053). */
+  readonly priorPermitClaim?: string | null;
 }
 
 interface QueuePage {
@@ -324,6 +328,8 @@ export interface FileOnBehalfInput {
   permitType: string;
   applicationAction: ApplicationAction;
   renewsPermitNumber?: string | null;
+  /** The unverified alternative to `renewsPermitNumber`, for a permit that predates eBPCO. Give one or the other, never both. */
+  priorPermitClaim?: string | null;
   location?: string;
   /** Free-form answers kept on the application (`applications.form`), the same place the citizen wizard puts its scope of work. */
   form?: Record<string, unknown>;
@@ -901,6 +907,11 @@ function toRecord(row: QueueRow): ApplicationRecord {
       row.evaluationStage != null && isValidEvaluationStage(row.evaluationStage)
         ? row.evaluationStage
         : null,
+    // Straight through — both are already whatever the server holds (a real
+    // permit number, an unverified claim, or null), with no catalog to
+    // validate against the way evaluationStage's guard above has one.
+    renewsPermitNumber: row.renewsPermitNumber ?? null,
+    priorPermitClaim: row.priorPermitClaim ?? null,
     evaluationResult: null,
     // Verified means paid, an assessed amount with no verification means it is
     // owed, and no assessment means there is nothing to pay yet.

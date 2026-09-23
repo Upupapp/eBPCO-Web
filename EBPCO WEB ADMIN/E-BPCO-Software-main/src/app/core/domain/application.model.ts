@@ -88,6 +88,21 @@ export interface ApplicationRecord {
    * ruling, 29 Aug) rather than hidden or claimed.
    */
   evaluationStage: EvaluationStage | null;
+  /**
+   * The permit number a Renewal/Amendment names, when it resolved to a real
+   * permit eBPCO itself issued — `null` for a New application and also
+   * `null` on the unverified path (see `priorPermitClaim`). Absent from an
+   * older server; the queue never carried this at all until 053.
+   */
+  renewsPermitNumber?: string | null;
+  /**
+   * The permit number a Renewal/Amendment names, self-reported by the
+   * applicant, when it predates eBPCO and so has no record to link instead.
+   * NEVER verified by the system — a claim for staff to judge from the
+   * attached `prior-permit-proof` document, not a confirmed fact. Mutually
+   * exclusive with `renewsPermitNumber`.
+   */
+  priorPermitClaim?: string | null;
   evaluationResult: EvaluationResult | null;
   paymentStatus: PaymentStatus;
   permitReleaseStatus: PermitReleaseStatus;

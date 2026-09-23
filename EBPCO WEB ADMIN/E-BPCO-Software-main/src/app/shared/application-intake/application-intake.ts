@@ -164,9 +164,21 @@ export class ApplicationIntake {
     applicationAction: 'New' as ApplicationAction,
     /** The permit being renewed or amended — the server refuses a Renewal that names none. */
     relatedPermitNumber: '',
+    /** The unverified alternative, for a permit that predates eBPCO — see `claimingPriorPermit`. */
+    priorPermitClaim: '',
     scopeDescription: '',
     dateReceived: this.todayInput(),
   };
+
+  /**
+   * Whether this step is showing the unverified-claim field instead of the
+   * matched-permit number box. eBPCO launched into a Municipality with
+   * decades of paper permits already outstanding, so "no record of it"
+   * is the common case for a real renewal at the counter, not a fraud
+   * signal — the officer holding the citizen's paper permit had no way to
+   * key it in before this (053).
+   */
+  protected claimingPriorPermit = false;
 
   // `applicant`/`business`/`applicationInfo` above are plain mutable
   // objects (not signals) — the simplest binding target for ngModel
@@ -371,12 +383,27 @@ export class ApplicationIntake {
   }
 
   protected onApplicationActionChange(): void {
-    if (this.applicationInfo.applicationAction === 'New') this.applicationInfo.relatedPermitNumber = '';
+    if (this.applicationInfo.applicationAction === 'New') {
+      this.applicationInfo.relatedPermitNumber = '';
+      this.applicationInfo.priorPermitClaim = '';
+      this.claimingPriorPermit = false;
+    }
     void this.onPermitTypeChange();
   }
 
   protected needsRelatedPermit(): boolean {
     return this.applicationInfo.applicationAction !== 'New';
+  }
+
+  /**
+   * `DocumentDraft.required` is the catalog's own answer — a pure function
+   * of permit type and action, blind to whether THIS applicant has a
+   * matched permit to select instead. `prior-permit-proof` is deliberately
+   * `required: false` there (053) for exactly that reason; this is where
+   * its real requiredness, specific to the claim path, is enforced.
+   */
+  protected isRequired(d: DocumentDraft): boolean {
+    return d.required || (d.requirementId === 'prior-permit-proof' && this.claimingPriorPermit);
   }
 
   private applyDocumentsFor(type: PermitType, action: ApplicationAction): void {
@@ -556,14 +583,17 @@ export class ApplicationIntake {
       if (!this.business.dateRegistered) errors.push('Date registered is required.');
     } else if (step === 'application') {
       if (!this.applicationInfo.permitType) errors.push('Permit type is required.');
-      if (this.needsRelatedPermit() && !this.applicationInfo.relatedPermitNumber.trim()) {
+      if (this.needsRelatedPermit() && !this.claimingPriorPermit && !this.applicationInfo.relatedPermitNumber.trim()) {
+        errors.push(`The permit number being ${this.applicationInfo.applicationAction === 'Renewal' ? 'renewed' : 'amended'} is required.`);
+      }
+      if (this.needsRelatedPermit() && this.claimingPriorPermit && !this.applicationInfo.priorPermitClaim.trim()) {
         errors.push(`The permit number being ${this.applicationInfo.applicationAction === 'Renewal' ? 'renewed' : 'amended'} is required.`);
       }
       if (!this.applicationInfo.scopeDescription.trim())
         errors.push('Description or scope of work is required.');
       if (!this.applicationInfo.dateReceived) errors.push('Date received is required.');
     } else if (step === 'documents') {
-      const missing = this.documents().filter((d) => d.required && !d.file);
+      const missing = this.documents().filter((d) => this.isRequired(d) && !d.file);
       if (missing.length > 0) {
         errors.push(
           `${missing.length} required document${missing.length === 1 ? '' : 's'} still need${missing.length === 1 ? 's' : ''} a file: ${missing.map((d) => d.label).join(', ')}.`,
@@ -696,7 +726,10 @@ export class ApplicationIntake {
         },
         permitType,
         applicationAction: this.applicationInfo.applicationAction,
-        renewsPermitNumber: this.needsRelatedPermit() ? this.applicationInfo.relatedPermitNumber.trim() : null,
+        renewsPermitNumber: this.needsRelatedPermit() && !this.claimingPriorPermit
+          ? this.applicationInfo.relatedPermitNumber.trim() : null,
+        priorPermitClaim: this.needsRelatedPermit() && this.claimingPriorPermit
+          ? this.applicationInfo.priorPermitClaim.trim() : null,
         location: `${this.business.addressLine.trim()}, Barangay ${this.business.barangay}, Castilla, Sorsogon`,
         // The answers that have no column of their own, kept on the
         // application's `form` the same way the citizen wizard keeps its
