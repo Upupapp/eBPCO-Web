@@ -511,7 +511,7 @@
                       </span>
                     }
                   </label>
-                  @if (showStepErrors() && !proofDoc.file) {
+                  @if (showStepErrors() && !proofDoc.file && !proofDoc.alreadyAttached) {
                     <span class="field-error">Please attach a photo or scan of the permit.</span>
                   }
                 }
@@ -597,8 +597,8 @@
             @for (doc of documents(); track doc.requirementId) {
               <div
                 class="doc-row"
-                [class.attached]="doc.file"
-                [class.incomplete]="showStepErrors() && (documentIssue(doc) || (isRequired(doc) && !doc.file))"
+                [class.attached]="doc.file || doc.alreadyAttached"
+                [class.incomplete]="showStepErrors() && (documentIssue(doc) || (isRequired(doc) && !doc.file && !doc.alreadyAttached))"
               >
                 <div class="doc-row-head">
                   <span class="doc-label">{{ doc.label }}</span>
@@ -686,7 +686,7 @@
                 </div>
                 @if (showStepErrors() && documentIssue(doc)) {
                   <span class="field-error doc-issue">{{ documentIssue(doc) }}</span>
-                } @else if (showStepErrors() && doc.required && !doc.file) {
+                } @else if (showStepErrors() && doc.required && !doc.file && !doc.alreadyAttached) {
                   <span class="field-error doc-issue">A file is required for this document.</span>
                 }
               </div>
@@ -810,7 +810,7 @@
           <section>
             <h3>Documents</h3>
             <p class="not-stored">
-              {{ attachedDocuments().length }} of {{ documents().length }} on the checklist attached. Each
+              {{ satisfiedDocumentCount() }} of {{ documents().length }} on the checklist attached. Each
               file is sent to the Municipality, with its issuing office and dates, once this application
               is filed.
             </p>
@@ -819,9 +819,9 @@
             } @else {
               <ul class="review-doc-list">
                 @for (doc of documents(); track doc.requirementId) {
-                  <li [class.missing]="isRequired(doc) && !doc.file">
+                  <li [class.missing]="isRequired(doc) && !doc.file && !doc.alreadyAttached">
                     <app-icon
-                      [name]="doc.file ? 'check-circle' : 'alert-triangle'"
+                      [name]="doc.file || doc.alreadyAttached ? 'check-circle' : 'alert-triangle'"
                       [size]="14"
                     />
                     <span>
@@ -832,6 +832,8 @@
                           @if (doc.issuingOffice) { {{ doc.issuingOffice }} · }
                           issued {{ doc.issueDate }}, expires {{ doc.expiryDate }}
                         </small>
+                      } @else if (doc.alreadyAttached) {
+                        {{ doc.fileName }} <small>saved from where you left off</small>
                       } @else {
                         No file attached
                       }
@@ -849,6 +851,29 @@
         </div>
       }
     </div>
+
+    @if (canSaveAsDraft()) {
+      <div class="intake-draft-row">
+        <button
+          type="button"
+          class="modal-btn neutral"
+          [disabled]="submitting() || savingDraft()"
+          (click)="saveAsDraft()"
+        >
+          {{ savingDraft() ? 'Saving…' : 'Save as Draft' }}
+        </button>
+        @switch (draftSaveStatus()) {
+          @case ('saved') { <span class="field-hint">Saved{{ draftReference() ? ' as ' + draftReference() : '' }}.</span> }
+          @case ('error') { <span class="field-error">Could not save. Try again.</span> }
+        }
+        @if (draftId()) {
+          <span class="field-hint">
+            Applicant and Business were saved when this draft was created. To correct either, use the
+            Citizens or Businesses module once it is filed.
+          </span>
+        }
+      </div>
+    }
 
     <div class="modal-actions intake-actions">
       @if (stepIndex() > 0) {

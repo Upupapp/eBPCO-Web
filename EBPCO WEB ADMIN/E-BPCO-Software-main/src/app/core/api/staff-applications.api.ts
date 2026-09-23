@@ -244,6 +244,15 @@ export interface ApplicationDetail {
   /** The applicant's real mobile number, from their account, or `null` when the account has none on file. */
   readonly applicantMobile: string | null;
   /**
+   * The structured name behind `summary.applicantName` — needed to refill
+   * EDITABLE first/middle/last inputs (resuming a staff-authored Draft),
+   * since a joined "First Last" cannot be split back apart reliably: either
+   * part may itself contain a space. Absent from an older server.
+   */
+  readonly applicantFirstName?: string;
+  readonly applicantMiddleName?: string | null;
+  readonly applicantLastName?: string;
+  /**
    * Where to send correspondence about this application — the applicant's
    * OWN address (migration 036, backend), distinct from `business`'s own
    * address below (where the business operates) and from wherever the work
@@ -333,6 +342,8 @@ export interface FileOnBehalfInput {
   location?: string;
   /** Free-form answers kept on the application (`applications.form`), the same place the citizen wizard puts its scope of work. */
   form?: Record<string, unknown>;
+  /** Files at Draft instead of Submitted — a real, resumable row with a real reference number, just not yet filed. */
+  saveAsDraft?: boolean;
 }
 
 export type ApplicationEditResult =
@@ -542,7 +553,16 @@ export class StaffApplicationsApi {
    */
   async edit(
     applicationId: string,
-    patch: { location?: string | null; form?: Record<string, unknown> },
+    patch: {
+      location?: string | null;
+      form?: Record<string, unknown>;
+      permitType?: string;
+      applicationAction?: ApplicationAction;
+      businessId?: string | null;
+      /** Resent together with applicationAction, always — see the server's own EditableFields doc comment. Either without the other is refused, not silently ignored. */
+      renewsPermitNumber?: string | null;
+      priorPermitClaim?: string | null;
+    },
   ): Promise<ApplicationEditResult> {
     try {
       const result = await this.api.patch<{ changed: string[] }>(

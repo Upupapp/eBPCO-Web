@@ -658,20 +658,38 @@ export class Applications {
       .sort((a, b) => a.localeCompare(b)),
   );
 
+  /**
+   * Orthogonal to `statusFilter` on purpose, not a fourth `STATUS_OPTIONS`
+   * value: `CoarseStatus` is the shared approved/under-review/rejected
+   * projection the Business Stages board and the dashboard's own cards also
+   * read, and a Draft (nothing evaluated yet) is honestly none of the
+   * three — widening that shared type risks miscounting a card this
+   * feature was never meant to touch. This toggle reads `lifecycleStatus`
+   * directly instead.
+   */
+  protected readonly draftsOnly = signal(false);
+  protected readonly draftCount = computed(
+    () => this.rows().filter((r) => r.lifecycleStatus === 'Draft').length,
+  );
+
   protected readonly activeFilterCount = computed(
-    () => (this.statusFilter() === 'All' ? 0 : 1) + (this.businessFilter() === 'All' ? 0 : 1),
+    () => (this.statusFilter() === 'All' ? 0 : 1) + (this.businessFilter() === 'All' ? 0 : 1)
+      + (this.draftsOnly() ? 1 : 0),
   );
 
   protected clearFilters(): void {
     this.statusFilter.set('All');
     this.businessFilter.set('All');
+    this.draftsOnly.set(false);
   }
 
   protected readonly filteredRows = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
     const status = this.statusFilter();
     const business = this.businessFilter();
+    const draftsOnly = this.draftsOnly();
     return this.rows().filter((r) => {
+      if (draftsOnly && r.lifecycleStatus !== 'Draft') return false;
       if (status !== 'All' && r.status !== status) return false;
       if (business !== 'All' && r.businessName !== business) return false;
       if (!term) return true;
@@ -1294,18 +1312,30 @@ export class Applications {
   // owns whether it's open and what happens once a record comes back.
 
   protected readonly showIntake = signal(false);
+  /** Non-null opens the intake form in resume mode — a staff-authored Draft any officer may pick up, not only the one who started it (see staff-queue.service.ts's own visibility rule). */
+  protected readonly resumeDraftId = signal<string | null>(null);
 
   protected openCreate(): void {
     if (!this.canCreate()) return;
+    this.resumeDraftId.set(null);
+    this.showIntake.set(true);
+  }
+
+  /** The row-level "Continue" action for a Draft — opens the same intake form, pre-filled from the server. */
+  protected openContinue(row: AppRow): void {
+    if (!this.canCreate()) return;
+    this.resumeDraftId.set(row.id);
     this.showIntake.set(true);
   }
 
   protected cancelCreate(): void {
     this.showIntake.set(false);
+    this.resumeDraftId.set(null);
   }
 
   protected onIntakeCreated(record: ApplicationRecord): void {
     this.showIntake.set(false);
+    this.resumeDraftId.set(null);
     this.router.navigateByUrl(`/applications/${record.id}`);
   }
 

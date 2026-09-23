@@ -1,4 +1,4 @@
-import { Component, computed, inject, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Icon } from '../icon/icon';
 import { ApplicationStore } from '../../core/domain/application-store';
@@ -17,7 +17,7 @@ import {
   validateMobileNumber,
 } from '../utils/validators';
 import { ToastService } from '../toast/toast.service';
-import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { FileOnBehalfInput, StaffApplicationsApi } from '../../core/api/staff-applications.api';
 import { StaffCitizensApi } from '../../core/api/staff-citizens.api';
 import { IdentityApi } from '../../core/api/identity.api';
 import { QueueLoader } from '../../core/domain/queue-loader';
@@ -59,6 +59,17 @@ interface DocumentDraft {
   issuingOffice: string;
   issueDate: string;
   expiryDate: string;
+  /**
+   * True for a document already attached server-side — from an earlier
+   * Save as Draft in this same session, or from resuming a colleague's.
+   * `file` stays null (no bytes survive a reload / a second officer's
+   * browser), so this is the separate marker that keeps it counted as
+   * satisfied rather than missing. Never sent anywhere; it only changes
+   * what THIS screen shows.
+   */
+  alreadyAttached?: boolean;
+  /** The server's own document id, once attached — carried for completeness, not read anywhere yet. */
+  documentId?: string;
 }
 
 type Step = 'applicant' | 'business' | 'application' | 'documents' | 'review';
@@ -107,10 +118,117 @@ export class ApplicationIntake {
   readonly cancelled = output<void>();
   readonly created = output<ApplicationRecord>();
 
+  /** A staff-authored Draft to resume — its id, or null to start a fresh intake. Read once, on the first truthy value; see the constructor's own effect. */
+  readonly resumeDraftId = input<string | null>(null);
+
   protected readonly steps = STEPS;
   protected readonly stepIndex = signal(0);
   protected readonly attempted = signal<ReadonlySet<Step>>(new Set());
   protected readonly submitError = signal('');
+
+  // ---- Save as Draft -----------------------------------------------------
+  // The real, server-assigned id once this application exists as a Draft —
+  // set by the first Save as Draft click, or by resuming one. `edit()`
+  // (PATCH) only ever touches the APPLICATION's own fields (permitType,
+  // applicationAction, the renewal reference, location, form): there is no
+  // staff route to update an applicant's or a business's own record from
+  // here, so once `draftId` is set the Applicant/Business steps' fields are
+  // display-only going forward — the template's own note beside the button
+  // says so.
+  protected readonly draftId = signal<string | null>(null);
+  protected readonly draftReference = signal<string | null>(null);
+  protected readonly savingDraft = signal(false);
+  protected readonly draftSaveStatus = signal<'idle' | 'saved' | 'error'>('idle');
+  /** Document ids already confirmed attached server-side — see attachDocument-in-saveAsDraft's own comment on why re-sending one would be wrong. */
+  private readonly attachedToServer = new Set<string>();
+  private resuming = false;
+
+  protected canSaveAsDraft(): boolean {
+    return this.currentStep() !== 'applicant' && this.currentStep() !== 'business';
+  }
+
+  constructor() {
+    effect(() => {
+      const id = this.resumeDraftId();
+      if (id && !this.resuming) {
+        this.resuming = true;
+        void this.resumeDraft(id);
+      }
+    });
+  }
+
+  /**
+   * Pulls a staff-authored Draft back from the server — the same
+   * `GET /staff/applications/:id` the detail page reads, which already
+   * carries everything this form needs back: the applicant's own
+   * first/middle/last name (not just the joined display name — see
+   * `StaffApplicationDetail.applicantFirstName`'s own doc comment), the
+   * business, the application's own fields, and every document already
+   * attached.
+   */
+  private async resumeDraft(applicationId: string): Promise<void> {
+    const result = await this.applicationsApi.detail(applicationId);
+    if (result.kind !== 'ok') {
+      this.submitError.set('Could not load this draft. It may have been filed or removed since.');
+      return;
+    }
+    const detail = result.detail;
+    if (!detail.summary) {
+      this.submitError.set('Could not load this draft. It may have been filed or removed since.');
+      return;
+    }
+    const summary = detail.summary;
+    this.draftId.set(applicationId);
+    this.draftReference.set(summary.referenceNumber);
+
+    this.applicant.firstName = detail.applicantFirstName ?? '';
+    this.applicant.middleName = detail.applicantMiddleName ?? '';
+    this.applicant.lastName = detail.applicantLastName ?? '';
+    this.applicant.email = detail.applicantEmail;
+    this.applicant.mobileNumber = detail.applicantMobile ?? '';
+    this.applicant.addressLine = detail.applicantAddress.street ?? '';
+    this.applicant.barangay = detail.applicantAddress.barangay ?? '';
+    this.emailVerified.set(detail.applicantEmailVerifiedAt !== null);
+
+    const form = detail.form ?? {};
+    const str = (key: string): string => (typeof form[key] === 'string' ? form[key] as string : '');
+    this.applicant.applicantType =
+      (str('applicantType') || 'Individual') as Applicant['applicantType'];
+    this.applicant.landlineNumber = str('landlineNumber');
+
+    if (detail.business) {
+      this.business.registeredName = detail.business.name;
+      this.business.category = detail.business.category;
+      this.business.addressLine = detail.business.street;
+      this.business.barangay = detail.business.barangay;
+      this.business.registrationNumber = detail.business.registrationNumber;
+      this.business.dateRegistered = detail.business.dateRegistered;
+    }
+    this.business.tradeName = str('tradeName');
+    this.business.ownerOrRepresentative = str('ownerOrRepresentative');
+
+    this.applicationInfo.permitType = summary.permitType as PermitType;
+    this.applicationInfo.applicationAction = summary.applicationAction as ApplicationAction;
+    this.applicationInfo.relatedPermitNumber = summary.renewsPermitNumber ?? '';
+    this.applicationInfo.priorPermitClaim = summary.priorPermitClaim ?? '';
+    this.applicationInfo.scopeDescription = str('scopeOfWork');
+    this.applicationInfo.dateReceived = str('dateReceived') || this.applicationInfo.dateReceived;
+
+    await this.onPermitTypeChange();
+    const byCode = new Map(detail.documents.map((d) => [d.requirementCode, d]));
+    this.documents.update((docs) => docs.map((d) => {
+      const attached = d.requirementId ? byCode.get(d.requirementId) : undefined;
+      if (!attached) return d;
+      this.attachedToServer.add(attached.id);
+      return {
+        ...d, fileName: attached.fileName, alreadyAttached: true, documentId: attached.id,
+        issuingOffice: attached.issuingOffice ?? d.issuingOffice,
+        issueDate: attached.issuedOn ?? d.issueDate,
+        expiryDate: attached.expiresOn ?? d.expiryDate,
+      };
+    }));
+    this.draftSaveStatus.set('saved');
+  }
 
   protected readonly barangays = CASTILLA_BARANGAYS;
   protected readonly businessCategories = BUSINESS_CATEGORIES;
@@ -476,7 +594,13 @@ export class ApplicationIntake {
   }
 
   protected clearFile(doc: DocumentDraft, input?: HTMLInputElement): void {
-    this.updateDocument(doc.requirementId, { fileName: '', file: null });
+    // For an already-attached document (resumed, or attached earlier this
+    // session) this only clears the LOCAL marker — there is no staff route
+    // to detach a document from an application, so the row stays attached
+    // server-side. Harmless in practice (an unused attachment, same as an
+    // uploaded-but-never-attached one elsewhere in this system), but worth
+    // knowing before treating this as a real removal.
+    this.updateDocument(doc.requirementId, { fileName: '', file: null, alreadyAttached: false });
     // The native control still shows the old name otherwise, and choosing the
     // same file again would not fire `change`.
     if (input) input.value = '';
@@ -604,14 +728,16 @@ export class ApplicationIntake {
         }
         if (hasClaim) {
           const proof = this.priorPermitProofDocument();
-          if (proof && !proof.file) errors.push('Please attach a photo or scan of the permit being claimed.');
+          if (proof && !proof.file && !proof.alreadyAttached) {
+            errors.push('Please attach a photo or scan of the permit being claimed.');
+          }
         }
       }
       if (!this.applicationInfo.scopeDescription.trim())
         errors.push('Description or scope of work is required.');
       if (!this.applicationInfo.dateReceived) errors.push('Date received is required.');
     } else if (step === 'documents') {
-      const missing = this.documents().filter((d) => this.isRequired(d) && !d.file);
+      const missing = this.documents().filter((d) => this.isRequired(d) && !d.file && !d.alreadyAttached);
       if (missing.length > 0) {
         errors.push(
           `${missing.length} required document${missing.length === 1 ? '' : 's'} still need${missing.length === 1 ? 's' : ''} a file: ${missing.map((d) => d.label).join(', ')}.`,
@@ -684,9 +810,14 @@ export class ApplicationIntake {
     return this.steps.every((s) => s.key === 'review' || this.stepErrors(s.key).length === 0);
   }
 
-  /** The attachments that will actually be sent — the Review step counts these, not the checklist. */
+  /** The attachments that will actually be SENT on this save — never includes an already-attached one, which needs nothing further sent for it. */
   protected attachedDocuments(): DocumentDraft[] {
     return this.documents().filter((d) => d.file !== null);
+  }
+
+  /** For display only (the Review step's own count) — a fresh pick and an already-attached document both count as satisfied. */
+  protected satisfiedDocumentCount(): number {
+    return this.documents().filter((d) => d.file !== null || d.alreadyAttached).length;
   }
 
   // ---- Submission -----------------------------------------------------
@@ -696,6 +827,184 @@ export class ApplicationIntake {
   // generated per attempt (see `StaffApplicationsApi.fileOnBehalf`), so a
   // second concurrent call would otherwise file the same application twice.
   protected readonly submitting = signal(false);
+
+  /**
+   * What `fileOnBehalf` needs, built once so `submit()`'s direct-filing path
+   * and `saveAsDraft()`'s first save can never drift apart. `saveAsDraft`
+   * is the one field that differs between the two callers.
+   */
+  private buildOnBehalfInput(saveAsDraft: boolean): FileOnBehalfInput {
+    return {
+      applicant: {
+        firstName: this.applicant.firstName.trim(),
+        middleName: this.applicant.middleName.trim() || undefined,
+        lastName: this.applicant.lastName.trim(),
+        email: this.emailValidation().normalized,
+        mobileNumber: this.mobileValidation().normalized || undefined,
+        street: this.applicant.addressLine.trim(),
+        barangay: this.applicant.barangay,
+      },
+      business: {
+        name: this.business.registeredName.trim(),
+        category: this.business.category,
+        street: this.business.addressLine.trim(),
+        barangay: this.business.barangay,
+        city: 'Castilla',
+        province: 'Sorsogon',
+        registrationNumber: this.business.registrationNumber.trim(),
+        dateRegistered: this.business.dateRegistered,
+      },
+      permitType: this.applicationInfo.permitType,
+      applicationAction: this.applicationInfo.applicationAction,
+      renewsPermitNumber: this.needsRelatedPermit() && this.applicationInfo.relatedPermitNumber.trim()
+        ? this.applicationInfo.relatedPermitNumber.trim() : null,
+      priorPermitClaim: this.needsRelatedPermit() && this.applicationInfo.priorPermitClaim.trim()
+        ? this.applicationInfo.priorPermitClaim.trim() : null,
+      location: `${this.business.addressLine.trim()}, Barangay ${this.business.barangay}, Castilla, Sorsogon`,
+      form: this.buildForm(),
+      saveAsDraft,
+    };
+  }
+
+  // The answers that have no column of their own, kept on the application's
+  // `form` the same way the citizen wizard keeps its scope of work — so the
+  // detail page reads them back from the record.
+  private buildForm(): Record<string, unknown> {
+    return {
+      scopeOfWork: this.applicationInfo.scopeDescription.trim(),
+      applicantType: this.applicant.applicantType,
+      landlineNumber: this.landlineValidation().normalized || null,
+      tradeName: this.business.tradeName.trim() || null,
+      ownerOrRepresentative: this.business.ownerOrRepresentative.trim(),
+      dateReceived: this.applicationInfo.dateReceived,
+      filedAtCounter: true,
+    };
+  }
+
+  /**
+   * What `edit()` (PATCH) can sync once a Draft already exists — the
+   * application's own fields only; see `draftId`'s own doc comment on why
+   * the applicant/business steps are display-only past that point.
+   * `applicationAction` is always resent, matching the server's own
+   * "resend the whole reference triad together" contract.
+   */
+  private buildDraftPatch() {
+    return {
+      permitType: this.applicationInfo.permitType || undefined,
+      applicationAction: this.applicationInfo.applicationAction,
+      renewsPermitNumber: this.needsRelatedPermit() && this.applicationInfo.relatedPermitNumber.trim()
+        ? this.applicationInfo.relatedPermitNumber.trim() : null,
+      priorPermitClaim: this.needsRelatedPermit() && this.applicationInfo.priorPermitClaim.trim()
+        ? this.applicationInfo.priorPermitClaim.trim() : null,
+      location: `${this.business.addressLine.trim()}, Barangay ${this.business.barangay}, Castilla, Sorsogon`,
+      form: this.buildForm(),
+    };
+  }
+
+  /**
+   * Real `POST /documents` per freshly-picked file — the same real
+   * route/method (`StaffApplicationsApi.attachDocument`) `applications.ts`'s
+   * own `attachDocumentFile` already uses for an existing application, now
+   * carrying the issuing office and dates the officer typed beside it.
+   * Marks each success `alreadyAttached` locally so a later Save as Draft
+   * never re-sends it.
+   */
+  private async attachPendingDocuments(applicationId: string): Promise<string[]> {
+    const failed: string[] = [];
+    for (const doc of this.attachedDocuments()) {
+      if (!doc.file) continue;
+      try {
+        const contentBase64 = await toBase64(doc.file);
+        const attachResult = await this.applicationsApi.attachDocument(
+          applicationId,
+          doc.requirementId,
+          doc.documentType.trim() || doc.label,
+          doc.file.name,
+          contentBase64,
+          {
+            issuingOffice: doc.issuingOffice.trim() || undefined,
+            issuedOn: doc.issueDate || undefined,
+            expiresOn: doc.expiryDate || undefined,
+          },
+        );
+        if (attachResult.kind === 'done') {
+          this.attachedToServer.add(attachResult.documentId);
+          this.updateDocument(doc.requirementId, {
+            alreadyAttached: true, documentId: attachResult.documentId, file: null,
+          });
+        } else {
+          failed.push(doc.label);
+        }
+      } catch {
+        failed.push(doc.label);
+      }
+    }
+    return failed;
+  }
+
+  /**
+   * Saves progress without filing — the officer's own explicit action, not
+   * tied to step navigation the way the citizen wizard's autosave is (an
+   * officer mid-counter-visit moves through this form at their own pace,
+   * not the citizen's). The first click per application files a Draft
+   * (`fileOnBehalf` with `saveAsDraft: true`); every one after that PATCHes
+   * the same id and attaches whatever is newly picked.
+   */
+  protected async saveAsDraft(): Promise<void> {
+    if (this.savingDraft() || this.submitting()) return;
+    if (!this.applicationInfo.permitType) {
+      this.toast.error('Choose a permit type before saving.');
+      this.draftSaveStatus.set('error');
+      return;
+    }
+
+    this.savingDraft.set(true);
+    try {
+      const existing = this.draftId();
+      if (existing === null) {
+        const result = await this.applicationsApi.fileOnBehalf(this.buildOnBehalfInput(true));
+        if (result.kind === 'name-mismatch') {
+          this.stepIndex.set(0);
+          this.attempted.update((set) => new Set(set).add('applicant'));
+          this.submitError.set(result.message);
+          this.toast.error(result.message);
+          this.draftSaveStatus.set('error');
+          return;
+        }
+        if (result.kind !== 'done') {
+          this.toast.error(
+            result.kind === 'unavailable' ? 'This deployment cannot save drafts yet.' : result.message,
+          );
+          this.draftSaveStatus.set('error');
+          return;
+        }
+        this.draftId.set(result.applicationId);
+        this.draftReference.set(result.referenceNumber);
+        await this.loader.reload();
+      } else {
+        const editResult = await this.applicationsApi.edit(existing, this.buildDraftPatch());
+        if (editResult.kind !== 'done') {
+          this.toast.error(
+            editResult.kind === 'unavailable'
+              ? 'This deployment cannot save further changes yet.' : editResult.message,
+          );
+          this.draftSaveStatus.set('error');
+          return;
+        }
+      }
+
+      const failed = await this.attachPendingDocuments(this.draftId()!);
+      if (failed.length > 0) {
+        this.toast.error(
+          `Saved, but ${failed.length} document${failed.length === 1 ? '' : 's'} could not be attached: `
+            + `${failed.join(', ')}. Try attaching ${failed.length === 1 ? 'it' : 'them'} again.`,
+        );
+      }
+      this.draftSaveStatus.set('saved');
+    } finally {
+      this.savingDraft.set(false);
+    }
+  }
 
   protected async submit(): Promise<void> {
     if (this.submitting()) return;
@@ -722,64 +1031,67 @@ export class ApplicationIntake {
 
     this.submitting.set(true);
     try {
-      const result = await this.applicationsApi.fileOnBehalf({
-        applicant: {
-          firstName: this.applicant.firstName.trim(),
-          middleName: this.applicant.middleName.trim() || undefined,
-          lastName: this.applicant.lastName.trim(),
-          email: this.emailValidation().normalized,
-          mobileNumber: this.mobileValidation().normalized || undefined,
-          street: this.applicant.addressLine.trim(),
-          barangay: this.applicant.barangay,
-        },
-        business: {
-          name: this.business.registeredName.trim(),
-          category: this.business.category,
-          street: this.business.addressLine.trim(),
-          barangay: this.business.barangay,
-          city: 'Castilla',
-          province: 'Sorsogon',
-          registrationNumber: this.business.registrationNumber.trim(),
-          dateRegistered: this.business.dateRegistered,
-        },
-        permitType,
-        applicationAction: this.applicationInfo.applicationAction,
-        renewsPermitNumber: this.needsRelatedPermit() && this.applicationInfo.relatedPermitNumber.trim()
-          ? this.applicationInfo.relatedPermitNumber.trim() : null,
-        priorPermitClaim: this.needsRelatedPermit() && this.applicationInfo.priorPermitClaim.trim()
-          ? this.applicationInfo.priorPermitClaim.trim() : null,
-        location: `${this.business.addressLine.trim()}, Barangay ${this.business.barangay}, Castilla, Sorsogon`,
-        // The answers that have no column of their own, kept on the
-        // application's `form` the same way the citizen wizard keeps its
-        // scope of work — so the detail page reads them back from the record.
-        form: {
-          scopeOfWork: this.applicationInfo.scopeDescription.trim(),
-          applicantType: this.applicant.applicantType,
-          landlineNumber: this.landlineValidation().normalized || null,
-          tradeName: this.business.tradeName.trim() || null,
-          ownerOrRepresentative: this.business.ownerOrRepresentative.trim(),
-          dateReceived: this.applicationInfo.dateReceived,
-          filedAtCounter: true,
-        },
-      });
+      const existing = this.draftId();
+      let applicationId: string;
+      let referenceNumber: string;
+      let toastSuffix: string;
 
-      if (result.kind === 'name-mismatch') {
-        // Nothing was filed. Send the officer back to the applicant step with
-        // the server's own sentence, which names who the address belongs to.
-        this.stepIndex.set(0);
-        this.attempted.update((set) => new Set(set).add('applicant'));
-        this.submitError.set(result.message);
-        this.toast.error(result.message);
-        return;
-      }
-      if (result.kind !== 'done') {
-        const message =
-          result.kind === 'unavailable'
-            ? 'This deployment cannot file applications on behalf of an applicant yet.'
-            : result.message;
-        this.submitError.set(message);
-        this.toast.error(message);
-        return;
+      if (existing !== null) {
+        // The normal path once anything has been saved as a draft: sync
+        // whatever changed since the last save, then move it from Draft to
+        // Submitted through the real transition engine — never a second
+        // `fileOnBehalf`, which would file a SECOND application.
+        const synced = await this.applicationsApi.edit(existing, this.buildDraftPatch());
+        if (synced.kind !== 'done') {
+          const message = synced.kind === 'unavailable'
+            ? 'This deployment cannot save further changes yet.' : synced.message;
+          this.submitError.set(message);
+          this.toast.error(message);
+          return;
+        }
+        const finalized = await this.applicationsApi.transition(existing, 'Submitted');
+        if (finalized.kind !== 'done') {
+          const message = finalized.kind === 'unavailable'
+            ? 'This deployment cannot finalize a draft yet.' : finalized.message;
+          this.submitError.set(message);
+          this.toast.error(message);
+          return;
+        }
+        applicationId = existing;
+        referenceNumber = this.draftReference() ?? '';
+        toastSuffix = '';
+      } else {
+        const result = await this.applicationsApi.fileOnBehalf(this.buildOnBehalfInput(false));
+
+        if (result.kind === 'name-mismatch') {
+          // Nothing was filed. Send the officer back to the applicant step
+          // with the server's own sentence, which names who the address
+          // belongs to.
+          this.stepIndex.set(0);
+          this.attempted.update((set) => new Set(set).add('applicant'));
+          this.submitError.set(result.message);
+          this.toast.error(result.message);
+          return;
+        }
+        if (result.kind !== 'done') {
+          const message =
+            result.kind === 'unavailable'
+              ? 'This deployment cannot file applications on behalf of an applicant yet.'
+              : result.message;
+          this.submitError.set(message);
+          this.toast.error(message);
+          return;
+        }
+        applicationId = result.applicationId;
+        referenceNumber = result.referenceNumber;
+        const who = this.fullName();
+        const under = result.returningApplicant
+          ? ` under ${who}’s existing account`
+          : ` — a new account for ${who}`;
+        const verified = result.emailVerified === undefined
+          ? ''
+          : result.emailVerified ? ' (email verified)' : ' (email not yet verified)';
+        toastSuffix = `${under}${verified}`;
       }
 
       // The server's own record, not a locally-assembled guess — filing
@@ -787,57 +1099,25 @@ export class ApplicationIntake {
       // is the one place that gets to see exactly what it decided (e.g. a
       // returning email reused instead of duplicated).
       await this.loader.reload();
-      const record = this.store.getById(result.applicationId);
+      const record = this.store.getById(applicationId);
       if (!record) {
         const message =
           'The application was filed, but this screen could not find it in the reloaded queue. Refresh and look for it directly.';
         this.submitError.set(message);
-        this.toast.error(`Application ${result.referenceNumber} filed, but could not be reopened here.`);
+        this.toast.error(`Application ${referenceNumber} filed, but could not be reopened here.`);
         return;
       }
 
-      // Real `POST /documents` per chosen file — the same real route/method
-      // (`StaffApplicationsApi.attachDocument`) `applications.ts`'s own
-      // `attachDocumentFile` already uses for an existing application, now
-      // carrying the issuing office and dates the officer typed beside it.
-      const failedAttachments: string[] = [];
-      for (const doc of this.attachedDocuments()) {
-        if (!doc.file) continue;
-        try {
-          const contentBase64 = await toBase64(doc.file);
-          const attachResult = await this.applicationsApi.attachDocument(
-            record.id,
-            doc.requirementId,
-            doc.documentType.trim() || doc.label,
-            doc.file.name,
-            contentBase64,
-            {
-              issuingOffice: doc.issuingOffice.trim() || undefined,
-              issuedOn: doc.issueDate || undefined,
-              expiresOn: doc.expiryDate || undefined,
-            },
-          );
-          if (attachResult.kind !== 'done') failedAttachments.push(doc.label);
-        } catch {
-          failedAttachments.push(doc.label);
-        }
-      }
+      const failedAttachments = await this.attachPendingDocuments(record.id);
       if (failedAttachments.length > 0) {
         this.toast.error(
-          `Application ${result.referenceNumber} filed, but ${failedAttachments.length} document`
+          `Application ${referenceNumber} filed, but ${failedAttachments.length} document`
             + `${failedAttachments.length === 1 ? '' : 's'} could not be attached: ${failedAttachments.join(', ')}. `
             + 'Attach them from the application\'s own Documents tab.',
         );
       }
 
-      const who = this.fullName();
-      const under = result.returningApplicant
-        ? ` under ${who}’s existing account`
-        : ` — a new account for ${who}`;
-      const verified = result.emailVerified === undefined
-        ? ''
-        : result.emailVerified ? ' (email verified)' : ' (email not yet verified)';
-      this.toast.success(`Application ${result.referenceNumber} filed${under}${verified}.`);
+      this.toast.success(`Application ${referenceNumber} filed${toastSuffix}.`);
       this.created.emit(this.store.getById(record.id) ?? record);
     } finally {
       this.submitting.set(false);

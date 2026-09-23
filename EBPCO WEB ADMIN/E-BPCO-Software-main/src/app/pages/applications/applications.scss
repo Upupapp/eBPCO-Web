@@ -110,6 +110,29 @@ h3 {
   gap: 0.7rem;
 }
 
+// Deliberately NOT inside `.filter-field` (filter-panel.scss): that class
+// styles its label/input pair as a select-box field, which would force this
+// checkbox into a bordered, padded box meant for a dropdown. A plain row
+// instead, matching the filter panel's own field rhythm loosely without
+// borrowing rules built for a different control.
+.filter-drafts-toggle {
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: $color-ink-700;
+    cursor: pointer;
+  }
+
+  input[type='checkbox'] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+  }
+}
+
 .id-cell {
   font-weight: 700;
 }

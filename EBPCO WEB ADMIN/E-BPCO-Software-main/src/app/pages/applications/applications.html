@@ -58,6 +58,12 @@
               }
             </select>
           </div>
+          <div class="filter-drafts-toggle">
+            <label for="app-drafts-only">
+              <input id="app-drafts-only" type="checkbox" [(ngModel)]="draftsOnly" />
+              Drafts only ({{ draftCount() }})
+            </label>
+          </div>
         </app-filter-panel>
         <button type="button" class="btn-outline" (click)="exportVisible()">
           <app-icon name="download" [size]="15" />
@@ -180,28 +186,52 @@
               <td>{{ row.dateSubmitted }}</td>
               <td>{{ row.officer }}</td>
               <td>
-                <span class="status-pill" [class]="row.status.toLowerCase().replace(/\s+/g, '-')">{{
-                  row.status
-                }}</span>
+                <!--
+                  A Draft is deliberately shown apart from the coarse 3-value
+                  approved/under-review/rejected projection (CoarseStatus,
+                  application.model.ts) rather than widened into it: nothing
+                  has been evaluated yet, so none of the three tones is
+                  honest, and CoarseStatus feeds the Business Stages board
+                  and the dashboard's own cards too — this checks the real
+                  lifecycleStatus directly instead of touching that shared type.
+                -->
+                @if (row.lifecycleStatus === 'Draft') {
+                  <span class="status-pill info">Draft</span>
+                } @else {
+                  <span class="status-pill" [class]="row.status.toLowerCase().replace(/\s+/g, '-')">{{
+                    row.status
+                  }}</span>
+                }
               </td>
               <td (click)="$event.stopPropagation()">
                 <div class="actions-cell">
-                  <button
-                    type="button"
-                    class="icon-btn view"
-                    [attr.aria-label]="'View application ' + row.id"
-                    (click)="openDetail(row)"
-                  >
-                    <app-icon name="eye" [size]="15" />
-                  </button>
-                  <button
-                    type="button"
-                    class="icon-btn edit"
-                    [attr.aria-label]="'Edit application ' + row.id"
-                    (click)="openDetail(row)"
-                  >
-                    <app-icon name="edit" [size]="15" />
-                  </button>
+                  @if (row.lifecycleStatus === 'Draft') {
+                    <button
+                      type="button"
+                      class="icon-btn edit"
+                      [attr.aria-label]="'Continue application ' + row.id"
+                      (click)="openContinue(row)"
+                    >
+                      <app-icon name="edit" [size]="15" />
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="icon-btn view"
+                      [attr.aria-label]="'View application ' + row.id"
+                      (click)="openDetail(row)"
+                    >
+                      <app-icon name="eye" [size]="15" />
+                    </button>
+                    <button
+                      type="button"
+                      class="icon-btn edit"
+                      [attr.aria-label]="'Edit application ' + row.id"
+                      (click)="openDetail(row)"
+                    >
+                      <app-icon name="edit" [size]="15" />
+                    </button>
+                  }
                   <button
                     type="button"
                     class="icon-btn del"
@@ -1353,7 +1383,11 @@
 }
 
 @if (showIntake()) {
-  <app-application-intake (cancelled)="cancelCreate()" (created)="onIntakeCreated($event)" />
+  <app-application-intake
+    [resumeDraftId]="resumeDraftId()"
+    (cancelled)="cancelCreate()"
+    (created)="onIntakeCreated($event)"
+  />
 }
 
 @if (showDocPreview() && selectedRow(); as row) {
