@@ -342,7 +342,6 @@
             <th><input type="checkbox" aria-label="Select all applications in this stage" /></th>
             <th>APPLICATION ID</th>
             <th>APPLICANT NAME</th>
-            <th>MISSING DOCUMENTS</th>
             <th>TYPE</th>
             <th>REVIEWING DEPARTMENT</th>
             <th>DATE SUBMITTED</th>
@@ -377,8 +376,6 @@
                   </div>
                 </div>
               </td>
-              <!-- null means no document data is held, which is not the same as none outstanding. -->
-              <td>{{ row.missingDocuments ?? '—' }}</td>
               <td>{{ row.type }}</td>
               <td>{{ row.department }}</td>
               <td>{{ row.dateSubmitted }}</td>

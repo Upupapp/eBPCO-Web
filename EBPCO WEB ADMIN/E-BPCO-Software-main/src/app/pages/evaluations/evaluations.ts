@@ -702,8 +702,6 @@ export class Evaluations implements OnInit {
       Applicant: row.applicant,
       'Business ID': row.businessId,
       'Business / Project': row.businessName,
-      // '—' not '' — a blank cell in a spreadsheet reads as zero.
-      'Missing Documents': row.missingDocuments ?? '—',
       Type: row.type,
       'Reviewing Department': row.department,
       'Date Submitted': row.dateSubmitted,

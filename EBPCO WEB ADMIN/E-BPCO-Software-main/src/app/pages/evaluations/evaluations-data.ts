@@ -44,8 +44,6 @@ export interface EvalRow {
   applicantHasPhoto?: boolean;
   businessId: string;
   businessName: string;
-  /** `requiredDocumentCount - attachedDocumentCount` — the server does not link an uploaded document to the requirement it satisfies, so this is a count, not a per-document checklist. */
-  missingDocuments: number | null;
   type: string | null;
   dateSubmitted: string;
   /** The server assigns no named officer to an evaluation. */
@@ -185,7 +183,6 @@ export function buildEvalRows(rows: EvaluationQueueRow[], stageKey: EvalTypeKey)
       applicantHasPhoto: r.applicantHasPhoto === true,
       businessId: r.businessId ?? '',
       businessName: r.businessName ?? '—',
-      missingDocuments: r.requiredDocumentCount - r.attachedDocumentCount,
       type: permitType,
       dateSubmitted: r.submittedAt ? r.submittedAt.slice(0, 10) : '—',
       officer: '—',
