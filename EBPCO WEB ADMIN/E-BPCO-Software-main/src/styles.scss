@@ -184,6 +184,55 @@ input[type='password']::-ms-clear {
   display: none;
 }
 
+// A bare `<input type="file">` renders as raw OS chrome — a system-styled
+// "Choose File" button glued to "No file chosen" text, next to every other
+// styled field on the same form (the walk-in intake's document rows, an
+// application's document resubmission). Restyled via `::file-selector-
+// button` rather than swapped for a hidden-input-plus-label trick, so it
+// keeps native keyboard/screen-reader behaviour (Tab focus, Enter/Space to
+// open the picker, drag and drop, the "no file chosen" announcement) and
+// only its appearance changes. Global, not per-page: the same bare input is
+// used in more than one place, and restyling one would just move the
+// inconsistency instead of fixing it. Values mirror $color-border-strong /
+// $color-ink-600 / $color-surface / $color-bg-muted / $radius-sm /
+// $color-brand-focus-ring (shared/styles/_tokens.scss) — hardcoded rather
+// than `@use`d because this file, unlike every component stylesheet, has
+// never imported that partial.
+input[type='file'] {
+  display: block;
+  width: 100%;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: #454a58;
+  padding: 6px;
+  border: 1px solid #e6e6ec;
+  border-radius: 0.4rem;
+  background: #ffffff;
+}
+input[type='file']::file-selector-button {
+  font: inherit;
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: #454a58;
+  padding: 7px 14px;
+  margin-right: 10px;
+  border: 1px solid #e6e6ec;
+  border-radius: 0.4rem;
+  background: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+input[type='file']::file-selector-button:hover {
+  background: #f4f4f7;
+  border-color: #c81e2c;
+  color: #c81e2c;
+}
+input[type='file']:focus-visible {
+  outline: none;
+  border-color: #c81e2c;
+  box-shadow: 0 0 0 3px rgba(200, 30, 44, 0.25);
+}
+
 :focus-visible {
   outline: 2px solid #c81e2c;
   outline-offset: 2px;

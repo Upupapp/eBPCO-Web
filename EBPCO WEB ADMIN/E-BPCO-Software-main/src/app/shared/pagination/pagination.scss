@@ -6,6 +6,12 @@
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+  // Every one of this component's eleven call sites places it directly
+  // after a table's closing `</div>` with nothing but a blank line in the
+  // template between them — this component owns its own top spacing
+  // because nothing else does, and without it the page numbers sit flush
+  // against the table's last row (found live 2026-09-23).
+  margin-top: 1.25rem;
 }
 
 .range-label {
