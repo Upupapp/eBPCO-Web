@@ -163,9 +163,11 @@ describe('ApplicationIntake — next() refuses to advance past an invalid step',
     expect(component.currentStep()).toBe('documents');
   });
 
-  it('accepts a claimed prior permit in place of a matched one (053)', () => {
+  it('accepts a claimed prior permit in place of a matched one, once proof is attached (053)', () => {
     // The officer at the counter, holding a paper permit that predates
     // eBPCO, has no matched permit to select — this is the alternative.
+    // Both fields are always on screen now (no toggle to click); typing
+    // into the claim field is what reveals the proof upload.
     fillApplicant(component);
     component.next();
     fillBusiness(component);
@@ -173,14 +175,38 @@ describe('ApplicationIntake — next() refuses to advance past an invalid step',
     fillApplication(component, 'Building Permit');
     component.applicationInfo.applicationAction = 'Renewal';
     component.onApplicationActionChange();
-    component.claimingPriorPermit = true;
     component.next();
     expect(component.currentStep()).toBe('application');
     expect(component.currentStepErrors().some((e: string) => /permit number/i.test(e))).toBe(true);
 
-    component.applicationInfo.priorPermitClaim = 'OLD-BP-1998-042';
+    component.onPriorPermitClaimChange('OLD-BP-1998-042');
+    component.next();
+    expect(component.currentStep()).toBe('application');
+    expect(component.currentStepErrors().some((e: string) => /photo or scan/i.test(e))).toBe(true);
+
+    const proof = component.priorPermitProofDocument();
+    expect(proof).toBeTruthy();
+    component['updateDocument'](proof.requirementId, {
+      fileName: 'permit.pdf', file: new File([new Uint8Array([1])], 'permit.pdf'),
+    });
     component.next();
     expect(component.currentStep()).toBe('documents');
+  });
+
+  it('typing into one permit-reference field clears the other, instead of needing a toggle', () => {
+    fillApplicant(component);
+    component.next();
+    fillBusiness(component);
+    component.next();
+    fillApplication(component, 'Building Permit');
+    component.applicationInfo.applicationAction = 'Renewal';
+    component.onApplicationActionChange();
+
+    component.onRelatedPermitNumberChange('BP-2025-000123');
+    expect(component.applicationInfo.priorPermitClaim).toBe('');
+
+    component.onPriorPermitClaimChange('OLD-BP-1998-042');
+    expect(component.applicationInfo.relatedPermitNumber).toBe('');
   });
 
   it('makes the proof document required only on the claim path', () => {
@@ -195,7 +221,7 @@ describe('ApplicationIntake — next() refuses to advance past an invalid step',
     const proof = () => component.documents().find((d: any) => d.requirementId === 'prior-permit-proof');
     if (!proof()) return; // not seeded in this test's fixture data; skip rather than assert nothing
     expect(component.isRequired(proof())).toBe(false);
-    component.claimingPriorPermit = true;
+    component.onPriorPermitClaimChange('OLD-BP-1998-042');
     expect(component.isRequired(proof())).toBe(true);
   });
 
@@ -207,13 +233,11 @@ describe('ApplicationIntake — next() refuses to advance past an invalid step',
     fillApplication(component, 'Building Permit');
     component.applicationInfo.applicationAction = 'Renewal';
     component.onApplicationActionChange();
-    component.claimingPriorPermit = true;
-    component.applicationInfo.priorPermitClaim = 'OLD-BP-1998-042';
+    component.onPriorPermitClaimChange('OLD-BP-1998-042');
 
     component.applicationInfo.applicationAction = 'New';
     component.onApplicationActionChange();
 
-    expect(component.claimingPriorPermit).toBe(false);
     expect(component.applicationInfo.priorPermitClaim).toBe('');
   });
 

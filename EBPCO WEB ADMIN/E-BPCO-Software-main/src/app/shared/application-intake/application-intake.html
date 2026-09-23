@@ -451,78 +451,83 @@
               }
             </select>
           </label>
-          @if (needsRelatedPermit() && !claimingPriorPermit) {
-            <label class="field">
-              <span class="field-label"
-                >Permit Number Being
-                {{ applicationInfo.applicationAction === 'Renewal' ? 'Renewed' : 'Amended' }}&nbsp;<span
-                  class="field-label-required"
-                  aria-hidden="true"
-                  >*</span
-                ></span
-              >
-              <input
-                type="text"
-                required
-                aria-required="true"
-                [(ngModel)]="applicationInfo.relatedPermitNumber"
-                name="relatedPermitNumber"
-                placeholder="e.g. BP-2025-000123"
-              />
-              @if (showStepErrors() && !applicationInfo.relatedPermitNumber.trim()) {
-                <span class="field-error">The permit being {{ applicationInfo.applicationAction === 'Renewal' ? 'renewed' : 'amended' }} is required.</span>
-              } @else {
-                <span class="field-hint">
-                  Must be a permit already issued through eBPCO. If it predates this system,
-                  <button type="button" class="link-btn" (click)="claimingPriorPermit = true">
-                    claim it as an existing permit
-                  </button>
-                  instead.
-                </span>
-              }
-            </label>
-          }
-          @if (needsRelatedPermit() && claimingPriorPermit) {
+          @if (needsRelatedPermit()) {
             <!--
               053: eBPCO launched into a Municipality with decades of paper
               permits already outstanding, so "not on file" is the common
-              case for a real renewal, not a fraud signal. Self-reported and
-              never verified — judged by staff from the proof attached in
-              the Document Attachments step (requirement code
-              prior-permit-proof, required there via isRequired()).
+              case for a real renewal, not a fraud signal. Both fields
+              always visible — nothing to click through — because the
+              officer already knows from talking to the applicant which one
+              applies; typing into either clears the other so the two can
+              never both hold a value (the server refuses that combination).
             -->
             <label class="field">
               <span class="field-label"
                 >Permit Number Being
-                {{ applicationInfo.applicationAction === 'Renewal' ? 'Renewed' : 'Amended' }} (not on file)&nbsp;<span
-                  class="field-label-required"
-                  aria-hidden="true"
-                  >*</span
-                ></span
+                {{ applicationInfo.applicationAction === 'Renewal' ? 'Renewed' : 'Amended' }}, if already in
+                eBPCO</span
               >
               <input
                 type="text"
-                required
-                aria-required="true"
-                [(ngModel)]="applicationInfo.priorPermitClaim"
+                [ngModel]="applicationInfo.relatedPermitNumber"
+                (ngModelChange)="onRelatedPermitNumberChange($event)"
+                name="relatedPermitNumber"
+                placeholder="e.g. BP-2025-000123"
+              />
+              <span class="field-hint">Must be a permit already issued through eBPCO.</span>
+            </label>
+            <label class="field">
+              <span class="field-label"
+                >OR, Permit Number Being
+                {{ applicationInfo.applicationAction === 'Renewal' ? 'Renewed' : 'Amended' }}, if NOT yet in
+                eBPCO</span
+              >
+              <input
+                type="text"
+                [ngModel]="applicationInfo.priorPermitClaim"
+                (ngModelChange)="onPriorPermitClaimChange($event)"
                 name="priorPermitClaim"
                 placeholder="e.g. BP-1998-000042, as printed on the permit"
               />
-              @if (showStepErrors() && !applicationInfo.priorPermitClaim.trim()) {
-                <span class="field-error">The permit being {{ applicationInfo.applicationAction === 'Renewal' ? 'renewed' : 'amended' }} is required.</span>
-              } @else {
+              @if (applicationInfo.priorPermitClaim.trim()) {
                 <span class="field-hint">
-                  eBPCO has no record of this permit, so it cannot be verified automatically —
-                  attach a photo or scan of it in Document Attachments.
-                  <button
-                    type="button" class="link-btn"
-                    (click)="claimingPriorPermit = false; applicationInfo.priorPermitClaim = ''"
-                  >
-                    This applicant has an eBPCO-issued permit instead
-                  </button>
+                  eBPCO cannot verify this permit automatically — attach a photo or scan below so the office
+                  can confirm it.
                 </span>
+                @if (priorPermitProofDocument(); as proofDoc) {
+                  <label class="file-field" style="margin-top:6px;">
+                    <input
+                      #proofFileInput
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      (change)="onFileChosen(proofDoc, $event)"
+                    />
+                    @if (proofDoc.fileName) {
+                      <span class="file-chip"
+                        >{{ proofDoc.fileName }}
+                        <button type="button" (click)="clearFile(proofDoc, proofFileInput)" aria-label="Remove file">
+                          &#10005;
+                        </button>
+                      </span>
+                    }
+                  </label>
+                  @if (showStepErrors() && !proofDoc.file) {
+                    <span class="field-error">Please attach a photo or scan of the permit.</span>
+                  }
+                }
+              } @else {
+                <span class="field-hint">Only needed if the permit above isn't already in eBPCO.</span>
               }
             </label>
+            @if (
+              showStepErrors() && !applicationInfo.relatedPermitNumber.trim() &&
+              !applicationInfo.priorPermitClaim.trim()
+            ) {
+              <span class="field-error"
+                >The permit being {{ applicationInfo.applicationAction === 'Renewal' ? 'renewed' : 'amended' }}
+                is required — fill in one of the two fields above.</span
+              >
+            }
           }
           <label class="field">
             <span class="field-label"
@@ -776,16 +781,16 @@
                 <dt>Transaction</dt>
                 <dd>{{ applicationInfo.applicationAction }}</dd>
               </div>
-              @if (needsRelatedPermit() && !claimingPriorPermit) {
+              @if (needsRelatedPermit() && applicationInfo.relatedPermitNumber.trim()) {
                 <div>
                   <dt>{{ applicationInfo.applicationAction === 'Renewal' ? 'Renews' : 'Amends' }}</dt>
-                  <dd>{{ applicationInfo.relatedPermitNumber || '—' }}</dd>
+                  <dd>{{ applicationInfo.relatedPermitNumber }}</dd>
                 </div>
               }
-              @if (needsRelatedPermit() && claimingPriorPermit) {
+              @if (needsRelatedPermit() && applicationInfo.priorPermitClaim.trim()) {
                 <div>
                   <dt>{{ applicationInfo.applicationAction === 'Renewal' ? 'Renews' : 'Amends' }} (claimed)</dt>
-                  <dd>{{ applicationInfo.priorPermitClaim || '—' }} <span class="field-hint">not on file — unverified</span></dd>
+                  <dd>{{ applicationInfo.priorPermitClaim }} <span class="field-hint">not on file — unverified</span></dd>
                 </div>
               }
               <div>

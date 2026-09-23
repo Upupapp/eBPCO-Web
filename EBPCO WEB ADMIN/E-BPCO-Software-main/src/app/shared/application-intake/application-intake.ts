@@ -162,23 +162,20 @@ export class ApplicationIntake {
   protected applicationInfo = {
     permitType: '' as PermitType | '',
     applicationAction: 'New' as ApplicationAction,
-    /** The permit being renewed or amended — the server refuses a Renewal that names none. */
+    /** The permit being renewed or amended, verified against a real eBPCO-issued permit — the server refuses a Renewal that names neither this nor `priorPermitClaim`. */
     relatedPermitNumber: '',
-    /** The unverified alternative, for a permit that predates eBPCO — see `claimingPriorPermit`. */
+    /**
+     * The unverified alternative, for a permit that predates eBPCO — the
+     * common case at the counter, not a fraud signal (053). Mutually
+     * exclusive with `relatedPermitNumber` (the server refuses both set);
+     * `onRelatedPermitNumberChange`/`onPriorPermitClaimChange` below keep
+     * that true as the officer types, rather than a toggle they have to
+     * click to switch between the two.
+     */
     priorPermitClaim: '',
     scopeDescription: '',
     dateReceived: this.todayInput(),
   };
-
-  /**
-   * Whether this step is showing the unverified-claim field instead of the
-   * matched-permit number box. eBPCO launched into a Municipality with
-   * decades of paper permits already outstanding, so "no record of it"
-   * is the common case for a real renewal at the counter, not a fraud
-   * signal — the officer holding the citizen's paper permit had no way to
-   * key it in before this (053).
-   */
-  protected claimingPriorPermit = false;
 
   // `applicant`/`business`/`applicationInfo` above are plain mutable
   // objects (not signals) — the simplest binding target for ngModel
@@ -386,13 +383,29 @@ export class ApplicationIntake {
     if (this.applicationInfo.applicationAction === 'New') {
       this.applicationInfo.relatedPermitNumber = '';
       this.applicationInfo.priorPermitClaim = '';
-      this.claimingPriorPermit = false;
     }
     void this.onPermitTypeChange();
   }
 
+  /** Typing a verified permit number and an unverified claim at once is what the server refuses — this is what keeps that from happening as the officer types, instead of a toggle they'd have to click. */
+  protected onRelatedPermitNumberChange(value: string): void {
+    this.applicationInfo.relatedPermitNumber = value;
+    if (value.trim()) this.applicationInfo.priorPermitClaim = '';
+  }
+
+  /** The other half of `onRelatedPermitNumberChange`'s own mutual-exclusion. */
+  protected onPriorPermitClaimChange(value: string): void {
+    this.applicationInfo.priorPermitClaim = value;
+    if (value.trim()) this.applicationInfo.relatedPermitNumber = '';
+  }
+
   protected needsRelatedPermit(): boolean {
     return this.applicationInfo.applicationAction !== 'New';
+  }
+
+  /** The claim path's own upload target, once the checklist for this type/action actually carries it (see `applyDocumentsFor`). */
+  protected priorPermitProofDocument(): DocumentDraft | undefined {
+    return this.documents().find((d) => d.requirementId === 'prior-permit-proof');
   }
 
   /**
@@ -403,7 +416,7 @@ export class ApplicationIntake {
    * its real requiredness, specific to the claim path, is enforced.
    */
   protected isRequired(d: DocumentDraft): boolean {
-    return d.required || (d.requirementId === 'prior-permit-proof' && this.claimingPriorPermit);
+    return d.required || (d.requirementId === 'prior-permit-proof' && !!this.applicationInfo.priorPermitClaim.trim());
   }
 
   private applyDocumentsFor(type: PermitType, action: ApplicationAction): void {
@@ -583,11 +596,16 @@ export class ApplicationIntake {
       if (!this.business.dateRegistered) errors.push('Date registered is required.');
     } else if (step === 'application') {
       if (!this.applicationInfo.permitType) errors.push('Permit type is required.');
-      if (this.needsRelatedPermit() && !this.claimingPriorPermit && !this.applicationInfo.relatedPermitNumber.trim()) {
-        errors.push(`The permit number being ${this.applicationInfo.applicationAction === 'Renewal' ? 'renewed' : 'amended'} is required.`);
-      }
-      if (this.needsRelatedPermit() && this.claimingPriorPermit && !this.applicationInfo.priorPermitClaim.trim()) {
-        errors.push(`The permit number being ${this.applicationInfo.applicationAction === 'Renewal' ? 'renewed' : 'amended'} is required.`);
+      if (this.needsRelatedPermit()) {
+        const hasNumber = !!this.applicationInfo.relatedPermitNumber.trim();
+        const hasClaim = !!this.applicationInfo.priorPermitClaim.trim();
+        if (!hasNumber && !hasClaim) {
+          errors.push(`The permit number being ${this.applicationInfo.applicationAction === 'Renewal' ? 'renewed' : 'amended'} is required.`);
+        }
+        if (hasClaim) {
+          const proof = this.priorPermitProofDocument();
+          if (proof && !proof.file) errors.push('Please attach a photo or scan of the permit being claimed.');
+        }
       }
       if (!this.applicationInfo.scopeDescription.trim())
         errors.push('Description or scope of work is required.');
@@ -726,9 +744,9 @@ export class ApplicationIntake {
         },
         permitType,
         applicationAction: this.applicationInfo.applicationAction,
-        renewsPermitNumber: this.needsRelatedPermit() && !this.claimingPriorPermit
+        renewsPermitNumber: this.needsRelatedPermit() && this.applicationInfo.relatedPermitNumber.trim()
           ? this.applicationInfo.relatedPermitNumber.trim() : null,
-        priorPermitClaim: this.needsRelatedPermit() && this.claimingPriorPermit
+        priorPermitClaim: this.needsRelatedPermit() && this.applicationInfo.priorPermitClaim.trim()
           ? this.applicationInfo.priorPermitClaim.trim() : null,
         location: `${this.business.addressLine.trim()}, Barangay ${this.business.barangay}, Castilla, Sorsogon`,
         // The answers that have no column of their own, kept on the
