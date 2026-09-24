@@ -399,6 +399,11 @@ export class ApplicationIntake {
       this.attempted.update((set) => new Set(set).add('applicant'));
       return;
     }
+    // The template already hides this button once emailTaken() is true;
+    // guarded here too since a code sent (and confirmable) for an address
+    // this screen has already refused to file under is misleading on its
+    // own, whatever hid or didn't hide the button that triggered it.
+    if (this.emailTaken()) return;
     this.codeError.set(null);
     this.codeNotice.set(null);
     this.sendingCode.set(true);

@@ -16,9 +16,13 @@ import { ApiError } from './problem';
 
 export interface StaffBusinessOwner {
   applicantId: string;
+  /** The owner's account id — GET /staff/citizens/:id/photo (and the Citizens module generally) is keyed on this, not applicantId. */
+  accountId: string;
   name: string;
   email: string;
   mobileNumber: string | null;
+  /** Whether to even ask for a photo — see ApplicantPhotoService.urlForAccount's own doc comment. */
+  hasPhoto: boolean;
 }
 
 export interface StaffBusinessRow {

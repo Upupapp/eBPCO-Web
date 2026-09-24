@@ -194,6 +194,21 @@ export class StaffCitizensApi {
     }
   }
 
+  /**
+   * `GET /staff/citizens/:id/photo` — the same real photo `ApplicantPhotoService`
+   * fetches per-application, here keyed by the account id directly so a
+   * screen with no application in context (the Businesses module's own
+   * Contact Person avatar) can still show it. `null` for no photo or a
+   * failed fetch — initials are the honest fallback either way.
+   */
+  async photo(accountId: string): Promise<Blob | null> {
+    try {
+      return await this.api.getBlob(`/staff/citizens/${encodeURIComponent(accountId)}/photo`);
+    } catch {
+      return null;
+    }
+  }
+
   async detail(citizenId: string): Promise<CitizenDetailResult> {
     try {
       const detail = await this.api.get<CitizenDetail>(`/staff/citizens/${encodeURIComponent(citizenId)}`);

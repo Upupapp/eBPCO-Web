@@ -19,6 +19,7 @@ import { validateEmail, validateMobileNumber } from '../../shared/utils/validato
 import { CapitalizeNameDirective } from '../../shared/utils/capitalize-name.directive';
 import { CASTILLA_BARANGAYS } from '../../core/domain/castilla-barangays';
 import { StaffBusinessesApi, StaffBusinessDetail, StaffBusinessRow } from '../../core/api/staff-businesses.api';
+import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 
 type SubTab = 'analytics' | 'recent-activity';
 type ViewMode = 'list' | 'create' | 'detail';
@@ -53,6 +54,9 @@ interface BusinessRow {
   city: string;
   contactName: string;
   contactPhone: string;
+  /** Null for the local-demo path, which has no account id or stored photo to fetch. */
+  contactAccountId: string | null;
+  contactHasPhoto: boolean;
   dateCreated: string;
   /** `null` when unknown. It was `8 + (hash(id) % 16)`, which sat beside a real "Active Users" count and contradicted it. */
   userCount: number | null;
@@ -108,6 +112,7 @@ interface GrowthPoint {
 export class Businesses {
   protected readonly store = inject(ApplicationStore);
   private readonly businessesApi = inject(StaffBusinessesApi);
+  protected readonly photos = inject(ApplicantPhotoService);
 
   /**
    * `GET /staff/businesses` is real and this page now calls it (P-4b) — the
@@ -296,6 +301,8 @@ export class Businesses {
       city: `Barangay ${b.barangay}`,
       contactName: owner ? applicantFullName(owner) : 'Not provided',
       contactPhone: owner?.mobileNumber ?? 'Not provided',
+      contactAccountId: null,
+      contactHasPhoto: false,
       dateCreated: b.dateRegistered,
       userCount: null,
       status: b.status,
@@ -311,6 +318,8 @@ export class Businesses {
       city: `Barangay ${b.barangay}`,
       contactName: b.owner.name,
       contactPhone: b.owner.mobileNumber ?? 'Not provided',
+      contactAccountId: b.owner.accountId,
+      contactHasPhoto: b.owner.hasPhoto,
       dateCreated: b.dateRegistered,
       userCount: null,
       status: b.status === 'Active' ? 'Active' : 'Inactive',

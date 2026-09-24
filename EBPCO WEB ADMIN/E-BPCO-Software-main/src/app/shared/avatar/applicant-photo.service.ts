@@ -1,5 +1,6 @@
 import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
+import { StaffCitizensApi } from '../../core/api/staff-citizens.api';
 
 /**
  * The applicant's real profile photo, for every staff screen that draws an
@@ -22,8 +23,15 @@ import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
 @Injectable({ providedIn: 'root' })
 export class ApplicantPhotoService {
   private readonly api = inject(StaffApplicationsApi);
+  private readonly citizensApi = inject(StaffCitizensApi);
   private readonly urls = new Map<string, WritableSignal<string | null>>();
   private readonly requested = new Set<string>();
+  // Same cache/request-once shape as urlFor()/urls/requested above, kept
+  // separate so an application id and an account id can never collide in
+  // one map (they are different id spaces, and nothing stops the two UUIDs
+  // matching by chance).
+  private readonly accountUrls = new Map<string, WritableSignal<string | null>>();
+  private readonly accountRequested = new Set<string>();
 
   /**
    * The object URL of the applicant's photo for this application, or `null`
@@ -44,8 +52,35 @@ export class ApplicantPhotoService {
     return url.asReadonly();
   }
 
+  /**
+   * The same photo, keyed by the citizen's own account id rather than an
+   * application — for a screen with no single application to view it
+   * through, e.g. the Businesses module's Contact Person avatar
+   * (`GET /staff/citizens/:id/photo`, staff-citizens.controller.ts).
+   */
+  urlForAccount(accountId: string, hasPhoto: boolean | undefined): Signal<string | null> {
+    let url = this.accountUrls.get(accountId);
+    if (url === undefined) {
+      url = signal<string | null>(null);
+      this.accountUrls.set(accountId, url);
+    }
+    if (hasPhoto === true && !this.accountRequested.has(accountId)) {
+      this.accountRequested.add(accountId);
+      queueMicrotask(() => void this.loadAccount(accountId, url as WritableSignal<string | null>));
+    }
+    return url.asReadonly();
+  }
+
   private async load(applicationId: string, into: WritableSignal<string | null>): Promise<void> {
     const blob = await this.api.applicantPhoto(applicationId);
+    if (blob === null) return;
+    const previous = into();
+    into.set(URL.createObjectURL(blob));
+    if (previous !== null) URL.revokeObjectURL(previous);
+  }
+
+  private async loadAccount(accountId: string, into: WritableSignal<string | null>): Promise<void> {
+    const blob = await this.citizensApi.photo(accountId);
     if (blob === null) return;
     const previous = into();
     into.set(URL.createObjectURL(blob));

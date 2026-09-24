@@ -113,7 +113,7 @@
               @if (emailVerified()) {
                 <span class="verified-badge"><app-icon name="check-circle" [size]="14" /> Verified</span>
                 <button type="button" class="link-btn" (click)="changeEmail()">Change</button>
-              } @else {
+              } @else if (!emailTaken()) {
                 <button
                   type="button"
                   class="modal-btn neutral verify-btn"
