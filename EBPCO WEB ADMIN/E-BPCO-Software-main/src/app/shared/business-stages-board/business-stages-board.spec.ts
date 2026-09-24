@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { BusinessStagesBoard } from './business-stages-board';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { barangayOf } from '../../core/domain/application.model';
+import { CASTILLA_BARANGAYS } from '../../core/domain/castilla-barangays';
 
 // `protected` members are accessed via `as any` throughout — the
 // standard pattern for exercising component-internal filter state from a
@@ -30,25 +31,32 @@ describe('BusinessStagesBoard — combined filtering', () => {
     expect(total).toBeGreaterThan(0);
   });
 
-  it('barangay options are generated from the real application data, sorted, with "All" first', () => {
+  it('barangay options are the real 34-barangay Castilla list, sorted, with "All" first', () => {
+    // Deliberately NOT derived from the application data any more — that was
+    // how "Barangay Castilla" (the old seed's own city-name placeholder, not
+    // a real barangay) ended up as a filter option (found live 2026-09-20,
+    // see this component's own module comment on `barangayOptions`). Every
+    // real barangay has to be selectable regardless of whether the current
+    // queue happens to hold an application from it yet.
     const options: string[] = component.barangayOptions();
     expect(options[0]).toBe('All');
-    const realBarangays = new Set(store.applications().map((a) => barangayOf(a)));
-    for (const b of options.slice(1)) expect(realBarangays.has(b)).toBe(true);
-    // Sorted alphabetically after "All", and matches the real distinct set exactly.
-    const rest = options.slice(1);
-    const expectedSorted = Array.from(realBarangays).sort((a, b) => a.localeCompare(b));
-    expect(rest).toEqual(expectedSorted);
+    expect(options.slice(1)).toEqual(CASTILLA_BARANGAYS);
   });
 
-  it('never offers a barangay option with zero real applications', () => {
-    const options: string[] = component.barangayOptions();
+  it('filtering narrows to real applications via the same barangayOf the board uses internally', () => {
+    // `barangayOf` (application.model.ts) is exercised directly here rather
+    // than through a second, options-derived expectation — see the test
+    // above for why the dropdown's own options no longer come from the data.
     const counts = new Map<string, number>();
     for (const app of store.applications()) {
       const b = barangayOf(app);
       counts.set(b, (counts.get(b) ?? 0) + 1);
     }
-    for (const b of options.slice(1)) expect(counts.get(b)).toBeGreaterThan(0);
+    expect(counts.size).toBeGreaterThan(0);
+    for (const [b, n] of counts) {
+      expect(CASTILLA_BARANGAYS).toContain(b);
+      expect(n).toBeGreaterThan(0);
+    }
   });
 
   it('filtering by one real barangay only returns applications from that barangay', () => {

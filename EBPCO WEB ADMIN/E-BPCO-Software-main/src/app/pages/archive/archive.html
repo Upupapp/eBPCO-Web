@@ -7,8 +7,8 @@
     <span class="archive-banner-icon"><app-icon name="archive" [size]="18" /></span>
     <p>
       Nothing in eBPCO is deleted. Applications that were cancelled, rejected or
-      allowed to expire are kept here with who set them aside and why. This
-      list is read-only.
+      allowed to expire are kept here with who set them aside and why. This list
+      itself is read-only — open a record to restore it to the active queue.
     </p>
   </div>
 
@@ -36,11 +36,21 @@
               <th scope="col">Status</th>
               <th scope="col">Set aside by</th>
               <th scope="col">Reason</th>
+              <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
             @for (row of rows(); track row.record.id) {
-              <tr class="row-clickable" tabindex="0" role="button" (click)="open(row)">
+              <!--
+                No `tabindex`/`role="button"` here any more — the row now
+                holds a real `<button>` (View & Restore), and a focusable
+                element inside another focusable element is an accessibility
+                violation axe catches (a11y-guarded-screens.spec.ts), not a
+                hypothetical one. Same pattern citizens.html's own row
+                already uses: the row still navigates on a mouse click, the
+                button is what keyboard/screen-reader users reach.
+              -->
+              <tr class="row-clickable" (click)="open(row)">
                 <td class="id-cell">
                   {{ row.record.id }}
                   @if (row.record.referenceNumber; as reference) {
@@ -93,6 +103,19 @@
                     -->
                     <span class="muted">No reason was recorded</span>
                   }
+                </td>
+                <td (click)="$event.stopPropagation()">
+                  <!--
+                    Navigates only — nothing on THIS page ever mutates a
+                    record. The actual restore is the application's own
+                    "Restore to Active Queue" action (applications.ts's
+                    STATUS_ACTIONS), the real lifecycle transition
+                    migration 056_archive_restore.sql seeds server-side.
+                  -->
+                  <button type="button" class="btn-outline" (click)="open(row)">
+                    <app-icon name="eye" [size]="14" />
+                    View &amp; Restore
+                  </button>
                 </td>
               </tr>
             }

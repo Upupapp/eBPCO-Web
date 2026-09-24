@@ -50,6 +50,15 @@
             </select>
           </div>
           <div class="filter-field">
+            <label for="app-permit-type-filter">Permit Type</label>
+            <select id="app-permit-type-filter" [(ngModel)]="permitTypeFilter">
+              <option value="All">All Permit Types</option>
+              @for (t of permitTypeOptions(); track t) {
+                <option [value]="t">{{ t }}</option>
+              }
+            </select>
+          </div>
+          <div class="filter-field">
             <label for="app-business-filter">Business / Project</label>
             <select id="app-business-filter" [(ngModel)]="businessFilter">
               <option value="All">All Businesses</option>

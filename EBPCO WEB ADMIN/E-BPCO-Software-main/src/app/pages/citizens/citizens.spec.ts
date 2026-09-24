@@ -38,6 +38,8 @@ function citizenRow(overrides: Partial<CitizenRow> = {}): CitizenRow {
     emailVerified: true,
     mobileVerified: false,
     status: 'active',
+    hasPhoto: false,
+    erasedAt: null,
     registeredAt: '2026-01-15T00:00:00.000Z',
     businessCount: 1,
     applicationCount: 2,

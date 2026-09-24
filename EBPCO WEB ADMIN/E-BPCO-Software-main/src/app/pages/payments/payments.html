@@ -270,7 +270,11 @@
                     <td class="id-cell">{{ row.payment.applicationReference }}</td>
                     <td>
                       <div class="applicant-cell">
-                        <app-avatar [name]="row.applicant" [size]="28" />
+                        <app-avatar
+                          [name]="row.applicant"
+                          [size]="28"
+                          [photoUrl]="photos.urlFor(row.payment.applicationId, row.applicantHasPhoto)()"
+                        />
                         <span class="truncate truncate--name" [title]="row.applicant">{{ row.applicant }}</span>
                       </div>
                     </td>

@@ -210,6 +210,7 @@ export class ApplicationStore {
         applicationId: string;
         applicant: string;
         applicantId: string;
+        applicantHasPhoto: boolean;
         businessId: string;
         business: Business | undefined;
         businessLabel: string;
@@ -224,6 +225,7 @@ export class ApplicationStore {
       applicationId: app.id,
       applicant: app.applicant,
       applicantId: app.applicantId,
+      applicantHasPhoto: app.applicantHasPhoto ?? false,
       businessId: app.businessId,
       business,
       businessLabel,

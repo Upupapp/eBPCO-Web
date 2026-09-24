@@ -24,6 +24,9 @@ export interface CitizenRow {
   readonly emailVerified: boolean;
   readonly mobileVerified: boolean;
   readonly status: 'active' | 'disabled';
+  readonly hasPhoto: boolean;
+  /** RA 10173 s.16(e). Non-null means this account was erased — always also `status: 'disabled'`, but a stronger, permanent state the UI must tell apart from a plain disable. */
+  readonly erasedAt: string | null;
   readonly registeredAt: string;
   readonly businessCount: number;
   readonly applicationCount: number;

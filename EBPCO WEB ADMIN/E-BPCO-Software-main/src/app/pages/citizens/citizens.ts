@@ -16,7 +16,8 @@ import { ACTION_PERMISSIONS } from '../../core/session/permissions';
 import {
   CitizenDetail, CitizenRectifyInput, CitizenRow, CitizenMetrics, StaffCitizensApi,
 } from '../../core/api/staff-citizens.api';
-import { activityLabel, formatTimestamp, statusPillClass, verifiedLabel } from './citizen-detail-data';
+import { activityLabel, formatTimestamp, statusLabel, statusPillClass, verifiedLabel } from './citizen-detail-data';
+import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 
 /**
  * The Citizens module — staff-side administration of a citizen's OWN
@@ -79,6 +80,7 @@ export class Citizens {
   private readonly toast = inject(ToastService);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  protected readonly photos = inject(ApplicantPhotoService);
 
   readonly id = input<string>();
 
@@ -115,6 +117,7 @@ export class Citizens {
   protected readonly canActOnStatus = computed(() => this.canDisable() || this.canEnable());
 
   protected readonly statusPillClass = statusPillClass;
+  protected readonly statusLabel = statusLabel;
   protected readonly activityLabel = activityLabel;
   protected readonly formatTimestamp = formatTimestamp;
   protected readonly verifiedLabel = verifiedLabel;
@@ -209,6 +212,21 @@ export class Citizens {
   protected readonly eraseReference = signal('');
   protected readonly eraseStep = signal<0 | 1 | 2>(0);
   private pendingEraseReason = '';
+
+  /**
+   * Erasure removes sign-in and contact details, never the application
+   * itself — `ErasureService`'s own module comment explains why a permit
+   * record has to outlive the account it was filed under (PD 1096). An
+   * application already Rejected, Cancelled or Completed needs no officer
+   * left to act on it, so only the statuses still awaiting an officer are
+   * surfaced here — a heads-up before erasing, not a block: the citizen's
+   * right to erasure does not depend on whether staff have finished with
+   * their filing yet.
+   */
+  protected readonly ongoingApplications = computed(() => {
+    const terminal = new Set(['Rejected', 'Cancelled', 'Completed']);
+    return (this.detail()?.applications ?? []).filter((a) => !terminal.has(a.lifecycleStatus));
+  });
 
   constructor() {
     effect(() => {

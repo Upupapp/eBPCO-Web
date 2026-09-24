@@ -255,6 +255,36 @@
     }
   }
 
+  .erase-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    margin-top: 1.1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    background: $color-warning-bg-soft;
+    color: $color-warning;
+
+    app-icon {
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    p {
+      margin: 0 0 0.4rem;
+      line-height: 1.5;
+      color: $color-ink-700;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      font-size: 0.85rem;
+      color: $color-ink-400;
+      line-height: 1.6;
+    }
+  }
+
   .erase-icon {
     flex-shrink: 0;
     width: 36px;

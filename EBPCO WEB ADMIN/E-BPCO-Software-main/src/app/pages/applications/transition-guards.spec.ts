@@ -95,9 +95,15 @@ describe('Application transitions', () => {
 
     store.transitionStatus(row.id, 'Rejected', 'Engr. Tester', 'Evaluator', 'Rejected for cause.');
 
-    // Nothing follows Rejected in the table. An application that could be
-    // revived after rejection would make the rejection a suggestion.
-    expect(VALID_TRANSITIONS['Rejected']).toEqual([]);
+    // The ONLY thing that follows Rejected in the table is the deliberate
+    // "Unarchive" restore path back to Submitted (migration
+    // 056_archive_restore.sql, on the real backend; VALID_TRANSITIONS here is
+    // its client-side mirror) — an application that could jump straight back
+    // into evaluation, or anywhere else mid-pipeline, would make the
+    // rejection a suggestion. Restarting from Submitted is not that: it is
+    // the queue an officer already re-processes a walk-in resubmission
+    // through, at the cost of one "Mark Received" click.
+    expect(VALID_TRANSITIONS['Rejected']).toEqual(['Submitted']);
     expect(store.transitionStatus(row.id, 'Under Evaluation', 'Engr. Tester', 'Evaluator')).toBe(false);
   });
 });

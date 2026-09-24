@@ -120,9 +120,16 @@ export const VALID_TRANSITIONS: Record<ApplicationLifecycleStatus, ApplicationLi
   'Ready for Release': ['Released'],
   Released: ['Completed'],
   Completed: [],
-  Rejected: [],
-  Cancelled: [],
-  Expired: [],
+  // "Unarchive" (the Archive screen's own action, and the Applications
+  // detail's "Restore to Active Queue"). Restored to Submitted specifically,
+  // not wherever each one happened to leave the active queue FROM — each of
+  // these three is reachable from several different statuses, so there is no
+  // single "the" prior one to reopen into (see migration
+  // 056_archive_restore.sql, which seeds the real, database-enforced version
+  // of this same rule).
+  Rejected: ['Submitted'],
+  Cancelled: ['Submitted'],
+  Expired: ['Submitted'],
 };
 
 export function canTransition(

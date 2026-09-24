@@ -39,6 +39,7 @@ import {
 } from '../../core/api/staff-fee-config.api';
 import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 import { DocumentPreview } from '../../shared/document-preview/document-preview';
+import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 
 type PaymentsTab = 'transactions' | 'fee-schedule' | 'configuration';
 type ConfigSubTab = 'payment-methods' | 'bank-information' | 'payroll';
@@ -75,6 +76,7 @@ const LINE_LABELS: Record<FeeLine, string> = {
 interface PaymentRow {
   readonly payment: PaymentQueueRow;
   readonly applicant: string;
+  readonly applicantHasPhoto: boolean;
   readonly businessName: string;
   readonly permitType: string;
 }
@@ -130,6 +132,7 @@ export class Payments {
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  protected readonly photos = inject(ApplicantPhotoService);
 
   /** Bound to the `?applicationId=` query param — Applications' own detail header links straight to one application's Assessment Workspace here, the same way it already links to Evaluations. */
   readonly applicationId = input<string>();
@@ -215,12 +218,14 @@ export class Payments {
 
   private applicationLabel(applicationId: string): {
     applicant: string;
+    applicantHasPhoto: boolean;
     businessName: string;
     permitType: string;
   } {
     const ctx = this.store.getApplicationContext(applicationId);
     return {
       applicant: ctx?.applicant ?? '—',
+      applicantHasPhoto: ctx?.applicantHasPhoto ?? false,
       businessName: ctx?.businessLabel ?? 'Not provided',
       permitType: ctx?.permitType ?? '—',
     };

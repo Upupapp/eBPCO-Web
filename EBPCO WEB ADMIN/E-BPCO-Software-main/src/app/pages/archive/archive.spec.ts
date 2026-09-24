@@ -164,15 +164,23 @@ describe('Archive', () => {
     expect(text).toContain('No reason was recorded');
   });
 
-  it('offers no way to change or remove anything', async () => {
+  it('offers no way to change or remove anything — only to open a record', async () => {
     const fixture = await mount([row()]);
     const el: HTMLElement = fixture.nativeElement;
-    const labels = [...el.querySelectorAll('button')].map((b) =>
-      (b.textContent ?? '').toLowerCase(),
-    );
+    const buttons = [...el.querySelectorAll('button')];
 
     // A page whose whole point is preservation must not be the place things
-    // can be changed from.
-    expect(labels.some((l) => /delete|remove|restore|edit/.test(l))).toBe(false);
+    // can be changed FROM. "View & Restore" is the one exception, and it is
+    // exactly that: navigation, not a mutation — clicking it calls the same
+    // `open()` a row click already does (archive.html's own comment on the
+    // button), landing on the application's own record, where restoring is
+    // a real lifecycle transition (migration 056_archive_restore.sql) an
+    // officer can then choose to make. Nothing on THIS page writes anything.
+    const labels = buttons.map((b) => (b.textContent ?? '').toLowerCase());
+    expect(labels.some((l) => /delete|remove|edit/.test(l))).toBe(false);
+
+    const restoreButton = buttons.find((b) => /view.*restore/i.test(b.textContent ?? ''));
+    expect(restoreButton).toBeTruthy();
+    expect(restoreButton?.getAttribute('type')).toBe('button');
   });
 });

@@ -167,21 +167,26 @@ export function withProjectedFields<
  * board's Barangay filter and the intake form's location field never
  * diverge on how they derive it.
  *
- * Two real shapes reach this function: seed/intake-built locations already
- * write "Barangay Poblacion" (stripped below), but the real backend's own
- * `location` field for an application is a full street address in the usual
- * Philippine order — "60 Rizal Street, Poblacion" — with the barangay as the
- * last comma-separated segment, not a "Barangay "-prefixed string at all.
- * Only handling the prefix case (the original implementation) left the whole
- * address unstripped for real applications, which the filter's own label
- * then re-prefixed with "Barangay " a second time — "Barangay 60 Rizal
- * Street, Poblacion" — nonsensical to a real user even though the filter
- * itself still narrowed correctly.
+ * A bare "Barangay Poblacion" string was the only shape this originally
+ * handled (prefix-stripped below), with everything else falling back to
+ * "whatever comes after the last comma" on the theory that a real street
+ * address always ends "..., Barangay". That theory was never actually
+ * true of this app's own real intake: `application-intake.ts`'s
+ * `buildOnBehalfInput`/`submit` both write
+ * `` `${addressLine}, Barangay ${barangay}, Castilla, Sorsogon` `` — FOUR
+ * comma segments, with the barangay second and the *last* segment being
+ * "Sorsogon", the province. The last-comma fallback was silently
+ * extracting "Sorsogon" for every real, staff-encoded application, which
+ * matches no option in `CASTILLA_BARANGAYS` — the Business Application
+ * Stages board's own Barangay filter, and the Applications detail's
+ * barangay column value pasted into it, both always came up empty (found
+ * live 2026-09-25). Fixed by finding the literal "Barangay X" marker
+ * wherever it falls in the string, not by assuming a fixed segment count.
  */
 export function barangayOf(app: Pick<ApplicationRecord, 'location'>): string {
   const raw = app.location.trim();
-  const prefixStripped = raw.replace(/^Barangay\s+/i, '');
-  if (prefixStripped !== raw) return prefixStripped.trim();
+  const marker = /\bBarangay\s+([^,]+)/i.exec(raw);
+  if (marker?.[1]) return marker[1].trim();
   const lastComma = raw.lastIndexOf(',');
   return (lastComma === -1 ? raw : raw.slice(lastComma + 1)).trim();
 }

@@ -20,6 +20,18 @@ export function statusPillClass(status: 'active' | 'disabled'): 'active' | 'inac
   return status === 'active' ? 'active' : 'inactive';
 }
 
+/**
+ * "Disabled" reads as reversible — an officer can imagine an Enable button
+ * fixing it. An erased account cannot be re-enabled (migration 011's
+ * `erased_account_holds_no_personal_data` CHECK forbids it), so it gets its
+ * own word rather than sharing "Disabled" with an account an officer merely
+ * suspended.
+ */
+export function statusLabel(row: { status: 'active' | 'disabled'; erasedAt: string | null }): string {
+  if (row.erasedAt !== null) return 'Deleted';
+  return row.status === 'active' ? 'Active' : 'Disabled';
+}
+
 const ACTIVITY_LABELS: Readonly<Record<string, string>> = {
   'citizen.viewed': 'Record viewed by staff',
   'citizen.disabled': 'Account disabled',

@@ -192,6 +192,10 @@ const STATUS_ACTIONS: { label: string; target: ApplicationLifecycleStatus }[] = 
   // rejection.
   { label: 'Return for Revision', target: 'Revision Required' },
   { label: 'Mark Rejected', target: 'Rejected' },
+  // "Unarchive" — only ever legal from Cancelled, Rejected or Expired
+  // (status.model.ts's own VALID_TRANSITIONS), so `canTransition` below
+  // keeps this hidden for every other status same as every other entry here.
+  { label: 'Restore to Active Queue', target: 'Submitted' },
 ];
 
 @Component({
@@ -658,6 +662,14 @@ export class Applications {
       .sort((a, b) => a.localeCompare(b)),
   );
 
+  /** Same real-rows-not-a-fixed-catalog treatment as `businessOptions` above — only permit types actually present in the current queue are offered. */
+  protected readonly permitTypeFilter = signal<'All' | string>('All');
+
+  protected readonly permitTypeOptions = computed(() =>
+    Array.from(new Set(this.rows().map((r) => r.type).filter((t): t is string => !!t && t.trim() !== '')))
+      .sort((a, b) => a.localeCompare(b)),
+  );
+
   /**
    * Orthogonal to `statusFilter` on purpose, not a fourth `STATUS_OPTIONS`
    * value: `CoarseStatus` is the shared approved/under-review/rejected
@@ -674,12 +686,13 @@ export class Applications {
 
   protected readonly activeFilterCount = computed(
     () => (this.statusFilter() === 'All' ? 0 : 1) + (this.businessFilter() === 'All' ? 0 : 1)
-      + (this.draftsOnly() ? 1 : 0),
+      + (this.permitTypeFilter() === 'All' ? 0 : 1) + (this.draftsOnly() ? 1 : 0),
   );
 
   protected clearFilters(): void {
     this.statusFilter.set('All');
     this.businessFilter.set('All');
+    this.permitTypeFilter.set('All');
     this.draftsOnly.set(false);
   }
 
@@ -687,11 +700,13 @@ export class Applications {
     const term = this.searchTerm().trim().toLowerCase();
     const status = this.statusFilter();
     const business = this.businessFilter();
+    const permitType = this.permitTypeFilter();
     const draftsOnly = this.draftsOnly();
     return this.rows().filter((r) => {
       if (draftsOnly && r.lifecycleStatus !== 'Draft') return false;
       if (status !== 'All' && r.status !== status) return false;
       if (business !== 'All' && r.businessName !== business) return false;
+      if (permitType !== 'All' && r.type !== permitType) return false;
       if (!term) return true;
       return (
         r.id.toLowerCase().includes(term) ||
@@ -1281,8 +1296,18 @@ export class Applications {
     };
   }
 
+  /**
+   * A non-empty selection narrows this to exactly the checked rows — an
+   * officer who ticked 5 of 7 and pressed Export got all 7 (found live
+   * 2026-09-25), because this always exported `filteredRows()` regardless
+   * of what was checked. Falls back to every row the current filters/search
+   * show when nothing is checked, same as before.
+   */
   protected exportVisible(): void {
-    const rows = this.filteredRows();
+    const selected = this.selectedIds();
+    const rows = selected.size > 0
+      ? this.rows().filter((r) => selected.has(r.id))
+      : this.filteredRows();
     // `downloadCsv` writes nothing for an empty set, so "Exported 0
     // applications." announced a file that was never created.
     if (rows.length === 0) {

@@ -83,13 +83,17 @@
               <tr class="row-clickable" (click)="openDetail(row)">
                 <td>
                   <div class="owner-cell">
-                    <app-avatar [name]="row.firstName + ' ' + row.lastName" [size]="30" />
+                    <app-avatar
+                      [name]="row.firstName + ' ' + row.lastName"
+                      [size]="30"
+                      [photoUrl]="photos.urlForAccount(row.id, row.hasPhoto)()"
+                    />
                     <span>{{ row.firstName }} {{ row.lastName }}</span>
                   </div>
                 </td>
                 <td>{{ row.email }}</td>
                 <td>{{ verifiedLabel(row.emailVerified) }}</td>
-                <td><span class="status-pill" [class]="statusPillClass(row.status)">{{ row.status === 'active' ? 'Active' : 'Disabled' }}</span></td>
+                <td><span class="status-pill" [class]="statusPillClass(row.status)">{{ statusLabel(row) }}</span></td>
                 <td>{{ formatTimestamp(row.registeredAt) }}</td>
                 <td>{{ row.businessCount }}</td>
                 <td>{{ row.applicationCount }}</td>
@@ -148,7 +152,7 @@
   <div class="detail-head">
     <h1>{{ row.firstName }} {{ row.lastName }}</h1>
     <div class="header-actions">
-      <span class="status-pill" [class]="statusPillClass(row.status)">{{ row.status === 'active' ? 'Active' : 'Disabled' }}</span>
+      <span class="status-pill" [class]="statusPillClass(row.status)">{{ statusLabel(row) }}</span>
       <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
     </div>
   </div>
@@ -157,25 +161,39 @@
     <div class="record-card">
       <div class="record-banner">
         <app-icon name="user" [size]="26" />
-        <app-avatar [name]="row.firstName + ' ' + row.lastName" [size]="72" class="banner-avatar" />
+        <app-avatar
+          [name]="row.firstName + ' ' + row.lastName"
+          [size]="72"
+          class="banner-avatar"
+          [photoUrl]="photos.urlForAccount(row.id, row.hasPhoto)()"
+        />
       </div>
 
       <div class="record-info">
         <h2>{{ row.firstName }} {{ row.lastName }}</h2>
-        <span class="status-pill" [class]="statusPillClass(row.status)">{{ row.status === 'active' ? 'Active' : 'Disabled' }}</span>
+        <span class="status-pill" [class]="statusPillClass(row.status)">{{ statusLabel(row) }}</span>
 
         <dl class="info-list">
           <div><dt>Email:</dt><dd>{{ row.email }}</dd></div>
           <div><dt>Mobile:</dt><dd>{{ row.mobileNumber ?? '—' }}</dd></div>
           <div><dt>Registered:</dt><dd>{{ formatTimestamp(row.registeredAt) }}</dd></div>
-          @if (row.status === 'disabled') {
+          @if (row.erasedAt) {
+            <div><dt>Erased:</dt><dd>{{ formatTimestamp(row.erasedAt) }}</dd></div>
+          } @else if (row.status === 'disabled') {
             <div><dt>Disabled:</dt><dd>{{ row.disabledAt ? formatTimestamp(row.disabledAt) : '—' }}</dd></div>
             <div><dt>Reason:</dt><dd>{{ row.disabledReason ?? '—' }}</dd></div>
           }
         </dl>
       </div>
 
-      @if (canActOnStatus() || canSignOutSessions() || canSendResetLink()) {
+      @if (row.erasedAt) {
+        <div class="record-actions">
+          <p class="muted">
+            This account was erased at the data subject’s request on {{ formatTimestamp(row.erasedAt) }}.
+            It cannot be re-enabled, messaged, corrected or signed out — there is nothing left to act on.
+          </p>
+        </div>
+      } @else if (canActOnStatus() || canSignOutSessions() || canSendResetLink()) {
         <div class="record-actions">
           @if (row.status === 'active') {
             @if (canDisable()) {
@@ -237,7 +255,14 @@
             <div><dt>Postal Code</dt><dd>{{ row.postalCode ?? '—' }}</dd></div>
           </dl>
 
-          @if (canRectify()) {
+          @if (canRectify() && row.erasedAt) {
+            <div class="rectify-panel">
+              <h3>Correct a Detail</h3>
+              <p class="muted">
+                This account was erased; its details can no longer be corrected.
+              </p>
+            </div>
+          } @else if (canRectify()) {
             <div class="rectify-panel">
               <h3>Correct a Detail</h3>
               <p class="muted">
@@ -347,7 +372,7 @@
     </div>
   </div>
 
-  @if (canErase()) {
+  @if (canErase() && !row.erasedAt) {
     <div class="card erase-panel">
       <div class="erase-head">
         <span class="erase-icon"><app-icon name="alert-triangle" [size]="18" /></span>
@@ -360,6 +385,23 @@
           </p>
         </div>
       </div>
+      @if (ongoingApplications().length > 0) {
+        <div class="erase-warning">
+          <app-icon name="alert-triangle" [size]="16" />
+          <div>
+            <p>
+              This citizen has {{ ongoingApplications().length }} application{{ ongoingApplications().length === 1 ? '' : 's' }}
+              still awaiting officer action. Erasing this account will not cancel or pause them — they
+              keep processing normally, but the citizen will no longer be able to sign in to track them.
+            </p>
+            <ul>
+              @for (a of ongoingApplications(); track a.id) {
+                <li>{{ a.referenceNumber }} — {{ a.permitType }} ({{ a.lifecycleStatus }})</li>
+              }
+            </ul>
+          </div>
+        </div>
+      }
       <div class="erase-form">
         <div class="field">
           <label class="field-label" for="erase-reference">Request reference <span class="required" aria-hidden="true">*</span></label>
