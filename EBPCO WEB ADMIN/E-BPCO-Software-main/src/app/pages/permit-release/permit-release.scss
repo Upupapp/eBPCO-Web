@@ -351,18 +351,19 @@
 }
 
 // ---- Printable summary ----------------------------------------------------
-// Hidden on screen; shown (and everything else hidden) only when the browser
-// print dialog is invoked from the "Print PDF" button.
+// Hidden on screen; rendered only while the "READY TO PRINT" dialog is open
+// (permit-release.html), where it is the `.print-root` the global print rule
+// in styles.scss keeps. That global rule is what hides everything else —
+// this file used to do it with `:host > *:not(.print-only)`, which also hid
+// a receipt or permit preview opened on this page, so THEIR Print button
+// printed this (empty) summary instead of the document (found live
+// 2026-09-24).
 
 .print-only {
   display: none;
 }
 
 @media print {
-  :host > *:not(.print-only) {
-    display: none !important;
-  }
-
   .print-only {
     display: block;
 

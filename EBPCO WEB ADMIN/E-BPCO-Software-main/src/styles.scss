@@ -282,22 +282,42 @@ input[type='file']:focus-visible {
   color: #7a5b00;
 }
 
-// window.print() (payments.ts, permit-release.ts, document-preview.ts,
-// generated-permit-document-modal.ts) prints the WHOLE page by default —
-// the sidebar and whatever page sits behind the modal, not just the
-// receipt/permit/summary the officer opened it for (found live 2026-09-20).
-// Each modal's own component-scoped @media print rules only reach inside
-// its own template (Angular view encapsulation) — they can never hide
-// .admin-sidebar or a sibling on the routed page underneath, both of which
-// live outside that component entirely. Global, unscoped, and keyed off
-// every print-triggering modal's own existing .modal-backdrop wrapper
-// (confirmed consistent across all four files above) rather than one path
-// per page.
+// Every Print / Download button in this portal calls window.print(), which
+// prints the WHOLE page by default — the sidebar, the routed page's own
+// tables and cards, whatever sits behind the modal (found live 2026-09-20).
+// The first fix keyed off `.modal-backdrop` and hid the sidebar and OTHER
+// routed pages, but never the page's own content beside the modal — so a
+// receipt still printed with the Payments table under it, and on Permit
+// Release that page's own print rule (which only knew about its batch
+// summary) hid the receipt the officer had opened and printed the empty
+// summary instead (found live 2026-09-24).
+//
+// One mechanism, not one rule per page: whichever surface is the thing to
+// print marks itself `.print-root` — document-preview's modal (receipts,
+// application forms), the generated-permit modal, and Permit Release's
+// batch summary while its own print dialog is open. Everything that is not
+// that element, not inside it, and not one of its ancestors is removed from
+// the print. A page with no `.print-root` open (Ctrl+P on a list) prints as
+// the browser normally would. `:has()` was already what the first fix used.
 @media print {
-  body:has(.modal-backdrop) .admin-sidebar {
+  body:has(.print-root) *:not(.print-root):not(.print-root *):not(:has(.print-root)) {
     display: none !important;
   }
-  body:has(.modal-backdrop) .admin-content > *:not(:has(.modal-backdrop)) {
+
+  // The ancestors that stay carry screen-only sizing (admin-layout.scss:
+  // a 100dvh shell with a scrolling content pane) that would clip the
+  // print to a single page.
+  body:has(.print-root) app-admin-layout,
+  body:has(.print-root) .admin-shell,
+  body:has(.print-root) .admin-content {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .no-print {
     display: none !important;
   }
 }

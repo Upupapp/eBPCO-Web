@@ -434,7 +434,8 @@
     </div>
   }
 
-  <div class="print-only">
+  @if (showPrintModal()) {
+  <div class="print-only print-root">
     <h1>Permit Release Summary</h1>
     <p class="print-meta">
       {{ printTarget() ? 'Single application' : 'Ready for Release batch' }} — printed
@@ -469,6 +470,7 @@
       </tbody>
     </table>
   </div>
+  }
 
   @if (previewTarget(); as target) {
     <app-generated-permit-document-modal

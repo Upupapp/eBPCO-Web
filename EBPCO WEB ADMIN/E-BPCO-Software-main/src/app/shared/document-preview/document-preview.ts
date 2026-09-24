@@ -344,6 +344,15 @@ export class DocumentPreview {
   }
 
   protected print(): void {
+    // The permit form is a PDF in an iframe. window.print() on the parent
+    // page captures that iframe's on-screen box — one page tall, and often
+    // blank, since the PDF viewer paints out of process. Open the PDF itself
+    // and the browser's own viewer prints/downloads it whole.
+    const pdf = this.kind() === 'permit' ? this.permitFormUrl() : null;
+    if (pdf) {
+      window.open(pdf, '_blank', 'noopener');
+      return;
+    }
     window.print();
   }
 }
