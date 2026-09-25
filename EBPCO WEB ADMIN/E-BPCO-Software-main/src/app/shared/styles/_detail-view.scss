@@ -70,8 +70,12 @@
   // banner appears (citizens, businesses, evaluations, permit release,
   // user roles — every `.record-banner` shares this one rule in
   // _detail-view.scss), not a per-page choice.
-  background: linear-gradient(160deg, rgba(215, 219, 227, 0.35), rgba(236, 238, 242, 0.35)),
-    url('/assets/backgrounds/municipality.png') center / cover no-repeat;
+  // Dimmed like a modal's own backdrop, not washed out light gray — and
+  // positioned to the photo's own top-center, where the "Castilla Town
+  // Hall" sign and seal actually are, rather than the vertical middle
+  // (a plain `center` cut straight through the columns below the sign).
+  background: linear-gradient(rgba(20, 22, 28, 0.45), rgba(20, 22, 28, 0.45)),
+    url('/assets/backgrounds/municipality.png') top center / cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
