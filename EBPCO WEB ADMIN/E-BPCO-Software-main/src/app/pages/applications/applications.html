@@ -408,8 +408,8 @@
             <dd>{{ detail.businessLabel }}</dd>
           </div>
           <div>
-            <dt>City :</dt>
-            <dd>{{ detail.row.location }}</dd>
+            <dt>City/Municipality :</dt>
+            <dd>{{ detail.applicantAddress.city ?? 'Not on file' }}</dd>
           </div>
           <div>
             <dt>Region :</dt>
