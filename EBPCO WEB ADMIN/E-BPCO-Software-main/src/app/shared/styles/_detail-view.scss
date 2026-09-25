@@ -63,7 +63,15 @@
 .record-banner {
   position: relative;
   height: 110px;
-  background: linear-gradient(160deg, #d7dbe3, #eceef2);
+  // The Castilla Town Hall, standing in for a record's own cover photo —
+  // no record here (a citizen, a business, an evaluation queue row) has
+  // ever had a landscape photo of its own, so this filled a genuinely
+  // empty gray box with a generic icon before. Same photo everywhere this
+  // banner appears (citizens, businesses, evaluations, permit release,
+  // user roles — every `.record-banner` shares this one rule in
+  // _detail-view.scss), not a per-page choice.
+  background: linear-gradient(160deg, rgba(215, 219, 227, 0.35), rgba(236, 238, 242, 0.35)),
+    url('/assets/backgrounds/municipality.png') center / cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
