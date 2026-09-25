@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Topbar } from '../../shared/topbar/topbar';
 import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
@@ -24,6 +25,7 @@ import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
 import { StaffEvaluationsApi, EvaluationQueueRow } from '../../core/api/staff-evaluations.api';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 import { StaffApplicationsApi, ApplicationDocumentRow, ApplicationTimelineEvent } from '../../core/api/staff-applications.api';
+import { sniffContentType } from '../applications/applications';
 import {
   buildEvalTypeCards,
   buildEvalRows,
@@ -55,7 +57,9 @@ interface RecordDocumentRow {
   label: string;
   required: boolean;
   departmentName: string;
-  doc: { fileName: string; status: DocumentStatus; uploadedAt: string } | null;
+  /** `id`/`contentType` are only ever known for a real (`isReal`) document — the local demo store never recorded either, since no local-demo document has real bytes behind it. */
+  doc: { id: string; fileName: string; status: DocumentStatus; uploadedAt: string; contentType?: string } | null;
+  isReal: boolean;
 }
 
 /** One step of the record view's real 5-stage evaluation stepper — `result`/`evaluatorLabel` are null until that stage has actually been evaluated at least once. */
@@ -336,8 +340,12 @@ export class Evaluations implements OnInit {
           required: req.required,
           departmentName: departmentName(req.reviewingDepartmentId),
           doc: found
-            ? { fileName: found.fileName, status: found.reviewStatus ?? 'Uploaded', uploadedAt: found.uploadedAt }
+            ? {
+                id: found.id, fileName: found.fileName, status: found.reviewStatus ?? 'Uploaded',
+                uploadedAt: found.uploadedAt, contentType: found.contentType,
+              }
             : null,
+          isReal: true,
         };
       });
     }
@@ -349,6 +357,7 @@ export class Evaluations implements OnInit {
       required: req.required,
       departmentName: departmentName(req.reviewingDepartmentId),
       doc: byRequirement.get(req.id) ?? null,
+      isReal: false,
     }));
   });
 
@@ -430,28 +439,77 @@ export class Evaluations implements OnInit {
 
   // ---- Record view: document preview modal ------------------------------
   // Mirrors applications.ts's own `previewItem`/`closeDocPreview`/
-  // `downloadPreviewDoc` (its real Documents-tab preview) — kept local
-  // here rather than extracted into a shared component, matching that
-  // existing precedent.
+  // `downloadPreviewDoc` (its real Documents-tab preview) exactly, sharing
+  // its `sniffContentType`. Previously only the type and the doc comment
+  // matched — the fetch itself was never written, so a real document always
+  // rendered the fabricated placeholder "sheet" below, and Download always
+  // exported a CSV metadata stub, never the actual file (found live
+  // 2026-09-25, same bug class this file's own comment on `recordRealDocuments`
+  // already names twice for other rows on this page).
+
+  private readonly sanitizer = inject(DomSanitizer);
 
   protected readonly previewItem = signal<{
     label: string;
     filename: string;
     status: string;
+    real: { objectUrl: string; safeUrl: SafeResourceUrl; contentType: string } | null;
+    loading: boolean;
   } | null>(null);
+
+  private previewToken = 0;
 
   protected openDocPreview(r: RecordDocumentRow): void {
     if (!r.doc) return;
-    this.previewItem.set({ label: r.label, filename: r.doc.fileName, status: r.doc.status });
+    const token = ++this.previewToken;
+    this.previewItem.set({ label: r.label, filename: r.doc.fileName, status: r.doc.status, real: null, loading: r.isReal });
+    if (!r.isReal) return;
+    void this.loadRealDocPreview(token, r.doc.id);
+  }
+
+  private async loadRealDocPreview(token: number, documentId: string): Promise<void> {
+    const content = await this.applicationsApi.documentContent(documentId);
+    if (content.kind !== 'ok') {
+      this.toast.error('Could not open this document. Try again.');
+      if (this.previewToken === token) this.previewItem.set(null);
+      return;
+    }
+    try {
+      const response = await fetch(content.url);
+      if (!response.ok) throw new Error(`fetch failed: ${response.status}`);
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const contentType = sniffContentType(bytes) ?? 'application/octet-stream';
+      const objectUrl = URL.createObjectURL(new Blob([bytes], { type: contentType }));
+      if (this.previewToken !== token) {
+        URL.revokeObjectURL(objectUrl);
+        return;
+      }
+      this.previewItem.update((cur) => (cur
+        ? { ...cur, real: { objectUrl, safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl), contentType }, loading: false }
+        : cur));
+    } catch {
+      this.toast.error('Could not open this document. Try again.');
+      if (this.previewToken === token) this.previewItem.set(null);
+    }
   }
 
   protected closeDocPreview(): void {
+    const objectUrl = this.previewItem()?.real?.objectUrl;
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
     this.previewItem.set(null);
   }
 
   protected downloadPreviewDoc(): void {
     const doc = this.previewItem();
     if (!doc) return;
+    if (doc.real) {
+      const a = document.createElement('a');
+      a.href = doc.real.objectUrl;
+      a.download = doc.filename;
+      a.click();
+      this.toast.success('Downloaded.');
+      return;
+    }
     downloadCsv(`document-${doc.label.replace(/\s+/g, '-').toLowerCase()}`, [
       { Document: doc.label, File: doc.filename, Status: doc.status },
     ]);

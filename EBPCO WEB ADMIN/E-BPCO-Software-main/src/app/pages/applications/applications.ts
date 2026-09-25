@@ -1998,7 +1998,7 @@ export class Applications {
  * preview can show. PDF, PNG, JPEG, GIF, WebP — the formats citizens are
  * allowed to upload. Deliberately not HTML/SVG/anything scriptable.
  */
-function sniffContentType(bytes: Uint8Array): string | null {
+export function sniffContentType(bytes: Uint8Array): string | null {
   const startsWith = (sig: number[], offset = 0): boolean => sig.every((b, i) => bytes[offset + i] === b);
   if (startsWith([0x25, 0x50, 0x44, 0x46])) return 'application/pdf';                  // %PDF
   if (startsWith([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return 'image/png';

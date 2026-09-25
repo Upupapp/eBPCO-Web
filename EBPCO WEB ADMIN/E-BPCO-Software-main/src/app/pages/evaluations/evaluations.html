@@ -759,29 +759,45 @@
 
 @if (previewItem(); as doc) {
   <div class="modal-backdrop" (click)="closeDocPreview()">
-    <div class="modal-box doc-preview-box" (click)="$event.stopPropagation()">
+    <div class="modal-box doc-preview-box" [class.doc-preview-box-real]="doc.real" (click)="$event.stopPropagation()">
       <button type="button" class="modal-close" (click)="closeDocPreview()">&#10005;</button>
       <h2>{{ doc.label }}</h2>
       <p class="doc-preview-filename">{{ doc.filename }}</p>
-      <div class="doc-preview-sheet">
-        <span class="sheet-watermark" [class]="doc.status.toLowerCase().replace(' ', '-')">{{
-          doc.status
-        }}</span>
-        <div class="sheet-header">
-          <app-icon name="file-check" [size]="28" />
-          <div>
-            <strong>Republic of the Philippines</strong>
-            <span>Office of the Building Official</span>
+
+      @if (doc.loading) {
+        <div class="doc-preview-loading">Loading the document…</div>
+      } @else if (doc.real; as real) {
+        @if (real.contentType.includes('pdf')) {
+          <iframe class="doc-preview-frame" [src]="real.safeUrl" [title]="'Preview of ' + doc.filename"></iframe>
+        } @else if (real.contentType.startsWith('image/')) {
+          <img class="doc-preview-image" [src]="real.objectUrl" [alt]="'Preview of ' + doc.filename" />
+        } @else {
+          <div class="doc-preview-loading">
+            This file type can't be shown here. Use Download to open it.
+          </div>
+        }
+      } @else {
+        <div class="doc-preview-sheet">
+          <span class="sheet-watermark" [class]="doc.status.toLowerCase().replace(' ', '-')">{{
+            doc.status
+          }}</span>
+          <div class="sheet-header">
+            <app-icon name="file-check" [size]="28" />
+            <div>
+              <strong>Republic of the Philippines</strong>
+              <span>Office of the Building Official</span>
+            </div>
+          </div>
+          <h3>{{ doc.label }}</h3>
+          <div class="sheet-row">
+            <span>File Name</span><strong>{{ doc.filename }}</strong>
           </div>
         </div>
-        <h3>{{ doc.label }}</h3>
-        <div class="sheet-row">
-          <span>File Name</span><strong>{{ doc.filename }}</strong>
-        </div>
-      </div>
+      }
+
       <div class="modal-actions">
         <button type="button" class="modal-btn cancel" (click)="closeDocPreview()">Close</button>
-        <button type="button" class="modal-btn confirm" (click)="downloadPreviewDoc()">
+        <button type="button" class="modal-btn confirm" [disabled]="doc.loading" (click)="downloadPreviewDoc()">
           <app-icon name="download" [size]="15" />
           Download
         </button>
