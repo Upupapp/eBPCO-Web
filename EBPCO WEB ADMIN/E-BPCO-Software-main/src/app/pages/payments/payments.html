@@ -93,6 +93,9 @@
                           <button type="button" class="btn-outline" (click)="openAdjust(toQueueRow(p, appId), 'Reverse')">Reverse</button>
                           <button type="button" class="btn-outline" (click)="openAdjust(toQueueRow(p, appId), 'Refund')">Refund</button>
                         }
+                        @if (p.proofDocumentId) {
+                          <button type="button" class="link-btn" (click)="openProof(toQueueRow(p, appId))">View Proof</button>
+                        }
                         @if (p.officialReceiptNumber) {
                           <button type="button" class="link-btn" (click)="openReceipt(toQueueRow(p, appId))">View Receipt</button>
                         }
@@ -345,6 +348,9 @@
                 <button type="button" class="btn-outline" (click)="openAdjust(p, 'Void')">Void</button>
                 <button type="button" class="btn-outline" (click)="openAdjust(p, 'Reverse')">Reverse</button>
                 <button type="button" class="btn-outline" (click)="openAdjust(p, 'Refund')">Refund</button>
+              }
+              @if (p.proofDocumentId) {
+                <button type="button" class="btn-outline" (click)="openProof(p)">View Proof</button>
               }
               @if (p.officialReceiptNumber) {
                 <button type="button" class="btn-outline" (click)="openReceipt(p)">View Receipt</button>
@@ -684,6 +690,33 @@
     (confirmed)="confirmAdjust($event)"
     (cancelled)="cancelAdjust()"
   />
+}
+
+@if (proofPreview(); as proof) {
+  <div class="modal-backdrop" (click)="closeProof()">
+    <div class="modal-box doc-preview-box" [class.doc-preview-box-real]="proof.real" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" (click)="closeProof()">&#10005;</button>
+      <h2>Proof of Payment</h2>
+
+      @if (proof.loading) {
+        <div class="doc-preview-loading">Loading the document…</div>
+      } @else if (proof.real; as real) {
+        @if (real.contentType.includes('pdf')) {
+          <iframe class="doc-preview-frame" [src]="real.safeUrl" title="Proof of payment"></iframe>
+        } @else if (real.contentType.startsWith('image/')) {
+          <img class="doc-preview-image" [src]="real.objectUrl" alt="Proof of payment" />
+        } @else {
+          <div class="doc-preview-loading">This file type can't be shown here.</div>
+        }
+      } @else {
+        <div class="doc-preview-loading">Could not load this document.</div>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="modal-btn cancel" (click)="closeProof()">Close</button>
+      </div>
+    </div>
+  </div>
 }
 
 @if (receiptTarget(); as t) {

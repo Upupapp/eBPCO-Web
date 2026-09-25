@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { sniffContentType } from '../applications/applications';
 import { Topbar } from '../../shared/topbar/topbar';
 import { Icon } from '../../shared/icon/icon';
 import { Avatar } from '../../shared/avatar/avatar';
@@ -536,6 +538,7 @@ export class Payments {
       status: payment.status,
       submittedAt: payment.submittedAt,
       officialReceiptNumber: payment.officialReceiptNumber,
+      proofDocumentId: payment.proofDocumentId,
     };
   }
 
@@ -753,6 +756,67 @@ export class Payments {
    * of it.
    */
   protected readonly receiptTarget = signal<PaymentQueueRow | null>(null);
+
+  /**
+   * The citizen's own uploaded bank-transfer proof — until now there was no
+   * button anywhere that let a verifying officer actually see it (found live
+   * 2026-09-25): `proofDocumentId` sat on the payment row unread, and the
+   * upload that produced it never even carried an `applicationId`, so the
+   * file didn't surface on the application's own Documents tab either. Same
+   * real fetch-and-blob pattern as `applications.ts`'s `loadRealDocPreview`
+   * (shares its `sniffContentType`), sourced from the raw `documentId`
+   * rather than a `DocumentRow` — this screen has no requirements catalog
+   * to join against, only the id the payment record itself carries.
+   */
+  private readonly sanitizer = inject(DomSanitizer);
+
+  protected readonly proofPreview = signal<{
+    real: { objectUrl: string; safeUrl: SafeResourceUrl; contentType: string } | null;
+    loading: boolean;
+  } | null>(null);
+
+  private proofPreviewToken = 0;
+
+  protected openProof(payment: PaymentQueueRow): void {
+    const documentId = payment.proofDocumentId;
+    if (!documentId) return;
+    const token = ++this.proofPreviewToken;
+    this.proofPreview.set({ real: null, loading: true });
+    void this.loadProofPreview(token, documentId);
+  }
+
+  private async loadProofPreview(token: number, documentId: string): Promise<void> {
+    const content = await this.applicationsApi.documentContent(documentId);
+    if (content.kind !== 'ok') {
+      this.toast.error('Could not open the proof of payment. Try again.');
+      if (this.proofPreviewToken === token) this.proofPreview.set(null);
+      return;
+    }
+    try {
+      const response = await fetch(content.url);
+      if (!response.ok) throw new Error(`fetch failed: ${response.status}`);
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const contentType = sniffContentType(bytes) ?? 'application/octet-stream';
+      const objectUrl = URL.createObjectURL(new Blob([bytes], { type: contentType }));
+      if (this.proofPreviewToken !== token) {
+        URL.revokeObjectURL(objectUrl);
+        return;
+      }
+      this.proofPreview.set({
+        real: { objectUrl, safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl), contentType },
+        loading: false,
+      });
+    } catch {
+      this.toast.error('Could not open the proof of payment. Try again.');
+      if (this.proofPreviewToken === token) this.proofPreview.set(null);
+    }
+  }
+
+  protected closeProof(): void {
+    const objectUrl = this.proofPreview()?.real?.objectUrl;
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    this.proofPreview.set(null);
+  }
 
   protected openReceipt(payment: PaymentQueueRow): void {
     this.receiptTarget.set(payment);

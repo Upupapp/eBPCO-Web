@@ -112,6 +112,8 @@ export interface PaymentQueueRow {
   readonly status: string;
   readonly submittedAt: string;
   readonly officialReceiptNumber: string | null;
+  /** The citizen's own bank-transfer proof upload, when this payment carries one — absent for Onsite. */
+  readonly proofDocumentId: string | null;
 }
 
 export type PaymentQueueResult =

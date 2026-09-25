@@ -113,6 +113,8 @@ export interface ApplicationPaymentRow {
   readonly submittedAt: string;
   readonly verifiedAt: string | null;
   readonly officialReceiptNumber: string | null;
+  /** The citizen's own bank-transfer proof upload, when this payment carries one — `POST /documents`'s id, absent for Onsite (no file picker shown for that method on the Citizen Portal). */
+  readonly proofDocumentId: string | null;
 }
 
 /** The most recent non-superseded Order of Payment, or `null` before one is issued. Never an in-progress Draft/Submitted/Approved assessment — see `StaffPaymentsApi.getAssessment`'s own doc comment for why that has no per-application lookup at all. */
