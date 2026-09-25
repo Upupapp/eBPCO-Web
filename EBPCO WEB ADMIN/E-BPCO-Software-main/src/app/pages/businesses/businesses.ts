@@ -996,9 +996,6 @@ export class Businesses {
 
     const [firstName, ...rest] = contactName.split(/\s+/);
     const lastName = rest.length ? rest.join(' ') : '';
-    const barangayLabel = this.newBusiness.barangay
-      .replace(/-/g, ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase());
 
     this.creatingBusiness.set(true);
     try {
@@ -1013,7 +1010,7 @@ export class Businesses {
           name,
           category: this.newBusiness.type,
           street,
-          barangay: barangayLabel,
+          barangay: this.newBusiness.barangay,
           city: 'Castilla',
           province: 'Sorsogon',
           registrationNumber: this.newBusiness.registrationNumber.trim() || 'PENDING',

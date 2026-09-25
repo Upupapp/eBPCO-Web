@@ -858,40 +858,7 @@
         <label for="barangay" class="field-label">Barangay</label>
         <select id="barangay" class="select-input" [(ngModel)]="newBusiness.barangay">
           <option value="">Select Barangay</option>
-          <option value="amomonting">Amomonting</option>
-          <option value="bagalayag">Bagalayag</option>
-          <option value="bagong-sirang">Bagong Sirang</option>
-          <option value="bonga">Bonga</option>
-          <option value="buenavista">Buenavista</option>
-          <option value="burabod">Burabod</option>
-          <option value="caburacan">Caburacan</option>
-          <option value="canjela">Canjela</option>
-          <option value="cogon">Cogon</option>
-          <option value="cumadcad">Cumadcad</option>
-          <option value="dangcalan">Dangcalan</option>
-          <option value="dinapa">Dinapa</option>
-          <option value="la-union">La Union</option>
-          <option value="libtong">Libtong</option>
-          <option value="loreto">Loreto</option>
-          <option value="macalaya">Macalaya</option>
-          <option value="maracabac">Maracabac</option>
-          <option value="mayon">Mayon</option>
-          <option value="maypangi">Maypangi</option>
-          <option value="milagrosa">Milagrosa</option>
-          <option value="miluya">Miluya</option>
-          <option value="monte-carmelo">Monte Carmelo</option>
-          <option value="oras">Oras</option>
-          <option value="pandan">Pandan</option>
-          <option value="poblacion">Poblacion</option>
-          <option value="quirapi">Quirapi</option>
-          <option value="saclayan">Saclayan</option>
-          <option value="salvacion">Salvacion</option>
-          <option value="san-isidro">San Isidro</option>
-          <option value="san-rafael">San Rafael</option>
-          <option value="san-roque">San Roque</option>
-          <option value="san-vicente">San Vicente</option>
-          <option value="sogoy">Sogoy</option>
-          <option value="tomalaytay">Tomalaytay</option>
+          @for (b of barangayOptions; track b) { <option [value]="b">{{ b }}</option> }
         </select>
       </div>
     </div>
