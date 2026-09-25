@@ -18,6 +18,7 @@ import { ToastService } from '../../shared/toast/toast.service';
 import { validateEmail, validateMobileNumber } from '../../shared/utils/validators';
 import { CapitalizeNameDirective } from '../../shared/utils/capitalize-name.directive';
 import { CASTILLA_BARANGAYS } from '../../core/domain/castilla-barangays';
+import { REAL_CATEGORY_OPTIONS } from '../../core/domain/business-categories';
 import { StaffBusinessesApi, StaffBusinessDetail, StaffBusinessRow } from '../../core/api/staff-businesses.api';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 
@@ -353,16 +354,7 @@ export class Businesses {
   ];
   // The backend's real `businessShape.category` enum (businesses.controller.ts)
   // — wider than mobile's, and without "Wholesale".
-  protected readonly REAL_CATEGORY_OPTIONS: readonly string[] = [
-    'Retail',
-    'Food Service',
-    'Services',
-    'Manufacturing',
-    'Construction',
-    'Transport',
-    'Agriculture',
-    'Other',
-  ];
+  protected readonly REAL_CATEGORY_OPTIONS = REAL_CATEGORY_OPTIONS;
   /** The filter dropdown's options track which vocabulary the visible rows actually use, so every real category is reachable and no seed-only category is offered when it could never match. */
   protected readonly categoryOptions = computed<readonly string[]>(() =>
     this.store.isSeedData() ? this.SEED_CATEGORY_OPTIONS : this.REAL_CATEGORY_OPTIONS,

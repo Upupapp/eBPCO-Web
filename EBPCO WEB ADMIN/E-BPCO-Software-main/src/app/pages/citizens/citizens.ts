@@ -18,6 +18,7 @@ import {
 } from '../../core/api/staff-citizens.api';
 import { activityLabel, formatTimestamp, statusLabel, statusPillClass, verifiedLabel } from './citizen-detail-data';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
+import { CASTILLA_BARANGAYS, CASTILLA_CITY, CASTILLA_PROVINCE } from '../../core/domain/castilla-barangays';
 
 /**
  * The Citizens module — staff-side administration of a citizen's OWN
@@ -122,6 +123,9 @@ export class Citizens {
   protected readonly formatTimestamp = formatTimestamp;
   protected readonly verifiedLabel = verifiedLabel;
   protected readonly rectifiableFields = RECTIFIABLE_FIELDS;
+  protected readonly barangays = CASTILLA_BARANGAYS;
+  protected readonly castillaCity = CASTILLA_CITY;
+  protected readonly castillaProvince = CASTILLA_PROVINCE;
 
   // ── List state ──────────────────────────────────────────────────────
   // Never null: an empty array both before the first load resolves and
@@ -446,6 +450,12 @@ export class Citizens {
     // Middle name is the one field a citizen may genuinely have none of —
     // an empty value there means "clear it," not "invalid."
     if (field === 'middleName') return true;
+    // Selects, not free text — the backend enforces the same allow-list
+    // (castilla-barangays.ts there), so a value outside it would 400 anyway;
+    // checked here too so the button disables instead of round-tripping.
+    if (field === 'barangay') return this.barangays.includes(value);
+    if (field === 'city') return value === this.castillaCity;
+    if (field === 'province') return value === this.castillaProvince;
     return value.length > 0;
   });
 

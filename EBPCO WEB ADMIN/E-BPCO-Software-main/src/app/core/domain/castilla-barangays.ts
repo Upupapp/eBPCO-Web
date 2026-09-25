@@ -44,3 +44,14 @@ export const CASTILLA_BARANGAYS: readonly string[] = [
   'Sogoy',
   'Tomalaytay',
 ];
+
+/**
+ * Owner decision, 2026-09-25: an applicant's own personal address is
+ * Castilla-only too, matching a business's — same as the Citizen Portal's
+ * own sign-up form, which has always hardcoded these two as single-option
+ * fields. The backend now enforces both as literals on every address write
+ * (`auth.controller.ts`, `staff-applications.controller.ts`,
+ * `staff-citizens.controller.ts`).
+ */
+export const CASTILLA_CITY = 'Castilla';
+export const CASTILLA_PROVINCE = 'Sorsogon';

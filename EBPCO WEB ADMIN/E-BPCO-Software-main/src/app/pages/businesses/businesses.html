@@ -381,7 +381,6 @@
   <div class="detail-grid">
     <div class="record-card">
       <div class="record-banner">
-        <app-icon name="image" [size]="26" />
         <app-avatar
           [name]="row.contactName"
           [size]="72"
@@ -769,14 +768,7 @@
         <label for="business-category" class="field-label">Business Category</label>
         <select id="business-category" class="select-input" [(ngModel)]="newBusiness.type">
           <option value="">Select Business Category</option>
-          <option value="Retail">Retail</option>
-          <option value="Food Service">Food Service</option>
-          <option value="Services">Services</option>
-          <option value="Manufacturing">Manufacturing</option>
-          <option value="Construction">Construction</option>
-          <option value="Transport">Transport</option>
-          <option value="Agriculture">Agriculture</option>
-          <option value="Other">Other</option>
+          @for (c of REAL_CATEGORY_OPTIONS; track c) { <option [value]="c">{{ c }}</option> }
         </select>
 
         <label for="business-street" class="field-label">Business Address</label>

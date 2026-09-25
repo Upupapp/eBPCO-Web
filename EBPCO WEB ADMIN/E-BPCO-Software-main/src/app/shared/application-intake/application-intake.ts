@@ -5,6 +5,7 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import { Applicant } from '../../core/domain/applicant.model';
 import { CASTILLA_BARANGAYS } from '../../core/domain/castilla-barangays';
+import { REAL_CATEGORY_OPTIONS } from '../../core/domain/business-categories';
 import { ALL_PERMIT_TYPES, ApplicationAction, PermitType } from '../../core/domain/permit.model';
 import { documentsFor, requirementsFor } from '../../core/domain/requirements-catalog';
 import { RequirementsConfigStore } from '../../core/domain/requirements-config-store';
@@ -24,22 +25,7 @@ import { QueueLoader } from '../../core/domain/queue-loader';
 import { toBase64 } from '../utils/to-base64';
 import { CapitalizeNameDirective } from '../utils/capitalize-name.directive';
 
-/**
- * The server's own `business.category` vocabulary for a staff filing
- * (`staff-applications.controller.ts` `onBehalfShape`). Not the mobile app's
- * six-value list this used to offer: that one had "Wholesale", which the
- * route refuses with a 400, and lacked the three the route accepts.
- */
-const BUSINESS_CATEGORIES: readonly string[] = [
-  'Retail',
-  'Food Service',
-  'Services',
-  'Manufacturing',
-  'Construction',
-  'Transport',
-  'Agriculture',
-  'Other',
-];
+const BUSINESS_CATEGORIES = REAL_CATEGORY_OPTIONS;
 const APPLICANT_TYPES: NonNullable<Applicant['applicantType']>[] = [
   'Individual',
   'Authorized Representative',

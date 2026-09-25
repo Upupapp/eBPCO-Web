@@ -160,7 +160,6 @@
   <div class="detail-grid">
     <div class="record-card">
       <div class="record-banner">
-        <app-icon name="user" [size]="26" />
         <app-avatar
           [name]="row.firstName + ' ' + row.lastName"
           [size]="72"
@@ -281,9 +280,28 @@
                 </div>
                 <div class="field">
                   <label class="field-label" for="rectify-value">New value</label>
-                  <input id="rectify-value" class="text-input" [(ngModel)]="rectifyValue"
-                    [disabled]="!rectifyField()"
-                    [placeholder]="!rectifyField() ? 'Choose a field first' : rectifyField() === 'middleName' ? 'Leave blank to clear' : 'Enter the corrected value'" />
+                  @if (rectifyField() === 'barangay') {
+                    <select id="rectify-value" class="select-input" [(ngModel)]="rectifyValue">
+                      <option value="" disabled>Select a barangay…</option>
+                      @for (b of barangays; track b) {
+                        <option [value]="b">{{ b }}</option>
+                      }
+                    </select>
+                  } @else if (rectifyField() === 'city') {
+                    <select id="rectify-value" class="select-input" [(ngModel)]="rectifyValue">
+                      <option value="" disabled>Select…</option>
+                      <option [value]="castillaCity">{{ castillaCity }}</option>
+                    </select>
+                  } @else if (rectifyField() === 'province') {
+                    <select id="rectify-value" class="select-input" [(ngModel)]="rectifyValue">
+                      <option value="" disabled>Select…</option>
+                      <option [value]="castillaProvince">{{ castillaProvince }}</option>
+                    </select>
+                  } @else {
+                    <input id="rectify-value" class="text-input" [(ngModel)]="rectifyValue"
+                      [disabled]="!rectifyField()"
+                      [placeholder]="!rectifyField() ? 'Choose a field first' : rectifyField() === 'middleName' ? 'Leave blank to clear' : 'Enter the corrected value'" />
+                  }
                 </div>
               </div>
               <div class="form-actions">
