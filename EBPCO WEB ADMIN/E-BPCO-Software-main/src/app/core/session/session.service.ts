@@ -1,11 +1,14 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { StaffRole } from './permissions';
-import { IdentityApi } from '../api/identity.api';
+import { Authority, StaffRole } from './permissions';
+import { IdentityApi, type Me } from '../api/identity.api';
 import { TokenStore } from '../api/token-store';
 import { portalRoleFor } from '../api/role-map';
+import { positionFor } from './position';
 
 export interface Session {
+  /** The account's own id, from `/me` — what "Assigned to you" is matched on. Empty for an offline dev bypass. */
+  accountId: string;
   name: string;
   email: string;
   role: StaffRole;
@@ -27,6 +30,38 @@ export interface Session {
    * explain an empty result, never so it can filter one.
    */
   assignedForms: readonly string[] | null;
+  /** The server's own role identifiers (`evaluator`, `cashier`, ...), as `/me` sent them. */
+  wireRoles: readonly string[];
+  /**
+   * The evaluation stages this officer decides, or null when `/me` did not
+   * say (an older server) — the same null-is-silence rule as `scopes`.
+   */
+  stages: readonly string[] | null;
+  /** "Fire Safety Evaluator", "Cashier" — see `positionFor`. */
+  position: string;
+}
+
+/** The session's fields that come from `/me`, built the same way on sign-in and on restore. */
+function fromMe(me: Me, role: StaffRole): Session {
+  // `fullName` for staff, first/last for applicants, email as the last
+  // resort. Until the backend closed F-32 there was no name for staff at
+  // all, so every officer saw their own email address in the topbar — the
+  // fallback was working exactly as written, on a field that never arrived.
+  const composed = [me.firstName, me.lastName].filter(Boolean).join(' ');
+  const name = me.fullName ?? (composed === '' ? null : composed);
+  const wireRoles = me.roles ?? [];
+  const stages = me.evaluationStages ?? null;
+  return {
+    accountId: me.id,
+    name: name ?? me.email,
+    email: me.email,
+    role,
+    scopes: me.scopes ?? null,
+    assignedForms: me.permitTypes ?? null,
+    wireRoles,
+    stages,
+    position: positionFor(wireRoles, stages),
+  };
 }
 
 /**
@@ -51,6 +86,25 @@ export class SessionService {
   readonly isAuthenticated = computed(() => this._session() !== null);
   readonly role = computed<StaffRole | null>(() => this._session()?.role ?? null);
   readonly name = computed(() => this._session()?.name ?? '');
+  /** The signed-in account's id, or null when nobody is (or an offline bypass, which has none). */
+  readonly accountId = computed(() => this._session()?.accountId || null);
+  /** The officer's position ("Fire Safety Evaluator"), for display. */
+  readonly position = computed(() => this._session()?.position ?? '');
+
+  /**
+   * What this officer may do — the one value the sidebar, the route guard and
+   * every button ask (see `Authority` in permissions.ts).
+   */
+  readonly authority = computed<Authority | null>(() => {
+    const current = this._session();
+    if (current === null) return null;
+    return {
+      role: current.role,
+      scopes: current.scopes,
+      stages: current.stages,
+      superAdmin: current.wireRoles.includes('super-admin') || current.role === 'Super Admin',
+    };
+  });
 
   private readonly identity = inject(IdentityApi);
   private readonly tokens = inject(TokenStore);
@@ -90,19 +144,7 @@ export class SessionService {
           : 'This is an applicant account. Staff sign in here; applicants use the mobile app.',
       );
     }
-    // `fullName` for staff, first/last for applicants, email as the last
-    // resort. Until the backend closed F-32 there was no name for staff at
-    // all, so every officer saw their own email address in the topbar — the
-    // fallback was working exactly as written, on a field that never arrived.
-    const composed = [me.firstName, me.lastName].filter(Boolean).join(' ');
-    const name = me.fullName ?? (composed === '' ? null : composed);
-    this._session.set({
-      name: name ?? me.email,
-      email: me.email,
-      role,
-      scopes: me.scopes ?? null,
-      assignedForms: me.permitTypes ?? null,
-    });
+    this._session.set(fromMe(me, role));
     this.scheduleRefresh();
   }
 
@@ -153,15 +195,7 @@ export class SessionService {
         this.tokens.clear();
         return;
       }
-      const composed = [me.firstName, me.lastName].filter(Boolean).join(' ');
-      const name = me.fullName ?? (composed === '' ? null : composed);
-      this._session.set({
-        name: name ?? me.email,
-        email: me.email,
-        role,
-        scopes: me.scopes ?? null,
-        assignedForms: me.permitTypes ?? null,
-      });
+      this._session.set(fromMe(me, role));
       this.scheduleRefresh();
     } catch {
       // An expired or revoked token is not an error worth showing on load; the
@@ -241,11 +275,15 @@ export class SessionService {
     // surviving a direct URL entry, while offline.
     const qaRole = sessionStorage.getItem('qa-dev-bypass-role') as StaffRole | null;
     this._session.set({
+      accountId: '',
       name: 'Dev Bypass (Super Admin)',
       email: 'dev-bypass@ebpco.local',
       role: qaRole ?? 'Super Admin',
       scopes: null,
       assignedForms: null,
+      wireRoles: [],
+      stages: null,
+      position: qaRole ?? 'Super Admin',
     });
   }
 

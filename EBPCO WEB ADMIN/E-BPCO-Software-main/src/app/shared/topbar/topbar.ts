@@ -53,7 +53,9 @@ export class Topbar {
   // string — so a person's displayed identity is the same everywhere and
   // changes the moment the session does.
   protected readonly userName = computed(() => this.session.name() || 'Guest');
-  protected readonly userRole = computed(() => this.session.role() ?? '');
+  // The officer's position ("Fire Safety Evaluator"), not the portal's coarse
+  // menu role — a Receiving Officer used to read "Administrator" here.
+  protected readonly userRole = computed(() => this.session.position() || (this.session.role() ?? ''));
 
   // Search is a real controlled field either way. Pages with a matching
   // search signal of their own bind [searchTerm]/(searchChange) straight

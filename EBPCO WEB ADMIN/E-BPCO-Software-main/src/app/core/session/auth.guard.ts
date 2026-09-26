@@ -46,8 +46,10 @@ export const authGuard: CanActivateFn = async (_route, state) => {
     }
     return router.parseUrl('/login');
   }
-  const role = session.role();
-  if (role && !canAccessPath(role, state.url)) {
+  // The account's real scopes decide (see `mayOpen`) — the same answer the
+  // sidebar gives, so a hidden link and a refused URL can never disagree.
+  const who = session.authority();
+  if (who && !canAccessPath(who, state.url)) {
     return router.parseUrl('/dashboard');
   }
   return true;

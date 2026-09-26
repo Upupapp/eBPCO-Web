@@ -25,7 +25,8 @@ import {
 } from '../../core/domain/status.model';
 import { AuditEvent } from '../../core/domain/audit.model';
 import { SessionService } from '../../core/session/session.service';
-import { ACTION_PERMISSIONS } from '../../core/session/permissions';
+import { ACTION_PERMISSIONS, mayMove } from '../../core/session/permissions';
+import { assignedOfficerNames, isAssignedTo } from '../../core/domain/responsibility';
 import { ApplicationIntake } from '../../shared/application-intake/application-intake';
 import {
   DocumentPreview,
@@ -282,8 +283,8 @@ export class Applications {
 
   private readonly loaded = this.load();
   protected readonly canCreate = computed(() => {
-    const role = this.session.role();
-    return role ? ACTION_PERMISSIONS.createApplication(role) : false;
+    const who = this.session.authority();
+    return who ? ACTION_PERMISSIONS.createApplication(who) : false;
   });
   // Bound to the optional :id route segment (see app.routes.ts) via
   // withComponentInputBinding — this is the single source of truth for
@@ -299,6 +300,53 @@ export class Applications {
   // pre-filtered to one status instead of dumping the user on an
   // unfiltered list they'd have to re-filter by hand.
   readonly status = input<string>();
+
+  /**
+   * `'edit'` on `/applications/:id/edit` (route data), absent on the plain
+   * record. View and Edit used to open the very same screen, which made the
+   * two buttons one button twice (owner, 2026-09-26). View is now the record,
+   * read-only; Edit is the working screen — decisions, document review, fees,
+   * the permit and internal notes.
+   */
+  readonly mode = input<string>();
+
+  /** Whether this officer can act on applications at all. An Auditor reads, and only ever sees View. */
+  protected readonly canWork = computed(() => {
+    const who = this.session.authority();
+    return who !== null && ACTION_PERMISSIONS.workOnApplication(who);
+  });
+
+  /** The working screen — asked for by the route AND allowed; a read-only officer who follows an edit link gets the record. */
+  protected readonly editing = computed(() => this.mode() === 'edit' && this.canWork());
+
+  /** Whether the open application is waiting on this officer (the server's responsibility). */
+  protected readonly assignedToMe = computed(() =>
+    isAssignedTo(this.selectedRow()?.responsibility, this.session.accountId()),
+  );
+
+  protected isMine(row: AppRow): boolean {
+    return isAssignedTo(row.responsibility, this.session.accountId());
+  }
+
+  /** Every officer's name, for the table cell's tooltip. */
+  protected officerNames(row: AppRow): string {
+    return assignedOfficerNames(row.responsibility);
+  }
+
+  /**
+   * The full "Assigned To" sentence on the record: every officer and their
+   * position, or who else the step is waiting on.
+   */
+  protected assignedLine(row: AppRow): string {
+    const r = row.responsibility;
+    if (!r) return row.officer;
+    if (r.awaitingApplicant) return 'The applicant';
+    if (r.holder === null) return 'Nobody — this application is closed';
+    const names = assignedOfficerNames(r);
+    return names === ''
+      ? `${r.holder} — no officer assigned yet, so only a super admin can act`
+      : `${names} (${r.holder})`;
+  }
 
   constructor() {
     // This page is the only one that overwrites the browser tab title with a
@@ -521,33 +569,20 @@ export class Applications {
   /** Detail page's "Action" menu — only the legal, currently-eligible, and role-authorized next steps from the selected row's real lifecycleStatus, per STATUS_ACTIONS above. */
   protected readonly availableStatusActions = computed(() => {
     const row = this.selectedRow();
-    const role = this.session.role();
+    const who = this.session.authority();
     if (!row) return [];
     return STATUS_ACTIONS.filter((a) => {
       if (!canTransition(row.lifecycleStatus, a.target)) return false;
-      if (a.target === 'Assessed') {
-        // Same scope as approving a fee assessment (`staff:assess`) — this
-        // is the same office, just a different action on it.
-        if (!role || !ACTION_PERMISSIONS.approveAssessment(role)) return false;
-      }
-      if (a.target === 'Payment Under Verification' || a.target === 'Payment Verified') {
-        // Same scope as verifying the payment itself and as the 'For
-        // Approval' hop right below — all three are `staff:verify-payment`.
-        if (!role || !ACTION_PERMISSIONS.verifyPayment(role)) return false;
-      }
-      if (a.target === 'For Approval') {
-        // Same scope as verifying the payment itself (`staff:verify-payment`
-        // — cashier's real backend scope) — this hop belongs to whoever just
-        // confirmed the money, not to the evaluator or the approving officer.
-        if (!role || !ACTION_PERMISSIONS.verifyPayment(role)) return false;
-      }
+      // Every move by the scope the server's transition table requires for it,
+      // and an evaluation move by the stage the application is on — so each
+      // officer is offered exactly their own office's next step (`mayMove`).
+      if (!mayMove(who, row.lifecycleStatus, a.target, row.evaluationStage)) return false;
       if (a.target === 'Approved') {
         // Not `store.canApprove(row.id)` — that reads only the local
         // ApplicationStore signal, which a real application's documents
         // never populate. `approvalBlockingDocs` below is real-data-aware
         // (built from `documentRows()`) and expresses the identical rule.
         if (this.approvalBlockingDocs().length > 0) return false;
-        if (!role || !ACTION_PERMISSIONS.approveApplication(role)) return false;
       }
       return true;
     });
@@ -575,8 +610,8 @@ export class Applications {
     const row = this.selectedRow();
     if (!row) return false;
     if (!canTransition(row.lifecycleStatus, 'Approved')) return false;
-    const role = this.session.role();
-    if (!role || !ACTION_PERMISSIONS.approveApplication(role)) return false;
+    const who = this.session.authority();
+    if (!who || !ACTION_PERMISSIONS.approveApplication(who)) return false;
     return this.approvalBlockingDocs().length > 0;
   });
 
@@ -854,7 +889,7 @@ export class Applications {
 
   protected readonly canAssessFee = computed(() => {
     const row = this.selectedRow();
-    const role = this.session.role();
+    const role = this.session.authority();
     return (
       !!row &&
       !!role &&
@@ -878,7 +913,7 @@ export class Applications {
    */
   protected readonly canGeneratePermit = computed(() => {
     const row = this.selectedRow();
-    const role = this.session.role();
+    const role = this.session.authority();
     return (
       !!row &&
       !!role &&
@@ -1021,6 +1056,23 @@ export class Applications {
     this.router.navigateByUrl(`/applications/${row.id}`);
   }
 
+  /** The row's Edit — straight to the working screen. */
+  protected openEdit(row: AppRow): void {
+    this.router.navigateByUrl(`/applications/${row.id}/edit`);
+  }
+
+  /** From the record to the working screen. */
+  protected editCurrent(): void {
+    const row = this.selectedRow();
+    if (row) this.router.navigateByUrl(`/applications/${row.id}/edit`);
+  }
+
+  /** From the working screen back to the read-only record. */
+  protected viewCurrent(): void {
+    const row = this.selectedRow();
+    if (row) this.router.navigateByUrl(`/applications/${row.id}`);
+  }
+
   selectDetailTab(tab: DetailTab): void {
     this.detailTab.set(tab);
   }
@@ -1050,7 +1102,7 @@ export class Applications {
 
   /** Same pattern as openEvaluations() above — the Assessment Workspace lives on the standalone Payments page (no per-application route here), reached with `?applicationId=`. There is no bulk "assessments" list to link to instead; see payments.ts's own doc comment for why. */
   protected readonly canEditAssessment = computed(() => {
-    const role = this.session.role();
+    const role = this.session.authority();
     return !!role && ACTION_PERMISSIONS.editAssessment(role);
   });
 
@@ -1361,7 +1413,9 @@ export class Applications {
   protected onIntakeCreated(record: ApplicationRecord): void {
     this.showIntake.set(false);
     this.resumeDraftId.set(null);
-    this.router.navigateByUrl(`/applications/${record.id}`);
+    // Filed at the counter to be worked on — the next act is usually the
+    // officer's own (receive it, check the documents), so the working screen.
+    this.router.navigateByUrl(`/applications/${record.id}${this.canWork() ? '/edit' : ''}`);
   }
 
   // ---- Detail-header "Action" (status) menu ----------------------------

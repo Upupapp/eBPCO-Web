@@ -32,11 +32,15 @@ function withSession(session: Session | null): Capabilities {
 }
 
 const session = (over: Partial<Session> = {}): Session => ({
+  accountId: 'a0000000-0000-4000-8000-000000000001',
   name: 'Engr. Ana Reyes',
   email: 'ana@castillasorsogon.gov.ph',
   role: 'Evaluator',
   scopes: null,
   assignedForms: null,
+  wireRoles: ['evaluator'],
+  stages: null,
+  position: 'Evaluator',
   ...over,
 });
 

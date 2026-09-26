@@ -13,12 +13,13 @@ import { PermitType } from '../domain/permit.model';
  * (b) whether it may only view, or view and edit — respond to citizens and
  * decide applications.
  *
- * ── There is no delete ──────────────────────────────────────────────────
+ * ── Delete is the super admin's, and it keeps the record ────────────────
  *
- * Deliberately absent, and the absence is the feature. An account is disabled,
- * never removed: the applications it touched carry its name, and deleting the
- * account would leave an audit trail pointing at nobody. The API agrees — it
- * offers `disable` and `enable` and no destructive route for a staff user.
+ * Owner request, 2026-09-26: the super admin may delete a staff account. The
+ * server decides what that means (`remove` below): an account that never acted
+ * is deleted outright; one whose name is on decisions is RETIRED — it can never
+ * sign in again and leaves the directory, but its name stays on what it did, so
+ * the audit trail never points at nobody. An administrator still only disables.
  */
 
 export type StaffStatus = 'Active' | 'Disabled' | 'Pending';
@@ -35,6 +36,8 @@ export type StaffStatus = 'Active' | 'Disabled' | 'Pending';
 export interface StaffMember {
   readonly id: string;
   readonly email: string;
+  /** The officer's own name. Null for an account made before names were recorded; absent from an older server. */
+  readonly fullName?: string | null;
   readonly roles: readonly string[];
   readonly status: StaffStatus;
   readonly mfaRequired: boolean;
@@ -48,6 +51,11 @@ export interface StaffMember {
 export interface StaffAccess {
   readonly level: AccessLevel;
   readonly permitTypes: readonly string[];
+  /**
+   * The evaluation stages this officer decides (officer positions, 2026-09-26).
+   * Absent from an older server — which is silence, not "none".
+   */
+  readonly evaluationStages?: readonly string[];
 }
 
 export type StaffAccessResult =
@@ -88,6 +96,13 @@ export type SessionListResult =
 
 export type StaffWriteResult =
   | { readonly kind: 'done' }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
+/** What deleting an account did — the server's own words in `detail`. */
+export type StaffRemoveResult =
+  | { readonly kind: 'done'; readonly mode: 'deleted' | 'retired'; readonly detail: string }
   | { readonly kind: 'refused'; readonly message: string }
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
@@ -197,10 +212,12 @@ export class StaffDirectoryApi {
    * account with no roles is a legitimate call (the server defaults `roles`
    * to `[]`), created ahead of a posting being confirmed.
    */
-  async create(email: string, roles: readonly string[]): Promise<StaffCreateResult> {
+  async create(email: string, roles: readonly string[], fullName?: string): Promise<StaffCreateResult> {
     try {
+      const name = fullName?.trim();
       const response = await this.api.post<StaffMember & { nextStep: string }>('/staff/users', {
         email,
+        ...(name ? { fullName: name } : {}),
         roles: [...roles],
       });
       const { nextStep, ...member } = response;
@@ -215,7 +232,56 @@ export class StaffDirectoryApi {
     }
   }
 
-  /** Disable an account. It is preserved — see the note on delete above. */
+  /**
+   * Replace an account's roles — the complete set, which the server swaps in
+   * wholesale. It refuses an administrator changing their own, and anyone but a
+   * super admin touching the super admin role.
+   */
+  async setRoles(id: string, roles: readonly string[]): Promise<StaffWriteResult> {
+    return this.write(`/staff/users/${encodeURIComponent(id)}/roles`, { roles: [...roles] });
+  }
+
+  /** Replace the forms an account may work on. The server refuses an empty list. */
+  async setForms(id: string, permitTypes: readonly string[]): Promise<StaffWriteResult> {
+    return this.put(`/staff/users/${encodeURIComponent(id)}/access/forms`, { permitTypes: [...permitTypes] });
+  }
+
+  /** View only, or view and edit. */
+  async setLevel(id: string, level: AccessLevel): Promise<StaffWriteResult> {
+    return this.put(`/staff/users/${encodeURIComponent(id)}/access/level`, { level });
+  }
+
+  /** Replace the evaluation stages this officer decides. An empty list takes every stage away. */
+  async setStages(id: string, stages: readonly string[]): Promise<StaffWriteResult> {
+    return this.put(`/staff/users/${encodeURIComponent(id)}/access/stages`, { stages: [...stages] });
+  }
+
+  /** Correct the name an officer's decisions are shown under. The address cannot be changed. */
+  async rename(id: string, fullName: string): Promise<StaffWriteResult> {
+    try {
+      await this.api.patch<void>(`/staff/users/${encodeURIComponent(id)}`, { fullName: fullName.trim() });
+      return { kind: 'done' };
+    } catch (error) {
+      return this.classify(error);
+    }
+  }
+
+  /**
+   * Delete an account — the super admin's alone. The answer says whether it was
+   * deleted outright or retired because its name is on decisions.
+   */
+  async remove(id: string): Promise<StaffRemoveResult> {
+    try {
+      const answer = await this.api.delete<{ mode: 'deleted' | 'retired'; detail: string }>(
+        `/staff/users/${encodeURIComponent(id)}`,
+      );
+      return { kind: 'done', mode: answer.mode, detail: answer.detail };
+    } catch (error) {
+      return this.classify(error);
+    }
+  }
+
+  /** Disable an account. It is preserved, and can be enabled again. */
   async disable(id: string, reason: string): Promise<StaffWriteResult> {
     return this.write(`/staff/users/${encodeURIComponent(id)}/disable`, {
       reason: reason.trim(),
@@ -300,7 +366,7 @@ export class StaffDirectoryApi {
    * answer and must reach the screen as the server worded it, not flattened
    * into "something went wrong".
    */
-  private classify(error: unknown): StaffWriteResult {
+  private classify(error: unknown): Exclude<StaffWriteResult, { readonly kind: 'done' }> {
     if (error instanceof ApiError) {
       if (error.status === 404 || error.status === 501) return { kind: 'unavailable' };
       if (error.status === 403 || error.status === 409) {

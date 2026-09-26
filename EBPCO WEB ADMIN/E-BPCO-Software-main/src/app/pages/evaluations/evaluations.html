@@ -22,6 +22,9 @@
           <span class="eval-step-number" aria-hidden="true">{{
             (i + 1 + '').padStart(2, '0')
           }}</span>
+          @if (isMyStage(card.key)) {
+            <span class="eval-step-mine">Your stage</span>
+          }
           <span class="eval-step-arrow" aria-hidden="true">
             <app-icon name="arrow-up-right" [size]="14" />
           </span>
@@ -344,7 +347,7 @@
             <th>TYPE</th>
             <th>REVIEWING DEPARTMENT</th>
             <th>DATE SUBMITTED</th>
-            <th>ASSIGNED OFFICER</th>
+            <th>ASSIGNED TO</th>
             <th>STATUS</th>
             <th>ACTION</th>
           </tr>
@@ -440,10 +443,8 @@
                           <button
                             type="button"
                             role="menuitem"
-                            [disabled]="!capabilities.canEdit()"
-                            [attr.title]="
-                              capabilities.canEdit() ? null : capabilities.viewOnlyReason()
-                            "
+                            [disabled]="!mayDecide()"
+                            [attr.title]="decideBlockedReason()"
                             (click)="advanceStage(row)"
                           >
                             <app-icon name="check-circle" [size]="14" />
@@ -470,7 +471,8 @@
                             type="button"
                             role="menuitem"
                             class="danger"
-                            [disabled]="!revisionRemarks().trim()"
+                            [disabled]="!mayDecide() || !revisionRemarks().trim()"
+                            [attr.title]="decideBlockedReason()"
                             (click)="returnForRevision(row)"
                           >
                             <app-icon name="alert-triangle" [size]="14" />
@@ -619,7 +621,7 @@
         }
       </ul>
 
-      <h3>Assigned Officer</h3>
+      <h3>Assigned To</h3>
       <div class="officer-row">
         <app-avatar [name]="row.officer" [size]="34" />
         <div>
@@ -717,8 +719,8 @@
             <button
               type="button"
               class="btn-primary"
-              [disabled]="!capabilities.canEdit()"
-              [attr.title]="capabilities.canEdit() ? null : capabilities.viewOnlyReason()"
+              [disabled]="!mayDecide()"
+              [attr.title]="decideBlockedReason()"
               (click)="advanceStage(row)"
             >
               <app-icon name="check-circle" [size]="14" />
@@ -740,8 +742,8 @@
             <button
               type="button"
               class="btn-outline danger"
-              [disabled]="!capabilities.canEdit() || !revisionRemarks().trim()"
-              [attr.title]="capabilities.canEdit() ? null : capabilities.viewOnlyReason()"
+              [disabled]="!mayDecide() || !revisionRemarks().trim()"
+              [attr.title]="decideBlockedReason()"
               (click)="returnForRevision(row)"
             >
               <app-icon name="alert-triangle" [size]="14" />

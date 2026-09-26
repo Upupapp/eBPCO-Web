@@ -166,27 +166,27 @@ export class Payments {
   // ---- Permissions ---------------------------------------------------------
 
   protected readonly canConfigurePayments = computed(() => {
-    const role = this.session.role();
+    const role = this.session.authority();
     return !!role && ACTION_PERMISSIONS.configurePayments(role);
   });
   protected readonly canEditAssessment = computed(() => {
-    const role = this.session.role();
+    const role = this.session.authority();
     return !!role && ACTION_PERMISSIONS.editAssessment(role);
   });
   protected readonly canApproveAssessment = computed(() => {
-    const role = this.session.role();
+    const role = this.session.authority();
     return !!role && ACTION_PERMISSIONS.approveAssessment(role);
   });
   protected readonly canRecordPayment = computed(() => {
-    const role = this.session.role();
+    const role = this.session.authority();
     return !!role && ACTION_PERMISSIONS.recordPayment(role);
   });
   protected readonly canVerifyPayment = computed(() => {
-    const role = this.session.role();
+    const role = this.session.authority();
     return !!role && ACTION_PERMISSIONS.verifyPayment(role);
   });
   protected readonly canAdjustPayment = computed(() => {
-    const role = this.session.role();
+    const role = this.session.authority();
     return !!role && ACTION_PERMISSIONS.adjustPayment(role);
   });
 

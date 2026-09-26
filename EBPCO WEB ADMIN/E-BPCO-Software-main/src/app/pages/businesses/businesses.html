@@ -148,11 +148,25 @@
                     type="button"
                     class="icon-btn view"
                     aria-label="View business"
+                    title="View — read-only"
                     (click)="openDetail(row)"
                   >
                     <app-icon name="eye" [size]="14" />
                   </button>
-                  @if (row.status === 'Active') {
+                  @if (!store.isSeedData() && canEditBusiness()) {
+                    <button
+                      type="button"
+                      class="icon-btn edit"
+                      aria-label="Edit business"
+                      title="Edit — correct the business details"
+                      (click)="openEdit(row)"
+                    >
+                      <app-icon name="edit" [size]="14" />
+                    </button>
+                  }
+                  @if (!canEditBusiness() && !store.isSeedData()) {
+                    <!-- Deactivating needs applications:write too; nothing to offer. -->
+                  } @else if (row.status === 'Active') {
                     <button
                       type="button"
                       class="status-toggle-btn deactivate"
@@ -475,7 +489,7 @@
 
       @switch (detailTab()) {
         @case ('overview') {
-          @if (!store.isSeedData()) {
+          @if (!store.isSeedData() && canEditBusiness()) {
             <div class="detail-actions" style="display:flex; gap:8px; margin-bottom:12px;">
               @if (!editingBusiness()) {
                 <button type="button" class="btn-outline" (click)="startEditBusiness()">

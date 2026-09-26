@@ -1,4 +1,7 @@
-import { ACTION_PERMISSIONS, ALL_STAFF_ROLES, NAV_MODULES, StaffRole, canAccessPath } from './permissions';
+import {
+  ACTION_PERMISSIONS, ALL_STAFF_ROLES, Authority, NAV_MODULES, StaffRole, canAccessPath,
+  mayEvaluateStage, mayMove, mayOpen,
+} from './permissions';
 
 function allowedRoles(fn: (role: StaffRole) => boolean): StaffRole[] {
   return ALL_STAFF_ROLES.filter(fn);
@@ -130,5 +133,147 @@ describe('the renamed Staff & Roles module', () => {
     const mod = NAV_MODULES.find((m) => m.key === 'user-roles')!;
     expect(mod.label).toBe('Staff & Roles');
     expect(mod.path).toBe('/user-roles');
+  });
+});
+
+// ── Officer positions (2026-09-26) ─────────────────────────────────────
+//
+// The scopes below are the server's own (`ROLE_SCOPES` in the API's
+// identity/domain/account.ts), copied rather than invented, so each test asks
+// "would the server accept this officer's request?".
+
+const SCOPES = {
+  receiving: ['applications:read', 'documents:read', 'staff:receive', 'staff:annotate', 'citizens:read'],
+  evaluator: ['applications:read', 'documents:read', 'staff:evaluate', 'staff:annotate'],
+  assessor: ['applications:read', 'payments:read', 'staff:assess', 'staff:annotate'],
+  cashier: ['applications:read', 'payments:read', 'staff:verify-payment', 'staff:annotate'],
+  administrator: ['staff:administer', 'citizens:read'],
+  auditor: ['applications:read', 'documents:read', 'payments:read', 'audit:read'],
+} as const;
+
+const officer = (
+  scopes: readonly string[],
+  stages: readonly string[] | null = [],
+  role: StaffRole = 'Evaluator',
+): Authority => ({ role, scopes, stages, superAdmin: false });
+const superAdmin: Authority = { role: 'Super Admin', scopes: ['staff:administer'], stages: null, superAdmin: true };
+const opens = (who: Authority) => NAV_MODULES.filter((m) => mayOpen(m, who)).map((m) => m.key);
+
+describe('officer positions — which screens an officer sees', () => {
+  it('a Receiving Officer sees intake and citizens, not Staff & Roles — the portal used to file them under Administrator', () => {
+    expect(opens(officer(SCOPES.receiving, null, 'Administrator'))).toEqual([
+      'dashboard', 'applications', 'businesses', 'citizens', 'archive',
+    ]);
+  });
+
+  it('a Cashier sees Payments, never Evaluations or Permit Release', () => {
+    expect(opens(officer(SCOPES.cashier, null, 'Payment Officer'))).toEqual([
+      'dashboard', 'applications', 'payments', 'archive',
+    ]);
+  });
+
+  it('an Administrator manages staff and citizens but holds no application scope, so Applications stays hidden', () => {
+    const keys = opens(officer(SCOPES.administrator, null, 'Administrator'));
+    expect(keys).toContain('user-roles');
+    expect(keys).toContain('workflow');
+    expect(keys).not.toContain('applications');
+    // The owner's ruling: approving access requests is the super admin's alone.
+    expect(keys).not.toContain('access-requests');
+  });
+
+  it('the super admin opens every module', () => {
+    const everyScope: Authority = {
+      ...superAdmin,
+      scopes: [
+        'applications:read', 'applications:write', 'staff:evaluate', 'staff:assess', 'staff:verify-payment',
+        'staff:approve', 'staff:release', 'staff:administer', 'citizens:read', 'audit:read',
+      ],
+    };
+    for (const mod of NAV_MODULES) expect(mayOpen(mod, everyScope)).toBe(true);
+  });
+
+  it('a session with no scopes (an offline dev bypass) falls back to the portal role, as before', () => {
+    const bypass: Authority = { role: 'Auditor', scopes: null, stages: null, superAdmin: false };
+    expect(canAccessPath(bypass, '/system-logs')).toBe(true);
+    expect(canAccessPath(bypass, '/user-roles')).toBe(false);
+  });
+});
+
+describe('officer positions — evaluation stages', () => {
+  const fireSafety = officer(SCOPES.evaluator, ['Fire Safety']);
+
+  it('a Fire Safety Evaluator decides the Fire Safety stage and no other', () => {
+    expect(mayEvaluateStage(fireSafety, 'Fire Safety')).toBe(true);
+    for (const stage of ['Initial', 'Zoning', 'OBO', 'Final Approval']) {
+      expect(mayEvaluateStage(fireSafety, stage)).toBe(false);
+    }
+  });
+
+  it('the super admin decides every stage', () => {
+    const everything: Authority = { ...superAdmin, scopes: ['staff:evaluate'], stages: [] };
+    for (const stage of ['Initial', 'Zoning', 'Fire Safety', 'OBO', 'Final Approval']) {
+      expect(mayEvaluateStage(everything, stage)).toBe(true);
+    }
+  });
+
+  it('a stage assigned to an account without the evaluate scope still decides nothing', () => {
+    expect(mayEvaluateStage(officer(SCOPES.cashier, ['Fire Safety']), 'Fire Safety')).toBe(false);
+  });
+
+  it('an older server that reports no stages is not second-guessed — it stays the judge', () => {
+    expect(mayEvaluateStage(officer(SCOPES.evaluator, null), 'Zoning')).toBe(true);
+  });
+});
+
+describe('officer positions — the status moves offered', () => {
+  const fireSafety = officer(SCOPES.evaluator, ['Fire Safety']);
+  const initial = officer(SCOPES.evaluator, ['Initial']);
+
+  it('a Fire Safety Evaluator returns an application only while Fire Safety is the stage on hand', () => {
+    expect(mayMove(fireSafety, 'Under Evaluation', 'Revision Required', 'Fire Safety')).toBe(true);
+    expect(mayMove(fireSafety, 'Under Evaluation', 'Revision Required', 'Zoning')).toBe(false);
+  });
+
+  it('moving out of Document Verification is the Initial stage\'s decision', () => {
+    expect(mayMove(initial, 'Document Verification', 'Under Evaluation', null)).toBe(true);
+    expect(mayMove(fireSafety, 'Document Verification', 'Under Evaluation', null)).toBe(false);
+  });
+
+  it('a Cashier is never offered "Mark Received", and a Receiving Officer never "Verify Payment"', () => {
+    expect(mayMove(officer(SCOPES.cashier), 'Submitted', 'Received', null)).toBe(false);
+    expect(mayMove(officer(SCOPES.receiving), 'Submitted', 'Received', null)).toBe(true);
+    expect(mayMove(officer(SCOPES.receiving), 'Payment Under Verification', 'Payment Verified', null)).toBe(false);
+    expect(mayMove(officer(SCOPES.cashier), 'Payment Under Verification', 'Payment Verified', null)).toBe(true);
+  });
+
+  it('a move the Workflow screen added, which this table does not know, is left for the server to judge', () => {
+    expect(mayMove(officer(SCOPES.cashier), 'Assessed', 'Some New Status', null)).toBe(true);
+  });
+
+  it('nobody signed in moves nothing', () => {
+    expect(mayMove(null, 'Submitted', 'Received', null)).toBe(false);
+  });
+});
+
+describe('officer positions — actions follow the server scope, not the portal role', () => {
+  it('the Assessor issues the Order of Payment and the Cashier confirms it, never the other way round', () => {
+    const assessor = officer(SCOPES.assessor, null, 'Payment Officer');
+    const cashier = officer(SCOPES.cashier, null, 'Payment Officer');
+    expect(ACTION_PERMISSIONS.approveAssessment(assessor)).toBe(true);
+    expect(ACTION_PERMISSIONS.verifyPayment(assessor)).toBe(false);
+    expect(ACTION_PERMISSIONS.approveAssessment(cashier)).toBe(false);
+    expect(ACTION_PERMISSIONS.verifyPayment(cashier)).toBe(true);
+  });
+
+  it('an Auditor reads everything and acts on nothing', () => {
+    const auditor = officer(SCOPES.auditor, null, 'Auditor');
+    for (const [name, allowed] of Object.entries(ACTION_PERMISSIONS)) {
+      expect({ name, allowed: allowed(auditor) }).toEqual({ name, allowed: false });
+    }
+  });
+
+  it('only the super admin configures payments, whatever scopes an Administrator holds', () => {
+    expect(ACTION_PERMISSIONS.configurePayments(officer(SCOPES.administrator, null, 'Administrator'))).toBe(false);
+    expect(ACTION_PERMISSIONS.configurePayments(superAdmin)).toBe(true);
   });
 });

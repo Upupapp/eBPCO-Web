@@ -1,3 +1,4 @@
+import { Responsibility, assignedToLabel } from '../domain/responsibility';
 import { Injectable, inject } from '@angular/core';
 
 import { ApiClient } from './api.client';
@@ -31,8 +32,6 @@ import {
  *   businessId           the row has the NAME but not the id; the detail
  *                        endpoint has it. Rendering a link from a name would
  *                        be wrong the moment two businesses share one.
- *   officer              no counterpart at all. Nothing in the API assigns an
- *                        application to a named officer.
  *   evaluationResult     the detail endpoint carries the per-stage evaluation
  *                        rows; the queue row does not, and has no single
  *                        result to summarise across up to 5 of them.
@@ -96,6 +95,8 @@ interface QueueRow {
   readonly renewsPermitNumber?: string | null;
   /** The permit a Renewal/Amendment names, self-reported and never verified, for a permit predating eBPCO. Absent from an older server (053). */
   readonly priorPermitClaim?: string | null;
+  /** Who it is waiting on — the officers holding the current step (officer positions). Absent from an older server. */
+  readonly responsibility?: Responsibility | null;
 }
 
 interface QueuePage {
@@ -917,7 +918,10 @@ function toRecord(row: QueueRow): ApplicationRecord {
     applicationAction: isValidApplicationAction(row.applicationAction)
       ? row.applicationAction
       : null,
-    officer: NOT_SENT,
+    // Who the application is waiting on, from the server's own derivation —
+    // this was a dash on every row while nothing in the API named an officer.
+    officer: row.responsibility ? assignedToLabel(row.responsibility) : NOT_SENT,
+    responsibility: row.responsibility ?? null,
     dateSubmitted: submitted === null ? NOT_SENT : submitted.toISOString().slice(0, 10),
     dateValue: submitted ?? new Date(0),
     completedAt: completed,

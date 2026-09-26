@@ -54,6 +54,7 @@ const SCREENS: ReadonlyArray<{ route: string; component: unknown }> = [
   { route: 'dashboard', component: Dashboard },
   { route: 'applications', component: Applications },
   { route: 'applications/:id', component: Applications },
+  { route: 'applications/:id/edit', component: Applications },
   { route: 'evaluations', component: Evaluations },
   { route: 'payments', component: Payments },
   { route: 'permit-release', component: PermitRelease },

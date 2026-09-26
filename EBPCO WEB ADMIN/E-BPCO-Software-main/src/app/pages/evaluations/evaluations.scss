@@ -733,3 +733,19 @@
     flex: 1 1 50%;
   }
 }
+
+// "Your stage" on the evaluation-type cards (officer positions): an officer
+// sees at a glance which of the five queues is theirs to decide.
+.eval-step-mine {
+  margin-left: auto;
+  margin-right: 0.4rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+  white-space: nowrap;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}

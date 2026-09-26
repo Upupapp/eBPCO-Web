@@ -21,6 +21,8 @@ import { DocumentStatus } from '../../core/domain/document.model';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 import { Capabilities } from '../../core/session/capabilities';
+import { SessionService } from '../../core/session/session.service';
+import { mayEvaluateStage } from '../../core/session/permissions';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
 import { StaffEvaluationsApi, EvaluationQueueRow } from '../../core/api/staff-evaluations.api';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
@@ -122,6 +124,43 @@ export class Evaluations implements OnInit {
    */
   protected readonly capabilities = inject(Capabilities);
   protected readonly formatDateTime = formatDateTime;
+  private readonly session = inject(SessionService);
+
+  /** The evaluation stage of the card that is open, or null on the card list. */
+  protected readonly openStage = computed(() => {
+    const card = this.selectedCard();
+    return card ? EVAL_KEY_TO_APP_STAGE[card.key] : null;
+  });
+
+  /**
+   * Whether this officer decides the open stage (migration 057): the server
+   * refuses any other stage, so Advance and Return are offered only on the
+   * officer's own — a Zoning Officer sees Fire Safety as a record, not a form.
+   */
+  protected readonly mayDecide = computed(() => {
+    const stage = this.openStage();
+    return stage !== null && this.capabilities.canEdit() && mayEvaluateStage(this.session.authority(), stage);
+  });
+
+  /** Why the decision buttons are off, in one sentence — or null when they are on. */
+  protected readonly decideBlockedReason = computed<string | null>(() => {
+    if (this.mayDecide()) return null;
+    if (!this.capabilities.canEdit()) return this.capabilities.viewOnlyReason();
+    const stage = this.openStage();
+    const held = this.session.authority()?.stages ?? [];
+    return `The ${stage ?? 'this'} stage is decided by its own office. `
+      + (held.length === 0 ? 'Your account has no evaluation stage assigned.' : `Your account decides: ${held.join(', ')}.`);
+  });
+
+  /** The officer's own stages, for "Your stage" on the cards. Every stage for a super admin. */
+  protected readonly myStages = computed(() => this.session.authority()?.stages ?? []);
+
+  /** Whether a card is one of this officer's own stages — never on a super admin's, who holds every one. */
+  protected isMyStage(key: EvalTypeKey): boolean {
+    const stage = EVAL_KEY_TO_APP_STAGE[key];
+    const who = this.session.authority();
+    return stage !== null && who !== null && !who.superAdmin && this.myStages().includes(stage);
+  }
 
   private readonly store = inject(ApplicationStore);
   private readonly evaluationsApi = inject(StaffEvaluationsApi);

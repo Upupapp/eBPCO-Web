@@ -3,7 +3,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Icon } from '../icon/icon';
 import { DilgSeal } from '../dilg-seal/dilg-seal';
 import { SessionService } from '../../core/session/session.service';
-import { NAV_MODULES, NavGroup, NavModule } from '../../core/session/permissions';
+import { NAV_MODULES, NavGroup, NavModule, mayOpen } from '../../core/session/permissions';
 
 interface NavSection {
   group: NavGroup;
@@ -37,8 +37,9 @@ export class Sidebar {
   readonly logoutPath = input<string>('/login');
 
   protected readonly sections = computed<NavSection[]>(() => {
-    const role = this.session.role();
-    const visible = role ? NAV_MODULES.filter((m) => m.roles.includes(role)) : NAV_MODULES;
+    // By the account's real scopes (`mayOpen`), the same test the route guard applies.
+    const who = this.session.authority();
+    const visible = who ? NAV_MODULES.filter((m) => mayOpen(m, who)) : NAV_MODULES;
     return GROUP_ORDER.map((g) => ({ ...g, items: visible.filter((m) => m.group === g.group) })).filter(
       (section) => section.items.length > 0,
     );

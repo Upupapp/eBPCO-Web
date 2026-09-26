@@ -203,6 +203,8 @@ describe('Access Requests', () => {
     c.startApprove(c.requests()[0]);
     c.setLevel('view-edit');
     (c as unknown as { toggleGrantRole(k: string): void }).toggleGrantRole('evaluator');
+    // An evaluator decides one stage, granted in the same approval.
+    (c as unknown as { toggleGrantStage(s: string): void }).toggleGrantStage('Zoning');
     const pending = c.confirmApprove();
 
     const http = TestBed.inject(HttpTestingController);
@@ -216,6 +218,7 @@ describe('Access Requests', () => {
     // `roles` is required by the server and non-empty. The portal used to send
     // only level and permitTypes, so every approval would have failed (F-30).
     expect(req.request.body.roles).toEqual(['evaluator']);
+    expect(req.request.body.stages).toEqual(['Zoning']);
     req.flush(null, { status: 204, statusText: 'No Content' });
 
     // The reload is queued behind the decision's promise, so it does not exist

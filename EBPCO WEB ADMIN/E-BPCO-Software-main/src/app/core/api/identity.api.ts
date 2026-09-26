@@ -40,6 +40,12 @@ export interface Me {
    */
   readonly permitTypes?: readonly string[];
 
+  /**
+   * The evaluation stages this officer decides (migration 057) — every stage
+   * for a super admin. Absent means an older server that does not say.
+   */
+  readonly evaluationStages?: readonly string[];
+
   /** The officer's name. Null means genuinely not on record, not blank. */
   readonly fullName?: string | null;
 

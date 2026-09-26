@@ -1,3 +1,4 @@
+import { Responsibility } from './responsibility';
 import {
   ApplicationLifecycleStatus,
   CoarseStatus,
@@ -55,7 +56,14 @@ export interface ApplicationRecord {
    */
   permitType: PermitType | null;
   applicationAction: ApplicationAction | null;
+  /**
+   * Who the application is waiting on, as one line ("Maria Santos",
+   * "Applicant", "Fire Safety Evaluator (no officer yet)") — built from
+   * `responsibility` by `assignedToLabel`. '—' where the server did not say.
+   */
   officer: string;
+  /** The server's own "Assigned to" (officer positions, 2026-09-26). Absent from an older server and on local rows. */
+  responsibility?: Responsibility | null;
   dateSubmitted: string;
   /** Same moment as dateSubmitted, kept as a real Date for sorting/range filtering. */
   dateValue: Date;

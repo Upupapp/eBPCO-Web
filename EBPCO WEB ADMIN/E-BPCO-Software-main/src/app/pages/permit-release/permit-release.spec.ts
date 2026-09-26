@@ -40,6 +40,10 @@ function mount(role: StaffRole = 'Releasing Officer'): ComponentFixture<PermitRe
     role,
     scopes: null,
     assignedForms: null,
+    accountId: 'a0000000-0000-4000-8000-000000000002',
+    wireRoles: [],
+    stages: null,
+    position: role,
   });
   const fixture = TestBed.createComponent(PermitRelease);
   fixture.detectChanges();

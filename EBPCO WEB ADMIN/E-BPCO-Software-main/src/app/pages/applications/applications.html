@@ -147,7 +147,7 @@
             <th>LOCATION</th>
             <th>TYPE</th>
             <th>DATE SUBMITTED</th>
-            <th>ASSIGNED OFFICER</th>
+            <th>ASSIGNED TO</th>
             <th>STATUS</th>
             <th>ACTION</th>
           </tr>
@@ -193,7 +193,23 @@
               <td>{{ row.location }}</td>
               <td>{{ row.type }}</td>
               <td>{{ row.dateSubmitted }}</td>
-              <td>{{ row.officer }}</td>
+              <!-- Who the application is waiting on — the server's own answer
+                   (officer positions), with the position beneath the name. -->
+              <td>
+                <div class="assigned-cell">
+                  <span class="assigned-name" [title]="officerNames(row)">
+                    {{ row.officer }}
+                    @if (isMine(row)) {
+                      <span class="mine-badge">You</span>
+                    }
+                  </span>
+                  @if (row.responsibility; as r) {
+                    @if (!r.awaitingApplicant && r.holder && r.officers.length > 0) {
+                      <span class="assigned-position">{{ r.holder }}</span>
+                    }
+                  }
+                </div>
+              </td>
               <td>
                 <!--
                   A Draft is deliberately shown apart from the coarse 3-value
@@ -224,22 +240,28 @@
                       <app-icon name="edit" [size]="15" />
                     </button>
                   } @else {
+                    <!-- View opens the record read-only; Edit opens the working
+                         screen. They used to open the same page. -->
                     <button
                       type="button"
                       class="icon-btn view"
                       [attr.aria-label]="'View application ' + row.id"
+                      title="View — read-only"
                       (click)="openDetail(row)"
                     >
                       <app-icon name="eye" [size]="15" />
                     </button>
-                    <button
-                      type="button"
-                      class="icon-btn edit"
-                      [attr.aria-label]="'Edit application ' + row.id"
-                      (click)="openDetail(row)"
-                    >
-                      <app-icon name="edit" [size]="15" />
-                    </button>
+                    @if (canWork()) {
+                      <button
+                        type="button"
+                        class="icon-btn edit"
+                        [attr.aria-label]="'Edit application ' + row.id"
+                        title="Edit — work on this application"
+                        (click)="openEdit(row)"
+                      >
+                        <app-icon name="edit" [size]="15" />
+                      </button>
+                    }
                   }
                   <button
                     type="button"
@@ -265,8 +287,12 @@
   </section>
 } @else if (view() === 'detail' && selectedDetail(); as detail) {
   <div class="detail-head">
-    <h1>Application Details</h1>
+    <div class="detail-title">
+      <h1>{{ editing() ? 'Edit Application' : 'Application Details' }}</h1>
+      <span class="mode-pill" [class.is-edit]="editing()">{{ editing() ? 'Editing' : 'View only' }}</span>
+    </div>
     <div class="header-actions">
+      @if (editing()) {
       <div class="menu-wrap">
         <button
           type="button"
@@ -306,6 +332,16 @@
       @if (canEditAssessment()) {
         <button type="button" class="btn-primary" (click)="openPaymentAssessment()">Payment</button>
       }
+      <button type="button" class="btn-outline" (click)="viewCurrent()">
+        <app-icon name="eye" [size]="15" />
+        View
+      </button>
+      } @else if (canWork()) {
+        <button type="button" class="btn-primary" (click)="editCurrent()">
+          <app-icon name="edit" [size]="15" />
+          Edit
+        </button>
+      }
       <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
       <div class="menu-wrap">
         <button
@@ -336,17 +372,38 @@
               <app-icon name="download" [size]="14" />
               Export Application
             </button>
-            <button type="button" role="menuitem" class="danger" (click)="deleteFromDetail()">
-              <app-icon name="archive" [size]="14" />
-              Archive Application
-            </button>
+            @if (editing()) {
+              <button type="button" role="menuitem" class="danger" (click)="deleteFromDetail()">
+                <app-icon name="archive" [size]="14" />
+                Archive Application
+              </button>
+            }
           </div>
         </ng-template>
       </div>
     </div>
   </div>
 
-  @if (quickActionError(); as message) {
+  @if (!editing()) {
+    <div class="mode-note" role="note">
+      <app-icon name="eye" [size]="16" />
+      <span>
+        You are viewing this application.
+        @if (canWork()) {
+          Choose <strong>Edit</strong> to decide on it, review its documents, assess its fees or add a note.
+        } @else {
+          Your position can read it but not change it.
+        }
+      </span>
+    </div>
+  } @else if (assignedToMe()) {
+    <div class="mode-note is-mine" role="note">
+      <app-icon name="user-check" [size]="16" />
+      <span>This application is waiting on you — {{ detail.row.responsibility?.step }}.</span>
+    </div>
+  }
+
+  @if (editing() && quickActionError(); as message) {
     <div class="quick-action-error" role="alert">
       <app-icon name="alert-triangle" [size]="16" />
       <span>{{ message }}</span>
@@ -356,7 +413,7 @@
     </div>
   }
 
-  @if (approvalBlockedByDocs()) {
+  @if (editing() && approvalBlockedByDocs()) {
     <div class="quick-action-error" role="alert">
       <app-icon name="alert-triangle" [size]="16" />
       <span>
@@ -468,8 +525,8 @@
           <span>Date Submitted</span>
         </div>
         <div>
-          <strong>{{ detail.row.officer }}</strong>
-          <span>Assigned Officer</span>
+          <strong [title]="assignedLine(detail.row)">{{ assignedToMe() ? 'You' : detail.row.officer }}</strong>
+          <span>{{ detail.row.responsibility?.officers?.length ? detail.row.responsibility?.holder : 'Assigned To' }}</span>
         </div>
       </div>
 
@@ -544,8 +601,16 @@
             <h3>Quick Information :</h3>
             <div class="quick-info">
               <ul>
-                <li>Assigned To: {{ detail.row.officer }}</li>
-                <li>Current Step: {{ detail.row.lifecycleStatus }}</li>
+                <li>
+                  Assigned To: {{ assignedLine(detail.row) }}
+                  @if (assignedToMe()) {
+                    <span class="mine-badge">You</span>
+                  }
+                </li>
+                @if (detail.row.responsibility?.step; as step) {
+                  <li>Next Step: {{ step }}</li>
+                }
+                <li>Current Status: {{ detail.row.lifecycleStatus }}</li>
                 @if (detail.row.lifecycleStatus === 'Under Evaluation') {
                   <!-- The one status where "what is it waiting on" is not the
                        status itself: five stages happen inside Under Evaluation,
@@ -657,16 +722,18 @@
                       <app-icon name="download" [size]="14" />
                       Export {{ docSelectedIds().size > 0 ? 'Selected' : 'All' }}
                     </button>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      [disabled]="!!realDetail() && !canAttachDocuments()"
-                      [title]="!!realDetail() && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
-                      (click)="markSelectedDocsAccepted()"
-                    >
-                      <app-icon name="check-circle" [size]="14" />
-                      Mark Selected Accepted
-                    </button>
+                    @if (editing()) {
+                      <button
+                        type="button"
+                        role="menuitem"
+                        [disabled]="!!realDetail() && !canAttachDocuments()"
+                        [title]="!!realDetail() && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
+                        (click)="markSelectedDocsAccepted()"
+                      >
+                        <app-icon name="check-circle" [size]="14" />
+                        Mark Selected Accepted
+                      </button>
+                    }
                   </div>
                 </ng-template>
               </div>
@@ -695,15 +762,17 @@
               </ul>
             </details>
 
-            <label class="doc-remarks-field">
-              Remarks <span class="optional">(required when rejecting or requesting revision)</span>
-              <input aria-label="Reason shown to the applicant…"
-                type="text"
-                [value]="docRemarksDraft()"
-                (input)="docRemarksDraft.set($any($event.target).value)"
-                placeholder="Reason shown to the applicant…"
-              />
-            </label>
+            @if (editing()) {
+              <label class="doc-remarks-field">
+                Remarks <span class="optional">(required when rejecting or requesting revision)</span>
+                <input aria-label="Reason shown to the applicant…"
+                  type="text"
+                  [value]="docRemarksDraft()"
+                  (input)="docRemarksDraft.set($any($event.target).value)"
+                  placeholder="Reason shown to the applicant…"
+                />
+              </label>
+            }
 
             <div class="table-wrap">
               <table>
@@ -781,6 +850,7 @@
                           <button type="button" class="preview-btn" (click)="previewDocumentRow(r)">
                             Preview
                           </button>
+                          @if (editing()) {
                           @if (
                             r.doc.status === 'Rejected' ||
                             r.doc.status === 'Revision Required' ||
@@ -838,7 +908,8 @@
                               Reject
                             </button>
                           }
-                        } @else {
+                          }
+                        } @else if (editing()) {
                           <label
                             class="resubmit-btn"
                             [title]="r.isReal && !canAttachDocuments() ? 'Only Records Officers and Super Admins can attach a document on a citizen\'s behalf.' : ''"
@@ -959,12 +1030,12 @@
                   </p>
                 }
                 <div class="permit-result-actions">
-                  @if (canAssessFee()) {
+                  @if (editing() && canAssessFee()) {
                     <button type="button" class="btn-primary" (click)="assessFeeAction()">
                       Assess Fee
                     </button>
                   }
-                  @if (canGeneratePermit()) {
+                  @if (editing() && canGeneratePermit()) {
                     <button type="button" class="btn-primary" (click)="openGeneratePermitModal()">
                       Generate {{ finalDocumentName() }}
                     </button>
@@ -984,6 +1055,9 @@
                 <span>Notes could not be read: {{ message }}</span>
               </div>
             }
+            @if (!editing()) {
+              <p class="empty-note">Choose <strong>Edit</strong> to add a note or reply.</p>
+            } @else {
             @if (replyTarget(); as target) {
               <div class="reply-banner">
                 Replying to <strong>{{ target.author }}</strong>
@@ -1005,6 +1079,7 @@
                 {{ sendingComment() ? 'Sending…' : 'Send' }}
               </button>
             </div>
+            }
 
             <div class="comment-list">
               @for (c of comments(); track c.id) {
@@ -1015,9 +1090,11 @@
                       >{{ c.author }}<em>{{ c.timeAgo }}</em></span
                     >
                     <p>{{ c.text }}</p>
-                    <div class="comment-links">
-                      <a href="javascript:void(0)" (click)="startReply(c)">Reply</a>
-                    </div>
+                    @if (editing()) {
+                      <div class="comment-links">
+                        <a href="javascript:void(0)" (click)="startReply(c)">Reply</a>
+                      </div>
+                    }
                   </div>
                 </div>
               } @empty {
@@ -1031,7 +1108,10 @@
   </div>
 } @else if (view() === 'info' && selectedDetail(); as detail) {
   <div class="detail-head">
-    <h1>Application Details</h1>
+    <div class="detail-title">
+      <h1>{{ editing() ? 'Edit Application' : 'Application Details' }}</h1>
+      <span class="mode-pill" [class.is-edit]="editing()">{{ editing() ? 'Editing' : 'View only' }}</span>
+    </div>
     <div class="header-actions">
       <button type="button" class="btn-outline" (click)="exportDetail()">
         <app-icon name="download" [size]="15" />
@@ -1067,10 +1147,12 @@
               <app-icon name="download" [size]="14" />
               Export Application
             </button>
-            <button type="button" role="menuitem" class="danger" (click)="deleteFromDetail()">
-              <app-icon name="archive" [size]="14" />
-              Archive Application
-            </button>
+            @if (editing()) {
+              <button type="button" role="menuitem" class="danger" (click)="deleteFromDetail()">
+                <app-icon name="archive" [size]="14" />
+                Archive Application
+              </button>
+            }
           </div>
         </ng-template>
       </div>
@@ -1125,7 +1207,7 @@
          returns when either of those closes the form. -->
     <div class="info-header-actions">
       <span class="last-updated">Last updated: {{ detail.lastUpdated }}</span>
-      @if (!editingProfile()) {
+      @if (editing() && !editingProfile()) {
         <button type="button" class="btn-primary" (click)="startEditProfile()">
           <app-icon name="edit" [size]="15" />Edit Profile
         </button>

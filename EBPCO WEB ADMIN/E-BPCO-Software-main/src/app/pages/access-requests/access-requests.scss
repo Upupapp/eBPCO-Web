@@ -227,6 +227,20 @@
   margin-bottom: 6px;
 }
 
+// The position quick-pick: sets role and stage together.
+.position-select {
+  display: block;
+  width: 100%;
+  max-width: 460px;
+  margin-bottom: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border, #d8dee9);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 13.5px;
+}
+
 .decision-warn {
   margin: -6px 0 14px;
   padding: 9px 11px;

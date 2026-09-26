@@ -136,6 +136,21 @@
                   }
                 }
 
+                <label class="decision-label" [attr.for]="'position-' + request.id">Position</label>
+                <select
+                  class="position-select"
+                  [id]="'position-' + request.id"
+                  (change)="applyPosition($any($event.target).value)"
+                >
+                  <option value="" [selected]="grantPositionKey() === ''">Choose a position</option>
+                  @for (p of positionOptions; track p.key) {
+                    <option [value]="p.key" [selected]="grantPositionKey() === p.key">{{ p.title }} — {{ p.office }}</option>
+                  }
+                </select>
+                <p class="decision-note">
+                  Sets the role and, for an evaluator, the one stage they decide. Adjust below if the post is unusual.
+                </p>
+
                 <fieldset class="forms-field">
                   <legend>
                     Role
@@ -164,6 +179,23 @@
                     }
                   </div>
                 </fieldset>
+
+                @if (grantDecidesStages()) {
+                  <fieldset class="forms-field">
+                    <legend>
+                      Evaluation stages this officer decides
+                      <span class="count">{{ grantStageCount() }} selected</span>
+                    </legend>
+                    <div class="forms-grid">
+                      @for (stage of evaluationStages; track stage) {
+                        <label class="form-option">
+                          <input type="checkbox" [checked]="isGrantStage(stage)" (change)="toggleGrantStage(stage)" />
+                          <span>{{ stage }}</span>
+                        </label>
+                      }
+                    </div>
+                  </fieldset>
+                }
 
                 <fieldset class="level-field">
                   <legend>Level of access</legend>

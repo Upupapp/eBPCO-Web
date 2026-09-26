@@ -35,11 +35,15 @@ function mount(session: Session | null) {
 }
 
 const session = (assignedForms: readonly string[] | null): Session => ({
+  accountId: 'a0000000-0000-4000-8000-000000000001',
   name: 'Engr. Ana Reyes',
   email: 'ana@castillasorsogon.gov.ph',
   role: 'Evaluator',
   scopes: null,
   assignedForms,
+  wireRoles: ['evaluator'],
+  stages: null,
+  position: 'Evaluator',
 });
 
 describe('Assigned forms notice', () => {

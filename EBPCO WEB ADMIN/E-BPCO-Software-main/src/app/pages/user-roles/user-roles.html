@@ -1,14 +1,12 @@
-<app-topbar title="User &amp; Roles" />
+<app-topbar title="Staff &amp; Roles" />
 
 @if (view() === 'list') {
   <div class="prototype-disclaimer" role="note">
     <app-icon name="info" [size]="16" />
     <span>
-      The staff directory above is real — creating, disabling and re-enabling an account, and
-      changing its access level and assigned forms, all reach the real server. Editing a role
-      card's own description and permission list further down this page does not: those stay
-      local to this browser session. The system's actual scope grants per role are defined in
-      code (<code>core/session/permissions.ts</code>) and are not editable from here.
+      Every account here is real. Give each officer a <strong>position</strong> — it sets what they may do and,
+      for an evaluator, which evaluation stage they decide; the server refuses anything outside it. A new
+      officer sets their own password with <strong>Forgot password</strong> on the sign-in page.
     </span>
   </div>
 
@@ -27,7 +25,7 @@
 
   <section class="card">
     <nav class="tab-nav">
-      @for (t of visibleTabs(); track t.key) {
+      @for (t of tabs; track t.key) {
         <button
           type="button"
           class="tab-btn"
@@ -44,20 +42,20 @@
       <div class="filter-bar">
         <div class="search-box">
           <app-icon name="search" [size]="16" />
-          <label class="sr-only" for="user-search">Search users</label>
+          <label class="sr-only" for="user-search">Search staff</label>
           <input
             id="user-search"
             type="text"
-            placeholder="Search name, email, or role..."
+            placeholder="Search name, email, or position"
             [(ngModel)]="searchTerm"
             (ngModelChange)="onFilterChange()"
           />
         </div>
 
-        <select aria-label="Role filter" class="filter-select" [(ngModel)]="roleFilter" (ngModelChange)="onFilterChange()">
-          <option>All Roles</option>
-          @for (role of roleOptions; track role) {
-            <option>{{ role }}</option>
+        <select aria-label="Position filter" class="filter-select" [(ngModel)]="positionFilter" (ngModelChange)="onFilterChange()">
+          <option>All Positions</option>
+          @for (title of positionOptions; track title) {
+            <option>{{ title }}</option>
           }
         </select>
         <select aria-label="Status filter" class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
@@ -69,12 +67,7 @@
 
         <div class="spacer"></div>
 
-        <button
-          type="button"
-          class="btn-outline"
-          [disabled]="!hasActiveFilters()"
-          (click)="clearFilters()"
-        >
+        <button type="button" class="btn-outline" [disabled]="!hasActiveFilters()" (click)="clearFilters()">
           <app-icon name="filter" [size]="15" />
           Clear Filters
         </button>
@@ -82,31 +75,33 @@
           <app-icon name="download" [size]="15" />
           Export
         </button>
-        <button type="button" class="btn-primary" (click)="openAddUser()">
-          <app-icon name="plus" [size]="15" />
-          Add User
-        </button>
+        @if (capabilities.canEdit()) {
+          <button type="button" class="btn-primary" (click)="openCreate()">
+            <app-icon name="plus" [size]="15" />
+            Add Staff Account
+          </button>
+        }
       </div>
 
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th scope="col">User</th>
-              <th scope="col">Role</th>
-              <th scope="col">Department</th>
+              <th scope="col">Staff</th>
+              <th scope="col">Position</th>
+              <th scope="col">Access</th>
               <th scope="col">Status</th>
               <th scope="col">Last Active</th>
               <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
-            @for (row of pagedUsers(); track row.email) {
+            @for (row of pagedUsers(); track row.id) {
               <tr
                 class="row-clickable"
                 tabindex="0"
                 role="button"
-                [attr.aria-label]="'View profile for ' + row.name"
+                [attr.aria-label]="'View ' + row.name"
                 (click)="openDetail(row)"
                 (keydown.enter)="openDetail(row)"
                 (keydown.space)="$event.preventDefault(); openDetail(row)"
@@ -120,7 +115,16 @@
                     </div>
                   </div>
                 </td>
-                <td>{{ row.role }}</td>
+                <td>
+                  <div class="position-cell">
+                    <span class="position-title">{{ row.position }}</span>
+                    @if (row.office) {
+                      <span class="position-office">{{ row.office }}</span>
+                    } @else if (row.stages && row.stages.length > 0) {
+                      <span class="position-office">Stages: {{ row.stages.join(', ') }}</span>
+                    }
+                  </div>
+                </td>
                 <td>{{ row.department }}</td>
                 <td>
                   <span class="status-pill" [class]="(row.status ?? 'unknown').toLowerCase()">{{
@@ -129,50 +133,58 @@
                 </td>
                 <td>{{ row.lastActive ?? '—' }}</td>
                 <td class="actions-cell" (click)="$event.stopPropagation()">
+                  <!-- View opens the account read-only; Edit opens its form.
+                       They used to open the same screen. -->
                   <button
                     type="button"
                     class="icon-btn view"
                     [attr.aria-label]="'View ' + row.name"
+                    title="View — read-only"
                     (click)="openDetail(row)"
                   >
                     <app-icon name="eye" [size]="14" />
                   </button>
-                  <button
-                    type="button"
-                    class="icon-btn edit"
-                    [attr.aria-label]="'Edit ' + row.name"
-                    (click)="openDetail(row)"
-                  >
-                    <app-icon name="edit" [size]="14" />
-                  </button>
-                  @if (row.status === 'Inactive') {
+                  @if (mayManage(row)) {
                     <button
                       type="button"
-                      class="icon-btn"
-                      [attr.aria-label]="'Enable ' + row.name"
-                      (click)="requestEnable(row)"
+                      class="icon-btn edit"
+                      [attr.aria-label]="'Edit ' + row.name"
+                      title="Edit — position, stages, forms and access"
+                      (click)="openEdit(row)"
                     >
-                      <app-icon name="check" [size]="14" />
+                      <app-icon name="edit" [size]="14" />
                     </button>
-                  } @else {
-                    <button
-                      type="button"
-                      class="icon-btn del"
-                      [attr.aria-label]="'Disable ' + row.name"
-                      (click)="requestDisable(row)"
-                    >
-                      <app-icon name="slash" [size]="14" />
-                    </button>
+                    @if (!isSelf(row)) {
+                      @if (row.status === 'Inactive') {
+                        <button
+                          type="button"
+                          class="icon-btn"
+                          [attr.aria-label]="'Enable ' + row.name"
+                          title="Enable"
+                          (click)="requestEnable(row)"
+                        >
+                          <app-icon name="check" [size]="14" />
+                        </button>
+                      } @else {
+                        <button
+                          type="button"
+                          class="icon-btn del"
+                          [attr.aria-label]="'Disable ' + row.name"
+                          title="Disable"
+                          (click)="requestDisable(row)"
+                        >
+                          <app-icon name="slash" [size]="14" />
+                        </button>
+                      }
+                    }
                   }
                 </td>
               </tr>
             } @empty {
               <!--
-                Four different facts, four sentences. "No users match your
-                search" is only true once the server has answered and the list
-                is genuinely filtered to nothing; saying it while loading, or
-                while the read failed, tells an administrator the directory is
-                empty when nobody has looked.
+                Four different facts, four sentences. "No accounts match" is only
+                true once the server has answered and the list is genuinely
+                filtered to nothing.
               -->
               <tr class="table-empty-row">
                 <td colspan="6">
@@ -185,7 +197,7 @@
                     The staff directory could not be read, so this is not a
                     picture of who holds an account. {{ message }}
                   } @else {
-                    No users match your search.
+                    No accounts match your search.
                   }
                 </td>
               </tr>
@@ -194,92 +206,92 @@
         </table>
       </div>
 
-      <app-pagination
-        class="pagination-row"
-        [totalItems]="totalItems()"
-        [pageSize]="pageSize"
-        [(page)]="page"
-      />
-    } @else if (activeTab() === 'roles') {
+      <app-pagination class="pagination-row" [totalItems]="totalItems()" [pageSize]="pageSize" [(page)]="page" />
+    } @else {
+      <p class="positions-intro">
+        The jobs in the permit office. Each is a fixed set of permissions the server enforces — an evaluator
+        decides only their own stage, and the Cashier cannot assess the fee they collect.
+      </p>
       <div class="role-grid">
-        @for (role of roles(); track role.name) {
-          <div class="role-card">
+        @for (p of positions; track p.key) {
+          <article class="role-card">
             <div class="role-head">
-              <span class="role-icon" [style.background]="role.iconBg">
+              <span class="role-icon" [class.is-super]="p.key === 'super-admin'">
                 <app-icon name="shield" [size]="18" />
               </span>
               <div>
-                <h3>{{ role.name }}</h3>
-                <span class="role-count"
-                  >{{ role.userCount }} user{{ role.userCount === 1 ? '' : 's' }}</span
-                >
+                <h3>{{ p.title }}</h3>
+                <span class="role-count">{{ p.office }}</span>
               </div>
             </div>
 
-            <p class="role-desc">{{ role.description }}</p>
+            <p class="role-desc">{{ p.does }}</p>
+            @if (p.doesNot) {
+              <p class="role-not"><strong>Cannot:</strong> {{ p.doesNot }}</p>
+            }
 
             <div class="role-permissions">
-              @for (perm of role.permissions; track perm) {
-                <span class="permission-badge">{{ perm }}</span>
+              @for (stage of p.stages; track stage) {
+                <span class="permission-badge">{{ stage }} stage</span>
               }
+              <span class="holder-badge" [class.is-empty]="holdersOf(p) === 0">
+                {{ holdersOf(p) === 0 ? 'No active account' : holdersOf(p) + ' active account' + (holdersOf(p) === 1 ? '' : 's') }}
+              </span>
             </div>
 
             <div class="role-actions">
-              <button type="button" class="btn-outline" (click)="openEditRole(role)">
-                <app-icon name="edit" [size]="14" />
-                Edit
-              </button>
-              <button type="button" class="btn-outline" (click)="viewUsersForRole(role.name)">
+              <button type="button" class="btn-outline" (click)="viewOfficersIn(p)">
                 <app-icon name="user-check" [size]="14" />
-                View Users
+                View Officers
               </button>
+              @if (capabilities.canEdit() && (p.key !== 'super-admin' || viewerIsSuperAdmin())) {
+                <button type="button" class="btn-outline" (click)="openCreate(p.key)">
+                  <app-icon name="plus" [size]="14" />
+                  Add Officer
+                </button>
+              }
             </div>
-          </div>
+          </article>
         }
       </div>
     }
   </section>
 } @else if (view() === 'detail' && selectedUser(); as row) {
   <div class="detail-head">
-    <h1>{{ row.name }}</h1>
+    <div class="detail-title">
+      <h1>{{ row.name }}</h1>
+      <span class="mode-pill">View only</span>
+    </div>
     <div class="header-actions">
       <span class="status-pill" [class]="(row.status ?? 'unknown').toLowerCase()">{{ row.status ?? '—' }}</span>
-      <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
+      @if (mayManage(row)) {
+        <button type="button" class="btn-primary" (click)="openEdit(row)">
+          <app-icon name="edit" [size]="15" />
+          Edit
+        </button>
+      }
+      <button type="button" class="btn-outline" (click)="backToList()">Back to List</button>
     </div>
   </div>
 
-  @if (workload(); as w) {
-    <div class="kpi-grid kpi-grid--compact">
-      <app-kpi-card
-        label="Open Assignments"
-        [value]="w.openAssignments + ''"
-        icon="logs"
-        tone="info"
-        density="compact"
-      />
-      <app-kpi-card
-        label="Overdue"
-        [value]="w.overdue + ''"
-        icon="alert-triangle"
-        tone="danger"
-        density="compact"
-      />
-      <app-kpi-card
-        label="Completed This Month"
-        [value]="w.completedThisMonth + ''"
-        icon="check-circle"
-        tone="success"
-        density="compact"
-      />
-      <app-kpi-card
-        label="Assigned Role"
-        [value]="selectedUserRole()?.name || '—'"
-        icon="shield"
-        tone="brand"
-        density="compact"
-      />
-    </div>
-  }
+  <div class="kpi-grid kpi-grid--compact">
+    <app-kpi-card label="Position" [value]="row.position" icon="shield" tone="brand" density="compact" />
+    <app-kpi-card
+      label="Waiting On Them"
+      [value]="viewerReadsApplications() ? assignments().length + '' : '—'"
+      icon="logs"
+      tone="info"
+      density="compact"
+    />
+    <app-kpi-card
+      label="Forms"
+      [value]="row.permitTypes === null ? '—' : row.permitTypes.length + ''"
+      icon="file-check"
+      tone="success"
+      density="compact"
+    />
+    <app-kpi-card label="Last Sign-In" [value]="row.lastActive ?? 'Never'" icon="clock" tone="neutral" density="compact" />
+  </div>
 
   <div class="detail-grid">
     <div class="record-card">
@@ -297,12 +309,16 @@
             <dd>{{ row.email }}</dd>
           </div>
           <div>
-            <dt>Role :</dt>
-            <dd>{{ row.role }}</dd>
+            <dt>Position :</dt>
+            <dd>{{ row.position }}</dd>
           </div>
           <div>
-            <dt>Department :</dt>
-            <dd>{{ row.department }}</dd>
+            <dt>Office :</dt>
+            <dd>{{ row.office ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>Authenticator :</dt>
+            <dd>{{ row.mfaEnrolled ? 'Set up' : row.mfaRequired ? 'Required — not set up yet' : 'Not required' }}</dd>
           </div>
         </dl>
       </div>
@@ -313,8 +329,8 @@
           <span>Last Active</span>
         </div>
         <div>
-          <strong>{{ row.status ?? '—' }}</strong>
-          <span>Account Status</span>
+          <strong>{{ formatLastActive(row.createdAt) ?? '—' }}</strong>
+          <span>Account Created</span>
         </div>
       </div>
     </div>
@@ -322,253 +338,191 @@
     <div class="summary-card">
       <div class="card-head">
         <h2>Staff Account</h2>
-        @if (selectedUserRole(); as role) {
-          <button
-            type="button"
-            class="icon-btn edit"
-            [attr.aria-label]="'Edit ' + role.name"
-            (click)="openEditRole(role)"
-          >
-            <app-icon name="edit" [size]="14" />
-          </button>
-        }
       </div>
 
       <nav class="detail-tabs">
-        <button
-          type="button"
-          class="detail-tab"
-          [class.active]="userDetailTab() === 'profile'"
-          (click)="selectUserDetailTab('profile')"
-        >
+        <button type="button" class="detail-tab" [class.active]="userDetailTab() === 'profile'" (click)="selectUserDetailTab('profile')">
           Profile
         </button>
-        <button
-          type="button"
-          class="detail-tab"
-          [class.active]="userDetailTab() === 'permissions'"
-          (click)="selectUserDetailTab('permissions')"
-        >
-          Role &amp; Permissions
+        <button type="button" class="detail-tab" [class.active]="userDetailTab() === 'access'" (click)="selectUserDetailTab('access')">
+          Position &amp; Access
         </button>
-        <button
-          type="button"
-          class="detail-tab"
-          [class.active]="userDetailTab() === 'workload'"
-          (click)="selectUserDetailTab('workload')"
-        >
-          Workload
+        <button type="button" class="detail-tab" [class.active]="userDetailTab() === 'assignments'" (click)="selectUserDetailTab('assignments')">
+          Assignments
         </button>
-        <button
-          type="button"
-          class="detail-tab"
-          [class.active]="userDetailTab() === 'security'"
-          (click)="selectUserDetailTab('security')"
-        >
+        <button type="button" class="detail-tab" [class.active]="userDetailTab() === 'security'" (click)="selectUserDetailTab('security')">
           Security
         </button>
-        <button
-          type="button"
-          class="detail-tab"
-          [class.active]="userDetailTab() === 'activity'"
-          (click)="selectUserDetailTab('activity')"
-        >
+        <button type="button" class="detail-tab" [class.active]="userDetailTab() === 'activity'" (click)="selectUserDetailTab('activity')">
           Activity
         </button>
       </nav>
 
       @switch (userDetailTab()) {
         @case ('profile') {
-          <h3>Contact Information</h3>
+          <h3>Account</h3>
           <dl class="info-grid">
             <div>
               <dt>Full Name</dt>
-              <dd>{{ row.name }}</dd>
+              <dd>{{ row.fullName ?? 'Not recorded' }}</dd>
             </div>
             <div>
               <dt>Email</dt>
               <dd>{{ row.email }}</dd>
             </div>
             <div>
-              <dt>Department</dt>
-              <dd>{{ row.department }}</dd>
+              <dt>Position</dt>
+              <dd>{{ row.position }}</dd>
+            </div>
+            <div>
+              <dt>Office</dt>
+              <dd>{{ row.office ?? '—' }}</dd>
             </div>
             <div>
               <dt>Account Status</dt>
-              <dd>{{ row.status }}</dd>
+              <dd>{{ row.status ?? '—' }}</dd>
+            </div>
+            <div>
+              <dt>Authenticator App</dt>
+              <dd>{{ row.mfaEnrolled ? 'Set up' : row.mfaRequired ? 'Required — not set up yet' : 'Not required' }}</dd>
             </div>
           </dl>
+          @if (row.status === 'Pending') {
+            <p class="empty-note">
+              This officer has not signed in yet. They set their password from <strong>Forgot password</strong> on the
+              sign-in page, using {{ row.email }}.
+            </p>
+          }
+        }
 
-          <h3>Department</h3>
-          <div class="officer-row">
-            <app-avatar [name]="row.department" [size]="34" />
-            <div>
-              <strong>{{ row.department }}</strong>
-              <span>Assigned Department</span>
+        @case ('access') {
+          <section class="access-panel">
+            <app-view-only-notice />
+            <div class="access-head">
+              <div>
+                <h3>{{ row.position }}</h3>
+                @if (selectedPreset(); as preset) {
+                  <p class="access-sub">
+                    {{ preset.does }}
+                    @if (preset.doesNot) {
+                      <br /><strong>Cannot:</strong> {{ preset.doesNot }}
+                    }
+                  </p>
+                } @else {
+                  <p class="access-sub">A custom combination of roles — not one of the office's standard positions.</p>
+                }
+              </div>
             </div>
+
+            <dl class="access-summary">
+              <dt>Level</dt>
+              <dd>
+                @if (row.level === null) {
+                  <span class="none">Loading…</span>
+                } @else {
+                  <span class="level" [class.elevated]="row.level === 'view-edit'">
+                    {{ row.level === 'view-edit' ? 'View and edit' : 'View only' }}
+                  </span>
+                }
+              </dd>
+              <dt>Evaluation stages</dt>
+              <dd>
+                @if (row.serverRoles.includes('super-admin')) {
+                  Every stage
+                } @else if (row.stages === null) {
+                  <span class="none">Not reported</span>
+                } @else if (row.stages.length === 0) {
+                  None
+                } @else {
+                  <ul class="form-chips">
+                    @for (stage of row.stages; track stage) {
+                      <li>{{ stage }}</li>
+                    }
+                  </ul>
+                }
+              </dd>
+              <dt>Forms</dt>
+              <dd>
+                @if (row.permitTypes === null) {
+                  <span class="none">Loading…</span>
+                } @else if (row.permitTypes.length === 0) {
+                  <span class="none">No forms assigned — this account can see nothing.</span>
+                } @else {
+                  <ul class="form-chips">
+                    @for (type of row.permitTypes; track type) {
+                      <li>{{ type }}</li>
+                    }
+                  </ul>
+                }
+              </dd>
+            </dl>
+          </section>
+
+          <h3>What this account can open and do</h3>
+          <div class="table-wrap">
+            <table class="permission-matrix">
+              <thead>
+                <tr>
+                  <th>Module</th>
+                  <th>View</th>
+                  <th>Create</th>
+                  <th>Approve</th>
+                  <th>Verify</th>
+                  <th>Export</th>
+                  <th>Configure</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (perm of permissionMatrix(); track perm.module) {
+                  <tr>
+                    <td>{{ perm.module }}</td>
+                    <td [class]="perm.view ? 'perm-yes' : 'perm-no'">{{ perm.view ? '✓' : '—' }}</td>
+                    <td [class]="perm.create ? 'perm-yes' : 'perm-no'">{{ perm.create ? '✓' : '—' }}</td>
+                    <td [class]="perm.approve ? 'perm-yes' : 'perm-no'">{{ perm.approve ? '✓' : '—' }}</td>
+                    <td [class]="perm.verify ? 'perm-yes' : 'perm-no'">{{ perm.verify ? '✓' : '—' }}</td>
+                    <td [class]="perm.export ? 'perm-yes' : 'perm-no'">{{ perm.export ? '✓' : '—' }}</td>
+                    <td [class]="perm.configure ? 'perm-yes' : 'perm-no'">{{ perm.configure ? '✓' : '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
         }
 
-        @case ('permissions') {
-          @if (selectedUser(); as user) {
-            <section class="access-panel">
-              <app-view-only-notice />
-              <div class="access-head">
-                <div>
-                  <h3>Access</h3>
-                  <p class="access-sub">
-                    What this account may do. This is the access that is
-                    enforced — the matrix below describes the role's shape and
-                    is not what grants anything.
-                  </p>
-                </div>
-                @if (!editingAccess() && capabilities.canEdit()) {
-                  <button type="button" class="modal-btn confirm" (click)="startEditAccess()">
-                    Change access
-                  </button>
-                }
-              </div>
-
-              @if (!editingAccess()) {
-                <dl class="access-summary">
-                  <dt>Level</dt>
-                  <dd>
-                    <span class="level" [class.elevated]="user.level === 'view-edit'">
-                      {{ user.level === 'view-edit' ? 'View and edit' : 'View only' }}
-                    </span>
-                  </dd>
-                  <dt>Forms</dt>
-                  <dd>
-                    @if (user.permitTypes === null) {
-                      <span class="none">Loading…</span>
-                    } @else if (user.permitTypes.length === 0) {
-                      <span class="none">No forms assigned — this account can see nothing.</span>
-                    } @else {
-                      <ul class="form-chips">
-                        @for (type of user.permitTypes; track type) {
-                          <li>{{ type }}</li>
-                        }
-                      </ul>
-                    }
-                  </dd>
-                </dl>
-              } @else {
-                <fieldset class="forms-field">
-                  <legend>
-                    Forms this account may work on
-                    <span class="count">{{ accessFormCount() }} selected</span>
-                  </legend>
-                  <div class="forms-grid">
-                    @for (type of permitTypes; track type) {
-                      <label class="form-option">
-                        <input
-                          type="checkbox"
-                          [checked]="isAccessForm(type)"
-                          (change)="toggleAccessForm(type)"
-                        />
-                        <span>{{ type }}</span>
-                      </label>
-                    }
-                  </div>
-                </fieldset>
-
-                <fieldset class="level-field">
-                  <legend>Level of access</legend>
-                  <label class="level-option">
-                    <input
-                      type="radio"
-                      name="accessLevel"
-                      [checked]="accessLevel() === 'view'"
-                      (change)="setAccessLevel('view')"
-                    />
-                    <span>
-                      <strong>View only</strong>
-                      <small>See applications and documents. Cannot change anything.</small>
-                    </span>
-                  </label>
-                  <label class="level-option">
-                    <input
-                      type="radio"
-                      name="accessLevel"
-                      [checked]="accessLevel() === 'view-edit'"
-                      (change)="setAccessLevel('view-edit')"
-                    />
-                    <span>
-                      <strong>View and edit</strong>
-                      <small>Respond to citizens and decide on applications.</small>
-                    </span>
-                  </label>
-                </fieldset>
-
-                <!--
-                  The reason field was removed, not hidden. Neither
-                  `PUT :id/access/level` nor `PUT :id/access/forms` accepts one
-                  — both are `.strict()` — so it was collecting text and
-                  discarding it, which is the F-24 defect exactly. Asking an
-                  administrator to justify a change and then dropping the
-                  justification is worse than not asking. Filed for the backend.
-                -->
-
-                @if (accessError(); as message) {
-                  <p class="access-error" role="alert">{{ message }}</p>
-                }
-
-                <div class="modal-actions">
-                  <button type="button" class="modal-btn neutral" (click)="cancelEditAccess()">
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    class="modal-btn confirm"
-                    [disabled]="accessWorking()"
-                    (click)="saveAccess()"
-                  >
-                    {{ accessWorking() ? 'Saving…' : 'Save access' }}
-                  </button>
-                </div>
-              }
-            </section>
-          }
-
-          @if (selectedUserRole(); as role) {
-            <h3>{{ role.name }}</h3>
-            <p class="role-desc">{{ role.description }}</p>
-
+        @case ('assignments') {
+          <h3>Waiting on this officer</h3>
+          @if (!viewerReadsApplications()) {
+            <p class="empty-note">
+              Your position cannot read applications, so the ones waiting on this officer are not shown to you.
+            </p>
+          } @else if (assignmentsLoading()) {
+            <p class="empty-note">Loading the queue…</p>
+          } @else {
+            <p class="role-desc">
+              Applications whose next step is this officer's, as the server works it out from their position,
+              stages and forms. A super admin can act on every step, so none are listed under one.
+            </p>
             <div class="table-wrap">
-              <table class="permission-matrix">
+              <table class="detail-table">
                 <thead>
                   <tr>
-                    <th>Module</th>
-                    <th>View</th>
-                    <th>Create</th>
-                    <th>Approve</th>
-                    <th>Verify</th>
-                    <th>Export</th>
-                    <th>Configure</th>
+                    <th>Application</th>
+                    <th>Applicant</th>
+                    <th>Permit</th>
+                    <th>Next Step</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (perm of permissionMatrix(); track perm.module) {
-                    <tr>
-                      <td>{{ perm.module }}</td>
-                      <td [class]="perm.view ? 'perm-yes' : 'perm-no'">
-                        {{ perm.view ? '✓' : '—' }}
-                      </td>
-                      <td [class]="perm.create ? 'perm-yes' : 'perm-no'">
-                        {{ perm.create ? '✓' : '—' }}
-                      </td>
-                      <td [class]="perm.approve ? 'perm-yes' : 'perm-no'">
-                        {{ perm.approve ? '✓' : '—' }}
-                      </td>
-                      <td [class]="perm.verify ? 'perm-yes' : 'perm-no'">
-                        {{ perm.verify ? '✓' : '—' }}
-                      </td>
-                      <td [class]="perm.export ? 'perm-yes' : 'perm-no'">
-                        {{ perm.export ? '✓' : '—' }}
-                      </td>
-                      <td [class]="perm.configure ? 'perm-yes' : 'perm-no'">
-                        {{ perm.configure ? '✓' : '—' }}
-                      </td>
+                  @for (app of assignments(); track app.id) {
+                    <tr class="row-clickable" (click)="openApplication(app.id)">
+                      <td>{{ app.referenceNumber || app.id }}</td>
+                      <td>{{ app.applicant }}</td>
+                      <td>{{ app.type ?? '—' }}</td>
+                      <td class="muted">{{ app.responsibility?.step ?? app.lifecycleStatus }}</td>
+                    </tr>
+                  } @empty {
+                    <tr class="table-empty-row">
+                      <td colspan="4">Nothing is waiting on this officer right now.</td>
                     </tr>
                   }
                 </tbody>
@@ -577,40 +531,10 @@
           }
         }
 
-        @case ('workload') {
-          @if (row.status !== 'Pending') {
-            <p class="empty-note">
-              Sample data for preview only — this deployment does not yet track real assignment
-              counts.
-            </p>
-          }
-          @if (workload(); as w) {
-            <dl class="info-grid">
-              <div>
-                <dt>Open Assignments</dt>
-                <dd>{{ w.openAssignments }}</dd>
-              </div>
-              <div>
-                <dt>Overdue</dt>
-                <dd>{{ w.overdue }}</dd>
-              </div>
-              <div>
-                <dt>Completed This Month</dt>
-                <dd>{{ w.completedThisMonth }}</dd>
-              </div>
-              <div>
-                <dt>Department</dt>
-                <dd>{{ row.department }}</dd>
-              </div>
-            </dl>
-          }
-        }
-
         @case ('security') {
-          <h3>Recent Sessions</h3>
+          <h3>Signed-In Sessions</h3>
           <p class="role-desc">
-            Live sessions for this account, read from the server. Ending one
-            signs that device out immediately.
+            Live sessions for this account, read from the server. Ending one signs that device out immediately.
           </p>
           <div class="table-wrap">
             <table class="detail-table">
@@ -632,7 +556,7 @@
                       <button
                         type="button"
                         class="modal-btn neutral"
-                        [disabled]="revoking() === s.sessionId"
+                        [disabled]="revoking() === s.sessionId || !mayManage(row)"
                         (click)="revokeSession(s)"
                       >
                         {{ revoking() === s.sessionId ? 'Ending…' : 'End session' }}
@@ -662,106 +586,294 @@
         }
 
         @case ('activity') {
-          <p class="empty-note">
-            Sample data for preview only — this deployment does not yet keep a real per-account
-            activity log.
-          </p>
-          <ul class="timeline-feed">
-            @for (item of userActivity(); track item.title) {
-              <li class="timeline-feed-item">
-                <span class="timeline-feed-icon"><app-icon name="clock" [size]="14" /></span>
-                <div class="timeline-feed-body">
-                  <div class="timeline-feed-head">
-                    <span class="timeline-feed-title">{{ item.title }}</span>
-                    <span class="timeline-feed-time">{{ item.timeAgo }}</span>
-                  </div>
-                  <p class="timeline-feed-detail">{{ item.detail }}</p>
-                </div>
-              </li>
+          @for (block of [
+            { title: 'What this officer did', result: actorActivity(), empty: 'Nothing recorded for this account yet.' },
+            { title: 'Changes to this account', result: accountChanges(), empty: 'No changes recorded.' }
+          ]; track block.title) {
+            <h3>{{ block.title }}</h3>
+            @if (block.result === null) {
+              <p class="empty-note">Loading from the audit log…</p>
+            } @else if (block.result.kind === 'forbidden') {
+              <p class="empty-note">
+                Reading the audit log needs the audit permission — a super admin or an auditor can see this.
+              </p>
+            } @else if (block.result.kind === 'unavailable') {
+              <p class="empty-note">This deployment has no audit log to read.</p>
+            } @else if (block.result.kind === 'failed') {
+              <p class="empty-note">The audit log could not be read. {{ block.result.message }}</p>
+            } @else {
+              <ul class="timeline-feed">
+                @for (entry of entriesOf(block.result); track entry.sequence) {
+                  <li class="timeline-feed-item">
+                    <span class="timeline-feed-icon" [class.is-denied]="entry.outcome === 'denied'">
+                      <app-icon [name]="entry.outcome === 'denied' ? 'x-circle' : 'clock'" [size]="14" />
+                    </span>
+                    <div class="timeline-feed-body">
+                      <div class="timeline-feed-head">
+                        <span class="timeline-feed-title">
+                          {{ describeAuditAction(entry.action) }}
+                          @if (entry.outcome === 'denied') {
+                            <em class="denied">refused</em>
+                          }
+                        </span>
+                        <span class="timeline-feed-time">{{ formatLastActive(entry.occurredAt) }}</span>
+                      </div>
+                      @if (entry.actorRole) {
+                        <p class="timeline-feed-detail">By: {{ entry.actorRole }}</p>
+                      }
+                    </div>
+                  </li>
+                } @empty {
+                  <li class="empty-note">{{ block.empty }}</li>
+                }
+              </ul>
             }
-          </ul>
+          }
         }
       }
     </div>
   </div>
-}
+} @else if ((view() === 'edit' && selectedUser()) || view() === 'create') {
+  <div class="detail-head">
+    <div class="detail-title">
+      <h1>{{ view() === 'create' ? 'Add Staff Account' : 'Edit Staff Account' }}</h1>
+      <span class="mode-pill is-edit">{{ view() === 'create' ? 'New' : 'Editing' }}</span>
+    </div>
+    <div class="header-actions">
+      @if (view() === 'edit' && selectedUser(); as row) {
+        <button type="button" class="btn-outline" (click)="openDetail(row)">
+          <app-icon name="eye" [size]="15" />
+          View
+        </button>
+      }
+      <button type="button" class="btn-outline" (click)="backToList()">Back to List</button>
+    </div>
+  </div>
 
-@if (showAddUser()) {
-  <div class="modal-backdrop" (click)="cancelAddUser()">
-    <div class="modal-box create-box" (click)="$event.stopPropagation()">
-      <button type="button" class="modal-close" aria-label="Close" (click)="cancelAddUser()">
-        &#10005;
-      </button>
-      <h2>Add User</h2>
-      <form class="create-form" (ngSubmit)="createUser()">
-        <label>
-          Email
-          <input aria-label="Email address"
-            type="email"
-            [(ngModel)]="newUser.email"
-            name="userEmail"
-            placeholder="officer@ebpco.gov.ph"
-            required
+  <form class="account-form card" (ngSubmit)="view() === 'create' ? createAccount() : saveEdit()">
+    <section class="form-section">
+      <h2>Account</h2>
+      <div class="field-row">
+        <label class="field">
+          <span>Full name</span>
+          <input
+            type="text"
+            name="fullName"
+            autocomplete="off"
+            placeholder="e.g. Engr. Maria Santos"
+            [ngModel]="editName()"
+            (ngModelChange)="editName.set($event)"
+            [disabled]="editWorking()"
           />
+          <small>Shown on every decision this officer makes.</small>
         </label>
-        <span class="field-label">Roles</span>
-        <p class="field-hint">
-          An account with no roles yet is fine — created ahead of a posting being confirmed.
-        </p>
-        <div class="role-checklist">
-          @for (role of wireRoleOptions; track role) {
-            <label class="checkbox-row">
-              <input
-                type="checkbox"
-                [checked]="isNewUserRoleChecked(role)"
-                (change)="toggleNewUserRole(role)"
-              />
-              {{ wireRoleLabel(role) }}
+        <label class="field">
+          <span>Email</span>
+          @if (view() === 'create') {
+            <input
+              type="email"
+              name="email"
+              autocomplete="off"
+              placeholder="officer@castilla.gov.ph"
+              [ngModel]="editEmail()"
+              (ngModelChange)="editEmail.set($event)"
+              [disabled]="editWorking()"
+            />
+            <small>They sign in with it, and set their password from it with Forgot password.</small>
+          } @else {
+            <input type="email" name="email" [value]="editEmail()" disabled />
+            <small>An address cannot be changed — it is the sign-in identity. Delete the account and add the new address instead.</small>
+          }
+        </label>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Position</h2>
+      @if (editingSelf()) {
+        <p class="form-note">You cannot change your own position — another administrator has to.</p>
+      }
+      <label class="field">
+        <span>Position</span>
+        <select
+          name="position"
+          [ngModel]="editPositionKey()"
+          (ngModelChange)="choosePosition($event)"
+          [disabled]="editWorking() || editingSelf()"
+        >
+          @for (p of assignablePositions(); track p.key) {
+            <option [value]="p.key">{{ p.title }} — {{ p.office }}</option>
+          }
+          <option value="custom">Custom — choose the roles yourself</option>
+        </select>
+      </label>
+
+      @if (editPreset(); as preset) {
+        <div class="position-summary">
+          <p>{{ preset.does }}</p>
+          @if (preset.doesNot) {
+            <p class="position-not"><strong>Cannot:</strong> {{ preset.doesNot }}</p>
+          }
+          @if (preset.stages.length > 0) {
+            <p class="position-stages">
+              Decides the <strong>{{ preset.stages.join(', ') }}</strong> evaluation stage{{ preset.stages.length === 1 ? '' : 's' }}, and no other.
+            </p>
+          }
+        </div>
+      }
+
+      @if (editIsCustom()) {
+        <fieldset class="choice-field">
+          <legend>Roles</legend>
+          <div class="choice-grid">
+            @for (role of assignableRoles(); track role) {
+              <label class="choice">
+                <input
+                  type="checkbox"
+                  [checked]="isEditRole(role)"
+                  [disabled]="editWorking() || editingSelf()"
+                  (change)="toggleEditRole(role)"
+                />
+                <span>{{ wireRoleLabel(role) }}</span>
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        @if (editDecidesStages()) {
+          <fieldset class="choice-field">
+            <legend>Evaluation stages this officer decides</legend>
+            <div class="choice-grid">
+              @for (stage of evaluationStages; track stage) {
+                <label class="choice">
+                  <input
+                    type="checkbox"
+                    [checked]="isEditStage(stage)"
+                    [disabled]="editWorking()"
+                    (change)="toggleEditStage(stage)"
+                  />
+                  <span>{{ stage }}</span>
+                </label>
+              }
+            </div>
+            @if (view() === 'edit' && editStages().size === 0) {
+              <small class="form-note">With no stage, this evaluator can decide nothing until one is chosen.</small>
+            }
+          </fieldset>
+        }
+      }
+    </section>
+
+    <section class="form-section">
+      <h2>Access</h2>
+      <fieldset class="choice-field">
+        <legend>Level</legend>
+        <div class="level-grid">
+          <label class="level-choice">
+            <input
+              type="radio"
+              name="level"
+              [checked]="editLevel() === 'view-edit'"
+              [disabled]="editWorking() || editingSelf()"
+              (change)="setEditLevel('view-edit')"
+            />
+            <span>
+              <strong>View and edit</strong>
+              <small>Acts within the position — decides, reviews, records.</small>
+            </span>
+          </label>
+          <label class="level-choice">
+            <input
+              type="radio"
+              name="level"
+              [checked]="editLevel() === 'view'"
+              [disabled]="editWorking() || editingSelf()"
+              (change)="setEditLevel('view')"
+            />
+            <span>
+              <strong>View only</strong>
+              <small>Sees what the position sees and changes nothing.</small>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="choice-field">
+        <legend>
+          Forms this account may work on
+          <span class="count">{{ editFormCount() }} of {{ permitTypes.length }}</span>
+        </legend>
+        <div class="form-links">
+          <button type="button" class="link-btn" [disabled]="editWorking()" (click)="selectAllForms(true)">Select all</button>
+          <button type="button" class="link-btn" [disabled]="editWorking()" (click)="selectAllForms(false)">Clear</button>
+        </div>
+        <div class="choice-grid forms">
+          @for (type of permitTypes; track type) {
+            <label class="choice">
+              <input type="checkbox" [checked]="isEditForm(type)" [disabled]="editWorking()" (change)="toggleEditForm(type)" />
+              <span>{{ type }}</span>
             </label>
           }
         </div>
-        <div class="modal-actions">
-          <button type="button" class="modal-btn neutral" (click)="cancelAddUser()">Cancel</button>
-          <button type="submit" class="modal-btn confirm" [disabled]="addUserWorking()">
-            {{ addUserWorking() ? 'Creating…' : 'Create Account' }}
+      </fieldset>
+    </section>
+
+    @if (editError(); as message) {
+      <p class="access-error" role="alert">{{ message }}</p>
+    }
+
+    <div class="form-actions">
+      <button type="button" class="modal-btn neutral" [disabled]="editWorking()" (click)="cancelEdit()">Cancel</button>
+      <button type="submit" class="modal-btn confirm" [disabled]="editWorking()">
+        @if (editWorking()) {
+          Saving…
+        } @else {
+          {{ view() === 'create' ? 'Create Account' : 'Save Changes' }}
+        }
+      </button>
+    </div>
+  </form>
+
+  @if (view() === 'edit' && selectedUser(); as row) {
+    <section class="card danger-zone">
+      <h2>Account</h2>
+      <div class="danger-row">
+        <div>
+          <strong>{{ row.status === 'Inactive' ? 'Enable this account' : 'Disable this account' }}</strong>
+          <p>
+            {{ row.status === 'Inactive'
+              ? 'It regains the access it had before it was disabled.'
+              : 'It loses access at its next request. The account and its history are kept, and it can be enabled again.' }}
+          </p>
+        </div>
+        @if (!isSelf(row)) {
+          @if (row.status === 'Inactive') {
+            <button type="button" class="btn-outline" (click)="requestEnable(row)">Enable</button>
+          } @else {
+            <button type="button" class="btn-outline danger" (click)="requestDisable(row)">Disable</button>
+          }
+        }
+      </div>
+      @if (viewerIsSuperAdmin() && !isSelf(row)) {
+        <div class="danger-row">
+          <div>
+            <strong>Delete this account</strong>
+            <p>
+              An account that never acted is deleted. One whose name is on decisions is retired instead: it can never
+              sign in again and leaves this list, and its name stays on what it did.
+            </p>
+          </div>
+          <button type="button" class="btn-danger" [attr.aria-label]="'Delete ' + row.name" (click)="requestDelete(row)">
+            <app-icon name="trash" [size]="14" />
+            Delete Account
           </button>
         </div>
-      </form>
-    </div>
-  </div>
-}
-
-@if (editingRole(); as role) {
-  <div class="modal-backdrop" (click)="cancelEditRole()">
-    <div class="modal-box create-box" (click)="$event.stopPropagation()">
-      <button type="button" class="modal-close" aria-label="Close" (click)="cancelEditRole()">
-        &#10005;
-      </button>
-      <h2>Edit Role</h2>
-      <form class="create-form" (ngSubmit)="saveEditRole()">
-        <label>
-          Role Name
-          <input type="text" [(ngModel)]="role.name" name="roleName" required />
-        </label>
-        <label>
-          Description
-          <textarea rows="3" [(ngModel)]="role.description" name="roleDescription"></textarea>
-        </label>
-        <div class="modal-actions">
-          <button type="button" class="modal-btn neutral" (click)="cancelEditRole()">Cancel</button>
-          <button type="submit" class="modal-btn confirm">Save Changes</button>
-        </div>
-      </form>
-    </div>
-  </div>
+      }
+    </section>
+  }
 }
 
 @if (disableRefused(); as refusal) {
-  <!--
-    Refused before anything was sent. The server refuses this too; saying so
-    immediately, in the portal's own words, is a better answer than a wait
-    followed by an error body.
-  -->
   <app-confirm-dialog
     title="This account cannot be disabled"
     [message]="refusal"
@@ -773,16 +885,11 @@
 }
 
 @if (disableTarget(); as target) {
-  <!--
-    "Disable", not "Remove". The account is kept so that every application it
-    has already touched stays attributable — a permit decided by a person the
-    system can no longer identify is a permit nobody can defend.
-  -->
   <app-confirm-dialog
     title="Disable this account?"
     [message]="
       target.name +
-      ' will lose access immediately. The account is kept, not deleted, so their past decisions stay attributable — and it can be enabled again.'
+      ' will lose access immediately. The account is kept, so their past decisions stay attributable — and it can be enabled again.'
     "
     confirmLabel="Disable"
     tone="danger"
@@ -803,5 +910,29 @@
     reasonPlaceholder="The account holder will be able to ask, so say plainly."
     (confirmed)="confirmEnable($event)"
     (cancelled)="cancelEnable()"
+  />
+}
+
+@if (deleteRefused(); as refusal) {
+  <app-confirm-dialog
+    title="This account cannot be deleted"
+    [message]="refusal"
+    confirmLabel="Understood"
+    tone="default"
+    (confirmed)="dismissDeleteRefusal()"
+    (cancelled)="dismissDeleteRefusal()"
+  />
+}
+
+@if (deleteTarget(); as target) {
+  <app-confirm-dialog
+    title="Delete this account?"
+    [message]="
+      target.name + ' (' + target.email + ') will never be able to sign in again. If they never acted, the account is removed and the address can be used again; if their name is on decisions, it is retired and stays on those records.'
+    "
+    confirmLabel="Delete Account"
+    tone="danger"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
   />
 }

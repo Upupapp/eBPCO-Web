@@ -1,3 +1,4 @@
+import { Responsibility } from '../domain/responsibility';
 import { Injectable, inject } from '@angular/core';
 
 import { ApiClient } from './api.client';
@@ -44,6 +45,8 @@ export interface EvaluationQueueRow {
   readonly nextStage: EvaluationStage | null;
   readonly requiredDocumentCount: number;
   readonly attachedDocumentCount: number;
+  /** Who it is waiting on (officer positions) — see `Responsibility`. Absent from an older server. */
+  readonly responsibility?: Responsibility | null;
 }
 
 export type EvaluationQueueResult =

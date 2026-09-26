@@ -113,6 +113,11 @@ export interface AccessGrant {
    * would have been an invention, so the approver is asked.
    */
   readonly roles: readonly string[];
+  /**
+   * The evaluation stages an evaluator decides (officer positions), granted in
+   * the same approval. Sent only when there are some: most positions decide none.
+   */
+  readonly stages?: readonly string[];
 }
 
 /**
@@ -212,6 +217,7 @@ export class AccessRequestApi {
       roles: [...grant.roles],
       level: grant.level,
       permitTypes: [...grant.permitTypes],
+      ...(grant.stages !== undefined && grant.stages.length > 0 ? { stages: [...grant.stages] } : {}),
     });
   }
 

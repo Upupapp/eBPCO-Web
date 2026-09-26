@@ -8,6 +8,7 @@ import {
   PendingAccessRequest,
 } from '../../core/api/access-request.api';
 import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
+import { EVALUATION_STAGES, OFFICER_POSITIONS, presetFor } from '../../core/session/position';
 import { Icon } from '../../shared/icon/icon';
 import { Topbar } from '../../shared/topbar/topbar';
 
@@ -96,6 +97,43 @@ export class AccessRequests implements OnInit {
   }
 
   /**
+   * The office's positions, as a quick pick that sets the role and — for an
+   * evaluator — the one stage they decide (officer positions, 2026-09-26). The
+   * super admin's is not offered, for the reason `super-admin` is not a role
+   * checkbox here.
+   */
+  protected readonly positionOptions = OFFICER_POSITIONS.filter((p) => p.key !== 'super-admin');
+  protected readonly evaluationStages = EVALUATION_STAGES;
+  private readonly grantStages = signal<ReadonlySet<string>>(new Set());
+  protected readonly grantStageCount = computed(() => this.grantStages().size);
+  /** Stages mean something only to an evaluator. */
+  protected readonly grantDecidesStages = computed(() => this.grantRoles().has('evaluator'));
+  /** The position the ticked roles and stages amount to, or '' for a custom mix. */
+  protected readonly grantPositionKey = computed(
+    () => presetFor([...this.grantRoles()], [...this.grantStages()])?.key ?? '',
+  );
+
+  protected applyPosition(key: string): void {
+    const position = OFFICER_POSITIONS.find((p) => p.key === key);
+    if (position === undefined) return;
+    this.grantRoles.set(new Set(position.roles));
+    this.grantStages.set(new Set(position.stages));
+    this.grantLevel.set(position.level);
+    this.decisionError.set('');
+  }
+
+  protected isGrantStage(stage: string): boolean {
+    return this.grantStages().has(stage);
+  }
+
+  protected toggleGrantStage(stage: string): void {
+    const next = new Set(this.grantStages());
+    if (!next.delete(stage)) next.add(stage);
+    this.grantStages.set(next);
+    this.decisionError.set('');
+  }
+
+  /**
    * True when View and edit would grant nothing.
    *
    * The level is SUBTRACTIVE — the server withholds authority scopes at `view`
@@ -155,6 +193,7 @@ export class AccessRequests implements OnInit {
     // Nothing pre-selected: the requester never asked for a role, so any
     // default here would be the portal deciding what an officer does.
     this.grantRoles.set(new Set());
+    this.grantStages.set(new Set());
   }
 
   protected startReject(request: PendingAccessRequest): void {
@@ -194,6 +233,12 @@ export class AccessRequests implements OnInit {
       );
       return;
     }
+    if (this.grantDecidesStages() && this.grantStages().size === 0) {
+      // An evaluator with no stage can decide nothing — the server refuses
+      // every stage they do not hold.
+      this.decisionError.set('Choose the evaluation stage this officer decides.');
+      return;
+    }
 
     this.working.set(true);
     try {
@@ -201,6 +246,7 @@ export class AccessRequests implements OnInit {
         permitTypes: [...this.grantForms()],
         level: this.grantLevel(),
         roles: [...this.grantRoles()],
+        stages: this.grantDecidesStages() ? EVALUATION_STAGES.filter((s) => this.grantStages().has(s)) : [],
       });
       await this.afterDecision(result);
     } finally {

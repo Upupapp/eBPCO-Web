@@ -21,6 +21,8 @@ import { CASTILLA_BARANGAYS } from '../../core/domain/castilla-barangays';
 import { REAL_CATEGORY_OPTIONS } from '../../core/domain/business-categories';
 import { StaffBusinessesApi, StaffBusinessDetail, StaffBusinessRow } from '../../core/api/staff-businesses.api';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
+import { SessionService } from '../../core/session/session.service';
+import { ACTION_PERMISSIONS } from '../../core/session/permissions';
 
 type SubTab = 'analytics' | 'recent-activity';
 type ViewMode = 'list' | 'create' | 'detail';
@@ -436,6 +438,14 @@ export class Businesses {
   // own doc comment below). Edit is real-data only — a seed/local-demo row
   // has no server record to PATCH.
 
+  private readonly session = inject(SessionService);
+
+  /** Whether this officer may correct a business — the Records Officer and the super admin (`applications:write`). */
+  protected readonly canEditBusiness = computed(() => {
+    const who = this.session.authority();
+    return who !== null && ACTION_PERMISSIONS.editBusiness(who);
+  });
+
   protected readonly editingBusiness = signal(false);
   protected readonly editForm = signal<{
     name: string; category: string; street: string; barangay: string; city: string; province: string;
@@ -527,6 +537,20 @@ export class Businesses {
       }));
     return buildBusinessDetail(row, linked);
   });
+
+  /**
+   * The row's Edit — the business opened straight into its edit form. View
+   * and Edit used to be one button (owner, 2026-09-26); the form needs the
+   * server's own record (street, barangay and city apart), so it opens once
+   * that has loaded.
+   */
+  protected async openEdit(row: BusinessRow): Promise<void> {
+    this.cancelEditBusiness();
+    this.openDetail(row);
+    if (this.store.isSeedData()) return;
+    await this.loadRealDetail(row.id);
+    if (this.selectedBusiness()?.id === row.id && this.realDetail() !== null) this.startEditBusiness();
+  }
 
   openDetail(row: BusinessRow): void {
     this.selectedBusiness.set(row);

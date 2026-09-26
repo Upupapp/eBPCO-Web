@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Topbar } from '../../shared/topbar/topbar';
 import { KpiCard, KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-card';
 import { Icon } from '../../shared/icon/icon';
@@ -8,112 +9,82 @@ import { Pagination } from '../../shared/pagination/pagination';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { SessionService } from '../../core/session/session.service';
-import { StaffAccess, StaffDirectoryApi, StaffMember, StaffSession } from '../../core/api/staff-directory.api';
+import {
+  StaffAccess, StaffDirectoryApi, StaffMember, StaffSession, StaffWriteResult,
+} from '../../core/api/staff-directory.api';
+import { AccountAuditResult, AuditApi, AuditEntry, describeAuditAction } from '../../core/api/audit.api';
 import { ALL_WIRE_ROLES, WIRE_ROLE_LABELS, portalRoleFor } from '../../core/api/role-map';
-import { ALL_STAFF_ROLES, StaffRole } from '../../core/session/permissions';
 import { AccessLevel } from '../../core/api/access-request.api';
 import { Capabilities } from '../../core/session/capabilities';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
 import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
+import { ApplicationStore } from '../../core/domain/application-store';
+import { QueueLoader } from '../../core/domain/queue-loader';
+import { isAssignedTo } from '../../core/domain/responsibility';
 import { ToastService } from '../../shared/toast/toast.service';
 import {
-  buildPermissionMatrix,
-  buildUserActivity,
-  buildWorkload,
-} from './user-detail-data';
+  EVALUATION_STAGES, OFFICER_POSITIONS, OfficerPosition, authorityForAccount, positionFor, presetFor,
+} from '../../core/session/position';
+import { buildPermissionMatrix } from './user-detail-data';
 
-type Tab = 'users' | 'roles';
-type UserDetailTab = 'profile' | 'permissions' | 'workload' | 'security' | 'activity';
+type Tab = 'users' | 'positions';
+/** The list; one account read-only; one account's edit form; a new account's form. */
+type PageView = 'list' | 'detail' | 'edit' | 'create';
+type UserDetailTab = 'profile' | 'access' | 'assignments' | 'security' | 'activity';
 /**
- * `null` where the portal does not know. There is no user endpoint, and status
- * used to be derived from the row's INDEX — `i % 9 === 8 ? 'Pending' : ...` —
- * so an administrator could read "Inactive" off a number with no account
- * behind it. Owner ruling, 29 Aug: show what is known, dash what is not.
+ * `null` where the portal does not know. Status used to be derived from the
+ * row's INDEX — `i % 9 === 8 ? 'Pending' : ...` — so an administrator could
+ * read "Inactive" off a number with no account behind it. Owner ruling,
+ * 29 Aug: show what is known, dash what is not.
  */
 type UserStatus = 'Active' | 'Inactive' | 'Pending' | null;
 
+const CUSTOM = 'custom';
+
 export interface UserRow {
-  /** The server's account id. Empty only for a row this page has not saved. */
+  /** The server's account id. */
   id: string;
   /**
    * The access this account actually holds, carried raw as well as rendered.
    *
-   * `role` and `department` are display strings derived from these two. Editing
-   * access has to start from the real values, not from parsing "2 forms" back
+   * Editing has to start from the real values, not from parsing "2 forms" back
    * out of a label — a round trip through display text is how an edit quietly
-   * grants something nobody chose.
-   *
-   * `null` until this row's `GET /staff/users/:id/access` call has answered —
-   * the roster listing itself doesn't carry it (see `StaffMember` on
-   * `staff-directory.api.ts`), so every row starts not-yet-known rather than
-   * a guessed default.
+   * grants something nobody chose. `null` until this row's
+   * `GET /staff/users/:id/access` call has answered.
    */
   level: AccessLevel | null;
   permitTypes: readonly string[] | null;
+  /** The evaluation stages it decides; `null` until access has loaded (or from an older server). */
+  stages: readonly string[] | null;
   /**
-   * The roles the SERVER holds for this account, kept raw.
-   *
-   * `role` below is a display label derived from the level. This is what the
-   * last-super-admin guard has to check, and checking a display string would
-   * break the moment the label is reworded.
+   * The roles the SERVER holds for this account, kept raw. The
+   * last-super-admin guard checks these, never a display string.
    */
   serverRoles: readonly string[];
-  /** The server has no name column for staff accounts — the email stands in. */
+  /** The officer's own name, or null when never recorded. */
+  fullName: string | null;
+  /** What the page shows as the name — the full name, else the email. */
   name: string;
   email: string;
+  /** The portal's coarse role, for the permission rules that still take one. */
   role: string;
+  /** "Fire Safety Evaluator", "Cashier" — the account's position. */
+  position: string;
+  /** The office behind the position, when it is one of the presets. */
+  office: string | null;
+  /** "View and edit · 17 forms", or why that is not known. */
   department: string;
   status: UserStatus;
+  mfaRequired: boolean;
+  mfaEnrolled: boolean;
+  createdAt: string | null;
   /** `null` when unknown — it used to be index arithmetic ("Online now", "3h ago"). */
   lastActive: string | null;
 }
 
-export interface RoleRow {
-  name: string;
-  description: string;
-  userCount: number;
-  permissions: string[];
-  iconBg: string;
-}
-
-const NAMES = [
-  'Engr. Ricardo Buenaflor',
-  'Arch. Jonathan Dizon',
-  'Julius Bragais',
-  'Ma. Teresa Arquero',
-  'Carlo Salvador',
-  'Leonardo Ariola',
-  'Rowena Escueta',
-  'Danilo Olivar',
-  'Cristina Fajota',
-  'Ferdinand Rosales',
-  'Jasmine Realuyo',
-  'Noel Buban',
-  'Karen Joy Estioco',
-  'Reynaldo Gultiano',
-  'Angelica Villareal',
-  'Bryan Sarita',
-  'Ma. Corazon Bermudez',
-  'Vincent Bonghanoy',
-  'Charmaine Bordios',
-  'Allan Bermas',
-  'Jenny Rose Casipong',
-  'Michael Buban',
-  'Sheila Marie Estioco',
-  'Rodel Panti',
-];
-
-// The real 7-role portal vocabulary (see role-map.ts's BY_WIRE_NAME / BREADTH)
-// — not a separate, invented list. `row.role` (from `portalRoleFor`) only ever
-// takes one of these seven names, so a filter option outside this set can
-// never match a real row.
-const ROLE_ORDER = ALL_STAFF_ROLES;
-
 /**
- * The server's raw ISO timestamp (`"2026-09-12T11:20:26.612Z"`), in a form
- * an officer reads without decoding it themselves. Anything that isn't a
- * real timestamp — the "Invited — not yet accepted" placeholder a
- * locally-added row starts with — is left exactly as it was.
+ * The server's raw ISO timestamp, in a form an officer reads without decoding
+ * it themselves. Anything that is not a real timestamp is left as it was.
  */
 function formatLastActive(value: string | null): string | null {
   if (!value) return value;
@@ -128,113 +99,62 @@ function formatLastActive(value: string | null): string | null {
   });
 }
 
-/**
- * A server staff record as this page's row.
- *
- * `role` shows the LEVEL rather than a job title, because that is what the
- * owner's model actually grants: an ADMIN sub-type is defined by accessibility
- * — which forms, and view or view-and-edit — not by what the post is called.
- *
- * `level`/`permitTypes` are `null` here — the roster call (`GET /staff/users`)
- * doesn't carry them, only `GET /staff/users/:id/access` does. `mergeAccess`
- * below fills them in once that per-row call answers.
- */
+function describePosition(roles: readonly string[], stages: readonly string[] | null): {
+  position: string; office: string | null;
+} {
+  const preset = presetFor(roles, stages ?? []);
+  if (preset !== null) return { position: preset.title, office: preset.office };
+  if (roles.length === 0) return { position: 'No position yet', office: null };
+  return { position: positionFor(roles, stages), office: null };
+}
+
+/** A server staff record as this page's row. Access (level, forms, stages) follows in `withAccess`. */
 function toUserRow(member: StaffMember): UserRow {
+  const fullName = member.fullName?.trim() || null;
   return {
     id: member.id,
     level: null,
     permitTypes: null,
+    stages: null,
     serverRoles: member.roles,
-    // No name column exists for a staff account server-side — the email is
-    // the honest display name, not a guess at one.
-    name: member.email,
+    fullName,
+    name: fullName ?? member.email,
     email: member.email,
-    // The real role, from the roster call itself (`member.roles`) — reusing
-    // the same wire-role → portal-role mapping the account's own session
-    // uses (`portalRoleFor`), not a guess at one. This used to show the
-    // account's ACCESS LEVEL ("View and edit"/"View only") under a field
-    // and column both titled "Role" — a real role name (Assessor, Cashier,
-    // Approving Officer...) was never shown anywhere on this page, even
-    // though the roster response already carries it and no second call is
-    // needed for it (unlike `department` below, which genuinely does wait
-    // on `GET /staff/users/:id/access`).
     role: portalRoleFor(member.roles) ?? 'Role not recognised',
+    ...describePosition(member.roles, null),
     department: 'Access not yet loaded',
     status: member.status === 'Disabled' ? 'Inactive' : member.status === 'Pending' ? 'Pending' : 'Active',
+    mfaRequired: member.mfaRequired,
+    mfaEnrolled: member.mfaEnrolled,
+    createdAt: member.createdAt ?? null,
     lastActive: formatLastActive(member.lastSignInAt),
   };
 }
 
-/** Folds a `GET /staff/users/:id/access` answer into a row already on screen. `role` is untouched — it comes from the roster call in `toUserRow`, not from this one. */
+/** Folds a `GET /staff/users/:id/access` answer into a row already on screen. */
 function withAccess(row: UserRow, access: StaffAccess | null): UserRow {
   if (access === null) {
     return { ...row, department: 'Access could not be read' };
   }
+  const stages = access.evaluationStages ?? null;
+  const count = access.permitTypes.length;
   return {
     ...row,
     level: access.level,
     permitTypes: access.permitTypes,
-    department: access.permitTypes.length === 0
+    stages,
+    ...describePosition(row.serverRoles, stages),
+    department: count === 0
       ? 'No forms assigned'
-      : `${access.permitTypes.length} form${access.permitTypes.length === 1 ? '' : 's'}`,
+      : `${access.level === 'view-edit' ? 'View and edit' : 'View only'} · ${count} form${count === 1 ? '' : 's'}`,
   };
 }
 
-/**
- * The real 7-role vocabulary (see `ALL_STAFF_ROLES` above), with static
- * descriptive copy — not a separate, larger, partly-invented catalog.
- *
- * `userCount` is deliberately NOT here: it used to be nine hand-typed
- * numbers that never matched the real roster (a "Super Admin" card claiming
- * 3 users when the real roster held 2, and a "Tenant Admin" role — 12 users
- * claimed — that does not exist server-side at all). It is computed in
- * `roles` below, from the same roster this page's Users tab renders.
- */
-const ROLE_CATALOG: Omit<RoleRow, 'userCount'>[] = [
-  {
-    name: 'Super Admin',
-    description:
-      'Full platform access across every module, including every action scope any other staff role holds.',
-    permissions: ['All Modules', 'User Management', 'System Settings'],
-    iconBg: '#c81e2c',
-  },
-  {
-    name: 'Administrator',
-    description: 'Manages staff accounts and access, and takes applications in at the counter.',
-    permissions: ['User Management', 'Access Requests', 'Application Intake'],
-    iconBg: '#2563eb',
-  },
-  {
-    name: 'Evaluator',
-    description: 'Reviews submissions stage by stage — Initial, Zoning, Fire Safety, OBO, Final Approval.',
-    permissions: ['View Applications', 'Record Evaluations'],
-    iconBg: '#7c3aed',
-  },
-  {
-    name: 'Payment Officer',
-    description: 'Computes the order of payment and verifies that payment was received.',
-    permissions: ['View Applications', 'Payment Processing'],
-    iconBg: '#0891b2',
-  },
-  {
-    name: 'Approving Officer',
-    description: 'Approves or refuses the permit, and generates it once approved.',
-    permissions: ['View Applications', 'Approve Permits', 'Generate Permits'],
-    iconBg: '#16a34a',
-  },
-  {
-    name: 'Releasing Officer',
-    description: 'Prepares and releases the approved permit document to applicants.',
-    permissions: ['View Applications', 'Document Release'],
-    iconBg: '#65a30d',
-  },
-  {
-    name: 'Auditor',
-    description: 'Reads everything, changes nothing.',
-    permissions: ['View Applications', 'View Reports'],
-    iconBg: '#565c6b',
-  },
-];
+const sameSet = (a: Iterable<string>, b: Iterable<string>): boolean => {
+  const left = new Set(a);
+  const right = new Set(b);
+  return left.size === right.size && [...left].every((item) => right.has(item));
+};
 
 @Component({
   selector: 'app-user-roles',
@@ -245,121 +165,79 @@ const ROLE_CATALOG: Omit<RoleRow, 'userCount'>[] = [
 export class UserRoles implements OnInit {
   protected readonly capabilities = inject(Capabilities);
   protected readonly formatLastActive = formatLastActive;
+  protected readonly describeAuditAction = describeAuditAction;
 
   private readonly session = inject(SessionService);
   private readonly toast = inject(ToastService);
+  private readonly directory = inject(StaffDirectoryApi);
+  private readonly audit = inject(AuditApi);
+  private readonly store = inject(ApplicationStore);
+  private readonly loader = inject(QueueLoader);
+  private readonly router = inject(Router);
 
-  // Payment fee-rule/method configuration moved to Payments > Configuration
-  // (still Super Admin-only, gated by the same ACTION_PERMISSIONS.configurePayments)
-  // — one source for that settings surface instead of two.
   protected readonly tabs: { key: Tab; label: string; icon: string }[] = [
-    { key: 'users', label: 'Users', icon: 'user' },
-    { key: 'roles', label: 'Roles & Permissions', icon: 'shield' },
+    { key: 'users', label: 'Staff Accounts', icon: 'user' },
+    { key: 'positions', label: 'Positions', icon: 'shield' },
   ];
-
-  protected readonly visibleTabs = computed(() => this.tabs);
 
   protected readonly activeTab = signal<Tab>('users');
   protected readonly page = signal(1);
   protected readonly pageSize = 8;
   protected readonly searchTerm = signal('');
-  protected readonly roleFilter = signal('All Roles');
+  protected readonly positionFilter = signal('All Positions');
   protected readonly statusFilter = signal('All Statuses');
 
-  private readonly directory = inject(StaffDirectoryApi);
+  /** The viewer is a super admin — the only one who may delete, and who may act on another super admin. */
+  protected readonly viewerIsSuperAdmin = computed(() => this.session.authority()?.superAdmin === true);
 
   /**
-   * The staff list, read from the server.
-   *
-   * It used to be `buildUsers()` — names and departments invented from
-   * hardcoded arrays. A fabricated LIST is worse than a fabricated chart: an
-   * administrator reading it believes these people hold accounts, and the
-   * absence of somebody who does hold one is invisible.
-   *
-   * Three states, because an empty table is not an answer: loaded, capability
-   * absent, read failed. `directoryLoaded` is false until the server has
-   * actually answered, so the page never presents an empty list as "no staff".
+   * The staff list, read from the server — never invented. Three states,
+   * because an empty table is not an answer: loaded, capability absent, read
+   * failed. `directoryLoading` is true until the server has answered, so the
+   * page never presents an empty list as "no staff".
    */
   private readonly users = signal<UserRow[]>([]);
   protected readonly directoryLoading = signal(true);
   protected readonly directoryUnavailable = signal(false);
   protected readonly directoryError = signal<string | null>(null);
-  // Session-only local edits from the "Edit Role" card action — kept
-  // separate from ROLE_CATALOG so an edited description/permissions list
-  // survives, while userCount below always stays live rather than being
-  // frozen at whatever it read when the card was last edited.
-  private readonly roleOverrides = signal<ReadonlyMap<string, Pick<RoleRow, 'description' | 'permissions'>>>(
-    new Map(),
-  );
 
-  // Recomputed from the real roster on every load, not seeded once — a
-  // signal(ROLES) never reflects who actually holds a role after the
-  // directory answers.
-  protected readonly roles = computed<RoleRow[]>(() => {
-    const all = this.users();
-    const overrides = this.roleOverrides();
-    return ROLE_CATALOG.map((entry) => ({
-      ...entry,
-      ...(overrides.get(entry.name) ?? {}),
-      userCount: all.filter((u) => u.role === entry.name).length,
-    }));
-  });
-  protected readonly roleOptions = ROLE_ORDER;
+  protected readonly positions = OFFICER_POSITIONS;
+  protected readonly positionOptions = [...OFFICER_POSITIONS.map((p) => p.title), 'Custom'];
   protected readonly statusOptions: UserStatus[] = ['Active', 'Inactive', 'Pending'];
 
-  // Every value here is derived from the same `users` list the table
-  // below renders, so "Total Users" always equals the real row count
-  // instead of an unrelated hardcoded figure.
+  /** How many ENABLED accounts hold each preset position. */
+  protected holdersOf(position: OfficerPosition): number {
+    return this.users().filter((u) => u.status !== 'Inactive' && u.position === position.title).length;
+  }
+
   protected readonly stats = computed<
-    {
-      icon: string;
-      tone: KpiTone;
-      illustration: KpiIllustration;
-      label: string;
-      value: string;
-      footnote?: string;
-    }[]
+    { icon: string; tone: KpiTone; illustration: KpiIllustration; label: string; value: string; footnote?: string }[]
   >(() => {
     const all = this.users();
-    // Counting a status nobody knows gives 0, and 0 is a claim — "no user is
-    // active" — not an absence. Total Users is real: the roster length.
-    const anyStatusKnown = all.some((u) => u.status !== null);
-    const active = anyStatusKnown ? String(all.filter((u) => u.status === 'Active').length) : '—';
-    const pending = anyStatusKnown ? String(all.filter((u) => u.status === 'Pending').length) : '—';
+    const active = all.filter((u) => u.status === 'Active').length;
+    const pending = all.filter((u) => u.status === 'Pending').length;
+    // The officer positions, not counting the super admin's own: which of the
+    // office's jobs has somebody able to do it today.
+    const officerPositions = OFFICER_POSITIONS.filter((p) => p.key !== 'super-admin');
+    const filled = officerPositions.filter((p) => this.holdersOf(p) > 0).length;
     return [
       {
-        icon: 'users',
-        tone: 'info',
-        illustration: 'users',
-        label: 'Total Users',
-        value: String(all.length),
-        footnote: 'Across All Departments',
+        icon: 'users', tone: 'info', illustration: 'users',
+        label: 'Staff Accounts', value: String(all.length), footnote: 'Every account on the server',
       },
       {
-        icon: 'check-circle',
-        tone: 'success',
-        illustration: 'active',
-        label: 'Active Users',
-        value: active,
-        footnote: anyStatusKnown
-          ? `${Math.round((Number(active) / (all.length || 1)) * 100)}% of total`
-          : 'Status not recorded',
+        icon: 'check-circle', tone: 'success', illustration: 'active',
+        label: 'Active', value: String(active),
+        footnote: `${Math.round((active / (all.length || 1)) * 100)}% have signed in`,
       },
       {
-        icon: 'alert-triangle',
-        tone: 'warning',
-        illustration: 'pending',
-        label: 'Pending Invites',
-        value: pending,
-        footnote: 'Awaiting acceptance',
+        icon: 'alert-triangle', tone: 'warning', illustration: 'pending',
+        label: 'Not Yet Signed In', value: String(pending), footnote: 'Password not set yet',
       },
       {
-        icon: 'user-check',
-        tone: 'neutral',
-        illustration: 'roles',
-        label: 'Roles Defined',
-        value: `${ROLE_CATALOG.length}`,
-        footnote: 'Across the platform',
+        icon: 'user-check', tone: 'neutral', illustration: 'roles',
+        label: 'Positions Filled', value: `${filled} / ${officerPositions.length}`,
+        footnote: 'Officer positions with an account',
       },
     ];
   });
@@ -376,11 +254,8 @@ export class UserRoles implements OnInit {
       const result = await this.directory.list();
       if (result.kind === 'ok') {
         const rows = result.members.map(toUserRow);
-        // The roster alone doesn't say what each account may do — that's a
-        // separate call per account (`GET /staff/users/:id/access`). Fired
-        // once, in parallel, right after the roster answers, rather than
-        // deferred to each row's own detail view: the list screen's own
-        // Role/Department columns need this too.
+        // The roster alone does not say what each account may do — that is a
+        // separate call per account, fired in parallel once it answers.
         this.users.set(rows);
         await this.loadAccessFor(rows);
         return;
@@ -408,16 +283,18 @@ export class UserRoles implements OnInit {
 
   protected readonly filteredUsers = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
-    const role = this.roleFilter();
+    const position = this.positionFilter();
     const status = this.statusFilter();
+    const presetTitles = new Set(OFFICER_POSITIONS.map((p) => p.title));
     return this.users().filter((u) => {
-      if (role !== 'All Roles' && u.role !== role) return false;
+      if (position === 'Custom' && presetTitles.has(u.position)) return false;
+      if (position !== 'All Positions' && position !== 'Custom' && u.position !== position) return false;
       if (status !== 'All Statuses' && u.status !== status) return false;
       if (!term) return true;
       return (
         u.name.toLowerCase().includes(term) ||
         u.email.toLowerCase().includes(term) ||
-        u.role.toLowerCase().includes(term)
+        u.position.toLowerCase().includes(term)
       );
     });
   });
@@ -438,38 +315,100 @@ export class UserRoles implements OnInit {
     this.page.set(1);
   }
 
-  protected readonly view = signal<'list' | 'detail'>('list');
+  // ---- Which account is open, and how ------------------------------------
+
+  protected readonly view = signal<PageView>('list');
   protected readonly selectedUser = signal<UserRow | null>(null);
   protected readonly userDetailTab = signal<UserDetailTab>('profile');
 
-  protected readonly selectedUserRole = computed(() => {
+  /** The row's View — the account, read-only. */
+  openDetail(row: UserRow): void {
+    this.selectedUser.set(row);
+    this.userDetailTab.set('profile');
+    this.view.set('detail');
+  }
+
+  backToList(): void {
+    this.view.set('list');
+  }
+
+  /** What the open account may do, asked of the same rules the portal enforces. */
+  protected readonly selectedAuthority = computed(() => {
     const row = this.selectedUser();
     if (!row) return null;
-    return this.roles().find((r) => r.name === row.role) ?? null;
+    const portalRole = portalRoleFor(row.serverRoles) ?? 'Auditor';
+    return authorityForAccount(row.serverRoles, row.stages, row.level, portalRole);
   });
 
-  protected readonly permissionMatrix = computed(() => {
+  protected readonly permissionMatrix = computed(() => buildPermissionMatrix(this.selectedAuthority()));
+
+  protected readonly selectedPreset = computed(() => {
     const row = this.selectedUser();
-    if (!row) return [];
-    return buildPermissionMatrix(ALL_STAFF_ROLES.includes(row.role as StaffRole) ? (row.role as StaffRole) : null);
+    return row ? presetFor(row.serverRoles, row.stages ?? []) : null;
   });
 
-  protected readonly workload = computed(() => {
-    const row = this.selectedUser();
-    return row ? buildWorkload(row) : null;
-  });
+  protected selectUserDetailTab(tab: UserDetailTab): void {
+    if (tab === 'security') void this.loadSessions();
+    if (tab === 'activity') void this.loadActivity();
+    if (tab === 'assignments') void this.loadAssignments();
+    this.userDetailTab.set(tab);
+  }
 
-  // ---- A-09 · Live sessions ----------------------------------------------
+  // ---- Guards that hold before anything is sent ---------------------------
+  //
+  // The server refuses all of these too. Checking first means the officer is
+  // told immediately, in the portal's own words, instead of after a wait. The
+  // one that genuinely matters is the last super admin: an LGU with none has
+  // nobody who can grant anybody access, including to fix it.
 
-  /**
-   * The account's live sign-ins, read from the server.
-   *
-   * These used to be `buildSessions(row)` — devices, IP addresses and
-   * last-seen times generated from the row. A fabricated session list is a
-   * particular kind of harmful: it is the screen an administrator opens when
-   * they suspect an account is compromised, and it would have answered with
-   * invented reassurance.
-   */
+  protected isSelf(row: UserRow): boolean {
+    const email = this.session.session()?.email;
+    return email !== undefined && email.toLowerCase() === row.email.toLowerCase();
+  }
+
+  private isSuperAdmin(row: UserRow): boolean {
+    return row.serverRoles.includes('super-admin');
+  }
+
+  private enabledSuperAdmins(): UserRow[] {
+    return this.users().filter((u) => this.isSuperAdmin(u) && u.status !== 'Inactive');
+  }
+
+  /** Whether this viewer may change the account at all — a super admin's is the super admin's alone. */
+  protected mayManage(row: UserRow): boolean {
+    return this.capabilities.canEdit() && (this.viewerIsSuperAdmin() || !this.isSuperAdmin(row));
+  }
+
+  /** Why this account may not be disabled, or null when it may be. */
+  protected disableRefusal(row: UserRow): string | null {
+    if (this.isSelf(row)) {
+      return 'You cannot disable your own account — you would be signed out with no way back in.';
+    }
+    if (!this.viewerIsSuperAdmin() && this.isSuperAdmin(row)) {
+      return 'Only a super admin can disable a super admin account.';
+    }
+    if (this.isSuperAdmin(row) && this.enabledSuperAdmins().length <= 1) {
+      return 'This is the last enabled super admin. Disabling it would leave nobody able to grant access, including to undo this.';
+    }
+    return null;
+  }
+
+  /** Why this account may not be deleted, or null when it may be. */
+  protected deleteRefusal(row: UserRow): string | null {
+    if (!this.viewerIsSuperAdmin()) return 'Only a super admin can delete a staff account.';
+    if (this.isSelf(row)) return 'You cannot delete your own account.';
+    if (this.isSuperAdmin(row) && this.enabledSuperAdmins().length <= 1 && row.status !== 'Inactive') {
+      return 'This is the last enabled super admin. Deleting it would leave nobody able to grant access.';
+    }
+    return null;
+  }
+
+  // ---- Live sessions -------------------------------------------------------
+  //
+  // Read from the server. These used to be generated devices and IP addresses —
+  // on the screen an administrator opens when they suspect a compromised
+  // account, which would have answered with invented reassurance.
+
   protected readonly sessions = signal<readonly StaffSession[]>([]);
   protected readonly sessionsLoading = signal(false);
   protected readonly sessionsUnavailable = signal(false);
@@ -482,8 +421,6 @@ export class UserRoles implements OnInit {
     this.sessionsUnavailable.set(false);
     this.sessionsError.set(null);
     if (!row?.id) {
-      // No server id means this row was never saved, so it has no sessions to
-      // show. Saying "unavailable" is truer than an empty table.
       this.sessionsUnavailable.set(true);
       return;
     }
@@ -514,216 +451,412 @@ export class UserRoles implements OnInit {
         return;
       }
       this.sessionsError.set(
-        result.kind === 'unavailable'
-          ? 'This deployment cannot end sessions yet.'
-          : result.message,
+        result.kind === 'unavailable' ? 'This deployment cannot end sessions yet.' : result.message,
       );
     } finally {
       this.revoking.set(null);
     }
   }
 
-  protected readonly userActivity = computed(() => {
+  // ---- Activity: the real audit trail -------------------------------------
+
+  protected readonly actorActivity = signal<AccountAuditResult | null>(null);
+  protected readonly accountChanges = signal<AccountAuditResult | null>(null);
+
+  protected async loadActivity(): Promise<void> {
     const row = this.selectedUser();
-    return row ? buildUserActivity(row) : [];
+    this.actorActivity.set(null);
+    this.accountChanges.set(null);
+    if (!row?.id) return;
+    const [did, changes] = await Promise.all([
+      this.audit.byActor(row.id),
+      this.audit.accountHistory(row.id),
+    ]);
+    if (this.selectedUser()?.id !== row.id) return; // moved to another account meanwhile
+    this.actorActivity.set(did);
+    this.accountChanges.set(changes);
+  }
+
+  protected entriesOf(result: AccountAuditResult | null): readonly AuditEntry[] {
+    return result?.kind === 'ok' ? result.entries : [];
+  }
+
+  // ---- Assignments: what is waiting on this officer -----------------------
+
+  /** Whether the viewer can read applications at all — an Administrator cannot, by design. */
+  protected readonly viewerReadsApplications = computed(() => {
+    const who = this.session.authority();
+    if (!who) return false;
+    return who.superAdmin || who.scopes === null || who.scopes.includes('applications:read');
   });
 
-  openDetail(row: UserRow): void {
-    this.selectedUser.set(row);
-    this.userDetailTab.set('profile');
-    this.view.set('detail');
-  }
+  protected readonly assignmentsLoading = signal(false);
 
-  // ---- A-10 · Guards that must hold before anything is sent --------------
-
-  /**
-   * Refusing an action here as well as on the server.
-   *
-   * The server is the authority and refuses these too. Checking first is not
-   * duplication for its own sake: an officer who clicks Disable, waits, and is
-   * then told the server said no has been given a worse answer than one who was
-   * told immediately and shown why. It also means the reason is worded by the
-   * portal in the portal's own voice, rather than depending on an error body.
-   *
-   * The one that genuinely matters is the last super admin. Every other refusal
-   * here is a convenience; that one guards the single failure this product
-   * cannot repair from inside itself — an LGU with no super admin has nobody
-   * who can grant anybody access, including to fix it.
-   */
-  private isSelf(row: UserRow): boolean {
-    const email = this.session.session()?.email;
-    return email !== undefined && email.toLowerCase() === row.email.toLowerCase();
-  }
-
-  private isSuperAdmin(row: UserRow): boolean {
-    return row.serverRoles.includes('super-admin');
-  }
-
-  private enabledSuperAdmins(): UserRow[] {
-    return this.users().filter((u) => this.isSuperAdmin(u) && u.status !== 'Inactive');
-  }
-
-  /** Why this account may not be disabled, or null when it may be. */
-  protected disableRefusal(row: UserRow): string | null {
-    if (this.isSelf(row)) {
-      return 'You cannot disable your own account — you would be signed out with no way back in.';
+  protected async loadAssignments(): Promise<void> {
+    if (!this.viewerReadsApplications()) return;
+    this.assignmentsLoading.set(true);
+    try {
+      await this.loader.ensureLoaded();
+    } finally {
+      this.assignmentsLoading.set(false);
     }
-    if (this.isSuperAdmin(row) && this.enabledSuperAdmins().length <= 1) {
-      return 'This is the last enabled super admin. Disabling it would leave nobody able to grant access, including to undo this.';
-    }
-    return null;
   }
 
-  /** Why this account's access may not be changed, or null when it may be. */
-  protected accessRefusal(row: UserRow, nextLevel: AccessLevel): string | null {
-    if (this.isSelf(row) && nextLevel === 'view') {
-      return 'You cannot reduce your own access — an administrator has to do it.';
-    }
-    return null;
-  }
-
-  // ---- A-07 · Changing what an account may do ----------------------------
-
-  /**
-   * Editing access is one operation, not two.
-   *
-   * The level and the forms are sent together for the same reason the approval
-   * grant is: applying one without the other leaves the account in a state
-   * nobody chose, for however long the second call takes to fail.
-   *
-   * The reason is mandatory and is not decoration. Every access change lands in
-   * the audit stream, and an entry saying "level changed" without saying why is
-   * a record that answers the easy question and not the one anybody asks.
-   */
-  protected readonly permitTypes = ALL_PERMIT_TYPES;
-  protected readonly editingAccess = signal(false);
-  protected readonly accessLevel = signal<AccessLevel>('view');
-  private readonly accessForms = signal<ReadonlySet<string>>(new Set());
-  protected readonly accessError = signal('');
-  protected readonly accessWorking = signal(false);
-
-  protected readonly accessFormCount = computed(() => this.accessForms().size);
-
-  protected isAccessForm(type: PermitType): boolean {
-    return this.accessForms().has(type);
-  }
-
-  protected toggleAccessForm(type: PermitType): void {
-    const next = new Set(this.accessForms());
-    if (!next.delete(type)) next.add(type);
-    this.accessForms.set(next);
-    this.accessError.set('');
-  }
-
-  protected setAccessLevel(level: AccessLevel): void {
-    this.accessLevel.set(level);
-    this.accessError.set('');
-  }
-
-  protected startEditAccess(): void {
+  /** The applications whose current step names this officer — the server's own responsibility. */
+  protected readonly assignments = computed(() => {
     const row = this.selectedUser();
-    if (!row) return;
+    if (!row) return [];
+    return this.store.applications().filter((app) => isAssignedTo(app.responsibility, row.id));
+  });
+
+  protected openApplication(id: string): void {
+    this.router.navigateByUrl(`/applications/${id}`);
+  }
+
+  // ---- The account form: Edit, and Add Staff Account ----------------------
+
+  protected readonly permitTypes = ALL_PERMIT_TYPES;
+  protected readonly evaluationStages = EVALUATION_STAGES;
+  protected readonly wireRoleOptions = ALL_WIRE_ROLES;
+  /** The role's name as the positions say it — "Building Official", not the older "Approving Officer". */
+  protected wireRoleLabel(role: string): string {
+    return role === 'building-official' ? 'Building Official' : WIRE_ROLE_LABELS[role] ?? role;
+  }
+
+  protected readonly editName = signal('');
+  protected readonly editEmail = signal('');
+  protected readonly editPositionKey = signal<string>(CUSTOM);
+  protected readonly editRoles = signal<ReadonlySet<string>>(new Set());
+  protected readonly editStages = signal<ReadonlySet<string>>(new Set());
+  protected readonly editLevel = signal<AccessLevel>('view-edit');
+  private readonly editForms = signal<ReadonlySet<string>>(new Set());
+  protected readonly editError = signal('');
+  protected readonly editWorking = signal(false);
+
+  /** The positions this viewer may give — the super admin's only by a super admin. */
+  protected readonly assignablePositions = computed(() =>
+    OFFICER_POSITIONS.filter((p) => p.key !== 'super-admin' || this.viewerIsSuperAdmin()),
+  );
+
+  protected readonly assignableRoles = computed(() =>
+    ALL_WIRE_ROLES.filter((role) => role !== 'super-admin' || this.viewerIsSuperAdmin()),
+  );
+
+  protected readonly editPreset = computed(
+    () => OFFICER_POSITIONS.find((p) => p.key === this.editPositionKey()) ?? null,
+  );
+
+  protected readonly editIsCustom = computed(() => this.editPositionKey() === CUSTOM);
+
+  /** Stages matter only to an account that evaluates; a super admin decides every stage already. */
+  protected readonly editDecidesStages = computed(() => {
+    const roles = this.editRoles();
+    return roles.has('evaluator') && !roles.has('super-admin');
+  });
+
+  protected readonly editFormCount = computed(() => this.editForms().size);
+
+  /** Editing your own account: the server refuses your own roles, and the portal your own level. */
+  protected readonly editingSelf = computed(() => {
+    const row = this.selectedUser();
+    return this.view() === 'edit' && row !== null && this.isSelf(row);
+  });
+
+  protected isEditRole(role: string): boolean {
+    return this.editRoles().has(role);
+  }
+
+  protected isEditStage(stage: string): boolean {
+    return this.editStages().has(stage);
+  }
+
+  protected isEditForm(type: PermitType): boolean {
+    return this.editForms().has(type);
+  }
+
+  protected choosePosition(key: string): void {
+    this.editPositionKey.set(key);
+    this.editError.set('');
+    const preset = OFFICER_POSITIONS.find((p) => p.key === key);
+    if (preset === undefined) return; // Custom keeps whatever is ticked.
+    this.editRoles.set(new Set(preset.roles));
+    this.editStages.set(new Set(preset.stages));
+    if (this.view() === 'create') this.editLevel.set(preset.level);
+  }
+
+  protected toggleEditRole(role: string): void {
+    const next = new Set(this.editRoles());
+    if (!next.delete(role)) next.add(role);
+    this.editRoles.set(next);
+    this.syncPositionKey();
+  }
+
+  protected toggleEditStage(stage: string): void {
+    const next = new Set(this.editStages());
+    if (!next.delete(stage)) next.add(stage);
+    this.editStages.set(next);
+    this.syncPositionKey();
+  }
+
+  /** Ticking boxes by hand lands on a preset when it matches one. */
+  private syncPositionKey(): void {
+    this.editPositionKey.set(presetFor([...this.editRoles()], [...this.editStages()])?.key ?? CUSTOM);
+    this.editError.set('');
+  }
+
+  protected toggleEditForm(type: PermitType): void {
+    const next = new Set(this.editForms());
+    if (!next.delete(type)) next.add(type);
+    this.editForms.set(next);
+    this.editError.set('');
+  }
+
+  protected selectAllForms(all: boolean): void {
+    this.editForms.set(new Set(all ? ALL_PERMIT_TYPES : []));
+    this.editError.set('');
+  }
+
+  protected setEditLevel(level: AccessLevel): void {
+    this.editLevel.set(level);
+    this.editError.set('');
+  }
+
+  /** The row's Edit — the account's form, seeded from what the account HOLDS. */
+  protected openEdit(row: UserRow): void {
+    if (!this.mayManage(row)) {
+      this.toast.error('Only a super admin can change a super admin account.');
+      return;
+    }
     if (row.level === null || row.permitTypes === null) {
       this.toast.error("This account's current access hasn't finished loading yet.");
       return;
     }
-    // Seeded from what the account HOLDS, so the editor sees the current state
-    // and changes it, rather than composing a replacement from memory.
-    this.accessLevel.set(row.level);
-    this.accessForms.set(new Set(row.permitTypes));
-    this.accessError.set('');
-    this.editingAccess.set(true);
+    this.selectedUser.set(row);
+    this.editName.set(row.fullName ?? '');
+    this.editEmail.set(row.email);
+    this.editRoles.set(new Set(row.serverRoles));
+    this.editStages.set(new Set(row.stages ?? []));
+    this.editPositionKey.set(presetFor(row.serverRoles, row.stages ?? [])?.key ?? CUSTOM);
+    this.editLevel.set(row.level);
+    this.editForms.set(new Set(row.permitTypes));
+    this.editError.set('');
+    this.view.set('edit');
   }
 
-  protected cancelEditAccess(): void {
-    this.editingAccess.set(false);
-    this.accessError.set('');
+  /** "Add Staff Account", or "Add officer" from a position card with that position chosen. */
+  protected openCreate(positionKey: string | null = null): void {
+    this.selectedUser.set(null);
+    this.editName.set('');
+    this.editEmail.set('');
+    this.editRoles.set(new Set());
+    this.editStages.set(new Set());
+    this.editPositionKey.set(CUSTOM);
+    this.editLevel.set('view-edit');
+    // Every form by default: an officer assigned none can reach nothing, and
+    // the office narrows it here when a post covers only some permits.
+    this.editForms.set(new Set(ALL_PERMIT_TYPES));
+    this.editError.set('');
+    this.view.set('create');
+    if (positionKey !== null) this.choosePosition(positionKey);
   }
 
-  async saveAccess(): Promise<void> {
+  protected cancelEdit(): void {
     const row = this.selectedUser();
-    if (!row || this.accessWorking()) return;
+    this.editError.set('');
+    if (this.view() === 'edit' && row) this.view.set('detail');
+    else this.view.set('list');
+  }
 
-    if (!row.id) {
-      this.accessError.set('This account has not been created on the server yet.');
-      return;
+  /** The roles to save: stages without the evaluator role are dropped, not kept dangling. */
+  private formStages(): string[] {
+    return this.editDecidesStages() ? EVALUATION_STAGES.filter((s) => this.editStages().has(s)) : [];
+  }
+
+  /** Checks shared by both forms; the refusal, or null. */
+  private formRefusal(creating: boolean): string | null {
+    const name = this.editName().trim();
+    if (creating && name.length < 2) return "Enter the officer's full name — it is shown on every decision they make.";
+    if (!creating && name.length > 0 && name.length < 2) return 'A name needs at least two characters.';
+    if (creating && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.editEmail().trim())) {
+      return 'Enter a valid email address — the officer sets their password from it.';
     }
-    const refusal = this.accessRefusal(row, this.accessLevel());
+    if (this.editRoles().size === 0) return 'Choose a position.';
+    if (this.editRoles().has('super-admin') && !this.viewerIsSuperAdmin()) {
+      return 'Only a super admin can give the Super Admin position.';
+    }
+    if (creating && this.editDecidesStages() && this.formStages().length === 0) {
+      return 'Choose the evaluation stage this officer decides.';
+    }
+    if (this.editForms().size === 0) {
+      return 'Choose at least one form. An account with no forms can see nothing.';
+    }
+    return null;
+  }
+
+  /**
+   * Save the edit form — only what changed, one request per part, in an order
+   * that narrows before it widens: name, position, stages, forms, then level.
+   *
+   * The parts are separate endpoints on the server, so a failure part-way is
+   * possible, and the officer is told exactly which parts landed. An
+   * administrator who does not know what took effect will guess, and guessing
+   * about access is how somebody keeps authority they were meant to lose.
+   */
+  protected async saveEdit(): Promise<void> {
+    const row = this.selectedUser();
+    if (!row || this.editWorking()) return;
+    const refusal = this.formRefusal(false);
     if (refusal !== null) {
-      this.accessError.set(refusal);
+      this.editError.set(refusal);
       return;
     }
-    if (this.accessForms().size === 0) {
-      this.accessError.set('Choose at least one form. An account with no forms can see nothing.');
+    const name = this.editName().trim();
+    const roles = ALL_WIRE_ROLES.filter((r) => this.editRoles().has(r));
+    const stages = this.formStages();
+    const forms = ALL_PERMIT_TYPES.filter((t) => this.editForms().has(t));
+    const level = this.editLevel();
+
+    if (this.isSelf(row) && !sameSet(roles, row.serverRoles)) {
+      this.editError.set('You cannot change your own position — another administrator has to.');
       return;
     }
-    this.accessWorking.set(true);
+    if (this.isSelf(row) && level === 'view' && row.level === 'view-edit') {
+      this.editError.set('You cannot reduce your own access — an administrator has to do it.');
+      return;
+    }
+
+    const steps: { label: string; run: () => Promise<StaffWriteResult> }[] = [];
+    if (name !== '' && name !== (row.fullName ?? '')) {
+      steps.push({ label: 'name', run: () => this.directory.rename(row.id, name) });
+    }
+    if (!sameSet(roles, row.serverRoles)) {
+      steps.push({ label: 'position', run: () => this.directory.setRoles(row.id, roles) });
+    }
+    if (!sameSet(stages, row.stages ?? [])) {
+      steps.push({ label: 'evaluation stages', run: () => this.directory.setStages(row.id, stages) });
+    }
+    if (!sameSet(forms, row.permitTypes ?? [])) {
+      steps.push({ label: 'forms', run: () => this.directory.setForms(row.id, forms) });
+    }
+    if (level !== row.level) {
+      steps.push({ label: 'access level', run: () => this.directory.setLevel(row.id, level) });
+    }
+    if (steps.length === 0) {
+      this.toast.info('Nothing changed.');
+      this.view.set('detail');
+      return;
+    }
+
+    this.editWorking.set(true);
     try {
-      const result = await this.directory.changeAccess(row.id, {
-        level: this.accessLevel(),
-        permitTypes: [...this.accessForms()] as PermitType[],
-      });
-
-      if (result.kind === 'done') {
-        this.editingAccess.set(false);
-            this.toast.success(`Access updated for ${row.name}.`);
-        await this.loadDirectory();
-        // Re-select from the reloaded list so the panel shows what the SERVER
-        // now holds, not what this page hoped it sent.
-        this.selectedUser.set(this.filteredUsers().find((u) => u.id === row.id) ?? null);
+      const outcome = await this.runSteps(steps);
+      await this.reloadKeeping(row.id);
+      if (outcome === null) {
+        this.toast.success(`Saved ${this.selectedUser()?.name ?? row.name}.`);
+        this.view.set('detail');
         return;
       }
-      if (result.kind === 'refused') {
-        // The server refusing on purpose — most importantly when this would
-        // strip the last super admin. That is a correct answer, and it is shown
-        // as the server worded it rather than flattened into a generic failure.
-        this.accessError.set(result.message);
-        return;
-      }
-      this.accessError.set(
-        result.kind === 'unavailable'
-          ? 'This deployment cannot change access yet.'
-          : result.message,
-      );
+      this.editError.set(outcome);
     } finally {
-      this.accessWorking.set(false);
+      this.editWorking.set(false);
     }
   }
 
-  protected selectUserDetailTab(tab: UserDetailTab): void {
-    if (tab === 'security') void this.loadSessions();
-    this.userDetailTab.set(tab);
+  /**
+   * Create the account, then give it its stages, forms and level — four
+   * requests, because the server keeps them apart. A failure after the first
+   * leaves a real account behind, so the officer is taken to its Edit form to
+   * finish rather than told "failed" about something that half-exists.
+   */
+  protected async createAccount(): Promise<void> {
+    if (this.editWorking()) return;
+    const refusal = this.formRefusal(true);
+    if (refusal !== null) {
+      this.editError.set(refusal);
+      return;
+    }
+    const name = this.editName().trim();
+    const email = this.editEmail().trim();
+    const roles = ALL_WIRE_ROLES.filter((r) => this.editRoles().has(r));
+    const stages = this.formStages();
+    const forms = ALL_PERMIT_TYPES.filter((t) => this.editForms().has(t));
+    const level = this.editLevel();
+
+    this.editWorking.set(true);
+    try {
+      const created = await this.directory.create(email, roles, name);
+      if (created.kind !== 'done') {
+        this.editError.set(
+          created.kind === 'unavailable' ? 'This deployment cannot create staff accounts yet.' : created.message,
+        );
+        return;
+      }
+      const id = created.member.id;
+      const steps: { label: string; run: () => Promise<StaffWriteResult> }[] = [];
+      if (stages.length > 0) steps.push({ label: 'evaluation stages', run: () => this.directory.setStages(id, stages) });
+      steps.push({ label: 'forms', run: () => this.directory.setForms(id, forms) });
+      steps.push({ label: 'access level', run: () => this.directory.setLevel(id, level) });
+      const outcome = await this.runSteps(steps);
+      await this.reloadKeeping(id);
+      const row = this.selectedUser();
+      if (outcome !== null && row) {
+        this.openEdit(row);
+        this.editError.set(`The account was created. ${outcome} Finish it here.`);
+        return;
+      }
+      this.toast.success(
+        `${name}'s account is ready. Ask them to open this portal, choose "Forgot password" and enter `
+        + `${email} — the email lets them set a password.`
+        + (created.member.mfaRequired ? ' Their position needs an authenticator app, which they set up at first sign-in.' : ''),
+      );
+      this.view.set(row ? 'detail' : 'list');
+    } finally {
+      this.editWorking.set(false);
+    }
   }
 
-  backToList(): void {
-    this.view.set('list');
+  /** Run the parts in order; null when all landed, else the sentence saying which did. */
+  private async runSteps(
+    steps: readonly { label: string; run: () => Promise<StaffWriteResult> }[],
+  ): Promise<string | null> {
+    const done: string[] = [];
+    for (const [index, step] of steps.entries()) {
+      const result = await step.run();
+      if (result.kind === 'done') {
+        done.push(step.label);
+        continue;
+      }
+      const why = result.kind === 'unavailable' ? 'this deployment cannot change it yet.' : result.message;
+      const untried = steps.slice(index + 1).map((s) => s.label);
+      return [
+        done.length > 0 ? `Saved: ${done.join(', ')}.` : '',
+        `The ${step.label} was not saved — ${why}`,
+        untried.length > 0 ? `Not sent: ${untried.join(', ')}.` : '',
+      ].filter(Boolean).join(' ');
+    }
+    return null;
   }
 
-  // ---- Filters / export --------------------------------------------------
+  /** Reload the directory and re-select the account from what the SERVER now holds. */
+  private async reloadKeeping(id: string): Promise<void> {
+    await this.loadDirectory();
+    this.selectedUser.set(this.users().find((u) => u.id === id) ?? null);
+  }
+
+  // ---- Filters / export ----------------------------------------------------
 
   protected readonly hasActiveFilters = computed(
     () =>
-      this.roleFilter() !== 'All Roles' ||
+      this.positionFilter() !== 'All Positions' ||
       this.statusFilter() !== 'All Statuses' ||
       !!this.searchTerm().trim(),
   );
 
   protected clearFilters(): void {
-    this.roleFilter.set('All Roles');
+    this.positionFilter.set('All Positions');
     this.statusFilter.set('All Statuses');
     this.searchTerm.set('');
     this.onFilterChange();
-  }
-
-  private userCsvRow(row: UserRow) {
-    return {
-      Name: row.name,
-      Email: row.email,
-      Role: row.role,
-      Department: row.department,
-      Status: row.status,
-      'Last Active': row.lastActive,
-    };
   }
 
   protected exportUsers(): void {
@@ -731,36 +864,38 @@ export class UserRoles implements OnInit {
     // `downloadCsv` writes nothing for an empty set, so "Exported 0 rows."
     // announced a file that was never created.
     if (rows.length === 0) {
-      this.toast.info('Nothing to export — no users match the current view.');
+      this.toast.info('Nothing to export — no accounts match the current view.');
       return;
     }
     downloadCsv(
-      'users',
-      rows.map((row) => this.userCsvRow(row)),
+      'staff-accounts',
+      rows.map((row) => ({
+        Name: row.name,
+        Email: row.email,
+        Position: row.position,
+        Office: row.office ?? '',
+        'Evaluation Stages': (row.stages ?? []).join('; '),
+        Access: row.department,
+        Status: row.status,
+        'Last Active': row.lastActive,
+      })),
     );
     this.toast.success(`Exported ${rows.length} row${rows.length === 1 ? '' : 's'}.`);
   }
 
-  // ---- Delete -------------------------------------------------------------
+  protected viewOfficersIn(position: OfficerPosition): void {
+    this.positionFilter.set(position.title);
+    this.onFilterChange();
+    this.selectTab('users');
+  }
 
-  /**
-   * Disabling an account. There is no delete, and the absence is the feature.
-   *
-   * Owner ruling, 2026-08-31: no delete access anywhere — archive or disable,
-   * and what is set aside is preserved. This control used to remove the row
-   * from the list outright:
-   *
-   *     this.users.update((rows) => rows.filter((r) => r.email !== target.email));
-   *
-   * An officer's name is on every application they touched. Deleting the
-   * account leaves that audit trail pointing at nobody, and a permit decided by
-   * a person the system can no longer identify is a permit nobody can defend.
-   * The API agrees: it offers `disable` and `enable` and no destructive route
-   * for a staff user.
-   */
+  // ---- Disable / enable ----------------------------------------------------
+  //
+  // Disabling keeps the account — its past decisions stay attributable — and
+  // it can be enabled again.
+
   protected readonly disableTarget = signal<UserRow | null>(null);
   protected readonly disableWorking = signal(false);
-
   protected readonly disableRefused = signal('');
 
   protected requestDisable(row: UserRow): void {
@@ -781,31 +916,16 @@ export class UserRoles implements OnInit {
     this.disableTarget.set(null);
   }
 
-  /**
-   * Mirrors `saveAccess()`'s shape: guard the not-yet-created case, call the
-   * real endpoint, reload from the server rather than trust a local mutation.
-   *
-   * `ConfirmDialog` has no slot for an inline error, unlike the persistent
-   * Edit Access panel — so a refusal here (a rare race, e.g. someone else
-   * disabled the second-to-last super admin a moment ago; the common cases
-   * are already caught by `disableRefusal()` before this dialog even opens)
-   * closes the dialog and surfaces through the toast, same as a plain action
-   * button's refusal elsewhere in this app.
-   */
   protected async confirmDisable(reason: string): Promise<void> {
     const target = this.disableTarget();
     if (!target || this.disableWorking()) return;
     this.disableTarget.set(null);
-    if (!target.id) {
-      this.toast.error('This account has not been created on the server yet.');
-      return;
-    }
     this.disableWorking.set(true);
     try {
       const result = await this.directory.disable(target.id, reason);
       if (result.kind === 'done') {
-        this.toast.success(`"${target.name}" disabled. The account is kept, not deleted.`);
-        await this.loadDirectory();
+        this.toast.success(`"${target.name}" disabled. The account is kept and can be enabled again.`);
+        await this.reloadKeeping(target.id);
         return;
       }
       this.toast.error(
@@ -820,6 +940,10 @@ export class UserRoles implements OnInit {
   protected readonly enableWorking = signal(false);
 
   protected requestEnable(row: UserRow): void {
+    if (!this.mayManage(row)) {
+      this.toast.error('Only a super admin can enable a super admin account.');
+      return;
+    }
     this.enableTarget.set(row);
   }
 
@@ -831,16 +955,12 @@ export class UserRoles implements OnInit {
     const target = this.enableTarget();
     if (!target || this.enableWorking()) return;
     this.enableTarget.set(null);
-    if (!target.id) {
-      this.toast.error('This account has not been created on the server yet.');
-      return;
-    }
     this.enableWorking.set(true);
     try {
       const result = await this.directory.enable(target.id, reason);
       if (result.kind === 'done') {
         this.toast.success(`"${target.name}" enabled.`);
-        await this.loadDirectory();
+        await this.reloadKeeping(target.id);
         return;
       }
       this.toast.error(
@@ -851,104 +971,54 @@ export class UserRoles implements OnInit {
     }
   }
 
-  // ---- Add user -------------------------------------------------------
+  // ---- Delete (super admin) -------------------------------------------------
   //
-  // Real, against `POST /staff/users` — this used to push a row straight
-  // into the local `users` signal with `id: ''`, telling the administrator
-  // in the same breath that it had been "added" and that "no account exists
-  // yet". The real route creates a real account (without a password — the
-  // officer sets one through account recovery, which is exactly what the
-  // server's own `nextStep` says). The role picker offers the real 10
-  // `StaffRole` wire values (`ALL_WIRE_ROLES`/`WIRE_ROLE_LABELS`), not this
-  // page's own collapsed 7-category display roles — `assessor` and `cashier`
-  // are separate real roles the server keeps apart on purpose (separation of
-  // duty between assessing a fee and confirming its payment), and collapsing
-  // them into one "Payment Officer" choice here would make it impossible to
-  // grant just one of the two. There is also no `name`/`department` field:
-  // the server has no name column for a staff account (`toUserRow` above
-  // already uses the email as the display name) and no department concept at
-  // all, so collecting either would be a field the server silently discards.
+  // Owner request, 2026-09-26. The server decides what deleting means: an
+  // account that never acted is deleted outright; one whose name is on
+  // decisions is RETIRED — it can never sign in again and leaves this list,
+  // and its name stays on what it did. The answer says which happened.
 
-  protected readonly showAddUser = signal(false);
-  protected readonly addUserWorking = signal(false);
-  protected newUser: { email: string; roles: string[] } = { email: '', roles: [] };
-  protected readonly wireRoleOptions = ALL_WIRE_ROLES;
-  protected wireRoleLabel(role: string): string {
-    return WIRE_ROLE_LABELS[role] ?? role;
-  }
+  protected readonly deleteTarget = signal<UserRow | null>(null);
+  protected readonly deleteWorking = signal(false);
+  protected readonly deleteRefused = signal('');
 
-  protected openAddUser(): void {
-    this.newUser = { email: '', roles: [] };
-    this.showAddUser.set(true);
-  }
-
-  protected cancelAddUser(): void {
-    this.showAddUser.set(false);
-  }
-
-  protected isNewUserRoleChecked(role: string): boolean {
-    return this.newUser.roles.includes(role);
-  }
-
-  protected toggleNewUserRole(role: string): void {
-    this.newUser.roles = this.isNewUserRoleChecked(role)
-      ? this.newUser.roles.filter((r) => r !== role)
-      : [...this.newUser.roles, role];
-  }
-
-  protected async createUser(): Promise<void> {
-    const email = this.newUser.email.trim();
-    if (!email) {
-      this.toast.error('Enter an email address before adding this user.');
+  protected requestDelete(row: UserRow): void {
+    const refusal = this.deleteRefusal(row);
+    if (refusal !== null) {
+      this.deleteRefused.set(refusal);
       return;
     }
-    if (this.addUserWorking()) return;
-    this.addUserWorking.set(true);
+    this.deleteRefused.set('');
+    this.deleteTarget.set(row);
+  }
+
+  protected dismissDeleteRefusal(): void {
+    this.deleteRefused.set('');
+  }
+
+  protected cancelDelete(): void {
+    this.deleteTarget.set(null);
+  }
+
+  protected async confirmDelete(): Promise<void> {
+    const target = this.deleteTarget();
+    if (!target || this.deleteWorking()) return;
+    this.deleteTarget.set(null);
+    this.deleteWorking.set(true);
     try {
-      const result = await this.directory.create(email, this.newUser.roles);
+      const result = await this.directory.remove(target.id);
       if (result.kind === 'done') {
-        this.showAddUser.set(false);
-        this.toast.success(result.nextStep);
+        this.toast.success(`${target.name}: ${result.detail}`);
+        this.selectedUser.set(null);
+        this.view.set('list');
         await this.loadDirectory();
         return;
       }
-      if (result.kind === 'unavailable') {
-        this.toast.error('This deployment cannot create staff accounts yet.');
-        return;
-      }
-      this.toast.error(result.message);
+      this.toast.error(
+        result.kind === 'unavailable' ? 'This deployment cannot delete staff accounts yet.' : result.message,
+      );
     } finally {
-      this.addUserWorking.set(false);
+      this.deleteWorking.set(false);
     }
-  }
-
-  // ---- Role card actions ---------------------------------------------
-
-  protected readonly editingRole = signal<RoleRow | null>(null);
-
-  protected openEditRole(role: RoleRow): void {
-    this.editingRole.set({ ...role });
-  }
-
-  protected cancelEditRole(): void {
-    this.editingRole.set(null);
-  }
-
-  protected saveEditRole(): void {
-    const edited = this.editingRole();
-    if (!edited) return;
-    this.roleOverrides.update((current) => {
-      const next = new Map(current);
-      next.set(edited.name, { description: edited.description, permissions: edited.permissions });
-      return next;
-    });
-    this.editingRole.set(null);
-    this.toast.success(`"${edited.name}" role updated.`);
-  }
-
-  protected viewUsersForRole(roleName: string): void {
-    this.roleFilter.set(roleName);
-    this.onFilterChange();
-    this.selectTab('users');
   }
 }

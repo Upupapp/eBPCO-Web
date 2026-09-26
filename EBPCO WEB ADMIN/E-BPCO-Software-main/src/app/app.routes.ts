@@ -58,6 +58,16 @@ export const routes: Routes = [
           import('./pages/applications/applications').then((m) => m.Applications),
       },
       {
+        // The same record, opened to WORK on it (View vs Edit, 2026-09-26):
+        // decisions, document review, fees, the permit and notes. The plain
+        // `:id` route above is the read-only record. `mode` reaches the
+        // component as an input through withComponentInputBinding.
+        path: 'applications/:id/edit',
+        loadComponent: () =>
+          import('./pages/applications/applications').then((m) => m.Applications),
+        data: { mode: 'edit' },
+      },
+      {
         path: 'evaluations',
         loadComponent: () => import('./pages/evaluations/evaluations').then((m) => m.Evaluations),
       },

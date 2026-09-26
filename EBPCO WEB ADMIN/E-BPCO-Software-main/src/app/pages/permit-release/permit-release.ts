@@ -147,7 +147,7 @@ export class PermitRelease implements OnInit {
   }
 
   protected readonly canRelease = computed(() => {
-    const role = this.session.role();
+    const role = this.session.authority();
     return role ? ACTION_PERMISSIONS.releasePermit(role) : false;
   });
 
@@ -172,7 +172,7 @@ export class PermitRelease implements OnInit {
   // while editing the checklist is narrowed further (see canConfigureRequirements).
 
   protected readonly canConfigureRequirements = computed(() => {
-    const role = this.session.role();
+    const role = this.session.authority();
     return !!role && ACTION_PERMISSIONS.configureRequirements(role);
   });
 

@@ -94,27 +94,27 @@ export class Citizens {
   // instant between a session ending and this page's own redirect is a
   // real state a template-level non-null assertion would crash on.
   protected readonly canDisable = computed(() => {
-    const r = this.role();
+    const r = this.session.authority();
     return !!r && ACTION_PERMISSIONS['citizen.disable'](r);
   });
   protected readonly canEnable = computed(() => {
-    const r = this.role();
+    const r = this.session.authority();
     return !!r && ACTION_PERMISSIONS['citizen.enable'](r);
   });
   protected readonly canSignOutSessions = computed(() => {
-    const r = this.role();
+    const r = this.session.authority();
     return !!r && ACTION_PERMISSIONS['citizen.signOutSessions'](r);
   });
   protected readonly canSendResetLink = computed(() => {
-    const r = this.role();
+    const r = this.session.authority();
     return !!r && ACTION_PERMISSIONS['citizen.sendResetLink'](r);
   });
   protected readonly canRectify = computed(() => {
-    const r = this.role();
+    const r = this.session.authority();
     return !!r && ACTION_PERMISSIONS['citizen.rectify'](r);
   });
   protected readonly canErase = computed(() => {
-    const r = this.role();
+    const r = this.session.authority();
     return !!r && ACTION_PERMISSIONS['citizen.erase'](r);
   });
   protected readonly canActOnStatus = computed(() => this.canDisable() || this.canEnable());

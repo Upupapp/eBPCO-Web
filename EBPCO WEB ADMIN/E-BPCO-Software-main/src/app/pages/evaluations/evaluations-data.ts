@@ -1,3 +1,4 @@
+import { assignedToLabel } from '../../core/domain/responsibility';
 import { KpiIllustration, KpiTone } from '../../shared/kpi-card/kpi-card';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
@@ -46,7 +47,10 @@ export interface EvalRow {
   businessName: string;
   type: string | null;
   dateSubmitted: string;
-  /** The server assigns no named officer to an evaluation. */
+  /**
+   * The officer(s) the stage is waiting on, for the row's CURRENT stage — a
+   * stage it has already passed is nobody's work any more ('—').
+   */
   officer: string;
   status: RowStatus;
   stage: Stage;
@@ -185,7 +189,7 @@ export function buildEvalRows(rows: EvaluationQueueRow[], stageKey: EvalTypeKey)
       businessName: r.businessName ?? '—',
       type: permitType,
       dateSubmitted: r.submittedAt ? r.submittedAt.slice(0, 10) : '—',
-      officer: '—',
+      officer: appStage !== null && r.nextStage === appStage ? assignedToLabel(r.responsibility) : '—',
       status: STAGE_STATUS[stage],
       stage,
       isCurrentStage: appStage !== null && r.nextStage === appStage,
