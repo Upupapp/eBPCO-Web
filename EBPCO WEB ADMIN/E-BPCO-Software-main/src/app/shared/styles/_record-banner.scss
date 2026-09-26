@@ -1,0 +1,13 @@
+// The Castilla Town Hall behind a record's avatar, dimmed like a modal's
+// backdrop and cropped to the photo's top-center, where the "Castilla Town
+// Hall" sign and seal are.
+//
+// A mixin, not only the `.record-banner` rule in _detail-view.scss, because
+// Application Details draws its applicant card with its own `.banner` markup
+// and never used that rule — so when the photo went onto every other record's
+// banner, that one card kept the old empty gray box with a generic image icon.
+// Both now take the photo from here, so they cannot drift apart again.
+@mixin town-hall-photo {
+  background: linear-gradient(rgba(20, 22, 28, 0.45), rgba(20, 22, 28, 0.45)),
+    url('/assets/backgrounds/municipality.png') top center / cover no-repeat;
+}

@@ -2,6 +2,7 @@
 @use '../../shared/styles/kpi-grid';
 @use '../../shared/styles/modal';
 @use '../../shared/styles/menu-popover';
+@use '../../shared/styles/record-banner';
 @use '../../shared/styles/tokens' as *;
 
 // The shared `.kpi-grid > app-kpi-card` rule (`_kpi-grid.scss`) sizes each
@@ -301,11 +302,12 @@ h3 {
 .banner {
   position: relative;
   height: 110px;
-  background: linear-gradient(160deg, #d7dbe3, #eceef2);
+  // The same Town Hall photo as every other record's banner — this card
+  // was the one left with an empty gray box (see _record-banner.scss).
+  @include record-banner.town-hall-photo;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9297a3;
 
   .banner-avatar {
     position: absolute;

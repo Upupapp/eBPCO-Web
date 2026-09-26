@@ -1,4 +1,5 @@
 @use 'tokens' as *;
+@use 'record-banner';
 
 // Shared "Detail Page Pattern" per docs/02-Design-System/11-Layout-Patterns.md:
 // Header -> Summary Information -> Sections -> Supporting Information ->
@@ -74,8 +75,9 @@
   // positioned to the photo's own top-center, where the "Castilla Town
   // Hall" sign and seal actually are, rather than the vertical middle
   // (a plain `center` cut straight through the columns below the sign).
-  background: linear-gradient(rgba(20, 22, 28, 0.45), rgba(20, 22, 28, 0.45)),
-    url('/assets/backgrounds/municipality.png') top center / cover no-repeat;
+  // Defined once in _record-banner.scss, which Application Details' own
+  // card uses too.
+  @include record-banner.town-hall-photo;
   display: flex;
   align-items: center;
   justify-content: center;
