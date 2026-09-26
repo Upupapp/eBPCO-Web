@@ -79,7 +79,7 @@
         </button>
         <!-- Real data: deactivates for real (POST .../deactivate). Seed data: hides from this view only. See confirmDelete(). -->
         <button type="button" class="btn-outline danger" (click)="requestDeleteSelected()">
-          <app-icon name="eye-off" [size]="14" />
+          <app-icon name="slash" [size]="14" />
           {{ store.isSeedData() ? 'Hide' : 'Deactivate' }}
         </button>
       </div>
@@ -102,7 +102,6 @@
             <th>CATEGORY</th>
             <th>CONTACT PERSON</th>
             <th>DATE CREATED</th>
-            <th>User Count</th>
             <th>STATUS</th>
             <th>ACTION</th>
           </tr>
@@ -140,7 +139,6 @@
                 </div>
               </td>
               <td>{{ row.dateCreated }}</td>
-              <td>{{ row.userCount ?? '—' }}</td>
               <td>
                 <span class="status-pill" [class]="row.status.toLowerCase()">{{ row.status }}</span>
               </td>
@@ -157,21 +155,23 @@
                   @if (row.status === 'Active') {
                     <button
                       type="button"
-                      class="icon-btn del"
+                      class="status-toggle-btn deactivate"
                       [attr.aria-label]="store.isSeedData() ? 'Hide business from this view' : 'Deactivate business'"
                       (click)="requestDelete(row)"
                     >
-                      <app-icon name="eye-off" [size]="14" />
+                      <app-icon name="slash" [size]="13" />
+                      {{ store.isSeedData() ? 'Hide' : 'Deactivate' }}
                     </button>
                   } @else if (!store.isSeedData()) {
                     <button
                       type="button"
-                      class="icon-btn"
-                      aria-label="Reactivate business"
+                      class="status-toggle-btn activate"
+                      aria-label="Activate business"
                       [disabled]="changingBusinessStatus()"
                       (click)="reactivateBusiness(row)"
                     >
-                      <app-icon name="eye" [size]="14" />
+                      <app-icon name="refresh" [size]="13" />
+                      Activate
                     </button>
                   }
                 </div>
@@ -179,7 +179,7 @@
             </tr>
           } @empty {
             <tr class="table-empty-row">
-              <td colspan="10">No businesses match your search.</td>
+              <td colspan="8">No businesses match your search.</td>
             </tr>
           }
         </tbody>
@@ -415,8 +415,8 @@
           <span>Date Created</span>
         </div>
         <div>
-          <strong>{{ row.userCount ?? '—' }}</strong>
-          <span>User Count</span>
+          <strong>{{ row.category }}</strong>
+          <span>Category</span>
         </div>
       </div>
     </div>
@@ -485,7 +485,7 @@
               }
               @if (row.status === 'Active') {
                 <button type="button" class="btn-outline danger" (click)="requestDelete(row)">
-                  <app-icon name="eye-off" [size]="14" />
+                  <app-icon name="slash" [size]="14" />
                   Deactivate
                 </button>
               } @else {
@@ -494,8 +494,8 @@
                   [disabled]="changingBusinessStatus()"
                   (click)="reactivateBusiness(row)"
                 >
-                  <app-icon name="eye" [size]="14" />
-                  {{ changingBusinessStatus() ? 'Reactivating…' : 'Reactivate' }}
+                  <app-icon name="refresh" [size]="14" />
+                  {{ changingBusinessStatus() ? 'Activating…' : 'Activate' }}
                 </button>
               }
             </div>

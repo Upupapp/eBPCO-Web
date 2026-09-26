@@ -272,7 +272,7 @@
                 <div class="field">
                   <label class="field-label" for="rectify-field">Field</label>
                   <select id="rectify-field" class="select-input" [(ngModel)]="rectifyField">
-                    <option value="">Select a field…</option>
+                    <option value="">Select a field</option>
                     @for (f of rectifiableFields; track f.value) {
                       <option [value]="f.value">{{ f.label }}</option>
                     }
@@ -282,19 +282,19 @@
                   <label class="field-label" for="rectify-value">New value</label>
                   @if (rectifyField() === 'barangay') {
                     <select id="rectify-value" class="select-input" [(ngModel)]="rectifyValue">
-                      <option value="" disabled>Select a barangay…</option>
+                      <option value="" disabled>Select a barangay</option>
                       @for (b of barangays; track b) {
                         <option [value]="b">{{ b }}</option>
                       }
                     </select>
                   } @else if (rectifyField() === 'city') {
                     <select id="rectify-value" class="select-input" [(ngModel)]="rectifyValue">
-                      <option value="" disabled>Select…</option>
+                      <option value="" disabled>Select</option>
                       <option [value]="castillaCity">{{ castillaCity }}</option>
                     </select>
                   } @else if (rectifyField() === 'province') {
                     <select id="rectify-value" class="select-input" [(ngModel)]="rectifyValue">
-                      <option value="" disabled>Select…</option>
+                      <option value="" disabled>Select</option>
                       <option [value]="castillaProvince">{{ castillaProvince }}</option>
                     </select>
                   } @else {
@@ -314,43 +314,60 @@
           }
         }
         @case ('businesses-applications') {
-          <h3>Businesses</h3>
-          @if (row.businesses.length > 0) {
-            <table class="detail-table">
-              <thead><tr><th>Name</th><th>Status</th></tr></thead>
-              <tbody>
+          <section class="ba-section">
+            <div class="ba-section-head">
+              <h3>Businesses</h3>
+              <span class="ba-count">{{ row.businesses.length }}</span>
+            </div>
+            @if (row.businesses.length > 0) {
+              <ul class="ba-business-list">
                 @for (b of row.businesses; track b.id) {
-                  <!-- Not a link: the Businesses screen has no per-business
-                       detail URL today (its own detail view is an in-page
-                       toggle, not a route — see app.routes.ts), so there is
-                       nowhere real to point to yet. See /businesses itself
-                       for the full directory. -->
-                  <tr><td>{{ b.name }}</td><td>{{ b.status }}</td></tr>
+                  <li class="ba-business">
+                    <span class="ba-business-icon"><app-icon name="building" [size]="16" /></span>
+                    <span class="ba-business-name">{{ b.name }}</span>
+                    <span class="status-pill" [class]="b.status.toLowerCase()">{{ b.status }}</span>
+                  </li>
                 }
-              </tbody>
-            </table>
-          } @else {
-            <p class="muted">No businesses on file.</p>
-          }
+              </ul>
+            } @else {
+              <p class="ba-empty">No businesses on file.</p>
+            }
+          </section>
 
-          <h3>Applications</h3>
-          @if (row.applications.length > 0) {
-            <table class="detail-table">
-              <thead><tr><th>Reference</th><th>Permit Type</th><th>Status</th><th>Submitted</th></tr></thead>
-              <tbody>
-                @for (a of row.applications; track a.id) {
-                  <tr>
-                    <td><a [routerLink]="['/applications', a.id]">{{ a.referenceNumber }}</a></td>
-                    <td>{{ a.permitType }}</td>
-                    <td>{{ a.lifecycleStatus }}</td>
-                    <td>{{ a.submittedAt ? formatTimestamp(a.submittedAt) : '—' }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          } @else {
-            <p class="muted">No applications on file.</p>
-          }
+          <section class="ba-section">
+            <div class="ba-section-head">
+              <h3>Applications</h3>
+              <span class="ba-count">{{ row.applications.length }}</span>
+            </div>
+            @if (row.applications.length > 0) {
+              <div class="table-wrap">
+                <table class="detail-table ba-app-table">
+                  <thead>
+                    <tr><th>Reference</th><th>Permit Type</th><th>Status</th><th>Submitted</th><th aria-label="Open"></th></tr>
+                  </thead>
+                  <tbody>
+                    @for (a of row.applications; track a.id) {
+                      <tr class="ba-app-row" (click)="openApplication(a.id)">
+                        <td>
+                          <a class="ba-ref" [routerLink]="['/applications', a.id]" (click)="$event.stopPropagation()">
+                            {{ a.referenceNumber }}
+                          </a>
+                        </td>
+                        <td>{{ a.permitType }}</td>
+                        <td>
+                          <span class="status-pill" [class]="lifecyclePillClass(a.lifecycleStatus)">{{ a.lifecycleStatus }}</span>
+                        </td>
+                        <td class="ba-date">{{ a.submittedAt ? formatDay(a.submittedAt) : 'Not submitted' }}</td>
+                        <td class="ba-open"><app-icon name="chevron-right" [size]="16" /></td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="ba-empty">No applications on file.</p>
+            }
+          </section>
         }
         @case ('sessions') {
           @if (row.sessions.length > 0) {

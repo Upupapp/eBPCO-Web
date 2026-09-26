@@ -233,7 +233,7 @@
               [(ngModel)]="applicant.barangay"
               name="applicantBarangay"
             >
-              <option value="" disabled>Select a barangay…</option>
+              <option value="" disabled>Select a barangay</option>
               @for (b of barangays; track b) {
                 <option [value]="b">{{ b }}</option>
               }
@@ -341,7 +341,7 @@
               [(ngModel)]="business.barangay"
               name="bizBarangay"
             >
-              <option value="" disabled>Select a barangay…</option>
+              <option value="" disabled>Select a barangay</option>
               @for (b of barangays; track b) {
                 <option [value]="b">{{ b }}</option>
               }
@@ -424,7 +424,7 @@
               name="permitType"
               (ngModelChange)="onPermitTypeChange()"
             >
-              <option value="" disabled>Select a permit type…</option>
+              <option value="" disabled>Select a permit type</option>
               @for (p of permitTypeOptions; track p) {
                 <option [value]="p">{{ p }}</option>
               }

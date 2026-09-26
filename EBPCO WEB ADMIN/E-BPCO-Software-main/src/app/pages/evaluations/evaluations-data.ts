@@ -204,7 +204,6 @@ export interface EvalRingStat {
   pct: number;
   isTotal: boolean;
   support?: string;
-  bars?: number[];
 }
 
 export function buildEvalRingStats(
@@ -234,8 +233,11 @@ export function buildEvalRingStats(
       illustration: 'applications',
       pct: 100,
       isTotal: true,
-      support: 'Across every status below — Revision Required · Under Review · Accepted',
-      bars: [revisionRequired, underReview, accepted],
+      // One line and the same full-width bar as its three neighbours, so all
+      // four tinted footers are the same size. The mini bar chart this used
+      // to carry made this one footer taller than the rest, and it repeated
+      // the three numbers the cards beside it already show.
+      support: 'All statuses in this evaluation',
     },
     {
       label: 'Revision Required',

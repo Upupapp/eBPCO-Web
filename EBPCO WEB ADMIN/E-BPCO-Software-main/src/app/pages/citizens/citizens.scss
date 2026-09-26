@@ -338,3 +338,141 @@
   font-size: 0.8rem;
   color: $color-ink-300;
 }
+
+// ---- Businesses & Applications tab -----------------------------------------
+// Each list under its own header with a count, businesses as rows with a
+// status pill, applications as a table whose whole row opens the record —
+// instead of two bare tables with browser-default purple links.
+
+.ba-section + .ba-section {
+  margin-top: 1.75rem;
+}
+
+.ba-section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.ba-count {
+  min-width: 1.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: $radius-pill;
+  background: $color-bg-muted;
+  color: $color-ink-500;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.ba-business-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  overflow: hidden;
+}
+
+.ba-business {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+
+  & + & {
+    border-top: 1px solid $color-border;
+  }
+}
+
+.ba-business-icon {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: $radius-md;
+  display: grid;
+  place-items: center;
+  background: $color-brand-50;
+  color: $color-brand-600;
+}
+
+.ba-business-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+  color: $color-ink-900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ba-app-table {
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+
+  th {
+    background: $color-bg-subtle;
+  }
+
+  td {
+    vertical-align: middle;
+  }
+}
+
+.ba-app-row {
+  cursor: pointer;
+  transition: background $ease-fast;
+
+  &:hover {
+    background: $color-bg-subtle;
+
+    .ba-open {
+      color: $color-ink-700;
+    }
+  }
+}
+
+.ba-ref {
+  font-weight: 700;
+  color: $color-info;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:visited {
+    color: $color-info;
+  }
+
+  &:hover {
+    color: $color-info-700;
+    text-decoration: underline;
+  }
+}
+
+.ba-date {
+  color: $color-ink-500;
+  white-space: nowrap;
+}
+
+.ba-open {
+  width: 2rem;
+  color: $color-ink-100;
+  text-align: right;
+}
+
+.ba-empty {
+  margin: 0;
+  padding: 1rem;
+  border: 1px dashed $color-border-strong;
+  border-radius: $radius-lg;
+  color: $color-ink-400;
+  font-size: 0.85rem;
+  text-align: center;
+}

@@ -294,40 +294,71 @@
           }
         }
 
-        <h3>Permit Status</h3>
-        <p class="release-note">
-          @if (row.permitStage === 'Permit Generated') {
-            This permit has been generated and is awaiting a release preparation (claim location and
-            office hours) before it can be released.
-          } @else if (row.permitStage === 'Ready for Release') {
-            This permit has been prepared and is ready to be handed over to the applicant.
-          } @else {
-            This permit has already been released to the applicant.
-          }
-        </p>
-
-        <div class="header-actions">
-          <button type="button" class="btn-outline" (click)="previewPermit(row)">
-            <app-icon name="file-check" [size]="15" />
-            Preview Permit
-          </button>
-          <button type="button" class="btn-outline" (click)="previewReceipt(row)">
-            <app-icon name="file-check" [size]="15" />
-            View Receipt
-          </button>
-          @if (canRelease() && row.permitStage === 'Permit Generated') {
-            <button type="button" class="btn-primary" (click)="requestPrepareRelease(row)">
-              <app-icon name="edit" [size]="15" />
-              Prepare Release
-            </button>
-          }
-          @if (canRelease() && row.permitStage === 'Ready for Release') {
-            <button type="button" class="btn-primary" (click)="requestRelease(row)">
-              <app-icon name="send" [size]="15" />
-              Mark as Released
-            </button>
-          }
+        <!--
+          The status sits in its own tinted block, with the documents and the
+          next act below it as separate rows — the explanation used to run
+          straight into the buttons with no space between them.
+        -->
+        <div
+          class="release-status"
+          [class.is-generated]="row.permitStage === 'Permit Generated'"
+          [class.is-ready]="row.permitStage === 'Ready for Release'"
+          [class.is-released]="row.permitStage !== 'Permit Generated' && row.permitStage !== 'Ready for Release'"
+        >
+          <span class="release-status-icon">
+            <app-icon
+              [name]="row.permitStage === 'Permit Generated' ? 'clock' : row.permitStage === 'Ready for Release' ? 'file-check' : 'check-circle'"
+              [size]="18"
+            />
+          </span>
+          <div class="release-status-text">
+            <span class="release-status-label">Permit Status</span>
+            <strong class="release-status-value">{{ row.permitStage }}</strong>
+            <p class="release-note">
+              @if (row.permitStage === 'Permit Generated') {
+                Generated, and waiting for a release preparation (claim location and office hours)
+                before it can be released.
+              } @else if (row.permitStage === 'Ready for Release') {
+                Prepared and ready to be handed over to the applicant.
+              } @else {
+                Already released to the applicant.
+              }
+            </p>
+          </div>
         </div>
+
+        <div class="release-action-group">
+          <span class="release-action-caption">Documents</span>
+          <div class="release-action-row">
+            <button type="button" class="btn-outline" (click)="previewPermit(row)">
+              <app-icon name="file-check" [size]="15" />
+              Preview Permit
+            </button>
+            <button type="button" class="btn-outline" (click)="previewReceipt(row)">
+              <app-icon name="wallet" [size]="15" />
+              View Receipt
+            </button>
+          </div>
+        </div>
+
+        @if (canRelease() && (row.permitStage === 'Permit Generated' || row.permitStage === 'Ready for Release')) {
+          <div class="release-action-group">
+            <span class="release-action-caption">Next step</span>
+            <div class="release-action-row">
+              @if (row.permitStage === 'Permit Generated') {
+                <button type="button" class="btn-primary" (click)="requestPrepareRelease(row)">
+                  <app-icon name="edit" [size]="15" />
+                  Prepare Release
+                </button>
+              } @else {
+                <button type="button" class="btn-primary" (click)="requestRelease(row)">
+                  <app-icon name="send" [size]="15" />
+                  Mark as Released
+                </button>
+              }
+            </div>
+          </div>
+        }
       </div>
     </div>
   }

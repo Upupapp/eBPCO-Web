@@ -16,7 +16,9 @@ import { ACTION_PERMISSIONS } from '../../core/session/permissions';
 import {
   CitizenDetail, CitizenRectifyInput, CitizenRow, CitizenMetrics, StaffCitizensApi,
 } from '../../core/api/staff-citizens.api';
-import { activityLabel, formatTimestamp, statusLabel, statusPillClass, verifiedLabel } from './citizen-detail-data';
+import {
+  activityLabel, formatDay, formatTimestamp, lifecyclePillClass, statusLabel, statusPillClass, verifiedLabel,
+} from './citizen-detail-data';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 import { CASTILLA_BARANGAYS, CASTILLA_CITY, CASTILLA_PROVINCE } from '../../core/domain/castilla-barangays';
 
@@ -121,7 +123,14 @@ export class Citizens {
   protected readonly statusLabel = statusLabel;
   protected readonly activityLabel = activityLabel;
   protected readonly formatTimestamp = formatTimestamp;
+  protected readonly formatDay = formatDay;
+  protected readonly lifecyclePillClass = lifecyclePillClass;
   protected readonly verifiedLabel = verifiedLabel;
+
+  /** The whole application row opens it, not only the reference number. */
+  protected openApplication(applicationId: string): void {
+    void this.router.navigate(['/applications', applicationId]);
+  }
   protected readonly rectifiableFields = RECTIFIABLE_FIELDS;
   protected readonly barangays = CASTILLA_BARANGAYS;
   protected readonly castillaCity = CASTILLA_CITY;

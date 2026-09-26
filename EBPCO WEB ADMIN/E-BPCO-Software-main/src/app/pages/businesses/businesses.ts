@@ -683,8 +683,6 @@ export class Businesses {
       Contact: row.contactName,
       Phone: row.contactPhone,
       'Date Registered': row.dateCreated,
-      // '—' not '' — a blank spreadsheet cell reads as zero.
-      Users: row.userCount ?? '—',
       Status: row.status,
     };
   }

@@ -72,6 +72,42 @@ export function formatTimestamp(iso: string): string {
     + value.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' });
 }
 
+/**
+ * The shared `.status-pill` tone for an application's raw lifecycle status —
+ * green once approved, red when refused or sent back, blue on arrival, amber
+ * while it is being worked on, grey for a draft or one the citizen withdrew
+ * (the same grey "Cancelled" the citizen sees in their own portal).
+ */
+export function lifecyclePillClass(status: string): string {
+  switch (status) {
+    case 'Approved':
+    case 'Permit Generated':
+    case 'Ready for Release':
+    case 'Released':
+    case 'Completed':
+      return 'approved';
+    case 'Rejected':
+    case 'Revision Required':
+      return 'rejected';
+    case 'Submitted':
+    case 'Received':
+      return 'info';
+    case 'Draft':
+    case 'Cancelled':
+    case 'Expired':
+      return 'neutral';
+    default:
+      return 'pending';
+  }
+}
+
+/** A date alone, for a column where the time of day adds noise. */
+export function formatDay(iso: string): string {
+  const value = new Date(iso);
+  if (Number.isNaN(value.getTime())) return iso;
+  return value.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
 /** `null` (never verified) is shown as an explicit fact, not an empty cell. */
 export function verifiedLabel(verified: boolean): string {
   return verified ? 'Verified' : 'Not verified';
