@@ -837,6 +837,22 @@
   @if (view() === 'edit' && selectedUser(); as row) {
     <section class="card danger-zone">
       <h2>Account</h2>
+      @if ((row.mfaRequired || row.mfaEnrolled) && !isSelf(row)) {
+        <div class="danger-row">
+          <div>
+            <strong>{{ row.mfaEnrolled ? 'Replace the authenticator' : 'Set up the authenticator' }}</strong>
+            <p>
+              {{ row.mfaEnrolled
+                ? 'For a lost or new phone. You get a new QR code for the officer, and the old codes stop working at once.'
+                : 'This position signs in with a code from an authenticator app and cannot sign in until one is set up. You get a QR code to give the officer.' }}
+            </p>
+          </div>
+          <button type="button" class="btn-outline" [disabled]="mfaWorking()" (click)="requestMfaReissue(row)">
+            <app-icon name="shield" [size]="14" />
+            {{ mfaWorking() ? 'Preparing…' : row.mfaEnrolled ? 'Replace' : 'Set Up' }}
+          </button>
+        </div>
+      }
       <div class="danger-row">
         <div>
           <strong>{{ row.status === 'Inactive' ? 'Enable this account' : 'Disable this account' }}</strong>
@@ -911,6 +927,49 @@
     (confirmed)="confirmEnable($event)"
     (cancelled)="cancelEnable()"
   />
+}
+
+@if (mfaTarget(); as target) {
+  <app-confirm-dialog
+    [title]="target.mfaEnrolled ? 'Replace this authenticator?' : 'Set up an authenticator?'"
+    [message]="
+      target.mfaEnrolled
+        ? target.name + '’s current authenticator codes stop working at once. You will see a new QR code to give them — once.'
+        : 'You will see a QR code for ' + target.name + ' to scan with an authenticator app — once. Give it to them directly.'
+    "
+    [confirmLabel]="target.mfaEnrolled ? 'Replace' : 'Show QR Code'"
+    tone="default"
+    (confirmed)="confirmMfaReissue()"
+    (cancelled)="cancelMfaReissue()"
+  />
+}
+
+@if (mfaOffer(); as offer) {
+  <div class="modal-backdrop">
+    <div class="modal-box mfa-box" role="dialog" aria-modal="true" aria-labelledby="mfa-title">
+      <h2 id="mfa-title">Authenticator for {{ offer.name }}</h2>
+      <p>
+        {{ offer.name }} scans this with Google Authenticator or Microsoft Authenticator. It is shown once and
+        cannot be retrieved — closing this forgets it.
+      </p>
+      <svg
+        class="mfa-qr"
+        [attr.viewBox]="'-2 -2 ' + (offer.count + 4) + ' ' + (offer.count + 4)"
+        role="img"
+        [attr.aria-label]="'Authenticator QR code for ' + offer.email"
+      >
+        <rect x="-2" y="-2" [attr.width]="offer.count + 4" [attr.height]="offer.count + 4" fill="#fff" />
+        @for (cell of offer.cells; track $index) {
+          <rect [attr.x]="cell.x" [attr.y]="cell.y" width="1.02" height="1.02" fill="#000" />
+        }
+      </svg>
+      <p class="mfa-key">Or type this key: <code>{{ spacedKey(offer.key) }}</code></p>
+      <p class="mfa-note">{{ offer.nextStep }}</p>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn confirm" (click)="closeMfaOffer()">Done</button>
+      </div>
+    </div>
+  </div>
 }
 
 @if (deleteRefused(); as refusal) {

@@ -627,6 +627,38 @@
   }
 }
 
+// ---- Authenticator QR --------------------------------------------------
+
+.mfa-box {
+  max-width: 420px;
+  text-align: center;
+
+  p {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: $color-ink-500;
+  }
+}
+
+.mfa-qr {
+  display: block;
+  width: 220px;
+  max-width: 100%;
+  height: auto;
+  margin: 0.5rem auto;
+  shape-rendering: crispEdges;
+}
+
+.mfa-key code {
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: $color-ink-900;
+}
+
+.mfa-note {
+  font-size: 0.78rem !important;
+}
+
 // ---- Position & Access tab ---------------------------------------------
 
 .access-panel {

@@ -107,6 +107,13 @@ export type StaffRemoveResult =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
 
+/** A re-issued authenticator: the provisioning URI, shown once, and the server's own next step. */
+export type MfaReissueResult =
+  | { readonly kind: 'done'; readonly uri: string; readonly nextStep: string }
+  | { readonly kind: 'refused'; readonly message: string }
+  | { readonly kind: 'unavailable' }
+  | { readonly kind: 'failed'; readonly message: string };
+
 export type StaffCreateResult =
   | { readonly kind: 'done'; readonly member: StaffMember; readonly nextStep: string }
   | { readonly kind: 'refused'; readonly message: string }
@@ -276,6 +283,26 @@ export class StaffDirectoryApi {
         `/staff/users/${encodeURIComponent(id)}`,
       );
       return { kind: 'done', mode: answer.mode, detail: answer.detail };
+    } catch (error) {
+      return this.classify(error);
+    }
+  }
+
+  /**
+   * Issue the officer a new authenticator key — `POST /staff/users/:id/mfa/reissue`.
+   *
+   * The only way an officer in a position that requires one ever gets a
+   * factor: sign-in demands a code, and enrolling needs a session they cannot
+   * have without one. The URI comes back ONCE, to hand over; the old key stops
+   * working at once. The server refuses your own account, and a super admin's
+   * to anyone but a super admin.
+   */
+  async reissueMfa(id: string): Promise<MfaReissueResult> {
+    try {
+      const answer = await this.api.post<{ uri: string; nextStep: string }>(
+        `/staff/users/${encodeURIComponent(id)}/mfa/reissue`, {},
+      );
+      return { kind: 'done', uri: answer.uri, nextStep: answer.nextStep };
     } catch (error) {
       return this.classify(error);
     }

@@ -385,6 +385,38 @@ describe('Staff directory', () => {
     expect(c.filteredUsers().length).toBe(0);
   });
 
+  it('sets up an authenticator for a position that needs one, showing the QR code once', async () => {
+    const fixture = await mount((http) =>
+      http.expectOne('/staff/users').flush({ data: [member({ roles: ['cashier'], mfaRequired: true })] }),
+    );
+    const c = fixture.componentInstance as unknown as Page & {
+      requestMfaReissue(r: unknown): void; confirmMfaReissue(): Promise<void>;
+      mfaOffer(): { key: string; cells: unknown[] } | null; closeMfaOffer(): void;
+    };
+    c.requestMfaReissue(c.filteredUsers()[0]);
+    const pending = c.confirmMfaReissue();
+
+    const http = TestBed.inject(HttpTestingController);
+    await tick();
+    const reissue = http.expectOne('/staff/users/USR-1/mfa/reissue');
+    expect(reissue.request.method).toBe('POST');
+    reissue.flush({
+      uri: 'otpauth://totp/eBPCO%3Aana?secret=JBSWY3DPEHPK3PXP&issuer=eBPCO',
+      nextStep: 'Give this to the officer now.',
+    });
+    await tick();
+    http.expectOne('/staff/users').flush({ data: [member({ roles: ['cashier'], mfaRequired: true, mfaEnrolled: true })] });
+    await tick();
+    flushAccess(http);
+    await pending;
+
+    expect(c.mfaOffer()?.key).toBe('JBSWY3DPEHPK3PXP');
+    expect(c.mfaOffer()?.cells.length).toBeGreaterThan(0);
+    // Closing forgets it: the key is not kept on the page.
+    c.closeMfaOffer();
+    expect(c.mfaOffer()).toBeNull();
+  });
+
   it('refuses deleting your own account before sending anything', async () => {
     const fixture = await mount((http) =>
       http.expectOne('/staff/users').flush({ data: [member({ email: 'paul@lguids.com.ph', roles: ['super-admin'] })] }),

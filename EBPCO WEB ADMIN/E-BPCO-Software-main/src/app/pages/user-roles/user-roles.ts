@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import qrcodegen from 'qrcode-generator';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Topbar } from '../../shared/topbar/topbar';
@@ -969,6 +970,74 @@ export class UserRoles implements OnInit {
     } finally {
       this.enableWorking.set(false);
     }
+  }
+
+  // ---- Authenticator ---------------------------------------------------------
+  //
+  // Five positions (and the super admin) sign in with a code from an
+  // authenticator app, and the server offers no way to set one up from the
+  // sign-in page: an officer in one of those positions cannot sign in at all
+  // until an administrator issues their key here. Also the fix for a lost
+  // phone. The QR code is shown once and never stored by this page.
+
+  protected readonly mfaTarget = signal<UserRow | null>(null);
+  protected readonly mfaWorking = signal(false);
+  protected readonly mfaOffer = signal<{
+    name: string; email: string; key: string; nextStep: string;
+    count: number; cells: readonly { x: number; y: number }[];
+  } | null>(null);
+
+  protected requestMfaReissue(row: UserRow): void {
+    if (!this.mayManage(row) || this.isSelf(row)) return;
+    this.mfaTarget.set(row);
+  }
+
+  protected cancelMfaReissue(): void {
+    this.mfaTarget.set(null);
+  }
+
+  protected async confirmMfaReissue(): Promise<void> {
+    const target = this.mfaTarget();
+    if (!target || this.mfaWorking()) return;
+    this.mfaTarget.set(null);
+    this.mfaWorking.set(true);
+    try {
+      const result = await this.directory.reissueMfa(target.id);
+      if (result.kind !== 'done') {
+        this.toast.error(
+          result.kind === 'unavailable' ? 'This deployment cannot set up authenticators yet.' : result.message,
+        );
+        return;
+      }
+      const qr = qrcodegen(0, 'M');
+      qr.addData(result.uri);
+      qr.make();
+      const count = qr.getModuleCount();
+      const cells: { x: number; y: number }[] = [];
+      for (let y = 0; y < count; y++) {
+        for (let x = 0; x < count; x++) if (qr.isDark(y, x)) cells.push({ x, y });
+      }
+      this.mfaOffer.set({
+        name: target.name,
+        email: target.email,
+        key: /[?&]secret=([A-Z2-7]+)/i.exec(result.uri)?.[1] ?? '',
+        nextStep: result.nextStep,
+        count,
+        cells,
+      });
+      await this.reloadKeeping(target.id);
+    } finally {
+      this.mfaWorking.set(false);
+    }
+  }
+
+  /** Closing forgets it: the key is not kept anywhere on this page. */
+  protected closeMfaOffer(): void {
+    this.mfaOffer.set(null);
+  }
+
+  protected spacedKey(key: string): string {
+    return key.replace(/(.{4})(?=.)/g, '$1 ');
   }
 
   // ---- Delete (super admin) -------------------------------------------------
