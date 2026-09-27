@@ -8,6 +8,20 @@ export const PLACEHOLDER_FOR_VERIFICATION = 'For verification';
 export const PLACEHOLDER_NOT_ON_FILE = 'Not on file';
 export const PLACEHOLDER_NOT_AVAILABLE = 'Not available';
 
+/**
+ * A date as people read it ("Sep 27, 2026"), from an ISO instant or a
+ * YYYY-MM-DD date. The permit's issue date was printed as the raw instant
+ * "2026-09-27T03:41:57.323Z" (found live 2026-09-27). A plain date is read as
+ * a local calendar date so it never shifts a day west of Greenwich.
+ */
+export function formatDocDate(value: string | null | undefined, placeholder: string = PLACEHOLDER_NOT_ASSIGNED): string {
+  if (!value) return placeholder;
+  const plain = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  const when = plain ? new Date(Number(plain[1]), Number(plain[2]) - 1, Number(plain[3])) : new Date(value);
+  if (Number.isNaN(when.getTime())) return value;
+  return when.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
 export function formatPHP(centavos: number | null | undefined): string {
   if (centavos === null || centavos === undefined) return PLACEHOLDER_PENDING;
   return `₱${(centavos / 100).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

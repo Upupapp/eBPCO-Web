@@ -55,6 +55,7 @@ import { AssignedFormsNotice } from '../../shared/assigned-forms-notice/assigned
 import { PermitReleaseApi } from '../../core/api/permit-release.api';
 import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
+import { formatDocDate } from '../../shared/generated-document/doc-format';
 
 /** One row of the real per-application Documents tab — a required-but-not-yet-uploaded requirement has `doc: null` and renders as "Missing". */
 /**
@@ -234,6 +235,7 @@ export class Applications {
 
   protected formatDateTime = formatDateTime;
   protected formatDate = formatDate;
+  protected formatDocDate = formatDocDate;
 
   /** Null until the first fetch resolves; a message when it fails. */
   protected readonly loadError = signal<string | null>(null);

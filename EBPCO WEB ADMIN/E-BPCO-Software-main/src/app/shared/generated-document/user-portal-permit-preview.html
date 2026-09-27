@@ -33,8 +33,8 @@
         </div>
         <div class="num-dates">
           <span>Application No.: <strong>{{ a.id }}</strong></span>
-          <span>Date Issued: <strong>{{ permit()?.issuedDate ?? 'Not yet assigned' }}</strong></span>
-          <span>Valid Until: <strong>{{ permit() ? (permit()!.expiryDate ?? 'No fixed expiry') : 'Not yet assigned' }}</strong></span>
+          <span>Date Issued: <strong>{{ formatDocDate(permit()?.issuedDate) }}</strong></span>
+          <span>Valid Until: <strong>{{ permit() ? (permit()!.expiryDate ? formatDocDate(permit()!.expiryDate) : 'Not recorded by the office') : 'Not yet assigned' }}</strong></span>
         </div>
       </div>
 
@@ -93,6 +93,12 @@
             <dt>Date Applied</dt>
             <dd>{{ a.dateSubmitted || 'Pending' }}</dd>
           </div>
+          @if (permitScope(); as sc) {
+            <div style="grid-column: 1 / -1;">
+              <dt>Scope</dt>
+              <dd>{{ sc }}</dd>
+            </div>
+          }
         </dl>
       </section>
 
@@ -137,10 +143,10 @@
               }
             </ol>
           } @else {
-            <p>{{ requirements()?.validityRules ?? 'Not yet available.' }}</p>
+            <p>No conditions were recorded by the office.</p>
           }
         } @else {
-          <p>{{ requirements()?.validityRules ?? 'Not yet available.' }}</p>
+          <p>No permit has been generated yet.</p>
         }
       </section>
 

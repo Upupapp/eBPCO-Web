@@ -5,7 +5,7 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
 import { requirementsFor } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
-import { formatPHP } from './doc-format';
+import { formatDocDate, formatPHP } from './doc-format';
 import { agencyHeaderFor, documentTitleFor } from './user-portal-document-helpers';
 import { ApplicationDetail, StaffApplicationsApi } from '../../core/api/staff-applications.api';
 import { FeeLine, FEE_LINES } from '../../core/api/staff-payments.api';
@@ -130,6 +130,9 @@ export class UserPortalPermitPreview {
   });
   /** Whatever the approving officer typed into "Conditions" when generating this permit — real, per-permit text, never invented. `null`/empty falls back to the permit type's generic validity boilerplate in the template. */
   protected readonly permitConditions = computed(() => this.detail()?.permit?.conditions ?? null);
+  /** What the Building Official wrote the permit covers — it was collected and never printed. */
+  protected readonly permitScope = computed(() => this.detail()?.permit?.scope || null);
+  protected readonly formatDocDate = formatDocDate;
 
   protected readonly assessment = computed<PermitAssessmentView | null>(() => {
     const order = this.detail()?.orderOfPayment;

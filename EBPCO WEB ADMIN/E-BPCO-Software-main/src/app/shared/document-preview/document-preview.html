@@ -25,7 +25,7 @@
       } @else {
         <article class="doc-page">
           @if (kind() === 'official-receipt') {
-            <div class="doc-page-watermark" aria-hidden="true">{{ receiptWatermarkText }}</div>
+            <div class="doc-page-watermark" aria-hidden="true">{{ receiptWatermarkText() }}</div>
           }
           <header class="doc-header">
             <img class="doc-seal" src="/assets/logos/logo.png" alt="" aria-hidden="true" />
@@ -360,11 +360,11 @@
                     </div>
                     <div>
                       <dt>Date Issued</dt>
-                      <dd>{{ permit.issuedDate }}</dd>
+                      <dd>{{ formatDocDate(permit.issuedDate) }}</dd>
                     </div>
                     <div>
                       <dt>Valid Until</dt>
-                      <dd>{{ permit.expiryDate ?? 'No fixed expiry' }}</dd>
+                      <dd>{{ permit.expiryDate ? formatDocDate(permit.expiryDate) : 'Not recorded by the office' }}</dd>
                     </div>
                     <div>
                       <dt>Approving Official</dt>
@@ -375,7 +375,6 @@
                       <dd>{{ permit.approvingOffice }}</dd>
                     </div>
                   </dl>
-                  <p class="doc-note">{{ requirements()?.validityRules }}</p>
                 </section>
               } @else {
                 <p class="doc-note">No permit has been generated yet for this application.</p>

@@ -13,6 +13,7 @@ import {
   StaffApplicationsApi,
 } from '../../core/api/staff-applications.api';
 import { FeeLine, FEE_LINES } from '../../core/api/staff-payments.api';
+import { formatDocDate } from '../generated-document/doc-format';
 
 export type SampleDocumentKind =
   | 'application-form'
@@ -141,10 +142,15 @@ export class DocumentPreview {
 
   protected readonly formatDateTime = formatDateTime;
 
-  // Owner decision (same as the generated permit): this system produces no
-  // real receipts — there is no real LGU behind it — so this always shows,
-  // never gated on payment/verification status.
-  protected readonly receiptWatermarkText = 'SAMPLE — NOT AN OFFICIAL RECEIPT';
+  // Superseded 2026-09-27 (owner: "fix all bugs"): "SAMPLE — NOT AN OFFICIAL
+  // RECEIPT" sat over a document titled "Official Receipt" once the Cashier
+  // had recorded a real OR number. The watermark now says what the page is:
+  // an electronic copy of a recorded Official Receipt, or not yet verified.
+  // Same wording as the Citizen Portal's receipt.
+  protected receiptWatermarkText(): string {
+    return this.hasOfficialReceipt() ? 'ELECTRONIC COPY' : 'NOT YET VERIFIED';
+  }
+  protected readonly formatDocDate = formatDocDate;
 
   // ---- Real backend data, for the 'official-receipt' kind only -----------
 
