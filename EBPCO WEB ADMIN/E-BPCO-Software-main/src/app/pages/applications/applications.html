@@ -949,15 +949,15 @@
                   </div>
                   <div>
                     <dt>Validity / Expiry</dt>
-                    <dd>{{ permit.expiryDate === undefined ? 'Not tracked by this deployment' : (permit.expiryDate ?? 'No fixed expiry') }}</dd>
+                    <dd>{{ permit.expiryDate ? formatDocDate(permit.expiryDate) : 'Not recorded by the office' }}</dd>
                   </div>
                   <div>
                     <dt>Approving Official</dt>
-                    <dd>{{ permit.approvingOfficial ?? 'Not tracked by this deployment' }}</dd>
+                    <dd>{{ permit.approvingOfficial ?? 'Not recorded by the office' }}</dd>
                   </div>
                   <div>
                     <dt>Approving Office</dt>
-                    <dd>{{ permit.approvingOffice ?? 'Not tracked by this deployment' }}</dd>
+                    <dd>{{ permit.approvingOffice ?? 'Not recorded by the office' }}</dd>
                   </div>
                 </dl>
                 @if (releaseResult(); as release) {
