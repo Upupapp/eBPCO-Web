@@ -1505,8 +1505,8 @@
       <p class="modal-hint">
         {{ reason.row.applicant }}'s application ({{ reason.row.referenceNumber || reason.row.id }}) will move to {{ reason.target }}.
         @if (reason.target !== 'Rejected') {
-          The applicant is notified and sees your reason as the office's request. They fix it and click
-          Resubmit Application, which sends it back to Under Evaluation.
+          The applicant is notified and sees your reason as the office's request. They replace any
+          document you returned and click Send Back to the Office, which moves it to Under Evaluation.
         }
       </p>
       <form class="create-form" (ngSubmit)="confirmQuickReason()">
