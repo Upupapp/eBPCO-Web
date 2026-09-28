@@ -138,6 +138,22 @@ export class ApplicationStore {
   }
 
   /**
+   * Refreshes the application LIST only, leaving every detail collection as
+   * it is.
+   *
+   * `replaceApplications` also empties documents, evaluations, assessments and
+   * the rest, which is right when the data changes hands (first load, a new
+   * officer signing in) and wrong for a background refresh: an assessment an
+   * officer has open in the Payments workspace would vanish mid-task. The
+   * detail views reload their own records when opened.
+   */
+  refreshApplicationList(rows: readonly ApplicationRecord[]): void {
+    this._dataSource.set('server');
+    this._loadFailure.set(null);
+    this._applications.set([...rows]);
+  }
+
+  /**
    * Whether these rows came from the server, or are the seed.
    *
    * ── Why this has to exist ───────────────────────────────────────────────
@@ -342,8 +358,18 @@ export class ApplicationStore {
     this.countByLifecycleIn(ApplicationStore.PENDING_STATUSES),
   );
   readonly revisionRequired = computed(() => this.countByLifecycle('Revision Required'));
+  /**
+   * Both payment stages before a verdict: `Payment Submitted` is where every
+   * new payment lands, and the card reads "Submitted, not yet verified".
+   * Counting only `Payment Under Verification` showed 0 while a payment sat
+   * in the cashier's queue.
+   */
+  private static readonly AWAITING_VERIFICATION: ApplicationLifecycleStatus[] = [
+    'Payment Submitted',
+    'Payment Under Verification',
+  ];
   readonly paymentsAwaitingVerification = computed(() =>
-    this.countByLifecycle('Payment Under Verification'),
+    this.countByLifecycleIn(ApplicationStore.AWAITING_VERIFICATION),
   );
   readonly approvedTotal = computed(() =>
     this.countByLifecycleIn(ApplicationStore.APPROVED_STATUSES),
@@ -355,7 +381,7 @@ export class ApplicationStore {
     this.monthOverMonth((a) => ApplicationStore.PENDING_STATUSES.includes(a.lifecycleStatus)),
   );
   readonly paymentsAwaitingVerificationMonthly = computed(() =>
-    this.monthOverMonth((a) => a.lifecycleStatus === 'Payment Under Verification'),
+    this.monthOverMonth((a) => ApplicationStore.AWAITING_VERIFICATION.includes(a.lifecycleStatus)),
   );
   readonly approvedMonthly = computed(() =>
     this.monthOverMonth((a) => ApplicationStore.APPROVED_STATUSES.includes(a.lifecycleStatus)),

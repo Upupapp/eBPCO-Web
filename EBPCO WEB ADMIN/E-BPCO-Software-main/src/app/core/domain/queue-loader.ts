@@ -1,7 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApplicationStore } from './application-store';
+import { PermitReleaseSessionCache } from './permit-release-session-cache';
 import { StaffApplicationsApi } from '../api/staff-applications.api';
+import { SessionService } from '../session/session.service';
 
 /**
  * The one place the application queue is read from the server.
@@ -37,6 +39,27 @@ import { StaffApplicationsApi } from '../api/staff-applications.api';
 export class QueueLoader {
   private readonly store = inject(ApplicationStore);
   private readonly queue = inject(StaffApplicationsApi);
+  private readonly session = inject(SessionService);
+  private readonly permitCache = inject(PermitReleaseSessionCache);
+
+  /**
+   * The account whose queue the store holds: undefined until this loader has
+   * loaded anything.
+   *
+   * The store lives for the whole browser tab, and signing out and back in as
+   * someone else does not reload the page. Before this, `ensureLoaded` saw
+   * data already present and returned, so a cashier who signed in after the
+   * super admin on the same tab was shown the super admin's applications,
+   * counts and board (10 applications, where the cashier's own queue held 1).
+   */
+  private loadedFor: string | null | undefined = undefined;
+
+  /** Drops another officer's data before anything can render it. */
+  private forget(): void {
+    this.loadedFor = undefined;
+    this.store.replaceApplications([]);
+    this.permitCache.clear();
+  }
 
   private inFlight: Promise<void> | null = null;
   private readonly _loading = signal(false);
@@ -47,7 +70,16 @@ export class QueueLoader {
 
   /** Loads once. Repeat calls join the request in flight, or return. */
   async ensureLoaded(): Promise<void> {
-    if (this.loaded()) return;
+    const account = this.session.accountId();
+    if (this.loadedFor !== undefined && this.loadedFor !== account) {
+      // Loaded for a different officer: cleared synchronously, before the
+      // page that asked can render a single row of it.
+      this.forget();
+    } else if (this.loaded()) {
+      // Already this officer's (or put there directly, before any load).
+      this.loadedFor = account;
+      return;
+    }
     if (this.inFlight !== null) return this.inFlight;
     return this.reload();
   }
@@ -63,10 +95,33 @@ export class QueueLoader {
     return this.inFlight;
   }
 
-  private async run(): Promise<void> {
+  /**
+   * Fetches the list again in the background and swaps in the rows, leaving
+   * detail collections alone (`refreshApplicationList`). Quiet on failure: the
+   * rows already on screen stay, rather than a flicker to an empty queue.
+   */
+  async refresh(): Promise<void> {
+    const account = this.session.accountId();
+    if (account === null || this.inFlight !== null) return;
+    if (this.loadedFor !== account) return this.ensureLoaded();
     try {
       const page = await this.queue.page({ limit: 100 });
+      if (this.session.accountId() !== account) return;
+      this.store.refreshApplicationList(page.rows);
+    } catch {
+      // The next tick tries again; a full reload still reports failures.
+    }
+  }
+
+  private async run(): Promise<void> {
+    const account = this.session.accountId();
+    try {
+      const page = await this.queue.page({ limit: 100 });
+      // Signed out or switched while this was in flight: the answer is for
+      // someone who is no longer here.
+      if (this.session.accountId() !== account) return;
       this.store.replaceApplications(page.rows);
+      this.loadedFor = account;
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'The queue could not be loaded.';

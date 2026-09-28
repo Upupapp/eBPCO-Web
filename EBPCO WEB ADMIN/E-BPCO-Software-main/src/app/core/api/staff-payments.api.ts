@@ -107,6 +107,9 @@ export interface PaymentQueueRow {
   readonly applicationReference: string;
   readonly referenceNumber: string;
   readonly applicantName: string;
+  /** The business the application was filed for; null when it names none. Absent from servers older than this field. */
+  readonly businessName?: string | null;
+  readonly applicantHasPhoto?: boolean;
   readonly amountCentavos: number;
   readonly method: string;
   readonly status: string;

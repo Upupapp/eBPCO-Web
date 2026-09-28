@@ -42,6 +42,13 @@ export class PermitReleaseSessionCache {
   private readonly _preparations = signal<Record<string, CachedPreparation>>({});
   private readonly _releases = signal<Record<string, CachedRelease>>({});
 
+  /** Forgets everything — for when a different officer signs in on this tab (see `QueueLoader`). */
+  clear(): void {
+    this._permits.set({});
+    this._preparations.set({});
+    this._releases.set({});
+  }
+
   permitFor(applicationId: string): CachedPermit | undefined {
     return this._permits()[applicationId];
   }

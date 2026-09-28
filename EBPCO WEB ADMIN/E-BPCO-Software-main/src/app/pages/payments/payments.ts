@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -125,6 +125,7 @@ interface PaymentRow {
   styleUrl: './payments.scss',
 })
 export class Payments {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly store = inject(ApplicationStore);
   private readonly applicationsApi = inject(StaffApplicationsApi);
   protected readonly paymentsApi = inject(StaffPaymentsApi);
@@ -218,17 +219,23 @@ export class Payments {
     this.page.set(1);
   }
 
-  private applicationLabel(applicationId: string): {
+  /**
+   * Who paid and for what. Read from the payment row first: the server sends
+   * the citizen and business on it, while the application list only holds
+   * applications this officer can currently see — a cashier cannot see a
+   * Completed one, so every finished payment used to read "—" / "Not provided".
+   */
+  private applicationLabel(payment: PaymentQueueRow): {
     applicant: string;
     applicantHasPhoto: boolean;
     businessName: string;
     permitType: string;
   } {
-    const ctx = this.store.getApplicationContext(applicationId);
+    const ctx = this.store.getApplicationContext(payment.applicationId);
     return {
-      applicant: ctx?.applicant ?? '—',
-      applicantHasPhoto: ctx?.applicantHasPhoto ?? false,
-      businessName: ctx?.businessLabel ?? 'Not provided',
+      applicant: payment.applicantName || ctx?.applicant || '—',
+      applicantHasPhoto: payment.applicantHasPhoto ?? ctx?.applicantHasPhoto ?? false,
+      businessName: payment.businessName ?? ctx?.businessLabel ?? 'Not provided',
       permitType: ctx?.permitType ?? '—',
     };
   }
@@ -564,13 +571,35 @@ export class Payments {
   protected readonly queueRows = signal<readonly PaymentQueueRow[]>([]);
 
   async ngOnInit(): Promise<void> {
+    this.startQueueRefresh();
     await Promise.all([this.loadQueue(), this.loadSchedules(), this.loadPaymentMethods()]);
   }
 
-  protected async loadQueue(): Promise<void> {
-    this.queueLoading.set(true);
-    this.queueUnavailable.set(false);
-    this.queueError.set(null);
+  /**
+   * A payment a citizen submits while this page is open appears without a
+   * reload: fetched again every 30 s while the tab is visible, and at once on
+   * returning to it. Skipped while a load is already running.
+   */
+  private startQueueRefresh(): void {
+    const tick = (): void => {
+      if (document.visibilityState === 'visible' && !this.queueLoading()) void this.loadQueue({ quiet: true });
+    };
+    const timer = setInterval(tick, 30_000);
+    document.addEventListener('visibilitychange', tick);
+    this.destroyRef.onDestroy(() => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', tick);
+    });
+  }
+
+  protected async loadQueue(options: { quiet?: boolean } = {}): Promise<void> {
+    // A background refresh keeps the rows on screen and does not show the
+    // loading state; a failed one leaves the last good list in place.
+    if (!options.quiet) {
+      this.queueLoading.set(true);
+      this.queueUnavailable.set(false);
+      this.queueError.set(null);
+    }
     try {
       const filter = this.queueStatusFilter();
       const result = await this.paymentsApi.queue({
@@ -581,11 +610,12 @@ export class Payments {
         this.queueRows.set(result.rows);
         return;
       }
+      if (options.quiet) return;
       this.queueRows.set([]);
       if (result.kind === 'unavailable') this.queueUnavailable.set(true);
       else this.queueError.set(result.message);
     } finally {
-      this.queueLoading.set(false);
+      if (!options.quiet) this.queueLoading.set(false);
     }
   }
 
@@ -597,7 +627,7 @@ export class Payments {
   protected readonly queueTableRows = computed<PaymentRow[]>(() =>
     this.queueRows().map((payment) => ({
       payment,
-      ...this.applicationLabel(payment.applicationId),
+      ...this.applicationLabel(payment),
     })),
   );
 

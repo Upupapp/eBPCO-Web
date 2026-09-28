@@ -192,6 +192,18 @@ describe('ApplicationStore — KPI selectors match the underlying data', () => {
     expect(store.totalApplications()).toBe(store.applications().length);
   });
 
+  it('counts a just-submitted payment as awaiting verification, as the card says', () => {
+    // A payment lands at Payment Submitted. Counting only Payment Under
+    // Verification showed the cashier 0 while one sat in her queue.
+    const [first, second] = store.applications();
+    store.replaceApplications([
+      { ...first, lifecycleStatus: 'Payment Submitted' },
+      { ...second, lifecycleStatus: 'Payment Under Verification' },
+    ]);
+
+    expect(store.paymentsAwaitingVerification()).toBe(2);
+  });
+
   it('status-bucket selectors sum to no more than the total, and each equals a real filter', () => {
     const apps = store.applications();
     expect(store.pendingUnderReview()).toBe(
@@ -205,7 +217,7 @@ describe('ApplicationStore — KPI selectors match the underlying data', () => {
       apps.filter((a) => a.lifecycleStatus === 'Revision Required').length,
     );
     expect(store.paymentsAwaitingVerification()).toBe(
-      apps.filter((a) => a.lifecycleStatus === 'Payment Under Verification').length,
+      apps.filter((a) => ['Payment Submitted', 'Payment Under Verification'].includes(a.lifecycleStatus)).length,
     );
     expect(store.approvedTotal()).toBe(
       apps.filter((a) =>

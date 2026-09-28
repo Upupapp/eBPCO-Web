@@ -1,8 +1,11 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { QueueLoader } from './queue-loader';
 import { ApplicationStore } from './application-store';
 import { StaffApplicationsApi } from '../api/staff-applications.api';
+import { SessionService } from '../session/session.service';
+import { ApplicationRecord } from './application.model';
 
 /**
  * One request per session, made in one place.
@@ -90,5 +93,75 @@ describe('QueueLoader', () => {
     await loader.reload();
 
     expect(calls).toBe(2);
+  });
+});
+
+/**
+ * The queue belongs to whoever loaded it.
+ *
+ * Signing out and in as someone else does not reload the page, and the store
+ * outlives both sessions. A cashier who signed in after the super admin on the
+ * same tab was shown the super admin's 10 applications, where her own queue
+ * held 1.
+ */
+describe('QueueLoader — a different officer on the same tab', () => {
+  function setup() {
+    TestBed.resetTestingModule();
+    const account = signal<string | null>('super-admin');
+    const answers: Record<string, number> = {};
+    let seed: readonly ApplicationRecord[] = [];
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: SessionService, useValue: { accountId: account.asReadonly() } },
+        {
+          provide: StaffApplicationsApi,
+          useValue: {
+            page: () => {
+              const who = account() ?? 'nobody';
+              answers[who] = (answers[who] ?? 0) + 1;
+              // The super admin sees ten; the cashier sees one.
+              return Promise.resolve({ rows: seed.slice(0, who === 'super-admin' ? 10 : 1), nextCursor: null });
+            },
+          },
+        },
+      ],
+    });
+    const store = TestBed.inject(ApplicationStore);
+    seed = store.applications();
+    return { loader: TestBed.inject(QueueLoader), store, account, answers };
+  }
+
+  it("does not show the next officer the previous officer's applications", async () => {
+    const { loader, store, account, answers } = setup();
+    await loader.ensureLoaded();
+    expect(store.applications().length).toBe(10);
+
+    account.set('cashier');
+    const loading = loader.ensureLoaded();
+    // Cleared before the new request even answers — nothing of the super
+    // admin's can render in the meantime.
+    expect(store.applications().length).toBe(0);
+    await loading;
+
+    expect(store.applications().length).toBe(1);
+    expect(answers['cashier']).toBe(1);
+  });
+
+  it('keeps one request per officer: the same officer asking again does not reload', async () => {
+    const { loader, answers } = setup();
+    await loader.ensureLoaded();
+    await loader.ensureLoaded();
+
+    expect(answers['super-admin']).toBe(1);
+  });
+
+  it("a background refresh after the switch loads the new officer's queue, not a stale one", async () => {
+    const { loader, store, account } = setup();
+    await loader.ensureLoaded();
+
+    account.set('cashier');
+    await loader.refresh();
+
+    expect(store.applications().length).toBe(1);
   });
 });
