@@ -222,8 +222,9 @@ export class Payments {
   /**
    * Who paid and for what. Read from the payment row first: the server sends
    * the citizen and business on it, while the application list only holds
-   * applications this officer can currently see — a cashier cannot see a
-   * Completed one, so every finished payment used to read "—" / "Not provided".
+   * applications this officer may read, and the first 100 of those. A cashier
+   * could once read no Completed application, so every finished payment read
+   * "—" / "Not provided"; the row does not depend on the list either way.
    */
   private applicationLabel(payment: PaymentQueueRow): {
     applicant: string;
