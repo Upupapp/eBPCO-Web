@@ -762,7 +762,16 @@
               </ul>
             </details>
 
-            @if (editing()) {
+            @if (editing() && !!realDetail() && !canAttachDocuments()) {
+              <!-- The review buttons below are disabled for this role. They used
+                   to look exactly like enabled ones, with the reason only in a
+                   hover tooltip (found 2026-09-28, an Initial Evaluator trying
+                   to accept a replaced plan). Say it on the page. -->
+              <p class="doc-review-note" role="note">
+                Only the Records Officer (or the Super Admin) can accept, send back or reject a document.
+                You can preview every file here.
+              </p>
+            } @else if (editing()) {
               <label class="doc-remarks-field">
                 Remarks <span class="optional">(required when rejecting or requesting revision)</span>
                 <input aria-label="Reason shown to the applicant…"
