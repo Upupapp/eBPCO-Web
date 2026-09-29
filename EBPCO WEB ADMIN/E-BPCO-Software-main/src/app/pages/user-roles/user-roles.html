@@ -212,6 +212,13 @@
       </div>
 
       <app-pagination class="pagination-row" [totalItems]="totalItems()" [pageSize]="pageSize" [(page)]="page" />
+    } @else if (activeTab() === 'teams') {
+      <p class="positions-intro">
+        Every position is a team with a <strong>team lead</strong>. The lead hands out the applications waiting at
+        the team's step and a member takes one nobody has yet; once it is assigned, only that member or the lead can
+        work on it. Every officer can still view every application.
+      </p>
+      <app-teams-board scope="all" (teamRoleChanged)="onTeamRoleChanged($event)" />
     } @else {
       <p class="positions-intro">
         The jobs in the permit office. Each is a fixed set of permissions the server enforces — an evaluator

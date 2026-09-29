@@ -1,118 +1,14 @@
-<app-topbar title="Teams" />
+<app-topbar title="My Team" />
 
-<section class="teams-page">
-  <div class="teams-banner">
-    <span class="teams-banner-icon"><app-icon name="users" [size]="18" /></span>
-    <p>
-      Every officer can view every application. The team whose step an application is at works on it: the
-      <strong>team lead</strong> assigns it to a member, a member takes one nobody has yet, and once it is assigned only
-      that member or the lead can edit it or move it on.
-    </p>
-  </div>
-
-  @switch (state()) {
-    @case ('loading') {
-      <p class="muted">Loading the teams…</p>
+<section class="card">
+  <p class="intro">
+    @if (session.isTeamLead()) {
+      You lead this team. Give each application waiting at your step to a member, or keep it yourself; once it is
+      assigned, only that officer or you can work on it.
+    } @else {
+      Your team and its lead. Take an application nobody has yet; once it is yours, only you or your team lead can
+      work on it. You can still view every application.
     }
-    @case ('failed') {
-      <div class="card empty">
-        <p>The teams could not be loaded: {{ failure() }}</p>
-        <button type="button" class="btn-outline" (click)="load()">Try again</button>
-      </div>
-    }
-    @default {
-      <div class="team-grid">
-        @for (team of ordered(); track team.key) {
-          <article class="card team-card" [class.is-mine]="isMine(team)">
-            <header class="team-head">
-              <div>
-                <h2>{{ team.name }}</h2>
-                <span class="team-position">{{ team.position }}s</span>
-              </div>
-              @if (isMine(team)) {
-                <span class="mine-pill">{{ session.isTeamLead() ? 'You lead this team' : 'Your team' }}</span>
-              }
-            </header>
-
-            @if (team.ownsStep) {
-              <div class="team-stats">
-                <span><strong>{{ team.waiting }}</strong> waiting</span>
-                <span><strong>{{ team.unassigned }}</strong> unassigned</span>
-              </div>
-            } @else {
-              <p class="muted small">Applications do not wait on this team; it keeps the records, the audit or the accounts.</p>
-            }
-
-            <ul class="member-list">
-              @for (member of team.members; track member.id) {
-                <li>
-                  <span class="member-name">{{ member.name }}</span>
-                  @if (member.lead) {
-                    <span class="lead-badge">Lead</span>
-                  }
-                  @if (!member.canWork) {
-                    <span class="view-badge" title="View-only access: holds no work">View only</span>
-                  }
-                  @if (team.ownsStep) {
-                    <span class="member-load">{{ member.assigned }} on hand</span>
-                  }
-                </li>
-              } @empty {
-                <li class="muted">No officer holds this position yet.</li>
-              }
-            </ul>
-
-            @if (team.ownsStep && (leads(team) || isMine(team))) {
-              @let waiting = waitingFor(team);
-              @if (waiting.length > 0) {
-                <h3>Waiting at this step</h3>
-                <ul class="work-list">
-                  @for (row of waiting; track row.id) {
-                    <li>
-                      <button type="button" class="link-btn" (click)="open(row)">{{ row.referenceNumber ?? row.id }}</button>
-                      <span class="work-applicant">{{ row.applicant }}</span>
-                      @if (leads(team)) {
-                        <select
-                          class="assign-select"
-                          [attr.aria-label]="'Assign ' + (row.referenceNumber ?? row.id)"
-                          [(ngModel)]="choice[row.id]"
-                          [disabled]="busyId() === row.id"
-                        >
-                          <option [ngValue]="undefined">Unassigned</option>
-                          @for (member of team.members; track member.id) {
-                            @if (member.canWork) {
-                              <option [ngValue]="member.id">{{ member.name }}</option>
-                            }
-                          }
-                        </select>
-                        <button
-                          type="button"
-                          class="btn-outline small-btn"
-                          [disabled]="busyId() === row.id"
-                          (click)="assign(row, choice[row.id] ?? null)"
-                        >
-                          {{ busyId() === row.id ? 'Saving…' : 'Assign' }}
-                        </button>
-                      } @else if (row.responsibility?.assignee; as assignee) {
-                        <span class="work-with">With {{ assignee.id === session.accountId() ? 'you' : assignee.name }}</span>
-                      } @else {
-                        <button
-                          type="button"
-                          class="btn-outline small-btn"
-                          [disabled]="busyId() === row.id"
-                          (click)="assign(row, session.accountId())"
-                        >
-                          Take it
-                        </button>
-                      }
-                    </li>
-                  }
-                </ul>
-              }
-            }
-          </article>
-        }
-      </div>
-    }
-  }
+  </p>
+  <app-teams-board scope="mine" />
 </section>

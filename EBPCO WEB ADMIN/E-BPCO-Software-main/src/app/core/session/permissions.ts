@@ -42,6 +42,11 @@ export interface NavModule {
   scopes: readonly string[] | 'any';
   /** Super admin only, whatever the scopes say (the owner's ruling for Access Requests). */
   superAdminOnly?: boolean;
+  /**
+   * Officers who reach this module elsewhere, so the sidebar leaves it out for
+   * them; the route itself stays open.
+   */
+  sidebarHiddenFor?: (who: Authority) => boolean;
   /** The portal roles that see it — used only when `/me` reported no scopes. */
   roles: StaffRole[];
 }
@@ -59,6 +64,19 @@ export interface Authority {
   /** The evaluation stages this account decides; null when `/me` did not say. */
   readonly stages: readonly string[] | null;
   readonly superAdmin: boolean;
+}
+
+/** Whether this officer manages staff accounts: Staff & Roles, with every team in its Teams tab. */
+export function managesStaff(who: Authority | null): boolean {
+  if (who === null) return false;
+  if (who.superAdmin) return true;
+  if (who.scopes === null) return who.role === 'Super Admin' || who.role === 'Administrator';
+  return who.scopes.includes('staff:administer');
+}
+
+/** Whether the sidebar lists a module for this officer. */
+export function inSidebar(mod: NavModule, who: Authority): boolean {
+  return mayOpen(mod, who) && !(mod.sidebarHiddenFor?.(who) ?? false);
 }
 
 /** Whether this officer may open a module. */
@@ -109,16 +127,17 @@ export const NAV_MODULES: NavModule[] = [
     roles: ['Super Admin', 'Administrator', 'Evaluator'],
   },
   {
-    // The office's teams, their leads and members, and who has what
-    // (2026-09-29). Every officer: a member sees their team's work, a lead
-    // hands it out.
+    // The officer's own team: its lead, members and the work at its step. A
+    // staff administrator has every team in the Teams tab of Staff & Roles
+    // instead (owner request, 2026-09-30).
     key: 'teams',
-    label: 'Teams',
+    label: 'My Team',
     icon: 'users',
     path: '/teams',
     group: 'operations',
     scopes: 'any',
     roles: ALL_STAFF_ROLES,
+    sidebarHiddenFor: managesStaff,
   },
   {
     key: 'payments',

@@ -1,0 +1,281 @@
+@switch (state()) {
+  @case ('loading') {
+    <p class="board-status">Loading the teams…</p>
+  }
+  @case ('failed') {
+    <div class="board-failed" role="alert">
+      <app-icon name="alert-triangle" [size]="18" />
+      <span>The teams could not be loaded: {{ failure() }}</span>
+      <button type="button" class="btn-outline" (click)="load()">Try again</button>
+    </div>
+  }
+  @default {
+    @if (visibleTeams().length === 0) {
+      <div class="board-empty">
+        <span class="team-mark lg"><app-icon name="users" [size]="20" /></span>
+        <h3>No team yet</h3>
+        <p>Your position does not belong to a team. An administrator sets each officer's position in Staff &amp; Roles.</p>
+      </div>
+    } @else {
+      <div class="board" [class.single]="visibleTeams().length === 1">
+        @if (visibleTeams().length > 1) {
+          <nav class="team-list" aria-label="Teams">
+            <div class="team-list-head">
+              <span>{{ visibleTeams().length }} teams</span>
+              <span>{{ totals().officers }} officers</span>
+            </div>
+            @for (team of visibleTeams(); track team.key) {
+              <button
+                type="button"
+                class="team-item"
+                [class.active]="selected()?.key === team.key"
+                [attr.aria-current]="selected()?.key === team.key ? 'true' : null"
+                (click)="select(team)"
+              >
+                <span class="team-mark"><app-icon [name]="iconFor(team)" [size]="16" /></span>
+                <span class="team-item-text">
+                  <span class="team-item-name">{{ team.name }}</span>
+                  <span class="team-item-sub">
+                    @if (leadNames(team); as lead) {
+                      Lead: {{ lead }}
+                    } @else {
+                      No lead yet
+                    }
+                  </span>
+                </span>
+                @if (team.ownsStep && team.waiting > 0) {
+                  <span
+                    class="count-badge"
+                    [class.alert]="team.unassigned > 0"
+                    [attr.title]="team.waiting + ' waiting, ' + team.unassigned + ' not yet assigned'"
+                  >{{ team.waiting }}</span>
+                }
+              </button>
+            }
+          </nav>
+        }
+
+        @if (selected(); as team) {
+          <section class="team-panel" [attr.aria-label]="team.name + ' team'">
+            <header class="panel-head">
+              <span class="team-mark lg"><app-icon [name]="iconFor(team)" [size]="20" /></span>
+              <div class="panel-title">
+                <h3>{{ team.name }}</h3>
+                <p>
+                  {{ team.position }}s
+                  @if (officeOf(team); as office) {
+                    · {{ office }}
+                  }
+                </p>
+              </div>
+              @if (isMine(team)) {
+                <span class="mine-pill">{{ session.isTeamLead() ? 'You lead this team' : 'Your team' }}</span>
+              }
+            </header>
+
+            <div class="panel-stats">
+              <div class="stat">
+                <span class="stat-value">{{ team.members.length }}</span>
+                <span class="stat-label">{{ team.members.length === 1 ? 'Officer' : 'Officers' }}</span>
+              </div>
+              @if (team.ownsStep) {
+                <div class="stat">
+                  <span class="stat-value">{{ team.waiting }}</span>
+                  <span class="stat-label">Waiting at this step</span>
+                </div>
+                <div class="stat" [class.alert]="team.unassigned > 0">
+                  <span class="stat-value">{{ team.unassigned }}</span>
+                  <span class="stat-label">Not yet assigned</span>
+                </div>
+              } @else {
+                <div class="stat note">
+                  <span class="stat-label">No applications wait on this team: it keeps the records, the audit or the accounts.</span>
+                </div>
+              }
+            </div>
+
+            <h4 class="section-label">Members</h4>
+            <div class="table-wrap">
+              <table class="board-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Officer</th>
+                    <th scope="col">Team role</th>
+                    @if (team.ownsStep) {
+                      <th scope="col" class="num">On hand</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (member of team.members; track member.id) {
+                    <tr>
+                      <td>
+                        <div class="user-cell">
+                          <app-avatar [name]="member.name" [size]="32" />
+                          <div class="cell-stack">
+                            <span class="cell-main">
+                              {{ member.name }}
+                              @if (isMe(member)) {
+                                <span class="you">You</span>
+                              }
+                            </span>
+                            <span class="cell-sub">{{ member.email }}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="role-cell">
+                          @if (managesTeams()) {
+                            <div class="role-toggle" role="group" [attr.aria-label]="'Team role of ' + member.name">
+                              <button
+                                type="button"
+                                class="is-lead"
+                                [class.on]="member.lead"
+                                [attr.aria-pressed]="member.lead"
+                                [disabled]="busy() !== null"
+                                (click)="setTeamRole(team, member, 'lead')"
+                              >
+                                Lead
+                              </button>
+                              <button
+                                type="button"
+                                [class.on]="!member.lead"
+                                [attr.aria-pressed]="!member.lead"
+                                [disabled]="busy() !== null"
+                                (click)="setTeamRole(team, member, 'member')"
+                              >
+                                Member
+                              </button>
+                            </div>
+                          } @else if (member.lead) {
+                            <span class="role-pill lead">Team lead</span>
+                          } @else {
+                            <span class="role-pill">Member</span>
+                          }
+                          @if (!member.canWork) {
+                            <span class="role-pill quiet" title="View-only access: holds no work">View only</span>
+                          }
+                        </div>
+                      </td>
+                      @if (team.ownsStep) {
+                        <td class="num">{{ member.assigned }}</td>
+                      }
+                    </tr>
+                  } @empty {
+                    <tr class="table-empty-row">
+                      <td [attr.colspan]="team.ownsStep ? 3 : 2">No officer holds this position yet.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            @if (team.ownsStep) {
+              <h4 class="section-label">Waiting at this step</h4>
+              @if (!readsApplications()) {
+                <p class="panel-note">
+                  Your account does not open applications, so the
+                  {{ team.waiting === 1 ? 'one application' : team.waiting + ' applications' }} waiting here
+                  {{ team.waiting === 1 ? 'is' : 'are' }} counted but not listed.
+                </p>
+              } @else {
+                <div class="table-wrap">
+                  <table class="board-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Application</th>
+                        <th scope="col">Applicant</th>
+                        <th scope="col">Assigned to</th>
+                        <th scope="col" class="action-cell">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (row of waitingFor(team); track row.id) {
+                        <tr>
+                          <td>
+                            <div class="cell-stack">
+                              <button type="button" class="ref-link" (click)="open(row)">
+                                {{ row.referenceNumber ?? row.id }}
+                              </button>
+                              <span class="cell-sub">{{ row.type ?? 'Permit' }}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="cell-stack">
+                              <span class="cell-main">{{ row.applicant }}</span>
+                              @if (businessOf(row); as business) {
+                                <span class="cell-sub">{{ business }}</span>
+                              }
+                            </div>
+                          </td>
+                          <td>
+                            @if (leads(team)) {
+                              <select
+                                class="assign-select"
+                                [attr.aria-label]="'Assign ' + (row.referenceNumber ?? row.id) + ' to'"
+                                [(ngModel)]="choice[row.id]"
+                                [disabled]="busy() !== null"
+                              >
+                                <option [ngValue]="null">Unassigned</option>
+                                @for (member of workingMembers(team); track member.id) {
+                                  <option [ngValue]="member.id">{{ member.name }}{{ member.lead ? ' (lead)' : '' }}</option>
+                                }
+                              </select>
+                            } @else if (assigneeOf(row); as assignee) {
+                              <span class="assignee">
+                                <app-avatar [name]="assignee.name" [size]="24" />
+                                {{ assignee.id === session.accountId() ? 'You' : assignee.name }}
+                              </span>
+                            } @else {
+                              <span class="role-pill warn">Unassigned</span>
+                            }
+                          </td>
+                          <td class="action-cell">
+                            @if (leads(team)) {
+                              <button
+                                type="button"
+                                class="btn-primary small"
+                                [disabled]="busy() !== null || unchanged(row)"
+                                (click)="assign(row, choice[row.id] ?? null)"
+                              >
+                                {{ busy() === row.id ? 'Saving…' : 'Assign' }}
+                              </button>
+                            } @else if (works(team) && assigneeOf(row) === null) {
+                              <button
+                                type="button"
+                                class="btn-primary small"
+                                [disabled]="busy() !== null"
+                                (click)="assign(row, session.accountId())"
+                              >
+                                {{ busy() === row.id ? 'Saving…' : 'Take it' }}
+                              </button>
+                            } @else if (works(team) && assigneeOf(row)?.id === session.accountId()) {
+                              <button
+                                type="button"
+                                class="btn-outline small"
+                                [disabled]="busy() !== null"
+                                (click)="assign(row, null)"
+                              >
+                                {{ busy() === row.id ? 'Saving…' : 'Hand back' }}
+                              </button>
+                            } @else {
+                              <button type="button" class="btn-outline small" (click)="open(row)">Open</button>
+                            }
+                          </td>
+                        </tr>
+                      } @empty {
+                        <tr class="table-empty-row">
+                          <td colspan="4">Nothing is waiting at this step.</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            }
+          </section>
+        }
+      </div>
+    }
+  }
+}

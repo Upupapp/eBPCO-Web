@@ -33,7 +33,9 @@ describe('Sidebar', () => {
   it('shows every module to a Super Admin, exactly once, with no /tenant hrefs', async () => {
     await session.signIn('super@ebpco.gov.ph', 'correct-horse');
     const links = renderLinks();
-    expect(links.length).toBe(NAV_MODULES.length);
+    // My Team is the Teams tab of Staff & Roles for anyone who manages staff.
+    expect(links.map((l) => l.label)).not.toContain('My Team');
+    expect(links.length).toBe(NAV_MODULES.length - 1);
     const hrefs = links.map((l) => l.href);
     expect(new Set(hrefs).size).toBe(hrefs.length);
     expect(hrefs.some((h) => h?.includes('/tenant'))).toBe(false);

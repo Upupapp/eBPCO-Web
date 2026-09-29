@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, input, signal, OnInit } from '@angular/core';
 import qrcodegen from 'qrcode-generator';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,6 +8,7 @@ import { Icon } from '../../shared/icon/icon';
 import { Avatar } from '../../shared/avatar/avatar';
 import { Pagination } from '../../shared/pagination/pagination';
 import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
+import { TeamsBoard } from '../../shared/teams-board/teams-board';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { SessionService } from '../../core/session/session.service';
 import {
@@ -28,7 +29,7 @@ import {
 } from '../../core/session/position';
 import { buildPermissionMatrix } from './user-detail-data';
 
-type Tab = 'users' | 'positions';
+type Tab = 'users' | 'positions' | 'teams';
 /** The list; one account read-only; one account's edit form; a new account's form. */
 type PageView = 'list' | 'detail' | 'edit' | 'create';
 type UserDetailTab = 'profile' | 'access' | 'assignments' | 'security' | 'activity';
@@ -163,7 +164,7 @@ const sameSet = (a: Iterable<string>, b: Iterable<string>): boolean => {
 
 @Component({
   selector: 'app-user-roles',
-  imports: [ViewOnlyNotice, Topbar, KpiCard, Icon, Avatar, Pagination, FormsModule, ConfirmDialog],
+  imports: [ViewOnlyNotice, Topbar, KpiCard, Icon, Avatar, Pagination, FormsModule, ConfirmDialog, TeamsBoard],
   templateUrl: './user-roles.html',
   styleUrl: './user-roles.scss',
 })
@@ -183,7 +184,11 @@ export class UserRoles implements OnInit {
   protected readonly tabs: { key: Tab; label: string; icon: string }[] = [
     { key: 'users', label: 'Staff Accounts', icon: 'user' },
     { key: 'positions', label: 'Positions', icon: 'shield' },
+    { key: 'teams', label: 'Teams', icon: 'users' },
   ];
+
+  /** `?tab=teams` or `?tab=positions` opens that tab (My Team sends a staff administrator here). */
+  readonly tab = input<string | undefined>(undefined);
 
   protected readonly activeTab = signal<Tab>('users');
   protected readonly page = signal(1);
@@ -248,7 +253,14 @@ export class UserRoles implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
+    const tab = this.tab();
+    if (tab === 'teams' || tab === 'positions') this.activeTab.set(tab);
     await this.loadDirectory();
+  }
+
+  /** The Teams tab changed who leads, so the account list's "Team lead" badges follow. */
+  protected onTeamRoleChanged(change: { id: string; teamRole: 'lead' | 'member' }): void {
+    this.users.update((rows) => rows.map((row) => (row.id === change.id ? { ...row, teamRole: change.teamRole } : row)));
   }
 
   protected async loadDirectory(): Promise<void> {
