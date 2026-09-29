@@ -1338,7 +1338,7 @@ export class Applications {
     }
     if (target) {
       const action = isTerminalStatus(target.lifecycleStatus) ? 'archived' : 'moved to Cancelled';
-      return `${target.applicant}'s application (${target.id}) will be ${action}, `
+      return `${target.applicant}'s application (${target.referenceNumber ?? target.id}) will be ${action}, `
         + 'where it stays visible and auditable. Nothing is deleted.';
     }
     return '';

@@ -18,7 +18,7 @@ import { ALL_WIRE_ROLES, WIRE_ROLE_LABELS, portalRoleFor } from '../../core/api/
 import { AccessLevel } from '../../core/api/access-request.api';
 import { Capabilities } from '../../core/session/capabilities';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
-import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
+import { ALL_PERMIT_TYPES, FILEABLE_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { QueueLoader } from '../../core/domain/queue-loader';
 import { isAssignedTo } from '../../core/domain/responsibility';
@@ -520,7 +520,9 @@ export class UserRoles implements OnInit {
 
   // ---- The account form: Edit, and Add Staff Account ----------------------
 
-  protected readonly permitTypes = ALL_PERMIT_TYPES;
+  // Not the retired BFP types (FSEC, FSIC): nobody files them with the Municipality
+  // now, so nobody is granted them. An older grant is kept on save, unseen.
+  protected readonly permitTypes = FILEABLE_PERMIT_TYPES;
   protected readonly evaluationStages = EVALUATION_STAGES;
   protected readonly wireRoleOptions = ALL_WIRE_ROLES;
   /** The role's name as the positions say it — "Building Official", not the older "Approving Officer". */
@@ -561,7 +563,8 @@ export class UserRoles implements OnInit {
     return roles.has('evaluator') && !roles.has('super-admin');
   });
 
-  protected readonly editFormCount = computed(() => this.editForms().size);
+  /** Counted over the forms shown, so an older grant of a retired type never reads as "16 of 15". */
+  protected readonly editFormCount = computed(() => FILEABLE_PERMIT_TYPES.filter((t) => this.editForms().has(t)).length);
 
   /** Editing your own account: the server refuses your own roles, and the portal your own level. */
   protected readonly editingSelf = computed(() => {
@@ -619,7 +622,7 @@ export class UserRoles implements OnInit {
   }
 
   protected selectAllForms(all: boolean): void {
-    this.editForms.set(new Set(all ? ALL_PERMIT_TYPES : []));
+    this.editForms.set(new Set(all ? FILEABLE_PERMIT_TYPES : []));
     this.editError.set('');
   }
 
@@ -668,7 +671,7 @@ export class UserRoles implements OnInit {
     this.editTeamRole.set('member');
     // Every form by default: an officer assigned none can reach nothing, and
     // the office narrows it here when a post covers only some permits.
-    this.editForms.set(new Set(ALL_PERMIT_TYPES));
+    this.editForms.set(new Set(FILEABLE_PERMIT_TYPES));
     this.editError.set('');
     this.view.set('create');
     if (positionKey !== null) this.choosePosition(positionKey);

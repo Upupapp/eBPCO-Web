@@ -329,7 +329,9 @@ describe('Staff directory', () => {
     await tick();
     const forms = http.expectOne('/staff/users/USR-2/access/forms');
     // Every form by default — an officer assigned none can reach nothing.
-    expect((forms.request.body as { permitTypes: string[] }).permitTypes.length).toBe(17);
+    // Every form still filed — the 17 permit types less the two the BFP now
+    // issues itself (FSEC, FSIC), which nobody is granted any more.
+    expect((forms.request.body as { permitTypes: string[] }).permitTypes.length).toBe(15);
     forms.flush({});
     await tick();
     const level = http.expectOne('/staff/users/USR-2/access/level');
