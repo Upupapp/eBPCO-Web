@@ -38,6 +38,8 @@ export interface EvalTypeCard {
 
 export interface EvalRow {
   id: string;
+  /** The permit reference (E-BPCO-2026-000059) an applicant quotes; shown under the id. */
+  referenceNumber: string;
   applicant: string;
   applicantHasPhoto?: boolean;
   businessId: string;
@@ -168,6 +170,7 @@ export function buildEvalRows(rows: EvaluationQueueRow[], stageKey: EvalTypeKey)
             ?.departmentId;
     return {
       id: r.applicationId,
+      referenceNumber: r.referenceNumber ?? '',
       applicant: r.applicantName,
       applicantHasPhoto: r.applicantHasPhoto === true,
       businessId: r.businessId ?? '',

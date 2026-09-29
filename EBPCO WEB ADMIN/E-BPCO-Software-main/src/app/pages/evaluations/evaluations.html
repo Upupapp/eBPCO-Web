@@ -366,7 +366,12 @@
               <td (click)="$event.stopPropagation()">
                   <input type="checkbox" [attr.aria-label]="'Select ' + row.id" />
                 </td>
-              <td class="id-cell">{{ row.id }}</td>
+              <td class="id-cell">
+                {{ row.id }}
+                @if (row.referenceNumber) {
+                  <span class="id-reference">{{ row.referenceNumber }}</span>
+                }
+              </td>
               <td>
                 <div class="identity-cell">
                   <app-avatar [name]="row.applicant" [size]="30" [photoUrl]="photos.urlFor(row.id, row.applicantHasPhoto)()" />
@@ -479,6 +484,9 @@
                             Return for Revision
                           </button>
                         }
+                        @if (row.isCurrentStage && blockedReasonFor(row); as reason) {
+                          <span class="menu-empty-note menu-blocked-reason">{{ reason }}</span>
+                        }
                       </div>
                     </ng-template>
                   </div>
@@ -510,7 +518,7 @@
   </section>
 } @else if (view() === 'record' && selectedRow(); as row) {
   <div class="detail-head">
-    <h1>{{ row.id }}</h1>
+    <h1>{{ row.referenceNumber || row.id }}</h1>
     <div class="header-actions">
       <span class="status-pill" [class]="row.status.toLowerCase().replace(/ /g, '-')">{{
         row.status
@@ -573,8 +581,8 @@
           <span>Date Submitted</span>
         </div>
         <div>
-          <strong>{{ row.id }}</strong>
-          <span>Application ID</span>
+          <strong>{{ row.referenceNumber || row.id }}</strong>
+          <span>{{ row.referenceNumber ? 'Reference Number' : 'Application ID' }}</span>
         </div>
       </div>
     </div>
@@ -779,6 +787,9 @@
             </button>
           }
         </div>
+        @if (!capabilities.isViewOnly() && blockedReasonFor(row); as reason) {
+          <p class="small muted record-blocked-reason">{{ reason }}</p>
+        }
       } @else {
         <p class="small muted">Already moved past this stage — no action to take here.</p>
       }

@@ -148,6 +148,15 @@ button {
   font-family: inherit;
 }
 
+// A button that cannot be used has to look it. The element in the selector
+// outranks each page's scoped `.btn-primary` / `.btn-outline`; a page that
+// styles its own `:disabled` still wins.
+button.btn-primary:disabled,
+button.btn-outline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 // A slim, on-brand scrollbar everywhere the app scrolls — the sidebar's own
 // internal scroll included — instead of each browser's default wide grey
 // one. A softer, pastel tint of the sidebar's brand red

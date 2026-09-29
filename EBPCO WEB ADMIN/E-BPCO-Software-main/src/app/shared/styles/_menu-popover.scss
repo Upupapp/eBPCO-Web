@@ -65,6 +65,13 @@
         background: $color-warning-bg-soft;
       }
     }
+
+    &:disabled,
+    &:disabled:hover {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: transparent;
+    }
   }
 
   .menu-empty-note {
@@ -132,6 +139,13 @@
       &:hover {
         background: $color-warning-bg-soft;
       }
+    }
+
+    &:disabled,
+    &:disabled:hover {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: transparent;
     }
   }
 

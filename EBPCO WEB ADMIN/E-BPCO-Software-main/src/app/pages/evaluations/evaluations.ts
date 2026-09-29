@@ -268,6 +268,7 @@ export class Evaluations implements OnInit {
       if (!term) return true;
       return (
         r.id.toLowerCase().includes(term) ||
+        r.referenceNumber.toLowerCase().includes(term) ||
         r.applicant.toLowerCase().includes(term) ||
         r.businessName.toLowerCase().includes(term) ||
         (r.type?.toLowerCase().includes(term) ?? false)
@@ -814,6 +815,7 @@ export class Evaluations implements OnInit {
   private evalCsvRow(row: EvalRow) {
     return {
       'Application ID': row.id,
+      'Reference Number': row.referenceNumber,
       Applicant: row.applicant,
       'Business ID': row.businessId,
       'Business / Project': row.businessName,

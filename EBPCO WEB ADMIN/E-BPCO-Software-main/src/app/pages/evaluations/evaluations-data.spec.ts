@@ -58,6 +58,16 @@ describe('buildEvalRows — business/project context is preserved unchanged', ()
     expect(results[0].businessName).not.toBe(results[1].businessName);
   });
 
+  it('carries the permit reference an applicant quotes, not just the internal id', () => {
+    const row = makeRow({
+      applicationId: '2567fda0-6f7a-41e0-bdd1-9bd67291a202',
+      referenceNumber: 'E-BPCO-2026-000059',
+    });
+    const [result] = buildEvalRows([row], 'initial');
+    expect(result.id).toBe('2567fda0-6f7a-41e0-bdd1-9bd67291a202');
+    expect(result.referenceNumber).toBe('E-BPCO-2026-000059');
+  });
+
   it('only includes applications whose next stage matches the requested stage key', () => {
     const initialRow = makeRow({ applicationId: 'E-BPCO-2026-000020', nextStage: 'Initial' });
     const zoningRow = makeRow({ applicationId: 'E-BPCO-2026-000021', nextStage: 'Zoning' });

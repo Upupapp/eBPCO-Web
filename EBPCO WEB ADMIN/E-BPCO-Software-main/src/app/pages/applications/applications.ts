@@ -421,9 +421,10 @@ export class Applications {
     // saying it was unassigned.
     if (r.team !== undefined) {
       const team = r.officers.map((o) => (o.lead ? `${o.name} (lead)` : o.name)).join(', ');
+      const label = r.team ? teamName(r.team) : r.holder;
       return r.assignee
-        ? `${r.assignee.name} — ${r.holder} team: ${team}`
-        : `Unassigned — any of the ${r.holder} team can take it: ${team}`;
+        ? `${r.assignee.name} — ${label} team: ${team}`
+        : `Unassigned — any of the ${label} team can take it: ${team}`;
     }
     return `${names} (${r.holder})`;
   }
@@ -831,6 +832,7 @@ export class Applications {
       if (!term) return true;
       return (
         r.id.toLowerCase().includes(term) ||
+        (r.referenceNumber?.toLowerCase().includes(term) ?? false) ||
         r.applicant.toLowerCase().includes(term) ||
         r.businessName.toLowerCase().includes(term) ||
         r.location.toLowerCase().includes(term) ||

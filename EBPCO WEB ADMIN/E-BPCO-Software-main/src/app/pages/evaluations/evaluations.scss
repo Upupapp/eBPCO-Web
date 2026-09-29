@@ -19,6 +19,20 @@
   }
 }
 
+// Why Advance / Return are off, in words: a greyed-out button alone does not
+// say whether it is the stage, the assignment or the account.
+.record-blocked-reason {
+  margin: 0.6rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: $color-ink-600;
+}
+
+.menu-blocked-reason {
+  max-width: 17rem;
+  line-height: 1.4;
+}
+
 .revision-remarks-input.inline {
   width: auto;
   flex: 1;
@@ -672,6 +686,15 @@
 
 .id-cell {
   font-weight: 700;
+}
+
+// The permit reference, under the id — same treatment as applications.scss's
+// own `.id-reference`.
+.id-reference {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: $color-ink-300;
 }
 
 // Applicant (a person) and Business/Project (the permit's real owner —
