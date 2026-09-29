@@ -1,6 +1,7 @@
 import { Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
+import { NavigationHistory } from '../../core/session/navigation-history';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl, Title } from '@angular/platform-browser';
 import { Topbar } from '../../shared/topbar/topbar';
@@ -226,6 +227,7 @@ const STATUS_ACTIONS: { label: string; target: ApplicationLifecycleStatus }[] = 
 export class Applications {
   private readonly store = inject(ApplicationStore);
   private readonly router = inject(Router);
+  protected readonly history = inject(NavigationHistory);
   private readonly titleService = inject(Title);
   protected readonly session = inject(SessionService);
   private readonly toast = inject(ToastService);
@@ -1176,6 +1178,11 @@ export class Applications {
 
   backToList(): void {
     this.router.navigateByUrl('/applications');
+  }
+
+  /** Back to the screen this record was opened from — the list, the Dashboard, a team, a citizen. */
+  protected goBack(): void {
+    this.history.back('/applications');
   }
 
   openInfo(): void {

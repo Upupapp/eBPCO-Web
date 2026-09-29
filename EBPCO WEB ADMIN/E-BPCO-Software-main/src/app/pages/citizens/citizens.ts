@@ -14,6 +14,7 @@ import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
 import { ToastService } from '../../shared/toast/toast.service';
 import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS } from '../../core/session/permissions';
+import { NavigationHistory } from '../../core/session/navigation-history';
 import {
   CitizenDetail, CitizenRectifyInput, CitizenRow, CitizenMetrics, StaffCitizensApi,
 } from '../../core/api/staff-citizens.api';
@@ -84,6 +85,7 @@ export class Citizens {
   private readonly toast = inject(ToastService);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  protected readonly history = inject(NavigationHistory);
   protected readonly photos = inject(ApplicantPhotoService);
 
   readonly id = input<string>();
@@ -374,6 +376,11 @@ export class Citizens {
 
   protected backToList(): void {
     this.router.navigateByUrl('/citizens');
+  }
+
+  /** Back to the screen this citizen was opened from, or the register. */
+  protected goBack(): void {
+    this.history.back('/citizens');
   }
 
   protected selectDetailTab(tab: DetailTab): void {

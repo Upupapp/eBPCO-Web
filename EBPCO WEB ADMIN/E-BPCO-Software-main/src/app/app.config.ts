@@ -1,9 +1,10 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/api/auth.interceptor';
+import { NavigationHistory } from './core/session/navigation-history';
 
 /**
  * The portal's first HTTP client.
@@ -22,5 +23,9 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(routes, withComponentInputBinding()),
+    // From the first navigation on, so a Back button knows the screen before.
+    provideAppInitializer(() => {
+      inject(NavigationHistory);
+    }),
   ],
 };

@@ -1,9 +1,9 @@
-import { Component, computed, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Topbar } from '../../shared/topbar/topbar';
 import { Icon } from '../../shared/icon/icon';
 import { FlowChart } from '../../shared/flow-chart/flow-chart';
 import { buildAllFlows, FlowDef } from './workflow-flows';
+import { NavigationHistory } from '../../core/session/navigation-history';
 
 @Component({
   selector: 'app-workflow',
@@ -34,7 +34,7 @@ export class Workflow {
     () => this.filters.find((f) => f.key === this.activeFilter())?.label ?? 'Overall',
   );
 
-  constructor(private readonly router: Router) {}
+  protected readonly history = inject(NavigationHistory);
 
   toggleFilterMenu(): void {
     this.filterMenuOpen.update((v) => !v);
@@ -46,6 +46,6 @@ export class Workflow {
   }
 
   backToList(): void {
-    this.router.navigateByUrl('/dashboard');
+    this.history.back('/dashboard');
   }
 }

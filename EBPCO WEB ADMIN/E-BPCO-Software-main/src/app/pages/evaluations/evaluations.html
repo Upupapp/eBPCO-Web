@@ -245,7 +245,7 @@
   <div class="detail-head">
     <h1>{{ card.key === 'final' ? 'Final Evaluations' : card.title }}</h1>
     <div class="header-actions">
-      <button type="button" class="btn-primary" (click)="backToList()">Back</button>
+      <button type="button" class="btn-primary" (click)="backToList()">{{ stageBackLabel() }}</button>
       <div class="menu-wrap">
         <button
           type="button"
@@ -524,7 +524,7 @@
         row.status
       }}</span>
       <button type="button" class="btn-primary" (click)="backToStage()">
-        Back to {{ stageLabel() }}
+        {{ recordBackLabel() }}
       </button>
     </div>
   </div>

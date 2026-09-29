@@ -24,6 +24,7 @@ import { departmentName } from '../../core/domain/department.model';
 import { Capabilities } from '../../core/session/capabilities';
 import { SessionService } from '../../core/session/session.service';
 import { mayEvaluateStage } from '../../core/session/permissions';
+import { NavigationHistory } from '../../core/session/navigation-history';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
 import { StaffEvaluationsApi, EvaluationQueueRow } from '../../core/api/staff-evaluations.api';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
@@ -183,6 +184,25 @@ export class Evaluations implements OnInit {
   protected readonly photos = inject(ApplicantPhotoService);
   private readonly applicationsApi = inject(StaffApplicationsApi);
   private readonly router = inject(Router);
+  private readonly history = inject(NavigationHistory);
+  /**
+   * The view this page was opened on from another screen: a stage (the
+   * Dashboard's cards) or one record (an application's Evaluations link).
+   * Back from that view returns to that screen.
+   */
+  private readonly arrivedAt = signal<'detail' | 'record' | null>(null);
+
+  protected readonly stageBackLabel = computed(() =>
+    this.arrivedAt() === 'detail' && this.history.previous() !== null
+      ? `Back to ${this.history.previousLabel('the list')}`
+      : 'Back',
+  );
+
+  protected readonly recordBackLabel = computed(() =>
+    this.arrivedAt() === 'record' && this.history.previous() !== null
+      ? `Back to ${this.history.previousLabel(this.stageLabel())}`
+      : `Back to ${this.stageLabel()}`,
+  );
   private readonly toast = inject(ToastService);
 
   // Bound to the `?stage=` query param (see withComponentInputBinding in
@@ -590,6 +610,7 @@ export class Evaluations implements OnInit {
     if (card) {
       this.appliedStageParam = true;
       this.openCard(card);
+      this.arrivedAt.set('detail');
     }
   });
 
@@ -654,6 +675,7 @@ export class Evaluations implements OnInit {
     this.appliedApplicationIdParam = true;
     this.selectedCard.set(found.card);
     this.openRecord(found.row);
+    this.arrivedAt.set('record');
   });
 
   selectStage(stage: Stage): void {
@@ -671,11 +693,19 @@ export class Evaluations implements OnInit {
   }
 
   backToStage(): void {
+    if (this.arrivedAt() === 'record' && this.history.previous() !== null) {
+      this.history.back('/evaluations');
+      return;
+    }
     this.view.set('detail');
     this.selectedRow.set(null);
   }
 
   backToList(): void {
+    if (this.arrivedAt() === 'detail' && this.history.previous() !== null) {
+      this.history.back('/evaluations');
+      return;
+    }
     this.view.set('list');
     this.selectedCard.set(null);
     this.selectedRow.set(null);

@@ -347,7 +347,7 @@
           Edit
         </button>
       }
-      <button type="button" class="btn-primary" (click)="backToList()">Back to List</button>
+      <button type="button" class="btn-primary" (click)="goBack()">Back to {{ history.previousLabel('Applications') }}</button>
       <div class="menu-wrap">
         <button
           type="button"
@@ -1446,7 +1446,7 @@
       This application ID doesn't match any record. It may have been removed, or the link may be out
       of date.
     </p>
-    <button type="button" class="btn-primary" (click)="backToList()">Back to Applications</button>
+    <button type="button" class="btn-primary" (click)="goBack()">Back to {{ history.previousLabel('Applications') }}</button>
   </div>
 }
 

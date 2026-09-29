@@ -19,6 +19,7 @@ import { PayrollStore } from '../../core/domain/payroll-store';
 import { PayrollStaffMember } from '../../core/domain/payroll.model';
 import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS } from '../../core/session/permissions';
+import { NavigationHistory } from '../../core/session/navigation-history';
 import { ALL_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
 import {
   StaffApplicationsApi,
@@ -134,6 +135,7 @@ export class Payments {
   protected readonly payrollStore = inject(PayrollStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  private readonly history = inject(NavigationHistory);
   private readonly toast = inject(ToastService);
   protected readonly photos = inject(ApplicantPhotoService);
 
@@ -337,7 +339,7 @@ export class Payments {
 
   protected backFromWorkspace(): void {
     const id = this.applicationId();
-    if (id) this.router.navigateByUrl(`/applications/${id}`);
+    if (id) this.history.back(`/applications/${id}`);
   }
 
   protected async startAssessment(): Promise<void> {
