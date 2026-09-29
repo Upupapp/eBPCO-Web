@@ -28,6 +28,9 @@ describe('authGuard', () => {
         { provide: IdentityApi, useFactory: () => new FakeIdentityApi(TestBed.inject(TokenStore)) },
       ],
     });
+    // Tokens live in sessionStorage, which outlives one spec file: a sign-in left
+    // there by an earlier test would be restored here as a real session.
+    TestBed.inject(TokenStore).clear();
     session = TestBed.inject(SessionService);
   });
 
