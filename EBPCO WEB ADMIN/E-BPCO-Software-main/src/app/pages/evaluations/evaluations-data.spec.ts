@@ -80,28 +80,20 @@ describe('evaluations-data — applications with no recorded stage', () => {
   const unknown = makeRow({ applicationId: 'SRV-1', nextStage: null, evaluations: [] });
   const initial = makeRow({ applicationId: 'SEED-1', nextStage: 'Initial' });
 
-  it('counts them under "Stage not recorded", never under Initial', () => {
-    const cards = buildEvalTypeCards([unknown, initial]);
-    const by = (key: string) => cards.find((c) => c.key === key)!;
-
-    expect(by('unrecorded').count).toBe(1);
-    // The whole defect: this used to be 2.
-    expect(by('initial').count).toBe(1);
-    expect(by('unrecorded').title).toBe('Stage not recorded');
+  it('shows exactly the five evaluation stages', () => {
+    expect(buildEvalTypeCards([]).map((c) => c.key)).toEqual(['initial', 'zoning', 'fire', 'obo', 'final']);
   });
 
-  it('keeps them out of every real stage queue', () => {
+  it('never counts them under Initial', () => {
+    const cards = buildEvalTypeCards([unknown, initial]);
+    // The whole defect: this used to be 2.
+    expect(cards.find((c) => c.key === 'initial')!.count).toBe(1);
+  });
+
+  it('keeps them out of every stage queue', () => {
     for (const key of ['initial', 'zoning', 'fire', 'obo', 'final'] as const) {
       const ids = buildEvalRows([unknown], key).map((r) => r.id);
       expect(ids).not.toContain('SRV-1');
     }
-    expect(buildEvalRows([unknown], 'unrecorded').map((r) => r.id)).toEqual(['SRV-1']);
-  });
-
-  it('never marks an unknown stage as the current one', () => {
-    // `null === null` would be true and would offer Passed / Return for Revision
-    // on a row whose stage nobody knows.
-    const [row] = buildEvalRows([unknown], 'unrecorded');
-    expect(row.isCurrentStage).toBe(false);
   });
 });

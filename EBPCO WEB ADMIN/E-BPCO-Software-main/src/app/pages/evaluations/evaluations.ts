@@ -582,10 +582,10 @@ export class Evaluations implements OnInit {
    * `refreshRecordViewAfter` (re-landing on it after a real mutation) share,
    * so the two can never disagree about where an application "is".
    *
-   * Mirrors evaluations-data.ts's own bucketing: no next stage and no
-   * decisions yet means unrecorded; no next stage but a history of
-   * decisions means every stage has been passed, which the 'final' card's
-   * own Passed tab is where that application permanently lives.
+   * Mirrors evaluations-data.ts's own bucketing: no next stage but a history
+   * of decisions means every stage has been passed, which the 'final' card's
+   * own Passed tab is where that application permanently lives. No next stage
+   * and no decisions belongs on no card.
    */
   private findRecordCardAndRow(id: string): { card: EvalTypeCard; row: EvalRow } | null {
     const queueRow = this.queueRows().find((r) => r.applicationId === id);
@@ -593,7 +593,7 @@ export class Evaluations implements OnInit {
     const cardKey =
       queueRow.nextStage === null
         ? queueRow.evaluations.length === 0
-          ? 'unrecorded'
+          ? undefined
           : 'final'
         : (Object.entries(EVAL_KEY_TO_APP_STAGE) as [EvalTypeKey, string | null][]).find(
             ([, stage]) => stage === queueRow.nextStage,

@@ -92,8 +92,9 @@ export interface ApplicationRecord {
    *
    * Nullable rather than widened with an 'Unknown' member, because "unknown" is
    * not a stage an application can be AT — it is the absence of the fact. Rows
-   * with null are surfaced in their own "Stage not recorded" bucket (owner
-   * ruling, 29 Aug) rather than hidden or claimed.
+   * with null are never claimed as Initial (owner ruling, 29 Aug); they appear
+   * on no Evaluations stage card (the "Stage not recorded" card was removed,
+   * 29 Sept).
    */
   evaluationStage: EvaluationStage | null;
   /**

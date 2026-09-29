@@ -9,16 +9,13 @@ import {
   EvaluationStage,
 } from '../../core/api/staff-evaluations.api';
 
-// 'unrecorded' is not a stage an application can be AT — it is the absence of
-// the fact. The staff queue does not send a stage once every one of the five
-// has a decision (`nextStage: null`) — but that already-complete case IS
-// findable in the tabs above, so 'unrecorded' here means specifically an
-// application whose evaluations array is genuinely empty (no decision at
-// any stage yet) AND whose `nextStage` — the server's own next-step field —
-// is also null, which the server itself never actually sends for a fresh
-// application (it sends 'Initial'). Kept as a bucket regardless, so a shape
-// this portal has not seen before still lands somewhere named, not nowhere.
-export type EvalTypeKey = 'initial' | 'zoning' | 'fire' | 'obo' | 'final' | 'unrecorded';
+// The five evaluation stages. There used to be a sixth card, "Stage not
+// recorded", for an application with no next stage and no decision yet — a
+// shape the server never sends (a fresh application's next stage is 'Initial').
+// It was removed at the owner's request (2026-09-29) as an empty card with no
+// work in it. Such a row is still never counted under Initial; it simply
+// appears on no stage card.
+export type EvalTypeKey = 'initial' | 'zoning' | 'fire' | 'obo' | 'final';
 // Previously 4 buckets ('pending-review' and 'under-review' both meaning
 // "nobody has ruled on this yet") — collapsed to 3, since the distinction
 // never meant anything an admin could act on differently. 'passed' is a
@@ -73,7 +70,6 @@ export const EVAL_KEY_TO_APP_STAGE: Record<EvalTypeKey, EvaluationStage | null> 
   fire: 'Fire Safety',
   obo: 'OBO',
   final: 'Final Approval',
-  unrecorded: null,
 };
 
 const CARD_META: Omit<EvalTypeCard, 'count'>[] = [
@@ -117,14 +113,6 @@ const CARD_META: Omit<EvalTypeCard, 'count'>[] = [
     tone: 'success',
     illustration: 'evaluations',
   },
-  {
-    key: 'unrecorded',
-    title: 'Stage not recorded',
-    description: 'Applications the server has not told this portal the evaluation stage for.',
-    icon: 'help-circle',
-    tone: 'info',
-    illustration: 'evaluations',
-  },
 ];
 
 export const STAGE_STATUS: Record<Stage, RowStatus> = {
@@ -164,10 +152,7 @@ function scopedRows(rows: EvaluationQueueRow[], stageKey: EvalTypeKey): Evaluati
 export function buildEvalTypeCards(rows: EvaluationQueueRow[]): EvalTypeCard[] {
   return CARD_META.map((meta) => ({
     ...meta,
-    count:
-      meta.key === 'unrecorded'
-        ? rows.filter((r) => r.nextStage === null && r.evaluations.length === 0).length
-        : rows.filter((r) => r.nextStage === EVAL_KEY_TO_APP_STAGE[meta.key]).length,
+    count: rows.filter((r) => r.nextStage === EVAL_KEY_TO_APP_STAGE[meta.key]).length,
   }));
 }
 
