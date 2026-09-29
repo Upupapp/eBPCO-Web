@@ -22,7 +22,14 @@ export interface Responsibility {
    * The officers holding this step for this permit type. Never super admins —
    * they hold every step. Empty means no officer is assigned yet.
    */
-  readonly officers: ReadonlyArray<{ readonly id: string; readonly name: string }>;
+  readonly officers: ReadonlyArray<{ readonly id: string; readonly name: string; readonly lead?: boolean }>;
+  /** The team whose step this is (ebpco-api 062), or null when no team owns it. Absent from an older server. */
+  readonly team?: string | null;
+  /**
+   * Who the team has it with: assigned by the lead, or taken by the member
+   * who first worked on it. Null means unassigned — any member may take it.
+   */
+  readonly assignee?: { readonly id: string; readonly name: string } | null;
 }
 
 /** One line for a table cell: the officer, or who else the step waits on. */
@@ -30,8 +37,12 @@ export function assignedToLabel(responsibility: Responsibility | null | undefine
   if (!responsibility) return '—';
   if (responsibility.awaitingApplicant) return 'Applicant';
   if (responsibility.holder === null) return '—';
+  if (responsibility.assignee) return responsibility.assignee.name;
   const [first, ...others] = responsibility.officers;
   if (first === undefined) return `${responsibility.holder} (no officer yet)`;
+  // A team with several members and nobody on it yet: say so, rather than
+  // naming the first member as if it were theirs.
+  if (responsibility.team !== undefined && others.length > 0) return `Unassigned · ${responsibility.holder}`;
   return others.length === 0 ? first.name : `${first.name} +${others.length}`;
 }
 
@@ -43,5 +54,6 @@ export function assignedOfficerNames(responsibility: Responsibility | null | und
 /** Whether this account is one of the officers the step is waiting on. */
 export function isAssignedTo(responsibility: Responsibility | null | undefined, accountId: string | null): boolean {
   if (!responsibility || accountId === null) return false;
+  if (responsibility.assignee) return responsibility.assignee.id === accountId;
   return responsibility.officers.some((officer) => officer.id === accountId);
 }

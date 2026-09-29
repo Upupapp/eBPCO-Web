@@ -1,3 +1,4 @@
+import { TeamsApi } from '../../core/api/teams.api';
 import { Component, ElementRef, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -571,6 +572,34 @@ export class Businesses {
 
   protected readonly selectedIds = signal<ReadonlySet<string>>(new Set());
   protected readonly deleteTarget = signal<BusinessRow | 'bulk' | null>(null);
+
+  // ── Archive (2026-09-29): out of the list, kept on record, restorable ──
+  private readonly teamsApi = inject(TeamsApi);
+  protected readonly archiveTarget = signal<BusinessRow | null>(null);
+  protected readonly archiving = signal(false);
+
+  protected requestArchive(row: BusinessRow): void {
+    this.archiveTarget.set(row);
+  }
+
+  protected async confirmArchive(reason: string): Promise<void> {
+    const row = this.archiveTarget();
+    if (!row || this.archiving()) return;
+    this.archiveTarget.set(null);
+    this.archiving.set(true);
+    try {
+      const result = await this.teamsApi.archive('business', row.id, reason);
+      if (result.kind === 'done') {
+        this.toast.success(`${row.code}: ${result.detail}`);
+        await this.loadRealBusinesses();
+        this.backToList();
+      } else {
+        this.toast.error(result.kind === 'unavailable' ? 'This server cannot archive businesses yet.' : result.message);
+      }
+    } finally {
+      this.archiving.set(false);
+    }
+  }
 
   protected isSelected(row: BusinessRow): boolean {
     return this.selectedIds().has(row.id);

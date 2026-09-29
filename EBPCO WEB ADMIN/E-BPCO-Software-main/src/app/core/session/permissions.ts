@@ -109,6 +109,18 @@ export const NAV_MODULES: NavModule[] = [
     roles: ['Super Admin', 'Administrator', 'Evaluator'],
   },
   {
+    // The office's teams, their leads and members, and who has what
+    // (2026-09-29). Every officer: a member sees their team's work, a lead
+    // hands it out.
+    key: 'teams',
+    label: 'Teams',
+    icon: 'users',
+    path: '/teams',
+    group: 'operations',
+    scopes: 'any',
+    roles: ALL_STAFF_ROLES,
+  },
+  {
     key: 'payments',
     label: 'Payments',
     icon: 'wallet',
@@ -198,9 +210,11 @@ export const NAV_MODULES: NavModule[] = [
     icon: 'archive',
     path: '/archive',
     group: 'administration',
-    // Everyone who can see applications can see what was set aside. A
-    // preservation guarantee only counts if the people relying on it can look.
-    scopes: ['applications:read'],
+    // Every officer can see what was set aside — an Administrator included,
+    // who archives accounts and holds no `applications:read`. A preservation
+    // guarantee only counts if the people relying on it can look; who may
+    // restore each item is the server's answer, per item.
+    scopes: 'any',
     roles: ALL_STAFF_ROLES,
   },
 

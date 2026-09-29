@@ -1,127 +1,142 @@
 <app-topbar title="Archive" />
 
 <section class="archive-page">
-  <app-queue-load-notice />
-
   <div class="archive-banner">
     <span class="archive-banner-icon"><app-icon name="archive" [size]="18" /></span>
     <p>
-      Nothing in eBPCO is deleted. Applications that were cancelled, rejected or
-      allowed to expire are kept here with who set them aside and why. This list
-      itself is read-only — open a record to restore it to the active queue.
+      Nothing in eBPCO is deleted — not by any officer, the super admin included. Applications, staff and citizen
+      accounts, businesses, checklist documents and permit types that were set aside are kept here with who archived
+      them, when and why. <strong>Restore</strong> puts one back exactly where it was.
     </p>
   </div>
 
-  @if (emptyAndKnown()) {
-    <section class="card table-card">
-      <div class="empty-state">
-        <app-icon name="archive" [size]="30" />
-        <p>Nothing has been archived.</p>
-      </div>
-    </section>
-  } @else if (count() > 0) {
-    <section class="card table-card">
-      <div class="card-head">
-        <h2>Archived applications</h2>
-        <span class="count-pill">{{ count() }} application{{ count() === 1 ? '' : 's' }}</span>
-      </div>
+  <nav class="tab-nav" role="tablist" aria-label="What was archived">
+    @for (tab of tabs; track tab.kind) {
+      <button
+        type="button"
+        role="tab"
+        class="tab-btn"
+        [class.active]="activeKind() === tab.kind"
+        [attr.aria-selected]="activeKind() === tab.kind"
+        (click)="activeKind.set(tab.kind)"
+      >
+        <app-icon [name]="tab.icon" [size]="15" />
+        {{ tab.label }}
+        <span class="tab-count">{{ countOf(tab.kind) }}</span>
+      </button>
+    }
+  </nav>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Application</th>
-              <th scope="col">Citizen</th>
-              <th scope="col">Permit type</th>
-              <th scope="col">Status</th>
-              <th scope="col">Set aside by</th>
-              <th scope="col">Reason</th>
-              <th scope="col">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of rows(); track row.record.id) {
-              <!--
-                No `tabindex`/`role="button"` here any more — the row now
-                holds a real `<button>` (View & Restore), and a focusable
-                element inside another focusable element is an accessibility
-                violation axe catches (a11y-guarded-screens.spec.ts), not a
-                hypothetical one. Same pattern citizens.html's own row
-                already uses: the row still navigates on a mouse click, the
-                button is what keyboard/screen-reader users reach.
-              -->
-              <tr class="row-clickable" (click)="open(row)">
-                <td class="id-cell">
-                  {{ row.record.id }}
-                  @if (row.record.referenceNumber; as reference) {
-                    <span class="id-reference">{{ reference }}</span>
-                  }
-                </td>
-                <td>
-                  <div class="owner-cell">
-                    <app-avatar [name]="row.record.applicant" [size]="30" />
-                    <span>{{ row.record.applicant }}</span>
-                  </div>
-                </td>
-                <td>
-                  @if (row.record.permitType) {
-                    {{ row.record.permitType }}
-                  } @else if (row.record.filedAs) {
-                    <!--
-                      Filed as something this office does not publish — the legacy
-                      `Business Permit`. Saying "Not recorded" was false: the type
-                      was recorded, the portal just does not publish that name.
-                    -->
-                    {{ row.record.filedAs }}
-                    <span class="not-published">not an office permit</span>
-                  } @else {
-                    <span class="muted">Not recorded</span>
-                  }
-                </td>
-                <td>
-                  <span
-                    class="status-pill"
-                    [class]="row.record.lifecycleStatus.toLowerCase().replace(/\s+/g, '-')"
-                    >{{ row.record.lifecycleStatus }}</span
-                  >
-                </td>
-                <td>
-                  @if (row.archivedBy) {
-                    <span class="who-name">{{ row.archivedBy }}</span>
-                    <span class="when">{{ row.archivedAt }}</span>
-                  } @else {
-                    <span class="muted">Not recorded</span>
-                  }
-                </td>
-                <td class="reason-cell">
-                  @if (row.remarks) {
-                    {{ row.remarks }}
-                  } @else {
-                    <!--
-                      Archives made before remarks were required. Saying so is
-                      better than a blank cell, which reads as "no reason needed".
-                    -->
-                    <span class="muted">No reason was recorded</span>
-                  }
-                </td>
-                <td (click)="$event.stopPropagation()">
-                  <!--
-                    Navigates only — nothing on THIS page ever mutates a
-                    record. The actual restore is the application's own
-                    "Restore to Active Queue" action (applications.ts's
-                    STATUS_ACTIONS), the real lifecycle transition
-                    migration 056_archive_restore.sql seeds server-side.
-                  -->
-                  <button type="button" class="btn-outline" (click)="open(row)">
-                    <app-icon name="eye" [size]="14" />
-                    View &amp; Restore
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </section>
-  }
+  <section class="card table-card">
+    <div class="card-head">
+      <h2>
+        {{ heading() }}
+      </h2>
+      <input
+        class="archive-search"
+        type="search"
+        aria-label="Search the archive"
+        placeholder="Search by name, reason or who archived it"
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
+      />
+    </div>
+
+    @switch (state()) {
+      @case ('loading') {
+        <div class="empty-state"><p>Loading the archive…</p></div>
+      }
+      @case ('unavailable') {
+        <div class="empty-state">
+          <app-icon name="alert-circle" [size]="28" />
+          <p>This server does not keep a shared archive list yet.</p>
+        </div>
+      }
+      @case ('failed') {
+        <div class="empty-state">
+          <app-icon name="alert-triangle" [size]="28" />
+          <p>The archive could not be loaded: {{ failure() }}</p>
+          <button type="button" class="btn-outline" (click)="load()">Try again</button>
+        </div>
+      }
+      @default {
+        @if (visible().length === 0) {
+          <div class="empty-state">
+            <app-icon name="archive" [size]="30" />
+            <p>
+              @if (search().trim()) {
+                Nothing archived matches “{{ search() }}”.
+              } @else {
+                Nothing here has been archived.
+              }
+            </p>
+          </div>
+        } @else {
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Item</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Archived</th>
+                  <th scope="col">By</th>
+                  <th scope="col">Reason</th>
+                  <th scope="col"><span class="sr-only">Action</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of visible(); track item.kind + item.id) {
+                  <tr>
+                    <td>
+                      <span class="item-title">{{ item.title }}</span>
+                      @if (item.subtitle) {
+                        <span class="item-subtitle">{{ item.subtitle }}</span>
+                      }
+                    </td>
+                    <td><span class="kind-pill" [attr.data-kind]="item.kind">{{ kindLabel[item.kind] }}</span></td>
+                    <td class="nowrap">{{ formatWhen(item.archivedAt) }}</td>
+                    <td>{{ item.archivedBy ?? '—' }}</td>
+                    <td class="reason-cell">
+                      @if (item.reason) {
+                        {{ item.reason }}
+                      } @else {
+                        <span class="muted">Not recorded</span>
+                      }
+                    </td>
+                    <td class="action-cell">
+                      @if (item.canRestore) {
+                        <button
+                          type="button"
+                          class="btn-outline restore-btn"
+                          [disabled]="restoringId() === item.id"
+                          [attr.aria-label]="'Restore ' + item.title"
+                          (click)="requestRestore(item)"
+                        >
+                          <app-icon name="refresh" [size]="14" />
+                          {{ restoringId() === item.id ? 'Restoring…' : 'Restore' }}
+                        </button>
+                      } @else {
+                        <span class="muted" title="Your position cannot restore this kind of item.">View only</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    }
+  </section>
 </section>
+
+@if (restoreTarget(); as target) {
+  <app-confirm-dialog
+    [title]="'Restore this ' + kindLabel[target.kind].toLowerCase() + '?'"
+    [message]="restoreMessage(target)"
+    confirmLabel="Restore"
+    tone="default"
+    (confirmed)="confirmRestore()"
+    (cancelled)="restoreTarget.set(null)"
+  />
+}

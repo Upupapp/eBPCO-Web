@@ -1,186 +1,127 @@
-import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { vi } from 'vitest';
 
 import { Archive } from './archive';
-import { ApplicationStore } from '../../core/domain/application-store';
-import { ApplicationRecord, withProjectedFields } from '../../core/domain/application.model';
-import { API_BASE_URL } from '../../core/api/api.config';
-import { canAccessPath } from '../../core/session/permissions';
+import { ArchiveKind, ArchivedItem, TeamsApi, Write } from '../../core/api/teams.api';
+import { ToastService } from '../../shared/toast/toast.service';
+import { ALL_STAFF_ROLES, canAccessPath } from '../../core/session/permissions';
 
 /**
- * The archive section.
- *
- * "Archived, not deleted" is a promise, and until this page existed it was one
- * nobody could check: an application moved to Cancelled left the working queue
- * and appeared nowhere else, so the difference between archiving and deleting
- * was visible only to somebody reading the store. A preservation guarantee with
- * no way to see what was preserved is indistinguishable from the deletion it
- * replaced.
+ * The Archive (owner request, 2026-09-29): nothing is deleted, by anyone, and
+ * everything archived — of every kind — can be found here and restored by
+ * the officers the server allows.
  */
-const row = (over: Partial<ApplicationRecord> = {}): ApplicationRecord =>
-  withProjectedFields({
-    id: 'APP-1',
-    businessId: 'BIZ-1',
-    businessName: 'Villanueva Hardware',
-    applicantId: 'APL-1',
-    applicant: 'Raul Villanueva',
-    location: 'Barangay Poblacion',
-    permitType: 'Fencing Permit',
-    applicationAction: 'New',
-    officer: 'Engr. Tester',
-    dateSubmitted: '2026-08-01',
-    dateValue: new Date('2026-08-01T00:00:00.000Z'),
-    lifecycleStatus: 'Cancelled',
-    evaluationStage: null,
-    evaluationResult: null,
-    ...over,
-  } as ApplicationRecord);
+const item = (over: Partial<ArchivedItem> = {}): ArchivedItem => ({
+  kind: 'application', id: 'a1', title: 'E-BPCO-2026-000101', subtitle: 'Fencing Permit · Maria Santos · Cancelled',
+  archivedAt: '2026-09-28T02:00:00.000Z', archivedBy: 'Joel Dimaano', reason: 'Duplicate filing', canRestore: true,
+  ...over,
+});
 
-interface TimelineEntryFixture {
-  toStatus: string;
-  occurredAt: string;
-  actorName: string | null;
-  remarks: string | null;
-}
+const ITEMS: readonly ArchivedItem[] = [
+  item(),
+  item({ kind: 'staff', id: 's1', title: 'Ben Reyes', subtitle: 'ben@castilla.test · evaluator', reason: 'Transferred', canRestore: false }),
+  item({ kind: 'business', id: 'b1', title: 'Santos Store', subtitle: 'BN-1', reason: null }),
+  item({ kind: 'requirement', id: 'r1', title: 'Fence plan', subtitle: 'Checklist: Fencing Permit', reason: null }),
+];
 
-/**
- * Mounts the page against `replaceApplications(rows)` — which is real/server
- * data the moment it's called (`ApplicationStore.isSeedData()` goes `false`
- * — see `_dataSource`'s own doc comment) — then flushes whichever real
- * `GET /staff/applications/:id` calls the page actually makes: one per
- * ARCHIVED row, never for a row still in flight, since the component only
- * fetches attribution for the rows it already knows are archived.
- * `timelineByAppId` supplies each one's timeline; a row with no entry gets
- * `{ timeline: [] }`, which is a legitimate real answer ("no archiving entry
- * on this record's own timeline"), not a test shortcut.
- */
-async function mount(
-  rows: ApplicationRecord[],
-  timelineByAppId: Record<string, readonly TimelineEntryFixture[]> = {},
-): Promise<ComponentFixture<Archive>> {
-  TestBed.resetTestingModule();
+function render(restore: (kind: ArchiveKind, id: string) => Promise<Write> = async () => ({ kind: 'done', detail: 'Restored.' })) {
+  const api = { archived: vi.fn(async () => ({ kind: 'ok' as const, value: ITEMS })), restore: vi.fn(restore) };
+  const toast = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
   TestBed.configureTestingModule({
     imports: [Archive],
     providers: [
-      provideRouter([]),
-      provideHttpClient(),
-      provideHttpClientTesting(),
-      { provide: API_BASE_URL, useValue: '' },
+      provideRouter([]), provideHttpClient(), provideHttpClientTesting(),
+      { provide: TeamsApi, useValue: api },
+      { provide: ToastService, useValue: toast },
     ],
   });
-  const store = TestBed.inject(ApplicationStore);
-  store.replaceApplications(rows);
   const fixture = TestBed.createComponent(Archive);
-  fixture.detectChanges();
-  const http = TestBed.inject(HttpTestingController);
-  await new Promise((resolve) => setTimeout(resolve, 0));
-  for (const req of http.match((r) => /^\/staff\/applications\/[^/]+$/.test(r.url))) {
-    const id = req.request.url.split('/').pop()!;
-    req.flush({ timeline: timelineByAppId[id] ?? [] });
-  }
-  await new Promise((resolve) => setTimeout(resolve, 0));
-  fixture.detectChanges();
-  return fixture;
+  return { fixture, api, toast };
 }
 
+const settle = async (fixture: ReturnType<typeof render>['fixture']) => {
+  await fixture.whenStable();
+  fixture.detectChanges();
+};
+
 describe('Archive', () => {
-  it('is reachable by every staff role', () => {
-    // A preservation guarantee only counts if the people relying on it can look.
-    expect(canAccessPath('Auditor', '/archive')).toBe(true);
-    expect(canAccessPath('Evaluator', '/archive')).toBe(true);
-    expect(canAccessPath('Super Admin', '/archive')).toBe(true);
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('is reachable by every staff role, an Administrator included', () => {
+    for (const role of ALL_STAFF_ROLES) {
+      expect(canAccessPath({ role, scopes: [], stages: null, superAdmin: role === 'Super Admin' }, '/archive')).toBe(true);
+    }
   });
 
-  it('lists what was set aside, with who and why — from the record\'s own real timeline', async () => {
-    const fixture = await mount([row({ lifecycleStatus: 'Cancelled' })], {
-      'APP-1': [
-        {
-          toStatus: 'Cancelled',
-          occurredAt: '2026-08-05T10:00:00.000Z',
-          actorName: 'Engr. Ana Reyes',
-          remarks: 'Duplicate filing.',
-        },
-      ],
-    });
-    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+  it('lists every kind that was archived, with who and why', async () => {
+    const { fixture } = render();
+    await settle(fixture);
+    const page = fixture.nativeElement as HTMLElement;
 
-    expect(text).toContain('Raul Villanueva');
-    expect(text).toContain('Engr. Ana Reyes');
-    expect(text).toContain('Duplicate filing.');
+    const titles = Array.from(page.querySelectorAll('.item-title')).map((el) => el.textContent?.trim());
+    expect(titles).toEqual(['E-BPCO-2026-000101', 'Ben Reyes', 'Santos Store', 'Fence plan']);
+    expect(page.textContent).toContain('Joel Dimaano');
+    expect(page.textContent).toContain('Duplicate filing');
+    expect(page.textContent).toContain('Not recorded');
   });
 
-  it('shows the most recent archiving entry when a record was set aside more than once', async () => {
-    const fixture = await mount([row({ lifecycleStatus: 'Cancelled' })], {
-      'APP-1': [
-        {
-          toStatus: 'Cancelled',
-          occurredAt: '2026-01-01T00:00:00.000Z',
-          actorName: 'Engr. Old Decision',
-          remarks: 'First reason.',
-        },
-        {
-          toStatus: 'Cancelled',
-          occurredAt: '2026-08-05T10:00:00.000Z',
-          actorName: 'Engr. Ana Reyes',
-          remarks: 'Duplicate filing.',
-        },
-      ],
-    });
-    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+  it('filters by kind, with a count on every tab', async () => {
+    const { fixture } = render();
+    await settle(fixture);
+    const page = fixture.nativeElement as HTMLElement;
 
-    expect(text).toContain('Engr. Ana Reyes');
-    expect(text).toContain('Duplicate filing.');
-    expect(text).not.toContain('Engr. Old Decision');
-    expect(text).not.toContain('First reason.');
+    const tab = Array.from(page.querySelectorAll<HTMLButtonElement>('.tab-btn')).find((b) => b.textContent?.includes('Businesses'))!;
+    expect(tab.textContent).toContain('1');
+    tab.click();
+    fixture.detectChanges();
+    expect(Array.from(page.querySelectorAll('.item-title')).map((el) => el.textContent?.trim())).toEqual(['Santos Store']);
   });
 
-  it('holds rejected and expired applications too, not only cancelled ones', async () => {
-    const fixture = await mount([
-      row({ id: 'APP-1', lifecycleStatus: 'Rejected' }),
-      row({ id: 'APP-2', lifecycleStatus: 'Expired' }),
-    ]);
-    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+  it('offers Restore only where the server says the officer may', async () => {
+    const { fixture } = render();
+    await settle(fixture);
+    const page = fixture.nativeElement as HTMLElement;
 
-    // Every terminal status has left the working queue. Showing only Cancelled
-    // would mean rejected applications had nowhere to be found either.
-    expect(text).toContain('Rejected');
-    expect(text).toContain('Expired');
+    const restoreLabels = Array.from(page.querySelectorAll('.restore-btn')).map((b) => b.getAttribute('aria-label'));
+    expect(restoreLabels).not.toContain('Restore Ben Reyes');
+    expect(restoreLabels).toContain('Restore Santos Store');
   });
 
-  it('does not show applications still in flight', async () => {
-    const fixture = await mount([row({ lifecycleStatus: 'Under Evaluation' })]);
+  it('restores after a confirmation, says so, and takes the item off the list', async () => {
+    const { fixture, api, toast } = render();
+    await settle(fixture);
+    const page = fixture.nativeElement as HTMLElement;
 
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Nothing has been archived');
+    page.querySelector<HTMLButtonElement>('[aria-label="Restore Santos Store"]')!.click();
+    fixture.detectChanges();
+    const confirm = Array.from(page.querySelectorAll<HTMLButtonElement>('.modal-btn')).find((b) => b.textContent?.trim() === 'Restore')!;
+    confirm.click();
+    await settle(fixture);
+
+    expect(api.restore).toHaveBeenCalledWith('business', 'b1');
+    expect(toast.success).toHaveBeenCalledWith('Restored.');
+    expect(Array.from(page.querySelectorAll('.item-title')).map((el) => el.textContent?.trim())).not.toContain('Santos Store');
   });
 
-  it('says a reason was not recorded rather than leaving it blank', async () => {
-    const fixture = await mount([row()]);
-    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+  it('shows the server’s refusal as it is', async () => {
+    const { fixture, toast } = render(async () => ({ kind: 'refused', message: 'Only a super admin can restore a staff account.' }));
+    await settle(fixture);
+    const page = fixture.nativeElement as HTMLElement;
 
-    // Archives made before remarks were required. A blank cell reads as "no
-    // reason was needed"; this says the reason is missing.
-    expect(text).toContain('No reason was recorded');
+    page.querySelector<HTMLButtonElement>('[aria-label="Restore Santos Store"]')!.click();
+    fixture.detectChanges();
+    Array.from(page.querySelectorAll<HTMLButtonElement>('.modal-btn')).find((b) => b.textContent?.trim() === 'Restore')!.click();
+    await settle(fixture);
+
+    expect(toast.error).toHaveBeenCalledWith('Only a super admin can restore a staff account.');
   });
 
-  it('offers no way to change or remove anything — only to open a record', async () => {
-    const fixture = await mount([row()]);
-    const el: HTMLElement = fixture.nativeElement;
-    const buttons = [...el.querySelectorAll('button')];
-
-    // A page whose whole point is preservation must not be the place things
-    // can be changed FROM. "View & Restore" is the one exception, and it is
-    // exactly that: navigation, not a mutation — clicking it calls the same
-    // `open()` a row click already does (archive.html's own comment on the
-    // button), landing on the application's own record, where restoring is
-    // a real lifecycle transition (migration 056_archive_restore.sql) an
-    // officer can then choose to make. Nothing on THIS page writes anything.
-    const labels = buttons.map((b) => (b.textContent ?? '').toLowerCase());
-    expect(labels.some((l) => /delete|remove|edit/.test(l))).toBe(false);
-
-    const restoreButton = buttons.find((b) => /view.*restore/i.test(b.textContent ?? ''));
-    expect(restoreButton).toBeTruthy();
-    expect(restoreButton?.getAttribute('type')).toBe('button');
+  it('never offers a way to delete anything', async () => {
+    const { fixture } = render();
+    await settle(fixture);
+    expect((fixture.nativeElement as HTMLElement).textContent?.toLowerCase()).not.toContain('delete ');
   });
 });

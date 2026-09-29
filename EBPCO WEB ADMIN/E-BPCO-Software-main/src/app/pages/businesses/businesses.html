@@ -497,8 +497,12 @@
                   Edit Business
                 </button>
               }
+              <button type="button" class="btn-outline archive" [disabled]="archiving()" (click)="requestArchive(row)">
+                <app-icon name="archive" [size]="14" />
+                Archive Business
+              </button>
               @if (row.status === 'Active') {
-                <button type="button" class="btn-outline danger" (click)="requestDelete(row)">
+                <button type="button" class="btn-outline" (click)="requestDelete(row)">
                   <app-icon name="slash" [size]="14" />
                   Deactivate
                 </button>
@@ -869,6 +873,21 @@
       </div>
     </div>
   </div>
+}
+
+@if (archiveTarget(); as target) {
+  <app-confirm-dialog
+    title="Archive this business?"
+    [message]="
+      target.code + ' leaves the Businesses list. Nothing is deleted: its record and applications stay on file, and it can be restored from the Archive. A business with an application still being processed cannot be archived.'
+    "
+    confirmLabel="Archive Business"
+    tone="archive"
+    reasonLabel="Why is this business being archived?"
+    reasonPlaceholder="Stored with the record. Anyone restoring it later will read this."
+    (confirmed)="confirmArchive($event)"
+    (cancelled)="archiveTarget.set(null)"
+  />
 }
 
 @if (deleteTarget()) {

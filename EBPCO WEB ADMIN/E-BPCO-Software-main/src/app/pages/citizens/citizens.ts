@@ -1,3 +1,4 @@
+import { TeamsApi } from '../../core/api/teams.api';
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -101,6 +102,24 @@ export class Citizens {
     const r = this.session.authority();
     return !!r && ACTION_PERMISSIONS['citizen.enable'](r);
   });
+
+  // ── Archive (2026-09-29): out of the list, kept on record, restorable ──
+  // The same authority as disabling (`staff:administer`); the server decides.
+  private readonly teamsApi = inject(TeamsApi);
+  protected readonly archiveTarget = signal<{ id: string; label: string } | null>(null);
+
+  protected async confirmArchive(reason: string): Promise<void> {
+    const target = this.archiveTarget();
+    if (!target) return;
+    this.archiveTarget.set(null);
+    const result = await this.teamsApi.archive('citizen', target.id, reason);
+    if (result.kind === 'done') {
+      this.toast.success(`${target.label}: ${result.detail}`);
+      this.backToList();
+    } else {
+      this.toast.error(result.kind === 'unavailable' ? 'This server cannot archive citizen accounts yet.' : result.message);
+    }
+  }
   protected readonly canSignOutSessions = computed(() => {
     const r = this.session.authority();
     return !!r && ACTION_PERMISSIONS['citizen.signOutSessions'](r);

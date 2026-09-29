@@ -209,6 +209,17 @@
               </button>
             }
           }
+          @if (canDisable()) {
+            <button
+              type="button"
+              class="btn-outline archive"
+              [disabled]="working()"
+              (click)="archiveTarget.set({ id: row.id, label: row.firstName + ' ' + row.lastName })"
+            >
+              <app-icon name="archive" [size]="14" />
+              Archive Account
+            </button>
+          }
           @if (canSignOutSessions()) {
             <button type="button" class="btn-outline" [disabled]="working()" (click)="revokeTarget.set(row)">
               <app-icon name="logout" [size]="14" />
@@ -462,6 +473,21 @@
     [reasonMinLength]="5"
     (confirmed)="confirmRevoke($event)"
     (cancelled)="revokeTarget.set(null)"
+  />
+}
+
+@if (archiveTarget(); as target) {
+  <app-confirm-dialog
+    title="Archive this citizen account?"
+    [message]="
+      target.label + ' leaves the Citizens list and cannot sign in. Nothing is deleted: their applications, businesses and documents stay on file, and the account can be restored from the Archive. An account with an application still being processed cannot be archived.'
+    "
+    confirmLabel="Archive Account"
+    tone="archive"
+    reasonLabel="Why is this account being archived?"
+    reasonPlaceholder="Stored with the account. Anyone restoring it later will read this."
+    (confirmed)="confirmArchive($event)"
+    (cancelled)="archiveTarget.set(null)"
   />
 }
 

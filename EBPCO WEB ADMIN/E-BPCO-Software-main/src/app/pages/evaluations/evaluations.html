@@ -443,8 +443,8 @@
                           <button
                             type="button"
                             role="menuitem"
-                            [disabled]="!mayDecide()"
-                            [attr.title]="decideBlockedReason()"
+                            [disabled]="!mayDecideOn(row)"
+                            [attr.title]="blockedReasonFor(row)"
                             (click)="advanceStage(row)"
                           >
                             <app-icon name="check-circle" [size]="14" />
@@ -471,8 +471,8 @@
                             type="button"
                             role="menuitem"
                             class="danger"
-                            [disabled]="!mayDecide() || !revisionRemarks().trim()"
-                            [attr.title]="decideBlockedReason()"
+                            [disabled]="!mayDecideOn(row) || !revisionRemarks().trim()"
+                            [attr.title]="blockedReasonFor(row)"
                             (click)="returnForRevision(row)"
                           >
                             <app-icon name="alert-triangle" [size]="14" />
@@ -747,8 +747,8 @@
             <button
               type="button"
               class="btn-primary"
-              [disabled]="!mayDecide()"
-              [attr.title]="decideBlockedReason()"
+              [disabled]="!mayDecideOn(row)"
+              [attr.title]="blockedReasonFor(row)"
               (click)="advanceStage(row)"
             >
               <app-icon name="check-circle" [size]="14" />
@@ -770,8 +770,8 @@
             <button
               type="button"
               class="btn-outline danger"
-              [disabled]="!mayDecide() || !revisionRemarks().trim()"
-              [attr.title]="decideBlockedReason()"
+              [disabled]="!mayDecideOn(row) || !revisionRemarks().trim()"
+              [attr.title]="blockedReasonFor(row)"
               (click)="returnForRevision(row)"
             >
               <app-icon name="alert-triangle" [size]="14" />

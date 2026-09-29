@@ -31,6 +31,18 @@
     border-color: $color-brand-600;
     color: $color-brand-600;
   }
+
+  // Archive: amber, a filing box — set aside and kept, never the red of a delete.
+  &.archive {
+    border-color: #f5d9a8;
+    color: $color-warning;
+
+    &:hover {
+      background: $color-warning-bg-soft;
+      border-color: $color-warning;
+      color: $color-warning;
+    }
+  }
 }
 
 .btn-primary {
@@ -213,6 +225,15 @@ tbody tr.row-clickable {
   &.del {
     background: $color-danger-bg-soft;
     color: $color-danger;
+  }
+  // Archive: a filing box, amber — set aside and kept, not destroyed.
+  &.archive {
+    background: $color-warning-bg-soft;
+    color: $color-warning;
+  }
+  &.restore {
+    background: $color-success-bg-soft;
+    color: $color-success;
   }
 }
 

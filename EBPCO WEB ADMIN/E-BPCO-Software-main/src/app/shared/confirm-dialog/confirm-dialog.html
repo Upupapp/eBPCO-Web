@@ -31,7 +31,8 @@
         type="button"
         class="modal-btn"
         [class.danger]="tone() === 'danger'"
-        [class.confirm]="tone() !== 'danger'"
+        [class.archive]="tone() === 'archive'"
+        [class.confirm]="tone() === 'default'"
         (click)="onConfirm()"
       >
         {{ confirmLabel() }}

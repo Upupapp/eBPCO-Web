@@ -682,4 +682,9 @@
   &.danger {
     color: $color-danger;
   }
+
+  // Archiving a checklist document: amber, not the red of a delete.
+  &.archive-link {
+    color: $color-warning;
+  }
 }

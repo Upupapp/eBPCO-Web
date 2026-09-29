@@ -45,6 +45,8 @@ export interface StaffMember {
   readonly createdAt: string;
   /** RFC 3339, or null when this account has never signed in. */
   readonly lastSignInAt: string | null;
+  /** Lead or member of their team (ebpco-api 062); null before an access level; absent from an older server. */
+  readonly teamRole?: 'lead' | 'member' | null;
 }
 
 /** What `GET /staff/users/:id/access` reports for one account. */
@@ -56,6 +58,8 @@ export interface StaffAccess {
    * Absent from an older server — which is silence, not "none".
    */
   readonly evaluationStages?: readonly string[];
+  /** Lead or member of their team (ebpco-api 062). Absent from an older server. */
+  readonly teamRole?: 'lead' | 'member' | null;
 }
 
 export type StaffAccessResult =
@@ -102,7 +106,7 @@ export type StaffWriteResult =
 
 /** What deleting an account did — the server's own words in `detail`. */
 export type StaffRemoveResult =
-  | { readonly kind: 'done'; readonly mode: 'deleted' | 'retired'; readonly detail: string }
+  | { readonly kind: 'done'; readonly mode: 'archived'; readonly detail: string }
   | { readonly kind: 'refused'; readonly message: string }
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'failed'; readonly message: string };
@@ -263,6 +267,11 @@ export class StaffDirectoryApi {
     return this.put(`/staff/users/${encodeURIComponent(id)}/access/stages`, { stages: [...stages] });
   }
 
+  /** Team lead, or team member (ebpco-api 062). */
+  async setTeamRole(id: string, teamRole: 'lead' | 'member'): Promise<StaffWriteResult> {
+    return this.put(`/staff/users/${encodeURIComponent(id)}/access/team-role`, { teamRole });
+  }
+
   /** Correct the name an officer's decisions are shown under. The address cannot be changed. */
   async rename(id: string, fullName: string): Promise<StaffWriteResult> {
     try {
@@ -274,13 +283,14 @@ export class StaffDirectoryApi {
   }
 
   /**
-   * Delete an account — the super admin's alone. The answer says whether it was
-   * deleted outright or retired because its name is on decisions.
+   * Archive an account — the super admin's alone, and never a delete
+   * (2026-09-29). It stays on record, cannot sign in, and a super admin
+   * restores it from the Archive.
    */
-  async remove(id: string): Promise<StaffRemoveResult> {
+  async remove(id: string, reason?: string): Promise<StaffRemoveResult> {
     try {
-      const answer = await this.api.delete<{ mode: 'deleted' | 'retired'; detail: string }>(
-        `/staff/users/${encodeURIComponent(id)}`,
+      const answer = await this.api.delete<{ mode: 'archived'; detail: string }>(
+        `/staff/users/${encodeURIComponent(id)}`, reason ? { reason } : {},
       );
       return { kind: 'done', mode: answer.mode, detail: answer.detail };
     } catch (error) {

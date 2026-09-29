@@ -684,8 +684,13 @@
                         <button type="button" class="link-btn" (click)="startEditDocument(doc)">
                           Edit
                         </button>
-                        <button type="button" class="link-btn danger" (click)="removeDocument(doc)">
-                          Remove
+                        <button
+                          type="button"
+                          class="link-btn archive-link"
+                          title="Archive — out of the checklist for new applications, restorable from the Archive"
+                          (click)="removeDocument(doc)"
+                        >
+                          Archive
                         </button>
                       </td>
                     }

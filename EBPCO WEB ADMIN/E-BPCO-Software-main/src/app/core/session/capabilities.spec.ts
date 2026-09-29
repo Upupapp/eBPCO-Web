@@ -32,6 +32,8 @@ function withSession(session: Session | null): Capabilities {
 }
 
 const session = (over: Partial<Session> = {}): Session => ({
+  teams: [],
+  teamRole: null,
   accountId: 'a0000000-0000-4000-8000-000000000001',
   name: 'Engr. Ana Reyes',
   email: 'ana@castillasorsogon.gov.ph',

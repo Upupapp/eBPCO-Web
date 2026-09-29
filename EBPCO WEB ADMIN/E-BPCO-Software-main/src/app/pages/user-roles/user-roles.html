@@ -117,7 +117,12 @@
                 </td>
                 <td>
                   <div class="position-cell">
-                    <span class="position-title">{{ row.position }}</span>
+                    <span class="position-title">
+                      {{ row.position }}
+                      @if (row.teamRole === 'lead') {
+                        <span class="lead-badge" title="Leads the team: assigns its work">Team lead</span>
+                      }
+                    </span>
                     @if (row.office) {
                       <span class="position-office">{{ row.office }}</span>
                     } @else if (row.stages && row.stages.length > 0) {
@@ -311,6 +316,10 @@
           <div>
             <dt>Position :</dt>
             <dd>{{ row.position }}</dd>
+          </div>
+          <div>
+            <dt>Team role :</dt>
+            <dd>{{ row.teamRole === 'lead' ? 'Team lead' : row.teamRole === 'member' ? 'Team member' : '—' }}</dd>
           </div>
           <div>
             <dt>Office :</dt>
@@ -797,6 +806,37 @@
           </label>
         </div>
       </fieldset>
+      <fieldset class="choice-field">
+        <legend>Team role</legend>
+        <div class="level-grid">
+          <label class="level-choice">
+            <input
+              type="radio"
+              name="teamRole"
+              [checked]="editTeamRole() === 'member'"
+              [disabled]="editWorking()"
+              (change)="setEditTeamRole('member')"
+            />
+            <span>
+              <strong>Team member</strong>
+              <small>Works on applications at the team’s step that are unassigned or assigned to them.</small>
+            </span>
+          </label>
+          <label class="level-choice">
+            <input
+              type="radio"
+              name="teamRole"
+              [checked]="editTeamRole() === 'lead'"
+              [disabled]="editWorking()"
+              (change)="setEditTeamRole('lead')"
+            />
+            <span>
+              <strong>Team lead</strong>
+              <small>Assigns the team’s applications, and can work on any of them.</small>
+            </span>
+          </label>
+        </div>
+      </fieldset>
 
       <fieldset class="choice-field">
         <legend>
@@ -873,15 +913,15 @@
       @if (viewerIsSuperAdmin() && !isSelf(row)) {
         <div class="danger-row">
           <div>
-            <strong>Delete this account</strong>
+            <strong>Archive this account</strong>
             <p>
-              An account that never acted is deleted. One whose name is on decisions is retired instead: it can never
-              sign in again and leaves this list, and its name stays on what it did.
+              Nothing is deleted. The account stops signing in and leaves this list, its name stays on everything it
+              did, and a super admin can restore it from the Archive.
             </p>
           </div>
-          <button type="button" class="btn-danger" [attr.aria-label]="'Delete ' + row.name" (click)="requestDelete(row)">
-            <app-icon name="trash" [size]="14" />
-            Delete Account
+          <button type="button" class="btn-outline archive" [attr.aria-label]="'Archive ' + row.name" (click)="requestDelete(row)">
+            <app-icon name="archive" [size]="14" />
+            Archive Account
           </button>
         </div>
       }
@@ -974,7 +1014,7 @@
 
 @if (deleteRefused(); as refusal) {
   <app-confirm-dialog
-    title="This account cannot be deleted"
+    title="This account cannot be archived"
     [message]="refusal"
     confirmLabel="Understood"
     tone="default"
@@ -985,13 +1025,15 @@
 
 @if (deleteTarget(); as target) {
   <app-confirm-dialog
-    title="Delete this account?"
+    title="Archive this account?"
     [message]="
-      target.name + ' (' + target.email + ') will never be able to sign in again. If they never acted, the account is removed and the address can be used again; if their name is on decisions, it is retired and stays on those records.'
+      target.name + ' (' + target.email + ') will stop signing in and leave the staff list. Nothing is deleted: their name stays on everything they did, and a super admin can restore the account from the Archive.'
     "
-    confirmLabel="Delete Account"
-    tone="danger"
-    (confirmed)="confirmDelete()"
+    confirmLabel="Archive Account"
+    tone="archive"
+    reasonLabel="Why is this account being archived?"
+    reasonPlaceholder="Stored with the account. Anyone restoring it later will read this."
+    (confirmed)="confirmDelete($event)"
     (cancelled)="cancelDelete()"
   />
 }

@@ -1,56 +1,55 @@
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
-import { ApplicationStore } from '../../core/domain/application-store';
-import { ApplicationRecord } from '../../core/domain/application.model';
-import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 import { Topbar } from '../../shared/topbar/topbar';
-import { StaffApplicationsApi } from '../../core/api/staff-applications.api';
-import { Avatar } from '../../shared/avatar/avatar';
 import { Icon } from '../../shared/icon/icon';
+import { ConfirmDialog } from '../../shared/confirm-dialog/confirm-dialog';
+import { ToastService } from '../../shared/toast/toast.service';
+import { ArchiveKind, ArchivedItem, TeamsApi } from '../../core/api/teams.api';
 
 /**
- * Everything that was set aside, and why.
+ * Everything that was set aside, and the way back (owner request, 2026-09-29:
+ * "all accounts, even the super admin, can only archive things ... redesign
+ * the archive screen so that it can cater to all things that will be
+ * archived").
  *
- * Owner ruling, 2026-08-31: no delete access anywhere — archive only, and all
- * archived items are preserved in an archive section.
+ * Nothing in eBPCO is deleted. Applications, staff and citizen accounts,
+ * businesses, checklist documents and permit types are archived instead, and
+ * this page is where every one of them can be found again — who set it aside,
+ * when and why — and restored by the officers allowed to (the server says
+ * which, per item, and is the judge of every restore).
  *
- * ── Why this page has to exist ──────────────────────────────────────────
- *
- * "Archived, not deleted" is a promise, and until now it was one nobody could
- * check. An application moved to Cancelled left the working queue and appeared
- * nowhere else; the difference between archiving and deleting was visible only
- * to somebody reading the store. A preservation guarantee with no way to see
- * what was preserved is indistinguishable from the deletion it replaced.
- *
- * ── Read-only, deliberately ─────────────────────────────────────────────
- *
- * Nothing here can be edited, re-archived or removed. Restoring an application
- * is a lifecycle transition and belongs to the workflow that governs
- * transitions, not to a list that exists to show what happened. A page whose
- * whole point is preservation must not be the place things can be changed from.
+ * Before this the page listed Cancelled, Rejected and Expired applications
+ * from the working queue: not what was archived, and nothing else at all.
  */
 
-interface ArchivedRow {
-  readonly record: ApplicationRecord;
-  readonly archivedBy: string | null;
-  readonly archivedAt: string | null;
-  readonly remarks: string | null;
+interface KindTab {
+  readonly kind: ArchiveKind | 'all';
+  readonly label: string;
+  readonly icon: string;
 }
 
-interface Attribution {
-  readonly archivedBy: string | null;
-  readonly archivedAt: string | null;
-  readonly remarks: string | null;
-}
+const TABS: readonly KindTab[] = [
+  { kind: 'all', label: 'Everything', icon: 'archive' },
+  { kind: 'application', label: 'Applications', icon: 'file-check' },
+  { kind: 'staff', label: 'Staff accounts', icon: 'shield' },
+  { kind: 'citizen', label: 'Citizen accounts', icon: 'user' },
+  { kind: 'business', label: 'Businesses', icon: 'building' },
+  { kind: 'requirement', label: 'Checklist documents', icon: 'copy' },
+  { kind: 'permit-type', label: 'Permit types', icon: 'workflow' },
+];
 
-const NO_ATTRIBUTION: Attribution = { archivedBy: null, archivedAt: null, remarks: null };
+const KIND_LABEL: Readonly<Record<ArchiveKind, string>> = {
+  application: 'Application',
+  staff: 'Staff account',
+  citizen: 'Citizen account',
+  business: 'Business',
+  requirement: 'Checklist document',
+  'permit-type': 'Permit type',
+};
 
-/** Terminal statuses. An application in any of these has left the working queue. */
-const ARCHIVED_STATUSES: readonly string[] = ['Cancelled', 'Rejected', 'Expired'];
-
-/** The server's raw ISO timestamp, in the form the table already shows for other dates. */
-function formatWhen(value: string): string {
+function formatWhen(value: string | null): string {
+  if (value === null) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString('en-PH', {
@@ -60,108 +59,95 @@ function formatWhen(value: string): string {
 
 @Component({
   selector: 'app-archive',
-  imports: [QueueLoadNotice, Topbar, Avatar, Icon],
+  imports: [Topbar, Icon, ConfirmDialog, FormsModule],
   templateUrl: './archive.html',
   styleUrl: './archive.scss',
 })
 export class Archive {
-  private readonly store = inject(ApplicationStore);
-  private readonly router = inject(Router);
-  private readonly applicationsApi = inject(StaffApplicationsApi);
+  private readonly teams = inject(TeamsApi);
+  private readonly toast = inject(ToastService);
 
-  /**
-   * `store.auditEvents()` is seed-only — `replaceApplications` wipes it to
-   * `[]` on every real load (see `ApplicationStore`'s own doc comment on
-   * `_businesses`/`_applicants` for the same pattern), so "Set aside by" and
-   * "Reason" were always blank on real data even though the record's own
-   * timeline (`GET /staff/applications/:id`, now carrying `actorName` — see
-   * `ApplicationTimelineEvent`'s own doc comment) genuinely has the answer.
-   * Fetched per archived row, once, and cached here rather than refetched on
-   * every `rows()` recomputation.
-   */
-  private readonly realAttribution = signal<ReadonlyMap<string, Attribution>>(new Map());
-  private readonly fetching = new Set<string>();
+  protected readonly tabs = TABS;
+  protected readonly kindLabel = KIND_LABEL;
+  protected readonly formatWhen = formatWhen;
 
-  private readonly baseRows = computed<ApplicationRecord[]>(() =>
-    this.store
-      .applications()
-      .filter((a) => ARCHIVED_STATUSES.includes(a.lifecycleStatus))
-      .sort((a, b) => b.dateValue.getTime() - a.dateValue.getTime()),
-  );
+  protected readonly items = signal<readonly ArchivedItem[]>([]);
+  protected readonly state = signal<'loading' | 'ready' | 'failed' | 'unavailable'>('loading');
+  protected readonly failure = signal('');
+  protected readonly activeKind = signal<ArchiveKind | 'all'>('all');
+  protected readonly search = signal('');
+
+  /** The item a Restore is being confirmed for. */
+  protected readonly restoreTarget = signal<ArchivedItem | null>(null);
+  protected readonly restoringId = signal<string | null>(null);
 
   constructor() {
-    effect(() => {
-      const isSeed = this.store.isSeedData();
-      const ids = this.baseRows().map((r) => r.id);
-      if (!isSeed) untracked(() => this.loadRealAttribution(ids));
-    });
+    void this.load();
   }
 
-  private async loadRealAttribution(ids: readonly string[]): Promise<void> {
-    const toFetch = ids.filter((id) => !this.realAttribution().has(id) && !this.fetching.has(id));
-    for (const id of toFetch) this.fetching.add(id);
-    await Promise.all(
-      toFetch.map(async (id) => {
-        const result = await this.applicationsApi.detail(id);
-        const attribution: Attribution = result.kind === 'ok'
-          ? this.attributionFromTimeline(result.detail.timeline)
-          : NO_ATTRIBUTION;
-        this.realAttribution.update((current) => new Map(current).set(id, attribution));
-        this.fetching.delete(id);
-      }),
-    );
+  protected readonly heading = computed(() => TABS.find((tab) => tab.kind === this.activeKind())?.label ?? 'Everything');
+
+  protected countOf(kind: ArchiveKind | 'all'): number {
+    return kind === 'all' ? this.items().length : this.items().filter((item) => item.kind === kind).length;
   }
 
-  private attributionFromTimeline(
-    timeline: ReadonlyArray<{ toStatus: string; occurredAt: string; actorName: string | null; remarks: string | null }>,
-  ): Attribution {
-    // The most recent archiving entry for this application. Most recent
-    // rather than first: an application returned to the queue and set aside
-    // again should show the decision that currently stands.
-    const entry = [...timeline]
-      .filter((e) => ARCHIVED_STATUSES.includes(e.toStatus))
-      .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())[0];
-    if (!entry) return NO_ATTRIBUTION;
-    return {
-      archivedBy: entry.actorName,
-      archivedAt: formatWhen(entry.occurredAt),
-      remarks: entry.remarks,
-    };
-  }
-
-  protected readonly rows = computed<ArchivedRow[]>(() => {
-    if (!this.store.isSeedData()) {
-      const attribution = this.realAttribution();
-      return this.baseRows().map((record) => ({
-        record,
-        ...(attribution.get(record.id) ?? NO_ATTRIBUTION),
-      }));
-    }
-    const audit = this.store.auditEvents();
-    return this.baseRows().map((record) => {
-      // The most recent archiving entry for this application. Most recent
-      // rather than first: an application returned to the queue and set
-      // aside again should show the decision that currently stands.
-      const entry = audit
-        .filter((e) => e.applicationId === record.id && /archiv|cancel/i.test(e.action))
-        .sort((a, b) => b.timestampValue.getTime() - a.timestampValue.getTime())[0];
-      return {
-        record,
-        archivedBy: entry?.actor ?? null,
-        archivedAt: entry?.timestamp ?? null,
-        remarks: entry?.remarks ?? null,
-      };
-    });
+  protected readonly visible = computed(() => {
+    const kind = this.activeKind();
+    const words = this.search().trim().toLowerCase().split(/\s+/).filter(Boolean);
+    return this.items()
+      .filter((item) => kind === 'all' || item.kind === kind)
+      .filter((item) => {
+        if (words.length === 0) return true;
+        const haystack = [item.title, item.subtitle, item.reason ?? '', item.archivedBy ?? '', KIND_LABEL[item.kind]]
+          .join(' ').toLowerCase();
+        return words.every((word) => haystack.includes(word));
+      });
   });
 
-  protected readonly count = computed(() => this.rows().length);
+  protected async load(): Promise<void> {
+    this.state.set('loading');
+    const result = await this.teams.archived();
+    if (result.kind === 'ok') {
+      this.items.set(result.value);
+      this.state.set('ready');
+    } else if (result.kind === 'unavailable') {
+      this.state.set('unavailable');
+    } else {
+      this.failure.set(result.message);
+      this.state.set('failed');
+    }
+  }
 
-  /** True when the queue loaded and genuinely holds nothing archived. */
-  protected readonly emptyAndKnown = computed(
-    () => this.store.loadFailure() === null && this.count() === 0,
-  );
+  protected requestRestore(item: ArchivedItem): void {
+    this.restoreTarget.set(item);
+  }
 
-  protected open(row: ArchivedRow): void {
-    this.router.navigateByUrl(`/applications/${row.record.id}`);
+  protected restoreMessage(item: ArchivedItem): string {
+    switch (item.kind) {
+      case 'application': return `${item.title} goes back to the working list, at the status it was archived at.`;
+      case 'staff': return `${item.title} is enabled again and can sign in, with the position and access they had.`;
+      case 'citizen': return `${item.title} can sign in again and is back in the Citizens list.`;
+      case 'business': return `${item.title} is back in the Businesses list.`;
+      case 'requirement': return `“${item.title}” is added back to the end of its checklist, for new applications.`;
+      case 'permit-type': return `Citizens can file a ${item.title} again.`;
+    }
+  }
+
+  protected async confirmRestore(): Promise<void> {
+    const item = this.restoreTarget();
+    if (item === null) return;
+    this.restoreTarget.set(null);
+    this.restoringId.set(item.id);
+    try {
+      const result = await this.teams.restore(item.kind, item.id);
+      if (result.kind === 'done') {
+        this.toast.success(result.detail);
+        this.items.update((all) => all.filter((other) => !(other.kind === item.kind && other.id === item.id)));
+      } else {
+        this.toast.error(result.kind === 'unavailable' ? 'This server cannot restore archived items yet.' : result.message);
+      }
+    } finally {
+      this.restoringId.set(null);
+    }
   }
 }

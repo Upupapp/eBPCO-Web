@@ -46,6 +46,12 @@ export interface Me {
    */
   readonly evaluationStages?: readonly string[];
 
+  /** The officer's team(s) (ebpco-api 062), by key — see core/domain/teams.ts. Absent from an older server. */
+  readonly teams?: readonly string[];
+
+  /** Whether they lead their team. Null before an access level exists; absent from an older server. */
+  readonly teamRole?: 'lead' | 'member' | null;
+
   /** The officer's name. Null means genuinely not on record, not blank. */
   readonly fullName?: string | null;
 

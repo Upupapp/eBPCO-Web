@@ -27,7 +27,8 @@ export class ConfirmDialog {
   readonly message = input<string>('');
   readonly confirmLabel = input<string>('Confirm');
   readonly cancelLabel = input<string>('Cancel');
-  readonly tone = input<'danger' | 'default'>('default');
+  /** 'archive': amber, a filing box — setting something aside, never the red of a delete. */
+  readonly tone = input<'danger' | 'default' | 'archive'>('default');
 
   /** Set to collect a reason. Null (the default) shows no field. */
   readonly reasonLabel = input<string | null>(null);

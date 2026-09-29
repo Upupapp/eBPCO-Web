@@ -100,7 +100,7 @@
           stays visible, filterable and auditable. The button said Delete, so
           an officer clicking it believed the record had been destroyed.
         -->
-        <button type="button" class="btn-outline danger" (click)="requestDeleteSelected()">
+        <button type="button" class="btn-outline archive" (click)="requestDeleteSelected()">
           <app-icon name="archive" [size]="14" />
           Archive
         </button>
@@ -251,7 +251,7 @@
                     >
                       <app-icon name="eye" [size]="15" />
                     </button>
-                    @if (canWork()) {
+                    @if (canWork() && workFor(row).canWork) {
                       <button
                         type="button"
                         class="icon-btn edit"
@@ -265,11 +265,12 @@
                   }
                   <button
                     type="button"
-                    class="icon-btn del"
-                    [attr.aria-label]="'Delete application ' + row.id"
+                    class="icon-btn archive"
+                    [attr.aria-label]="'Archive application ' + row.id"
+                    title="Archive — set aside, kept on record, restorable"
                     (click)="requestDelete(row)"
                   >
-                    <app-icon name="trash" [size]="15" />
+                    <app-icon name="archive" [size]="15" />
                   </button>
                 </div>
               </td>
@@ -336,7 +337,7 @@
         <app-icon name="eye" [size]="15" />
         View
       </button>
-      } @else if (canWork()) {
+      } @else if (canWork() && work().canWork) {
         <button type="button" class="btn-primary" (click)="editCurrent()">
           <app-icon name="edit" [size]="15" />
           Edit
@@ -389,8 +390,10 @@
       <app-icon name="eye" [size]="16" />
       <span>
         You are viewing this application.
-        @if (canWork()) {
+        @if (canWork() && work().canWork) {
           Choose <strong>Edit</strong> to decide on it, review its documents, assess its fees or add a note.
+        } @else if (canWork() && work().reason) {
+          {{ work().reason }}
         } @else {
           Your position can read it but not change it.
         }
@@ -400,6 +403,42 @@
     <div class="mode-note is-mine" role="note">
       <app-icon name="user-check" [size]="16" />
       <span>This application is waiting on you — {{ detail.row.responsibility?.step }}.</span>
+    </div>
+  }
+
+  @if (work().team) {
+    <!-- The team whose step this is, who has it, and — for the lead — who
+         to give it to. A member takes an unassigned one, or hands theirs back. -->
+    <div class="assign-bar" role="group" aria-label="Team assignment">
+      <app-icon name="users" [size]="16" />
+      <span class="assign-text">
+        <strong>{{ teamName(work().team) }} team</strong>
+        ·
+        @if (work().assignee; as assignee) {
+          With {{ work().mine ? 'you' : assignee.name }}
+        } @else {
+          Unassigned — any member of the team can take it
+        }
+      </span>
+      @if (work().mayAssign) {
+        <select class="assign-select" aria-label="Assign to" [(ngModel)]="assignTo" [disabled]="assigning()">
+          <option value="">Unassigned</option>
+          @for (member of teamMembers(); track member.id) {
+            <option [value]="member.id">{{ member.name }}{{ member.lead ? ' (lead)' : '' }} · {{ member.assigned }} on hand</option>
+          }
+        </select>
+        <button type="button" class="btn-outline" [disabled]="assigning()" (click)="assign(assignTo || null)">
+          {{ assigning() ? 'Saving…' : 'Assign' }}
+        </button>
+      } @else if (work().mayTake) {
+        <button type="button" class="btn-outline" [disabled]="assigning()" (click)="assign(session.accountId())">
+          Take it
+        </button>
+      } @else if (work().mine) {
+        <button type="button" class="btn-outline" [disabled]="assigning()" (click)="assign(null)">
+          Hand back to the team
+        </button>
+      }
     </div>
   }
 
@@ -1597,7 +1636,7 @@
     title="Archive this application?"
     [message]="deleteDialogMessage()"
     confirmLabel="Archive"
-    tone="danger"
+    tone="archive"
     reasonLabel="Why is this being archived?"
     reasonPlaceholder="Stored with the record. Anyone reading this later will have only this."
     (confirmed)="confirmDelete($event)"

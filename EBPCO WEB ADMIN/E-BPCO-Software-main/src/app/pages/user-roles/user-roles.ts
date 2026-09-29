@@ -57,6 +57,8 @@ export interface UserRow {
   permitTypes: readonly string[] | null;
   /** The evaluation stages it decides; `null` until access has loaded (or from an older server). */
   stages: readonly string[] | null;
+  /** Leads their team, or a member of it (ebpco-api 062); null when not known. */
+  teamRole: 'lead' | 'member' | null;
   /**
    * The roles the SERVER holds for this account, kept raw. The
    * last-super-admin guard checks these, never a display string.
@@ -129,6 +131,7 @@ function toUserRow(member: StaffMember): UserRow {
     mfaEnrolled: member.mfaEnrolled,
     createdAt: member.createdAt ?? null,
     lastActive: formatLastActive(member.lastSignInAt),
+    teamRole: member.teamRole ?? null,
   };
 }
 
@@ -144,6 +147,7 @@ function withAccess(row: UserRow, access: StaffAccess | null): UserRow {
     level: access.level,
     permitTypes: access.permitTypes,
     stages,
+    teamRole: access.teamRole ?? row.teamRole,
     ...describePosition(row.serverRoles, stages),
     department: count === 0
       ? 'No forms assigned'
@@ -530,6 +534,8 @@ export class UserRoles implements OnInit {
   protected readonly editRoles = signal<ReadonlySet<string>>(new Set());
   protected readonly editStages = signal<ReadonlySet<string>>(new Set());
   protected readonly editLevel = signal<AccessLevel>('view-edit');
+  /** Team lead or team member (ebpco-api 062). */
+  protected readonly editTeamRole = signal<'lead' | 'member'>('member');
   private readonly editForms = signal<ReadonlySet<string>>(new Set());
   protected readonly editError = signal('');
   protected readonly editWorking = signal(false);
@@ -622,6 +628,11 @@ export class UserRoles implements OnInit {
     this.editError.set('');
   }
 
+  protected setEditTeamRole(teamRole: 'lead' | 'member'): void {
+    this.editTeamRole.set(teamRole);
+    this.editError.set('');
+  }
+
   /** The row's Edit — the account's form, seeded from what the account HOLDS. */
   protected openEdit(row: UserRow): void {
     if (!this.mayManage(row)) {
@@ -639,6 +650,7 @@ export class UserRoles implements OnInit {
     this.editStages.set(new Set(row.stages ?? []));
     this.editPositionKey.set(presetFor(row.serverRoles, row.stages ?? [])?.key ?? CUSTOM);
     this.editLevel.set(row.level);
+    this.editTeamRole.set(row.teamRole ?? 'member');
     this.editForms.set(new Set(row.permitTypes));
     this.editError.set('');
     this.view.set('edit');
@@ -653,6 +665,7 @@ export class UserRoles implements OnInit {
     this.editStages.set(new Set());
     this.editPositionKey.set(CUSTOM);
     this.editLevel.set('view-edit');
+    this.editTeamRole.set('member');
     // Every form by default: an officer assigned none can reach nothing, and
     // the office narrows it here when a post covers only some permits.
     this.editForms.set(new Set(ALL_PERMIT_TYPES));
@@ -742,6 +755,10 @@ export class UserRoles implements OnInit {
     if (level !== row.level) {
       steps.push({ label: 'access level', run: () => this.directory.setLevel(row.id, level) });
     }
+    const teamRole = this.editTeamRole();
+    if (teamRole !== (row.teamRole ?? 'member')) {
+      steps.push({ label: 'team role', run: () => this.directory.setTeamRole(row.id, teamRole) });
+    }
     if (steps.length === 0) {
       this.toast.info('Nothing changed.');
       this.view.set('detail');
@@ -797,6 +814,9 @@ export class UserRoles implements OnInit {
       if (stages.length > 0) steps.push({ label: 'evaluation stages', run: () => this.directory.setStages(id, stages) });
       steps.push({ label: 'forms', run: () => this.directory.setForms(id, forms) });
       steps.push({ label: 'access level', run: () => this.directory.setLevel(id, level) });
+      if (this.editTeamRole() === 'lead') {
+        steps.push({ label: 'team role', run: () => this.directory.setTeamRole(id, 'lead') });
+      }
       const outcome = await this.runSteps(steps);
       await this.reloadKeeping(id);
       const row = this.selectedUser();
@@ -1069,22 +1089,22 @@ export class UserRoles implements OnInit {
     this.deleteTarget.set(null);
   }
 
-  protected async confirmDelete(): Promise<void> {
+  protected async confirmDelete(reason: string): Promise<void> {
     const target = this.deleteTarget();
     if (!target || this.deleteWorking()) return;
     this.deleteTarget.set(null);
     this.deleteWorking.set(true);
     try {
-      const result = await this.directory.remove(target.id);
+      const result = await this.directory.remove(target.id, reason);
       if (result.kind === 'done') {
-        this.toast.success(`${target.name}: ${result.detail}`);
+        this.toast.success(`${target.name}'s account was archived. A super admin can restore it from the Archive.`);
         this.selectedUser.set(null);
         this.view.set('list');
         await this.loadDirectory();
         return;
       }
       this.toast.error(
-        result.kind === 'unavailable' ? 'This deployment cannot delete staff accounts yet.' : result.message,
+        result.kind === 'unavailable' ? 'This deployment cannot archive staff accounts yet.' : result.message,
       );
     } finally {
       this.deleteWorking.set(false);

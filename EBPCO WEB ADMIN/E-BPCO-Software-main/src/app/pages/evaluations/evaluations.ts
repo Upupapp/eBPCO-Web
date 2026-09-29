@@ -1,3 +1,4 @@
+import { workStateFor } from '../../core/domain/teams';
 import { Component, OnInit, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -153,6 +154,19 @@ export class Evaluations implements OnInit {
     return `The ${stage ?? 'this'} stage is decided by its own office. `
       + (held.length === 0 ? 'Your account has no evaluation stage assigned.' : `Your account decides: ${held.join(', ')}.`);
   });
+
+  /**
+   * Whether this officer may decide THIS application (2026-09-29): their
+   * stage, and — once assigned within the team — theirs, or they lead it.
+   */
+  protected mayDecideOn(row: EvalRow): boolean {
+    return this.mayDecide() && workStateFor(row.row.responsibility, this.session.worker()).canWork;
+  }
+
+  /** Why the decision buttons are off on this application, or null when they are on. */
+  protected blockedReasonFor(row: EvalRow): string | null {
+    return this.decideBlockedReason() ?? workStateFor(row.row.responsibility, this.session.worker()).reason;
+  }
 
   /** The officer's own stages, for "Your stage" on the cards. Every stage for a super admin. */
   protected readonly myStages = computed(() => this.session.authority()?.stages ?? []);

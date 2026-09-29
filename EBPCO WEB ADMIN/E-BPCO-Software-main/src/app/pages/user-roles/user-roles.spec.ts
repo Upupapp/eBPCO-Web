@@ -48,6 +48,8 @@ const access = (over: Record<string, unknown> = {}) => ({
 
 /** The signed-in viewer: a super admin unless a test says otherwise. */
 const viewer = (over: Partial<Session> = {}): Session => ({
+  teams: [],
+  teamRole: null,
   accountId: 'ADMIN-1',
   name: 'Paul',
   email: 'paul@lguids.com.ph',

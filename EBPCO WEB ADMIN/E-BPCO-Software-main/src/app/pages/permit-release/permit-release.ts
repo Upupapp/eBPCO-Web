@@ -374,7 +374,10 @@ export class PermitRelease implements OnInit {
     }
     this.requirementsConfig.removeDocument(type, doc.id);
     this.checklistDirty.set(true);
-    this.toast.success(`"${doc.label}" removed from the draft. Select "Save Checklist" to publish it.`);
+    this.toast.success(
+      `"${doc.label}" taken out of the draft. Select "Save Checklist" to publish it — it is then archived, `
+      + 'not deleted, and can be restored from the Archive.',
+    );
   }
 
   protected resetDocumentsToDefault(): void {

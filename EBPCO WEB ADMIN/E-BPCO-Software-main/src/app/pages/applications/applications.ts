@@ -28,6 +28,8 @@ import { AuditEvent } from '../../core/domain/audit.model';
 import { SessionService } from '../../core/session/session.service';
 import { ACTION_PERMISSIONS, mayMove } from '../../core/session/permissions';
 import { assignedOfficerNames, isAssignedTo } from '../../core/domain/responsibility';
+import { WorkState, teamName, workStateFor } from '../../core/domain/teams';
+import { TeamMember, TeamsApi } from '../../core/api/teams.api';
 import { ApplicationIntake } from '../../shared/application-intake/application-intake';
 import {
   DocumentPreview,
@@ -225,7 +227,7 @@ export class Applications {
   private readonly store = inject(ApplicationStore);
   private readonly router = inject(Router);
   private readonly titleService = inject(Title);
-  private readonly session = inject(SessionService);
+  protected readonly session = inject(SessionService);
   private readonly toast = inject(ToastService);
   private readonly loader = inject(QueueLoader);
   private readonly applicationsApi = inject(StaffApplicationsApi);
@@ -319,8 +321,70 @@ export class Applications {
     return who !== null && ACTION_PERMISSIONS.workOnApplication(who);
   });
 
-  /** The working screen — asked for by the route AND allowed; a read-only officer who follows an edit link gets the record. */
-  protected readonly editing = computed(() => this.mode() === 'edit' && this.canWork());
+  /**
+   * Whether this officer may work on the open application NOW (2026-09-29):
+   * it is at their team's step, and — once assigned — it is theirs, or they
+   * lead the team. Everyone else reads it. The server decides; this shows it.
+   */
+  protected readonly work = computed<WorkState>(() =>
+    workStateFor(this.selectedRow()?.responsibility, this.session.worker()),
+  );
+
+  /** The same answer for one table row: whether its Edit button is offered. */
+  protected workFor(row: AppRow): WorkState {
+    return workStateFor(row.responsibility, this.session.worker());
+  }
+
+  protected readonly teamName = teamName;
+
+  /** The working screen — asked for by the route AND allowed; anyone else who follows an edit link gets the record, with the reason. */
+  protected readonly editing = computed(() => this.mode() === 'edit' && this.canWork() && this.work().canWork);
+
+  // ── Assignment within the team (ebpco-api 062) ───────────────────────────
+
+  private readonly teamsApi = inject(TeamsApi);
+  /** The members a lead can give the open application to. */
+  protected readonly teamMembers = signal<readonly TeamMember[]>([]);
+  protected assignTo = '';
+  protected readonly assigning = signal(false);
+
+  private readonly loadTeamMembers = effect(() => {
+    const work = this.work();
+    const team = work.team;
+    if (!work.mayAssign || team === null) return;
+    untracked(() => void this.fetchTeamMembers(team));
+  });
+
+  private async fetchTeamMembers(team: string): Promise<void> {
+    const result = await this.teamsApi.overview();
+    if (result.kind !== 'ok') return;
+    this.teamMembers.set(result.value.find((t) => t.key === team)?.members.filter((m) => m.canWork) ?? []);
+    this.assignTo = this.work().assignee?.id ?? '';
+  }
+
+  /**
+   * Gives the open application to a member (a lead), takes it (a member, when
+   * nobody has it), or hands it back to the team (null). The server's own
+   * sentence is the toast either way.
+   */
+  protected async assign(assigneeId: string | null): Promise<void> {
+    const row = this.selectedRow();
+    if (!row || this.assigning()) return;
+    this.assigning.set(true);
+    try {
+      const result = await this.teamsApi.assign(row.id, assigneeId);
+      if (result.kind === 'done') {
+        this.toast.success(result.detail);
+        await this.loader.reload();
+      } else if (result.kind === 'unavailable') {
+        this.toast.error('This server does not support team assignment yet.');
+      } else {
+        this.toast.error(result.message);
+      }
+    } finally {
+      this.assigning.set(false);
+    }
+  }
 
   /** Whether the open application is waiting on this officer (the server's responsibility). */
   protected readonly assignedToMe = computed(() =>

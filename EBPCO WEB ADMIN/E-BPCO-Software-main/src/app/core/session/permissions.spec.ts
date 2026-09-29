@@ -162,13 +162,13 @@ const opens = (who: Authority) => NAV_MODULES.filter((m) => mayOpen(m, who)).map
 describe('officer positions — which screens an officer sees', () => {
   it('a Receiving Officer sees intake and citizens, not Staff & Roles — the portal used to file them under Administrator', () => {
     expect(opens(officer(SCOPES.receiving, null, 'Administrator'))).toEqual([
-      'dashboard', 'applications', 'businesses', 'citizens', 'archive',
+      'dashboard', 'applications', 'teams', 'businesses', 'citizens', 'archive',
     ]);
   });
 
   it('a Cashier sees Payments, never Evaluations or Permit Release', () => {
     expect(opens(officer(SCOPES.cashier, null, 'Payment Officer'))).toEqual([
-      'dashboard', 'applications', 'payments', 'archive',
+      'dashboard', 'applications', 'teams', 'payments', 'archive',
     ]);
   });
 

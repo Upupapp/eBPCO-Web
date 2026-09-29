@@ -122,6 +122,17 @@
     }
   }
 
+  // Archiving: amber, a filing box — the record is set aside and kept, and can
+  // be restored, so it must not look like the red of a delete.
+  &.archive {
+    background: #b45309;
+    color: #fff;
+
+    &:hover {
+      filter: brightness(1.08);
+    }
+  }
+
   &.neutral {
     background: #fff;
     color: #454a58;

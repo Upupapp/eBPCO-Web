@@ -1,3 +1,4 @@
+import { Worker } from '../domain/teams';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Authority, StaffRole } from './permissions';
@@ -39,6 +40,10 @@ export interface Session {
   stages: readonly string[] | null;
   /** "Fire Safety Evaluator", "Cashier" — see `positionFor`. */
   position: string;
+  /** The officer's team keys (ebpco-api 062); empty from an older server. */
+  teams: readonly string[];
+  /** Whether they lead their team. */
+  teamRole: 'lead' | 'member' | null;
 }
 
 /** The session's fields that come from `/me`, built the same way on sign-in and on restore. */
@@ -61,6 +66,8 @@ function fromMe(me: Me, role: StaffRole): Session {
     wireRoles,
     stages,
     position: positionFor(wireRoles, stages),
+    teams: me.teams ?? [],
+    teamRole: me.teamRole ?? null,
   };
 }
 
@@ -103,6 +110,25 @@ export class SessionService {
       scopes: current.scopes,
       stages: current.stages,
       superAdmin: current.wireRoles.includes('super-admin') || current.role === 'Super Admin',
+    };
+  });
+
+  /** Whether the signed-in officer leads their team (ebpco-api 062). */
+  readonly isTeamLead = computed(() => this._session()?.teamRole === 'lead');
+
+  /**
+   * The officer as the team rules need them (`workStateFor`): their teams,
+   * whether they lead, and the two standings above every team.
+   */
+  readonly worker = computed<Worker>(() => {
+    const current = this._session();
+    const who = this.authority();
+    return {
+      accountId: current?.accountId || null,
+      teams: current?.teams ?? [],
+      lead: current?.teamRole === 'lead',
+      superAdmin: who?.superAdmin ?? false,
+      keepsRecords: who?.scopes?.includes('applications:write') ?? false,
     };
   });
 
@@ -284,6 +310,8 @@ export class SessionService {
       wireRoles: [],
       stages: null,
       position: qaRole ?? 'Super Admin',
+      teams: [],
+      teamRole: null,
     });
   }
 

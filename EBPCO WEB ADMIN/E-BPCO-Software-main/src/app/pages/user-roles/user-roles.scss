@@ -127,6 +127,18 @@
   color: $color-ink-900;
 }
 
+.lead-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: $color-violet-bg;
+  color: $color-violet;
+  font-size: 0.7rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
 .position-office {
   font-size: 0.75rem;
   color: $color-ink-300;
