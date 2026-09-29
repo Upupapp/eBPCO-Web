@@ -620,7 +620,10 @@
                        order-of-payment-issued). Said here so nobody reads a
                        finished evaluation as a stuck application. -->
                   <li>
-                    Evaluation: {{ evaluationStagesPassed() }} of {{ evaluationStageTotal }} stages passed
+                    Evaluation: {{ evaluationStagesPassed() }} of {{ evaluationStageTotal() }} stages passed
+                    @if (evaluationStagesSkipped().length > 0) {
+                      ({{ evaluationStagesSkipped().join(', ') }} not needed — nothing on this permit's checklist is checked there)
+                    }
                     @if (evaluationsComplete()) {
                       — complete. Next: assess the fee (Permit Result tab); the application moves to Assessed when the Order of Payment is issued.
                     }

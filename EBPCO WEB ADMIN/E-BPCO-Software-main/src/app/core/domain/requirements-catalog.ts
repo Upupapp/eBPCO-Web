@@ -41,6 +41,50 @@ export interface RequirementDocument {
   required: boolean;
   reviewingDepartmentId: string;
   description?: string;
+  /** The evaluation stage that checks it, as the server stores it (ebpco-api migration 060). Absent on this file's static entries: see `stageOf`. */
+  stage?: ChecklistStage;
+}
+
+/**
+ * The stages a document can be checked at. Final Approval checks no document of
+ * its own. A stage runs for an application only when a REQUIRED document on
+ * its checklist names it, so the checklist decides, per permit type, whether
+ * the application waits on Zoning, Fire Safety or OBO at all.
+ */
+export type ChecklistStage = 'Initial' | 'Zoning' | 'Fire Safety' | 'OBO';
+export const CHECKLIST_STAGES: readonly ChecklistStage[] = ['Initial', 'Zoning', 'Fire Safety', 'OBO'];
+
+export function isChecklistStage(value: unknown): value is ChecklistStage {
+  return typeof value === 'string' && (CHECKLIST_STAGES as readonly string[]).includes(value);
+}
+
+/** Who checks at each stage, in the words the checklist editor shows. */
+export const CHECKLIST_STAGE_LABELS: Readonly<Record<ChecklistStage, string>> = {
+  Initial: 'Initial (completeness at intake)',
+  Zoning: 'Zoning (MPDO)',
+  'Fire Safety': 'Fire Safety (BFP clearance)',
+  OBO: 'OBO (Building Official)',
+};
+
+// Identity, ownership and the barangay's clearance: checked for completeness at intake.
+const INITIAL_CODE_SUFFIXES = ['-land-title', '-owner-consent', '-brgy-clearance', '-id'];
+
+/**
+ * The stage a document is checked at: the server's own answer when it gave
+ * one, otherwise read from this file's static entry the same way migration 060
+ * seeded the live checklists (MPDO documents at Zoning, the BFP's at Fire
+ * Safety, identity and ownership at Initial, everything technical at OBO).
+ */
+export function stageOf(document: RequirementDocument): ChecklistStage {
+  if (document.stage !== undefined) return document.stage;
+  if (document.reviewingDepartmentId === 'zoning') return 'Zoning';
+  if (document.reviewingDepartmentId === 'bfp') return 'Fire Safety';
+  return INITIAL_CODE_SUFFIXES.some((suffix) => document.id.endsWith(suffix)) ? 'Initial' : 'OBO';
+}
+
+/** The office behind a stage, for the Department column the document tables show. */
+export function departmentForStage(stage: ChecklistStage): string {
+  return stage === 'Zoning' ? 'zoning' : stage === 'Fire Safety' ? 'bfp' : 'obo';
 }
 
 export interface EvaluationSequenceStep {
@@ -217,10 +261,11 @@ function doc(
   return { id, label, required, reviewingDepartmentId, description };
 }
 
-// Every permit type routes through the same office sequence — there is
-// only one workflow domain in this system now (see the "one shared
-// source of truth, no categories" requirement on the permit-type list
-// itself), so a single evaluation sequence applies uniformly.
+// The office behind each stage is the same for every permit type. WHICH
+// stages an application goes through is not decided here: the server reads it
+// off the application's own checklist (ebpco-api migration 060 — a stage runs
+// only when a required document is checked there) and sends it as
+// `evaluationStages`; see `applicableStages` in status.model.ts.
 const EVAL_SEQUENCE: EvaluationSequenceStep[] = [
   { stage: 'Initial', departmentId: 'obo' },
   { stage: 'Zoning', departmentId: 'zoning' },
@@ -267,7 +312,8 @@ const COMMON_DOCS = (prefix: string, opts?: { skipLocational?: boolean }): Requi
     false,
     'obo',
   ),
-  doc(`${prefix}-brgy-clearance`, 'Barangay Clearance', true, 'zoning'),
+  // Checked for completeness at intake (the Initial stage, OBO), as the server's checklist has it.
+  doc(`${prefix}-brgy-clearance`, 'Barangay Clearance', true, 'obo'),
   ...(opts?.skipLocational
     ? []
     : [doc(`${prefix}-locational`, 'Locational Clearance / Zoning Certification', true, 'zoning')]),

@@ -56,6 +56,21 @@ export const ALL_PERMIT_TYPES: PermitType[] = [
 
 const ALL_PERMIT_TYPES_SET: ReadonlySet<string> = new Set(ALL_PERMIT_TYPES);
 
+/**
+ * Types still recognised on old records but no longer filed through eBPCO
+ * (ebpco-api migration 060). The Bureau of Fire Protection issues the FSEC and
+ * the FSIC itself, through its own system BFP-FSIS (BFP Memorandum Circular
+ * 2024-024); the applicant uploads the one they receive with their Building
+ * Permit or Certificate of Occupancy, and the Fire Safety stage verifies it.
+ */
+export const RETIRED_PERMIT_TYPES: ReadonlySet<PermitType> = new Set<PermitType>([
+  'FSEC for Building Permit (BFP)',
+  'FSIC for Occupancy Permit (BFP)',
+]);
+
+/** What can be filed today — the list every intake form offers. */
+export const FILEABLE_PERMIT_TYPES: PermitType[] = ALL_PERMIT_TYPES.filter((type) => !RETIRED_PERMIT_TYPES.has(type));
+
 /** Runtime validation guard — the one place a permit-type value from an untyped source (form input, URL param, imported data) is checked against the fixed list, so nothing outside these 17 exact strings can ever be accepted. */
 export function isValidPermitType(value: string): value is PermitType {
   return ALL_PERMIT_TYPES_SET.has(value);

@@ -592,6 +592,14 @@
               Description <span class="optional">(optional)</span>
               <textarea aria-label="Description" rows="2" [(ngModel)]="newDocument.description" name="newDocDescription"></textarea>
             </label>
+            <label>
+              Checked At
+              <select [(ngModel)]="newDocument.stage" name="newDocStage">
+                @for (stage of checklistStages; track stage) {
+                  <option [value]="stage">{{ checklistStageLabels[stage] }}</option>
+                }
+              </select>
+            </label>
             <label class="checkbox-field">
               <input type="checkbox" [(ngModel)]="newDocument.required" name="newDocRequired" />
               Required
@@ -611,7 +619,7 @@
               <tr>
                 <th>Document</th>
                 <th>Required</th>
-                <th>Reviewing Department</th>
+                <th>Checked At</th>
                 @if (canConfigureRequirements()) {
                   <th>Actions</th>
                 }
@@ -641,7 +649,13 @@
                         name="editRequired-{{ doc.id }}"
                       />
                     </td>
-                    <td>{{ departmentLabel(doc.reviewingDepartmentId) }}</td>
+                    <td>
+                      <select aria-label="Checked at" [(ngModel)]="editDraft.stage" name="editStage-{{ doc.id }}">
+                        @for (stage of checklistStages; track stage) {
+                          <option [value]="stage">{{ checklistStageLabels[stage] }}</option>
+                        }
+                      </select>
+                    </td>
                     <td>
                       <button type="button" class="link-btn" (click)="confirmEditDocument()">
                         Save
@@ -664,7 +678,7 @@
                         doc.required ? 'Required' : 'Optional'
                       }}</span>
                     </td>
-                    <td>{{ departmentLabel(doc.reviewingDepartmentId) }}</td>
+                    <td>{{ checklistStageLabels[stageOf(doc)] }}</td>
                     @if (canConfigureRequirements()) {
                       <td>
                         <button type="button" class="link-btn" (click)="startEditDocument(doc)">

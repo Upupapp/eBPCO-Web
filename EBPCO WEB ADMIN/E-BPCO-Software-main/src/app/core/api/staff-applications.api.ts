@@ -89,8 +89,10 @@ interface QueueRow {
   readonly paymentVerified: boolean;
   /** Optimistic-concurrency token — threaded back as `expectedVersion` on a transition so a stale edit is refused rather than silently overwriting a decision made elsewhere in the meantime. */
   readonly version?: number;
-  /** The first of the 5 evaluation stages with no Passed row yet, or `null` once all 5 have passed. Absent from an older server; see this file's own doc comment above for the gap this closed. */
+  /** The first of this application's evaluation stages with no Passed row yet, or `null` once all have passed. Absent from an older server; see this file's own doc comment above for the gap this closed. */
   readonly evaluationStage?: string | null;
+  /** The stages this application goes through, in order — fewer than five when nothing on its checklist is checked at a stage (see `applicableStages`). Absent from an older server. */
+  readonly evaluationStages?: readonly string[];
   /** The permit a Renewal/Amendment names, verified against a real eBPCO-issued permit. `null` for New, and also null on the unverified path — see `priorPermitClaim`. Absent from an older server (053). */
   readonly renewsPermitNumber?: string | null;
   /** The permit a Renewal/Amendment names, self-reported and never verified, for a permit predating eBPCO. Absent from an older server (053). */

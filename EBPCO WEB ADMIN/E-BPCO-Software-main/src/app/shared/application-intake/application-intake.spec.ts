@@ -3,7 +3,7 @@ import { ApplicationIntake } from './application-intake';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord, withProjectedFields } from '../../core/domain/application.model';
 import { documentsFor, requirementsFor } from '../../core/domain/requirements-catalog';
-import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
+import { ALL_PERMIT_TYPES, FILEABLE_PERMIT_TYPES } from '../../core/domain/permit.model';
 import {
   DocumentProvenance, FileOnBehalfInput, FileOnBehalfResult, StaffApplicationsApi,
 } from '../../core/api/staff-applications.api';
@@ -364,7 +364,15 @@ describe('ApplicationIntake — dynamic document checklist', () => {
   );
 
   it('offers exactly the fixed permit-type list, in the required order, with no domain/category selection step', () => {
-    expect(component.permitTypeOptions).toEqual(ALL_PERMIT_TYPES);
+    expect(component.permitTypeOptions).toEqual(FILEABLE_PERMIT_TYPES);
+    // In the same order as the full list, minus the retired types only.
+    expect(ALL_PERMIT_TYPES.filter((t) => component.permitTypeOptions.includes(t))).toEqual(component.permitTypeOptions);
+  });
+
+  it('does not offer the FSEC or FSIC: the BFP issues those through BFP-FSIS', () => {
+    expect(component.permitTypeOptions).not.toContain('FSEC for Building Permit (BFP)');
+    expect(component.permitTypeOptions).not.toContain('FSIC for Occupancy Permit (BFP)');
+    expect(component.permitTypeOptions).toContain('Certificate of Occupancy');
   });
 
   it('clearing the permit type back to empty clears the checklist too', () => {

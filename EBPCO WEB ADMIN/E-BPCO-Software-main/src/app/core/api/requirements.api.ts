@@ -11,7 +11,7 @@ import { ApplicationAction } from '../domain/permit.model';
  * `PUT` replaces the *whole list* per permit type; there is no per-document
  * add/update/delete route, so a batched save is the only way to persist an
  * edit. `.strict()` server-side: sending anything beyond
- * `{code, label, description, required}` per document — a
+ * `{code, label, description, required, stage}` per document — a
  * `reviewingDepartmentId`, an `id` — 400s the entire request. There is no
  * "reviewing department" concept anywhere server-side; keep that field
  * client-only, sourced from the static requirements catalog, never sent here.
@@ -22,6 +22,13 @@ export interface RequirementDocumentDto {
   readonly label: string;
   readonly description?: string;
   readonly required: boolean;
+  /**
+   * The evaluation stage that checks it (migration 060). ALWAYS sent back on a
+   * save: the PUT replaces the whole list and a document without one is stored
+   * as Initial, so dropping it would quietly take a permit type out of the
+   * stages its documents need. Absent from an older server.
+   */
+  readonly stage?: 'Initial' | 'Zoning' | 'Fire Safety' | 'OBO';
 }
 
 export type RequirementsReadResult =

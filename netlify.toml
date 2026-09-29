@@ -29,32 +29,34 @@
   # on the login page (see the comment on EBPCO_API_BASE_URL below).
   command = "npm ci && npm run build"
 
-  # ── Always build. Do not remove without reading this. ────────────────────
+  # ── Build only when the portal changed ───────────────────────────────────
   #
-  # Every deploy from 30 Aug 23:26 to 31 Aug 12:29 was CANCELLED — fourteen
-  # commits, none published. The deploy log shows "Building: Complete" after
-  # 3.775s and Deploying/Cleanup/Post-processing all "Skipped", which is far too
-  # fast to have run `npm ci`. The build never started: Netlify decided nothing
-  # had changed.
-  #
-  # The cause is the SPACE in `base`. Netlify's default change detection for a
-  # site with a base directory compares the two commits limited to that path,
-  # and an unquoted path splits into three pathspecs that match nothing:
+  # History first, because it is why this is not Netlify's default. Every
+  # deploy from 30 Aug 23:26 to 31 Aug 12:29 was CANCELLED: fourteen commits,
+  # none published. Netlify's own change detection for a site with a base
+  # directory compares the two commits limited to that path, and the SPACE in
+  # `base` split it into three pathspecs that matched nothing:
   #
   #   git diff --quiet A B -- EBPCO WEB ADMIN/E-BPCO-Software-main
   #                            ^^^^^ ^^^ ^^^^^^^^^^^^^^^^^^^^^^^^
   #
-  # Verified against this repository: quoted reports changes between a69dcba and
-  # b87a7b5; unquoted reports none, and each of the three fragments matches zero
-  # files. `a69dcba` was the last success because it had no cached commit to
-  # compare against and so built unconditionally — then cached itself, and every
-  # build since compared against it and skipped.
+  # The fix then was `ignore = "exit 1"`: never skip. That built the portal on
+  # every push to this repository, including pushes that only touched the docs
+  # or the mobile app beside it, and every one of those spends build minutes.
   #
-  # `exit 1` means "never ignore, always build". The alternative is renaming the
-  # directory, which is a bigger change to a repository another agent also
-  # works in. A build here takes about a minute; a silently skipped deploy cost
-  # two days.
-  ignore = "exit 1"
+  # Now (29 Sep 2026) the check is done without the path. Netlify runs the
+  # ignore command FROM the base directory, so `.` is the portal itself and no
+  # space is ever parsed; `../../netlify.toml` is this file, whose changes
+  # (environment, headers) need a rebuild too. Exit 0 skips the build; anything
+  # else builds. It builds, never skips, whenever it cannot tell:
+  #
+  #   - no cached commit (the first deploy, or after the build cache is cleared);
+  #   - the cached commit IS this commit (Retry deploy, "Clear cache and deploy");
+  #   - the cached commit is not in the clone (git diff fails, exits 128).
+  #
+  # If a push that changed the portal ever shows "Canceled", this line is the
+  # first suspect: put `ignore = "exit 1"` back and deploy.
+  ignore = "test -n \"$CACHED_COMMIT_REF\" && test \"$CACHED_COMMIT_REF\" != \"$COMMIT_REF\" && git diff --quiet \"$CACHED_COMMIT_REF\" \"$COMMIT_REF\" -- . ../../netlify.toml"
 
 [build.environment]
   # Angular 22. Netlify's default image can be older than Angular requires, and

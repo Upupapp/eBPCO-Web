@@ -43,6 +43,8 @@ export interface EvaluationQueueRow {
   readonly evaluations: readonly EvaluationDecision[];
   /** `null` once every stage has a decision. */
   readonly nextStage: EvaluationStage | null;
+  /** The stages this application goes through (see `applicableStages`). Absent from an older server: all five. */
+  readonly evaluationStages?: readonly EvaluationStage[];
   readonly requiredDocumentCount: number;
   readonly attachedDocumentCount: number;
   /** Who it is waiting on (officer positions) — see `Responsibility`. Absent from an older server. */

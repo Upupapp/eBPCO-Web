@@ -606,11 +606,17 @@
       <h3>Evaluation Stage</h3>
       <ul class="status-timeline">
         @for (step of recordEvaluationSteps(); track step.stage) {
-          <li [class.done]="step.isDone || step.result === 'Passed'" [class.current]="step.isCurrent">
+          <li
+            [class.done]="step.isDone || step.result === 'Passed'"
+            [class.current]="step.isCurrent"
+            [class.skipped]="step.notNeeded"
+          >
             <span class="dot"></span>
             <span class="label">
               {{ step.stage }}
-              @if (step.result) {
+              @if (step.notNeeded) {
+                — Not needed
+              } @else if (step.result) {
                 — {{ step.result }}
               }
               @if (step.evaluatorLabel) {
@@ -705,6 +711,28 @@
           </li>
         }
       </ul>
+
+      @if (row.isCurrentStage && row.row.nextStage === 'Fire Safety') {
+        <!--
+          The Bureau of Fire Protection issues the FSEC / FSIC itself, through
+          BFP-FSIS (MC 2024-024). This stage does not re-review fire safety; it
+          confirms the clearance the applicant uploaded is real and is for
+          this project.
+        -->
+        <div class="eval-verify">
+          <h3>Fire Safety: verify the BFP clearance</h3>
+          <p>
+            The Bureau of Fire Protection issues the FSEC (building permit) and FSIC (occupancy) through its own
+            system, BFP-FSIS. Check the uploaded clearance before advancing:
+          </p>
+          <ul>
+            <li>It is an FSEC or FSIC issued by the BFP, with its control number, date and the fire marshal's signature.</li>
+            <li>The owner's name and the project location match this application.</li>
+            <li>The project it covers matches the plans filed (building, renovation or addition).</li>
+            <li>If in doubt, confirm the control number with the Castilla Fire Station.</li>
+          </ul>
+        </div>
+      }
 
       <h3>Actions</h3>
       <!--

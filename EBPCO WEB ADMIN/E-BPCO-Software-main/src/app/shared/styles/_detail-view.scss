@@ -291,6 +291,16 @@
     &.current .label {
       color: $color-brand-600;
     }
+
+    // A stage this application does not go through (nothing on its checklist is checked there).
+    &.skipped .label {
+      font-weight: 500;
+      font-style: italic;
+    }
+
+    &.skipped .dot {
+      background: $color-surface;
+    }
   }
 }
 

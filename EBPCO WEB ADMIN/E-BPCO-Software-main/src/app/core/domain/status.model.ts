@@ -203,6 +203,19 @@ export function isValidEvaluationStage(value: string): value is EvaluationStage 
   return EVALUATION_STAGE_SET.has(value);
 }
 
+/**
+ * The stages THIS application goes through, as the server reports them
+ * (`evaluationStages`, ebpco-api migration 060): Initial and Final Approval
+ * always, Zoning / Fire Safety / OBO only when a required document on its
+ * checklist is checked there — a Fencing Permit has nothing for the BFP, so
+ * it skips Fire Safety. Absent (an older server) or empty: all five, which is
+ * what every application went through before.
+ */
+export function applicableStages(stages: readonly string[] | null | undefined): EvaluationStage[] {
+  const known = (stages ?? []).filter(isValidEvaluationStage);
+  return known.length > 0 ? EVALUATION_STAGE_ORDER.filter((stage) => known.includes(stage)) : EVALUATION_STAGE_ORDER;
+}
+
 export type EvaluationResult = 'Pending' | 'Passed' | 'Revision Required' | 'Rejected';
 
 // Mirrors PaymentAssessmentStatus in

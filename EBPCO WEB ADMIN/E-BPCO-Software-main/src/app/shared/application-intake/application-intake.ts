@@ -6,7 +6,7 @@ import { ApplicationRecord } from '../../core/domain/application.model';
 import { Applicant } from '../../core/domain/applicant.model';
 import { CASTILLA_BARANGAYS } from '../../core/domain/castilla-barangays';
 import { REAL_CATEGORY_OPTIONS } from '../../core/domain/business-categories';
-import { ALL_PERMIT_TYPES, ApplicationAction, PermitType } from '../../core/domain/permit.model';
+import { ApplicationAction, FILEABLE_PERMIT_TYPES, PermitType } from '../../core/domain/permit.model';
 import { documentsFor, requirementsFor } from '../../core/domain/requirements-catalog';
 import { RequirementsConfigStore } from '../../core/domain/requirements-config-store';
 import { departmentById, departmentName } from '../../core/domain/department.model';
@@ -223,7 +223,8 @@ export class ApplicationIntake {
   // The fixed, complete 16-value permit-type list — every entry, exact
   // wording and order, nothing filtered out. There is no domain/category
   // selection step before this one; the permit type IS the full choice.
-  protected readonly permitTypeOptions = ALL_PERMIT_TYPES;
+  // Not the retired BFP types: the BFP issues those through BFP-FSIS (see RETIRED_PERMIT_TYPES).
+  protected readonly permitTypeOptions = FILEABLE_PERMIT_TYPES;
 
   protected readonly mobileExample = MOBILE_FORMAT_EXAMPLE;
   protected readonly landlineExample = LANDLINE_FORMAT_EXAMPLE;

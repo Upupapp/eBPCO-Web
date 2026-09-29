@@ -1,6 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { ALL_PERMIT_TYPES, ApplicationAction, PermitType } from './permit.model';
-import { RequirementDocument, documentsFor, requirementsFor } from './requirements-catalog';
+import {
+  RequirementDocument, departmentForStage, documentsFor, isChecklistStage, requirementsFor, stageOf,
+} from './requirements-catalog';
 import { RequirementsApi, RequirementDocumentDto } from '../api/requirements.api';
 
 export type RequirementDocumentPatch = Partial<Omit<RequirementDocument, 'id'>>;
@@ -140,7 +142,7 @@ export class RequirementsConfigStore {
    */
   addDocument(
     permitType: PermitType,
-    doc: { label: string; required: boolean; reviewingDepartmentId: string; description?: string },
+    doc: Omit<RequirementDocument, 'id'>,
     applicationAction?: ApplicationAction,
   ): RequirementDocument {
     const id = this.deriveUniqueCode(permitType, doc.label, applicationAction);
@@ -210,15 +212,21 @@ function reviewingDepartmentFor(permitType: PermitType, code: string): string {
 }
 
 function fromDto(dto: RequirementDocumentDto, permitType: PermitType): RequirementDocument {
+  // The server's stage, when it sends one, also decides the department shown:
+  // it is the real answer, where the static catalog's is a reference guess.
+  const stage = isChecklistStage(dto.stage) ? dto.stage : undefined;
   return {
     id: dto.code,
     label: dto.label,
     required: dto.required,
     description: dto.description,
-    reviewingDepartmentId: reviewingDepartmentFor(permitType, dto.code),
+    reviewingDepartmentId: stage !== undefined ? departmentForStage(stage) : reviewingDepartmentFor(permitType, dto.code),
+    ...(stage !== undefined ? { stage } : {}),
   };
 }
 
 function toDto(doc: RequirementDocument): RequirementDocumentDto {
-  return { code: doc.id, label: doc.label, description: doc.description ?? '', required: doc.required };
+  return {
+    code: doc.id, label: doc.label, description: doc.description ?? '', required: doc.required, stage: stageOf(doc),
+  };
 }

@@ -17,7 +17,9 @@ import { ALL_PERMIT_TYPES, PermitType, ReleaseMethod } from '../../core/domain/p
 import { ApplicationLifecycleStatus } from '../../core/domain/status.model';
 import { DocumentPreview } from '../../shared/document-preview/document-preview';
 import { GeneratedPermitDocumentModal } from '../../shared/generated-document/generated-permit-document-modal';
-import { requirementsFor, RequirementDocument } from '../../core/domain/requirements-catalog';
+import {
+  CHECKLIST_STAGES, CHECKLIST_STAGE_LABELS, ChecklistStage, RequirementDocument, departmentForStage, requirementsFor, stageOf,
+} from '../../core/domain/requirements-catalog';
 import { RequirementsConfigStore } from '../../core/domain/requirements-config-store';
 import { PaymentConfigStore } from '../../core/domain/payment-config-store';
 import { DEPARTMENTS, departmentName } from '../../core/domain/department.model';
@@ -261,11 +263,15 @@ export class PermitRelease implements OnInit {
   // just a full-list-replace PUT (see saveChecklist() below).
 
   protected readonly addDocumentOpen = signal(false);
-  protected newDocument = { label: '', required: true, description: '' };
+  protected newDocument: { label: string; required: boolean; description: string; stage: ChecklistStage } =
+    { label: '', required: true, description: '', stage: 'Initial' };
+  protected readonly checklistStages = CHECKLIST_STAGES;
+  protected readonly checklistStageLabels = CHECKLIST_STAGE_LABELS;
+  protected readonly stageOf = stageOf;
 
   protected startAddDocument(): void {
     if (!this.canConfigureRequirements()) return;
-    this.newDocument = { label: '', required: true, description: '' };
+    this.newDocument = { label: '', required: true, description: '', stage: 'Initial' };
     this.addDocumentOpen.set(true);
   }
 
@@ -309,7 +315,8 @@ export class PermitRelease implements OnInit {
       label,
       required: this.newDocument.required,
       description: this.newDocument.description.trim() || undefined,
-      reviewingDepartmentId: this.referenceFor(type).responsibleDepartmentId,
+      reviewingDepartmentId: departmentForStage(this.newDocument.stage),
+      stage: this.newDocument.stage,
     });
     this.checklistDirty.set(true);
     this.toast.success(`"${label}" added to the checklist. Select "Save Checklist" to publish it.`);
@@ -317,7 +324,8 @@ export class PermitRelease implements OnInit {
   }
 
   protected readonly editingDocumentId = signal<string | null>(null);
-  protected editDraft = { label: '', required: true, description: '' };
+  protected editDraft: { label: string; required: boolean; description: string; stage: ChecklistStage } =
+    { label: '', required: true, description: '', stage: 'Initial' };
 
   protected startEditDocument(doc: RequirementDocument): void {
     if (!this.canConfigureRequirements()) return;
@@ -325,6 +333,7 @@ export class PermitRelease implements OnInit {
       label: doc.label,
       required: doc.required,
       description: doc.description ?? '',
+      stage: stageOf(doc),
     };
     this.editingDocumentId.set(doc.id);
   }
@@ -349,6 +358,8 @@ export class PermitRelease implements OnInit {
       label,
       required: this.editDraft.required,
       description: this.editDraft.description.trim() || undefined,
+      stage: this.editDraft.stage,
+      reviewingDepartmentId: departmentForStage(this.editDraft.stage),
     });
     this.checklistDirty.set(true);
     this.toast.success(`"${label}" updated. Select "Save Checklist" to publish it.`);

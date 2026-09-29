@@ -13,7 +13,7 @@ import { FilterPanel } from '../../shared/filter-panel/filter-panel';
 import { ToastService } from '../../shared/toast/toast.service';
 import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
-import { EVALUATION_STAGE_ORDER, EvaluationStage } from '../../core/domain/status.model';
+import { EVALUATION_STAGE_ORDER, applicableStages, EvaluationStage } from '../../core/domain/status.model';
 import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import { Applicant } from '../../core/domain/applicant.model';
@@ -72,6 +72,8 @@ interface RecordEvalStep {
   evaluatorLabel: string | null;
   isCurrent: boolean;
   isDone: boolean;
+  /** Nothing on this application's checklist is checked at this stage, so it skips it (a Fencing Permit has nothing for Fire Safety). */
+  notNeeded: boolean;
 }
 
 // The server sends raw ISO timestamps. Mirrors applications.ts's own
@@ -426,6 +428,7 @@ export class Evaluations implements OnInit {
     const row = this.selectedRow();
     if (!row) return [];
     const decisions = row.row.evaluations;
+    const applicable = applicableStages(row.row.evaluationStages);
     return EVALUATION_STAGE_ORDER.map((stage) => {
       const stageDecisions = decisions.filter((d) => d.stage === stage);
       const latest =
@@ -438,6 +441,7 @@ export class Evaluations implements OnInit {
         evaluatorLabel: latest?.evaluatedAt ? formatDateTime(latest.evaluatedAt) : null,
         isCurrent: stage === row.row.nextStage,
         isDone: latest?.result === 'Passed',
+        notNeeded: !applicable.includes(stage),
       };
     });
   });

@@ -18,6 +18,7 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import {
   ApplicationLifecycleStatus,
+  applicableStages,
   EVALUATION_STAGE_ORDER,
   LIFECYCLE_SEQUENCE,
   canTransition,
@@ -879,15 +880,24 @@ export class Applications {
   protected readonly evaluationsComplete = computed(() => {
     const evaluations = this.realDetail()?.evaluations ?? [];
     const passed = new Set(evaluations.filter((e) => e.result === 'Passed').map((e) => e.stage));
-    return EVALUATION_STAGE_ORDER.every((stage) => passed.has(stage));
+    return this.evaluationStages().every((stage) => passed.has(stage));
   });
 
-  /** How many of the five stages have PASSED — the same count the server's `evaluations-complete` precondition is built on. */
+  /** The stages this application goes through — fewer than five when its checklist has nothing for a stage (a Fencing Permit skips Fire Safety). */
+  protected readonly evaluationStages = computed(() => applicableStages(this.realDetail()?.summary?.evaluationStages));
+
+  /** How many of ITS stages have PASSED — the same count the server's `evaluations-complete` precondition is built on. */
   protected readonly evaluationStagesPassed = computed(() => {
+    const stages = this.evaluationStages();
     const evaluations = this.realDetail()?.evaluations ?? [];
-    return new Set(evaluations.filter((e) => e.result === 'Passed').map((e) => e.stage)).size;
+    return new Set(evaluations.filter((e) => e.result === 'Passed' && stages.some((s) => s === e.stage)).map((e) => e.stage)).size;
   });
-  protected readonly evaluationStageTotal = EVALUATION_STAGE_ORDER.length;
+  protected readonly evaluationStageTotal = computed(() => this.evaluationStages().length);
+  /** The stages it skips, named, so "3 of 4" is not read as a missing stage. */
+  protected readonly evaluationStagesSkipped = computed(() => {
+    const stages = this.evaluationStages();
+    return EVALUATION_STAGE_ORDER.filter((stage) => !stages.includes(stage));
+  });
 
   protected readonly canAssessFee = computed(() => {
     const row = this.selectedRow();
