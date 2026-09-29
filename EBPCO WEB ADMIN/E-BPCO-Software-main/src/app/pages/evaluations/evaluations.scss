@@ -28,6 +28,24 @@
   color: $color-ink-600;
 }
 
+// Preview and Accept side by side in the record's documents table.
+.doc-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-outline.accept {
+  border-color: $color-success-bg;
+  color: $color-success;
+
+  &:hover:not(:disabled) {
+    background: $color-success-bg-soft;
+    border-color: $color-success;
+    color: $color-success;
+  }
+}
+
 .menu-blocked-reason {
   max-width: 17rem;
   line-height: 1.4;

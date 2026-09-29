@@ -672,11 +672,23 @@
                   >
                 </td>
                 <td>
-                  @if (r.doc) {
-                    <button type="button" class="btn-outline" (click)="openDocPreview(r)">
-                      Preview
-                    </button>
-                  }
+                  <div class="doc-row-actions">
+                    @if (r.doc) {
+                      <button type="button" class="btn-outline" (click)="openDocPreview(r)">
+                        Preview
+                      </button>
+                    }
+                    @if (r.doc && r.isReal && r.doc.status !== 'Accepted' && row.isCurrentStage && mayDecideOn(row)) {
+                      <button
+                        type="button"
+                        class="btn-outline accept"
+                        [disabled]="acceptingDocId() !== null"
+                        (click)="acceptDocument(r)"
+                      >
+                        {{ acceptingDocId() === r.doc.id ? 'Accepting…' : 'Accept' }}
+                      </button>
+                    }
+                  </div>
                 </td>
               </tr>
             } @empty {
@@ -739,6 +751,10 @@
             <li>The project it covers matches the plans filed (building, renovation or addition).</li>
             <li>If in doubt, confirm the control number with the Castilla Fire Station.</li>
           </ul>
+          <p>
+            When it checks out, <strong>Accept</strong> it in the documents above; the stage cannot be passed before.
+            If it does not, return the application for revision and say what is wrong.
+          </p>
         </div>
       }
 

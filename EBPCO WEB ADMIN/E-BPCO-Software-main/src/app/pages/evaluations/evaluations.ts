@@ -537,6 +537,36 @@ export class Evaluations implements OnInit {
 
   private previewToken = 0;
 
+  /** The document being accepted from the record. */
+  protected readonly acceptingDocId = signal<string | null>(null);
+
+  /**
+   * Accepts one document from the record. A stage passes only when the
+   * required documents it checks are accepted (the server refuses otherwise),
+   * so the officer deciding it accepts them here rather than on another screen.
+   */
+  protected async acceptDocument(r: RecordDocumentRow): Promise<void> {
+    const row = this.selectedRow();
+    if (!row || !r.doc || !r.isReal || this.acceptingDocId() !== null) return;
+    this.acceptingDocId.set(r.doc.id);
+    try {
+      const result = await this.applicationsApi.reviewDocument(row.id, r.doc.id, 'Accepted');
+      if (result.kind !== 'done') {
+        this.toast.error(`Could not accept "${r.label}": ${
+          result.kind === 'unavailable' ? 'this server cannot record document reviews yet' : result.message}`);
+        return;
+      }
+      this.toast.success(`"${r.label}" accepted.`);
+      const detail = await this.applicationsApi.detail(row.id);
+      if (detail.kind === 'ok' && this.lastRecordDocAppId === row.id) {
+        this.recordRealDocuments.set([...detail.detail.documents]);
+        this.recordRealTimeline.set([...detail.detail.timeline]);
+      }
+    } finally {
+      this.acceptingDocId.set(null);
+    }
+  }
+
   protected openDocPreview(r: RecordDocumentRow): void {
     if (!r.doc) return;
     const token = ++this.previewToken;
