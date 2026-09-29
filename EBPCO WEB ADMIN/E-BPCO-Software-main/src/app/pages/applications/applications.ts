@@ -1844,8 +1844,8 @@ export class Applications {
     }
     const actor = this.session.name() || 'Staff';
     const rows = this.documentRows().filter((r) => r.doc && ids.has(r.requirementId));
-    if (rows.some((r) => r.isReal) && !this.canAttachDocuments()) {
-      this.toast.error('Only Records Officers and Super Admins can review a document on this application.');
+    if (rows.some((r) => r.isReal) && !this.canReviewDocuments()) {
+      this.toast.error(this.reviewBlockedReason() ?? 'You cannot review documents on this application.');
       this.closeDocActionMenu();
       return;
     }
@@ -1886,8 +1886,8 @@ export class Applications {
         this.toast.error(`"${status}" is not a real staff verdict — only Under Review, Accepted, Rejected, or Revision Required can be recorded.`);
         return;
       }
-      if (!this.canAttachDocuments()) {
-        this.toast.error('Only Records Officers and Super Admins can review a document on this application.');
+      if (!this.canReviewDocuments()) {
+        this.toast.error(this.reviewBlockedReason() ?? 'You cannot review documents on this application.');
         return;
       }
       const result = await this.applicationsApi.reviewDocument(row.id, r.doc.id, status, remarks);
@@ -1918,6 +1918,24 @@ export class Applications {
     // Silence, not denial (see Capabilities' own doc comment on this
     // distinction) — fall back to the one portal role known to carry it.
     return current.role === 'Super Admin' || current.role === 'Administrator';
+  });
+
+  /**
+   * Whether this officer may give a verdict on a document (Accept, Request
+   * Revision, Reject) — separate from attaching one (2026-09-30). Since teams
+   * (ebpco-api 062) the server lets the team whose step the application is at
+   * review its documents, as well as the Records Officer: an Initial Evaluator
+   * checks the documents of an application at the Initial step, and cannot
+   * move it on until they have. This button used to follow
+   * `canAttachDocuments`, so an evaluator never could.
+   */
+  protected readonly canReviewDocuments = computed(() => this.canAttachDocuments() || this.work().canWork);
+
+  /** Why the verdict buttons are off, in one sentence — or null when they are on. */
+  protected readonly reviewBlockedReason = computed<string | null>(() => {
+    if (this.canReviewDocuments()) return null;
+    return this.work().reason
+      ?? 'Only the team this application is waiting on (or the Records Officer) can review its documents.';
   });
 
   /** Attaches a first file for a still-Missing required/optional document. Real (`POST /documents`) for a real application; local-only mock otherwise. */

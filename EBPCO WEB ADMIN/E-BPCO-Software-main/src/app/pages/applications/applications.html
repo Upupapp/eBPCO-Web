@@ -768,8 +768,8 @@
                       <button
                         type="button"
                         role="menuitem"
-                        [disabled]="!!realDetail() && !canAttachDocuments()"
-                        [title]="!!realDetail() && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
+                        [disabled]="!!realDetail() && !canReviewDocuments()"
+                        [title]="!!realDetail() ? (reviewBlockedReason() ?? '') : ''"
                         (click)="markSelectedDocsAccepted()"
                       >
                         <app-icon name="check-circle" [size]="14" />
@@ -804,13 +804,13 @@
               </ul>
             </details>
 
-            @if (editing() && !!realDetail() && !canAttachDocuments()) {
+            @if (editing() && !!realDetail() && !canReviewDocuments()) {
               <!-- The review buttons below are disabled for this role. They used
                    to look exactly like enabled ones, with the reason only in a
                    hover tooltip (found 2026-09-28, an Initial Evaluator trying
                    to accept a replaced plan). Say it on the page. -->
               <p class="doc-review-note" role="note">
-                Only the Records Officer (or the Super Admin) can accept, send back or reject a document.
+                {{ reviewBlockedReason() }}
                 You can preview every file here.
               </p>
             } @else if (editing()) {
@@ -923,8 +923,8 @@
                             <button
                               type="button"
                               class="preview-btn"
-                              [disabled]="r.isReal && !canAttachDocuments()"
-                              [title]="r.isReal && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
+                              [disabled]="r.isReal && !canReviewDocuments()"
+                              [title]="r.isReal ? (reviewBlockedReason() ?? '') : ''"
                               (click)="setDocStatus(r, 'Under Review')"
                             >
                               Mark Under Review
@@ -934,8 +934,8 @@
                             <button
                               type="button"
                               class="preview-btn"
-                              [disabled]="r.isReal && !canAttachDocuments()"
-                              [title]="r.isReal && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
+                              [disabled]="r.isReal && !canReviewDocuments()"
+                              [title]="r.isReal ? (reviewBlockedReason() ?? '') : ''"
                               (click)="setDocStatus(r, 'Accepted')"
                             >
                               Accept
@@ -943,8 +943,8 @@
                             <button
                               type="button"
                               class="preview-btn danger-text"
-                              [disabled]="r.isReal && !canAttachDocuments()"
-                              [title]="r.isReal && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
+                              [disabled]="r.isReal && !canReviewDocuments()"
+                              [title]="r.isReal ? (reviewBlockedReason() ?? '') : ''"
                               (click)="setDocStatus(r, 'Revision Required')"
                             >
                               Request Revision
@@ -952,8 +952,8 @@
                             <button
                               type="button"
                               class="preview-btn danger-text"
-                              [disabled]="r.isReal && !canAttachDocuments()"
-                              [title]="r.isReal && !canAttachDocuments() ? 'Only Records Officers and Super Admins can review a document on this application.' : ''"
+                              [disabled]="r.isReal && !canReviewDocuments()"
+                              [title]="r.isReal ? (reviewBlockedReason() ?? '') : ''"
                               (click)="setDocStatus(r, 'Rejected')"
                             >
                               Reject
