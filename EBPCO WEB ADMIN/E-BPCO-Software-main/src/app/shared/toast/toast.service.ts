@@ -44,8 +44,18 @@ export class ToastService {
   private push(tone: ToastTone, text: string): void {
     const id = this.nextId++;
     this._toasts.update((list) => [...list, { id, tone, text }]);
-    // Errors stay up longer — that text is usually longer and more
-    // important to actually finish reading than a short confirmation.
-    setTimeout(() => this.dismiss(id), tone === 'error' ? 6000 : 4000);
+    setTimeout(() => this.dismiss(id), toastDuration(tone, text));
   }
+}
+
+/**
+ * Long enough to read. A fixed 4s (6s for an error) took a reason such as
+ * "Review the documents the Initial stage checks before passing it: …" away
+ * before it was read. About a quarter of a second a word on top of the old
+ * floor, which errors keep higher, up to 15s.
+ */
+export function toastDuration(tone: ToastTone, text: string): number {
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const floor = tone === 'error' ? 6_000 : 4_000;
+  return Math.min(15_000, Math.max(floor, 1_500 + words * 280));
 }
