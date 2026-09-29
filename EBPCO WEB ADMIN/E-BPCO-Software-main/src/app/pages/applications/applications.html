@@ -100,10 +100,12 @@
           stays visible, filterable and auditable. The button said Delete, so
           an officer clicking it believed the record had been destroyed.
         -->
-        <button type="button" class="btn-outline archive" (click)="requestDeleteSelected()">
-          <app-icon name="archive" [size]="14" />
-          Archive
-        </button>
+        @if (canArchiveApplications()) {
+          <button type="button" class="btn-outline archive" (click)="requestDeleteSelected()">
+            <app-icon name="archive" [size]="14" />
+            Archive
+          </button>
+        }
       </div>
     }
 
@@ -263,15 +265,17 @@
                       </button>
                     }
                   }
-                  <button
-                    type="button"
-                    class="icon-btn archive"
-                    [attr.aria-label]="'Archive application ' + row.id"
-                    title="Archive — set aside, kept on record, restorable"
-                    (click)="requestDelete(row)"
-                  >
-                    <app-icon name="archive" [size]="15" />
-                  </button>
+                  @if (canArchiveApplications()) {
+                    <button
+                      type="button"
+                      class="icon-btn archive"
+                      [attr.aria-label]="'Archive application ' + row.id"
+                      title="Archive — set aside, kept on record, restorable"
+                      (click)="requestDelete(row)"
+                    >
+                      <app-icon name="archive" [size]="15" />
+                    </button>
+                  }
                 </div>
               </td>
             </tr>
@@ -373,8 +377,8 @@
               <app-icon name="download" [size]="14" />
               Export Application
             </button>
-            @if (editing()) {
-              <button type="button" role="menuitem" class="danger" (click)="deleteFromDetail()">
+            @if (editing() && canArchiveApplications()) {
+              <button type="button" role="menuitem" class="archive" (click)="deleteFromDetail()">
                 <app-icon name="archive" [size]="14" />
                 Archive Application
               </button>
@@ -1198,8 +1202,8 @@
               <app-icon name="download" [size]="14" />
               Export Application
             </button>
-            @if (editing()) {
-              <button type="button" role="menuitem" class="danger" (click)="deleteFromDetail()">
+            @if (editing() && canArchiveApplications()) {
+              <button type="button" role="menuitem" class="archive" (click)="deleteFromDetail()">
                 <app-icon name="archive" [size]="14" />
                 Archive Application
               </button>

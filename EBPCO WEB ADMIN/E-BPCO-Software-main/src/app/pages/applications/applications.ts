@@ -376,6 +376,11 @@ export class Applications {
       if (result.kind === 'done') {
         this.toast.success(result.detail);
         await this.loader.reload();
+        // The open record is a snapshot of its row: take the fresh one, or the
+        // team bar keeps saying "Unassigned" beside a toast saying "yours now".
+        const refreshed = this.store.getById(row.id);
+        if (refreshed) this.selectedRow.set(refreshed);
+        this.assignTo = refreshed?.responsibility?.assignee?.id ?? '';
       } else if (result.kind === 'unavailable') {
         this.toast.error('This server does not support team assignment yet.');
       } else {
@@ -410,10 +415,24 @@ export class Applications {
     if (r.awaitingApplicant) return 'The applicant';
     if (r.holder === null) return 'Nobody — this application is closed';
     const names = assignedOfficerNames(r);
-    return names === ''
-      ? `${r.holder} — no officer assigned yet, so only a super admin can act`
-      : `${names} (${r.holder})`;
+    if (names === '') return `${r.holder} — no officer assigned yet, so only a super admin can act`;
+    // Teams (ebpco-api 062): name who HAS it, then the team. Listing the whole
+    // team as "Assigned To" read as if every member had it, beside a card
+    // saying it was unassigned.
+    if (r.team !== undefined) {
+      const team = r.officers.map((o) => (o.lead ? `${o.name} (lead)` : o.name)).join(', ');
+      return r.assignee
+        ? `${r.assignee.name} — ${r.holder} team: ${team}`
+        : `Unassigned — any of the ${r.holder} team can take it: ${team}`;
+    }
+    return `${names} (${r.holder})`;
   }
+
+  /** Whether this officer may archive applications (the Records Officer, a super admin) — the server's own rule. */
+  protected readonly canArchiveApplications = computed(() => {
+    const who = this.session.authority();
+    return who !== null && ACTION_PERMISSIONS.archiveApplication(who);
+  });
 
   constructor() {
     // This page is the only one that overwrites the browser tab title with a

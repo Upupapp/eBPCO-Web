@@ -56,6 +56,15 @@
         background: $color-danger-bg-soft;
       }
     }
+
+    // Archiving: amber, a filing box — kept and restorable, not a delete.
+    &.archive {
+      color: $color-warning;
+
+      &:hover {
+        background: $color-warning-bg-soft;
+      }
+    }
   }
 
   .menu-empty-note {
@@ -113,6 +122,15 @@
 
       &:hover {
         background: $color-danger-bg-soft;
+      }
+    }
+
+    // Archiving: amber, a filing box — kept and restorable, not a delete.
+    &.archive {
+      color: $color-warning;
+
+      &:hover {
+        background: $color-warning-bg-soft;
       }
     }
   }

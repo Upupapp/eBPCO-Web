@@ -124,8 +124,12 @@
 // wrapping — every other column in `_data-table.scss`'s shared `td` rule
 // is `white-space: nowrap` by design, so this is a deliberate, scoped
 // override rather than a fight with the shared partial.
-.reason-cell {
+// `tbody td.reason-cell`, not `.reason-cell`: the shared partial's `tbody td`
+// (nowrap) is scoped by Angular too, and outranked the bare class — a long
+// reason ran on one line and pushed the Restore buttons off the table.
+tbody td.reason-cell {
   white-space: normal;
+  min-width: 12rem;
   max-width: 320px;
 }
 
@@ -219,4 +223,11 @@
   height: 1px;
   overflow: hidden;
   clip: rect(0 0 0 0);
+}
+
+// Seven kinds do not fit on one line at a laptop width: wrap rather than
+// hide the last ones behind a sideways scroll.
+.tab-nav {
+  flex-wrap: wrap;
+  row-gap: 0.35rem;
 }
