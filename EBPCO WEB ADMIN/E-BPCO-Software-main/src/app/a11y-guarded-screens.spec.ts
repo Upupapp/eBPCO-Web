@@ -9,6 +9,7 @@ import { routes } from './app.routes';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Applications } from './pages/applications/applications';
 import { Evaluations } from './pages/evaluations/evaluations';
+import { Teams } from './pages/teams/teams';
 import { Payments } from './pages/payments/payments';
 import { PermitRelease } from './pages/permit-release/permit-release';
 import { Businesses } from './pages/businesses/businesses';
@@ -56,6 +57,7 @@ const SCREENS: ReadonlyArray<{ route: string; component: unknown }> = [
   { route: 'applications/:id', component: Applications },
   { route: 'applications/:id/edit', component: Applications },
   { route: 'evaluations', component: Evaluations },
+  { route: 'teams', component: Teams },
   { route: 'payments', component: Payments },
   { route: 'permit-release', component: PermitRelease },
   { route: 'businesses', component: Businesses },
