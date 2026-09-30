@@ -19,7 +19,7 @@ import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import { Applicant } from '../../core/domain/applicant.model';
 import { DocumentStatus } from '../../core/domain/document.model';
-import { requirementsFor } from '../../core/domain/requirements-catalog';
+import { ChecklistStage, requirementsFor, stageOf } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 import { Capabilities } from '../../core/session/capabilities';
 import { SessionService } from '../../core/session/session.service';
@@ -62,6 +62,8 @@ interface RecordDocumentRow {
   label: string;
   required: boolean;
   departmentName: string;
+  /** The evaluation stage that checks it: only that stage accepts it. */
+  stage: ChecklistStage;
   /** `id`/`contentType` are only ever known for a real (`isReal`) document — the local demo store never recorded either, since no local-demo document has real bytes behind it. */
   doc: { id: string; fileName: string; status: DocumentStatus; uploadedAt: string; contentType?: string } | null;
   isReal: boolean;
@@ -130,6 +132,18 @@ export class Evaluations implements OnInit {
   protected readonly capabilities = inject(Capabilities);
   protected readonly formatDateTime = formatDateTime;
   private readonly session = inject(SessionService);
+
+  /**
+   * Whether Accept is offered on this document here: at the stage that checks
+   * it. The server refuses an evaluator accepting another stage's document
+   * (the Initial Evaluator could accept the fire clearance, and Fire Safety
+   * then had nothing to check); a super admin and Records are not limited.
+   */
+  protected acceptsHere(r: RecordDocumentRow): boolean {
+    const who = this.session.authority();
+    if (who?.superAdmin || who?.scopes === null || who?.scopes.includes('applications:write')) return true;
+    return r.stage === this.openStage();
+  }
 
   /** The evaluation stage of the card that is open, or null on the card list. */
   protected readonly openStage = computed(() => {
@@ -451,6 +465,7 @@ export class Evaluations implements OnInit {
           label: req.label,
           required: req.required,
           departmentName: departmentName(req.reviewingDepartmentId),
+          stage: stageOf(req),
           doc: found
             ? {
                 id: found.id, fileName: found.fileName, status: found.reviewStatus ?? 'Uploaded',
@@ -468,6 +483,7 @@ export class Evaluations implements OnInit {
       label: req.label,
       required: req.required,
       departmentName: departmentName(req.reviewingDepartmentId),
+      stage: stageOf(req),
       doc: byRequirement.get(req.id) ?? null,
       isReal: false,
     }));

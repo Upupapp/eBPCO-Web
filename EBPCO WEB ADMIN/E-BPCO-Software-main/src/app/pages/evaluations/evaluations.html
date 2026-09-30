@@ -681,7 +681,7 @@
                         Preview
                       </button>
                     }
-                    @if (r.doc && r.isReal && r.doc.status !== 'Accepted' && row.isCurrentStage && mayDecideOn(row)) {
+                    @if (r.doc && r.isReal && r.doc.status !== 'Accepted' && row.isCurrentStage && mayDecideOn(row) && acceptsHere(r)) {
                       <button
                         type="button"
                         class="btn-outline accept"
