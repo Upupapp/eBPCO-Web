@@ -860,7 +860,7 @@ export class Evaluations implements OnInit {
     });
     if (result.kind === 'done') {
       this.revisionRemarks.set('');
-      this.toast.success(`${row.applicant}'s application returned for revision.`);
+      this.toast.success(`${row.applicant}'s application went back to them for revision, with your remarks.`);
       await this.loadQueue();
       this.refreshRecordViewAfter(row.id);
     } else {
