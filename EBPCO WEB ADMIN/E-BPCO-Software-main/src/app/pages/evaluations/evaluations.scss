@@ -28,6 +28,31 @@
   color: $color-ink-600;
 }
 
+// The long document and office names wrap, and the office sits under the
+// document's name, so Preview and Accept stay on screen instead of past the
+// table's right edge. It sits in the narrow summary card, so it is spared the
+// list tables' 900px minimum.
+.detail-table.record-docs {
+  min-width: 0;
+}
+
+.detail-table.record-docs td.wrap {
+  white-space: normal;
+  min-width: 11rem;
+  line-height: 1.35;
+
+  &.date {
+    min-width: 6.5rem;
+  }
+}
+
+.doc-department {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.74rem;
+  color: $color-ink-300;
+}
+
 // Preview and Accept side by side in the record's documents table.
 .doc-row-actions {
   display: flex;
