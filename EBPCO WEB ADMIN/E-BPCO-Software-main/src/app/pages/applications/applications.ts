@@ -241,6 +241,16 @@ export class Applications {
 
   protected formatDateTime = formatDateTime;
   protected formatDate = formatDate;
+
+  /**
+   * The word on the status pill: the coarse status, except that a withdrawal
+   * says Cancelled and a lapsed application Expired. Both file under Rejected
+   * for filters and counts, but "Rejected" told staff the Municipality had
+   * turned down an application the citizen withdrew (live pass, 2026-09-30).
+   */
+  protected pillLabel(row: { status: string; lifecycleStatus: string }): string {
+    return row.lifecycleStatus === 'Cancelled' || row.lifecycleStatus === 'Expired' ? row.lifecycleStatus : row.status;
+  }
   protected formatDocDate = formatDocDate;
 
   /** Null until the first fetch resolves; a message when it fails. */

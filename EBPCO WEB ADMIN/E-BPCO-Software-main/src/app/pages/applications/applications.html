@@ -226,7 +226,7 @@
                   <span class="status-pill info">Draft</span>
                 } @else {
                   <span class="status-pill" [class]="row.status.toLowerCase().replace(/\s+/g, '-')">{{
-                    row.status
+                    pillLabel(row)
                   }}</span>
                 }
               </td>
@@ -500,7 +500,7 @@
           <p class="applicant-reference">{{ detail.meta.referenceNumber }}</p>
         }
         <span class="status-pill" [class]="detail.row.status.toLowerCase().replace(/\s+/g, '-')">{{
-          detail.row.status
+          pillLabel(detail.row)
         }}</span>
 
         <dl class="info-list">
@@ -1226,7 +1226,7 @@
       <div class="info-header-title-row">
         <h2>{{ detail.row.applicant }}</h2>
         <span class="status-pill" [class]="detail.row.status.toLowerCase().replace(/\s+/g, '-')">{{
-          detail.row.status
+          pillLabel(detail.row)
         }}</span>
       </div>
       <!-- The raw id used to sit IN the name ("9433ae6d-... - Michaela Cailinf")
