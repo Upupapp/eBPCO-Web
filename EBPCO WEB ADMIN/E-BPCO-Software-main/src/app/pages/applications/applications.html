@@ -940,6 +940,7 @@
                             </button>
                           }
                           @if (r.doc.status === 'Under Review') {
+                            @if (acceptsHere(r)) {
                             <button
                               type="button"
                               class="preview-btn"
@@ -949,6 +950,7 @@
                             >
                               Accept
                             </button>
+                            }
                             <button
                               type="button"
                               class="preview-btn danger-text"

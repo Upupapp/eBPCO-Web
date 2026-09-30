@@ -42,7 +42,7 @@ import {
   DocumentStatus,
   UNRESOLVED_DOCUMENT_STATUSES,
 } from '../../core/domain/document.model';
-import { requirementsFor } from '../../core/domain/requirements-catalog';
+import { ChecklistStage, requirementsFor, stageOf } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 import {
   AppRow,
@@ -79,6 +79,8 @@ interface DocumentRow {
   label: string;
   required: boolean;
   departmentName: string;
+  /** The evaluation stage that checks it: only that stage accepts it. */
+  stage: ChecklistStage;
   /** `contentType` is only ever known for a real (`isReal`) document — the local demo store never recorded one, since no local-demo document has real bytes to describe. */
   doc: {
     id: string; fileName: string; status: DocumentStatus; remarks: string | null; uploadedAt: string; contentType?: string;
@@ -248,6 +250,20 @@ export class Applications {
    * for filters and counts, but "Rejected" told staff the Municipality had
    * turned down an application the citizen withdrew (live pass, 2026-09-30).
    */
+  /**
+   * Whether Accept is offered on this document now: while the application is
+   * at the stage that checks it (the document check counts as Initial). The
+   * server refuses the rest, so an Initial Evaluator cannot accept the fire
+   * clearance for Fire Safety; a super admin and Records are not limited.
+   */
+  protected acceptsHere(r: DocumentRow): boolean {
+    const who = this.session.authority();
+    if (who?.superAdmin || who?.scopes === null || who?.scopes.includes('applications:write')) return true;
+    const row = this.selectedRow();
+    const current = row?.lifecycleStatus === 'Document Verification' ? 'Initial' : row?.responsibility?.stage ?? null;
+    return current === null || r.stage === current;
+  }
+
   protected pillLabel(row: { status: string; lifecycleStatus: string }): string {
     return row.lifecycleStatus === 'Cancelled' || row.lifecycleStatus === 'Expired' ? row.lifecycleStatus : row.status;
   }
@@ -1778,6 +1794,7 @@ export class Applications {
           label: req.label,
           required: req.required,
           departmentName: departmentName(req.reviewingDepartmentId),
+          stage: stageOf(req),
           isReal: true,
           doc: found
             ? {
@@ -1804,6 +1821,7 @@ export class Applications {
         label: req.label,
         required: req.required,
         departmentName: departmentName(req.reviewingDepartmentId),
+          stage: stageOf(req),
         isReal: false,
         doc: doc && { id: doc.id, fileName: doc.fileName, status: doc.status, remarks: doc.remarks, uploadedAt: doc.uploadedAt },
       };
