@@ -265,7 +265,12 @@
               (keydown.enter)="openDetail(row)"
               (keydown.space)="$event.preventDefault(); openDetail(row)"
             >
-              <td class="id-cell">{{ row.id }}</td>
+              <td class="id-cell">
+                {{ row.id }}
+                @if (row.referenceNumber) {
+                  <span class="id-reference">{{ row.referenceNumber }}</span>
+                }
+              </td>
               <td>
                 <div class="identity-cell">
                   <app-avatar [name]="row.applicant" [size]="30" />

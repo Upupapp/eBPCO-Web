@@ -136,6 +136,9 @@
                 >
                   {{ row.id }}
                 </button>
+                @if (row.referenceNumber) {
+                  <span class="id-reference">{{ row.referenceNumber }}</span>
+                }
               </td>
                 <td>
                   <div class="identity-cell">
@@ -210,7 +213,7 @@
     </section>
   } @else if (view() === 'detail' && selectedRow(); as row) {
     <div class="detail-head">
-      <h1>{{ row.id }}</h1>
+      <h1>{{ row.referenceNumber || row.id }}</h1>
       <div class="header-actions">
         <span class="status-pill" [class]="row.displayStatus.toLowerCase().replace(/\s+/g, '-')">{{
           row.displayStatus
@@ -265,8 +268,8 @@
             <span>Approval Status</span>
           </div>
           <div>
-            <strong>{{ row.id }}</strong>
-            <span>Application ID</span>
+            <strong>{{ row.referenceNumber || row.id }}</strong>
+            <span>{{ row.referenceNumber ? 'Reference Number' : 'Application ID' }}</span>
           </div>
         </div>
       </div>
@@ -483,7 +486,7 @@
       <tbody>
         @for (row of printRows(); track row.id) {
           <tr>
-            <td>{{ row.id }}</td>
+            <td>{{ row.referenceNumber || row.id }}</td>
             <td>{{ row.applicant }}</td>
             <td>{{ row.businessName || 'Not provided' }}</td>
             <td>{{ row.city }}</td>

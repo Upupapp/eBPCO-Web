@@ -251,7 +251,7 @@
                   }}</span>
                 </div>
               </td>
-              <td class="muted">{{ app.id }}</td>
+              <td class="muted">{{ app.referenceNumber ?? app.id }}</td>
               <td>{{ app.permitType }}</td>
               <td>{{ app.location }}</td>
               <td>
@@ -334,7 +334,7 @@
                   <span class="note-pin" aria-hidden="true"></span>
                   <span class="note-name">{{ app.applicant }}</span>
                   <span class="note-business">{{ app.businessName }}</span>
-                  <span class="note-id">{{ app.id }}</span>
+                  <span class="note-id">{{ app.referenceNumber ?? app.id }}</span>
                   <span class="note-type">{{ app.permitType }}</span>
                 </button>
               }

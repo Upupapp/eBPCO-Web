@@ -142,13 +142,15 @@ describe('the renamed Staff & Roles module', () => {
 // identity/domain/account.ts), copied rather than invented, so each test asks
 // "would the server accept this officer's request?".
 
+// Every position reads every application, its documents and payments (2026-09-30).
+const SIGHT = ['applications:read', 'documents:read', 'payments:read'] as const;
 const SCOPES = {
-  receiving: ['applications:read', 'documents:read', 'staff:receive', 'staff:annotate', 'citizens:read'],
-  evaluator: ['applications:read', 'documents:read', 'staff:evaluate', 'staff:annotate'],
-  assessor: ['applications:read', 'payments:read', 'staff:assess', 'staff:annotate'],
-  cashier: ['applications:read', 'payments:read', 'staff:verify-payment', 'staff:annotate'],
-  administrator: ['staff:administer', 'citizens:read'],
-  auditor: ['applications:read', 'documents:read', 'payments:read', 'audit:read'],
+  receiving: [...SIGHT, 'staff:receive', 'staff:annotate', 'citizens:read'],
+  evaluator: [...SIGHT, 'staff:evaluate', 'staff:annotate'],
+  assessor: [...SIGHT, 'staff:assess', 'staff:annotate'],
+  cashier: [...SIGHT, 'staff:verify-payment', 'staff:annotate'],
+  administrator: [...SIGHT, 'staff:administer', 'citizens:read'],
+  auditor: [...SIGHT, 'audit:read'],
 } as const;
 
 const officer = (
@@ -172,11 +174,13 @@ describe('officer positions — which screens an officer sees', () => {
     ]);
   });
 
-  it('an Administrator manages staff and citizens but holds no application scope, so Applications stays hidden', () => {
+  it('an Administrator manages staff and citizens, and views applications like every officer', () => {
     const keys = opens(officer(SCOPES.administrator, null, 'Administrator'));
     expect(keys).toContain('user-roles');
     expect(keys).toContain('workflow');
-    expect(keys).not.toContain('applications');
+    expect(keys).toContain('applications');
+    // Viewing is not deciding: no evaluation, payment or release screens.
+    expect(keys).not.toContain('evaluations');
     // The owner's ruling: approving access requests is the super admin's alone.
     expect(keys).not.toContain('access-requests');
   });

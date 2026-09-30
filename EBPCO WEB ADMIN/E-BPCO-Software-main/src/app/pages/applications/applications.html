@@ -333,8 +333,10 @@
           </div>
         </ng-template>
       </div>
-      <button type="button" class="btn-primary" (click)="openEvaluations()">Evaluate</button>
-      @if (canEditAssessment()) {
+      @if (canOpenEvaluations()) {
+        <button type="button" class="btn-primary" (click)="openEvaluations()">Evaluate</button>
+      }
+      @if (canEditAssessment() || canVerifyPayment()) {
         <button type="button" class="btn-primary" (click)="openPaymentAssessment()">Payment</button>
       }
       <button type="button" class="btn-outline" (click)="viewCurrent()">

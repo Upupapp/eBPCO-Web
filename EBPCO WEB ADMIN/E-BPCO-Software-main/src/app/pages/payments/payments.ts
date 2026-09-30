@@ -184,6 +184,16 @@ export class Payments {
     const role = this.session.authority();
     return !!role && ACTION_PERMISSIONS.recordPayment(role);
   });
+  /**
+   * Whether the signed-in officer drafted or submitted this assessment. They may
+   * not approve it (the server refuses a self-approval), so Approve is not
+   * offered to them.
+   */
+  protected preparedByMe(assessment: { createdBy: string; submittedBy: string | null }): boolean {
+    const me = this.session.accountId();
+    return me !== null && (assessment.createdBy === me || assessment.submittedBy === me);
+  }
+
   protected readonly canVerifyPayment = computed(() => {
     const role = this.session.authority();
     return !!role && ACTION_PERMISSIONS.verifyPayment(role);

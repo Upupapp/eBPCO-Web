@@ -169,10 +169,17 @@
               </button>
             }
             @if (assessment.status === 'Submitted' && canApproveAssessment()) {
-              <button type="button" class="btn-primary" [disabled]="workspaceWorking()" (click)="approveWorkspaceAssessment()">
-                Approve
-              </button>
-              <p class="muted-sub">A different officer from the one who drafted or submitted this must approve it — the server refuses a self-approval.</p>
+              @if (preparedByMe(assessment)) {
+                <p class="muted-sub">
+                  You prepared this assessment, so another assessor approves it — your team lead or a colleague on the
+                  Assessment team. The same officer may not both prepare and approve a fee.
+                </p>
+              } @else {
+                <button type="button" class="btn-primary" [disabled]="workspaceWorking()" (click)="approveWorkspaceAssessment()">
+                  Approve
+                </button>
+                <p class="muted-sub">A different officer from the one who drafted or submitted this must approve it — the server refuses a self-approval.</p>
+              }
             }
             @if (assessment.status === 'Approved' && canApproveAssessment()) {
               <button type="button" class="btn-primary" [disabled]="workspaceWorking()" (click)="issueOrder()">

@@ -306,6 +306,14 @@
   font-weight: 700;
 }
 
+// The permit reference, under the id — same treatment as applications.scss's own `.id-reference`.
+.id-reference {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: $color-ink-300;
+}
+
 // `row.id` opens the detail view, so it has to be a real <button> for
 // keyboard/screen-reader users — but with no styling of its own it rendered
 // with the BROWSER'S DEFAULT button chrome (a bordered box), unlike every

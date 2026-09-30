@@ -545,6 +545,7 @@ export class Dashboard {
       if (!term) return true;
       return (
         row.id.toLowerCase().includes(term) ||
+        (row.referenceNumber?.toLowerCase().includes(term) ?? false) ||
         row.applicant.toLowerCase().includes(term) ||
         row.businessName.toLowerCase().includes(term) ||
         row.location.toLowerCase().includes(term) ||

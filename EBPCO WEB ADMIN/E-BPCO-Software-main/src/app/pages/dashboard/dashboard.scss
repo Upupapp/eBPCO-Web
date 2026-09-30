@@ -610,6 +610,14 @@ h2 {
   font-weight: 700;
 }
 
+// The permit reference, under the id — same treatment as applications.scss's own `.id-reference`.
+.id-reference {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: $color-ink-300;
+}
+
 // Applicant (a person) and Business/Project (the permit's real owner —
 // see ApplicationStore.getApplicationContext) sit stacked in one cell so
 // they're always both visible, on wide and narrow layouts alike, rather

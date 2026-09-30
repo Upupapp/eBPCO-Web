@@ -67,6 +67,8 @@ const RELEASE_QUEUE_STAGES: ReadonlySet<ApplicationLifecycleStatus> = new Set([
 
 interface ReleaseRow {
   id: string;
+  /** The permit reference (E-BPCO-2026-000064) an applicant quotes; empty when the server sent none. */
+  referenceNumber: string;
   applicant: string;
   applicantHasPhoto?: boolean;
   /** Canonical relationship — see ApplicationStore.getApplicationContext. Never derived from `applicant`; one applicant can own multiple businesses. */
@@ -468,6 +470,7 @@ export class PermitRelease implements OnInit {
         const seedPermit = this.store.isSeedData() ? this.store.getPermit(app.id) : undefined;
         return {
           id: app.id,
+          referenceNumber: app.referenceNumber ?? '',
           applicant: app.applicant,
           applicantHasPhoto: app.applicantHasPhoto,
           businessId: app.businessId,
@@ -592,6 +595,7 @@ export class PermitRelease implements OnInit {
       if (!term) return true;
       return (
         r.id.toLowerCase().includes(term) ||
+        r.referenceNumber.toLowerCase().includes(term) ||
         r.applicant.toLowerCase().includes(term) ||
         r.businessName.toLowerCase().includes(term) ||
         r.city.toLowerCase().includes(term) ||
@@ -653,6 +657,7 @@ export class PermitRelease implements OnInit {
   private releaseCsvRow(row: ReleaseRow) {
     return {
       'Application ID': row.id,
+      'Reference Number': row.referenceNumber,
       Applicant: row.applicant,
       'Business ID': row.businessId,
       'Business / Project': row.businessName,

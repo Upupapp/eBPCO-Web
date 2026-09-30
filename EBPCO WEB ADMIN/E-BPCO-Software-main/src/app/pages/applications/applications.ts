@@ -27,7 +27,7 @@ import {
 } from '../../core/domain/status.model';
 import { AuditEvent } from '../../core/domain/audit.model';
 import { SessionService } from '../../core/session/session.service';
-import { ACTION_PERMISSIONS, mayMove } from '../../core/session/permissions';
+import { ACTION_PERMISSIONS, canAccessPath, mayMove } from '../../core/session/permissions';
 import { assignedOfficerNames, isAssignedTo } from '../../core/domain/responsibility';
 import { WorkState, teamName, workStateFor } from '../../core/domain/teams';
 import { TeamMember, TeamsApi } from '../../core/api/teams.api';
@@ -1208,6 +1208,18 @@ export class Applications {
   protected readonly canEditAssessment = computed(() => {
     const role = this.session.authority();
     return !!role && ACTION_PERMISSIONS.editAssessment(role);
+  });
+
+  /** The Cashier verifies the payment from the same workspace the Assessor builds the Order in. */
+  protected readonly canVerifyPayment = computed(() => {
+    const role = this.session.authority();
+    return !!role && ACTION_PERMISSIONS.verifyPayment(role);
+  });
+
+  /** Evaluate opens the Evaluations page, which not every position may open (a Receiving Officer, a Cashier). */
+  protected readonly canOpenEvaluations = computed(() => {
+    const who = this.session.authority();
+    return who !== null && canAccessPath(who, '/evaluations');
   });
 
   openPaymentAssessment(): void {
