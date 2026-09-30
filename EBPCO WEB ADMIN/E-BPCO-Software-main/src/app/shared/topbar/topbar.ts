@@ -7,6 +7,7 @@ import { ApplicationStore } from '../../core/domain/application-store';
 import { AppNotification } from '../../core/domain/notification.model';
 import { Capabilities } from '../../core/session/capabilities';
 import { StaffNotificationsApi, StaffNotificationRow } from '../../core/api/staff-notifications.api';
+import { onTick } from '../../core/session/live-refresh';
 
 function formatDateTime(iso: string): string {
   const when = new Date(iso);
@@ -80,9 +81,21 @@ export class Topbar {
   private readonly realNotifications = signal<readonly StaffNotificationRow[] | null>(null);
 
   constructor(private readonly router: Router) {
-    void this.notificationsApi.inbox().then((result) => {
-      if (result.kind === 'ok') this.realNotifications.set(result.notifications);
-    });
+    void this.loadInbox();
+  }
+
+  /**
+   * The bell used to be read only when a screen opened, so a notice that
+   * arrived while an officer stayed on one page never showed. It follows the
+   * portal's pulse now (LiveRefresh), except while the panel is open.
+   */
+  private readonly followPulse = onTick(() => {
+    if (!this.notifPanelOpen()) void this.loadInbox();
+  });
+
+  private async loadInbox(): Promise<void> {
+    const result = await this.notificationsApi.inbox();
+    if (result.kind === 'ok') this.realNotifications.set(result.notifications);
   }
 
   protected readonly notifications = computed<AppNotification[]>(() => {

@@ -1,4 +1,4 @@
-import { Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -43,6 +43,7 @@ import {
 import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 import { DocumentPreview } from '../../shared/document-preview/document-preview';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
+import { onTick } from '../../core/session/live-refresh';
 
 type PaymentsTab = 'transactions' | 'fee-schedule' | 'configuration';
 type ConfigSubTab = 'payment-methods' | 'bank-information' | 'payroll';
@@ -126,7 +127,6 @@ interface PaymentRow {
   styleUrl: './payments.scss',
 })
 export class Payments {
-  private readonly destroyRef = inject(DestroyRef);
   private readonly store = inject(ApplicationStore);
   private readonly applicationsApi = inject(StaffApplicationsApi);
   protected readonly paymentsApi = inject(StaffPaymentsApi);
@@ -584,26 +584,18 @@ export class Payments {
   protected readonly queueRows = signal<readonly PaymentQueueRow[]>([]);
 
   async ngOnInit(): Promise<void> {
-    this.startQueueRefresh();
     await Promise.all([this.loadQueue(), this.loadSchedules(), this.loadPaymentMethods()]);
   }
 
   /**
    * A payment a citizen submits while this page is open appears without a
-   * reload: fetched again every 30 s while the tab is visible, and at once on
-   * returning to it. Skipped while a load is already running.
+   * reload: fetched again on the portal's pulse (LiveRefresh), every 15 s
+   * while the tab is visible and at once on returning to it. Skipped while a
+   * load is already running.
    */
-  private startQueueRefresh(): void {
-    const tick = (): void => {
-      if (document.visibilityState === 'visible' && !this.queueLoading()) void this.loadQueue({ quiet: true });
-    };
-    const timer = setInterval(tick, 30_000);
-    document.addEventListener('visibilitychange', tick);
-    this.destroyRef.onDestroy(() => {
-      clearInterval(timer);
-      document.removeEventListener('visibilitychange', tick);
-    });
-  }
+  private readonly followPulse = onTick(() => {
+    if (!this.queueLoading()) void this.loadQueue({ quiet: true });
+  });
 
   protected async loadQueue(options: { quiet?: boolean } = {}): Promise<void> {
     // A background refresh keeps the rows on screen and does not show the
