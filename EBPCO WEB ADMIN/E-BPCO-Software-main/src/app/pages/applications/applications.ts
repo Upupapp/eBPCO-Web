@@ -1,4 +1,4 @@
-import { Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, EffectRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { NavigationHistory } from '../../core/session/navigation-history';
@@ -60,6 +60,7 @@ import { PermitReleaseApi } from '../../core/api/permit-release.api';
 import { PermitReleaseSessionCache } from '../../core/domain/permit-release-session-cache';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 import { formatDocDate } from '../../shared/generated-document/doc-format';
+import { onTick } from '../../core/session/live-refresh';
 
 /** One row of the real per-application Documents tab — a required-but-not-yet-uploaded requirement has `doc: null` and renders as "Missing". */
 /**
@@ -437,7 +438,14 @@ export class Applications {
     return who !== null && ACTION_PERMISSIONS.archiveApplication(who);
   });
 
+  private readonly followPulse: EffectRef;
+
   constructor() {
+    // An open record stays current without a reload (LiveRefresh): another
+    // officer's decision, a document review or a reassignment reaches it on
+    // the next pulse instead of waiting for someone to press F5.
+    this.followPulse = onTick(() => this.refreshOpenRecord());
+
     // This page is the only one that overwrites the browser tab title with a
     // per-record one (`${applicant} (${id}) — E-BPCO Admin`). Nothing else in
     // the app ever resets it, so navigating away entirely — a different
@@ -1854,6 +1862,21 @@ export class Applications {
     );
     this.toast.success('Exported.');
     this.closeDocActionMenu();
+  }
+
+  /**
+   * The open record, fetched again in the background: its row from the list
+   * the pulse just refreshed, then its own detail (documents, evaluations,
+   * timeline, permit) and notes. Leaves the tab and any selection as they are.
+   */
+  private async refreshOpenRecord(): Promise<void> {
+    const id = this.id();
+    if (!id || (this.view() !== 'detail' && this.view() !== 'info')) return;
+    const fresh = this.store.getById(id);
+    if (fresh) this.selectedRow.set(fresh);
+    const [detail] = await Promise.all([this.applicationsApi.detail(id), this.loadComments(id)]);
+    if (this.id() !== id) return; // moved to another record meanwhile
+    if (detail.kind === 'ok') this.realDetail.set(detail.detail);
   }
 
   /** Re-fetches `realDetail` after a real write, so `documentRows` picks up the new `reviewStatus` — the same reload `setDocStatus`/`markSelectedDocsAccepted` need whenever they act on a real document. */

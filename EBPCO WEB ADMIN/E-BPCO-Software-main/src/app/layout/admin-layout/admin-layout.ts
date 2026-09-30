@@ -2,6 +2,7 @@ import { Component, DestroyRef, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { QueueLoader } from '../../core/domain/queue-loader';
+import { LiveRefresh } from '../../core/session/live-refresh';
 import { Sidebar } from '../../shared/sidebar/sidebar';
 
 /**
@@ -29,22 +30,19 @@ import { Sidebar } from '../../shared/sidebar/sidebar';
   styleUrl: './admin-layout.scss',
 })
 export class AdminLayout {
-  /** How often the queue is fetched again while the tab is on screen. */
-  static readonly REFRESH_MS = 30_000;
-
   constructor() {
     const loader = inject(QueueLoader);
+    const live = inject(LiveRefresh);
     void loader.ensureLoaded();
 
-    // The queue used to be read once per tab, so a new filing or payment
-    // stayed invisible until someone reloaded the page. Refreshed on a timer
-    // while visible, and at once when the officer comes back to the tab.
+    // Every screen refreshes on one pulse (see LiveRefresh): on a timer while
+    // the tab is visible, and at once when the officer comes back to it.
     const visible = (): boolean => document.visibilityState === 'visible';
     const timer = setInterval(() => {
-      if (visible()) void loader.refresh();
-    }, AdminLayout.REFRESH_MS);
+      if (visible()) void live.pulse();
+    }, LiveRefresh.INTERVAL_MS);
     const onVisible = (): void => {
-      if (visible()) void loader.refresh();
+      if (visible()) void live.pulse();
     };
     document.addEventListener('visibilitychange', onVisible);
     inject(DestroyRef).onDestroy(() => {

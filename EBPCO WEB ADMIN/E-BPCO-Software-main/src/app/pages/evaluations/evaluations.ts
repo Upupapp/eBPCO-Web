@@ -30,6 +30,7 @@ import { StaffEvaluationsApi, EvaluationQueueRow } from '../../core/api/staff-ev
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 import { StaffApplicationsApi, ApplicationDocumentRow, ApplicationTimelineEvent } from '../../core/api/staff-applications.api';
 import { sniffContentType } from '../applications/applications';
+import { onTick } from '../../core/session/live-refresh';
 import {
   buildEvalTypeCards,
   buildEvalRows,
@@ -228,6 +229,41 @@ export class Evaluations implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.loadQueue();
+  }
+
+  /**
+   * Stays current without a reload (LiveRefresh): another evaluator's
+   * decision moves the stage counts, the open stage's list and an open
+   * record on the next pulse. The officer stays where they are -- the same
+   * stage, the same record -- unless that record has moved to another stage,
+   * where the record view follows it, as it does after the officer's own
+   * decision.
+   */
+  private readonly followPulse = onTick(() => this.refreshQuietly());
+
+  private async refreshQuietly(): Promise<void> {
+    if (this.queueLoading()) return;
+    const result = await this.evaluationsApi.queue();
+    if (result.kind !== 'ok') return; // the last good figures stay on screen
+    this.queueRows.set([...result.rows]);
+
+    const card = this.selectedCard();
+    if (card) {
+      const fresh = this.cards().find((c) => c.key === card.key);
+      if (fresh) this.selectedCard.set(fresh);
+    }
+    const row = this.selectedRow();
+    if (row && this.view() === 'record') {
+      this.refreshRecordViewAfter(row.id);
+      const id = this.recordApplication()?.id ?? null;
+      if (id !== null && id === this.lastRecordDocAppId) {
+        const detail = await this.applicationsApi.detail(id);
+        if (this.lastRecordDocAppId === id && detail.kind === 'ok') {
+          this.recordRealDocuments.set([...detail.detail.documents]);
+          this.recordRealTimeline.set([...detail.detail.timeline]);
+        }
+      }
+    }
   }
 
   protected async loadQueue(): Promise<void> {

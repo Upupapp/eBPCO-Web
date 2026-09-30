@@ -25,6 +25,7 @@ import {
   coarseStatus,
 } from '../../core/domain/status.model';
 import { StaffEvaluationsApi, EvaluationQueueRow } from '../../core/api/staff-evaluations.api';
+import { onTick } from '../../core/session/live-refresh';
 
 interface StatCardData {
   icon: string;
@@ -143,9 +144,15 @@ export class Dashboard {
   private readonly realEvaluationRows = signal<readonly EvaluationQueueRow[]>([]);
 
   constructor(private readonly router: Router) {
-    void this.evaluationsApi.queue().then((result) => {
-      if (result.kind === 'ok') this.realEvaluationRows.set(result.rows);
-    });
+    void this.loadEvaluationRows();
+  }
+
+  /** The stage figures follow the same pulse as the rest of the page (LiveRefresh). */
+  private readonly followPulse = onTick(() => this.loadEvaluationRows());
+
+  private async loadEvaluationRows(): Promise<void> {
+    const result = await this.evaluationsApi.queue();
+    if (result.kind === 'ok') this.realEvaluationRows.set(result.rows);
   }
 
   // Every KPI here is derived from the same ApplicationStore every other

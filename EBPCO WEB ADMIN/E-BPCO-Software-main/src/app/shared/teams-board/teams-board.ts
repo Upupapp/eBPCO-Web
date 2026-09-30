@@ -14,6 +14,7 @@ import { Capabilities } from '../../core/session/capabilities';
 import { managesStaff } from '../../core/session/permissions';
 import { OFFICER_POSITIONS } from '../../core/session/position';
 import { SessionService } from '../../core/session/session.service';
+import { onTick } from '../../core/session/live-refresh';
 
 const TEAM_ICONS: Record<string, string> = {
   receiving: 'mail',
@@ -193,10 +194,36 @@ export class TeamsBoard {
     this.resetChoices();
   }
 
+  /**
+   * The board follows the portal's pulse (LiveRefresh): another lead's
+   * assignment, or an application reaching a team's step, shows without a
+   * reload. The shared list was just refreshed by the pulse itself; a lead's
+   * pick that has not been saved yet is kept.
+   */
+  private readonly followPulse = onTick(async () => {
+    if (this.busy() !== null || this.state() !== 'ready') return;
+    const overview = await this.api.overview();
+    if (overview.kind === 'ok') this.teams.set(overview.value);
+    for (const row of this.store.applications()) {
+      const current = row.responsibility?.assignee?.id ?? null;
+      const picked = this.choice[row.id];
+      // Untouched since the last sync: follow the server. Changed by the lead
+      // and not yet saved: keep their pick.
+      if (picked === undefined || picked === (this.synced[row.id] ?? null)) this.choice[row.id] = current;
+      this.synced[row.id] = current;
+    }
+  });
+
+  /** Each application's assignee as of the last time `choice` was synced with the server. */
+  private synced: Record<string, string | null> = {};
+
   private resetChoices(): void {
     this.choice = {};
+    this.synced = {};
     for (const row of this.store.applications()) {
-      this.choice[row.id] = row.responsibility?.assignee?.id ?? null;
+      const current = row.responsibility?.assignee?.id ?? null;
+      this.choice[row.id] = current;
+      this.synced[row.id] = current;
     }
   }
 
