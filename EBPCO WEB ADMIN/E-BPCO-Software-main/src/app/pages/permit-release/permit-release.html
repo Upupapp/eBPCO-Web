@@ -374,7 +374,7 @@
         </button>
         <h2>Prepare Release — {{ target.permitNumber }}</h2>
         <p class="modal-hint">
-          {{ target.id }} — {{ target.applicant }} · {{ target.businessName || 'Not provided' }}
+          {{ target.referenceNumber || target.id }} — {{ target.applicant }} · {{ target.businessName || 'Not provided' }}
         </p>
         <form class="create-form" (ngSubmit)="confirmPrepareRelease()">
           <label>
@@ -419,7 +419,7 @@
         </button>
         <h2>Release Permit {{ target.permitNumber }}</h2>
         <p class="modal-hint">
-          {{ target.id }} — {{ target.applicant }} · {{ target.businessName || 'Not provided' }}
+          {{ target.referenceNumber || target.id }} — {{ target.applicant }} · {{ target.businessName || 'Not provided' }}
         </p>
         <form class="create-form" (ngSubmit)="confirmRelease()">
           <label>
