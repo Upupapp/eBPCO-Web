@@ -25,10 +25,12 @@ export function statusPillClass(status: 'active' | 'disabled'): 'active' | 'inac
  * fixing it. An erased account cannot be re-enabled (migration 011's
  * `erased_account_holds_no_personal_data` CHECK forbids it), so it gets its
  * own word rather than sharing "Disabled" with an account an officer merely
- * suspended.
+ * suspended. "Erased", the word the detail and the Erase action use: the
+ * contact details are gone at the citizen's request, but the account's
+ * applications, payments and history are kept, so nothing was deleted.
  */
 export function statusLabel(row: { status: 'active' | 'disabled'; erasedAt: string | null }): string {
-  if (row.erasedAt !== null) return 'Deleted';
+  if (row.erasedAt !== null) return 'Erased';
   return row.status === 'active' ? 'Active' : 'Disabled';
 }
 
