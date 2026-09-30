@@ -82,7 +82,7 @@ export const OFFICER_POSITIONS: readonly OfficerPosition[] = [
   {
     key: 'super-admin', title: 'Super Admin', office: 'LGU IT',
     roles: ['super-admin'], stages: [], level: 'view-edit',
-    does: 'Everything, in every module — including deleting staff accounts.',
+    does: 'Everything, in every module — including archiving and restoring staff accounts. Nothing is ever deleted.',
     doesNot: null,
   },
   {
