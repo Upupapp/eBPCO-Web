@@ -266,9 +266,9 @@
               (keydown.space)="$event.preventDefault(); openDetail(row)"
             >
               <td class="id-cell">
-                {{ row.id }}
+                {{ row.referenceNumber || row.id }}
                 @if (row.referenceNumber) {
-                  <span class="id-reference">{{ row.referenceNumber }}</span>
+                  <span class="id-reference">{{ row.id }}</span>
                 }
               </td>
               <td>

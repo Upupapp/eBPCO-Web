@@ -176,9 +176,9 @@
                 not declare the field.
               -->
               <td class="id-cell">
-                {{ row.id }}
-                @if (row.referenceNumber; as reference) {
-                  <span class="id-reference">{{ reference }}</span>
+                {{ row.referenceNumber || row.id }}
+                @if (row.referenceNumber) {
+                  <span class="id-reference">{{ row.id }}</span>
                 }
               </td>
               <td>

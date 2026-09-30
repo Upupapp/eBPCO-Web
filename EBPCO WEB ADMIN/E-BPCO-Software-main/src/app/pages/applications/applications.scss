@@ -138,8 +138,9 @@ h3 {
   font-weight: 700;
 }
 
-// The permit reference, under the id. Quieter than the id because the id is
-// what the URL and every aria label use; this is what an applicant quotes.
+// The internal id, under the permit reference. The reference is what an
+// applicant quotes and an officer searches, so it leads; the id is what the
+// URL uses.
 .id-reference {
   display: block;
   font-size: 0.76rem;

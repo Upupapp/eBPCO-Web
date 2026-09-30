@@ -367,9 +367,9 @@
                   <input type="checkbox" [attr.aria-label]="'Select ' + row.id" />
                 </td>
               <td class="id-cell">
-                {{ row.id }}
+                {{ row.referenceNumber || row.id }}
                 @if (row.referenceNumber) {
-                  <span class="id-reference">{{ row.referenceNumber }}</span>
+                  <span class="id-reference">{{ row.id }}</span>
                 }
               </td>
               <td>

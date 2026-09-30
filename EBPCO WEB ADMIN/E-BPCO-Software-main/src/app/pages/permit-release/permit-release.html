@@ -131,13 +131,13 @@
                 <button
                   type="button"
                   class="id-open"
-                  [attr.aria-label]="'View permit release for ' + row.id + ', ' + row.applicant"
+                  [attr.aria-label]="'View permit release for ' + (row.referenceNumber || row.id) + ', ' + row.applicant"
                   (click)="openDetail(row)"
                 >
-                  {{ row.id }}
+                  {{ row.referenceNumber || row.id }}
                 </button>
                 @if (row.referenceNumber) {
-                  <span class="id-reference">{{ row.referenceNumber }}</span>
+                  <span class="id-reference">{{ row.id }}</span>
                 }
               </td>
                 <td>
