@@ -728,6 +728,41 @@ h3 {
 }
 
 /* Documents tab */
+// The tab is narrower than a list, so the table is spared the lists' 900px
+// minimum: names and file names wrap, and when it was uploaded and the office
+// that checks it sit under the document's name, which keeps Status and the
+// review buttons on screen, each on one line.
+.docs-table {
+  min-width: 0;
+
+  .doc-cell {
+    min-width: 13rem;
+    white-space: normal;
+    line-height: 1.35;
+  }
+
+  .doc-file {
+    word-break: break-all;
+  }
+
+  .doc-actions {
+    flex-direction: column;
+    align-items: stretch;
+
+    .preview-btn,
+    .resubmit-btn {
+      white-space: nowrap;
+      justify-content: center;
+    }
+  }
+}
+
+.doc-department {
+  font-size: 0.74rem;
+  color: $color-ink-300;
+  margin-top: 0.1rem;
+}
+
 .card-head {
   display: flex;
   align-items: flex-start;

@@ -832,7 +832,7 @@
             }
 
             <div class="table-wrap">
-              <table>
+              <table class="docs-table">
                 <thead>
                   <tr>
                     <th>
@@ -845,8 +845,6 @@
                     </th>
                     <th>Document</th>
                     <th>Required</th>
-                    <th>Reviewing Department</th>
-                    <th>Uploaded</th>
                     <th>Status</th>
                     <th></th>
                   </tr>
@@ -869,6 +867,12 @@
                           <div>
                             <div class="doc-name">{{ r.label }}</div>
                             <div class="doc-file">{{ r.doc?.fileName ?? 'No file attached' }}</div>
+                            @if (r.doc?.uploadedAt) {
+                              <div class="doc-department">Uploaded {{ formatDateTime(r.doc?.uploadedAt) }}</div>
+                            }
+                            @if (r.departmentName) {
+                              <div class="doc-department">Checked by {{ r.departmentName }}</div>
+                            }
                             @if (r.doc?.issuingOffice || r.doc?.issuedOn || r.doc?.expiresOn) {
                               <div class="doc-provenance">
                                 @if (r.doc?.issuingOffice) {
@@ -893,8 +897,6 @@
                           r.required ? 'Required' : 'Optional'
                         }}</span>
                       </td>
-                      <td>{{ r.departmentName }}</td>
-                      <td>{{ formatDateTime(r.doc?.uploadedAt) }}</td>
                       <td>
                         <span
                           class="status-pill"
@@ -902,7 +904,8 @@
                           >{{ r.doc?.status ?? 'Missing' }}</span
                         >
                       </td>
-                      <td class="doc-actions">
+                      <td>
+                        <div class="doc-actions">
                         @if (r.doc) {
                           <button type="button" class="preview-btn" (click)="previewDocumentRow(r)">
                             Preview
@@ -979,6 +982,7 @@
                             />
                           </label>
                         }
+                        </div>
                       </td>
                     </tr>
                   }
