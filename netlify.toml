@@ -92,10 +92,13 @@
   EBPCO_API_BASE_URL = "https://139-162-51-165.sslip.io"
 
   # The citizen-facing User Portal — a different application, origin and
-  # repository. Only used to build the verification URL a permit's QR code
-  # encodes; empty means no QR is rendered, since a QR pointing at the wrong
-  # host is worse than none. Not derivable from the API's URL.
-  EBPCO_USER_PORTAL_BASE_URL = "https://fastidious-chimera-7a7a18.netlify.app"
+  # repository. Builds the verification URL a permit's QR code encodes, and
+  # the "apply at the citizen portal" link on /register; empty means no QR is
+  # rendered, since a QR pointing at the wrong host is worse than none. Not
+  # derivable from the API's URL. The custom domain since 2026-10-03: the
+  # Netlify address it replaced opened the citizen login on a scanned permit
+  # instead of the verification result (QA TC-15, TC-16).
+  EBPCO_USER_PORTAL_BASE_URL = "https://citizen.castilla-ebpco.online"
 
 # ── There is a real API now, reached CROSS-ORIGIN, not through this file ──
 #

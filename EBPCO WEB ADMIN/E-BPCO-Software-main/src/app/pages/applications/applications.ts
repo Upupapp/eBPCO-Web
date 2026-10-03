@@ -42,7 +42,7 @@ import {
   DocumentStatus,
   UNRESOLVED_DOCUMENT_STATUSES,
 } from '../../core/domain/document.model';
-import { ChecklistStage, requirementsFor, stageOf } from '../../core/domain/requirements-catalog';
+import { ChecklistStage, requirementsFor, stageForApplication } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 import {
   AppRow,
@@ -264,8 +264,15 @@ export class Applications {
     return current === null || r.stage === current;
   }
 
+  /**
+   * The real status, not the coarse group (QA TC-06, 2026-10-03): "Under
+   * Review" stood for Submitted, Received and even For Approval, and a
+   * Completed application read "Approved", so staff opened the timeline to
+   * learn where an application really was. The pill's colour still follows
+   * the coarse group; the word is where it actually is.
+   */
   protected pillLabel(row: { status: string; lifecycleStatus: string }): string {
-    return row.lifecycleStatus === 'Cancelled' || row.lifecycleStatus === 'Expired' ? row.lifecycleStatus : row.status;
+    return row.lifecycleStatus || row.status;
   }
   protected formatDocDate = formatDocDate;
 
@@ -531,7 +538,10 @@ export class Applications {
         this.selectedRow.set(row);
         this.detailTab.set('timeline');
         this.view.set('detail');
-        this.titleService.setTitle(`${row.applicant} (${row.id}) — E-BPCO Admin`);
+        // The reference staff quote, never the internal id (QA TC-11).
+        this.titleService.setTitle(
+          `${row.referenceNumber ? `${row.referenceNumber} — ` : ''}${row.applicant} — E-BPCO Admin`,
+        );
         // Real applicant contact info and the record's own real transition
         // history — neither is on the queue row. Fire-and-forget: the
         // detail view already renders from the queue row and local mock
@@ -650,9 +660,14 @@ export class Applications {
             event: e.toStatus,
             date: validDate ? occurred.toLocaleDateString() : e.occurredAt,
             time: validDate ? occurred.toLocaleTimeString() : '',
-            detail: e.remarks
-              ? `${e.remarks}${e.office ? ` — ${e.office}` : ''}`
-              : (e.office ?? (e.fromStatus ? `From ${e.fromStatus}` : 'Application filed')),
+            // Who moved it, and as what (QA TC-02): an auditor reading the
+            // timeline must be able to say who received, evaluated, assessed,
+            // verified or approved it without opening the System Logs.
+            detail: [
+              e.remarks ?? (e.fromStatus ? `From ${e.fromStatus}` : 'Application filed'),
+              e.actorName ? `by ${e.actorName}${e.actorPosition ? ` (${e.actorPosition})` : ''}` : null,
+              e.office,
+            ].filter((part): part is string => !!part).join(' — '),
           };
         })
         .reverse();
@@ -748,7 +763,10 @@ export class Applications {
     const total = rows.length || 1;
     const under = rows.filter((r) => r.status === 'Under Review').length;
     const approved = rows.filter((r) => r.status === 'Approved').length;
-    const rejected = rows.filter((r) => r.status === 'Rejected').length;
+    // Only what the Municipality turned down: a withdrawal (Cancelled) or a
+    // lapse (Expired) files under the coarse Rejected group, and counting it
+    // here overstated rejections (QA TC-07, 2026-10-03).
+    const rejected = rows.filter((r) => r.lifecycleStatus === 'Rejected').length;
     return [
       {
         label: 'Approved',
@@ -963,7 +981,16 @@ export class Applications {
     // available in this session" (found live 2026-09-20: FP-2026-000001 was
     // in the database and this panel had lost it on reload).
     const real = this.realDetail()?.permit;
-    if (real) return { permitNumber: real.permitNumber, issuedDate: real.issuedDate };
+    if (real) {
+      return {
+        permitNumber: real.permitNumber, issuedDate: real.issuedDate,
+        // Recorded since server migration 064 (QA TC-04); a permit issued
+        // before it has none, and the panel says so rather than guessing.
+        expiryDate: real.expiresOn ?? null,
+        ...(real.approvingOfficial ? { approvingOfficial: real.approvingOfficial } : {}),
+        ...(real.approvingOffice ? { approvingOffice: real.approvingOffice } : {}),
+      };
+    }
     if (!this.store.isSeedData()) return null;
     const seedPermit = this.store.getPermit(row.id);
     return seedPermit ? { ...seedPermit } : null;
@@ -1079,6 +1106,17 @@ export class Applications {
   protected readonly showGeneratePermitModal = signal(false);
   protected generatePermitScope = '';
   protected generatePermitConditionsText = '';
+  /**
+   * What the permit prints about itself (QA TC-04, 2026-10-03): until now
+   * every permit read "Not recorded by the office" on all three. Prefilled:
+   * valid for one year from today -- PD 1096 Sec. 307 voids a building permit
+   * whose work has not begun within a year -- the signed-in Building Official
+   * as approver, and the office last used on this browser. All editable.
+   */
+  protected generatePermitExpiresOn = '';
+  protected generatePermitApprovingOfficial = '';
+  protected generatePermitApprovingOffice = '';
+  protected readonly todayIso = new Date().toISOString().slice(0, 10);
   protected readonly generatePermitError = signal('');
   protected readonly generatingPermit = signal(false);
 
@@ -1087,8 +1125,16 @@ export class Applications {
       this.toast.error("Can't generate a permit yet — the application must be Approved and fully paid.");
       return;
     }
-    this.generatePermitScope = '';
+    // The citizen's own scope of work, so the Building Official edits it
+    // instead of retyping it (QA TC-04).
+    const scopeOfWork = this.realDetail()?.form?.['scopeOfWork'];
+    this.generatePermitScope = typeof scopeOfWork === 'string' ? scopeOfWork : '';
     this.generatePermitConditionsText = '';
+    const inAYear = new Date();
+    inAYear.setFullYear(inAYear.getFullYear() + 1);
+    this.generatePermitExpiresOn = inAYear.toISOString().slice(0, 10);
+    this.generatePermitApprovingOfficial = this.session.name();
+    this.generatePermitApprovingOffice = readLastApprovingOffice();
     this.generatePermitError.set('');
     this.showGeneratePermitModal.set(true);
   }
@@ -1105,6 +1151,17 @@ export class Applications {
       this.generatePermitError.set('Describe what this permit covers before generating it.');
       return;
     }
+    const expiresOn = this.generatePermitExpiresOn.trim();
+    const approvingOfficial = this.generatePermitApprovingOfficial.trim();
+    const approvingOffice = this.generatePermitApprovingOffice.trim();
+    if (!expiresOn || expiresOn <= this.todayIso) {
+      this.generatePermitError.set('Set the last day the permit is valid. It must be after today.');
+      return;
+    }
+    if (!approvingOfficial || !approvingOffice) {
+      this.generatePermitError.set('Name the approving official and the office, as they are printed on the permit.');
+      return;
+    }
     const conditions = this.generatePermitConditionsText
       .split('\n')
       .map((line) => line.trim())
@@ -1115,6 +1172,7 @@ export class Applications {
       const result = await this.permitReleaseApi.generatePermit(row.id, {
         scope,
         conditions: conditions.length > 0 ? conditions : undefined,
+        expiresOn, approvingOfficial, approvingOffice,
       });
       if (result.kind !== 'done') {
         const message =
@@ -1129,6 +1187,8 @@ export class Applications {
         permitNumber: result.permitNumber,
         issuedDate: result.issuedDate,
       });
+      rememberApprovingOffice(approvingOffice);
+      void this.refreshRealDetail(row.id);
       // The server makes `Approved -> Permit Generated` itself now and says
       // where the application stands; the hop below is a fallback for an
       // older server (no status reported) or a refused move. No
@@ -1794,7 +1854,7 @@ export class Applications {
           label: req.label,
           required: req.required,
           departmentName: departmentName(req.reviewingDepartmentId),
-          stage: stageOf(req),
+          stage: stageForApplication(req, this.realDetail()?.checklist),
           isReal: true,
           doc: found
             ? {
@@ -1821,7 +1881,7 @@ export class Applications {
         label: req.label,
         required: req.required,
         departmentName: departmentName(req.reviewingDepartmentId),
-          stage: stageOf(req),
+          stage: stageForApplication(req, this.realDetail()?.checklist),
         isReal: false,
         doc: doc && { id: doc.id, fileName: doc.fileName, status: doc.status, remarks: doc.remarks, uploadedAt: doc.uploadedAt },
       };
@@ -2245,4 +2305,27 @@ export function sniffContentType(bytes: Uint8Array): string | null {
   if (startsWith([0x47, 0x49, 0x46, 0x38])) return 'image/gif';                          // GIF8
   if (startsWith([0x52, 0x49, 0x46, 0x46]) && startsWith([0x57, 0x45, 0x42, 0x50], 8)) return 'image/webp';
   return null;
+}
+
+/**
+ * The approving office last printed on a permit from this browser, so the
+ * next one starts from it (QA TC-04). Per officer and per browser: it is a
+ * convenience, never a record, and losing it costs a line of typing.
+ */
+const APPROVING_OFFICE_KEY = 'ebpco.permit.approvingOffice';
+
+function readLastApprovingOffice(): string {
+  try {
+    return localStorage.getItem(APPROVING_OFFICE_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+function rememberApprovingOffice(office: string): void {
+  try {
+    localStorage.setItem(APPROVING_OFFICE_KEY, office);
+  } catch {
+    // Storage blocked: the next permit simply starts empty.
+  }
 }

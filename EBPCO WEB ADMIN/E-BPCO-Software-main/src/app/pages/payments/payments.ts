@@ -44,6 +44,7 @@ import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notic
 import { DocumentPreview } from '../../shared/document-preview/document-preview';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
 import { onTick } from '../../core/session/live-refresh';
+import { officialReceiptProblem } from '../../core/domain/official-receipt';
 
 type PaymentsTab = 'transactions' | 'fee-schedule' | 'configuration';
 type ConfigSubTab = 'payment-methods' | 'bank-information' | 'payroll';
@@ -454,13 +455,29 @@ export class Payments {
     }
   }
 
+  /**
+   * The date the applicant must pay by, printed on the Order (QA TC-05,
+   * 2026-10-03: every Order read "Due Date: —"). The assessor sets it as the
+   * Order is issued; the office's own deadline, so nothing is prefilled.
+   */
+  protected orderDueDate = '';
+  protected readonly tomorrowIso = (() => {
+    const day = new Date();
+    day.setDate(day.getDate() + 1);
+    return day.toISOString().slice(0, 10);
+  })();
+
   protected async issueOrder(): Promise<void> {
     const assessment = this.workspaceAssessment();
     const appId = this.applicationId();
     if (!assessment || !appId || !this.canApproveAssessment()) return;
+    if (!this.orderDueDate || this.orderDueDate < this.tomorrowIso) {
+      this.toast.error('Set the date the applicant must pay by. It must be after today.');
+      return;
+    }
     this.workspaceWorking.set(true);
     try {
-      const result = await this.paymentsApi.issueOrderOfPayment(appId);
+      const result = await this.paymentsApi.issueOrderOfPayment(appId, { dueDate: this.orderDueDate });
       if (result.kind === 'done') {
         // The server makes `Under Evaluation -> Assessed` itself as part of
         // issuing the Order (the Order is what "Assessed" means) and reports
@@ -481,6 +498,7 @@ export class Payments {
             : `Order of Payment ${result.number} issued, but the application could not be moved to Assessed. Check its status.`,
         );
         this.knownAssessmentId.delete(appId);
+        this.orderDueDate = '';
         await this.loadWorkspace(appId);
         return;
       }
@@ -520,6 +538,11 @@ export class Payments {
     const appId = this.applicationId();
     const order = this.workspaceOrder();
     if (!appId || !order || !this.canRecordPayment()) return;
+    const receiptProblem = officialReceiptProblem(this.paymentForm.officialReceiptNumber);
+    if (receiptProblem !== null) {
+      this.toast.error(receiptProblem);
+      return;
+    }
     if (!this.paymentForm.officialReceiptNumber.trim()) {
       this.toast.error('Enter the Official Receipt number.');
       return;
@@ -865,6 +888,9 @@ export class Payments {
     window.print();
   }
 
+  /** The receipt-number check the Verify dialog runs as the cashier types (QA TC-03, TC-08). */
+  protected readonly officialReceiptProblem = officialReceiptProblem;
+
   protected readonly correctReceiptTarget = signal<PaymentQueueRow | null>(null);
   protected correctReceiptForm = { officialReceiptNumber: '', reason: '' };
 
@@ -882,6 +908,11 @@ export class Payments {
     const payment = this.correctReceiptTarget();
     if (!payment || !this.correctReceiptForm.officialReceiptNumber.trim() || !this.correctReceiptForm.reason.trim()) {
       this.toast.error('Enter both the corrected OR number and a reason.');
+      return;
+    }
+    const problem = officialReceiptProblem(this.correctReceiptForm.officialReceiptNumber);
+    if (problem !== null) {
+      this.toast.error(problem);
       return;
     }
     const result = await this.paymentsApi.correctReceipt(

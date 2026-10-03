@@ -6,6 +6,7 @@ import { API_BASE_URL } from './api.config';
 import { ApiError } from './problem';
 import { ApplicationRecord, withProjectedFields } from '../domain/application.model';
 import { DocumentStatus } from '../domain/document.model';
+import { displayReference } from '../domain/draft-reference';
 import {
   ApplicationLifecycleStatus,
   PermitReleaseStatus,
@@ -118,6 +119,8 @@ export interface ApplicationPaymentRow {
   readonly officialReceiptNumber: string | null;
   /** The citizen's own bank-transfer proof upload, when this payment carries one — `POST /documents`'s id, absent for Onsite (no file picker shown for that method on the Citizen Portal). */
   readonly proofDocumentId: string | null;
+  /** The cashier who verified it: the Official Receipt's collecting officer (QA TC-09). Absent from an older server. */
+  readonly verifiedByName?: string | null;
 }
 
 /** The most recent non-superseded Order of Payment, or `null` before one is issued. Never an in-progress Draft/Submitted/Approved assessment — see `StaffPaymentsApi.getAssessment`'s own doc comment for why that has no per-application lookup at all. */
@@ -155,6 +158,8 @@ export interface ApplicationTimelineEvent {
   readonly occurredAt: string;
   readonly office: string | null;
   readonly actorName: string | null;
+  /** The capacity they acted in -- "Receiving Officer", "Applicant", "Super Admin" (QA TC-02). Absent from an older server. */
+  readonly actorPosition?: string | null;
   readonly remarks: string | null;
 }
 
@@ -206,12 +211,15 @@ export interface ApplicationBusiness {
   readonly status: string;
 }
 
-/** The `permit` object on `GET /staff/applications/:id` — `null` until `POST /staff/applications/:id/permit` has actually run. The server has no route to re-read `expiryDate`/`approvingOfficial`/`approvingOffice`: `generated_permits` never carried them. */
+/** The `permit` object on `GET /staff/applications/:id` — `null` until `POST /staff/applications/:id/permit` has actually run. `expiresOn`/`approvingOfficial`/`approvingOffice` since server migration 064 (QA TC-04); null on a permit issued before it. */
 export interface ApplicationGeneratedPermit {
   readonly permitNumber: string;
   readonly issuedDate: string;
   readonly scope: string;
   readonly conditions: readonly string[] | null;
+  readonly expiresOn?: string | null;
+  readonly approvingOfficial?: string | null;
+  readonly approvingOffice?: string | null;
 }
 
 /**
@@ -224,6 +232,9 @@ export interface ApplicationReleaseRecord {
   readonly status: string | null;
   readonly method: 'Physical Claim' | 'Authorized Representative' | null;
   readonly claimantName: string | null;
+  /** The ID the claimant presented, and a representative's authorization (QA TC-14, migration 064). */
+  readonly idPresented?: string | null;
+  readonly authorizationReference?: string | null;
   readonly releasedAt: string | null;
   readonly claimLocation: string | null;
   readonly officeHours: string | null;
@@ -295,6 +306,20 @@ export interface ApplicationDetail {
    * still incomplete and let the Assess Fee action show regardless.
    */
   readonly evaluations: readonly ApplicationEvaluation[];
+  /**
+   * The checklist this application is judged against, snapshotted when it was
+   * filed, with the stage that checks each document (QA TC-01, 2026-10-03).
+   * Read for the stage a document is accepted at, instead of guessing it from
+   * the code. Absent from an older server; `stage` null on a pre-060 snapshot.
+   */
+  readonly checklist?: readonly ApplicationChecklistEntry[];
+}
+
+export interface ApplicationChecklistEntry {
+  readonly code: string;
+  readonly label: string;
+  readonly required: boolean;
+  readonly stage: string | null;
 }
 
 export interface ApplicationEvaluation {
@@ -904,7 +929,7 @@ function toRecord(row: QueueRow): ApplicationRecord {
   const lifecycleStatus = row.lifecycleStatus;
   return withProjectedFields({
     id: row.id,
-    referenceNumber: row.referenceNumber,
+    referenceNumber: displayReference(row.referenceNumber),
     businessId: '',
     businessName: row.businessName ?? NOT_SENT,
     applicantId: '',

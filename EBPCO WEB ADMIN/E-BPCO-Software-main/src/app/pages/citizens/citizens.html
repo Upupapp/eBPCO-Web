@@ -361,7 +361,7 @@
                       <tr class="ba-app-row" (click)="openApplication(a.id)">
                         <td>
                           <a class="ba-ref" [routerLink]="['/applications', a.id]" (click)="$event.stopPropagation()">
-                            {{ a.referenceNumber }}
+                            {{ displayReference(a.referenceNumber) }}
                           </a>
                         </td>
                         <td>{{ a.permitType }}</td>
@@ -442,7 +442,7 @@
             </p>
             <ul>
               @for (a of ongoingApplications(); track a.id) {
-                <li>{{ a.referenceNumber }} — {{ a.permitType }} ({{ a.lifecycleStatus }})</li>
+                <li>{{ displayReference(a.referenceNumber) }} — {{ a.permitType }} ({{ a.lifecycleStatus }})</li>
               }
             </ul>
           </div>

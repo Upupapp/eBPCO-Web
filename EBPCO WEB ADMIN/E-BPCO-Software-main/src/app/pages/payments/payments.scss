@@ -1223,3 +1223,22 @@ h3 {
     line-height: 1.35;
   }
 }
+
+// The Order's due date, set as it is issued (QA TC-05).
+.due-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0.5rem 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  input {
+    max-width: 14rem;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid #d6d9e0;
+    border-radius: 0.5rem;
+    font: inherit;
+    font-weight: 400;
+  }
+}

@@ -3,6 +3,7 @@ import { Component, computed, effect, inject, input, signal, untracked } from '@
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
+import { displayReference } from '../../core/domain/draft-reference';
 import { Topbar } from '../../shared/topbar/topbar';
 import { Icon } from '../../shared/icon/icon';
 import { Avatar } from '../../shared/avatar/avatar';
@@ -81,6 +82,8 @@ const REASON_MIN_LENGTH = 5;
   styleUrl: './citizens.scss',
 })
 export class Citizens {
+  /** A walk-in draft's DRAFT- placeholder is not a number (QA TC-37). */
+  protected readonly displayReference = displayReference;
   private readonly api = inject(StaffCitizensApi);
   private readonly toast = inject(ToastService);
   private readonly session = inject(SessionService);

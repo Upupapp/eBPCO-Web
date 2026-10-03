@@ -113,15 +113,33 @@ export class UserPortalPermitPreview {
     const row = this.row();
     return row ? this.store.getBusiness(row.businessId) : undefined;
   });
+  /**
+   * The owner's own address, as the citizen's copy of the same permit prints
+   * it (QA TC-17, 2026-10-03: this copy read "Not on file" where the citizen's
+   * read their street). From the applicant's account on the real record; the
+   * demo record's own line otherwise.
+   */
+  protected readonly ownerAddress = computed<string | null>(() => {
+    const address = this.detail()?.applicantAddress;
+    if (address) {
+      const line = [address.street, address.barangay, address.city, address.province]
+        .filter((part): part is string => !!part && part.trim() !== '')
+        .join(', ');
+      return line === '' ? null : line;
+    }
+    return this.applicant()?.addressLine ?? null;
+  });
+
   protected readonly permit = computed(() => {
     const real = this.detail()?.permit;
     if (real) {
       return {
         permitNumber: real.permitNumber,
         issuedDate: real.issuedDate,
-        expiryDate: null as string | null,
-        approvingOfficial: undefined as string | undefined,
-        approvingOffice: undefined as string | undefined,
+        // Recorded since server migration 064 (QA TC-04, TC-18).
+        expiryDate: real.expiresOn ?? null,
+        approvingOfficial: real.approvingOfficial ?? undefined,
+        approvingOffice: real.approvingOffice ?? undefined,
       };
     }
     // Seed/demo fallback only — a real application's permit always comes

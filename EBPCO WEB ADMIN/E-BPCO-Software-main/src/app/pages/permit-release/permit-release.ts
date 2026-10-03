@@ -832,11 +832,20 @@ export class PermitRelease implements OnInit {
   protected readonly releasingPermit = signal(false);
   protected claimantName = '';
   protected releaseMethod: ReleaseMethod = 'Physical Claim';
+  /**
+   * The proof shown at the counter (QA TC-14, 2026-10-03): a name alone did
+   * not say the permit went to the right person. The ID presented is always
+   * asked; the authorization only for a representative.
+   */
+  protected releaseIdPresented = '';
+  protected releaseAuthorization = '';
 
   protected requestRelease(row: ReleaseRow): void {
     if (!this.canRelease() || row.permitStage !== 'Ready for Release') return;
     this.claimantName = row.applicant;
     this.releaseMethod = 'Physical Claim';
+    this.releaseIdPresented = '';
+    this.releaseAuthorization = '';
     this.releaseError.set('');
     this.releaseTarget.set(row);
   }
@@ -855,11 +864,25 @@ export class PermitRelease implements OnInit {
       this.toast.error(message);
       return;
     }
+    const idPresented = this.releaseIdPresented.trim();
+    const authorization = this.releaseAuthorization.trim();
+    const missing = !idPresented
+      ? 'Record the ID the claimant presented (type and number).'
+      : this.releaseMethod === 'Authorized Representative' && !authorization
+        ? "Record the representative's authorization (a letter or SPA, and from whom)."
+        : null;
+    if (missing !== null) {
+      this.releaseError.set(missing);
+      this.toast.error(missing);
+      return;
+    }
     this.releasingPermit.set(true);
     try {
       const result = await this.permitReleaseApi.release(row.id, {
         claimantName: claimant,
         method: this.releaseMethod,
+        idPresented,
+        ...(this.releaseMethod === 'Authorized Representative' ? { authorization } : {}),
       });
       if (result.kind !== 'done') {
         const message =

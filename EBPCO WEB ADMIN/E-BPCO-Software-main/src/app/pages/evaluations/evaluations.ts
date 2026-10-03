@@ -19,7 +19,7 @@ import { ALL_PERMIT_TYPES } from '../../core/domain/permit.model';
 import { ApplicationRecord } from '../../core/domain/application.model';
 import { Applicant } from '../../core/domain/applicant.model';
 import { DocumentStatus } from '../../core/domain/document.model';
-import { ChecklistStage, requirementsFor, stageOf } from '../../core/domain/requirements-catalog';
+import { ChecklistStage, requirementsFor, stageForApplication } from '../../core/domain/requirements-catalog';
 import { departmentName } from '../../core/domain/department.model';
 import { Capabilities } from '../../core/session/capabilities';
 import { SessionService } from '../../core/session/session.service';
@@ -28,7 +28,9 @@ import { NavigationHistory } from '../../core/session/navigation-history';
 import { ViewOnlyNotice } from '../../shared/view-only-notice/view-only-notice';
 import { StaffEvaluationsApi, EvaluationQueueRow } from '../../core/api/staff-evaluations.api';
 import { ApplicantPhotoService } from '../../shared/avatar/applicant-photo.service';
-import { StaffApplicationsApi, ApplicationDocumentRow, ApplicationTimelineEvent } from '../../core/api/staff-applications.api';
+import {
+  StaffApplicationsApi, ApplicationChecklistEntry, ApplicationDocumentRow, ApplicationTimelineEvent,
+} from '../../core/api/staff-applications.api';
 import { sniffContentType } from '../applications/applications';
 import { onTick } from '../../core/session/live-refresh';
 import {
@@ -406,6 +408,8 @@ export class Evaluations implements OnInit {
   // silently showed "No activity recorded yet." no matter how much real
   // history the application actually had.
   protected readonly recordRealTimeline = signal<readonly ApplicationTimelineEvent[] | null>(null);
+  /** The application's own checklist, with the stage each document is accepted at (QA TC-01). */
+  protected readonly recordRealChecklist = signal<readonly ApplicationChecklistEntry[] | null>(null);
 
   private lastRecordDocAppId: string | null = null;
   private readonly loadRecordDocuments = effect(() => {
@@ -416,12 +420,14 @@ export class Evaluations implements OnInit {
       this.lastRecordDocAppId = id;
       this.recordRealDocuments.set(null);
       this.recordRealTimeline.set(null);
+      this.recordRealChecklist.set(null);
       if (!id) return;
       void this.applicationsApi.detail(id).then((result) => {
         if (this.lastRecordDocAppId !== id) return; // moved to a different record before this resolved
         if (result.kind === 'ok') {
           this.recordRealDocuments.set([...result.detail.documents]);
           this.recordRealTimeline.set([...result.detail.timeline]);
+          this.recordRealChecklist.set(result.detail.checklist ? [...result.detail.checklist] : null);
         }
       });
     });
@@ -465,7 +471,7 @@ export class Evaluations implements OnInit {
           label: req.label,
           required: req.required,
           departmentName: departmentName(req.reviewingDepartmentId),
-          stage: stageOf(req),
+          stage: stageForApplication(req, this.recordRealChecklist()),
           doc: found
             ? {
                 id: found.id, fileName: found.fileName, status: found.reviewStatus ?? 'Uploaded',
@@ -483,7 +489,7 @@ export class Evaluations implements OnInit {
       label: req.label,
       required: req.required,
       departmentName: departmentName(req.reviewingDepartmentId),
-      stage: stageOf(req),
+      stage: stageForApplication(req, this.recordRealChecklist()),
       doc: byRequirement.get(req.id) ?? null,
       isReal: false,
     }));
@@ -558,7 +564,8 @@ export class Evaluations implements OnInit {
               ? `${occurred.toLocaleDateString()}, ${occurred.toLocaleTimeString()}`
               : e.occurredAt,
             actor: e.actorName ?? e.office ?? (e.fromStatus ? `From ${e.fromStatus}` : 'Application filed'),
-            role: '',
+            // Their position beside the name (QA TC-02).
+            role: e.actorPosition ?? '',
             remarks: e.remarks,
           };
         })

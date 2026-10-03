@@ -5,6 +5,8 @@
 export interface AppNotification {
   id: string;
   applicationId: string | null;
+  /** Where a notice about no application opens -- "/access-requests" for a new account request (QA TC-13). */
+  deepLink?: string | null;
   title: string;
   message: string;
   createdAtValue: Date;

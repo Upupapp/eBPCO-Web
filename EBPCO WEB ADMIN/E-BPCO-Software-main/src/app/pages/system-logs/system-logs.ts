@@ -8,7 +8,7 @@ import { downloadCsv } from '../../shared/utils/export-csv';
 import { ApplicationStore } from '../../core/domain/application-store';
 import { AssessmentStore } from '../../core/domain/assessment-store';
 import { AuditEvent } from '../../core/domain/audit.model';
-import { AuditApi, AuditEntry } from '../../core/api/audit.api';
+import { AuditApi, AuditEntry, auditActorLabel } from '../../core/api/audit.api';
 import { ToastService } from '../../shared/toast/toast.service';
 import { QueueLoadNotice } from '../../shared/queue-load-notice/queue-load-notice';
 
@@ -448,8 +448,8 @@ export class SystemLogs {
    * to push into it — the tab kept its "genuine action" banner while quietly
    * showing less and less of what was actually happening.
    *
-   * Real entries carry only `actorRole` ('staff'/'applicant'), not a name —
-   * coarser than the old fabricated rows' specific names, but real. Falls
+   * Real entries name the officer and their position (`actorName`,
+   * `actorPosition`, QA TC-02); an older server sends only `actorRole`. Falls
    * back to the local store's own audit trail (whatever it still captures)
    * only when the real stream is unavailable or fails, same as security's
    * fabricated-rows fallback.
@@ -827,8 +827,8 @@ export class SystemLogs {
   /**
    * Prefers the real `GET /staff/audit?stream=activity` entries
    * (`activityEntries()`, populated by `loadActivityStream()` above) — real
-   * `actorRole` is only the coarse 'staff'/'applicant' the server actually
-   * carries, not a name, and `ip` reads `sourceAddress` honestly rather than
+   * `user` names the officer and their position (`auditActorLabel`, QA
+   * TC-02), and `ip` reads `sourceAddress` honestly rather than
    * inventing one. Falls back to the local `ApplicationStore`/
    * `AssessmentStore` audit trail only when the real stream is unavailable
    * or fails — whatever that local trail still captures (some actions may no
@@ -852,7 +852,7 @@ export class SystemLogs {
             timestamp: formatLogTimestamp(e.occurredAt),
             eventType,
             description: e.outcome === 'denied' ? `${e.action} — denied` : e.action,
-            user: e.actorRole ?? 'system',
+            user: auditActorLabel(e),
             tenant: context?.businessLabel ?? 'System',
             module,
             ip: e.sourceAddress ?? '—',
@@ -899,7 +899,7 @@ export class SystemLogs {
         .sort((a, b) => b.sequence - a.sequence)
         .map((e): AccessRow => ({
           timestamp: formatLogTimestamp(e.occurredAt),
-          user: e.actorRole ?? 'system',
+          user: auditActorLabel(e),
           tenant: 'System',
           event: e.outcome === 'denied' ? `${e.action} — denied` : e.action,
           status: e.outcome === 'denied' ? 'Inactive' : 'Active',
@@ -961,7 +961,7 @@ export class SystemLogs {
           return {
             timestamp: formatLogTimestamp(e.occurredAt),
             eventType,
-            user: e.actorRole ?? 'system',
+            user: auditActorLabel(e),
             tenant: context?.businessLabel ?? 'System',
             message: e.outcome === 'denied' ? `${e.action} — denied` : e.action,
             ip: e.sourceAddress ?? '—',

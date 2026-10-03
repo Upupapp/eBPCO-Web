@@ -433,6 +433,18 @@
               <option value="Authorized Representative">Authorized Representative</option>
             </select>
           </label>
+          <label>
+            ID presented <span class="optional">(type and number — required)</span>
+            <input type="text" [(ngModel)]="releaseIdPresented" name="releaseIdPresented" required maxlength="200"
+              placeholder="e.g. Driver's licence N01-23-456789" />
+          </label>
+          @if (releaseMethod === 'Authorized Representative') {
+            <label>
+              Authorization <span class="optional">(letter or SPA, and from whom — required)</span>
+              <input type="text" [(ngModel)]="releaseAuthorization" name="releaseAuthorization" required maxlength="500"
+                placeholder="e.g. Authorization letter from the applicant, dated 3 Oct 2026" />
+            </label>
+          }
           @if (releaseError()) {
             <p class="form-error">{{ releaseError() }}</p>
           }

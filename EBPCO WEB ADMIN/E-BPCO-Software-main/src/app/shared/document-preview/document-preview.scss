@@ -422,6 +422,12 @@
   margin-top: 2rem;
   text-align: center;
 
+  .doc-signature-name {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.9rem;
+  }
+
   .doc-signature-line {
     width: 55%;
     margin: 0 auto 0.4rem;

@@ -71,9 +71,9 @@
                 [class.unread]="!n.isRead"
                 role="menuitem"
                 tabindex="0"
-                (click)="selectNotification(n.id, n.applicationId)"
-                (keydown.enter)="selectNotification(n.id, n.applicationId)"
-                (keydown.space)="$event.preventDefault(); selectNotification(n.id, n.applicationId)"
+                (click)="selectNotification(n.id, n.applicationId, n.deepLink ?? null)"
+                (keydown.enter)="selectNotification(n.id, n.applicationId, n.deepLink ?? null)"
+                (keydown.space)="$event.preventDefault(); selectNotification(n.id, n.applicationId, n.deepLink ?? null)"
               >
                 <span class="notif-dot" aria-hidden="true"></span>
                 <span class="notif-body">

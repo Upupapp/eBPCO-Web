@@ -34,6 +34,9 @@ export interface AuditEntry {
   readonly outcome: 'allowed' | 'denied';
   readonly actorAccountId: string | null;
   readonly actorRole: string | null;
+  /** Who acted, and in what capacity -- "Lorna Pascual", "Cashier" (QA TC-02, 2026-10-03). Null for a system act; absent from an older server. */
+  readonly actorName?: string | null;
+  readonly actorPosition?: string | null;
   readonly subjectType: string | null;
   readonly subjectId: string | null;
   readonly sourceAddress: string | null;
@@ -154,4 +157,15 @@ export function describeAuditAction(action: string): string {
   if (said !== undefined) return said;
   const words = action.replace(/[.-]+/g, ' ').trim();
   return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/**
+ * The User column's text for an audit entry: the officer's name and position
+ * ("Lorna Pascual (Cashier)"), or the bare role an older server sends, or
+ * "System" for an act with no account behind it (QA TC-02: every row read
+ * "staff" or "system", and an auditor could not tell who did anything).
+ */
+export function auditActorLabel(entry: Pick<AuditEntry, 'actorName' | 'actorPosition' | 'actorRole'>): string {
+  if (entry.actorName) return entry.actorPosition ? `${entry.actorName} (${entry.actorPosition})` : entry.actorName;
+  return entry.actorRole ?? 'System';
 }

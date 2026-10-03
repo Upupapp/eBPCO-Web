@@ -40,18 +40,19 @@
           <dl class="detail-fields">
             <div><dt>Fee Schedule Version:</dt><dd>{{ order.feeScheduleVersion }}</dd></div>
             <div><dt>Assessed:</dt><dd>{{ formatDateTime(order.assessedAt) }}</dd></div>
-            <div><dt>Due Date:</dt><dd>{{ order.dueDate ?? '—' }}</dd></div>
+            <div><dt>Due Date:</dt><dd>{{ order.dueDate ?? 'Not set' }}</dd></div>
           </dl>
           <div class="table-wrap">
             <table class="detail-table">
               <thead><tr><th>Line</th><th>Amount</th></tr></thead>
               <tbody>
-                <tr><td>{{ lineLabel('filing') }}</td><td>{{ formatPHP(order.filingCentavos) }}</td></tr>
-                <tr><td>{{ lineLabel('processing') }}</td><td>{{ formatPHP(order.processingCentavos) }}</td></tr>
-                <tr><td>{{ lineLabel('architectural') }}</td><td>{{ formatPHP(order.architecturalCentavos) }}</td></tr>
-                <tr><td>{{ lineLabel('structural') }}</td><td>{{ formatPHP(order.structuralCentavos) }}</td></tr>
-                <tr><td>{{ lineLabel('electrical') }}</td><td>{{ formatPHP(order.electricalCentavos) }}</td></tr>
-                <tr><td>{{ lineLabel('others') }}</td><td>{{ formatPHP(order.othersCentavos) }}</td></tr>
+                <!-- Only the fees that apply: a ₱0.00 line beside the real ones read as a charge (QA TC-05). -->
+                @if (order.filingCentavos > 0) { <tr><td>{{ lineLabel('filing') }}</td><td>{{ formatPHP(order.filingCentavos) }}</td></tr> }
+                @if (order.processingCentavos > 0) { <tr><td>{{ lineLabel('processing') }}</td><td>{{ formatPHP(order.processingCentavos) }}</td></tr> }
+                @if (order.architecturalCentavos > 0) { <tr><td>{{ lineLabel('architectural') }}</td><td>{{ formatPHP(order.architecturalCentavos) }}</td></tr> }
+                @if (order.structuralCentavos > 0) { <tr><td>{{ lineLabel('structural') }}</td><td>{{ formatPHP(order.structuralCentavos) }}</td></tr> }
+                @if (order.electricalCentavos > 0) { <tr><td>{{ lineLabel('electrical') }}</td><td>{{ formatPHP(order.electricalCentavos) }}</td></tr> }
+                @if (order.othersCentavos > 0) { <tr><td>{{ lineLabel('others') }}</td><td>{{ formatPHP(order.othersCentavos) }}</td></tr> }
                 <tr class="strong-cell"><td>Total</td><td>{{ formatPHP(order.totalCentavos) }}</td></tr>
               </tbody>
             </table>
@@ -182,7 +183,12 @@
               }
             }
             @if (assessment.status === 'Approved' && canApproveAssessment()) {
-              <button type="button" class="btn-primary" [disabled]="workspaceWorking()" (click)="issueOrder()">
+              <label class="due-date-field">
+                Payment due date <span class="muted-sub">(printed on the Order — required)</span>
+                <input type="date" [min]="tomorrowIso" [(ngModel)]="orderDueDate" name="orderDueDate"
+                  aria-label="Date the applicant must pay by" required />
+              </label>
+              <button type="button" class="btn-primary" [disabled]="workspaceWorking() || !orderDueDate" (click)="issueOrder()">
                 Issue Order of Payment
               </button>
             }
@@ -664,8 +670,9 @@
     confirmLabel="Verify"
     tone="default"
     reasonLabel="Official Receipt Number"
-    reasonPlaceholder="e.g. OR-2026-000123"
+    reasonPlaceholder="As printed on the receipt, e.g. OR-2026-000123"
     [reasonMinLength]="1"
+    [valueCheck]="officialReceiptProblem"
     (confirmed)="confirmVerify($event)"
     (cancelled)="cancelVerify()"
   />

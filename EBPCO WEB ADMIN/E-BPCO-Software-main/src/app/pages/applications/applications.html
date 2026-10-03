@@ -557,10 +557,21 @@
             <dt>Phone :</dt>
             <dd>{{ detail.phone }}</dd>
           </div>
+          <!--
+            The APPLICANT's home barangay, labelled as theirs: unlabelled
+            beside the project it read as where the work is (QA TC-10,
+            2026-10-03). The project's own location sits below it.
+          -->
           <div>
-            <dt>Barangay :</dt>
+            <dt>Applicant's barangay :</dt>
             <dd>{{ detail.barangay }}</dd>
           </div>
+          @if (detail.row.location) {
+            <div>
+              <dt>Project location :</dt>
+              <dd>{{ detail.row.location }}</dd>
+            </div>
+          }
         </dl>
       </div>
 
@@ -1626,6 +1637,32 @@
             name="generatePermitConditions"
             placeholder="One condition per line…"
           ></textarea>
+        </label>
+        <label>
+          Valid until <span class="optional">(the permit's last valid day — required)</span>
+          <input type="date" aria-label="The permit's last valid day"
+            required
+            [min]="todayIso"
+            [(ngModel)]="generatePermitExpiresOn"
+            name="generatePermitExpiresOn" />
+        </label>
+        <label>
+          Approving official <span class="optional">(as printed on the permit — required)</span>
+          <input type="text" aria-label="Approving official"
+            required
+            maxlength="200"
+            [(ngModel)]="generatePermitApprovingOfficial"
+            name="generatePermitApprovingOfficial"
+            placeholder="e.g. Engr. Juan dela Cruz, Building Official" />
+        </label>
+        <label>
+          Approving office <span class="optional">(as printed on the permit — required)</span>
+          <input type="text" aria-label="Approving office"
+            required
+            maxlength="200"
+            [(ngModel)]="generatePermitApprovingOffice"
+            name="generatePermitApprovingOffice"
+            placeholder="e.g. Office of the Building Official" />
         </label>
         @if (generatePermitError()) {
           <p class="form-error">{{ generatePermitError() }}</p>

@@ -32,7 +32,7 @@
           </span>
         </div>
         <div class="num-dates">
-          <span>Application No.: <strong>{{ a.id }}</strong></span>
+          <span>Application No.: <strong>{{ a.referenceNumber ?? a.id }}</strong></span>
           <span>Date Issued: <strong>{{ formatDocDate(permit()?.issuedDate) }}</strong></span>
           <span>Valid Until: <strong>{{ permit() ? (permit()!.expiryDate ? formatDocDate(permit()!.expiryDate) : 'Not recorded by the office') : 'Not yet assigned' }}</strong></span>
         </div>
@@ -55,7 +55,7 @@
           </div>
           <div>
             <dt>Address</dt>
-            <dd>{{ applicant()?.addressLine ?? 'Not on file' }}</dd>
+            <dd>{{ ownerAddress() ?? 'Not on file' }}</dd>
           </div>
         </dl>
       </section>
@@ -174,7 +174,7 @@
 
       <footer class="doc-generated-footer">
         <p>This is a system-generated document issued by the Municipality of Castilla, Sorsogon.</p>
-        <p>Document Ref. {{ a.id }} &middot; Generated {{ generatedOn }} &middot; Page 1 of 1</p>
+        <p>Document Ref. {{ a.referenceNumber ?? a.id }} &middot; Generated {{ generatedOn }} &middot; Page 1 of 1</p>
       </footer>
     </article>
   }

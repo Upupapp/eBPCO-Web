@@ -66,8 +66,15 @@ export const CHECKLIST_STAGE_LABELS: Readonly<Record<ChecklistStage, string>> = 
   OBO: 'OBO (Building Official)',
 };
 
-// Identity, ownership and the barangay's clearance: checked for completeness at intake.
-const INITIAL_CODE_SUFFIXES = ['-land-title', '-owner-consent', '-brgy-clearance', '-id'];
+// Identity, ownership, the barangay's clearance and the application form itself:
+// checked for completeness at intake. The server's own seed (migration 060)
+// puts these at Initial, and so must the fallback: missing the Building
+// Permit's -oct-tct and -unified-form here sent them to OBO, and the Initial
+// Evaluator was never offered Accept on them (QA TC-01, 2026-10-03).
+const INITIAL_CODE_SUFFIXES = [
+  '-land-title', '-owner-consent', '-brgy-clearance', '-id', '-oct-tct', '-unified-form', '-proof-address',
+];
+const INITIAL_CODES = ['prior-permit-proof', 'renovation-existing-permit'];
 
 /**
  * The stage a document is checked at: the server's own answer when it gave
@@ -79,7 +86,24 @@ export function stageOf(document: RequirementDocument): ChecklistStage {
   if (document.stage !== undefined) return document.stage;
   if (document.reviewingDepartmentId === 'zoning') return 'Zoning';
   if (document.reviewingDepartmentId === 'bfp') return 'Fire Safety';
-  return INITIAL_CODE_SUFFIXES.some((suffix) => document.id.endsWith(suffix)) ? 'Initial' : 'OBO';
+  return INITIAL_CODES.includes(document.id) || INITIAL_CODE_SUFFIXES.some((suffix) => document.id.endsWith(suffix))
+    ? 'Initial' : 'OBO';
+}
+
+/**
+ * The stage an APPLICATION's document is checked at: the application's own
+ * checklist, as the server snapshotted it at filing (`checklist` on
+ * `GET /staff/applications/:id`), matched by code and then by label -- the
+ * same answer the server enforces when the document is accepted. Falls back
+ * to `stageOf` for an application whose snapshot has no stage (filed before
+ * migration 060) or an older server that sends no checklist.
+ */
+export function stageForApplication(
+  document: RequirementDocument,
+  checklist: readonly { code: string; label: string; stage: string | null }[] | null | undefined,
+): ChecklistStage {
+  const entry = checklist?.find((e) => e.code === document.id) ?? checklist?.find((e) => e.label === document.label);
+  return entry !== undefined && isChecklistStage(entry.stage) ? entry.stage : stageOf(document);
 }
 
 /** The office behind a stage, for the Department column the document tables show. */

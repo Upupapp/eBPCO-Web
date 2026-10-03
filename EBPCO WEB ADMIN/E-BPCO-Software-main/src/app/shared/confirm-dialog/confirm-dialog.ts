@@ -35,6 +35,13 @@ export class ConfirmDialog {
   readonly reasonPlaceholder = input<string>('');
   /** The server's own floor is 3 characters; matching it avoids a round trip. */
   readonly reasonMinLength = input<number>(3);
+  /**
+   * For a field that is not a reason (an Official Receipt number): checks the
+   * value and returns what is wrong with it, or null. Its message replaces
+   * "Please give a reason", which made no sense under a receipt number (QA
+   * TC-08, 2026-10-03).
+   */
+  readonly valueCheck = input<((value: string) => string | null) | null>(null);
 
   readonly confirmed = output<string>();
   readonly cancelled = output<void>();
@@ -46,13 +53,16 @@ export class ConfirmDialog {
     () => this.reason().trim().length < this.reasonMinLength(),
   );
 
+  /** What is wrong with the value, by `valueCheck`; null when there is no check or nothing is wrong. */
+  protected readonly valueProblem = computed(() => this.valueCheck()?.(this.reason()) ?? null);
+
   protected onConfirm(): void {
     if (this.reasonLabel() === null) {
       this.confirmed.emit('');
       return;
     }
     this.touched.set(true);
-    if (this.reasonTooShort()) return;
+    if (this.valueCheck() !== null ? this.valueProblem() !== null : this.reasonTooShort()) return;
     this.confirmed.emit(this.reason().trim());
   }
 }

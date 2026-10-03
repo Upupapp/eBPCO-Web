@@ -20,6 +20,7 @@ function toAppNotification(row: StaffNotificationRow): AppNotification {
   return {
     id: row.id,
     applicationId: row.applicationId,
+    deepLink: row.deepLink,
     title: row.title,
     message: row.body,
     createdAtValue: new Date(row.createdAt),
@@ -181,7 +182,7 @@ export class Topbar {
     return this.store.getApplicationContext(applicationId)?.businessLabel ?? null;
   }
 
-  protected selectNotification(id: string, applicationId: string | null): void {
+  protected selectNotification(id: string, applicationId: string | null, deepLink: string | null = null): void {
     const real = this.realNotifications();
     if (real === null) {
       this.store.markNotificationRead(id);
@@ -193,6 +194,10 @@ export class Topbar {
     this.closeMenus();
     if (applicationId) {
       this.router.navigateByUrl(`/applications/${applicationId}`);
+    } else if (deepLink?.startsWith('/') && !deepLink.startsWith('//')) {
+      // A notice about no application, such as a new account request, opens
+      // the page it is about (QA TC-13). In-app only: never another origin.
+      this.router.navigateByUrl(deepLink);
     }
   }
 

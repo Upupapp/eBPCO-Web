@@ -17,7 +17,9 @@
         [(ngModel)]="reason"
         (ngModelChange)="touched.set(false)"
       ></textarea>
-      @if (touched() && reasonTooShort()) {
+      @if (touched() && valueCheck() !== null && valueProblem(); as problem) {
+        <p class="modal-reason-error" role="alert">{{ problem }}</p>
+      } @else if (touched() && valueCheck() === null && reasonTooShort()) {
         <p class="modal-reason-error" role="alert">
           Please give a reason. It is stored with the record and is what anyone
           reading this later will have.

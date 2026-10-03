@@ -23,6 +23,28 @@
   min-width: 0;
 }
 
+// On a phone the four cards no longer fit one row: with the floor above
+// removed they shrank until "Approved" read "Approv…" (QA TC-12,
+// 2026-10-03). Two per row there, at the shared grid's legible floor, and one
+// per row on the narrowest screens.
+@media (max-width: 600px) {
+  .kpi-grid {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  .kpi-grid > app-kpi-card {
+    flex: 1 1 calc(50% - 0.55rem);
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 380px) {
+  .kpi-grid > app-kpi-card {
+    flex-basis: 100%;
+  }
+}
+
 @keyframes section-in {
   from {
     opacity: 0;

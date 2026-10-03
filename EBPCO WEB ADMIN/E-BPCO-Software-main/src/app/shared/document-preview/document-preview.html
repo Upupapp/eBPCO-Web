@@ -324,7 +324,11 @@
                     </div>
                   </dl>
 
+                  <!-- The cashier who verified the payment collected it (QA TC-09). -->
                   <div class="doc-signature">
+                    @if (txn.verifiedByName) {
+                      <strong class="doc-signature-name">{{ txn.verifiedByName }}</strong>
+                    }
                     <div class="doc-signature-line"></div>
                     <span>Collecting Officer</span>
                   </div>

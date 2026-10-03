@@ -26,6 +26,10 @@ import { ApiError } from './problem';
 export interface GeneratePermitInput {
   readonly scope: string;
   readonly conditions?: readonly string[];
+  /** What the permit prints about itself (QA TC-04, server migration 064): its last valid day, who approved it, for which office. */
+  readonly expiresOn?: string;
+  readonly approvingOfficial?: string;
+  readonly approvingOffice?: string;
 }
 
 /**
@@ -59,6 +63,9 @@ export type PrepareReleaseResult =
 export interface ReleasePermitInput {
   readonly claimantName: string;
   readonly method: 'Physical Claim' | 'Authorized Representative';
+  /** The ID the claimant presented, and a representative's authorization (QA TC-14, server migration 064). */
+  readonly idPresented?: string;
+  readonly authorization?: string;
 }
 
 export type ReleasePermitResult =
